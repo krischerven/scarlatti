@@ -129,7 +129,7 @@ class ListsContainer:
                                                  _("All artists"), ""))
                 self._list_one.select_ids(state_one_ids)
                 # If list two not available, directly show view
-                if not self._list_two.get_visible():
+                if state_two_ids and not self._list_two.get_visible():
                     self.show_view(state_one_ids, state_two_ids)
                 # Wait for list to be populated and select item
                 elif state_two_ids and not state_three_ids:

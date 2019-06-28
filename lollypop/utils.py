@@ -371,7 +371,8 @@ def remove_static(ids):
         @param ids as [int]
         @return [int]
     """
-    return [item for item in ids if item >= 0]
+    # Special case for Type.WEB, only static item present in DB
+    return [item for item in ids if item >= 0 or item == Type.WEB]
 
 
 def get_icon_name(object_id, type=SelectionListMask.ARTISTS):

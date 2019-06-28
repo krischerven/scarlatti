@@ -101,7 +101,14 @@ class ViewsContainer:
         elif item_ids[0] == Type.COMPILATIONS:
             view = self._get_view_albums([], item_ids)
         elif item_ids[0] == Type.ARTISTS:
-            view = self._get_view_artists(item_ids, data)
+            # Here we handle static items for RoundedArtistView
+            if data and data[0] < 0:
+                self.show_view(data)
+                return
+            elif data is None:
+                view = self._rounded_artists_view
+            else:
+                view = self._get_view_artists(item_ids, data)
         else:
             view = self._get_view_artists([], item_ids)
         view.show()
@@ -531,17 +538,15 @@ class ViewsContainer:
         if self._rounded_artists_view is None:
             self._rounded_artists_view = self._get_view_artists_rounded(True)
             self._stack.set_visible_child(self._rounded_artists_view)
-        if state_one_ids and state_two_ids:
-            self.show_view(state_one_ids, None, False)
-            self.show_view(state_one_ids, state_two_ids)
-        if state_one_ids and state_three_ids:
+        if state_one_ids and state_two_ids and state_three_ids:
             self.show_view(state_one_ids, None, False)
             album = Album(state_three_ids[0], state_one_ids, state_two_ids)
             self.show_view([Type.ALBUM], album)
-        elif state_one_ids and state_one_ids[0] != Type.ARTISTS:
+        elif state_one_ids and state_two_ids:
+            self.show_view(state_one_ids, None, False)
+            self.show_view(state_one_ids, state_two_ids)
+        elif state_one_ids:
             self.show_view(state_one_ids)
-        elif state_two_ids:
-            self.show_view(state_two_ids)
         else:
             App().window.emit("can-go-back-changed", False)
             self._stack.set_visible_child(self._rounded_artists_view)
