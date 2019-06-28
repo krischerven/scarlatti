@@ -117,6 +117,10 @@ class ListsContainer:
             state_one_ids = App().settings.get_value("state-one-ids")
             state_two_ids = App().settings.get_value("state-two-ids")
             state_three_ids = App().settings.get_value("state-three-ids")
+            # Empty because we do not have any genre set
+            if not state_one_ids:
+                state_one_ids = state_two_ids
+                state_two_ids = state_three_ids
             if state_one_ids:
                 self._list_one.select_ids(state_one_ids)
                 # If list two not available, directly show view
