@@ -117,19 +117,13 @@ class ListsContainer:
             state_one_ids = App().settings.get_value("state-one-ids")
             state_two_ids = App().settings.get_value("state-two-ids")
             state_three_ids = App().settings.get_value("state-three-ids")
-
             if state_one_ids:
-                # Here we are just handling missing Type.ARTISTS from list
-                if state_one_ids[0] == Type.ARTISTS:
-                    from lollypop.shown import ShownLists
-                    shown_lists = ShownLists.get(SelectionListMask.LIST_ONE)
-                    ids = [l[0] for l in shown_lists]
-                    if Type.ARTISTS not in ids:
-                        self._list_one.add_value((Type.ARTISTS,
-                                                 _("All artists"), ""))
                 self._list_one.select_ids(state_one_ids)
                 # If list two not available, directly show view
-                if state_two_ids and not self._list_two.get_visible():
+                sidebar_content = App().settings.get_enum("sidebar-content")
+                if state_two_ids and (
+                                  App().window.is_adaptive or
+                                  sidebar_content == SidebarContent.DEFAULT):
                     self.show_view(state_one_ids, state_two_ids)
                 # Wait for list to be populated and select item
                 elif state_two_ids and not state_three_ids:
