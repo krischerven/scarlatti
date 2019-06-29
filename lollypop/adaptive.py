@@ -220,30 +220,14 @@ class AdaptiveWindow:
         # Do adaptive on init
         if self._adaptive_stack is None:
             self._adaptive_stack = not b
-        if b and not self._adaptive_stack:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            self._adaptive_stack = True
-            child = []
-            self.__stack.reset_history()
-            for (p, c) in self.__paned:
-                child.append(p.get_child1())
-                p.remove(c)
-                self.__stack.add(c)
-            self.__stack.set_visible_child(self.__paned[0][1])
-            self.emit("can-go-back-changed", False)
-            self.emit("show-can-go-back", True)
-            self.emit("adaptive-changed", True)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        elif not b and self._adaptive_stack:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            self._adaptive_stack = False
-            # Move wanted child to paned
-            for (p, c) in self.__paned:
-                self.__stack.remove(c)
-                p.add1(c)
-            self.emit("show-can-go-back", False)
-            self.emit("adaptive-changed", False)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        if b == self._adaptive_stack:
+            return
+        # Next code is just for GTK+ performance issue
+        # Hidding all list before resizing allow GTK to not handle this
+        # on resize => Slow with a Gtk.ListBox containing lot items
+        for (p, c) in self.__paned:
+            c.hide()
+        GLib.idle_add(self.__set_adaptive_stack, b)
 
     def do_adaptive_mode(self, width):
         """
@@ -286,6 +270,36 @@ class AdaptiveWindow:
 ############
 # PRIVATE  #
 ############
+    def __set_adaptive_stack(self, b):
+        """
+            Move paned child to stack
+            @param b as bool
+        """
+        if b:
+            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
+            self._adaptive_stack = True
+            child = []
+            self.__stack.reset_history()
+            for (p, c) in self.__paned:
+                child.append(p.get_child1())
+                p.remove(c)
+                self.__stack.add(c)
+            self.__stack.set_visible_child(self.__paned[0][1])
+            self.emit("can-go-back-changed", False)
+            self.emit("show-can-go-back", True)
+            self.emit("adaptive-changed", True)
+            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        else:
+            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
+            self._adaptive_stack = False
+            # Move wanted child to paned
+            for (p, c) in self.__paned:
+                self.__stack.remove(c)
+                p.add1(c)
+            self.emit("show-can-go-back", False)
+            self.emit("adaptive-changed", False)
+            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+
     def __on_configure_event(self, widget, event):
         """
             Delay event
