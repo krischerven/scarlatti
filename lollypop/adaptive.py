@@ -170,6 +170,7 @@ class AdaptiveWindow:
         """
         self._adaptive_stack = None
         self.__configure_event_connected = False
+        self.__adaptive_timeout_id = None
         self.__stack = None
         self.__paned = []
 
@@ -227,7 +228,10 @@ class AdaptiveWindow:
         # on resize => Slow with a Gtk.ListBox containing lot items
         for (p, c) in self.__paned:
             c.hide()
-        GLib.idle_add(self.__set_adaptive_stack, b)
+        if self.__adaptive_timeout_id is not None:
+            GLib.source_remove(self.__adaptive_timeout_id)
+        self.__adaptive_timeout_id = GLib.idle_add(
+            self.__set_adaptive_stack, b)
 
     def do_adaptive_mode(self, width):
         """
@@ -275,6 +279,7 @@ class AdaptiveWindow:
             Move paned child to stack
             @param b as bool
         """
+        self.__adaptive_timeout_id = None
         if b:
             self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
             self._adaptive_stack = True
