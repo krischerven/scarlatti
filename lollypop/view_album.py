@@ -38,6 +38,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
         LazyLoadingView.__init__(self, view_type)
         TracksView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        self.__adaptive_signal_id = None
         self._album = album
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
@@ -112,9 +113,10 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
 
     def _on_map(self, widget):
         """
-            Connect signals and set active ids
+            Set initial state and connect signals
             @param widget as Gtk.Widget
         """
+        LazyLoadingView._on_map(self, widget)
         self._responsive_widget.set_margin_top(
             self.__banner.default_height + 15)
         App().window.emit("show-can-go-back", True)
@@ -125,6 +127,20 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
                                  GLib.Variant("ai", self.__artist_ids))
         App().settings.set_value("state-three-ids",
                                  GLib.Variant("ai", [self._album.id]))
+        if self.__adaptive_signal_id is None:
+            self.__adaptive_signal_id = App().window.connect(
+                                                    "adaptive-changed",
+                                                    self.__on_adaptive_changed)
+
+    def _on_unmap(self, widget):
+        """
+            Disconnect signals
+            @param widget as Gtk.Widget
+        """
+        LazyLoadingView._on_unmap(self, widget)
+        if self.__adaptive_signal_id is not None:
+            App().window.disconnect(self.__adaptive_signal_id)
+            self.__adaptive_signal_id = None
 
     def _on_tracks_populated(self, disc_number):
         """
@@ -166,3 +182,14 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
 #######################
 # PRIVATE             #
 #######################
+    def __on_adaptive_changed(self, window, status):
+        """
+            Update banner style
+            @param window as Window
+            @param status as bool
+        """
+        if status:
+            view_type = self._view_type | ViewType.SMALL
+        else:
+            view_type = self._view_type & ~ViewType.SMALL
+        self.__banner.set_view_type(view_type)

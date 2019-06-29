@@ -41,6 +41,14 @@ class LovedWidget(Gtk.Bin):
         self.set_property("valign", Gtk.Align.CENTER)
         self.__set_artwork(self.__object.loved)
 
+    def set_icon_size(self, icon_size):
+        """
+            Set widget icon size
+            @param icon_size as Gtk.IconSize
+        """
+        self.__icon_size = icon_size
+        self.__set_artwork(self.__object.loved)
+
 #######################
 # PROTECTED           #
 #######################

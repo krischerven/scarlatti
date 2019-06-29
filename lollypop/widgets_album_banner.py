@@ -32,12 +32,12 @@ class AlbumBannerWidget(Gtk.Bin):
             @param view_type as ViewType
         """
         Gtk.Bin.__init__(self)
+        self.__view_type = view_type
+        self.__height = None
         self.__width = 0
-        art_size = 0
+        self.__cloud_image = None
         self.__allocation_timeout_id = None
         self.__album = album
-        self.__view_type = view_type
-        self.__height = self.default_height
         self.set_property("valign", Gtk.Align.START)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/AlbumBannerWidget.ui")
@@ -46,37 +46,10 @@ class AlbumBannerWidget(Gtk.Bin):
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__year_label = builder.get_object("year_label")
         self.__duration_label = builder.get_object("duration_label")
-        menu_button = builder.get_object("menu_button")
-        if view_type & ViewType.SMALL:
-            art_size = ArtSize.LARGE
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
-            self.__title_label.get_style_context().add_class(
-                "text-large")
-            self.__year_label.get_style_context().add_class(
-                "text-large")
-        elif view_type & ViewType.MEDIUM:
-            art_size = ArtSize.BANNER
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
-            self.__year_label.get_style_context().add_class(
-                "text-large")
-        else:
-            art_size = ArtSize.BANNER
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            self.__title_label.get_style_context().add_class(
-                "text-xx-large")
-            self.__year_label.get_style_context().add_class(
-                "text-x-large")
-        self.__cover_widget = CoverWidget(album, art_size, view_type)
+        self.__menu_button = builder.get_object("menu_button")
+        self.__cover_widget = CoverWidget(album, view_type)
         self.__cover_widget.set_vexpand(True)
         self.__cover_widget.show()
-        menu_button.get_style_context().add_class(style)
-        menu_button.get_image().set_from_icon_name("view-more-symbolic",
-                                                   icon_size)
         album_name = GLib.markup_escape_text(album.name)
         markup = "<b>%s</b>" % album_name
         if view_type & ViewType.ALBUM:
@@ -102,7 +75,8 @@ class AlbumBannerWidget(Gtk.Bin):
         self.__grid = builder.get_object("grid")
         self.__widget = builder.get_object("widget")
         if view_type & ViewType.ALBUM:
-            menu_button.get_style_context().add_class("black-transparent")
+            self.__menu_button.get_style_context().add_class(
+                "black-transparent")
             self.get_style_context().add_class("black")
             self.__artwork.get_style_context().add_class("black")
             self.connect("size-allocate", self.__on_size_allocate)
@@ -115,35 +89,81 @@ class AlbumBannerWidget(Gtk.Bin):
         self.__grid.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
         if album.mtime <= 0:
-            cloud = Gtk.Image.new_from_icon_name("goa-panel-symbolic",
-                                                 icon_size)
-            cloud.show()
-            cloud.set_margin_start(MARGIN)
-            self.__rating_grid.attach(cloud, 1, 0, 1, 1)
-        rating = RatingWidget(album, icon_size)
-        rating.set_property("halign", Gtk.Align.START)
-        rating.set_property("valign", Gtk.Align.CENTER)
-        rating.show()
-        self.__rating_grid.attach(rating, 2, 0, 1, 1)
-        loved = LovedWidget(album, icon_size)
-        loved.set_margin_start(10)
-        loved.set_property("halign", Gtk.Align.START)
-        loved.set_property("valign", Gtk.Align.CENTER)
-        loved.show()
-        self.__rating_grid.attach(loved, 3, 0, 1, 1)
+            self.__cloud_image = Gtk.Image.new()
+            self.__cloud_image.show()
+            self.__cloud_image.set_margin_start(MARGIN)
+            self.__rating_grid.attach(self.__cloud_image, 1, 0, 1, 1)
+        self.__rating_widget = RatingWidget(album, Gtk.IconSize.INVALID)
+        self.__rating_widget.set_property("halign", Gtk.Align.START)
+        self.__rating_widget.set_property("valign", Gtk.Align.CENTER)
+        self.__rating_widget.show()
+        self.__rating_grid.attach(self.__rating_widget, 2, 0, 1, 1)
+        self.__loved_widget = LovedWidget(album, Gtk.IconSize.INVALID)
+        self.__loved_widget.set_margin_start(10)
+        self.__loved_widget.set_property("halign", Gtk.Align.START)
+        self.__loved_widget.set_property("valign", Gtk.Align.CENTER)
+        self.__loved_widget.show()
+        self.__rating_grid.attach(self.__loved_widget, 3, 0, 1, 1)
         self.add(self.__widget)
         self.__cover_widget.set_margin_start(MARGIN)
         self.__year_label.set_margin_end(MARGIN)
         self.__duration_label.set_margin_start(MARGIN)
         self.__rating_grid.set_margin_end(MARGIN)
+        self.set_view_type(view_type)
+
+    def set_view_type(self, view_type):
+        """
+            Update widget internals for view_type
+            @param view_type as ViewType
+        """
+        self.__view_type = view_type
+        art_size = 0
+        if view_type & ViewType.SMALL:
+            art_size = ArtSize.LARGE
+            style = "menu-button"
+            icon_size = Gtk.IconSize.BUTTON
+            self.__title_label.get_style_context().add_class(
+                "text-large")
+            self.__year_label.get_style_context().add_class(
+                "text-large")
+        elif view_type & ViewType.MEDIUM:
+            art_size = ArtSize.BANNER
+            style = "menu-button-48"
+            icon_size = Gtk.IconSize.LARGE_TOOLBAR
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+            self.__year_label.get_style_context().add_class(
+                "text-large")
+        else:
+            art_size = ArtSize.BANNER
+            style = "menu-button-48"
+            icon_size = Gtk.IconSize.LARGE_TOOLBAR
+            self.__title_label.get_style_context().add_class(
+                "text-xx-large")
+            self.__year_label.get_style_context().add_class(
+                "text-x-large")
+        self.__rating_widget.set_icon_size(icon_size)
+        self.__loved_widget.set_icon_size(icon_size)
+        if self.__cloud_image is not None:
+            self.__cloud_image.set_from_icon_name("goa-panel-symbolic",
+                                                  icon_size)
+        self.__cover_widget.set_artwork(art_size)
+        menu_button_style_context = self.__menu_button.get_style_context()
+        menu_button_style_context.remove_class("menu-button-48")
+        menu_button_style_context.remove_class("menu-button")
+        menu_button_style_context.add_class(style)
+        self.__menu_button.get_image().set_from_icon_name(
+                                                   "view-more-symbolic",
+                                                   icon_size)
+        self.set_height(self.height)
 
     def set_height(self, height):
         """
             Set height
             @param height as int
         """
-        self.__height = height
         if height < self.default_height:
+            self.__height = height
             # Make grid cover artwork
             # No idea why...
             self.__grid.set_size_request(-1, height + 1)
@@ -151,19 +171,9 @@ class AlbumBannerWidget(Gtk.Bin):
             self.__duration_label.hide()
             self.__rating_grid.hide()
             self.__year_label.set_vexpand(True)
-            if self.__view_type & ViewType.SMALL:
-                self.__title_label.get_style_context().remove_class(
-                    "text-large")
-            else:
-                self.__title_label.get_style_context().remove_class(
-                    "text-xx-large")
-                self.__title_label.get_style_context().add_class(
-                    "text-x-large")
-                self.__year_label.get_style_context().remove_class(
-                    "text-x-large")
-                self.__year_label.get_style_context().add_class(
-                    "text-large")
+            self.__set_text_height(True)
         else:
+            self.__height = None
             # Make grid cover artwork
             # No idea why...
             self.__grid.set_size_request(-1, height + 1)
@@ -171,18 +181,7 @@ class AlbumBannerWidget(Gtk.Bin):
             self.__duration_label.show()
             self.__rating_grid.show()
             self.__year_label.set_vexpand(False)
-            if self.__view_type & ViewType.SMALL:
-                self.__title_label.get_style_context().add_class(
-                    "text-large")
-            else:
-                self.__title_label.get_style_context().remove_class(
-                    "text-x-large")
-                self.__title_label.get_style_context().add_class(
-                    "text-xx-large")
-                self.__year_label.get_style_context().remove_class(
-                    "text-large")
-                self.__year_label.get_style_context().add_class(
-                    "text-x-large")
+            self.__set_text_height(False)
 
     def do_get_preferred_width(self):
         """
@@ -194,7 +193,7 @@ class AlbumBannerWidget(Gtk.Bin):
         """
             Force preferred height
         """
-        return (self.__height, self.__height)
+        return (self.height, self.height)
 
     def set_selected(self, selected):
         """
@@ -212,7 +211,8 @@ class AlbumBannerWidget(Gtk.Bin):
             Get height
             @return int
         """
-        return self.__height
+        return self.__height if self.__height is not None\
+            else self.default_height
 
     @property
     def default_height(self):
@@ -220,9 +220,9 @@ class AlbumBannerWidget(Gtk.Bin):
             Get default height
         """
         if self.__view_type & ViewType.SMALL:
-            return ArtSize.LARGE + 20
+            return ArtSize.LARGE + 40
         elif self.__view_type & ViewType.MEDIUM:
-            return ArtSize.BANNER + 20
+            return ArtSize.BANNER + 40
         else:
             return ArtSize.BANNER + 40
 
@@ -242,6 +242,37 @@ class AlbumBannerWidget(Gtk.Bin):
 #######################
 # PRIVATE             #
 #######################
+    def __set_text_height(self, collapsed):
+        """
+            Set text height
+            @param collapsed as bool
+        """
+        title_context = self.__title_label.get_style_context()
+        year_context = self.__year_label.get_style_context()
+        for c in title_context.list_classes():
+            title_context.remove_class(c)
+        for c in year_context.list_classes():
+            title_context.remove_class(c)
+        if self.__view_type & ViewType.SMALL:
+            if not collapsed:
+                self.__title_label.get_style_context().add_class("text-large")
+        # Collapsed not implemented for MEDIUM
+        elif self.__view_type & ViewType.MEDIUM:
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+            self.__year_label.get_style_context().add_class(
+                "text-large")
+        elif collapsed:
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+            self.__year_label.get_style_context().add_class(
+                "text-large")
+        else:
+            self.__title_label.get_style_context().add_class(
+                "text-xx-large")
+            self.__year_label.get_style_context().add_class(
+                "text-x-large")
+
     def __handle_size_allocate(self, allocation):
         """
             Change box max/min children

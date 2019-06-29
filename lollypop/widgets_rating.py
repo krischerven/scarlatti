@@ -38,19 +38,27 @@ class RatingWidget(Gtk.Bin):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/RatingWidget.ui")
         builder.connect_signals(self)
-
+        self.__empty_star = builder.get_object("empty_star")
         self._stars = []
         for i in range(0, 5):
             star = builder.get_object("star%s" % i)
             star.set_from_icon_name("starred-symbolic", icon_size)
             self._stars.append(star)
-        builder.get_object("empty_star").set_from_icon_name("starred-symbolic",
-                                                            icon_size)
+        self.__empty_star.set_from_icon_name("starred-symbolic", icon_size)
         self._on_leave_notify_event(None, None)
         self.add(builder.get_object("widget"))
         if isinstance(object, Track):
             play_count = object.popularity
             self.set_tooltip_text(_("Song played %s times") % play_count)
+
+    def set_icon_size(self, icon_size):
+        """
+            Set widget icon size
+            @param icon_size as Gtk.IconSize
+        """
+        for start in self._stars:
+            start.set_from_icon_name("starred-symbolic", icon_size)
+        self.__empty_star.set_from_icon_name("starred-symbolic", icon_size)
 
 #######################
 # PROTECTED           #

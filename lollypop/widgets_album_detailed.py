@@ -100,7 +100,7 @@ class AlbumDetailedWidget(Gtk.Grid, AlbumWidget, TracksView):
         from lollypop.widgets_row_track import TrackRow
         track_height = TrackRow.get_best_height(self)
         # See Banner and row spacing
-        minimal_height = maximal_height = ArtSize.BANNER + 20 + 2
+        minimal_height = maximal_height = ArtSize.BANNER + 40 + 2
         count = len(self._album.tracks)
         mid_tracks = int(0.5 + count / 2)
         left_height = track_height * mid_tracks

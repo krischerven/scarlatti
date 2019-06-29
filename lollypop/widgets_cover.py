@@ -27,11 +27,9 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
-    def __init__(self, album, art_size=ArtSize.BANNER,
-                 view_type=ViewType.DEFAULT):
+    def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
-            @param art_size as ArtSize
             @param view_type as ViewType
         """
         Gtk.EventBox.__init__(self)
@@ -39,21 +37,9 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         self.set_property("valign", Gtk.Align.CENTER)
         self._album = album
         self.__image_button = None
-        self.__art_size = art_size
         self._artwork = Gtk.Image.new()
-        App().art_helper.set_frame(self._artwork,
-                                   "small-cover-frame",
-                                   self.__art_size,
-                                   self.__art_size)
         self._artwork.show()
         self._artwork.get_style_context().add_class("white")
-        App().art_helper.set_album_artwork(
-                album,
-                self.__art_size,
-                self.__art_size,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
-                self.__on_album_artwork)
         self._overlay = Gtk.Overlay.new()
         self._overlay.show()
         OverlayAlbumHelper.__init__(self, view_type)
@@ -65,6 +51,24 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         self.__art_signal_id = App().art.connect(
                                               "album-artwork-changed",
                                               self.__on_album_artwork_changed)
+
+    def set_artwork(self, art_size):
+        """
+            Set cover artwork
+            @param art_size as int
+        """
+        self.__art_size = art_size
+        App().art_helper.set_frame(self._artwork,
+                                   "small-cover-frame",
+                                   self.__art_size,
+                                   self.__art_size)
+        App().art_helper.set_album_artwork(
+                self._album,
+                self.__art_size,
+                self.__art_size,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
+                self.__on_album_artwork)
 
 #######################
 # PROTECTED           #
