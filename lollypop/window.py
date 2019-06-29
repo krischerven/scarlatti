@@ -41,6 +41,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.__timeout = None
         self.__miniplayer = None
         self.__mediakeys = None
+        self.__sidebar_shown = False
         self.__media_keys_busnames = []
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
         self.connect("map", self.__on_map)
@@ -260,73 +261,16 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             self.__show_miniplayer(False)
             self.__container.show()
 
-    def __on_drag_data_received(self, widget, context, x, y, data, info, time):
+    def __show_sidebar(self, show):
         """
-            Import values
-            @param widget as Gtk.Widget
-            @param context as Gdk.DragContext
-            @param x as int
-            @param y as int
-            @param data as Gtk.SelectionData
-            @param info as int
-            @param time as int
+            Show sidebar if needed
+            @param show as bool
         """
-        try:
-            from lollypop.collectionimporter import CollectionImporter
-            from urllib.parse import urlparse
-            importer = CollectionImporter()
-            uris = []
-            for uri in data.get_text().strip("\n").split("\r"):
-                parsed = urlparse(uri)
-                if parsed.scheme in ["file", "sftp", "smb", "webdav"]:
-                    uris.append(uri)
-            if uris:
-                App().task_helper.run(importer.add, uris,
-                                      callback=(App().scanner.update,))
-        except:
-            pass
-
-    def __on_map(self, window):
-        """
-            Connect signals
-            @param window as Window
-        """
-        if self.__signal1 is None:
-            self.__signal1 = self.connect("window-state-event",
-                                          self.__on_window_state_event)
-        if self.__signal2 is None:
-            self.__signal2 = self.connect("configure-event",
-                                          self.__on_configure_event)
-
-    def __on_unmap(self, window):
-        """
-            Disconnect signals
-            @param window as Window
-        """
-        if self.__signal1 is not None:
-            self.disconnect(self.__signal1)
-            self.__signal1 = None
-        if self.__signal2 is not None:
-            self.disconnect(self.__signal2)
-            self.__signal2 = None
-
-    def __on_configure_event(self, window, event):
-        """
-            Handle configure event
-            @param window as Gtk.Window
-            @param event as Gdk.Event
-        """
-        (width, height) = window.get_size()
-        self.__handle_miniplayer(width, height)
-        self.__toolbar.set_content_width(width)
-        if self.__timeout_configure:
-            GLib.source_remove(self.__timeout_configure)
-            self.__timeout_configure = None
-        if not self.is_maximized():
-            self.__timeout_configure = GLib.timeout_add(
-                1000,
-                self.__save_size_position,
-                window)
+        if self.__sidebar_shown:
+            return
+        self.__sidebar_shown = True
+        value = App().settings.get_value("show-sidebar")
+        self.__container.show_sidebar(show or value)
 
     def __save_size_position(self, widget):
         """
@@ -398,14 +342,82 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         if event.button == 8:
             App().window.go_back()
 
+    def __on_drag_data_received(self, widget, context, x, y, data, info, time):
+        """
+            Import values
+            @param widget as Gtk.Widget
+            @param context as Gdk.DragContext
+            @param x as int
+            @param y as int
+            @param data as Gtk.SelectionData
+            @param info as int
+            @param time as int
+        """
+        try:
+            from lollypop.collectionimporter import CollectionImporter
+            from urllib.parse import urlparse
+            importer = CollectionImporter()
+            uris = []
+            for uri in data.get_text().strip("\n").split("\r"):
+                parsed = urlparse(uri)
+                if parsed.scheme in ["file", "sftp", "smb", "webdav"]:
+                    uris.append(uri)
+            if uris:
+                App().task_helper.run(importer.add, uris,
+                                      callback=(App().scanner.update,))
+        except:
+            pass
+
+    def __on_map(self, window):
+        """
+            Connect signals
+            @param window as Window
+        """
+        if self.__signal1 is None:
+            self.__signal1 = self.connect("window-state-event",
+                                          self.__on_window_state_event)
+        if self.__signal2 is None:
+            self.__signal2 = self.connect("configure-event",
+                                          self.__on_configure_event)
+
+    def __on_unmap(self, window):
+        """
+            Disconnect signals
+            @param window as Window
+        """
+        if self.__signal1 is not None:
+            self.disconnect(self.__signal1)
+            self.__signal1 = None
+        if self.__signal2 is not None:
+            self.disconnect(self.__signal2)
+            self.__signal2 = None
+
+    def __on_configure_event(self, window, event):
+        """
+            Handle configure event
+            @param window as Gtk.Window
+            @param event as Gdk.Event
+        """
+        (width, height) = window.get_size()
+        self.__handle_miniplayer(width, height)
+        self.__toolbar.set_content_width(width)
+        if self.__timeout_configure:
+            GLib.source_remove(self.__timeout_configure)
+            self.__timeout_configure = None
+        if not self.is_maximized():
+            self.__timeout_configure = GLib.timeout_add(
+                1000,
+                self.__save_size_position,
+                window)
+
     def __on_adaptive_changed(self, window, adaptive_stack):
         """
             Handle adaptive mode
             @param window as AdaptiveWindow
             @param adaptive_stack as bool
         """
+        self.__show_sidebar(adaptive_stack)
         if adaptive_stack:
-            self.__container.show_sidebar(True)
             self.__toolbar.end.set_mini(True)
             self.__container.list_one.add_value((Type.SEARCH,
                                                 _("Search"),
@@ -414,8 +426,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
                                                 _("Current playlist"),
                                                 _("Current playlist")))
         else:
-            value = App().settings.get_value("show-sidebar")
             self.__toolbar.end.set_mini(False)
-            self.__container.show_sidebar(value)
             self.__container.list_one.remove_value(Type.CURRENT)
             self.__container.list_one.remove_value(Type.SEARCH)

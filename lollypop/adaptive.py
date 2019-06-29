@@ -279,13 +279,13 @@ class AdaptiveWindow:
             self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
             self._adaptive_stack = True
             child = []
+            can_go_back = self.__stack.get_visible_child() is not None
             self.__stack.reset_history()
             for (p, c) in self.__paned:
                 child.append(p.get_child1())
                 p.remove(c)
                 self.__stack.add(c)
-            self.__stack.set_visible_child(self.__paned[0][1])
-            self.emit("can-go-back-changed", False)
+            self.emit("can-go-back-changed", can_go_back)
             self.emit("show-can-go-back", True)
             self.emit("adaptive-changed", True)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)

@@ -91,9 +91,9 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         """
         if self.get_child() is not None:
             return
-        self._artwork = App().art_helper.get_image(ArtSize.MEDIUM,
-                                                   ArtSize.MEDIUM,
-                                                   "small-cover-frame")
+        self._artwork = Gtk.Image.new()
+        App().art_helper.set_frame(self._artwork, "small-cover-frame",
+                                   ArtSize.MEDIUM, ArtSize.MEDIUM)
         self._artwork.set_margin_start(self.__MARGIN)
         # Little hack: we do not set margin_bottom because already set by
         # get_best_height(): we are Align.FILL

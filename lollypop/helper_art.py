@@ -29,16 +29,17 @@ class ArtHelper(GObject.Object):
         """
         GObject.Object.__init__(self)
 
-    def get_image(self, width, height, frame):
+    def set_frame(self, image, frame, width, height):
         """
-            Get an artwork widget
+            Update image for frame
+            @param image as Gtk.Image
+            @param frame as str
             @param width as int
             @param height as int
-            @param frame as str
-            @return Gtk.Image
         """
-        image = Gtk.Image()
         context = image.get_style_context()
+        for c in context.list_classes():
+            context.remove_class(c)
         context.add_class(frame)
         padding = context.get_padding(Gtk.StateFlags.NORMAL)
         border = context.get_border(Gtk.StateFlags.NORMAL)
@@ -46,7 +47,6 @@ class ArtHelper(GObject.Object):
                                padding.right + border.left + border.right,
                                height + padding.top +
                                padding.bottom + border.top + border.bottom)
-        return image
 
     def set_album_artwork(self, album, width, height, scale_factor,
                           effect, callback, *args):

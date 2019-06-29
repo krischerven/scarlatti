@@ -46,9 +46,11 @@ class QueueRow(Row, DNDRow):
         self._grid.insert_column(0)
         self._grid.insert_column(1)
         self._grid.attach(self._indicator, 1, 1, 1, 2)
-        self.__artwork = App().art_helper.get_image(ArtSize.MEDIUM,
-                                                    ArtSize.MEDIUM,
-                                                    "small-cover-frame")
+        self.__artwork = Gtk.Image.new()
+        App().art_helper.set_frame(self.__artwork,
+                                   "small-cover-frame",
+                                   ArtSize.MEDIUM,
+                                   ArtSize.MEDIUM)
         self.__artwork.set_no_show_all(True)
         # We force width with a Box
         box = Gtk.Box()

@@ -60,9 +60,11 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         self._widget = Gtk.EventBox()
         grid = Gtk.Grid()
         grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self._artwork = App().art_helper.get_image(self.__art_size,
-                                                   self.__art_size,
-                                                   "cover-frame")
+        self._artwork = Gtk.Image.new()
+        App().art_helper.set_frame(self._artwork,
+                                   "cover-frame",
+                                   self.__art_size,
+                                   self.__art_size)
         self.__label = Gtk.Label.new()
         self.__label.set_justify(Gtk.Justification.CENTER)
         self.__label.set_ellipsize(Pango.EllipsizeMode.END)

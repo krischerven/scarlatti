@@ -40,9 +40,11 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         self._album = album
         self.__image_button = None
         self.__art_size = art_size
-        self._artwork = App().art_helper.get_image(self.__art_size,
-                                                   self.__art_size,
-                                                   "small-cover-frame")
+        self._artwork = Gtk.Image.new()
+        App().art_helper.set_frame(self._artwork,
+                                   "small-cover-frame",
+                                   self.__art_size,
+                                   self.__art_size)
         self._artwork.show()
         self._artwork.get_style_context().add_class("white")
         App().art_helper.set_album_artwork(

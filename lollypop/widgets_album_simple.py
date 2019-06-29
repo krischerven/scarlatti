@@ -47,15 +47,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         self.__widget = None
         # We do not use Gtk.Builder for speed reasons
         Gtk.FlowBoxChild.__init__(self)
-        self.__view_type = view_type
-        if self.__view_type & ViewType.SMALL:
-            self.__art_size = ArtSize.LARGE
-        elif self.__view_type & ViewType.MEDIUM:
-            self.__art_size = ArtSize.BANNER
-        else:
-            self.__art_size = ArtSize.BIG
-        self.set_size_request(self.__art_size,
-                              self.__art_size + self.LABEL_HEIGHT)
+        self.set_view_type(view_type)
         AlbumWidget.__init__(self, album, genre_ids, artist_ids)
 
     def populate(self):
@@ -93,13 +85,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         eventbox.show()
         self.__widget.add(grid)
         self._overlay = Gtk.Overlay.new()
-        if self.__art_size < ArtSize.BIG:
-            frame = "small-cover-frame"
-        else:
-            frame = "cover-frame"
-        self._artwork = App().art_helper.get_image(self.__art_size,
-                                                   self.__art_size,
-                                                   frame)
+        self._artwork = Gtk.Image.new()
         self._overlay.add(self._artwork)
         grid.add(self._overlay)
         grid.add(eventbox)
@@ -118,6 +104,14 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         """
         if self.__widget is None:
             return
+        if self.__art_size < ArtSize.BIG:
+            frame = "small-cover-frame"
+        else:
+            frame = "cover-frame"
+        App().art_helper.set_frame(self._artwork,
+                                   frame,
+                                   self.__art_size,
+                                   self.__art_size)
         App().art_helper.set_album_artwork(self._album,
                                            self.__art_size,
                                            self.__art_size,
@@ -125,6 +119,21 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
+
+    def set_view_type(self, view_type):
+        """
+            Update artwork size
+            @param view_type as ViewType
+        """
+        self.__view_type = view_type
+        if self.__view_type & ViewType.SMALL:
+            self.__art_size = ArtSize.LARGE
+        elif self.__view_type & ViewType.MEDIUM:
+            self.__art_size = ArtSize.BANNER
+        else:
+            self.__art_size = ArtSize.BIG
+        self.set_size_request(self.__art_size,
+                              self.__art_size + self.LABEL_HEIGHT)
 
     def do_get_preferred_width(self):
         """

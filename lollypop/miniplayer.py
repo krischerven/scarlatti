@@ -138,10 +138,11 @@ class MiniPlayer(Gtk.Bin, InformationController,
                 self.__cover = None
         else:
             if self.__cover is None:
-                self.__cover = App().art_helper.get_image(
-                                                        ArtSize.MINIPLAYER,
-                                                        ArtSize.MINIPLAYER,
-                                                        "small-cover-frame")
+                self.__cover = Gtk.Image.new()
+                App().art_helper.set_frame(self.__cover,
+                                           "small-cover-frame",
+                                           ArtSize.MINIPLAYER,
+                                           ArtSize.MINIPLAYER)
                 self.__cover.set_property("halign", Gtk.Align.CENTER)
                 self.__cover.set_property("valign", Gtk.Align.CENTER)
                 self.__update_artwork()
