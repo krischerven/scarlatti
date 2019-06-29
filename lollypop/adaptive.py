@@ -223,11 +223,6 @@ class AdaptiveWindow:
             self._adaptive_stack = not b
         if b == self._adaptive_stack:
             return
-        # Next code is just for GTK+ performance issue
-        # Hidding all list before resizing allow GTK to not handle this
-        # on resize => Slow with a Gtk.ListBox containing lot items
-        for (p, c) in self.__paned:
-            c.hide()
         if self.__adaptive_timeout_id is not None:
             GLib.source_remove(self.__adaptive_timeout_id)
         self.__adaptive_timeout_id = GLib.idle_add(
