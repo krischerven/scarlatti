@@ -14,6 +14,7 @@ from gi.repository import Gtk, GLib
 
 from lollypop.view import LazyLoadingView
 from lollypop.define import ViewType
+from lollypop.utils import get_font_height
 
 
 class FlowBoxView(LazyLoadingView):
@@ -29,6 +30,7 @@ class FlowBoxView(LazyLoadingView):
         LazyLoadingView.__init__(self, view_type | ViewType.FILTERED)
         self.__adaptive_signal_id = None
         self._widget_class = None
+        self.__font_height = get_font_height()
         self._items = []
         self._box = Gtk.FlowBox()
         self._box.set_filter_func(self._filter_func)
@@ -85,7 +87,7 @@ class FlowBoxView(LazyLoadingView):
             return
         if items:
             widget = self._widget_class(
-                items.pop(0), *args)
+                items.pop(0), *args, self.__font_height)
             self._box.insert(widget, -1)
             widget.show()
             self._lazy_queue.append(widget)

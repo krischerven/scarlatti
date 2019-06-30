@@ -29,22 +29,17 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
-    ctx = App().window.get_pango_context()
-    layout = Pango.Layout.new(ctx)
-    layout.set_text("a", 1)
-    # * 2 => two labels
-    LABEL_HEIGHT = int(layout.get_pixel_size()[1])
-
-    def __init__(self, album, genre_ids, artist_ids,
-                 view_type=ViewType.DEFAULT):
+    def __init__(self, album, genre_ids, artist_ids, view_type, font_height):
         """
             Init simple album widget
             @param album as Album
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param view_type as ViewType
+            @parma font_height as int
         """
         self.__widget = None
+        self.__font_height = font_height
         # We do not use Gtk.Builder for speed reasons
         Gtk.FlowBoxChild.__init__(self)
         self.set_view_type(view_type)
@@ -133,7 +128,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         else:
             self.__art_size = ArtSize.BIG
         self.set_size_request(self.__art_size,
-                              self.__art_size + self.LABEL_HEIGHT)
+                              self.__art_size + self.__font_height * 2)
 
     def do_get_preferred_width(self):
         """

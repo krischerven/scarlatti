@@ -266,7 +266,10 @@ class ViewsContainer:
             loader.start()
         else:
             from lollypop.view_playlists_manager import PlaylistsManagerView
-            view = PlaylistsManagerView(None, ViewType.SCROLLED)
+            view_type = ViewType.SCROLLED
+            if App().window.is_adaptive:
+                view_type |= ViewType.MEDIUM
+            view = PlaylistsManagerView(None, view_type)
             view.populate()
             view.show()
         return view

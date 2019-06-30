@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib, Gdk, GdkPixbuf
+from gi.repository import Gio, GLib, Gdk, GdkPixbuf, Pango
 
 from math import pi
 from gettext import gettext as _
@@ -373,6 +373,17 @@ def remove_static(ids):
     """
     # Special case for Type.WEB, only static item present in DB
     return [item for item in ids if item >= 0 or item == Type.WEB]
+
+
+def get_font_height():
+    """
+        Get current font height
+        @return int
+    """
+    ctx = App().window.get_pango_context()
+    layout = Pango.Layout.new(ctx)
+    layout.set_text("a", 1)
+    return int(layout.get_pixel_size()[1])
 
 
 def get_icon_name(object_id, type=SelectionListMask.ARTISTS):

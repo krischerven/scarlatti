@@ -27,22 +27,18 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
-    ctx = App().window.get_pango_context()
-    layout = Pango.Layout.new(ctx)
-    layout.set_text("a", 1)
-    # * 2 => two labels
-    LABEL_HEIGHT = int(layout.get_pixel_size()[1])
-
-    def __init__(self, radio_id, view_type):
+    def __init__(self, radio_id, view_type, font_height):
         """
             Init radio widget
             @param radio_id as int
             @param view_type as ViewType
+            @param font_height as int
         """
         Gtk.FlowBoxChild.__init__(self)
         OverlayRadioHelper.__init__(self)
         self.__widget = None
         self._artwork = None
+        self.__font_height = font_height
         self._radio_id = radio_id
         self.__radios = Radios()
         self.__name = self.__radios.get_name(self._radio_id)
@@ -114,7 +110,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         else:
             self.__art_size = ArtSize.BIG
         self.set_size_request(self.__art_size,
-                              self.__art_size + self.LABEL_HEIGHT)
+                              self.__art_size + self.__font_height)
 
     def do_get_preferred_width(self):
         """

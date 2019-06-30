@@ -12,7 +12,7 @@
 
 from gi.repository import GLib, Gtk, Pango, GObject
 
-from lollypop.define import ArtSize
+from lollypop.define import ArtSize, ViewType
 from lollypop.utils import on_query_tooltip, on_realize
 
 
@@ -26,24 +26,23 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
-    def __init__(self, data, name, sortname, art_size=ArtSize.BIG):
+    def __init__(self, data, name, sortname, view_type):
         """
             Init widget
             @param data as object
             @param name as str
             @param sortname as str
-            @param art_size as int
+            @param view_type as ViewType
         """
         # We do not use Gtk.Builder for speed reasons
         Gtk.FlowBoxChild.__init__(self)
         self._artwork = None
-        self._art_size = art_size
         self._data = data
         self.__name = name
         self.__sortname = sortname
         self.__filtered = False
+        self.set_view_type(view_type)
         self._scale_factor = self.get_scale_factor()
-        self.set_size_request(art_size, art_size)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
         self.connect("realize", on_realize)
@@ -64,7 +63,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._artwork = Gtk.Image.new()
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
-        self._set_artwork()
+        self.set_artwork()
         self._overlay = Gtk.Overlay()
         self._overlay.add(self._artwork)
         grid.add(self._overlay)
@@ -74,6 +73,19 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._widget.add(grid)
         self.add(self._widget)
         self.show_all()
+
+    def set_view_type(self, view_type):
+        """
+            Update artwork size
+            @param view_type as ViewType
+        """
+        self.__view_type = view_type
+        if self.__view_type & ViewType.SMALL:
+            self._art_size = ArtSize.LARGE
+        elif self.__view_type & ViewType.MEDIUM:
+            self._art_size = ArtSize.BANNER
+        else:
+            self._art_size = ArtSize.BIG
 
     def do_get_preferred_width(self):
         """
@@ -98,6 +110,12 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         """
         self.__filtered = b
         return not b
+
+    def set_artwork(self):
+        """
+            Set widget artwork
+        """
+        self._artwork.set_size_request(self._art_size, self._art_size)
 
     @property
     def name(self):
@@ -148,8 +166,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
 #######################
 # PROTECTED           #
 #######################
-    def _set_artwork(self):
-        pass
 
     def _get_album_ids(self):
         return []

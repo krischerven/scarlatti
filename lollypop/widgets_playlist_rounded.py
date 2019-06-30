@@ -25,14 +25,16 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         Playlist widget showing cover for 4 albums
     """
 
-    def __init__(self, playlist_id, obj, view_type):
+    def __init__(self, playlist_id, obj, view_type, font_height):
         """
             Init widget
             @param playlist_id as playlist_id
             @param obj as Track/Album
             @param view_type as ViewType
+            @param font_height as int
         """
         OverlayPlaylistHelper.__init__(self)
+        self.__font_height = font_height
         name = sortname = App().playlists.get_name(playlist_id)
         RoundedAlbumsWidget.__init__(self, playlist_id, name,
                                      sortname, view_type)
@@ -54,7 +56,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         """
             Populate widget content
         """
-        self.__set_album_ids()
         RoundedAlbumsWidget.populate(self)
         self._widget.connect("enter-notify-event", self._on_enter_notify)
         self._widget.connect("leave-notify-event", self._on_leave_notify)
@@ -64,6 +65,15 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         # We want to get release event after gesture
         self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.__gesture.set_button(0)
+
+    def set_view_type(self, view_type):
+        """
+            Update artwork size
+            @param view_type as ViewType
+        """
+        RoundedAlbumsWidget.set_view_type(self, view_type)
+        self.set_size_request(self._art_size,
+                              self._art_size + self.__font_height)
 
     @property
     def track_ids(self):
@@ -76,14 +86,12 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
 #######################
 # PROTECTED           #
 #######################
-
-#######################
-# PRIVATE             #
-#######################
-    def __set_album_ids(self):
+    def _get_album_ids(self):
         """
-            Set album ids
+            Get album ids
+            @return [int]
         """
+        album_ids = []
         if App().playlists.get_smart(self._data):
             request = App().playlists.get_smart_sql(self._data)
             if request is not None:
@@ -93,11 +101,15 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         sample(self._track_ids, len(self._track_ids))
         for track_id in self._track_ids:
             track = Track(track_id)
-            if track.album.id not in self._album_ids:
-                self._album_ids.append(track.album.id)
-            if len(self._album_ids) == self._ALBUMS_COUNT:
+            if track.album.id not in album_ids:
+                album_ids.append(track.album.id)
+            if len(album_ids) == self._ALBUMS_COUNT:
                 break
+        return album_ids
 
+#######################
+# PRIVATE             #
+#######################
     def __popup_menu(self, widget):
         """
             Popup menu for track
