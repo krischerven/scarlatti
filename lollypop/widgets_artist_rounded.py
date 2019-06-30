@@ -25,14 +25,16 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         Artist photo or artist's albums in a rounded widget
     """
 
-    def __init__(self, item, art_size):
+    def __init__(self, item, view_type, font_height):
         """
             Init widget
             @param item as (int, str, str)
-            @param art_size as int
+            @param view_type as ViewType
+            @param font_height as int
         """
+        self.__font_height = font_height
         RoundedFlowBoxWidget.__init__(self, item[0], item[1],
-                                      item[1], art_size)
+                                      item[1], view_type)
 
     def populate(self):
         """
@@ -59,6 +61,15 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             Set artist artwork
         """
         self._set_artwork()
+
+    def set_view_type(self, view_type):
+        """
+            Update view type
+            @param view_type as ViewType
+        """
+        RoundedFlowBoxWidget.set_view_type(self, view_type)
+        self.set_size_request(self._art_size,
+                              self._art_size + self.__font_height)
 
     @property
     def is_overlay(self):

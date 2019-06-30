@@ -13,7 +13,7 @@
 from gi.repository import GLib
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ArtSize
+from lollypop.define import App, Type
 from locale import strcoll
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.utils import get_icon_name
@@ -24,12 +24,14 @@ class RoundedArtistsView(FlowBoxView):
         Show artists in a FlowBox
     """
 
-    def __init__(self, destroy=True):
+    def __init__(self, view_type, destroy=True):
         """
-            Init decade view
+            Init artist view
+            @param view_type as ViewType
             @param destroy as bool
         """
         FlowBoxView.__init__(self)
+        self.__view_type = view_type
         self.__destroy = destroy
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
@@ -45,7 +47,7 @@ class RoundedArtistsView(FlowBoxView):
                 return
         # Setup sort on insert
         self._box.set_sort_func(self.__sort_func)
-        widget = RoundedArtistWidget(item, ArtSize.BIG)
+        widget = RoundedArtistWidget(item, self.__view_type)
         widget.populate()
         widget.show()
         self._box.insert(widget, -1)
@@ -82,13 +84,9 @@ class RoundedArtistsView(FlowBoxView):
     def _add_items(self, items, *args):
         """
             Add artists to the view
-            Start lazy loading
             @param items as [(int, str, str)]
         """
-        if App().window.is_adaptive:
-            FlowBoxView._add_items(self, items, ArtSize.BANNER)
-        else:
-            FlowBoxView._add_items(self, items, ArtSize.BIG)
+        FlowBoxView._add_items(self, items, self.__view_type)
 
     def _on_item_activated(self, flowbox, widget):
         """
