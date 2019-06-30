@@ -68,7 +68,7 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
 
     def set_view_type(self, view_type):
         """
-            Update artwork size
+            Update view type
             @param view_type as ViewType
         """
         RoundedAlbumsWidget.set_view_type(self, view_type)

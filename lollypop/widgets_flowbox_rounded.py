@@ -76,7 +76,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
 
     def set_view_type(self, view_type):
         """
-            Update artwork size
+            Update view type
             @param view_type as ViewType
         """
         self.__view_type = view_type
