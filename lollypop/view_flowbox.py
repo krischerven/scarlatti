@@ -31,7 +31,6 @@ class FlowBoxView(LazyLoadingView):
         self.__adaptive_signal_id = None
         self._widget_class = None
         self.__font_height = get_font_height()
-        self._items = []
         self._box = Gtk.FlowBox()
         self._box.set_filter_func(self._filter_func)
         self._box.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -53,8 +52,7 @@ class FlowBoxView(LazyLoadingView):
             @param items
         """
         if items and self._box.get_visible():
-            self._items = items
-            GLib.idle_add(self._add_items, self._items)
+            GLib.idle_add(self._add_items, items)
         else:
             LazyLoadingView.populate(self)
 
