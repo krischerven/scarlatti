@@ -52,6 +52,7 @@ class View(BaseView, Gtk.Grid):
         BaseView.__init__(self)
         Gtk.Grid.__init__(self)
         self._view_type = view_type
+        self.__adaptive_signal_id = None
         self.__overlayed = None
         self.__scanner_signal_id = App().scanner.connect(
             "album-updated", self._on_album_updated)
@@ -199,6 +200,12 @@ class View(BaseView, Gtk.Grid):
             return child.set_filtered(False)
         return child.set_filtered(True)
 
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+        """
+        pass
+
     def _on_search_changed(self, entry):
         """
             Update filter
@@ -221,6 +228,10 @@ class View(BaseView, Gtk.Grid):
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
+        if self.__adaptive_signal_id is None:
+            self.__adaptive_signal_id = App().window.connect(
+                                                    "adaptive-changed",
+                                                    self._on_adaptive_changed)
         if self._filter is not None and self.__search_bar.get_search_mode():
             App().enable_special_shortcuts(False)
 
@@ -229,6 +240,9 @@ class View(BaseView, Gtk.Grid):
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
+        if self.__adaptive_signal_id is not None:
+            App().window.disconnect(self.__adaptive_signal_id)
+            self.__adaptive_signal_id = None
         if self._filter is not None and self.__search_bar.get_search_mode():
             App().enable_special_shortcuts(True)
 

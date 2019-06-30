@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.view import LazyLoadingView
-from lollypop.define import ViewType, App
+from lollypop.define import ViewType
 
 
 class FlowBoxView(LazyLoadingView):
@@ -110,30 +110,6 @@ class FlowBoxView(LazyLoadingView):
 
     def _on_item_activated(self, flowbox, widget):
         pass
-
-    def _on_adaptive_changed(self, window, status):
-        pass
-
-    def _on_map(self, widget):
-        """
-            Connect signals
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_map(self, widget)
-        if self.__adaptive_signal_id is None:
-            self.__adaptive_signal_id = App().window.connect(
-                                                    "adaptive-changed",
-                                                    self._on_adaptive_changed)
-
-    def _on_unmap(self, widget):
-        """
-            Disconnect signals
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_unmap(self, widget)
-        if self.__adaptive_signal_id is not None:
-            App().window.disconnect(self.__adaptive_signal_id)
-            self.__adaptive_signal_id = None
 
 #######################
 # PRIVATE             #

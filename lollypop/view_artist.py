@@ -150,6 +150,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             Connect signals and set active ids
             @param widget as Gtk.Widget
         """
+        ArtistAlbumsView._on_map(self, widget)
         self.__on_album_changed(App().player)
         self.__art_signal_id = App().art.connect(
                                            "artist-artwork-changed",
@@ -175,6 +176,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             Disconnect signals
             @param widget as Gtk.Widget
         """
+        ArtistAlbumsView._on_unmap(self, widget)
         if self.__art_signal_id is not None:
             App().art.disconnect(self.__art_signal_id)
             self.__art_signal_id = None
@@ -187,6 +189,16 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         if self.__removed_signal_id is not None:
             App().player.disconnect(self.__removed_signal_id)
             self.__removed_signal_id = None
+
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update banner style
+            @param window as Window
+            @param status as bool
+        """
+        if status:
+            App().window.container.show_view(
+                self._genre_ids, self._artist_ids, True)
 
 #######################
 # PRIVATE             #

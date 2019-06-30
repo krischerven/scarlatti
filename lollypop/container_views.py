@@ -52,65 +52,63 @@ class ViewsContainer:
             @param data as object
             @param switch as bool
         """
-        if not item_ids:
-            return
         App().window.emit("can-go-back-changed", True)
-        if item_ids[0] in [Type.POPULARS,
-                           Type.LOVED,
-                           Type.RECENTS,
-                           Type.NEVER,
-                           Type.RANDOMS,
-                           Type.WEB]:
-            view = self._get_view_albums(item_ids, [])
-        elif item_ids[0] == Type.SEARCH:
-            view = self.get_view_search(data)
-        elif item_ids[0] == Type.INFO:
-            view = self._get_view_info()
-        elif item_ids[0] == Type.DEVICE_ALBUMS:
-            view = self._get_view_device_albums(data)
-        elif item_ids[0] == Type.DEVICE_PLAYLISTS:
-            view = self._get_view_device_playlists(data)
-        elif item_ids[0] == Type.GENRES:
-            if data is None:
-                view = self._get_view_genres()
-            else:
-                view = self._get_view_albums([data], [])
-        elif item_ids[0] == Type.ALBUM:
-            view = self._get_view_album(data)
-        elif item_ids[0] == Type.YEARS:
-            if data is None:
-                view = self._get_view_albums_decades()
-            else:
-                view = self._get_view_albums_years(data)
-        elif item_ids[0] == Type.PLAYLISTS:
-            view = self._get_view_playlists([] if data is None else data)
-        elif item_ids[0] == Type.RADIOS:
-            view = self._get_view_radios()
-        elif item_ids[0] == Type.EQUALIZER:
-            from lollypop.view_equalizer import EqualizerView
-            view = EqualizerView()
-        elif item_ids[0] in [Type.SETTINGS,
-                             Type.SETTINGS_APPEARANCE,
-                             Type.SETTINGS_BEHAVIOUR,
-                             Type.SETTINGS_COLLECTIONS,
-                             Type.SETTINGS_WEB,
-                             Type.SETTINGS_DEVICES]:
-            view = self._get_view_settings(item_ids[0])
-        elif item_ids[0] == Type.ALL:
-            view = self._get_view_albums(item_ids, [])
-        elif item_ids[0] == Type.COMPILATIONS:
-            view = self._get_view_albums([], item_ids)
-        elif item_ids[0] == Type.ARTISTS:
-            # Here we handle static items for RoundedArtistView
-            if data and data[0] < 0:
-                self.show_view(data)
-                return
-            elif data is None:
-                view = self._rounded_artists_view
-            else:
-                view = self._get_view_artists(item_ids, data)
-        else:
-            view = self._get_view_artists([], item_ids)
+        view = None
+        if item_ids:
+            if item_ids[0] in [Type.POPULARS,
+                               Type.LOVED,
+                               Type.RECENTS,
+                               Type.NEVER,
+                               Type.RANDOMS,
+                               Type.WEB]:
+                view = self._get_view_albums(item_ids, [])
+            elif item_ids[0] == Type.SEARCH:
+                view = self.get_view_search(data)
+            elif item_ids[0] == Type.INFO:
+                view = self._get_view_info()
+            elif item_ids[0] == Type.DEVICE_ALBUMS:
+                view = self._get_view_device_albums(data)
+            elif item_ids[0] == Type.DEVICE_PLAYLISTS:
+                view = self._get_view_device_playlists(data)
+            elif item_ids[0] == Type.GENRES:
+                if data is None:
+                    view = self._get_view_genres()
+                else:
+                    view = self._get_view_albums([data], [])
+            elif item_ids[0] == Type.ALBUM:
+                view = self._get_view_album(data)
+            elif item_ids[0] == Type.YEARS:
+                if data is None:
+                    view = self._get_view_albums_decades()
+                else:
+                    view = self._get_view_albums_years(data)
+            elif item_ids[0] == Type.PLAYLISTS:
+                view = self._get_view_playlists([] if data is None else data)
+            elif item_ids[0] == Type.RADIOS:
+                view = self._get_view_radios()
+            elif item_ids[0] == Type.EQUALIZER:
+                from lollypop.view_equalizer import EqualizerView
+                view = EqualizerView()
+            elif item_ids[0] in [Type.SETTINGS,
+                                 Type.SETTINGS_APPEARANCE,
+                                 Type.SETTINGS_BEHAVIOUR,
+                                 Type.SETTINGS_COLLECTIONS,
+                                 Type.SETTINGS_WEB,
+                                 Type.SETTINGS_DEVICES]:
+                view = self._get_view_settings(item_ids[0])
+            elif item_ids[0] == Type.ALL:
+                view = self._get_view_albums(item_ids, [])
+            elif item_ids[0] == Type.COMPILATIONS:
+                view = self._get_view_albums([], item_ids)
+            elif item_ids[0] == Type.ARTISTS:
+                # Here we handle static items for RoundedArtistView
+                if data and data[0] < 0:
+                    self.show_view(data)
+                    return
+                elif data is None:
+                    view = self._rounded_artists_view
+        if view is None:
+            view = self._get_view_artists(item_ids, data)
         view.show()
         self._stack.add(view)
         if switch:
