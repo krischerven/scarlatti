@@ -127,25 +127,6 @@ class RadiosView(FlowBoxView, ViewController):
             self.__pop_tunein.destroy()
             self.__pop_tunein = None
 
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update artwork
-            @param window as Window
-            @param status as bool
-        """
-        def update_artwork(view_type, children):
-            if children:
-                child = children.pop(0)
-                child.set_view_type(view_type)
-                child.set_artwork()
-                GLib.idle_add(update_artwork, view_type, children)
-
-        if status:
-            view_type = self._view_type | ViewType.MEDIUM
-        else:
-            view_type = self._view_type & ~ViewType.MEDIUM
-        update_artwork(view_type, self._box.get_children())
-
 #######################
 # PRIVATE             #
 #######################

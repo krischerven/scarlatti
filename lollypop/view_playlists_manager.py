@@ -128,6 +128,7 @@ class PlaylistsManagerView(FlowBoxView):
             Disconnect signal
             @param widget as Gtk.Widget
         """
+        FlowBoxView._on_unmap(self, widget)
         if self.__signal_id is not None:
             App().playlists.disconnect(self.__signal_id)
             self.__signal_id = None
