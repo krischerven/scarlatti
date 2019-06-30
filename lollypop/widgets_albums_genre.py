@@ -20,13 +20,15 @@ class AlbumsGenreWidget(RoundedAlbumsWidget, OverlayGenreHelper):
         Genre widget showing cover for 4 albums
     """
 
-    def __init__(self, genre_id, view_type):
+    def __init__(self, genre_id, view_type, font_height):
         """
             Init widget
             @param Genre as [int]
             @param view_type as ViewType
+            @param font_height as int
         """
         OverlayGenreHelper.__init__(self)
+        self.__font_height = font_height
         name = sortname = App().genres.get_name(genre_id)
         RoundedAlbumsWidget.__init__(self, genre_id, name, sortname, view_type)
         self._genre = Type.GENRES
@@ -36,14 +38,28 @@ class AlbumsGenreWidget(RoundedAlbumsWidget, OverlayGenreHelper):
             Populate widget content
         """
         self._lock_overlay = False
-        self._album_ids = App().albums.get_ids([], [self._data])
         RoundedAlbumsWidget.populate(self)
         self._widget.connect("enter-notify-event", self._on_enter_notify)
         self._widget.connect("leave-notify-event", self._on_leave_notify)
 
+    def set_view_type(self, view_type):
+        """
+            Update view type
+            @param view_type as ViewType
+        """
+        RoundedAlbumsWidget.set_view_type(self, view_type)
+        self.set_size_request(self._art_size,
+                              self._art_size + self.__font_height)
+
 #######################
 # PROTECTED           #
 #######################
+    def _get_album_ids(self):
+        """
+            Get album ids
+            @return [int]
+        """
+        return App().albums.get_ids([], [self._data])
 
 #######################
 # PRIVATE             #
