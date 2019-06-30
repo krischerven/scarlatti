@@ -286,7 +286,7 @@ class AlbumBannerWidget(Gtk.Bin):
                 self.__album,
                 # +100 to prevent resize lag
                 allocation.width + 100,
-                allocation.height,
+                self.default_height,
                 self.__artwork.get_scale_factor(),
                 ArtBehaviour.BLUR_HARD |
                 ArtBehaviour.DARKER,
@@ -311,7 +311,7 @@ class AlbumBannerWidget(Gtk.Bin):
                             self.__album,
                             # +100 to prevent resize lag
                             self.get_allocated_width() + 100,
-                            self.get_allocated_height(),
+                            self.default_height,
                             self.__artwork.get_scale_factor(),
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
