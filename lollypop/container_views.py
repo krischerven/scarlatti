@@ -381,7 +381,10 @@ class ViewsContainer:
                 decades.append(decade)
             return decades
         from lollypop.view_albums_decade_box import AlbumsDecadeBoxView
-        view = AlbumsDecadeBoxView(ViewType.SCROLLED)
+        view_type = ViewType.TWO_COLUMNS
+        if App().window.is_adaptive:
+            view_type |= ViewType.SMALL
+        view = AlbumsDecadeBoxView(view_type)
         view.show()
         loader = Loader(target=load, view=view)
         loader.start()
@@ -408,7 +411,10 @@ class ViewsContainer:
             return App().genres.get_ids()
 
         from lollypop.view_albums_genre_box import AlbumsGenreBoxView
-        view = AlbumsGenreBoxView(ViewType.SCROLLED)
+        view_type = ViewType.SCROLLED
+        if App().window.is_adaptive:
+            view_type |= ViewType.MEDIUM
+        view = AlbumsGenreBoxView(view_type)
         view.show()
         loader = Loader(target=load, view=view)
         loader.start()
