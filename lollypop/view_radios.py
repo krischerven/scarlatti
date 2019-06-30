@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, Type
+from lollypop.define import App, Type, ViewType
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_radio import RadioWidget
 from lollypop.radios import Radios
@@ -26,11 +26,12 @@ class RadiosView(FlowBoxView, ViewController):
         Show radios flow box
     """
 
-    def __init__(self):
+    def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init view
+            @param view_type as ViewType
         """
-        FlowBoxView.__init__(self)
+        FlowBoxView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._widget_class = RadioWidget
         self._empty_icon_name = get_icon_name(Type.RADIOS)
@@ -61,7 +62,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param radio ids as [int]
         """
         self._remove_placeholder()
-        widget = FlowBoxView._add_items(self, radio_ids, self.__radios)
+        widget = FlowBoxView._add_items(self, radio_ids, self._view_type)
         if widget is not None:
             widget.connect("overlayed", self.on_overlayed)
 
@@ -118,12 +119,32 @@ class RadiosView(FlowBoxView, ViewController):
             Destroy popover
             @param widget as Gtk.Widget
         """
+        FlowBoxView._on_unmap(self, widget)
         if self.__signal_id is not None:
             self.__radios.disconnect(self.__signal_id)
             self.__signal_id = None
         if self.__pop_tunein is not None:
             self.__pop_tunein.destroy()
             self.__pop_tunein = None
+
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update artwork
+            @param window as Window
+            @param status as bool
+        """
+        def update_artwork(view_type, children):
+            if children:
+                child = children.pop(0)
+                child.set_view_type(view_type)
+                child.set_artwork()
+                GLib.idle_add(update_artwork, view_type, children)
+
+        if status:
+            view_type = self._view_type | ViewType.MEDIUM
+        else:
+            view_type = self._view_type & ~ViewType.MEDIUM
+        update_artwork(view_type, self._box.get_children())
 
 #######################
 # PRIVATE             #

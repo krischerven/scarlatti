@@ -17,6 +17,7 @@ from lollypop.widgets_rating import RatingWidget
 from lollypop.define import App
 from lollypop.widgets_utils import Popover
 from lollypop.widgets_artwork_radio import RadioArtworkSearchWidget
+from lollypop.radios import Radios
 from lollypop.art import Art
 
 
@@ -26,16 +27,15 @@ class RadioPopover(Popover):
         Popover with radio logos from the web
     """
 
-    def __init__(self, radio_id, radios):
+    def __init__(self, radio_id):
         """
             Init Popover
             @param radio_id as int
-            @param radios as Radios
         """
         Popover.__init__(self)
         self.__uri_artwork_id = None
         self.__radio_id = radio_id
-        self.__radios = radios
+        self.__radios = Radios()
 
         self.__stack = Gtk.Stack()
         self.__stack.set_transition_duration(1000)
@@ -56,14 +56,14 @@ class RadioPopover(Popover):
 
         track = Track()
         if radio_id is not None:
-            name = radios.get_name(radio_id)
+            name = self.__radios.get_name(radio_id)
             track.set_radio_id(radio_id)
             rating = RatingWidget(track)
             rating.show()
             builder.get_object("widget").attach(rating, 0, 2, 2, 1)
             builder.get_object("delete_button").show()
             self.__name_entry.set_text(name)
-            uri = radios.get_uri(radio_id)
+            uri = self.__radios.get_uri(radio_id)
             if uri:
                 self.__uri_entry.set_text(uri)
 

@@ -94,7 +94,7 @@ class OverlayRadioHelper(OverlayHelper):
             @param button as Gtk.Button
         """
         from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover(self._radio_id, self._radios)
+        popover = RadioPopover(self._radio_id)
         popover.set_relative_to(button)
         popover.connect("closed", self._on_popover_closed)
         self._lock_overlay = True

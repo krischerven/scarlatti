@@ -481,7 +481,10 @@ class ViewsContainer:
             radios = Radios()
             return radios.get_ids()
         from lollypop.view_radios import RadiosView
-        view = RadiosView()
+        view_type = ViewType.SCROLLED
+        if App().window.is_adaptive:
+            view_type |= ViewType.MEDIUM
+        view = RadiosView(view_type)
         loader = Loader(target=load, view=view)
         loader.start()
         view.show()

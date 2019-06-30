@@ -12,9 +12,10 @@
 
 from gi.repository import Gtk, Pango, GObject
 
-from lollypop.define import App, ArtSize, Type, ArtBehaviour
+from lollypop.define import App, ArtSize, Type, ArtBehaviour, ViewType
 from lollypop.utils import on_query_tooltip
 from lollypop.helper_overlay_radio import OverlayRadioHelper
+from lollypop.radios import Radios
 
 
 class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
@@ -32,86 +33,95 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
     # * 2 => two labels
     LABEL_HEIGHT = int(layout.get_pixel_size()[1])
 
-    def __init__(self, radio_id, radios):
+    def __init__(self, radio_id, view_type):
         """
             Init radio widget
             @param radio_id as int
-            @param label_height as int
-            @param radios as Radios
+            @param view_type as ViewType
         """
         Gtk.FlowBoxChild.__init__(self)
         OverlayRadioHelper.__init__(self)
-        self._widget = None
+        self.__widget = None
         self._artwork = None
-        self._watch_loading = True
-        self.__art_size = 120\
-            if App().window.is_adaptive\
-            else ArtSize.BIG
-        self.set_size_request(self.__art_size,
-                              self.__art_size + self.LABEL_HEIGHT)
         self._radio_id = radio_id
-        self._radios = radios
+        self.__radios = Radios()
+        self.__name = self.__radios.get_name(self._radio_id)
+        self.__view_type = view_type
+        self._watch_loading = True
+        self.set_view_type(view_type)
 
     def populate(self):
         """
             Init widget content
         """
-        name = self._radios.get_name(self._radio_id)
-        self._widget = Gtk.EventBox()
+        self.__widget = Gtk.EventBox()
         grid = Gtk.Grid()
         grid.set_orientation(Gtk.Orientation.VERTICAL)
         self._artwork = Gtk.Image.new()
-        App().art_helper.set_frame(self._artwork,
-                                   "cover-frame",
-                                   self.__art_size,
-                                   self.__art_size)
         self.__label = Gtk.Label.new()
         self.__label.set_justify(Gtk.Justification.CENTER)
         self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__label.set_text(name)
+        self.__label.set_text(self.__name)
         self.__label.set_property("has-tooltip", True)
         self.__label.connect("query-tooltip", on_query_tooltip)
-        self._widget.add(grid)
+        self.__widget.add(grid)
         self._overlay = Gtk.Overlay.new()
         self._overlay.add(self._artwork)
         grid.add(self._overlay)
         grid.add(self.__label)
-        self.add(self._widget)
+        self.add(self.__widget)
         self.set_artwork()
         self.set_selection()
         self.show_all()
         self._lock_overlay = False
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
-        self._widget.connect("enter-notify-event", self._on_enter_notify)
-        self._widget.connect("leave-notify-event", self._on_leave_notify)
+        self.__widget.connect("enter-notify-event", self._on_enter_notify)
+        self.__widget.connect("leave-notify-event", self._on_leave_notify)
 
     def set_artwork(self):
         """
-            Set album artwork
+            Set artwork
         """
-        if self._widget is None:
+        if self.__widget is None:
             return
-        name = self._radios.get_name(self._radio_id)
-        App().art_helper.set_radio_artwork(name,
+        if self.__art_size < ArtSize.BIG:
+            frame = "small-cover-frame"
+        else:
+            frame = "cover-frame"
+        App().art_helper.set_frame(self._artwork,
+                                   frame,
+                                   self.__art_size,
+                                   self.__art_size)
+        App().art_helper.set_radio_artwork(self.__name,
                                            self.__art_size,
                                            self.__art_size,
                                            self._artwork.get_scale_factor(),
-                                           ArtBehaviour.CACHE,
+                                           ArtBehaviour.CACHE |
+                                           ArtBehaviour.CROP,
                                            self.__on_radio_artwork)
 
-    def set_sensitive(self, b):
+    def set_view_type(self, view_type):
         """
-            Ignore set sensitive
+            Update artwork size
+            @param view_type as ViewType
         """
-        pass
+        self.__view_type = view_type
+        if self.__view_type & ViewType.SMALL:
+            self.__art_size = ArtSize.LARGE
+        elif self.__view_type & ViewType.MEDIUM:
+            self.__art_size = ArtSize.BANNER
+        else:
+            self.__art_size = ArtSize.BIG
+        self.set_size_request(self.__art_size,
+                              self.__art_size + self.LABEL_HEIGHT)
 
     def do_get_preferred_width(self):
         """
             Return preferred width
             @return (int, int)
         """
-        if self._widget is None:
+        if self.__widget is None:
             return (0, 0)
         width = Gtk.FlowBoxChild.do_get_preferred_width(self)[0]
         return (width, width)
@@ -121,6 +131,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             Set radio name
             @param name as str
         """
+        self.__name = name
         self.__label.set_label(name)
 
     def set_selection(self):
@@ -129,9 +140,8 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
         if self._artwork is None:
             return
-        name = self._radios.get_name(self._radio_id)
         selected = App().player.current_track.id == Type.RADIOS and\
-            name == App().player.current_track.radio_name
+            self.__name == App().player.current_track.radio_name
         if selected:
             self._artwork.set_state_flags(Gtk.StateFlags.SELECTED, True)
         else:
@@ -164,7 +174,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             @return name as str
         """
-        return self._radios.get_name(self._radio_id)
+        return self.__name
 
 #######################
 # PROTECTED           #
