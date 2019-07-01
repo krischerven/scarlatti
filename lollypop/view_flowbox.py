@@ -92,7 +92,7 @@ class FlowBoxView(LazyLoadingView):
             GLib.idle_add(self._add_items, items)
             return widget
         else:
-            GLib.idle_add(self.lazy_loading)
+            self.lazy_loading()
             if self._view_type & ViewType.SCROLLED:
                 if self._viewport.get_child() is None:
                     self._viewport.add(self._box)
@@ -123,8 +123,7 @@ class FlowBoxView(LazyLoadingView):
                 child.set_artwork()
                 GLib.idle_add(update_artwork, children)
 
-        self.__priority_queue = []
-        self._lazy_queue = []
+        self.stop()
         if status:
             view_type = self._view_type | ViewType.MEDIUM
         else:
@@ -134,7 +133,7 @@ class FlowBoxView(LazyLoadingView):
             child.set_view_type(view_type)
             child.disable_artwork()
             self._lazy_queue.append(child)
-        GLib.idle_add(self.lazy_loading)
+        self.lazy_loading()
 
 #######################
 # PRIVATE             #

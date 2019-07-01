@@ -511,7 +511,7 @@ class SelectionList(LazyLoadingView):
                 self.__fastscroll.populate()
             self.__sort = True
             self.emit("populated")
-            GLib.idle_add(self.lazy_loading)
+            self.lazy_loading()
             # Scroll to first selected item
             for row in self._listbox.get_selected_rows():
                 GLib.idle_add(self.__scroll_to_row, row)

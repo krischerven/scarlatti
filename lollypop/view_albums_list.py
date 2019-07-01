@@ -724,7 +724,7 @@ class AlbumsListView(LazyLoadingView, ViewController):
                 children[0].populate()
                 children[0].reveal(True)
             else:
-                GLib.idle_add(self.lazy_loading)
+                self.lazy_loading()
             if self._viewport.get_child() is None:
                 self._viewport.add(self._box)
 
