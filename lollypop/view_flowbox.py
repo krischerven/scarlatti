@@ -123,7 +123,7 @@ class FlowBoxView(LazyLoadingView):
                 child.set_artwork()
                 GLib.idle_add(update_artwork, children)
 
-        self.stop()
+        self.stop(True)
         if status:
             view_type = self._view_type | ViewType.MEDIUM
         else:
