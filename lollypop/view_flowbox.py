@@ -117,18 +117,23 @@ class FlowBoxView(LazyLoadingView):
             @param window as Window
             @param status as bool
         """
-        def update_artwork(view_type, children):
+        def update_artwork(children):
             if children:
                 child = children.pop(0)
-                child.set_view_type(view_type)
                 child.set_artwork()
-                GLib.idle_add(update_artwork, view_type, children)
+                GLib.idle_add(update_artwork, children)
 
+        self._lazy_queue = []
         if status:
             view_type = self._view_type | ViewType.MEDIUM
         else:
             view_type = self._view_type & ~ViewType.MEDIUM
-        update_artwork(view_type, self._box.get_children())
+        children = self._box.get_children()
+        for child in children:
+            child.set_view_type(view_type)
+            child.disable_artwork()
+            self._lazy_queue.append(child)
+        GLib.idle_add(self.lazy_loading)
 
 #######################
 # PRIVATE             #

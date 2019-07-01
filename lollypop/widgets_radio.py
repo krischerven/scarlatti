@@ -50,30 +50,41 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             Init widget content
         """
-        self.__widget = Gtk.EventBox()
-        grid = Gtk.Grid()
-        grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self._artwork = Gtk.Image.new()
-        self.__label = Gtk.Label.new()
-        self.__label.set_justify(Gtk.Justification.CENTER)
-        self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__label.set_text(self.__name)
-        self.__label.set_property("has-tooltip", True)
-        self.__label.connect("query-tooltip", on_query_tooltip)
-        self.__widget.add(grid)
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.add(self._artwork)
-        grid.add(self._overlay)
-        grid.add(self.__label)
-        self.add(self.__widget)
-        self.set_artwork()
-        self.set_selection()
-        self.show_all()
-        self._lock_overlay = False
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.set_property("valign", Gtk.Align.CENTER)
-        self.__widget.connect("enter-notify-event", self._on_enter_notify)
-        self.__widget.connect("leave-notify-event", self._on_leave_notify)
+        if self._artwork is None:
+            self.__widget = Gtk.EventBox()
+            grid = Gtk.Grid()
+            grid.set_orientation(Gtk.Orientation.VERTICAL)
+            self._artwork = Gtk.Image.new()
+            self.__label = Gtk.Label.new()
+            self.__label.set_justify(Gtk.Justification.CENTER)
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+            self.__label.set_text(self.__name)
+            self.__label.set_property("has-tooltip", True)
+            self.__label.connect("query-tooltip", on_query_tooltip)
+            self.__widget.add(grid)
+            self._overlay = Gtk.Overlay.new()
+            self._overlay.add(self._artwork)
+            grid.add(self._overlay)
+            grid.add(self.__label)
+            self.add(self.__widget)
+            self.set_artwork()
+            self.set_selection()
+            self.show_all()
+            self._lock_overlay = False
+            self.set_property("halign", Gtk.Align.CENTER)
+            self.set_property("valign", Gtk.Align.CENTER)
+            self.__widget.connect("enter-notify-event", self._on_enter_notify)
+            self.__widget.connect("leave-notify-event", self._on_leave_notify)
+        else:
+            self.set_artwork()
+
+    def disable_artwork(self):
+        """
+            Disable widget artwork
+        """
+        if self._artwork is not None:
+            self._artwork.set_size_request(self.__art_size, self.__art_size)
+            self._artwork.set_from_surface(None)
 
     def set_artwork(self):
         """

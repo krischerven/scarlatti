@@ -40,14 +40,18 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         """
             Populate widget content
         """
-        RoundedFlowBoxWidget.populate(self)
-        self.connect("destroy", self.__on_destroy)
-        self.connect("button-release-event", self.__on_button_release_event)
-        self.__gesture = Gtk.GestureLongPress.new(self)
-        self.__gesture.connect("pressed", self.__on_gesture_pressed)
-        # We want to get release event after gesture
-        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.__gesture.set_button(0)
+        if self._artwork is None:
+            RoundedFlowBoxWidget.populate(self)
+            self.connect("destroy", self.__on_destroy)
+            self.connect("button-release-event",
+                         self.__on_button_release_event)
+            self.__gesture = Gtk.GestureLongPress.new(self)
+            self.__gesture.connect("pressed", self.__on_gesture_pressed)
+            # We want to get release event after gesture
+            self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+            self.__gesture.set_button(0)
+        else:
+            self.set_artwork()
 
     def show_overlay(self, show):
         """
@@ -86,15 +90,15 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         """
             Set artist artwork
         """
-        if self._artwork is None:
-            return
-
         def set_icon_name():
             icon_name = get_icon_name(self._data) or "avatar-default-symbolic"
             self._artwork.set_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
             self.emit("populated")
             self._artwork.get_style_context().add_class("artwork-icon-large")
 
+        if self._artwork is None:
+            return
+        RoundedFlowBoxWidget.set_artwork(self)
         if self._data < 0:
             set_icon_name()
         elif App().settings.get_value("artist-artwork"):

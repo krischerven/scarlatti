@@ -111,11 +111,20 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self.__filtered = b
         return not b
 
+    def disable_artwork(self):
+        """
+            Disable widget artwork
+        """
+        if self._artwork is not None:
+            self._artwork.set_size_request(self._art_size, self._art_size)
+            self._artwork.set_from_surface(None)
+
     def set_artwork(self):
         """
             Set widget artwork
         """
-        self._artwork.set_size_request(self._art_size, self._art_size)
+        if self._artwork is not None:
+            self._artwork.set_size_request(self._art_size, self._art_size)
 
     @property
     def name(self):

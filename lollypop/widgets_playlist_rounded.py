@@ -56,15 +56,19 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         """
             Populate widget content
         """
-        RoundedAlbumsWidget.populate(self)
-        self._widget.connect("enter-notify-event", self._on_enter_notify)
-        self._widget.connect("leave-notify-event", self._on_leave_notify)
-        self.connect("button-release-event", self.__on_button_release_event)
-        self.__gesture = Gtk.GestureLongPress.new(self)
-        self.__gesture.connect("pressed", self.__on_gesture_pressed)
-        # We want to get release event after gesture
-        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.__gesture.set_button(0)
+        if self._artwork is None:
+            RoundedAlbumsWidget.populate(self)
+            self._widget.connect("enter-notify-event", self._on_enter_notify)
+            self._widget.connect("leave-notify-event", self._on_leave_notify)
+            self.connect("button-release-event",
+                         self.__on_button_release_event)
+            self.__gesture = Gtk.GestureLongPress.new(self)
+            self.__gesture.connect("pressed", self.__on_gesture_pressed)
+            # We want to get release event after gesture
+            self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+            self.__gesture.set_button(0)
+        else:
+            self.set_artwork()
 
     def set_view_type(self, view_type):
         """

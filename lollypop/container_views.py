@@ -381,7 +381,7 @@ class ViewsContainer:
                 decades.append(decade)
             return decades
         from lollypop.view_albums_decade_box import AlbumsDecadeBoxView
-        view_type = ViewType.TWO_COLUMNS
+        view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.SMALL
         view = AlbumsDecadeBoxView(view_type)

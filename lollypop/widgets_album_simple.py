@@ -49,49 +49,61 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         """
             Populate widget content
         """
-        OverlayAlbumHelper.__init__(self, self.__view_type)
-        self._watch_loading = self._album.mtime <= 0
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.set_property("valign", Gtk.Align.CENTER)
-        self.__widget = Gtk.EventBox()
-        grid = Gtk.Grid()
-        grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__label = Gtk.Label.new()
-        self.__label.set_justify(Gtk.Justification.CENTER)
-        self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__label.set_property("halign", Gtk.Align.CENTER)
-        self.__label.set_property("has-tooltip", True)
-        self.__label.connect("query-tooltip", on_query_tooltip)
-        album_name = GLib.markup_escape_text(self._album.name)
-        if self.__view_type & ViewType.SMALL:
-            self.__label.set_markup("<span alpha='40000'>%s</span>" %
-                                    album_name)
+        if self._artwork is None:
+            OverlayAlbumHelper.__init__(self, self.__view_type)
+            self._watch_loading = self._album.mtime <= 0
+            self.set_property("halign", Gtk.Align.CENTER)
+            self.set_property("valign", Gtk.Align.CENTER)
+            self.__widget = Gtk.EventBox()
+            grid = Gtk.Grid()
+            grid.set_orientation(Gtk.Orientation.VERTICAL)
+            self.__label = Gtk.Label.new()
+            self.__label.set_justify(Gtk.Justification.CENTER)
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+            self.__label.set_property("halign", Gtk.Align.CENTER)
+            self.__label.set_property("has-tooltip", True)
+            self.__label.connect("query-tooltip", on_query_tooltip)
+            album_name = GLib.markup_escape_text(self._album.name)
+            if self.__view_type & ViewType.SMALL:
+                self.__label.set_markup("<span alpha='40000'>%s</span>" %
+                                        album_name)
+            else:
+                artist_name = GLib.markup_escape_text(", ".join(
+                                                      self._album.artists))
+                self.__label.set_markup(
+                    "<b>%s</b>\n<span alpha='40000'>%s</span>" % (album_name,
+                                                                  artist_name))
+            eventbox = Gtk.EventBox()
+            eventbox.add(self.__label)
+            eventbox.connect("realize", on_realize)
+            eventbox.connect("button-press-event",
+                             self.__on_artist_button_press)
+            eventbox.show()
+            self.__widget.add(grid)
+            self._overlay = Gtk.Overlay.new()
+            self._artwork = Gtk.Image.new()
+            self._overlay.add(self._artwork)
+            grid.add(self._overlay)
+            grid.add(eventbox)
+            self.set_artwork()
+            self.set_selection()
+            self.__widget.connect("enter-notify-event", self._on_enter_notify)
+            self.__widget.connect("leave-notify-event", self._on_leave_notify)
+            self.__widget.connect("button-press-event",
+                                  self._on_button_release)
+            self.__widget.connect("realize", on_realize)
+            self.connect("destroy", self.__on_destroy)
+            self.add(self.__widget)
         else:
-            artist_name = GLib.markup_escape_text(", ".join(
-                                                  self._album.artists))
-            self.__label.set_markup(
-                "<b>%s</b>\n<span alpha='40000'>%s</span>" % (album_name,
-                                                              artist_name))
-        eventbox = Gtk.EventBox()
-        eventbox.add(self.__label)
-        eventbox.connect("realize", on_realize)
-        eventbox.connect("button-press-event",
-                         self.__on_artist_button_press)
-        eventbox.show()
-        self.__widget.add(grid)
-        self._overlay = Gtk.Overlay.new()
-        self._artwork = Gtk.Image.new()
-        self._overlay.add(self._artwork)
-        grid.add(self._overlay)
-        grid.add(eventbox)
-        self.set_artwork()
-        self.set_selection()
-        self.__widget.connect("enter-notify-event", self._on_enter_notify)
-        self.__widget.connect("leave-notify-event", self._on_leave_notify)
-        self.__widget.connect("button-press-event", self._on_button_release)
-        self.__widget.connect("realize", on_realize)
-        self.connect("destroy", self.__on_destroy)
-        self.add(self.__widget)
+            self.set_artwork()
+
+    def disable_artwork(self):
+        """
+            Disable widget artwork
+        """
+        if self._artwork is not None:
+            self._artwork.set_size_request(self.__art_size, self.__art_size)
+            self._artwork.set_from_surface(None)
 
     def set_artwork(self):
         """
