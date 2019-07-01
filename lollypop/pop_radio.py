@@ -17,7 +17,6 @@ from lollypop.widgets_rating import RatingWidget
 from lollypop.define import App
 from lollypop.widgets_utils import Popover
 from lollypop.widgets_artwork_radio import RadioArtworkSearchWidget
-from lollypop.radios import Radios
 from lollypop.art import Art
 
 
@@ -27,15 +26,16 @@ class RadioPopover(Popover):
         Popover with radio logos from the web
     """
 
-    def __init__(self, radio_id):
+    def __init__(self, radio_id, radios):
         """
             Init Popover
             @param radio_id as int
+            @param radios as Radios
         """
         Popover.__init__(self)
         self.__uri_artwork_id = None
         self.__radio_id = radio_id
-        self.__radios = Radios()
+        self.__radios = radios
 
         self.__stack = Gtk.Stack()
         self.__stack.set_transition_duration(1000)

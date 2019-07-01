@@ -25,11 +25,13 @@ class OverlayRadioHelper(OverlayHelper):
         An overlay helper for a radio
     """
 
-    def __init__(self):
+    def __init__(self, radios):
         """
             Init helper
+            @param radios as Radios
         """
         OverlayHelper.__init__(self)
+        self.__radios = radios
 
 #######################
 # PROTECTED           #
@@ -94,7 +96,7 @@ class OverlayRadioHelper(OverlayHelper):
             @param button as Gtk.Button
         """
         from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover(self._radio_id)
+        popover = RadioPopover(self._radio_id, self.__radios)
         popover.set_relative_to(button)
         popover.connect("closed", self._on_popover_closed)
         self._lock_overlay = True

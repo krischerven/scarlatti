@@ -15,7 +15,6 @@ from gi.repository import Gtk, Pango, GObject
 from lollypop.define import App, ArtSize, Type, ArtBehaviour, ViewType
 from lollypop.utils import on_query_tooltip
 from lollypop.helper_overlay_radio import OverlayRadioHelper
-from lollypop.radios import Radios
 
 
 class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
@@ -27,20 +26,21 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
-    def __init__(self, radio_id, view_type, font_height):
+    def __init__(self, radio_id, radios, view_type, font_height):
         """
             Init radio widget
             @param radio_id as int
+            @param radios as Radios
             @param view_type as ViewType
             @param font_height as int
         """
         Gtk.FlowBoxChild.__init__(self)
-        OverlayRadioHelper.__init__(self)
+        OverlayRadioHelper.__init__(self, radios)
         self.__widget = None
         self._artwork = None
         self.__font_height = font_height
         self._radio_id = radio_id
-        self.__radios = Radios()
+        self.__radios = radios
         self.__name = self.__radios.get_name(self._radio_id)
         self.__view_type = view_type
         self._watch_loading = True
