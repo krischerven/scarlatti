@@ -383,7 +383,7 @@ class ViewsContainer:
         from lollypop.view_albums_decade_box import AlbumsDecadeBoxView
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
-            view_type |= ViewType.SMALL
+            view_type |= ViewType.MEDIUM
         view = AlbumsDecadeBoxView(view_type)
         view.show()
         loader = Loader(target=load, view=view)
