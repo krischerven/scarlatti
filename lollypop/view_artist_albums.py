@@ -103,12 +103,13 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
             for box in child.boxes:
                 box.invalidate_filter()
 
-    def _on_populated(self, widget):
+    def _on_populated(self, widget, idle_id):
         """
             Add another album/disc
             @param widget as AlbumWidget/TracksView
+            @param idle_id as int
         """
-        LazyLoadingView._on_populated(self, widget)
+        LazyLoadingView._on_populated(self, widget, idle_id)
         if widget.is_populated:
             widget.set_filter_func(self._filter_func)
             widget.set_opacity(1)
