@@ -328,7 +328,8 @@ class LazyLoadingView(View):
         """
             Load the view in a lazy way
         """
-        self.__lazy_loading_id = GLib.idle_add(self.__lazy_loading)
+        if self.__lazy_loading_id is None:
+            self.__lazy_loading_id = GLib.idle_add(self.__lazy_loading)
 
 #######################
 # PROTECTED           #
@@ -339,7 +340,7 @@ class LazyLoadingView(View):
             @param widget as Gtk.Widget
         """
         View._on_map(self, widget)
-        if self.__lazy_loading_id is None:
+        if self._lazy_queue:
             self.lazy_loading()
 
     def _on_value_changed(self, adj):
