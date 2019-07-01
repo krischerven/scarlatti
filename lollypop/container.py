@@ -76,7 +76,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         if self._rounded_artists_view is not None:
             self._rounded_artists_view.make_destroyable()
             self._rounded_artists_view = None
-        if show or adaptive_window:
+        if show:
             if not adaptive_window:
                 App().window.emit("show-can-go-back", False)
             self._list_one.show()
@@ -93,7 +93,7 @@ class Container(Gtk.Overlay, NotificationContainer,
                     GLib.idle_add(action.activate,
                                   GLib.Variant("i", self.view.type))
                 self._reload_list_view()
-        elif not adaptive_window:
+        else:
             if self._list_one.get_visible():
                 self._list_two.hide()
                 self._list_one.hide()

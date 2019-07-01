@@ -270,7 +270,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             return
         self.__sidebar_shown = True
         value = App().settings.get_value("show-sidebar")
-        self.__container.show_sidebar(show or value)
+        self.__container.show_sidebar(value and show)
 
     def __save_size_position(self, widget):
         """
