@@ -62,12 +62,6 @@ class RoundedArtistsView(FlowBoxView):
                 child.destroy()
                 break
 
-    def stop(self):
-        """
-            We want this view to be populated anyway (no sidebar mode)
-        """
-        FlowBoxView.stop(self)
-
     def make_destroyable(self):
         """
             Mark view as destroyable
