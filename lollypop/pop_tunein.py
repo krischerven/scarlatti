@@ -18,7 +18,6 @@ from lollypop.radios import Radios
 from lollypop.logger import Logger
 from lollypop.define import App, ArtSize
 from lollypop.utils import get_network_available
-from lollypop.art import Art
 from lollypop.list import LinkedList
 from lollypop.objects import Track
 from lollypop.helper_task import TaskHelper
@@ -279,13 +278,7 @@ class TuneinPopover(Gtk.Popover):
             @param name as str
         """
         if status:
-            cache_path_png = "%s/%s.png" % (Art._RADIOS_PATH, name)
-            bytes = GLib.Bytes(content)
-            stream = Gio.MemoryInputStream.new_from_bytes(bytes)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
-            stream.close()
-            pixbuf.savev(cache_path_png, "png", [None], [None])
-            App().art.emit("radio-artwork-changed", name)
+            App().art.add_radio_artwork(name, content)
 
     def __on_map(self, widget):
         """
