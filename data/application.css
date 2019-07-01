@@ -142,7 +142,7 @@ Gtk.ListBoxRow .menu-button:hover {
 .light-background {
     background-color: shade(@theme_bg_color, 1.05);
     border: 1px solid shade(@theme_bg_color, 0.7);
-    border-radius: 62px;
+    border-radius: 52px;
 }
 
 .no-top-border {
