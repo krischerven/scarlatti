@@ -139,7 +139,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
             Emit populated signal
             @param disc_number as int
         """
-        if TracksView.get_populated(self) and not App().window.is_adaptive:
+        if TracksView.get_populated(self):
             from lollypop.view_albums_box import AlbumsBoxView
             for artist_id in self.__artist_ids:
                 if artist_id == Type.COMPILATIONS:
