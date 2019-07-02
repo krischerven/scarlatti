@@ -74,6 +74,7 @@ class ArtistViewSmall(View, ArtistViewCommon):
             @param status as bool
         """
         if not status:
+            App().window.go_back()
             App().window.container.show_view(
                 self._genre_ids, self._artist_ids, True)
 

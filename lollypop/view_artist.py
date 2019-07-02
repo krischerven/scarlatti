@@ -197,9 +197,8 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             @param window as Window
             @param status as bool
         """
-        # FIXME
-        return
         if status:
+            App().window.go_back()
             App().window.container.show_view(
                 self._genre_ids, self._artist_ids, True)
 

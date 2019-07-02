@@ -274,7 +274,7 @@ class AdaptiveWindow:
             True if can go back
             @return bool
         """
-        return len(self.__stack.history) > 1
+        return len(self.__stack.history) > 0
 
     @property
     def is_adaptive(self):
