@@ -81,8 +81,7 @@ class Container(Gtk.Overlay, NotificationContainer,
             self._list_one.show()
             if len(self._stack.get_children()) == 1:
                 App().window.emit("can-go-back-changed", False)
-            if not self._stack.get_children():
-                self._list_one.connect("populated", select_list_one)
+            self._list_one.connect("populated", select_list_one)
             self.update_list_one()
             self.__show_settings_dialog()
         else:
