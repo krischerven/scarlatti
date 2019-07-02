@@ -74,6 +74,11 @@ class AdaptiveStack(Gtk.Stack):
         """
             Reset history
         """
+        children = self.get_chilren()
+        for item in self.__history:
+            if item in children:
+                item.stop()
+                item.destroy()
         self.__history = []
 
     def set_visible_child(self, widget):
@@ -95,11 +100,12 @@ class AdaptiveStack(Gtk.Stack):
         """
         if self.__history:
             visible_child = self.get_visible_child()
-            if visible_child is not None:
-                visible_child.stop()
             widget = self.__history[-1]
             Gtk.Stack.set_visible_child(self, widget)
             self.__history.remove(widget)
+            if visible_child is not None:
+                visible_child.stop()
+                visible_child.destroy_later()
 
     def remove(self, widget):
         """

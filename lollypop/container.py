@@ -75,12 +75,15 @@ class Container(Gtk.Overlay, NotificationContainer,
         if self._rounded_artists_view is not None:
             self._rounded_artists_view.destroy()
             self._rounded_artists_view = None
+
         if show:
             self._setup_lists()
             self._list_one.show()
-            if self._list_one.count == 0:
+            if len(self._stack.get_children()) == 1:
+                App().window.emit("can-go-back-changed", False)
+            if not self._stack.get_children():
                 self._list_one.connect("populated", select_list_one)
-                self.update_list_one()
+            self.update_list_one()
             self.__show_settings_dialog()
         else:
             if self._list_one is not None:

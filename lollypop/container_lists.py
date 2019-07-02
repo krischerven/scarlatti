@@ -156,7 +156,7 @@ class ListsContainer:
             elif not App().window.is_adaptive:
                 self._list_one.select_first()
         except Exception as e:
-            Logger.error("ListsContainer::_reload_list_view(): %s", e)
+            Logger.error("ListsContainer::_restore_state(): %s", e)
 
 ############
 # PRIVATE  #
