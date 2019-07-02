@@ -528,20 +528,15 @@ class ViewsContainer:
             view = SettingsChildView(item_id)
         return view
 
-    def _reload_navigation_view(self):
+    def _restore_state(self):
         """
-            Reload navigation view
+            Restore state
         """
         self._stack.destroy_children()
-        App().window.emit("show-can-go-back", True)
         state_one_ids = App().settings.get_value("state-one-ids")
         state_two_ids = App().settings.get_value("state-two-ids")
         state_three_ids = App().settings.get_value("state-three-ids")
         sidebar_content = App().settings.get_enum("sidebar-content")
-        # Be sure to have an initial artist view
-        if self._rounded_artists_view is None:
-            self._rounded_artists_view = self._get_view_artists_rounded(True)
-            self._stack.set_visible_child(self._rounded_artists_view)
         if state_one_ids and state_two_ids and state_three_ids:
             self.show_view(state_one_ids, None, False)
             album = Album(state_three_ids[0], state_one_ids, state_two_ids)
@@ -556,9 +551,6 @@ class ViewsContainer:
                 self.show_view(state_one_ids, state_two_ids)
         elif state_one_ids:
             self.show_view(state_one_ids)
-        else:
-            App().window.emit("can-go-back-changed", False)
-            self._stack.set_visible_child(self._rounded_artists_view)
 
 ############
 # PRIVATE  #

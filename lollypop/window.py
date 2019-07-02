@@ -228,8 +228,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         """
         self.__container = Container()
         self.set_stack(self.container.stack)
-        self.add_paned(self.container.paned_one, self.container.list_one)
-        self.add_paned(self.container.paned_two, self.container.list_two)
         self.__container.show()
         self.__vgrid = Gtk.Grid()
         self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
@@ -269,8 +267,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         if self.__sidebar_shown:
             return
         self.__sidebar_shown = True
-        value = App().settings.get_value("show-sidebar")
-        self.__container.show_sidebar(value and show)
+        self.__container.show_sidebar(show)
 
     def __save_size_position(self, widget):
         """
@@ -416,16 +413,23 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             @param window as AdaptiveWindow
             @param adaptive_stack as bool
         """
-        self.__show_sidebar(adaptive_stack)
+        show_sidebar = App().settings.get_value("show-sidebar")
+        self.__show_sidebar(show_sidebar)
+        if show_sidebar:
+            widget = self.__container.list_one
+        else:
+            widget = self.__container.rounded_artists_view
         if adaptive_stack:
             self.__toolbar.end.set_mini(True)
-            self.__container.list_one.add_value((Type.SEARCH,
-                                                _("Search"),
-                                                _("Search")))
-            self.__container.list_one.add_value((Type.CURRENT,
-                                                _("Current playlist"),
-                                                _("Current playlist")))
+            widget.add_value((Type.SEARCH, _("Search"), _("Search")))
+            widget.add_value((Type.CURRENT,
+                              _("Current playlist"),
+                              _("Current playlist")))
+            self.emit("show-can-go-back", True)
         else:
             self.__toolbar.end.set_mini(False)
-            self.__container.list_one.remove_value(Type.CURRENT)
-            self.__container.list_one.remove_value(Type.SEARCH)
+            widget.remove_value(Type.CURRENT)
+            widget.remove_value(Type.SEARCH)
+            if App().settings.get_value("show-sidebar"):
+                self.emit("show-can-go-back", False)
+        self.emit("can-go-back-changed", self.can_go_back)

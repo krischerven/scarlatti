@@ -59,7 +59,6 @@ class AdaptiveStack(Gtk.Stack):
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.set_hexpand(True)
         self.set_vexpand(True)
-        self.__visible_child = None
         self.__history = []
 
     def add(self, widget):
@@ -69,7 +68,6 @@ class AdaptiveStack(Gtk.Stack):
         """
         if widget not in self.get_children():
             Gtk.Stack.add(self, widget)
-            self.__add_to_history(widget)
             widget.connect("destroy", self.__on_child_destroy)
 
     def reset_history(self):
@@ -83,23 +81,25 @@ class AdaptiveStack(Gtk.Stack):
             Set visible child in stack
             @param widget as Gtk.Widget
         """
-        if widget == self.__visible_child:
+        visible_child = self.get_visible_child()
+        if visible_child == widget:
             return
-        if self.__visible_child is not None:
-            self.__visible_child.stop()
-        self.__visible_child = widget
+        if visible_child is not None:
+            self.__history.append(visible_child)
+            visible_child.stop()
         Gtk.Stack.set_visible_child(self, widget)
-        self.__add_to_history(widget)
 
-    def set_visible_child_name(self, widget, name):
+    def go_back(self):
         """
-            Set visible child name in stack
-            @param widget as Gtk.Widget
-            @param name as str
+            Go back in stack
         """
-        self.__visible_child = widget
-        Gtk.Stack.set_visible_child_name(self, widget, name)
-        self.__add_to_history(widget)
+        if self.__history:
+            visible_child = self.get_visible_child()
+            if visible_child is not None:
+                visible_child.stop()
+            widget = self.__history[-1]
+            Gtk.Stack.set_visible_child(self, widget)
+            self.__history.remove(widget)
 
     def remove(self, widget):
         """
@@ -128,16 +128,6 @@ class AdaptiveStack(Gtk.Stack):
 ############
 # PRIVATE  #
 ############
-    def __add_to_history(self, widget):
-        """
-            Add widget to history or rebase history at widget position
-        """
-        if widget in self.__history:
-            index = self.__history.index(widget)
-            self.__history = self.__history[0:index + 1]
-        else:
-            self.__history.append(widget)
-
     def __on_child_destroy(self, widget):
         """
             Remove from history
@@ -188,30 +178,56 @@ class AdaptiveWindow:
             @param child as Gtk.Widget
         """
         self.__paned.append((paned, child))
+        child.connect("destroy", self.__on_child_destroy)
+
+    def update_layout(self, adaptive_stack):
+        """
+            Update internal layout
+            @param adaptive_mode as bool
+        """
+        self._adaptive_stack = adaptive_stack
+        if not self.__paned:
+            return
+        if adaptive_stack:
+            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
+            self.__stack.reset_history()
+            children = self.__stack.get_children()
+            for child in children:
+                self.__stack.remove(child)
+            for (p, c) in self.__paned:
+                p.remove(c)
+                self.__stack.add(c)
+                if c.get_visible():
+                    self.__stack.set_visible_child(c)
+            for child in children:
+                self.__stack.add(child)
+                self.__stack.set_visible_child(child)
+            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        else:
+            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
+            # Move wanted child to paned
+            for (p, c) in self.__paned:
+                self.__stack.remove(c)
+                p.add1(c)
+            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 
     def go_back(self):
         """
             Go back in container stack
         """
-        if self.__stack.history:
-            visible = self.__stack.get_visible_child()
-            for widget in reversed(self.__stack.history):
-                if widget != visible and widget.get_visible():
-                    self.__stack.set_visible_child(widget)
-                    break
-            if len(self.__stack.history) <= 1:
-                self.emit("can-go-back-changed", False)
+        self.__stack.go_back()
+        if not self.__stack.history:
+            self.emit("can-go-back-changed", False)
 
     def go_home(self):
         """
             Go back to first page
         """
         if self.__stack.history:
-            visible = self.__stack.get_visible_child()
             widget = self.__stack.history[0]
-            if widget != visible and widget.get_visible():
-                self.__stack.set_visible_child(widget)
-                self.emit("can-go-back-changed", False)
+            self.__stack.reset_history()
+            self.__stack.set_visible_child(widget)
+            self.emit("can-go-back-changed", False)
 
     def set_adaptive_stack(self, b):
         """
@@ -271,34 +287,22 @@ class AdaptiveWindow:
 ############
     def __set_adaptive_stack(self, b):
         """
-            Move paned child to stack
+            Handle adaptive switch
             @param b as bool
         """
         self.__adaptive_timeout_id = None
-        if b:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            self._adaptive_stack = True
-            child = []
-            can_go_back = self.__stack.get_visible_child() is not None
-            self.__stack.reset_history()
-            for (p, c) in self.__paned:
-                child.append(p.get_child1())
-                p.remove(c)
-                self.__stack.add(c)
-            self.emit("can-go-back-changed", can_go_back)
-            self.emit("show-can-go-back", True)
-            self.emit("adaptive-changed", True)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        else:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            self._adaptive_stack = False
-            # Move wanted child to paned
-            for (p, c) in self.__paned:
-                self.__stack.remove(c)
-                p.add1(c)
-            self.emit("show-can-go-back", False)
-            self.emit("adaptive-changed", False)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.update_layout(b)
+        self.emit("adaptive-changed", b)
+
+    def __on_child_destroy(self, widget):
+        """
+            Remove widget from paned
+            @param widget as Gtk.Widget
+        """
+        for (p, c) in self.__paned:
+            if c == widget:
+                self.__paned.remove((p, c))
+                break
 
     def __on_configure_event(self, widget, event):
         """

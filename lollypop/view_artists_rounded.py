@@ -47,7 +47,7 @@ class RoundedArtistsView(FlowBoxView):
                 return
         # Setup sort on insert
         self._box.set_sort_func(self.__sort_func)
-        widget = RoundedArtistWidget(item, self.__view_type)
+        widget = RoundedArtistWidget(item, self.__view_type, self.font_height)
         widget.populate()
         widget.show()
         self._box.insert(widget, -1)

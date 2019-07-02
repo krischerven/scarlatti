@@ -30,15 +30,7 @@ class ListsContainer:
         """
             Init container
         """
-        self._list_one = SelectionList(SelectionListMask.LIST_ONE)
-        self._list_two = SelectionList(SelectionListMask.LIST_TWO)
-        self._list_one.listbox.connect("row-activated",
-                                       self.__on_list_one_activated)
-        self._list_two.listbox.connect("row-activated",
-                                       self.__on_list_two_activated)
-        self._list_one.connect("populated", self.__on_list_one_populated)
-        self._list_one.connect("pass-focus", self.__on_pass_focus)
-        self._list_two.connect("pass-focus", self.__on_pass_focus)
+        self._list_one = self._list_two = None
 
     def update_list_one(self, update=False):
         """
@@ -103,9 +95,30 @@ class ListsContainer:
 ##############
 # PROTECTED  #
 ##############
-    def _reload_list_view(self):
+    def _setup_lists(self):
         """
-            Reload list view
+            Add and setup list one and list two
+        """
+        self._list_one = SelectionList(SelectionListMask.LIST_ONE)
+        self._list_two = SelectionList(SelectionListMask.LIST_TWO)
+        self._list_one.listbox.connect("row-activated",
+                                       self.__on_list_one_activated)
+        self._list_two.listbox.connect("row-activated",
+                                       self.__on_list_two_activated)
+        self._list_one.connect("populated", self.__on_list_one_populated)
+        self._list_one.connect("pass-focus", self.__on_pass_focus)
+        self._list_two.connect("pass-focus", self.__on_pass_focus)
+        self._paned_two.add1(self._list_two)
+        self._paned_one.add1(self._list_one)
+        App().window.add_paned(self._paned_one, self._list_one)
+        App().window.add_paned(self._paned_two, self._list_two)
+        if App().window.is_adaptive:
+            self._list_one.show()
+            App().window.update_layout(True)
+
+    def _restore_state(self):
+        """
+            Restore list state
         """
         def select_list_two(selection_list, ids):
             # For some reasons, we need to delay this

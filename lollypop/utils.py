@@ -382,7 +382,7 @@ def get_font_height():
     """
     ctx = App().window.get_pango_context()
     layout = Pango.Layout.new(ctx)
-    layout.set_text("a", 1)
+    layout.set_text("A", 1)
     return int(layout.get_pixel_size()[1])
 
 

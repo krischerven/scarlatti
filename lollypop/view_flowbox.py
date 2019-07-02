@@ -57,6 +57,14 @@ class FlowBoxView(LazyLoadingView):
             LazyLoadingView.populate(self)
 
     @property
+    def font_height(self):
+        """
+            Get font height
+            @return int
+        """
+        return self.__font_height
+
+    @property
     def children(self):
         """
             Get box children
