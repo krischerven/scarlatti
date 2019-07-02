@@ -95,6 +95,10 @@ class View(BaseView, Gtk.Grid):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
+        if self.__adaptive_signal_id is None:
+            self.__adaptive_signal_id = App().window.connect(
+                                                    "adaptive-changed",
+                                                    self._on_adaptive_changed)
         if not view_type & (ViewType.POPOVER | ViewType.SEARCH):
             self.get_style_context().add_class("view")
 
@@ -228,10 +232,6 @@ class View(BaseView, Gtk.Grid):
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
-        if self.__adaptive_signal_id is None:
-            self.__adaptive_signal_id = App().window.connect(
-                                                    "adaptive-changed",
-                                                    self._on_adaptive_changed)
         if self._filter is not None and self.__search_bar.get_search_mode():
             App().enable_special_shortcuts(False)
 
@@ -240,9 +240,6 @@ class View(BaseView, Gtk.Grid):
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
-        if self.__adaptive_signal_id is not None:
-            App().window.disconnect(self.__adaptive_signal_id)
-            self.__adaptive_signal_id = None
         if self._filter is not None and self.__search_bar.get_search_mode():
             App().enable_special_shortcuts(True)
 
@@ -287,6 +284,9 @@ class View(BaseView, Gtk.Grid):
             Clean up widget
             @param widget as Gtk.Widget
         """
+        if self.__adaptive_signal_id is not None:
+            App().window.disconnect(self.__adaptive_signal_id)
+            self.__adaptive_signal_id = None
         if self.__scanner_signal_id is not None:
             App().scanner.disconnect(self.__scanner_signal_id)
             self.__scanner_signal_id = None
