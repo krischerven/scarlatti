@@ -42,7 +42,9 @@ class ArtistViewSmall(View, ArtistViewCommon):
         album_ids = App().albums.get_ids(artist_ids, genre_ids)
         self.__album_box = AlbumsBoxView(genre_ids,
                                          artist_ids,
-                                         ViewType.MEDIUM | ViewType.SCROLLED)
+                                         ViewType.MEDIUM |
+                                         ViewType.SCROLLED |
+                                         ViewType.NOT_ADAPTIVE)
         height = self._banner.default_height // 3
         self._banner.set_height(height)
         self.__album_box.set_margin_top(height)

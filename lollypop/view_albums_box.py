@@ -127,6 +127,15 @@ class AlbumsBoxView(FlowBoxView, ViewController):
                       self.__genre_ids, self.__artist_ids)
         App().window.container.show_view([Type.ALBUM], album)
 
+    def _on_adaptive_changed(self, window, status):
+        """
+            Block adaptive if MEDIUM wanted
+            @param window as Window
+            @param status as bool
+        """
+        if not self._view_type & ViewType.NOT_ADAPTIVE:
+            FlowBoxView._on_adaptive_changed(self, window, status)
+
     def _on_map(self, widget):
         """
             Set active ids
