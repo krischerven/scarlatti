@@ -74,7 +74,7 @@ class AdaptiveStack(Gtk.Stack):
         """
             Reset history
         """
-        children = self.get_chilren()
+        children = self.get_children()
         for item in self.__history:
             if item in children:
                 item.stop()
