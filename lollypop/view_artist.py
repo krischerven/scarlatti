@@ -198,9 +198,10 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             @param status as bool
         """
         if status:
-            App().window.go_back()
             App().window.container.show_view(
                 self._genre_ids, self._artist_ids, True)
+            # Destroy after any animation
+            GLib.idle_add(self.destroy, priority=GLib.PRIORITY_LOW)
 
 #######################
 # PRIVATE             #
