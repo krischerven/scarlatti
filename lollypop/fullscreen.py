@@ -110,10 +110,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__background_artwork = builder.get_object("background_artwork")
         self.__container = Container()
         self.set_stack(self.__container.stack)
-        self.add_paned(self.__container.paned_one, self.__container.list_one)
-        self.add_paned(self.__container.paned_two, self.__container.list_two)
         self.__container.show()
-        self.__container.show_sidebar(True)
         self.__sidebar = Gtk.Grid()
         self.__sidebar.set_size_request(400, -1)
         self.__sidebar.set_orientation(Gtk.Orientation.VERTICAL)
@@ -133,6 +130,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         """
             Setup window for current screen
         """
+        show_sidebar = App().settings.get_value("show-sidebar")
+        self.__container.show_sidebar(show_sidebar)
         self.__signal1_id = App().player.connect("current-changed",
                                                  self.on_current_changed)
         self.__signal2_id = App().player.connect("status-changed",
