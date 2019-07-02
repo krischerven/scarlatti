@@ -233,12 +233,14 @@ class Container(Gtk.Overlay, NotificationContainer,
             @param param as GParamSpec
         """
         position = paned.get_property(param.name)
+        # We do not want to save position while adaptive mode is set
+        # Not a good a fix but a working one
+        if position < 100:
+            return
         if paned == self._paned_one:
             setting = "paned-mainlist-width"
         else:
             setting = "paned-listview-width"
-        if position < 100:
-            position = 100
         App().settings.set_value(setting,
                                  GLib.Variant("i",
                                               position))
