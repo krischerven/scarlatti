@@ -268,29 +268,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         return True if self._responsive_widget is None or self.__reveal\
             else TracksView.get_populated(self)
 
-    def set_filtered(self, b):
-        """
-            Set widget filtered
-            @param b as bool
-            @return bool (should be shown)
-        """
-        self.__filtered = b
-        return not b
-
-    @property
-    def filtered(self):
-        """
-            True if filtered by parent
-        """
-        return self.__filtered
-
-    @property
-    def filter(self):
-        """
-            @return str
-        """
-        return " ".join([self._album.name] + self._album.artists)
-
     @property
     def album(self):
         """
@@ -500,7 +477,6 @@ class AlbumsListView(LazyLoadingView, ViewController):
         self._box.set_vexpand(True)
         self._box.set_selection_mode(Gtk.SelectionMode.NONE)
         self._box.set_activate_on_single_click(True)
-        self._box.set_filter_func(self._filter_func)
         self._box.show()
         self._scrolled.set_property("expand", True)
         self.add(self._scrolled)

@@ -93,16 +93,6 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
         for child in self.children:
             child.update_duration(track_id)
 
-    def _on_search_changed(self, entry):
-        """
-            Update filter
-            @param entry as Gtk.Entry
-        """
-        self._filter = entry.get_text()
-        for child in self.children:
-            for box in child.boxes:
-                box.invalidate_filter()
-
     def _on_populated(self, widget, idle_id):
         """
             Add another album/disc
@@ -111,7 +101,6 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
         """
         LazyLoadingView._on_populated(self, widget, idle_id)
         if widget.is_populated:
-            widget.set_filter_func(self._filter_func)
             widget.set_opacity(1)
 
 #######################

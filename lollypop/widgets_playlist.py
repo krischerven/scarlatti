@@ -74,13 +74,6 @@ class PlaylistsWidget(Gtk.Grid):
 
         self.add(self.__grid)
 
-    def set_filter_func(self, func):
-        """
-            Set filter function
-        """
-        self.__tracks_widget_left.set_filter_func(func)
-        self.__tracks_widget_right.set_filter_func(func)
-
     def update_allocation(self):
         """
             Update widget allocation

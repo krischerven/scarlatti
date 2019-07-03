@@ -126,16 +126,6 @@ class PlaylistRow(Row, DNDRow):
         self.__artwork.hide()
         self.__header.hide()
 
-    @property
-    def filter(self):
-        """
-            @return str
-        """
-        return " ".join(self._track.album.artists +
-                        self._track.artists +
-                        [self._track.name] +
-                        [self._track.album.name])
-
 #######################
 # PROTECTED           #
 #######################

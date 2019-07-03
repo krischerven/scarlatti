@@ -32,7 +32,6 @@ class AlbumWidget:
         self._album = album
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
-        self.__filtered = False
         self.connect("destroy", self.__on_destroy)
         self._scan_signal = App().scanner.connect("album-updated",
                                                   self._on_album_updated)
@@ -49,35 +48,12 @@ class AlbumWidget:
         else:
             self._artwork.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
-    def set_filtered(self, b):
-        """
-            Set widget filtered
-            @param b as bool
-            @return bool (should be shown)
-        """
-        self.__filtered = b
-        return not b
-
     @property
     def album(self):
         """
             @return Album
         """
         return self._album
-
-    @property
-    def filtered(self):
-        """
-            True if filtered by parent
-        """
-        return self.__filtered
-
-    @property
-    def filter(self):
-        """
-            @return str
-        """
-        return " ".join([self._album.name] + self._album.artists)
 
 #######################
 # PROTECTED           #

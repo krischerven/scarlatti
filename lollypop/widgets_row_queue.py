@@ -38,7 +38,6 @@ class QueueRow(Row, DNDRow):
         """
         Row.__init__(self, track, [], view_type)
         DNDRow.__init__(self)
-        self.__filtered = False
         self._grid.set_margin_start(MARGIN_SMALL)
         self._grid.set_margin_top(MARGIN_SMALL)
         self._grid.set_margin_bottom(MARGIN_SMALL)

@@ -40,7 +40,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._data = data
         self.__name = name
         self.__sortname = sortname
-        self.__filtered = False
         self.set_view_type(view_type)
         self._scale_factor = self.get_scale_factor()
         self.set_property("halign", Gtk.Align.CENTER)
@@ -102,15 +101,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         """
         self.__label.set_markup("<b>" + GLib.markup_escape_text(name) + "</b>")
 
-    def set_filtered(self, b):
-        """
-            Set widget filtered
-            @param b as bool
-            @return bool (should be shown)
-        """
-        self.__filtered = b
-        return not b
-
     def disable_artwork(self):
         """
             Disable widget artwork
@@ -149,21 +139,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             @return object
         """
         return self._data
-
-    @property
-    def filter(self):
-        """
-            Current filter
-            @return str
-        """
-        return self.name.lower()
-
-    @property
-    def filtered(self):
-        """
-            True if filtered by parent
-        """
-        return self.__filtered
 
     @property
     def is_populated(self):

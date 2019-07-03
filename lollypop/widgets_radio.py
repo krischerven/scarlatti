@@ -170,13 +170,6 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         return self._radio_id
 
     @property
-    def filter(self):
-        """
-            @return filter as str
-        """
-        return self.name.lower()
-
-    @property
     def name(self):
         """
             @return name as str

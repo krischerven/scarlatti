@@ -82,15 +82,6 @@ class AlbumDetailedWidget(Gtk.Grid, AlbumWidget, TracksView):
         selected = self._album.id == App().player.current_track.album.id
         self.__banner.set_selected(selected)
 
-    def set_filter_func(self, func):
-        """
-            Set filter function
-        """
-        for widget in self._tracks_widget_left.values():
-            widget.set_filter_func(func)
-        for widget in self._tracks_widget_right.values():
-            widget.set_filter_func(func)
-
     @property
     def requested_height(self):
         """

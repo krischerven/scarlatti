@@ -259,7 +259,6 @@ class SelectionList(LazyLoadingView):
                               self.__on_key_press_event)
         self._listbox.set_sort_func(self.__sort_func)
         self._listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-        self._listbox.set_filter_func(self._filter_func)
         self._listbox.show()
         self._viewport.add(self._listbox)
         overlay = Gtk.Overlay.new()

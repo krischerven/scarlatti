@@ -32,7 +32,6 @@ class FlowBoxView(LazyLoadingView):
         self._widget_class = None
         self.__font_height = get_font_height()
         self._box = Gtk.FlowBox()
-        self._box.set_filter_func(self._filter_func)
         self._box.set_selection_mode(Gtk.SelectionMode.NONE)
         # Allow lazy loading to not jump up and down
         self._box.set_homogeneous(True)

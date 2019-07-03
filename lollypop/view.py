@@ -63,28 +63,7 @@ class View(BaseView, Gtk.Grid):
         self._empty_icon_name = "emblem-music-symbolic"
 
         if view_type & ViewType.FILTERED:
-            self._filter = ""
-            grid = Gtk.Grid()
-            grid.set_column_spacing(2)
-            self.__search_entry = Gtk.SearchEntry.new()
-            self.__search_entry.connect("search-changed",
-                                        self._on_search_changed)
-            self.__search_entry.connect("key-press-event",
-                                        self.__on_key_press_event)
-            self.__search_entry.show()
-            button = Gtk.Button.new_from_icon_name("window-close-symbolic",
-                                                   Gtk.IconSize.MENU)
-            button.set_relief(Gtk.ReliefStyle.NONE)
-            button.connect("clicked", lambda x: self.__close_search_widget())
-            button.show()
-            grid.add(self.__search_entry)
-            grid.add(button)
-            grid.show()
-            self.__search_bar = Gtk.SearchBar.new()
-            self.__search_bar.add(grid)
-            self.add(self.__search_bar)
-        else:
-            self._filter = None
+            pass
 
         self._scrolled = Gtk.ScrolledWindow()
         self._scrolled.connect("leave-notify-event", self.__on_leave_notify)
@@ -137,15 +116,7 @@ class View(BaseView, Gtk.Grid):
            Filter the view
         """
         if self._filter is not None:
-            enable = not self.__search_bar.get_search_mode()
-            if enable:
-                width = self.get_allocated_width()
-                self.__search_entry.set_size_request(min(300, width / 2), -1)
-            self.__search_bar.show() if enable else self.__search_bar.hide()
-            self.__search_bar.set_search_mode(enable)
-            App().enable_special_shortcuts(not enable)
-            if enable:
-                self.__search_entry.grab_focus()
+            pass
 
     def disable_overlay(self):
         """
@@ -167,14 +138,6 @@ class View(BaseView, Gtk.Grid):
         elif self.__overlayed == widget:
             self.__overlayed = None
 
-    @property
-    def filtered(self):
-        """
-            True if view filtered
-            @return bool
-        """
-        return self._filter is not None and self._filter != ""
-
 #######################
 # PROTECTED           #
 #######################
@@ -190,33 +153,11 @@ class View(BaseView, Gtk.Grid):
                 break
         self._scrolled.show()
 
-    def _filter_func(self, child):
-        """
-            Filter function for a Gtk.FlowBox/GtkListBox
-            @param child as Gtk.FlowBoxChild/Gtk.ListBoxChild
-        """
-        if not self.filtered:
-            if child.get_state_flags() & Gtk.StateFlags.VISITED:
-                child.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            return True
-        filter = self._filter.lower()
-        if child.filter.lower().find(filter) != -1:
-            return child.set_filtered(False)
-        return child.set_filtered(True)
-
     def _on_adaptive_changed(self, window, status):
         """
             Handle adaptive mode for views
         """
         pass
-
-    def _on_search_changed(self, entry):
-        """
-            Update filter
-            @param entry as Gtk.Entry
-        """
-        self._filter = self.__search_entry.get_text()
-        self._box.invalidate_filter()
 
     def _on_album_updated(self, scanner, album_id, added):
         """
@@ -232,40 +173,18 @@ class View(BaseView, Gtk.Grid):
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
-        if self._filter is not None and self.__search_bar.get_search_mode():
-            App().enable_special_shortcuts(False)
+        pass
 
     def _on_unmap(self, widget):
         """
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
-        if self._filter is not None and self.__search_bar.get_search_mode():
-            App().enable_special_shortcuts(True)
+        pass
 
 #######################
 # PRIVATE             #
 #######################
-    def __close_search_widget(self):
-        """
-            Close search widget
-        """
-        self.__search_entry.set_text("")
-        self.__search_bar.set_search_mode(False)
-        self.__search_bar.hide()
-        App().enable_special_shortcuts(True)
-
-    def __on_key_press_event(self, widget, event):
-        """
-            If Esc, hide widget, why GTK doesn't do that?
-            Otherwise, we get an ugly frame
-            @param widget as Gtk.SearchEntry
-            @param event as Gdk.Event
-        """
-        if event.keyval == 65307:
-            self.__close_search_widget()
-            return True
-
     def __on_leave_notify(self, widget, event):
         """
             Update overlays as internal widget may not have received the signal

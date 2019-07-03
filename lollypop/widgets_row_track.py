@@ -65,13 +65,6 @@ class TrackRow(Row, DNDRow):
         if view_type & ViewType.DND:
             DNDRow.__init__(self)
 
-    @property
-    def filter(self):
-        """
-            @return str
-        """
-        return self._track.name
-
 #######################
 # PROTECTED           #
 #######################

@@ -36,7 +36,6 @@ class Row(Gtk.ListBoxRow):
         self._view_type = view_type
         self._artists_label = None
         self._track = track
-        self.__filtered = False
         self._indicator = IndicatorWidget(self, view_type)
         self._row_widget = Gtk.EventBox()
         self._row_widget.connect("destroy", self._on_destroy)
@@ -169,26 +168,6 @@ class Row(Gtk.ListBoxRow):
         else:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text("")
-
-    def set_filtered(self, b):
-        """
-            Set widget filtered
-            @param b as bool
-            @return bool (should be shown)
-        """
-        self.__filtered = b
-        if b:
-            self.set_state_flags(Gtk.StateFlags.NORMAL, True)
-        else:
-            self.set_state_flags(Gtk.StateFlags.VISITED, True)
-        return True
-
-    @property
-    def filtered(self):
-        """
-            True if filtered by parent
-        """
-        return self.__filtered
 
     @property
     def row_widget(self):

@@ -59,7 +59,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__buttons = builder.get_object("box-buttons")
         self.__widget = builder.get_object("widget")
         self.__playlists_widget = PlaylistsWidget(playlist_ids, view_type)
-        self.__playlists_widget.set_filter_func(self._filter_func)
         self.__playlists_widget.connect("populated", self.__on_populated)
         self.__playlists_widget.show()
         self._viewport.add(self.__playlists_widget)
@@ -188,15 +187,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         self.__update_jump_button()
         self.__playlists_widget.set_playing_indicator()
-
-    def _on_search_changed(self, entry):
-        """
-            Update filter
-            @param entry as Gtk.Entry
-        """
-        self._filter = entry.get_text()
-        for box in self.__playlists_widget.boxes:
-            box.invalidate_filter()
 
     def _on_destroy(self, widget):
         """

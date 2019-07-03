@@ -173,15 +173,6 @@ class TracksView:
                 return row
         return None
 
-    def set_filter_func(self, func):
-        """
-            Set filter function
-        """
-        for widget in self._tracks_widget_left.values():
-            widget.set_filter_func(func)
-        for widget in self._tracks_widget_right.values():
-            widget.set_filter_func(func)
-
     def get_current_ordinate(self, parent):
         """
             If current track in widget, return it ordinate,
