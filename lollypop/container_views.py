@@ -121,15 +121,16 @@ class ViewsContainer:
         """
         if App().player.queue and not view_type & ViewType.FULLSCREEN:
             from lollypop.view_queue import QueueView
-            view = QueueView(view_type)
+            view = QueueView(view_type | self._view_type)
             view.populate()
         elif App().player.playlist_ids:
             from lollypop.view_playlists import PlaylistsView
-            view = PlaylistsView(App().player.playlist_ids, view_type)
+            view = PlaylistsView(App().player.playlist_ids,
+                                 view_type | self._view_type)
             view.populate(App().player.playlist_tracks)
         else:
             from lollypop.view_current_albums import CurrentAlbumsView
-            view = CurrentAlbumsView(view_type)
+            view = CurrentAlbumsView(view_type | self._view_type)
             view.populate(App().player.albums)
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
@@ -254,13 +255,13 @@ class ViewsContainer:
         if len(playlist_ids) == 1 and\
                 App().playlists.get_smart(playlist_ids[0]):
             from lollypop.view_playlists import PlaylistsView
-            view = PlaylistsView(playlist_ids, view_type)
+            view = PlaylistsView(playlist_ids, view_type | self._view_type)
             view.show()
             loader = Loader(target=load_smart, view=view)
             loader.start()
         elif playlist_ids:
             from lollypop.view_playlists import PlaylistsView
-            view = PlaylistsView(playlist_ids, view_type)
+            view = PlaylistsView(playlist_ids, view_type | self._view_type)
             view.show()
             loader = Loader(target=load, view=view)
             loader.start()
@@ -269,7 +270,7 @@ class ViewsContainer:
             view_type = ViewType.SCROLLED
             if App().window.is_adaptive:
                 view_type |= ViewType.MEDIUM
-            view = PlaylistsManagerView(None, view_type)
+            view = PlaylistsManagerView(None, view_type | self._view_type)
             view.populate()
             view.show()
         return view
@@ -322,7 +323,7 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = RoundedArtistsView(view_type, not static)
+        view = RoundedArtistsView(view_type | self._view_type, not static)
         self._stack.add(view)
         loader = Loader(target=load, view=view,
                         on_finished=lambda r: setup(*r))
@@ -384,7 +385,7 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = AlbumsDecadeBoxView(view_type)
+        view = AlbumsDecadeBoxView(self._view_type | view_type)
         view.show()
         loader = Loader(target=load, view=view)
         loader.start()
@@ -399,7 +400,8 @@ class ViewsContainer:
         view_type = ViewType.TWO_COLUMNS
         if App().window.is_adaptive:
             view_type |= ViewType.SMALL
-        view = AlbumView(album, album.artist_ids, album.genre_ids, view_type)
+        view = AlbumView(album, album.artist_ids, album.genre_ids,
+                         view_type | self._view_type)
         view.populate()
         return view
 
@@ -414,7 +416,7 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = AlbumsGenreBoxView(view_type)
+        view = AlbumsGenreBoxView(view_type | self._view_type)
         view.show()
         loader = Loader(target=load, view=view)
         loader.start()
@@ -436,7 +438,7 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = AlbumsBoxView([Type.YEARS], years, view_type)
+        view = AlbumsBoxView([Type.YEARS], years, view_type | self._view_type)
         loader = Loader(target=load, view=view)
         loader.start()
         view.show()
@@ -457,7 +459,8 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = AlbumsBoxView(genre_ids, artist_ids, view_type)
+        view = AlbumsBoxView(genre_ids, artist_ids,
+                             view_type | self._view_type)
         loader = Loader(target=load, view=view)
         loader.start()
         view.show()
@@ -477,7 +480,7 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = AlbumsBoxView([], [], view_type)
+        view = AlbumsBoxView([], [], view_type | self._view_type)
         loader = Loader(target=load, view=view)
         loader.start()
         view.show()
@@ -496,7 +499,7 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = RadiosView(view_type)
+        view = RadiosView(view_type | self._view_type)
         loader = Loader(target=load, view=view)
         loader.start()
         view.show()

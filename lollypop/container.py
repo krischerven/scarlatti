@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, SidebarContent, Type
+from lollypop.define import App, SidebarContent, Type, ViewType
 from lollypop.view import View
 from lollypop.adaptive import AdaptiveStack
 from lollypop.container_notification import NotificationContainer
@@ -30,9 +30,10 @@ class Container(Gtk.Overlay, NotificationContainer,
         Main view management
     """
 
-    def __init__(self):
+    def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init container
+            @param view_type as ViewType, will be appended to any created view
         """
         Gtk.Overlay.__init__(self)
         NotificationContainer.__init__(self)
@@ -40,6 +41,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         PlaylistsContainer.__init__(self)
         ListsContainer.__init__(self)
         ViewsContainer.__init__(self)
+        self._view_type = view_type
         self._rounded_artists_view = None
         self._stack = AdaptiveStack()
         self._stack.show()

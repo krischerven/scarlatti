@@ -95,7 +95,7 @@ class View(BaseView, Gtk.Grid):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-        if self.__adaptive_signal_id is None:
+        if not self._view_type & ViewType.NOT_ADAPTIVE:
             self.__adaptive_signal_id = App().window.connect(
                                                     "adaptive-changed",
                                                     self._on_adaptive_changed)

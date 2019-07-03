@@ -18,7 +18,7 @@ from locale import strcoll
 from lollypop.view import LazyLoadingView
 from lollypop.fastscroll import FastScroll
 from lollypop.define import Type, App, ArtSize, SelectionListMask
-from lollypop.define import SidebarContent, ArtBehaviour
+from lollypop.define import SidebarContent, ArtBehaviour, ViewType
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, on_query_tooltip
 from lollypop.shown import ShownLists, ShownPlaylists
@@ -247,7 +247,7 @@ class SelectionList(LazyLoadingView):
             Init Selection list ui
             @param base_type as SelectionListMask
         """
-        LazyLoadingView.__init__(self)
+        LazyLoadingView.__init__(self, ViewType.NOT_ADAPTIVE)
         self.__base_type = base_type
         self.__sort = False
         self.__mask = 0
