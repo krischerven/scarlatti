@@ -148,10 +148,6 @@ class ApplicationActions:
                                     ["<Shift><Alt>Up"])
         App().set_accels_for_action("app.shortcut::volume_down",
                                     ["<Shift><Alt>Down"])
-        App().set_accels_for_action("app.shortcut::list_one_type_ahead",
-                                    ["<Control>o"])
-        App().set_accels_for_action("app.shortcut::list_two_type_ahead",
-                                    ["<Control>t"])
 
     def __on_update_db_activate(self, action=None, param=None):
         """
@@ -298,20 +294,13 @@ class ApplicationActions:
             App().player.set_volume(App().player.volume + 0.1)
         elif string == "volume_down":
             App().player.set_volume(App().player.volume - 0.1)
-        elif string == "list_one_type_ahead":
-            if App().window.container.list_one.is_visible():
-                App().window.container.list_one.type_ahead_popover.popup()
-        elif string == "list_two_type_ahead":
-            if App().window.container.list_two.is_visible():
-                App().window.container.list_two.type_ahead_popover.popup()
         elif string == "show_sidebar":
             value = App().settings.get_value("show-sidebar")
             App().settings.set_value("show-sidebar",
                                      GLib.Variant("b", not value))
             App().main_window.container.show_sidebar(not value)
         elif string == "filter":
-            if App().main_window.container.view is not None:
-                App().main_window.container.view.enable_filter()
+            App().window.container.show_filter()
         elif string == "volume":
             App().window.container.show_view([Type.EQUALIZER])
         elif string == "current_artist":

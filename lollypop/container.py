@@ -20,12 +20,35 @@ from lollypop.container_scanner import ScannerContainer
 from lollypop.container_playlists import PlaylistsContainer
 from lollypop.container_lists import ListsContainer
 from lollypop.container_views import ViewsContainer
+from lollypop.container_filter import FilterContainer
 from lollypop.progressbar import ProgressBar
+
+
+class ContainerStack(AdaptiveStack):
+    """
+        Glue for filtering between stack and current view
+    """
+
+    def __init__(self):
+        """
+            Init stack
+        """
+        AdaptiveStack.__init__(self)
+
+    def search_for_child(self, text):
+        view = self.get_visible_child()
+        if view is not None and hasattr(view, "search_for_child"):
+            view.search_for_child()
+
+    def activate_child(self):
+        view = self.get_visible_child()
+        if view is not None and hasattr(view, "activate_child"):
+            view.activate_child()
 
 
 class Container(Gtk.Overlay, NotificationContainer,
                 ScannerContainer, PlaylistsContainer,
-                ListsContainer, ViewsContainer):
+                ListsContainer, ViewsContainer, FilterContainer):
     """
         Main view management
     """
@@ -43,10 +66,16 @@ class Container(Gtk.Overlay, NotificationContainer,
         ViewsContainer.__init__(self)
         self._view_type = view_type
         self._rounded_artists_view = None
-        self._stack = AdaptiveStack()
+        self._stack = ContainerStack()
         self._stack.show()
         self.__setup_view()
-        self.add(self._paned_one)
+        self._grid = Gtk.Grid()
+        self._grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self._grid.set_column_spacing(2)
+        self._grid.show()
+        self.add(self._grid)
+        FilterContainer.__init__(self)
+        self.add_widget_to_filter(self._stack, 2)
 
     def stop_all(self):
         """

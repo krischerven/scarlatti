@@ -24,41 +24,6 @@ from lollypop.utils import get_icon_name, on_query_tooltip
 from lollypop.shown import ShownLists, ShownPlaylists
 
 
-class TypeAheadPopover(Gtk.Popover):
-    """
-        Special popover for find as type
-    """
-
-    def __init__(self):
-        """
-            Init popover
-        """
-        Gtk.Popover.__init__(self)
-        self.__entry = Gtk.Entry()
-        self.__entry.show()
-        self.add(self.__entry)
-        self.get_style_context().add_class("padding")
-        self.connect("unmap", self.__on_unmap)
-
-    @property
-    def entry(self):
-        """
-            Get popover entry
-            @return Gtk.Entry
-        """
-        return self.__entry
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_unmap(self, popover):
-        """
-            Clear entry
-            @param popover as Gtk.popover
-        """
-        self.__entry.set_text("")
-
-
 class SelectionListRow(Gtk.ListBoxRow):
     """
         A selection list row
@@ -273,12 +238,6 @@ class SelectionList(LazyLoadingView):
         self.get_style_context().add_class("sidebar")
         App().art.connect("artist-artwork-changed",
                           self.__on_artist_artwork_changed)
-        self.__type_ahead_popover = TypeAheadPopover()
-        self.__type_ahead_popover.set_relative_to(self._scrolled)
-        self.__type_ahead_popover.entry.connect("activate",
-                                                self.__on_type_ahead_activate)
-        self.__type_ahead_popover.entry.connect("changed",
-                                                self.__on_type_ahead_changed)
 
     def mark_as(self, type):
         """
@@ -428,20 +387,40 @@ class SelectionList(LazyLoadingView):
         except Exception as e:
             Logger.warning("SelectionList::select_first(): %s", e)
 
+    def search_for_child(self, text):
+        """
+            Search row and scroll down
+            @param text as str
+        """
+        for row in self._listbox.get_children():
+            style_context = row.get_style_context()
+            style_context.remove_class("typeahead")
+        if not text:
+            return
+        for row in self._listbox.get_children():
+            if row.name.lower().find(text) != -1:
+                style_context = row.get_style_context()
+                style_context.add_class("typeahead")
+                GLib.idle_add(self.__scroll_to_row, row)
+                break
+
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        self._listbox.unselect_all()
+        for row in self._listbox.get_children():
+            style_context = row.get_style_context()
+            if style_context.has_class("typeahead"):
+                row.activate()
+            style_context.remove_class("typeahead")
+
     def redraw(self):
         """
             Redraw list
         """
         for row in self._listbox.get_children():
             row.set_artwork()
-
-    @property
-    def type_ahead_popover(self):
-        """
-            Type ahead popover
-            @return TypeAheadPopover
-        """
-        return self.__type_ahead_popover
 
     @property
     def listbox(self):
@@ -622,34 +601,3 @@ class SelectionList(LazyLoadingView):
                 if row.id >= 0 and row.name == artist:
                     row.set_artwork()
                     break
-
-    def __on_type_ahead_activate(self, entry):
-        """
-            Close popover and activate row
-            @param entry as Gtk.Entry
-        """
-        self._listbox.unselect_all()
-        self.__type_ahead_popover.popdown()
-        for row in self._listbox.get_children():
-            style_context = row.get_style_context()
-            if style_context.has_class("typeahead"):
-                row.activate()
-            style_context.remove_class("typeahead")
-
-    def __on_type_ahead_changed(self, entry):
-        """
-            Search row and scroll down
-            @param entry as Gtk.Entry
-        """
-        search = entry.get_text().lower()
-        for row in self._listbox.get_children():
-            style_context = row.get_style_context()
-            style_context.remove_class("typeahead")
-        if not search:
-            return
-        for row in self._listbox.get_children():
-            if row.name.lower().find(search) != -1:
-                style_context = row.get_style_context()
-                style_context.add_class("typeahead")
-                GLib.idle_add(self.__scroll_to_row, row)
-                break
