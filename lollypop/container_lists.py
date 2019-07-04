@@ -212,12 +212,14 @@ class ListsContainer:
         """
         def load():
             if genre_ids is None:
-                return ([], [])
+                compilations = App().albums.get_compilation_ids([])
+                artists = []
             elif App().settings.get_value("show-performers"):
                 artists = App().artists.get_all(genre_ids)
+                compilations = App().albums.get_compilation_ids(genre_ids)
             else:
                 artists = App().artists.get(genre_ids)
-            compilations = App().albums.get_compilation_ids(genre_ids)
+                compilations = App().albums.get_compilation_ids(genre_ids)
             return (artists, compilations)
 
         def setup(artists, compilations):
