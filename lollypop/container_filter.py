@@ -84,8 +84,8 @@ class FilterContainer:
         else:
             App().enable_special_shortcuts(True)
             self.__type_ahead.entry.set_text("")
-            self.__widgets[self.__index].get_style_context().add_class(
-                "remove-border")
+            for widget in self.__widgets:
+                widget.get_style_context().remove_class("red-border")
 
 ############
 # PRIVATE  #
