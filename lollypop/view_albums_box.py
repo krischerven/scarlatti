@@ -20,6 +20,7 @@ from lollypop.define import App, Type, ViewType
 from lollypop.objects import Album
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, get_network_available
+from lollypop.utils import get_font_height
 from lollypop.controller_view import ViewController, ViewControllerType
 
 
@@ -66,7 +67,8 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             @param position as int
         """
         widget = AlbumSimpleWidget(album, self.__genre_ids,
-                                   self.__artist_ids, self._view_type)
+                                   self.__artist_ids, self._view_type,
+                                   get_font_height())
         self._box.insert(widget, position)
         widget.show()
         widget.populate()
