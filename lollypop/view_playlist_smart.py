@@ -215,12 +215,22 @@ class SmartPlaylistView(View):
 
     def _on_map(self, widget):
         """
-            Disable global shortcuts
+            Disable global shortcuts and update toolbar
             @param widget as Gtk.Widget
         """
+        View._on_map(self, widget)
+        App().enable_special_shortcuts(False)
         if App().settings.get_value("show-sidebar"):
             App().window.emit("can-go-back-changed", True)
             App().window.emit("show-can-go-back", True)
+
+    def _on_unmap(self, widget):
+        """
+            Enable global shortcuts
+            @param widget as Gtk.Widget
+        """
+        View._on_unmap(self, widget)
+        App().enable_special_shortcuts(True)
 
 #######################
 # PRIVATE             #
