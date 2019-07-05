@@ -396,6 +396,10 @@ Gtk.ListBoxRow .menu-button:hover {
     padding: 5px;
 }
 
+.small-padding {
+    padding: 1px;
+}
+
 .no-padding {
     padding: 0px;
     min-width: 0px;

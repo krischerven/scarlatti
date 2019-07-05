@@ -10,49 +10,70 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GLib
+
+from lollypop.define import App
 
 
-class TypeAheadWidget(Gtk.Grid):
+class TypeAheadWidget(Gtk.Revealer):
     """
-        Special popover for find as type
+        Type ahead widget
     """
 
     def __init__(self):
         """
             Init widget
         """
-        Gtk.Grid.__init__(self)
-        self.__left_button = Gtk.Button.new_from_icon_name(
-            "go-previous-symbolic", Gtk.IconSize.BUTTON)
-        self.__right_button = Gtk.Button.new_from_icon_name(
-            "go-next-symbolic", Gtk.IconSize.BUTTON)
-        self.__entry = Gtk.SearchEntry.new()
-        self.__entry.set_size_request(200, -1)
-        self.__left_button.show()
-        self.__right_button.show()
-        self.__entry.show()
-        self.add(self.__left_button)
-        self.add(self.__entry)
-        self.add(self.__right_button)
-        self.get_style_context().add_class("linked")
-        self.get_style_context().add_class("padding")
+        Gtk.Revealer.__init__(self)
+        self.__list_two_map_signal_id = None
+        builder = Gtk.Builder()
+        builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
+        builder.connect_signals(self)
+        widget = builder.get_object("widget")
+        self.__entry = builder.get_object("entry")
+        self.__next_button = builder.get_object("next_button")
+        self.__prev_button = builder.get_object("prev_button")
+        self.__toggle_grid = builder.get_object("toggle_grid")
+        self.__list_one_toggle = builder.get_object("list_one_toggle")
+        self.__list_two_toggle = builder.get_object("list_two_toggle")
+        self.__view_toggle = builder.get_object("view_toggle")
+        self.__view_toggle.set_active(True)
+        self.add(widget)
 
-    @property
-    def left_button(self):
+    def update_buttons(self):
         """
-            Get left button
-            @return Gtk.Button
+            Show hide buttons
         """
-        return self.__left_button
+        def hide_button(l):
+            App().window.container.list_two.disconnect(
+                self.__list_two_map_signal_id)
+            App().window.container.list_two.disconnect_by_func(hide_button)
+            self.__list_two_map_signal_id = None
+            self.__list_two_toggle.hide()
 
-    @property
-    def right_button(self):
-        """
-            Get right button
-            @return Gtk.Button
-        """
-        return self.__right_button
+        def show_button(l):
+            self.__list_two_toggle.show()
+
+        if not App().settings.get_value("show-sidebar"):
+            self.__toggle_grid.hide()
+        else:
+            self.__toggle_grid.show()
+        if App().window.container.list_one is None:
+            self.__list_one_toggle.hide()
+        else:
+            self.__list_one_toggle.show()
+        if App().window.container.list_two is not None:
+            if App().window.container.list_two.get_visible():
+                self.__list_two_toggle.show()
+            else:
+                self.__list_two_toggle.hide()
+            if self.__list_two_map_signal_id is None:
+                self.__list_two_map_signal_id =\
+                    App().window.container.list_two.connect("map",
+                                                            show_button)
+                App().window.container.list_two.connect("unmap", hide_button)
+        else:
+            self.__list_two_toggle.hide()
 
     @property
     def entry(self):
@@ -63,5 +84,118 @@ class TypeAheadWidget(Gtk.Grid):
         return self.__entry
 
 #######################
+# PROTECTED           #
+#######################
+    def _on_type_ahead_changed(self, entry):
+        """
+            Filter current widget
+            @param entry as Gtk.entry
+        """
+        widget = self.__get_widget()
+        if widget is not None:
+            widget.search_for_child(entry.get_text().lower())
+
+    def _on_type_ahead_activate(self, entry):
+        """
+            Activate row
+            @param entry as Gtk.Entry
+        """
+        widget = self.__get_widget()
+        if widget is not None:
+            widget.activate_child()
+            GLib.idle_add(self.__activate_next_button)
+            self.__entry.set_text("")
+            self.__entry.grab_focus()
+
+    def _on_entry_key_press_event(self, entry, event):
+        """
+            Handle special keys
+            @param entry as Gtk.Entry
+            @param Event as Gdk.EventKey
+        """
+        if event.state & (Gdk.ModifierType.SHIFT_MASK |
+                          Gdk.ModifierType.CONTROL_MASK):
+            return True
+
+    def _on_entry_key_release_event(self, entry, event):
+        """
+            Handle special keys
+            @param entry as Gtk.Entry
+            @param Event as Gdk.EventKey
+        """
+        if event.state & (Gdk.ModifierType.SHIFT_MASK |
+                          Gdk.ModifierType.CONTROL_MASK):
+            if event.keyval == Gdk.KEY_Right:
+                self.__activate_next_button()
+                return True
+            elif event.keyval == Gdk.KEY_Left:
+                self.__activate_prev_button()
+                return True
+
+    def _on_button_toggled(self, button):
+        """
+            Untoggle other buttons
+            @param button as Gtk.Button
+        """
+        if not button.get_active():
+            return
+        buttons = self.__get_buttons()
+        for _button in buttons:
+            if _button != button:
+                _button.set_active(False)
+
+#######################
 # PRIVATE             #
 #######################
+    def __get_widget(self):
+        """
+            Get widget for activated button
+            @return Gtk.Widget
+        """
+        if self.__list_one_toggle.get_active():
+            return App().window.container.list_one
+        elif self.__list_two_toggle.get_active():
+            return App().window.container.list_two
+        else:
+            return App().window.container.stack
+
+    def __get_buttons(self):
+        """
+            Get current buttons
+            @return [Gtk.ToggleButton]
+        """
+        buttons = []
+        for button in [self.__list_one_toggle,
+                       self.__list_two_toggle,
+                       self.__view_toggle]:
+            if button.get_visible():
+                buttons.append(button)
+        return buttons
+
+    def __activate_next_button(self):
+        """
+            Activate next button
+        """
+        active = None
+        buttons = self.__get_buttons()
+        for button in buttons:
+            if button.get_active():
+                active = button
+                break
+        index = buttons.index(active)
+        if index < len(buttons):
+            buttons[index + 1].set_active(True)
+
+    def __activate_prev_button(self):
+        """
+            Activate prev button
+        """
+        active = None
+        buttons = self.__get_buttons()
+        for button in buttons:
+            if button.get_active():
+                active = button
+                break
+        index = buttons.index(active)
+        if index > 0:
+            buttons[index - 1].set_active(True)

@@ -75,7 +75,6 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._grid.show()
         self.add(self._grid)
         FilterContainer.__init__(self)
-        self.add_widget_to_filter(self._stack, 2)
 
     def stop_all(self):
         """

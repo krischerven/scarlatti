@@ -35,6 +35,7 @@
      <file compressed="true" preprocess="xml-stripblanks">ToolbarPlayback.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ToolbarTitle.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">TuneinPopover.ui</file>
+     <file compressed="true" preprocess="xml-stripblanks">TypeAhead.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">AboutDialog.ui</file>
   </gresource>
 </gresources>
