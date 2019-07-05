@@ -61,9 +61,9 @@ class Container(Gtk.Overlay, NotificationContainer,
             Reload current view
         """
         if App().settings.get_value("show-sidebar"):
-            self._reload_list_view()
+            ListsContainer._restore_state(self)
         else:
-            self._reload_navigation_view()
+            ViewsContainer._restore_state(self)
 
     def show_sidebar(self, show):
         """
