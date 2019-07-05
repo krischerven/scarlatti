@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from lollypop.widgets_typeahead import TypeAheadWidget
 from lollypop.define import App
@@ -38,6 +38,10 @@ class FilterContainer:
                                                self.__on_right_button_clicked)
         self.__type_ahead.show()
         self.__search_bar = Gtk.SearchBar.new()
+        self.__search_bar.connect("key-press-event",
+                                  self.__on_entry_key_press_event)
+        self.__search_bar.connect("key-release-event",
+                                  self.__on_entry_key_release_event)
         self.__search_bar.add(self.__type_ahead)
         self.__search_bar.show()
         self._grid.add(self.__search_bar)
@@ -85,7 +89,7 @@ class FilterContainer:
             App().enable_special_shortcuts(True)
             self.__type_ahead.entry.set_text("")
             for widget in self.__widgets:
-                widget.get_style_context().remove_class("red-border")
+                widget.get_style_context().remove_class("filtered-view")
 
 ############
 # PRIVATE  #
@@ -124,9 +128,9 @@ class FilterContainer:
             self.__type_ahead.right_button.set_sensitive(
                 self.__next_widget() is not None)
             for widget in self.__widgets:
-                widget.get_style_context().remove_class("red-border")
+                widget.get_style_context().remove_class("filtered-view")
             self.__widgets[self.__index].get_style_context().add_class(
-                    "red-border")
+                    "filtered-view")
 
     def __on_destroy(self, widget):
         """
@@ -152,7 +156,7 @@ class FilterContainer:
         self.__widgets[self.__index].activate_child()
         self.show_filter()
         for widget in self.__widgets:
-            widget.get_style_context().remove_class("red-border")
+            widget.get_style_context().remove_class("filtered-view")
 
     def __on_left_button_clicked(self, button):
         """
@@ -167,3 +171,28 @@ class FilterContainer:
             @param button as Gtk.button
         """
         self.right()
+
+    def __on_entry_key_press_event(self, entry, event):
+        """
+            Handle special keys
+            @param entry as Gtk.Entry
+            @param Event as Gdk.EventKey
+        """
+        if event.state & (Gdk.ModifierType.SHIFT_MASK |
+                          Gdk.ModifierType.CONTROL_MASK):
+            return True
+
+    def __on_entry_key_release_event(self, entry, event):
+        """
+            Handle special keys
+            @param entry as Gtk.Entry
+            @param Event as Gdk.EventKey
+        """
+        if event.state & (Gdk.ModifierType.SHIFT_MASK |
+                          Gdk.ModifierType.CONTROL_MASK):
+            if event.keyval == Gdk.KEY_Right:
+                self.right()
+                return True
+            elif event.keyval == Gdk.KEY_Left:
+                self.left()
+                return True
