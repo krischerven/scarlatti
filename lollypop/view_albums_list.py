@@ -669,7 +669,10 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            margin = allocation.width / 4
+            if App().window.is_adaptive:
+                margin = 0
+            else:
+                margin = allocation.width / 4
             self._box.set_margin_start(margin)
             self._box.set_margin_end(margin)
 
