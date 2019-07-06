@@ -14,7 +14,7 @@ from gi.repository import Gio
 
 from random import shuffle
 
-from lollypop.objects import Album, Track
+from lollypop.objects import Album
 from lollypop.logger import Logger
 from lollypop.define import App, Repeat
 from lollypop.utils import get_network_available
@@ -47,23 +47,6 @@ class SimilarsPlayer:
             album_id = album_ids.pop(0)
             if album_id not in self.album_ids:
                 self.add_album(Album(album_id))
-                break
-
-    def __add_a_new_track(self, similar_artist_ids):
-        """
-            Add a new track to playback
-            @param similar_artist_ids as [int]
-        """
-        # Get an album
-        album_ids = App().albums.get_ids(similar_artist_ids, [])
-        track_ids = []
-        for album_id in album_ids:
-            track_ids += Album(album_id).track_ids
-        shuffle(track_ids)
-        while track_ids:
-            track_id = track_ids.pop(0)
-            if track_id not in self.playlist_track_ids:
-                self.insert_track(Track(track_id), -1)
                 break
 
     def __get_artist_ids(self, artists):
@@ -129,8 +112,6 @@ class SimilarsPlayer:
             Logger.info("Found a similar artist via Last.fm")
             if self.albums:
                 self.__add_a_new_album(similar_artist_ids)
-            else:
-                self.__add_a_new_track(similar_artist_ids)
 
     def __on_spotify_similar_artists(self, artists):
         """
@@ -142,5 +123,3 @@ class SimilarsPlayer:
             Logger.info("Found similar artists via Spotify:")
             if self.albums:
                 self.__add_a_new_album(similar_artist_ids)
-            else:
-                self.__add_a_new_track(similar_artist_ids)

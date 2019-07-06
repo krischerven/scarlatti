@@ -261,9 +261,9 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         self._show_append(False)
         if App().player.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
-        App().player.play_albums(self._album.id,
-                                 self._genre_ids,
-                                 self._artist_ids)
+        App().player.play_albums_for_filter(self._album.id,
+                                            self._genre_ids,
+                                            self._artist_ids)
         return True
 
     def __on_artist_button_press(self, eventbox, event):

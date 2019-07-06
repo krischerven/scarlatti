@@ -274,6 +274,28 @@ class TracksView:
         """
         pass
 
+    def _on_activated(self, widget, track):
+        """
+            A row has been activated, play track
+            @param widget as TracksWidget
+            @param track as Track
+        """
+        tracks = []
+        for child in self.children:
+            tracks.append(child.track)
+            child.set_state_flags(Gtk.StateFlags.NORMAL, True)
+        # Do not update album list if in party or album already available
+        if not App().player.is_party and\
+                not App().player.track_in_playback(track):
+            album = self._album.clone(True)
+            album.set_tracks(tracks)
+            if not App().settings.get_value("append-albums"):
+                App().player.clear_albums()
+            App().player.add_album(album)
+            App().player.load(album.get_track(track.id))
+        else:
+            App().player.load(track)
+
 #######################
 # PRIVATE             #
 #######################
@@ -298,9 +320,9 @@ class TracksView:
         self._tracks_widget_left[disc_number] = TracksWidget()
         self._tracks_widget_right[disc_number] = TracksWidget()
         self._tracks_widget_left[disc_number].connect("activated",
-                                                      self.__on_activated)
+                                                      self._on_activated)
         self._tracks_widget_right[disc_number].connect("activated",
-                                                       self.__on_activated)
+                                                       self._on_activated)
 
     def __add_tracks(self, widgets, disc_number, previous_row=None):
         """
@@ -495,28 +517,6 @@ class TracksView:
             for child in self.children:
                 if child.get_state_flags() & Gtk.StateFlags.SELECTED:
                     Row.destroy_row(child)
-
-    def __on_activated(self, widget, track):
-        """
-            On track activation, play track
-            @param widget as TracksWidget
-            @param track as Track
-        """
-        tracks = []
-        for child in self.children:
-            tracks.append(child.track)
-            child.set_state_flags(Gtk.StateFlags.NORMAL, True)
-        # Do not update album list if in party or album already available
-        if not App().player.is_party and\
-                not App().player.track_in_playback(track):
-            album = self._album.clone(True)
-            album.set_tracks(tracks)
-            if not App().settings.get_value("append-albums"):
-                App().player.clear_albums()
-            App().player.add_album(album)
-            App().player.load(album.get_track(track.id))
-        else:
-            App().player.load(track)
 
     def __on_insert_track(self, row, new_track_id, down):
         """

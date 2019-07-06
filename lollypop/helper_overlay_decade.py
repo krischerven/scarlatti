@@ -72,5 +72,6 @@ class OverlayDecadeHelper(OverlayHelper):
         """
         if App().player.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
-        App().player.play_albums(None, [Type.YEARS], self._data)
+        App().player.play_albums_for_filter_for_filter(
+            None, [Type.YEARS], self._data)
         return True

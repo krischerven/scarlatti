@@ -48,11 +48,6 @@ class BasePlayer(GObject.GObject):
             self._base_init = True
             # Should player do crossfading
             self._crossfading = False
-            # A user playlist used as current playlist
-            self._playlist_ids = []
-            self._playlist_tracks = []
-            # Used by shuffle tracks to restore user playlist before shuffle
-            self._playlist_backup = None
             self._current_track = Track()
             self._current_playback_track = Track()
             self._next_track = Track()

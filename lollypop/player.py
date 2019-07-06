@@ -19,7 +19,6 @@ from lollypop.player_queue import QueuePlayer
 from lollypop.player_linear import LinearPlayer
 from lollypop.player_shuffle import ShufflePlayer
 from lollypop.player_radio import RadioPlayer
-from lollypop.player_playlist import PlaylistPlayer
 from lollypop.player_similars import SimilarsPlayer
 from lollypop.radios import Radios
 from lollypop.logger import Logger
@@ -27,7 +26,7 @@ from lollypop.objects import Track, Album
 from lollypop.define import App, Type, LOLLYPOP_DATA_PATH, Shuffle
 
 
-class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
+class Player(BinPlayer, QueuePlayer, RadioPlayer,
              LinearPlayer, ShufflePlayer, SimilarsPlayer):
     """
         Player object used to manage playback and playlists
@@ -41,7 +40,6 @@ class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
         QueuePlayer.__init__(self)
         LinearPlayer.__init__(self)
         ShufflePlayer.__init__(self)
-        PlaylistPlayer.__init__(self)
         RadioPlayer.__init__(self)
         SimilarsPlayer.__init__(self)
         self.__stop_after_track_id = None
@@ -94,9 +92,6 @@ class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
             @param album as Album
             @param index as int
         """
-        # We are not playing a user playlist anymore
-        self._playlist_tracks = []
-        self._playlist_ids = []
         # We do not shuffle when user add an album
         self._albums_backup = []
         if index == -1:
@@ -173,9 +168,6 @@ class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self.reset_history()
-        # We are not playing a user playlist anymore
-        self._playlist_tracks = []
-        self._playlist_ids = []
         if App().settings.get_enum("shuffle") == Shuffle.TRACKS:
             track = choice(album.tracks)
         else:
@@ -184,7 +176,20 @@ class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
         self._albums = [album]
         self.emit("playlist-changed")
 
-    def play_albums(self, album_id, filter1_ids, filter2_ids):
+    def play_albums(self, albums, track):
+        """
+            Play albums and start by track
+            @param albums as [Album]
+            @param track as Track
+        """
+        if self.is_party:
+            App().lookup_action("party").change_state(GLib.Variant("b", False))
+        self.reset_history()
+        self.load(track)
+        self._albums = albums
+        self.emit("playlist-changed")
+
+    def play_albums_for_filter(self, album_id, filter1_ids, filter2_ids):
         """
             Play albums related to track/genre_ids/artist_ids
             @param album_id as int/None
@@ -426,10 +431,6 @@ class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
         try:
             prev_track = ShufflePlayer.prev(self)
 
-            # Look at user playlist then
-            if prev_track.id is None:
-                prev_track = PlaylistPlayer.prev(self)
-
             # Get a linear track then
             if prev_track.id is None:
                 prev_track = LinearPlayer.prev(self)
@@ -453,10 +454,6 @@ class Player(BinPlayer, QueuePlayer, PlaylistPlayer, RadioPlayer,
             # Look at shuffle
             if next_track.id is None:
                 next_track = ShufflePlayer.next(self)
-
-            # Look at user playlist then
-            if next_track.id is None:
-                next_track = PlaylistPlayer.next(self)
 
             # Get a linear track then
             if next_track.id is None:

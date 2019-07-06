@@ -108,9 +108,9 @@ class ArtistViewCommon:
             if App().player.is_party:
                 App().lookup_action("party").change_state(
                     GLib.Variant("b", False))
-            App().player.play_albums(None,
-                                     self._genre_ids,
-                                     self._artist_ids)
+            App().player.play_albums_for_filter(None,
+                                                self._genre_ids,
+                                                self._artist_ids)
             self._update_icon(False)
         except Exception as e:
             Logger.error("ArtistView::_on_play_clicked: %s" % e)

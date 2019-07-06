@@ -47,9 +47,6 @@ class PlaybackMenu(Gio.Menu):
                 if self.__track.album.id == album.id:
                     if self.__track.id in album.track_ids:
                         return True
-        elif App().player.playlist_ids:
-            if self.__track.id in App().player.playlist_track_ids:
-                return True
         return False
 
     def __set_playback_actions(self):

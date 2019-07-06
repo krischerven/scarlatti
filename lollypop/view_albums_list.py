@@ -39,7 +39,9 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                                (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT)),
         "remove-album": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "do-selection": (GObject.SignalFlags.RUN_FIRST, None, ())
+        "do-selection": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "track-activated": (GObject.SignalFlags.RUN_FIRST, None,
+                            (GObject.TYPE_PYOBJECT,))
     }
 
     __MARGIN = 4
@@ -334,6 +336,18 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             TracksView.populate(self)
         else:
             self.emit("populated")
+
+    def _on_activated(self, widget, track):
+        """
+            A row has been activated, play track
+            if in playlist, pass signal
+            @param widget as TracksWidget
+            @param track as Track
+        """
+        if self._view_type & ViewType.PLAYLISTS:
+            self.emit("track-activated", track)
+        else:
+            TracksView._on_activated(self, widget, track)
 
 #######################
 # PRIVATE             #
@@ -775,6 +789,7 @@ class AlbumsListView(LazyLoadingView, ViewController):
         row.connect("insert-album-after", self.__on_insert_album_after)
         row.connect("remove-album", self.__on_remove_album)
         row.connect("do-selection", self.__on_do_selection)
+        row.connect("track-activated", self.__on_track_activated)
         return row
 
     def __auto_scroll(self, up):
@@ -829,6 +844,17 @@ class AlbumsListView(LazyLoadingView, ViewController):
         position = 1
         for child in self._box.get_children():
             position = child.update_tracks_position(position)
+
+    def __on_track_activated(self, row, track):
+        """
+            Play playlist and track
+            @param row as AlbumRow
+            @param track as Track
+        """
+        albums = []
+        for child in self._box.get_children():
+            albums.append(child.album)
+        App().player.play_albums(albums, track)
 
     def __on_insert_track(self, row, new_track_id, down):
         """
