@@ -548,7 +548,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         self._box.set_activate_on_single_click(True)
         self._box.show()
         if view_type & ViewType.PLAYLISTS:
-            self._box.set_property("halign", Gtk.Align.CENTER)
             SizeAllocationHelper.__init__(self)
         self._scrolled.set_property("expand", True)
         self.add(self._scrolled)
@@ -670,8 +669,9 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            width = max(200, allocation.width / 2)
-            self._box.set_size_request(width, -1)
+            margin = allocation.width / 4
+            self._box.set_margin_start(margin)
+            self._box.set_margin_end(margin)
 
     def _on_current_changed(self, player):
         """
