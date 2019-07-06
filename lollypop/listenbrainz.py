@@ -53,18 +53,28 @@ class ListenBrainz(GObject.GObject):
             @param track as Track
             @param time as int
         """
-        if App().settings.get_value("disable-scrobbling") or track.id < 0:
+        if not get_network_available("MUSICBRAINZ") and\
+                get_network_available():
+            return
+        if track.id is None or track.id < 0:
             return
         payload = self.__get_payload(track)
         payload[0]["listened_at"] = time
-        self.__submit("single", payload)
+        if App().settings.get_value("disable-scrobbling") or\
+                not get_network_available("MUSICBRAINZ"):
+            self.__queue.append(("single", payload))
+            self.__clean_queue()
+        else:
+            self.__submit("single", payload)
 
     def playing_now(self, track):
         """
             Submit a playing now notification for a track
             @param track as Track
         """
-        if App().settings.get_value("disable-scrobbling") or track.id < 0:
+        if App().settings.get_value("disable-scrobbling"):
+            return
+        if track.id is None or track.id < 0:
             return
         payload = self.__get_payload(track)
         self.__submit("playing_now", payload)
@@ -110,11 +120,7 @@ class ListenBrainz(GObject.GObject):
             @param listen_type as str
             @param payload as []
         """
-        if get_network_available("MUSICBRAINZ"):
-            self.__clean_queue()
-            App().task_helper.run(self.__request, listen_type, payload)
-        else:
-            self.__queue.append((listen_type, payload))
+        App().task_helper.run(self.__request, listen_type, payload)
 
     def __request(self, listen_type, payload, retry=0):
         """

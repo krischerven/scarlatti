@@ -151,8 +151,12 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             @param track as Track
             @param timestamp as int
         """
-        if get_network_available("LASTFM") and\
-                track.id >= 0 and self.available:
+        if not get_network_available("LASTFM") and get_network_available():
+            return
+        if App().settings.get_value("disable-scrobbling") or\
+                not get_network_available("LASTFM"):
+            self.__queue.append((track, timestamp))
+        elif track.id is not None and track.id >= 0 and self.available:
             self.__clean_queue()
             App().task_helper.run(
                        self.__scrobble,
@@ -161,16 +165,17 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
                        track.title,
                        timestamp,
                        track.mb_track_id)
-        else:
-            self.__queue.append((track, timestamp))
 
     def playing_now(self, track):
         """
             Submit a playing now notification for a track
             @param track as Track
         """
-        if get_network_available("LASTFM") and\
-                track.id >= 0 and self.available:
+        if not get_network_available("LASTFM") and get_network_available():
+            return
+        if App().settings.get_value("disable-scrobbling"):
+            return
+        if track.id is not None and track.id >= 0 and self.available:
             App().task_helper.run(
                        self.__now_playing,
                        track.artists[0],
@@ -359,9 +364,6 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             @param mb_track_id as str
             @thread safe
         """
-        if App().settings.get_value("disable-scrobbling") or\
-                not get_network_available("LASTFM"):
-            return
         Logger.debug("LastFM::__scrobble(): %s, %s, %s, %s, %s" % (
                                                             artist,
                                                             album,
@@ -388,9 +390,6 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             @param duration as int
             @thread safe
         """
-        if App().settings.get_value("disable-scrobbling") or\
-                not get_network_available("LASTFM"):
-            return
         try:
             self.update_now_playing(artist=artist,
                                     album=album,
