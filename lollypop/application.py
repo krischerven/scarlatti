@@ -575,8 +575,7 @@ class Application(Gtk.Application, ApplicationActions):
         # Quit if background mode is on but player is off
         if not self.settings.get_value("background-mode") or\
                 not self.player.is_playing:
-            self.player.pause()
-            GLib.timeout_add(500, self.quit, True)
+            GLib.idle_add(self.quit, True)
         return widget.hide_on_delete()
 
     def __on_activate(self, application):

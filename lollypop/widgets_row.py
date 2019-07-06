@@ -36,6 +36,8 @@ class Row(Gtk.ListBoxRow):
         self._view_type = view_type
         self._artists_label = None
         self._track = track
+        self.__next_row = None
+        self.__previous_row = None
         self._indicator = IndicatorWidget(self, view_type)
         self._row_widget = Gtk.EventBox()
         self._row_widget.connect("destroy", self._on_destroy)
@@ -168,6 +170,36 @@ class Row(Gtk.ListBoxRow):
         else:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text("")
+
+    def set_next_row(self, row):
+        """
+            Set next row
+            @param row as Row
+        """
+        self.__next_row = row
+
+    def set_previous_row(self, row):
+        """
+            Set previous row
+            @param row as Row
+        """
+        self.__previous_row = row
+
+    @property
+    def next_row(self):
+        """
+            Get next row
+            @return row as Row
+        """
+        return self.__next_row
+
+    @property
+    def previous_row(self):
+        """
+            Get previous row
+            @return row as Row
+        """
+        return self.__previous_row
 
     @property
     def row_widget(self):
