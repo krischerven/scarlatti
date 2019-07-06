@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.utils import get_icon_name
 from lollypop.view_tracks import TracksView
 from lollypop.view import LazyLoadingView
+from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.objects import Album, Track
 from lollypop.define import ArtSize, App, ViewType, MARGIN, MARGIN_SMALL, Type
 from lollypop.define import ArtBehaviour
@@ -506,7 +507,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         self._artwork = None
 
 
-class AlbumsListView(LazyLoadingView, ViewController):
+class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
     """
         View showing albums
     """
@@ -546,6 +547,9 @@ class AlbumsListView(LazyLoadingView, ViewController):
         self._box.set_selection_mode(Gtk.SelectionMode.NONE)
         self._box.set_activate_on_single_click(True)
         self._box.show()
+        if view_type & ViewType.PLAYLISTS:
+            self._box.set_property("halign", Gtk.Align.CENTER)
+            SizeAllocationHelper.__init__(self)
         self._scrolled.set_property("expand", True)
         self.add(self._scrolled)
 
@@ -660,6 +664,15 @@ class AlbumsListView(LazyLoadingView, ViewController):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Change view width
+            @param allocation as Gtk.Allocation
+        """
+        SizeAllocationHelper._handle_size_allocate(self, allocation)
+        width = max(200, allocation.width / 2)
+        self._box.set_size_request(width, -1)
+
     def _on_current_changed(self, player):
         """
             Update children state

@@ -1,0 +1,53 @@
+# Copyright (c) 2014-2019 Cedric Bellegarde <cedric.bellegarde@adishatz.org>
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+from gi.repository import GLib
+
+
+class SizeAllocationHelper:
+    """
+        Listen to size-allocate signal and ignore unwanted allocations
+    """
+
+    def __init__(self):
+        """
+            Init helper
+        """
+        self.__allocation_timeout_id = None
+        self.__width = 0
+        self.connect("size-allocate", self.__on_size_allocate)
+
+#######################
+# PROTECTED           #
+#######################
+    def _handle_size_allocate(self, allocation):
+        """
+            @param allocation as Gtk.Allocation
+        """
+        self.__allocation_timeout_id = None
+        if allocation.width == 1 or self.__width == allocation.width:
+            return
+        self.__width = allocation.width
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_size_allocate(self, widget, allocation):
+        """
+            Filter unwanted allocations
+            @param widget as Gtk.Widget
+            @param allocation as Gtk.Allocation
+        """
+        if self.__allocation_timeout_id is not None:
+            GLib.source_remove(self.__allocation_timeout_id)
+        self.__allocation_timeout_id = GLib.idle_add(
+            self._handle_size_allocate, allocation)
