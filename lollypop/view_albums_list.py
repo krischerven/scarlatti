@@ -60,7 +60,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         else:
             return cover_height + 2
 
-    def __init__(self, album, height, view_type, reveal, cover_uri, parent):
+    def __init__(self, album, height, view_type,
+                 reveal, cover_uri, parent, position):
         """
             Init row widgets
             @param album as Album
@@ -68,9 +69,10 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             @param view_type as ViewType
             @param reveal as bool
             @param parent as AlbumListView
+            @param position as int
         """
         Gtk.ListBoxRow.__init__(self)
-        TracksView.__init__(self, view_type)
+        TracksView.__init__(self, view_type, position)
         if view_type & ViewType.DND:
             DNDRow.__init__(self)
         self.__next_row = None
@@ -230,6 +232,18 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             self.set_state_flags(Gtk.StateFlags.VISITED, True)
         else:
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
+
+    def update_tracks_position(self, position):
+        """
+            Update tracks position
+            @param position as int
+            @return new position
+        """
+        self.__position = position
+        for child in self.children:
+            child.set_position(self.__position)
+            self.__position += 1
+        return self.__position
 
     def stop(self):
         """
@@ -498,6 +512,8 @@ class AlbumsListView(LazyLoadingView, ViewController):
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
+        self.__position = 0
+        self.__track_position_id = None
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB and\
                     GLib.find_program_in_path("youtube-dl") is None:
@@ -752,7 +768,8 @@ class AlbumsListView(LazyLoadingView, ViewController):
             @param cover_uri as str
         """
         row = AlbumRow(album, self.__height, self._view_type,
-                       reveal, cover_uri, self)
+                       reveal, cover_uri, self, self.__position)
+        self.__position += len(album.tracks)
         row.connect("insert-track", self.__on_insert_track)
         row.connect("insert-album", self.__on_insert_album)
         row.connect("insert-album-after", self.__on_insert_album_after)
@@ -804,6 +821,15 @@ class AlbumsListView(LazyLoadingView, ViewController):
                 y = child.translate_coordinates(self._box, 0, 0)[1]
         return y
 
+    def __update_albums_positions(self):
+        """
+            Update track position for all albums
+        """
+        self.__track_position_id = None
+        position = 1
+        for child in self._box.get_children():
+            position = child.update_tracks_position(position)
+
     def __on_insert_track(self, row, new_track_id, down):
         """
             Insert a new row at position
@@ -833,7 +859,9 @@ class AlbumsListView(LazyLoadingView, ViewController):
         else:
             album = Album(new_track.album.id)
             album.set_tracks([new_track])
-            new_row = self.__row_for_album(album)
+            new_row = self.__row_for_album(
+                                          album,
+                                          self._view_type & ViewType.PLAYLISTS)
             new_row.populate()
             new_row.show()
             self._box.insert(new_row, position)
@@ -843,6 +871,10 @@ class AlbumsListView(LazyLoadingView, ViewController):
                     App().player.current_track.album.id:
                 App().player.set_next()
                 App().player.set_prev()
+        if self.__track_position_id is not None:
+            GLib.source_remove(self.__track_position_id)
+        self.__track_position_id = GLib.idle_add(
+            self.__update_albums_positions)
 
     def __on_insert_album(self, row, new_album_id, track_ids, down):
         """
@@ -857,11 +889,16 @@ class AlbumsListView(LazyLoadingView, ViewController):
             position += 1
         album = Album(new_album_id)
         album.set_tracks([Track(track_id) for track_id in track_ids])
-        new_row = self.__row_for_album(album)
+        new_row = self.__row_for_album(album,
+                                       self._view_type & ViewType.PLAYLISTS)
         new_row.populate()
         new_row.show()
         self._box.insert(new_row, position)
         App().player.add_album(album, position)
+        if self.__track_position_id is not None:
+            GLib.source_remove(self.__track_position_id)
+        self.__track_position_id = GLib.idle_add(
+            self.__update_albums_positions)
 
     def __on_insert_album_after(self, view, after_album, album):
         """
@@ -878,7 +915,8 @@ class AlbumsListView(LazyLoadingView, ViewController):
                 if row.album == after_album:
                     break
                 position += 1
-        new_row = self.__row_for_album(album)
+        new_row = self.__row_for_album(album,
+                                       self._view_type & ViewType.PLAYLISTS)
         new_row.populate()
         new_row.set_previous_row(children[position])
         new_row.set_next_row(children[position].next_row)
@@ -888,13 +926,18 @@ class AlbumsListView(LazyLoadingView, ViewController):
         new_row.show()
         self._box.insert(new_row, position + 1)
         App().player.add_album(album, position + 1)
+        if self.__track_position_id is not None:
+            GLib.source_remove(self.__track_position_id)
+        self.__track_position_id = GLib.idle_add(
+            self.__update_albums_positions)
 
     def __on_remove_album(self, row):
         """
             Remove album from player
             @param row as AlbumRow
         """
-        App().player.remove_album(row.album)
+        if self._view_type & ViewType.POPOVER:
+            App().player.remove_album(row.album)
 
     def __on_do_selection(self, row):
         """

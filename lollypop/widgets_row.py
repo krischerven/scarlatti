@@ -24,6 +24,22 @@ class Row(Gtk.ListBoxRow):
         A row
     """
 
+    def destroy_row(r):
+        """
+            Properly destroy a Row
+            @param r as Row
+        """
+        r.emit("remove-track")
+        r.destroy()
+        if r.previous_row is not None:
+            r.previous_row.set_next_row(r.next_row)
+            r.previous_row.set_position(
+                r.previous_row.track.number)
+        else:
+            r.set_position(r.track.number - 1)
+        if r.next_row is not None:
+            r.next_row.set_previous_row(r.previous_row)
+
     def __init__(self, track, album_artist_ids, view_type):
         """
             Init row widgets
@@ -40,7 +56,6 @@ class Row(Gtk.ListBoxRow):
         self.__previous_row = None
         self._indicator = IndicatorWidget(self, view_type)
         self._row_widget = Gtk.EventBox()
-        self._row_widget.connect("destroy", self._on_destroy)
         self.__gesture = Gtk.GestureLongPress.new(self._row_widget)
         self.__gesture.connect("pressed", self.__on_gesture_pressed)
         self.__gesture.connect("end", self.__on_gesture_end)
@@ -171,6 +186,17 @@ class Row(Gtk.ListBoxRow):
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text("")
 
+    def set_position(self, position):
+        """
+            Update row position
+            @param position as int
+        """
+        if App().settings.get_value("show-tag-tracknumber") and\
+                not (self._view_type & ViewType.PLAYLISTS | ViewType.POPOVER):
+            return
+        self._track.set_number(position)
+        self.update_number_label()
+
     def set_next_row(self, row):
         """
             Set next row
@@ -245,9 +271,6 @@ class Row(Gtk.ListBoxRow):
         """
             Check track always valid, destroy if not
         """
-        pass
-
-    def _on_destroy(self, widget):
         pass
 
 #######################

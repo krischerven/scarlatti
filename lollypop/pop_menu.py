@@ -49,9 +49,9 @@ class RemoveMenuPopover(Gtk.PopoverMenu):
             Remove rows
             @param button as Gtk.ModelButton
         """
-        from lollypop.widgets_row_dnd import DNDRow
+        from lollypop.widgets_row import Row
         for r in self.__rows:
-            DNDRow.destroy_track_row(r)
+            Row.destroy_row(r)
 
 
 class TrackMenuPopover(Popover):

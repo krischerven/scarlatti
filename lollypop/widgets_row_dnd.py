@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk, GLib
 
-from lollypop.define import App, ArtSize
+from lollypop.define import ArtSize
 from lollypop.logger import Logger
 
 
@@ -21,22 +21,6 @@ class DNDRow:
         Allow Drag & drop on a Row
     """
     __autoscroll_timeout_id = None
-
-    def destroy_track_row(r):
-        """
-            Properly destroy a Row
-            @param r as Row
-        """
-        r.emit("remove-track")
-        r.destroy()
-        if r.previous_row is not None:
-            r.previous_row.set_next_row(r.next_row)
-            r.previous_row.update_number(
-                r.previous_row.track.number)
-        else:
-            r.update_number(r.track.number - 1)
-        if r.next_row is not None:
-            r.next_row.set_previous_row(r.previous_row)
 
     def __init__(self):
         """
@@ -56,29 +40,9 @@ class DNDRow:
         self.connect("drag-leave", self.__on_drag_leave)
         self.connect("drag-motion", self.__on_drag_motion)
 
-    def update_number(self, position):
-        """
-            Update row number
-            @param position as int
-        """
-        if App().settings.get_value("show-tag-tracknumber"):
-            return
-        self._track.set_number(position)
-        self.update_number_label()
-        if self.next_row is not None:
-            self.next_row.update_number(position + 1)
-
 #######################
 # PROTECTED           #
 #######################
-    def _on_destroy(self, widget):
-        """
-            Update label
-            @param widget as Gtk.Widget
-        """
-        if self.next_row is not None:
-            position = self._track.number
-            self.next_row.update_number(position)
 
 #######################
 # PRIVATE             #
@@ -121,6 +85,7 @@ class DNDRow:
             @param row as RowDND
             @param context as Gdk.DragContext
         """
+        from lollypop.widgets_row import Row
         if row.get_parent() != self.get_parent():
             return
         if hasattr(row, "_track"):
@@ -128,14 +93,14 @@ class DNDRow:
             r = row.previous_row
             while r is not None:
                 if r.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    DNDRow.destroy_track_row(r)
+                    Row.destroy_row(r)
                 r = r.previous_row
             r = row.next_row
             while r is not None:
                 if r.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    DNDRow.destroy_track_row(r)
+                    Row.destroy_row(r)
                 r = r.next_row
-            DNDRow.destroy_track_row(row)
+            Row.destroy_row(row)
         elif hasattr(row, "_album"):
             self.emit("remove-album")
             row.destroy()

@@ -42,15 +42,17 @@ class TracksView:
                                (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT))
     }
 
-    def __init__(self, view_type):
+    def __init__(self, view_type, position=0):
         """
             Init widget
             @param view_type as ViewType
+            @param position as int
         """
         if App().settings.get_value("force-single-column"):
             view_type &= ~ViewType.TWO_COLUMNS
         self._view_type = view_type
         self._width = None
+        self.__position = position
         self.__discs = []
         self._responsive_widget = None
         self._orientation = None
@@ -112,7 +114,7 @@ class TracksView:
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
-            tracks = get_position_list(disc.tracks, 0)
+            tracks = get_position_list(disc.tracks, self.__position)
             if self._view_type & ViewType.TWO_COLUMNS:
                 mid_tracks = int(0.5 + len(tracks) / 2)
                 widgets = {self._tracks_widget_left[disc_number]:
@@ -129,10 +131,9 @@ class TracksView:
             Add track rows (only works for albums with merged discs)
             @param tracks as [Track]
         """
-        position = len(self.children)
-        previous_row = None if position == 1 else self.children[-1]
+        previous_row = None if self.__position == 1 else self.children[-1]
         widgets = {self._tracks_widget_left[0]:
-                   get_position_list(tracks, position)}
+                   get_position_list(tracks, self.__position)}
         self.__add_tracks(OrderedDict(widgets), 0, previous_row)
 
     def prepend_rows(self, tracks):
@@ -490,10 +491,10 @@ class TracksView:
             @param event as Gdk.EventKey
         """
         if event.keyval == Gdk.KEY_Delete:
-            from lollypop.widgets_row_dnd import DNDRow
+            from lollypop.widgets_row import Row
             for child in self.children:
                 if child.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    DNDRow.destroy_track_row(child)
+                    Row.destroy_row(child)
 
     def __on_activated(self, widget, track):
         """
@@ -548,7 +549,6 @@ class TracksView:
                 if row.previous_row is not None:
                     row.previous_row.set_next_row(new_row)
                 row.set_previous_row(new_row)
-            new_row.update_number(position + 1)
             row.get_parent().insert(new_row, position)
             row.track.album.insert_track(track, position)
             if new_row.previous_row is not None and\

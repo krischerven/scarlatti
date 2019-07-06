@@ -75,14 +75,6 @@ class TrackRow(Row, DNDRow):
         if self._track not in self._track.album.tracks:
             self.destroy()
 
-    def _on_destroy(self, widget):
-        """
-            Destroyed widget
-            @param widget as Gtk.Widget
-        """
-        if self._view_type & ViewType.DND:
-            DNDRow._on_destroy(self, widget)
-
 #######################
 # PRIVATE             #
 #######################
