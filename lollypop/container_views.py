@@ -123,11 +123,6 @@ class ViewsContainer:
             from lollypop.view_queue import QueueView
             view = QueueView(view_type | self._view_type)
             view.populate()
-        elif App().player.playlist_ids:
-            from lollypop.view_playlists import PlaylistsView
-            view = PlaylistsView(App().player.playlist_ids,
-                                 view_type | self._view_type)
-            view.populate(App().player.playlist_tracks)
         else:
             from lollypop.view_current_albums import CurrentAlbumsView
             view = CurrentAlbumsView(view_type | self._view_type)
