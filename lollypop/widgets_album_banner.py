@@ -33,7 +33,6 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             @param view_type as ViewType
         """
         Gtk.Bin.__init__(self)
-        SizeAllocationHelper.__init__(self)
         self.__view_type = view_type
         self.__height = None
         self.__cloud_image = None
@@ -75,6 +74,7 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
         self.__grid = builder.get_object("grid")
         self.__widget = builder.get_object("widget")
         if view_type & ViewType.ALBUM:
+            SizeAllocationHelper.__init__(self)
             self.__menu_button.get_style_context().add_class(
                 "black-transparent")
             self.get_style_context().add_class("black")
