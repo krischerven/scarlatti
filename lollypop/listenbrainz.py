@@ -40,6 +40,7 @@ class ListenBrainz(GObject.GObject):
         """
         GObject.GObject.__init__(self)
         try:
+            self.__queue_id = None
             self.__queue = load(
                 open(LOLLYPOP_DATA_PATH + "/listenbrainz_queue.bin", "rb"))
         except Exception as e:
@@ -63,9 +64,9 @@ class ListenBrainz(GObject.GObject):
         if App().settings.get_value("disable-scrobbling") or\
                 not get_network_available("MUSICBRAINZ"):
             self.__queue.append(("single", payload))
-            self.__clean_queue()
         else:
             self.__submit("single", payload)
+            self.__clean_queue()
 
     def playing_now(self, track):
         """
@@ -109,10 +110,15 @@ class ListenBrainz(GObject.GObject):
         """
             Send tracks in queue
         """
-        if self.__queue:
-            (listen_type, payload) = self.__queue.pop(0)
-            App().task_helper.run(self.__request, listen_type, payload)
-            GLib.timeout_add(1000, self.__clean_queue)
+        def queue():
+            if self.__queue:
+                (listen_type, payload) = self.__queue.pop(0)
+                App().task_helper.run(self.__request, listen_type, payload)
+                return True
+            self.__queue_id = None
+
+        if self.__queue_id is None:
+            self.__queue_id = GLib.timeout_add(1000, queue)
 
     def __submit(self, listen_type, payload):
         """
