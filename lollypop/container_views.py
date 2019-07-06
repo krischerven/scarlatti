@@ -222,7 +222,9 @@ class ViewsContainer:
                 if albums and albums[-1].id == track.album.id:
                     albums[-1].insert_track(track)
                 else:
-                    albums.append(track.album)
+                    album = track.album
+                    album.set_tracks([track])
+                    albums.append(album)
             return albums
 
         def load():

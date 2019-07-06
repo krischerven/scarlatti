@@ -318,6 +318,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         """
         if not self.is_populated:
             TracksView.populate(self)
+        else:
+            self.emit("populated")
 
 #######################
 # PRIVATE             #
@@ -480,6 +482,10 @@ class AlbumsListView(LazyLoadingView, ViewController):
     """
         View showing albums
     """
+
+    __gsignals__ = {
+        "populated": (GObject.SignalFlags.RUN_FIRST, None, ())
+    }
 
     def __init__(self, genre_ids, artist_ids, view_type):
         """
@@ -715,7 +721,8 @@ class AlbumsListView(LazyLoadingView, ViewController):
             return
         if albums:
             album = albums.pop(0)
-            row = self.__row_for_album(album, album in self.__reveals)
+            reveal = album in self.__reveals or len(album.tracks) < 4
+            row = self.__row_for_album(album, reveal)
             row.set_previous_row(previous_row)
             if previous_row is not None:
                 previous_row.set_next_row(row)

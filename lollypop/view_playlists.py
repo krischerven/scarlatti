@@ -128,8 +128,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self.__set_duration(duration)
         # Ask widget after populated
         else:
-            self.__playlists_widget.connect("populated",
-                                            self.__on_playlist_populated)
+            self.__view.connect("populated", self.__on_playlist_populated)
 
     def populate(self, albums):
         """
@@ -142,7 +141,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
             Stop populating
         """
-        self.__playlists_widget.stop()
+        self.__view.stop()
 
     @property
     def playlist_ids(self):
@@ -187,7 +186,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @param player as Player
         """
         self.__update_jump_button()
-        self.__playlists_widget.set_playing_indicator()
 
     def _on_destroy(self, widget):
         """
@@ -289,8 +287,9 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
             Update jump button status
         """
-        track_ids = [child.track.id
-                     for child in self.__playlists_widget.children]
+        track_ids = []
+        for child in self.__view.children:
+            track_ids += child.album.track_ids
         if App().player.current_track.id in track_ids:
             self.__jump_button.set_sensitive(True)
         else:
