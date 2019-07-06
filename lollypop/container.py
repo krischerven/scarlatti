@@ -193,7 +193,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.__progress.set_property("valign", Gtk.Align.END)
         self.add_overlay(self.__progress)
 
-        self._paned_two.pack2(self._stack, False, True)
+        self._paned_two.add2(self._stack)
         self._paned_one.add2(self._paned_two)
         position1 = App().settings.get_value(
             "paned-mainlist-width").get_int32()
