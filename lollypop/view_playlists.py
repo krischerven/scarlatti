@@ -21,6 +21,7 @@ from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
 from lollypop.define import MARGIN_SMALL
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_playlist_banner import PlaylistBannerWidget
+from lollypop.view_albums_list import AlbumsListView
 
 
 class PlaylistsView(LazyLoadingView, ViewController):
@@ -61,7 +62,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__playlists_widget = PlaylistsWidget(playlist_ids, view_type)
         self.__playlists_widget.connect("populated", self.__on_populated)
         self.__playlists_widget.show()
-        self._viewport.add(self.__playlists_widget)
+        self.__view = AlbumsListView([], [], view_type)
+        self._viewport.add(self.__view)
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
         if self.__view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
@@ -129,13 +131,12 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self.__playlists_widget.connect("populated",
                                             self.__on_playlist_populated)
 
-    def populate(self, tracks):
+    def populate(self, albums):
         """
-            Populate view with tracks from playlist
-            @param tracks as [track]
+            Populate view with albums
+            @param albums as [Album]
         """
-        self.__playlists_widget.populate(tracks)
-        self.__update_jump_button()
+        self.__view.populate(albums)
 
     def stop(self):
         """

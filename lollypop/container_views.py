@@ -215,36 +215,34 @@ class ViewsContainer:
             @param playlist_ids as [int]
             @return View
         """
+        def get_albums_for_track_ids(track_ids):
+            albums = []
+            for track_id in track_ids:
+                track = Track(track_id)
+                if albums and albums[-1].id == track.album.id:
+                    albums[-1].insert_track(track)
+                else:
+                    albums.append(track.album)
+            return albums
+
         def load():
-            tracks = []
-            all_ids = []
+            track_ids = []
             for playlist_id in playlist_ids:
                 if playlist_id == Type.LOVED:
-                    ids = App().tracks.get_loved_track_ids()
+                    _track_ids = App().tracks.get_loved_track_ids()
                 else:
-                    ids = App().playlists.get_track_ids(playlist_id)
-                for id in ids:
-                    if id in all_ids:
+                    _track_ids = App().playlists.get_track_ids(playlist_id)
+                for track_id in _track_ids:
+                    if track_id in track_ids:
                         continue
-                    all_ids.append(id)
-                    track = Track(id)
-                    tracks.append(track)
-            return tracks
+                    track_ids.append(track_id)
+            return get_albums_for_track_ids(track_ids)
 
         def load_smart():
-            tracks = []
+            track_ids = []
             request = App().playlists.get_smart_sql(playlist_ids[0])
-            ids = App().db.execute(request)
-            for id in ids:
-                track = Track(id)
-                # Smart playlist may report invalid tracks
-                # An album always have an artist so check
-                # object is valid. Others Lollypop widgets assume
-                # objects are valid
-                if not track.album.artist_ids:
-                    continue
-                tracks.append(track)
-            return tracks
+            track_ids = App().db.execute(request)
+            return get_albums_for_track_ids(track_ids)
 
         if App().window.is_adaptive:
             view_type = ViewType.DND
