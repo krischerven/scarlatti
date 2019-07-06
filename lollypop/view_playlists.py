@@ -16,7 +16,6 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration
 from lollypop.view import LazyLoadingView
-from lollypop.widgets_playlist import PlaylistsWidget
 from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
 from lollypop.define import MARGIN_SMALL
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -37,6 +36,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         LazyLoadingView.__init__(self)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        self.__allocation_timeout_id = None
+        self.__width = 0
         self.__view_type = view_type
         self.__playlist_ids = playlist_ids
         self.__signal_id1 = App().playlists.connect(
@@ -59,10 +60,9 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__menu_button = builder.get_object("menu_button")
         self.__buttons = builder.get_object("box-buttons")
         self.__widget = builder.get_object("widget")
-        self.__playlists_widget = PlaylistsWidget(playlist_ids, view_type)
-        self.__playlists_widget.connect("populated", self.__on_populated)
-        self.__playlists_widget.show()
         self.__view = AlbumsListView([], [], view_type)
+        self.__view.set_property("halign", Gtk.Align.CENTER)
+        self.__view.show()
         self._viewport.add(self.__view)
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
@@ -108,13 +108,13 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self.__banner.show()
             self._overlay.add_overlay(self.__banner)
             self.__banner.add_overlay(self.__widget)
-            self.__playlists_widget.set_margin_top(
-                self.__banner.default_height + 15)
+            self.__view.set_margin_top(self.__banner.default_height + 15)
             self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
         self._scrolled.set_property("expand", True)
         builder.connect_signals(self)
+        self.connect("size-allocate", self.__on_size_allocate)
 
         if len(playlist_ids) > 1:
             self.__menu_button.hide()
@@ -266,6 +266,18 @@ class PlaylistsView(LazyLoadingView, ViewController):
 #######################
 # PRIVATE             #
 #######################
+    def __handle_size_allocate(self, allocation):
+        """
+            Change view width
+            @param allocation as Gtk.Allocation
+        """
+        self.__allocation_timeout_id = None
+        if allocation.width == 1 or self.__width == allocation.width:
+            return
+        self.__width = allocation.width
+        width = max(200, self.__width / 2)
+        self.__view.set_size_request(width, -1)
+
     def __set_duration(self, duration):
         """
             Set playlist duration
@@ -331,3 +343,14 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @param value as GLib.Variant
         """
         self.__playlists_widget.update_allocation()
+
+    def __on_size_allocate(self, widget, allocation):
+        """
+            Change box max/min children
+            @param widget as Gtk.Widget
+            @param allocation as Gtk.Allocation
+        """
+        if self.__allocation_timeout_id is not None:
+            GLib.source_remove(self.__allocation_timeout_id)
+        self.__allocation_timeout_id = GLib.idle_add(
+            self.__handle_size_allocate, allocation)
