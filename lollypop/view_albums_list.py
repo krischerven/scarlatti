@@ -721,7 +721,8 @@ class AlbumsListView(LazyLoadingView, ViewController):
             return
         if albums:
             album = albums.pop(0)
-            reveal = album in self.__reveals or len(album.tracks) < 4
+            reveal = album in self.__reveals or\
+                self._view_type & ViewType.PLAYLISTS
             row = self.__row_for_album(album, reveal)
             row.set_previous_row(previous_row)
             if previous_row is not None:
