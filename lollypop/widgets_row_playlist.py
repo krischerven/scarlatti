@@ -89,7 +89,8 @@ class PlaylistRow(Row, DNDRow):
             Set previous row
             @param row as Row
         """
-        DNDRow.set_previous_row(self, row)
+        if self._view_type & ViewType.DND:
+            Row.set_previous_row(self, row)
         self.update_artwork_state()
 
     def update_artwork_state(self):
@@ -152,7 +153,8 @@ class PlaylistRow(Row, DNDRow):
             @param widget as Gtk.Widget
         """
         Row._on_destroy(self, widget)
-        DNDRow._on_destroy(self, widget)
+        if self._view_type & ViewType.DND:
+            DNDRow._on_destroy(self, widget)
         self.__artwork = None
 
 #######################

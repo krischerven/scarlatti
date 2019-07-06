@@ -42,8 +42,6 @@ class DNDRow:
         """
             Init drag & drop
         """
-        self.__next_row = None
-        self.__previous_row = None
         self.__drag_data_delete_id = None
         self.__timeout_id = None
         self.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, [],
@@ -70,36 +68,6 @@ class DNDRow:
         if self.next_row is not None:
             self.next_row.update_number(position + 1)
 
-    def set_next_row(self, row):
-        """
-            Set next row
-            @param row as Row
-        """
-        self.__next_row = row
-
-    def set_previous_row(self, row):
-        """
-            Set previous row
-            @param row as Row
-        """
-        self.__previous_row = row
-
-    @property
-    def next_row(self):
-        """
-            Get next row
-            @return row as Row
-        """
-        return self.__next_row
-
-    @property
-    def previous_row(self):
-        """
-            Get previous row
-            @return row as Row
-        """
-        return self.__previous_row
-
 #######################
 # PROTECTED           #
 #######################
@@ -108,7 +76,7 @@ class DNDRow:
             Update label
             @param widget as Gtk.Widget
         """
-        if self.__next_row is not None:
+        if self.next_row is not None:
             position = self._track.number
             self.next_row.update_number(position)
 

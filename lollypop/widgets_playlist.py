@@ -273,9 +273,10 @@ class PlaylistsWidget(Gtk.Grid):
         row.set_previous_row(previous_row)
         if previous_row is not None:
             previous_row.set_next_row(row)
-        row.connect("insert-track", self.__on_insert_track)
-        row.connect("remove-track", self.__on_remove_track)
-        row.connect("do-selection", self.__on_do_selection)
+        if self.__view_type & ViewType.DND:
+            row.connect("insert-track", self.__on_insert_track)
+            row.connect("remove-track", self.__on_remove_track)
+            row.connect("do-selection", self.__on_do_selection)
         row.show()
         widget.insert(row, position)
         GLib.idle_add(self.__add_tracks, widgets, tracks)
