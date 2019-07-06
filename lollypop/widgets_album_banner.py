@@ -17,10 +17,11 @@ from lollypop.define import ArtBehaviour
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
+from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.utils import get_human_duration, on_query_tooltip, on_realize
 
 
-class AlbumBannerWidget(Gtk.Bin):
+class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
     """
         Banner for album
     """
@@ -32,11 +33,10 @@ class AlbumBannerWidget(Gtk.Bin):
             @param view_type as ViewType
         """
         Gtk.Bin.__init__(self)
+        SizeAllocationHelper.__init__(self)
         self.__view_type = view_type
         self.__height = None
-        self.__width = 0
         self.__cloud_image = None
-        self.__allocation_timeout_id = None
         self.__album = album
         self.set_property("valign", Gtk.Align.START)
         builder = Gtk.Builder()
@@ -79,7 +79,6 @@ class AlbumBannerWidget(Gtk.Bin):
                 "black-transparent")
             self.get_style_context().add_class("black")
             self.__artwork.get_style_context().add_class("black")
-            self.connect("size-allocate", self.__on_size_allocate)
             self.connect("destroy", self.__on_destroy)
             self.__art_signal_id = App().art.connect(
                                                "album-artwork-changed",
@@ -229,6 +228,22 @@ class AlbumBannerWidget(Gtk.Bin):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            App().art_helper.set_album_artwork(
+                    self.__album,
+                    # +100 to prevent resize lag
+                    allocation.width + 100,
+                    self.default_height,
+                    self.__artwork.get_scale_factor(),
+                    ArtBehaviour.BLUR_HARD |
+                    ArtBehaviour.DARKER,
+                    self.__on_album_artwork)
+
     def _on_menu_button_clicked(self, button):
         """
             Show album menu
@@ -273,25 +288,6 @@ class AlbumBannerWidget(Gtk.Bin):
             self.__year_label.get_style_context().add_class(
                 "text-x-large")
 
-    def __handle_size_allocate(self, allocation):
-        """
-            Change box max/min children
-            @param allocation as Gtk.Allocation
-        """
-        self.__allocation_timeout_id = None
-        if allocation.width == 1 or self.__width == allocation.width:
-            return
-        self.__width = allocation.width
-        App().art_helper.set_album_artwork(
-                self.__album,
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                self.default_height,
-                self.__artwork.get_scale_factor(),
-                ArtBehaviour.BLUR_HARD |
-                ArtBehaviour.DARKER,
-                self.__on_album_artwork)
-
     def __on_destroy(self, widget):
         """
             Disconnect signal
@@ -334,14 +330,3 @@ class AlbumBannerWidget(Gtk.Bin):
         App().window.emit("can-go-back-changed", True)
         App().window.emit("show-can-go-back", True)
         App().window.container.show_view([Type.YEARS], [self.__album.year])
-
-    def __on_size_allocate(self, widget, allocation):
-        """
-            Delayed handling
-            @param widget as Gtk.Widget
-            @param allocation as Gtk.Allocation
-        """
-        if self.__allocation_timeout_id is not None:
-            GLib.source_remove(self.__allocation_timeout_id)
-        self.__allocation_timeout_id = GLib.idle_add(
-            self.__handle_size_allocate, allocation)

@@ -10,18 +10,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject, GLib
+from gi.repository import Gtk, GObject
 
 from lollypop.helper_art import ArtBehaviour
 from lollypop.controller_information import InformationController
 from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
+from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.utils import on_realize
 from lollypop.define import App, ArtSize, Type
 
 
 class MiniPlayer(Gtk.Bin, InformationController,
-                 ProgressController, PlaybackController):
+                 ProgressController, PlaybackController, SizeAllocationHelper):
     """
         Mini player shown in adaptive mode
     """
@@ -33,15 +34,15 @@ class MiniPlayer(Gtk.Bin, InformationController,
         """
             Init mini player
         """
-        self.__size = 0
-        self.__allocation_timeout_id = None
-        self.__cover = None
         Gtk.Bin.__init__(self)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |
                                        ArtBehaviour.DARKER)
         ProgressController.__init__(self)
         PlaybackController.__init__(self)
+        SizeAllocationHelper.__init__(self)
+        self.__size = 0
+        self.__cover = None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/MiniPlayer.ui")
         builder.connect_signals(self)
@@ -83,7 +84,6 @@ class MiniPlayer(Gtk.Bin, InformationController,
             self.update_position()
             ProgressController.on_status_changed(self, App().player)
         self.add(builder.get_object("widget"))
-        self.connect("size-allocate", self.__on_size_allocate)
         self.connect("destroy", self.__on_destroy)
 
     def do_get_preferred_width(self):
@@ -176,24 +176,24 @@ class MiniPlayer(Gtk.Bin, InformationController,
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_artwork)
 
-    def __handle_size_allocate(self, allocation):
+    def _handle_size_allocate(self, allocation):
         """
             Change box max/min children
             @param allocation as Gtk.Allocation
         """
-        self.__allocation_timeout_id = None
-        # We use parent height because we may be collapsed
-        parent = self.get_parent()
-        if parent is None:
-            height = allocation.height
-        else:
-            height = parent.get_allocated_height()
-        new_size = max(allocation.width, height)
-        if new_size == 1 or self.__size == new_size:
-            return
-        self.__size = new_size
-        self._previous_artwork_id = None
-        InformationController.on_current_changed(self, new_size, None)
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            # We use parent height because we may be collapsed
+            parent = self.get_parent()
+            if parent is None:
+                height = allocation.height
+            else:
+                height = parent.get_allocated_height()
+            new_size = max(allocation.width, height)
+            if new_size == 1 or self.__size == new_size:
+                return
+            self.__size = new_size
+            self._previous_artwork_id = None
+            InformationController.on_current_changed(self, new_size, None)
 
     def __on_destroy(self, widget):
         """
@@ -226,17 +226,6 @@ class MiniPlayer(Gtk.Bin, InformationController,
         """
         ProgressController.on_status_changed(self, player)
         PlaybackController.on_status_changed(self, player)
-
-    def __on_size_allocate(self, widget, allocation):
-        """
-            Delayed handling
-            @param widget as Gtk.Widget
-            @param allocation as Gtk.Allocation
-        """
-        if self.__allocation_timeout_id is not None:
-            GLib.source_remove(self.__allocation_timeout_id)
-        self.__allocation_timeout_id = GLib.idle_add(
-            self.__handle_size_allocate, allocation)
 
     def __on_artwork(self, surface):
         """

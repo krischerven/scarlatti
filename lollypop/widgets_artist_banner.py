@@ -10,13 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gdk
+from gi.repository import Gtk, Gdk
 
 from lollypop.objects import Album
 from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class ArtistBannerWidget(Gtk.Overlay):
+class ArtistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
     """
         Banner for artist
     """
@@ -27,19 +28,17 @@ class ArtistBannerWidget(Gtk.Overlay):
             @param artist_id as int
         """
         Gtk.Overlay.__init__(self)
-        self.__width = 0
+        SizeAllocationHelper.__init__(self)
         self.__album_ids = None
         self.__album_id = None
         self.__height = self.default_height
         self.__artist_id = artist_id
-        self.__allocation_timeout_id = None
         self.set_property("valign", Gtk.Align.START)
         self.__artwork = Gtk.Image()
         self.__artwork.get_style_context().add_class("black")
         self.get_style_context().add_class("black")
         self.__artwork.show()
         self.add(self.__artwork)
-        self.connect("size-allocate", self.__on_size_allocate)
         self.connect("destroy", self.__on_destroy)
         self.__art_signal_id = App().art.connect(
                                            "artist-artwork-changed",
@@ -87,6 +86,25 @@ class ArtistBannerWidget(Gtk.Overlay):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            if App().settings.get_value("artist-artwork"):
+                artist = App().artists.get_name(self.__artist_id)
+                App().art_helper.set_artist_artwork(
+                                            artist,
+                                            # +100 to prevent resize lag
+                                            allocation.width + 100,
+                                            allocation.height,
+                                            self.get_scale_factor(),
+                                            ArtBehaviour.BLUR_HARD |
+                                            ArtBehaviour.DARKER,
+                                            self.__on_artist_artwork)
+            else:
+                self.__use_album_artwork(allocation.width, allocation.height)
 
 #######################
 # PRIVATE             #
@@ -120,29 +138,6 @@ class ArtistBannerWidget(Gtk.Overlay):
                 ArtBehaviour.BLUR_HARD |
                 ArtBehaviour.DARKER,
                 self.__on_album_artwork)
-
-    def __handle_size_allocate(self, allocation):
-        """
-            Change box max/min children
-            @param allocation as Gtk.Allocation
-        """
-        self.__allocation_timeout_id = None
-        if allocation.width == 1 or self.__width == allocation.width:
-            return
-        self.__width = allocation.width
-        if App().settings.get_value("artist-artwork"):
-            artist = App().artists.get_name(self.__artist_id)
-            App().art_helper.set_artist_artwork(
-                                        artist,
-                                        # +100 to prevent resize lag
-                                        allocation.width + 100,
-                                        allocation.height,
-                                        self.get_scale_factor(),
-                                        ArtBehaviour.BLUR_HARD |
-                                        ArtBehaviour.DARKER,
-                                        self.__on_artist_artwork)
-        else:
-            self.__use_album_artwork(allocation.width, allocation.height)
 
     def __on_destroy(self, widget):
         """
@@ -188,14 +183,3 @@ class ArtistBannerWidget(Gtk.Overlay):
                                      self.get_allocated_height())
         else:
             self.__artwork.set_from_surface(surface)
-
-    def __on_size_allocate(self, widget, allocation):
-        """
-            Change box max/min children
-            @param widget as Gtk.Widget
-            @param allocation as Gtk.Allocation
-        """
-        if self.__allocation_timeout_id is not None:
-            GLib.source_remove(self.__allocation_timeout_id)
-        self.__allocation_timeout_id = GLib.idle_add(
-            self.__handle_size_allocate, allocation)

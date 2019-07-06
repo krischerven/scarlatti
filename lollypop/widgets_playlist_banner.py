@@ -10,15 +10,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from random import choice
 
 from lollypop.objects import Track
 from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class PlaylistBannerWidget(Gtk.Overlay):
+class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
     """
         Banner for playlist
     """
@@ -29,7 +30,7 @@ class PlaylistBannerWidget(Gtk.Overlay):
             @param playlist_id as int
         """
         Gtk.Overlay.__init__(self)
-        self.__width = 0
+        SizeAllocationHelper.__init__(self)
         self.__track = None
         self.__track_ids = []
         if App().playlists.get_smart(playlist_id):
@@ -40,14 +41,12 @@ class PlaylistBannerWidget(Gtk.Overlay):
             self.__track_ids = App().playlists.get_track_ids(playlist_id)
         self.__height = self.default_height
         self.__playlist_id = playlist_id
-        self.__allocation_timeout_id = None
         self.set_property("valign", Gtk.Align.START)
         self.get_style_context().add_class("black")
         self.__artwork = Gtk.Image()
         self.__artwork.get_style_context().add_class("black")
         self.__artwork.show()
         self.add(self.__artwork)
-        self.connect("size-allocate", self.__on_size_allocate)
 
     def set_height(self, height):
         """
@@ -91,34 +90,30 @@ class PlaylistBannerWidget(Gtk.Overlay):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            if self.__track_ids and self.__track is None:
+                track_id = choice(self.__track_ids)
+                self.__track_ids.remove(track_id)
+                self.__track = Track(track_id)
+            if self.__track is not None:
+                App().art_helper.set_album_artwork(
+                    self.__track.album,
+                    # +100 to prevent resize lag
+                    allocation.width + 100,
+                    allocation.height,
+                    self.__artwork.get_scale_factor(),
+                    ArtBehaviour.BLUR_HARD |
+                    ArtBehaviour.DARKER,
+                    self.__on_album_artwork)
 
 #######################
 # PRIVATE             #
 #######################
-    def __handle_size_allocate(self, allocation):
-        """
-            Change box max/min children
-            @param allocation as Gtk.Allocation
-        """
-        self.__allocation_timeout_id = None
-        if allocation.width == 1 or self.__width == allocation.width:
-            return
-        self.__width = allocation.width
-        if self.__track_ids and self.__track is None:
-            track_id = choice(self.__track_ids)
-            self.__track_ids.remove(track_id)
-            self.__track = Track(track_id)
-        if self.__track is not None:
-            App().art_helper.set_album_artwork(
-                self.__track.album,
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                allocation.height,
-                self.__artwork.get_scale_factor(),
-                ArtBehaviour.BLUR_HARD |
-                ArtBehaviour.DARKER,
-                self.__on_album_artwork)
-
     def __on_album_artwork(self, surface):
         """
             Set album artwork
@@ -126,14 +121,3 @@ class PlaylistBannerWidget(Gtk.Overlay):
         """
         if surface is not None:
             self.__artwork.set_from_surface(surface)
-
-    def __on_size_allocate(self, widget, allocation):
-        """
-            Change box max/min children
-            @param widget as Gtk.Widget
-            @param allocation as Gtk.Allocation
-        """
-        if self.__allocation_timeout_id is not None:
-            GLib.source_remove(self.__allocation_timeout_id)
-        self.__allocation_timeout_id = GLib.idle_add(
-            self.__handle_size_allocate, allocation)

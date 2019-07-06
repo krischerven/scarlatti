@@ -32,11 +32,13 @@ class SizeAllocationHelper:
     def _handle_size_allocate(self, allocation):
         """
             @param allocation as Gtk.Allocation
+            @return True if allocation is valid
         """
         self.__allocation_timeout_id = None
         if allocation.width == 1 or self.__width == allocation.width:
-            return
+            return False
         self.__width = allocation.width
+        return True
 
 #######################
 # PRIVATE             #

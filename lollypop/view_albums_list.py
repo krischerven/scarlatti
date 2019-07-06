@@ -669,9 +669,9 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             Change view width
             @param allocation as Gtk.Allocation
         """
-        SizeAllocationHelper._handle_size_allocate(self, allocation)
-        width = max(200, allocation.width / 2)
-        self._box.set_size_request(width, -1)
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            width = max(200, allocation.width / 2)
+            self._box.set_size_request(width, -1)
 
     def _on_current_changed(self, player):
         """
