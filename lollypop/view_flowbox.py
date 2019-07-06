@@ -55,6 +55,34 @@ class FlowBoxView(LazyLoadingView):
         else:
             LazyLoadingView.populate(self)
 
+    def search_for_child(self, text):
+        """
+            Search row and scroll down
+            @param text as str
+        """
+        for row in self._box.get_children():
+            style_context = row.get_style_context()
+            style_context.remove_class("typeahead")
+        if not text:
+            return
+        for row in self._box.get_children():
+            if row.name.lower().find(text) != -1:
+                style_context = row.get_style_context()
+                style_context.add_class("typeahead")
+                GLib.idle_add(self.__scroll_to_row, row)
+                break
+
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        self._box.unselect_all()
+        for row in self._box.get_children():
+            style_context = row.get_style_context()
+            if style_context.has_class("typeahead"):
+                row.activate()
+            style_context.remove_class("typeahead")
+
     @property
     def font_height(self):
         """
@@ -145,3 +173,12 @@ class FlowBoxView(LazyLoadingView):
 #######################
 # PRIVATE             #
 #######################
+    def __scroll_to_row(self, row):
+        """
+            Scroll to row
+            @param row as SelectionListRow
+        """
+        if self._view_type & ViewType.SCROLLED:
+            coordinates = row.translate_coordinates(self._box, 0, 0)
+            if coordinates:
+                self._scrolled.get_vadjustment().set_value(coordinates[1])

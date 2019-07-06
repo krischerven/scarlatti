@@ -156,6 +156,14 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         return (width, width)
 
     @property
+    def name(self):
+        """
+            Get name
+            @return str
+        """
+        return self.__label.get_text()
+
+    @property
     def artwork(self):
         """
             Get album artwork

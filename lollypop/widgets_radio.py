@@ -14,6 +14,7 @@ from gi.repository import Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, Type, ArtBehaviour, ViewType
 from lollypop.utils import on_query_tooltip
+from lollypop.objects import Track
 from lollypop.helper_overlay_radio import OverlayRadioHelper
 
 
@@ -45,6 +46,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         self.__view_type = view_type
         self._watch_loading = True
         self.set_view_type(view_type)
+        self.connect("activate", self.__on_activate)
 
     def populate(self):
         """
@@ -183,6 +185,15 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_activate(self, child):
+        """
+            Play radio
+            @param child as Gtk.FlowBoxChild
+        """
+        track = Track()
+        track.set_radio_id(self._radio_id)
+        App().player.load(track)
+
     def __on_radio_artwork(self, surface):
         """
             Set radio artwork

@@ -113,8 +113,8 @@ class TypeAheadWidget(Gtk.Revealer):
             @param entry as Gtk.Entry
             @param Event as Gdk.EventKey
         """
-        if event.state & (Gdk.ModifierType.SHIFT_MASK |
-                          Gdk.ModifierType.CONTROL_MASK):
+        if event.state & Gdk.ModifierType.SHIFT_MASK and\
+                event.state & Gdk.ModifierType.CONTROL_MASK:
             return True
 
     def _on_entry_key_release_event(self, entry, event):
@@ -183,7 +183,7 @@ class TypeAheadWidget(Gtk.Revealer):
                 active = button
                 break
         index = buttons.index(active)
-        if index < len(buttons):
+        if index + 1 < len(buttons):
             buttons[index + 1].set_active(True)
 
     def __activate_prev_button(self):

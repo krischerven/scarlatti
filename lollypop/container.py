@@ -38,7 +38,7 @@ class ContainerStack(AdaptiveStack):
     def search_for_child(self, text):
         view = self.get_visible_child()
         if view is not None and hasattr(view, "search_for_child"):
-            view.search_for_child()
+            view.search_for_child(text)
 
     def activate_child(self):
         view = self.get_visible_child()
