@@ -239,7 +239,6 @@ class ViewsContainer:
             return get_albums_for_track_ids(track_ids)
 
         def load_smart():
-            track_ids = []
             request = App().playlists.get_smart_sql(playlist_ids[0])
             track_ids = App().db.execute(request)
             return get_albums_for_track_ids(track_ids)
