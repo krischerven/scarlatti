@@ -78,7 +78,7 @@ class AdaptiveStack(Gtk.Stack):
         for item in self.__history:
             if item in children:
                 item.stop()
-                item.destroy()
+                item.destroy_later()
         self.__history = []
 
     def set_visible_child(self, widget):
