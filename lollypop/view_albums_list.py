@@ -73,6 +73,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         TracksView.__init__(self, view_type)
         if view_type & ViewType.DND:
             DNDRow.__init__(self)
+        self.__next_row = None
+        self.__previous_row = None
         self.__revealer = None
         self.__parent = parent
         self.__reveal = reveal
@@ -250,6 +252,36 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
+
+    def set_next_row(self, row):
+        """
+            Set next row
+            @param row as Row
+        """
+        self.__next_row = row
+
+    def set_previous_row(self, row):
+        """
+            Set previous row
+            @param row as Row
+        """
+        self.__previous_row = row
+
+    @property
+    def next_row(self):
+        """
+            Get next row
+            @return row as Row
+        """
+        return self.__next_row
+
+    @property
+    def previous_row(self):
+        """
+            Get previous row
+            @return row as Row
+        """
+        return self.__previous_row
 
     @property
     def parent(self):
