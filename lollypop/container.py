@@ -221,15 +221,11 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.__progress.set_property("valign", Gtk.Align.END)
         self.add_overlay(self.__progress)
 
-        self._paned_two.pack2(self._stack, False, True)
+        self._paned_two.add2(self._stack)
         self._paned_one.add2(self._paned_two)
-        position1 = App().settings.get_value(
+        position = App().settings.get_value(
             "paned-mainlist-width").get_int32()
-        position2 = App().settings.get_value(
-            "paned-listview-width").get_int32()
-        self._paned_one.set_position(position1)
-        # GTK does not like paned inside paned set_position()
-        GLib.timeout_add(100, self._paned_two.set_position, position2)
+        self._paned_one.set_position(position)
         self._paned_one.show()
         self._paned_two.show()
         search_action = App().lookup_action("search")

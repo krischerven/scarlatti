@@ -108,6 +108,7 @@ class ListsContainer:
         self._list_one.connect("populated", self.__on_list_one_populated)
         self._list_one.connect("pass-focus", self.__on_pass_focus)
         self._list_two.connect("pass-focus", self.__on_pass_focus)
+        self._list_two.connect("map", self.__on_list_two_mapped)
         self._paned_two.add1(self._list_two)
         self._paned_one.add1(self._list_one)
         App().window.add_paned(self._paned_one, self._list_one)
@@ -354,3 +355,11 @@ class ListsContainer:
                 self._list_two.grab_focus()
         else:
             self._list_one.grab_focus()
+
+    def __on_list_two_mapped(self, widget):
+        """
+            Force paned width, see ignore in container.py
+        """
+        position = App().settings.get_value(
+            "paned-listview-width").get_int32()
+        GLib.timeout_add(100, self._paned_two.set_position, position)
