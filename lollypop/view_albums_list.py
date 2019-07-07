@@ -313,7 +313,11 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         """
         row = AlbumRow(album, self.__height, self._view_type,
                        reveal, cover_uri, self, self.__position)
-        self.__position += len(album.tracks)
+        # For Playlists, we want track position not track number
+        if self._view_type & ViewType.PLAYLISTS:
+            self.__position += len(album.tracks)
+        else:
+            self.__position = 0
         row.connect("insert-track", self.__on_insert_track)
         row.connect("insert-album", self.__on_insert_album)
         row.connect("insert-album-after", self.__on_insert_album_after)
