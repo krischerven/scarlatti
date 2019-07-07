@@ -60,7 +60,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self._viewport.add(self.__view)
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
-        if self.__view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
+        if view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
             self.__title_label.get_style_context().add_class("dim-label")
             self.__duration_label.get_style_context().add_class("dim-label")
             self.__widget.add(self.__title_label)
@@ -98,11 +98,11 @@ class PlaylistsView(LazyLoadingView, ViewController):
                     "text-x-large")
             self.__title_label.set_property("valign", Gtk.Align.END)
             self.__duration_label.set_property("valign", Gtk.Align.START)
-            self.__banner = PlaylistBannerWidget(playlist_ids[0])
+            self.__banner = PlaylistBannerWidget(playlist_ids[0], view_type)
             self.__banner.show()
             self._overlay.add_overlay(self.__banner)
             self.__banner.add_overlay(self.__widget)
-            self.__view.set_margin_top(self.__banner.default_height + 15)
+            self.__view.set_margin_top(self.__banner.default_height)
             self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))

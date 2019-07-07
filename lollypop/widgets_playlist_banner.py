@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from random import choice
 
 from lollypop.objects import Track
-from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -24,13 +24,15 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
         Banner for playlist
     """
 
-    def __init__(self, playlist_id):
+    def __init__(self, playlist_id, view_type):
         """
             Init artist banner
             @param playlist_id as int
+            @param view_type as ViewType
         """
         Gtk.Overlay.__init__(self)
         SizeAllocationHelper.__init__(self)
+        self.__view_type = view_type
         self.__track = None
         self.__track_ids = []
         if App().playlists.get_smart(playlist_id):
@@ -82,10 +84,12 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
         """
             Get default height
         """
-        if App().window.is_adaptive:
-            return ArtSize.LARGE
+        if self.__view_type & ViewType.SMALL:
+            return ArtSize.LARGE + 40
+        elif self.__view_type & ViewType.MEDIUM:
+            return ArtSize.BANNER + 40
         else:
-            return ArtSize.BANNER
+            return ArtSize.BANNER + 40
 
 #######################
 # PROTECTED           #
