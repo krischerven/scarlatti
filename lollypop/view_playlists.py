@@ -44,9 +44,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__signal_id2 = App().playlists.connect(
                                             "playlist-track-removed",
                                             self.__on_playlist_track_removed)
-        self.__signal_id3 = App().settings.connect(
-                            "changed::split-view",
-                            self.__on_split_view_changed)
 
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/PlaylistView.ui")
@@ -318,11 +315,3 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @param widget as PlaylistsWidget
         """
         self.__set_duration(widget.duration)
-
-    def __on_split_view_changed(self, settings, value):
-        """
-            Split/Unsplit view
-            @param settings as Gio.Settings
-            @param value as GLib.Variant
-        """
-        self.__playlists_widget.update_allocation()

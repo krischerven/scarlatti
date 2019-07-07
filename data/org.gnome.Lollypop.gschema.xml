@@ -154,11 +154,6 @@
             <summary>Auto update music</summary>
             <description></description>
         </key>
-         <key type="b" name="split-view">
-            <default>true</default>
-            <summary>Split playlists view</summary>
-            <description></description>
-        </key>
          <key type="b" name="show-performers">
             <default>false</default>
             <summary>Show performers</summary>

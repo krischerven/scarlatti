@@ -39,15 +39,6 @@ class PlaylistMenu(Gio.Menu):
         App().add_action(smart_action)
         smart_action.connect("activate", self.__on_smart_action_activate)
         self.append(_("Manage smart playlist"), "app.smart_action")
-        if not App().window.is_adaptive:
-            split_action = Gio.SimpleAction.new_stateful(
-                "split_action",
-                None,
-                App().settings.get_value("split-view"))
-            split_action.connect("change-state",
-                                 self.__on_split_action_change_state)
-            App().add_action(split_action)
-            self.append(_("Split view"), "app.split_action")
         remove_action = Gio.SimpleAction(name="remove_pl_action")
         App().add_action(remove_action)
         remove_action.connect("activate", self.__on_remove_action_activate)
@@ -124,12 +115,3 @@ class PlaylistMenu(Gio.Menu):
                 stream.close()
         except Exception as e:
             Logger.error("PlaylistMenu::__on_save_response(): %s", e)
-
-    def __on_split_action_change_state(self, action, value):
-        """
-            Activate party mode
-            @param action as Gio.SimpleAction
-            @param value as bool
-        """
-        App().settings.set_value("split-view", value)
-        action.set_state(value)
