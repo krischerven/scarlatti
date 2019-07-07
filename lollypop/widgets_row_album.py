@@ -171,7 +171,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         # We want to get release event after gesture
         self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.__gesture.set_button(0)
-        if self.__reveal:
+        if self.__reveal or self.__view_type & ViewType.PLAYLISTS:
             self.reveal(True)
         if self.__cover_uri is None:
             self.set_artwork()
@@ -202,9 +202,11 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             Reveal/Unreveal tracks
             @param reveal as bool or None to just change state
         """
+        context = self.get_style_context()
         if self.__revealer.get_reveal_child() and reveal is not True:
             self.__revealer.set_reveal_child(False)
-            self.get_style_context().remove_class("albumrow-hover")
+            context.remove_class("albumrow-reveal")
+            context.add_class("albumrow")
             if self.album.id == App().player.current_track.album.id:
                 self.set_state_flags(Gtk.StateFlags.VISITED, True)
         else:
@@ -214,7 +216,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                 self.__revealer.add(self._responsive_widget)
             self.__revealer.set_reveal_child(True)
             self.unset_state_flags(Gtk.StateFlags.VISITED)
-            self.get_style_context().add_class("albumrow-hover")
+            context.add_class("albumrow-reveal")
+            context.remove_class("albumrow")
 
     def set_playing_indicator(self):
         """
@@ -435,7 +438,11 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                 self.__view_type & ViewType.DND:
             self.emit("do-selection")
         elif event.button == 1:
-            self.reveal()
+            if self.__view_type & ViewType.PLAYLISTS and self._album.tracks:
+                track = self._album.tracks[0]
+                self.emit("track-activated", track)
+            else:
+                self.reveal()
         elif event.button == 3:
             self.__popup_menu(self, event.x, event.y)
         return True

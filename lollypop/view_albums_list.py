@@ -283,9 +283,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             return
         if albums:
             album = albums.pop(0)
-            reveal = album in self.__reveals or\
-                self._view_type & ViewType.PLAYLISTS
-            row = self.__row_for_album(album, reveal)
+            row = self.__row_for_album(album, album in self.__reveals)
             row.set_previous_row(previous_row)
             if previous_row is not None:
                 previous_row.set_next_row(row)
