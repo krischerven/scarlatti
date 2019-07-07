@@ -18,7 +18,7 @@ from lollypop.utils import get_human_duration
 from lollypop.view import LazyLoadingView
 from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
 from lollypop.define import MARGIN_SMALL
-from lollypop.objects import Album
+from lollypop.objects import Album, Track
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_playlist_banner import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
@@ -286,26 +286,26 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         self.__update_jump_button()
 
-    def __on_playlist_track_added(self, playlists, playlist_id, uri, pos):
+    def __on_playlist_track_added(self, playlists, playlist_id, uri):
         """
-            Update tracks widgets
+            Append track to album list
             @param playlists as Playlists
             @param playlist_id as int
             @param uri as str
-            @param pos as int
         """
         if len(self.__playlist_ids) == 1 and\
                 playlist_id in self.__playlist_ids:
-            # TODO
-            pass
+            track = Track(App().tracks.get_id_by_uri(uri))
+            album = Album(track.album.id)
+            album.set_tracks([track])
+            self.__view.insert_album(album, True, -1)
 
-    def __on_playlist_track_removed(self, playlists, playlist_id, uri, pos):
+    def __on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
-            Update tracks widgets
+            Remove track from album list
             @param playlists as Playlists
             @param playlist_id as int
             @param uri as str
-            @param pos as int
         """
         if len(self.__playlist_ids) == 1 and\
                 playlist_id in self.__playlist_ids:

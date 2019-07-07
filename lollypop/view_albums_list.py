@@ -84,15 +84,24 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             @param position as int
             @param cover_uri as str
         """
-        row = self.__row_for_album(album, reveal, cover_uri)
+        row = None
+        previous_row = None
         children = self._box.get_children()
         if children:
             previous_row = children[position]
+            if previous_row.album.id == album.id:
+                row = previous_row
+                previous_row = None
+        if row is None:
+            row = self.__row_for_album(album, reveal, cover_uri)
+            row.populate()
+            row.show()
+            self._box.insert(row, position)
+        else:
+            row.append_rows(album.tracks)
+        if previous_row is not None:
             row.set_previous_row(previous_row)
             previous_row.set_next_row(row)
-        row.populate()
-        row.show()
-        self._box.insert(row, position)
         if self._viewport.get_child() is None:
             self._viewport.add(self._box)
 
