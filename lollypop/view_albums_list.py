@@ -295,7 +295,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             @param albums ids as [Album]
             @param previous_row as AlbumRow
         """
-        if self._lazy_queue is None or self._viewport is None:
+        if self._lazy_queue is None or self.destroyed:
             return
         if albums:
             album = albums.pop(0)

@@ -26,13 +26,14 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         Show artist albums and tracks
     """
 
-    def __init__(self, artist_ids, genre_ids):
+    def __init__(self, artist_ids, genre_ids,
+                 view_type=ViewType.TWO_COLUMNS | ViewType.SCROLLED):
         """
             Init ArtistView
             @param artist_id as int (Current if None)
             @param genre_id as int
+            @param view_type as ViewType
         """
-        view_type = ViewType.TWO_COLUMNS
         ArtistAlbumsView.__init__(self, artist_ids, genre_ids, view_type)
         self.__art_signal_id = None
         self.__allocation_timeout_id = None
@@ -48,7 +49,8 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         self._album_box.set_margin_start(MARGIN)
         self._album_box.set_margin_end(MARGIN)
         self.__set_artwork()
-        self._scrolled.get_vscrollbar().set_margin_top(self._banner.height)
+        if view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(self._banner.height)
 
     def jump_to_current(self):
         """
@@ -227,7 +229,8 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             self._title_label.set_margin_start(MARGIN)
             height = self._banner.default_height // 3
         self._banner.set_height(height)
-        self._scrolled.get_vscrollbar().set_margin_top(height)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(height)
         if self.__show_artwork:
             self._album_box.set_margin_top(self._banner.default_height + 15)
         else:

@@ -212,7 +212,8 @@ class SelectionList(LazyLoadingView):
             Init Selection list ui
             @param base_type as SelectionListMask
         """
-        LazyLoadingView.__init__(self, ViewType.NOT_ADAPTIVE)
+        LazyLoadingView.__init__(self, ViewType.NOT_ADAPTIVE |
+                                 ViewType.SCROLLED)
         self.__base_type = base_type
         self.__sort = False
         self.__mask = 0

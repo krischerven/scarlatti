@@ -55,17 +55,21 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
         """
         TracksView.populate(self)
         self.__grid.add(self._responsive_widget)
-        self._viewport.add(self.__grid)
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.add(self._scrolled)
-        self._overlay.show()
         self.__banner = AlbumBannerWidget(self._album,
                                           self._view_type | ViewType.ALBUM)
+        self._overlay = Gtk.Overlay.new()
+        if self._view_type & ViewType.SCROLLED:
+            self._overlay.add(self._scrolled)
+            self._viewport.add(self.__grid)
+            self._scrolled.get_vscrollbar().set_margin_top(
+                self.__banner.height)
+        else:
+            self._overlay.add(self.__grid)
+        self._overlay.show()
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
         self.add(self._overlay)
         self._responsive_widget.show()
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
 
 #######################
 # PROTECTED           #

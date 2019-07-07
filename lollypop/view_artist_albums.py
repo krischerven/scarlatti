@@ -39,10 +39,13 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
         self._album_box.set_orientation(Gtk.Orientation.VERTICAL)
         self._album_box.set_property("valign", Gtk.Align.START)
         self._album_box.show()
-        self._viewport.add(self._album_box)
         self._overlay = Gtk.Overlay.new()
-        self._overlay.add(self._scrolled)
         self._overlay.show()
+        if self._view_type & ViewType.SCROLLED:
+            self._overlay.add(self._scrolled)
+            self._viewport.add(self._album_box)
+        else:
+            self._overlay.add(self._album_box)
         self.add(self._overlay)
 
     def populate(self, albums):

@@ -56,7 +56,7 @@ class AlbumsBoxView(FlowBoxView, ViewController):
                                           _("and YouTube in network settings")
                     self._box.hide()
             self._empty_icon_name = get_icon_name(genre_ids[0])
-        if view_type & ViewType.SMALL:
+        if view_type & ViewType.SMALL and view_type & ViewType.SCROLLED:
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
                                       Gtk.PolicyType.NEVER)
 

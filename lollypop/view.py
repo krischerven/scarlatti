@@ -54,6 +54,7 @@ class View(BaseView, Gtk.Grid):
         self._view_type = view_type
         self.__adaptive_signal_id = None
         self.__overlayed = None
+        self.__destroyed = False
         self.__scanner_signal_id = App().scanner.connect(
             "album-updated", self._on_album_updated)
         self.set_orientation(Gtk.Orientation.VERTICAL)
@@ -62,15 +63,14 @@ class View(BaseView, Gtk.Grid):
         self._empty_message = _("No items to show")
         self._empty_icon_name = "emblem-music-symbolic"
 
-        if view_type & ViewType.FILTERED:
-            pass
-
-        self._scrolled = Gtk.ScrolledWindow()
-        self._scrolled.connect("leave-notify-event", self.__on_leave_notify)
-        self._scrolled.show()
-        self._viewport = Gtk.Viewport()
-        self._scrolled.add(self._viewport)
-        self._viewport.show()
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled = Gtk.ScrolledWindow()
+            self._scrolled.connect("leave-notify-event",
+                                   self.__on_leave_notify)
+            self._scrolled.show()
+            self._viewport = Gtk.Viewport()
+            self._scrolled.add(self._viewport)
+            self._viewport.show()
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
@@ -137,6 +137,14 @@ class View(BaseView, Gtk.Grid):
             self.__overlayed = widget
         elif self.__overlayed == widget:
             self.__overlayed = None
+
+    @property
+    def destroyed(self):
+        """
+            True if widget has been destroyed
+            @return bool
+        """
+        return self.__destroyed
 
 #######################
 # PROTECTED           #
@@ -209,7 +217,7 @@ class View(BaseView, Gtk.Grid):
         if self.__scanner_signal_id is not None:
             App().scanner.disconnect(self.__scanner_signal_id)
             self.__scanner_signal_id = None
-        self._viewport = None
+        self.__destroyed = True
         gc.collect()
 
 
@@ -227,9 +235,10 @@ class LazyLoadingView(View):
         self._lazy_queue = []
         self.__priority_queue = []
         self.__lazy_loading_id = None
-        self.__scroll_timeout_id = None
-        self._scrolled.get_vadjustment().connect("value-changed",
-                                                 self._on_value_changed)
+        if self._view_type & ViewType.SCROLLED:
+            self.__scroll_timeout_id = None
+            self._scrolled.get_vadjustment().connect("value-changed",
+                                                     self._on_value_changed)
         self.__start_time = time()
 
     def stop(self, clear=False):
