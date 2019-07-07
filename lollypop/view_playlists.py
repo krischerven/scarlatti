@@ -35,7 +35,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @parma playlist ids as [int]
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self)
+        LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__view_type = view_type
         self.__playlist_ids = playlist_ids
@@ -61,7 +61,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__view.connect("remove-from-playlist",
                             self.__on_remove_from_playlist)
         self.__view.show()
-        self._viewport.add(self.__view)
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
         if view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
@@ -78,11 +77,19 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self.__widget.add(self.__jump_button)
             self.__widget.set_margin_bottom(MARGIN_SMALL)
             self.add(self.__widget)
-            self.add(self._scrolled)
+            if view_type & ViewType.SCROLLED:
+                self._viewport.add(self.__view)
+                self.add(self._scrolled)
+            else:
+                self.add(self.__view)
         else:
             self.__duration_label.set_margin_start(MARGIN)
             self._overlay = Gtk.Overlay.new()
-            self._overlay.add(self._scrolled)
+            if view_type & ViewType.SCROLLED:
+                self._viewport.add(self.__view)
+                self._overlay.add(self._scrolled)
+            else:
+                self._overlay.Add(self._view)
             self._overlay.show()
             self.__widget.attach(self.__title_label, 0, 0, 1, 1)
             self.__widget.attach(self.__duration_label, 0, 1, 1, 1)
@@ -110,7 +117,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
-        self._scrolled.set_property("expand", True)
         builder.connect_signals(self)
 
         if len(playlist_ids) > 1:
