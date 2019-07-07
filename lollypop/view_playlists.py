@@ -56,7 +56,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__menu_button = builder.get_object("menu_button")
         self.__buttons = builder.get_object("box-buttons")
         self.__widget = builder.get_object("widget")
-        self.__view = AlbumsListView([], [], view_type)
+        # We remove SCROLLED because we want to be the scrolled view
+        self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
         self.__view.connect("remove-from-playlist",
                             self.__on_remove_from_playlist)
         self.__view.show()

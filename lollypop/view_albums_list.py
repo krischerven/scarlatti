@@ -66,8 +66,11 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         self._box.show()
         if view_type & ViewType.PLAYLISTS:
             SizeAllocationHelper.__init__(self)
-        self._scrolled.set_property("expand", True)
-        self.add(self._scrolled)
+        if view_type & ViewType.SCROLLED:
+            self._scrolled.set_property("expand", True)
+            self.add(self._scrolled)
+        else:
+            self.add(self._box)
 
     def set_reveal(self, albums):
         """
@@ -102,8 +105,11 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         if previous_row is not None:
             row.set_previous_row(previous_row)
             previous_row.set_next_row(row)
-        if self._viewport.get_child() is None:
-            self._viewport.add(self._box)
+        if self._view_type & ViewType.SCROLLED:
+            if self._viewport.get_child() is None:
+                self._viewport.add(self._box)
+        elif self._box not in self.get_children():
+            self.add(self._box)
 
     def populate(self, albums):
         """
@@ -311,8 +317,11 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
                 children[0].reveal(True)
             else:
                 self.lazy_loading()
-            if self._viewport.get_child() is None:
-                self._viewport.add(self._box)
+            if self._view_type & ViewType.SCROLLED:
+                if self._viewport.get_child() is None:
+                    self._viewport.add(self._box)
+            elif self._box not in self.get_children():
+                self.add(self._box)
 
     def __row_for_album(self, album, reveal=False, cover_uri=None):
         """
