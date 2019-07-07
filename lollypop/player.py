@@ -115,6 +115,8 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             @param album as Album
         """
         try:
+            if album not in self._albums:
+                return
             self._albums.remove(album)
             if album in self._albums_backup:
                 self._albums_backup.remove(album)
