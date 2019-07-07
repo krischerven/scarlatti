@@ -309,8 +309,16 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         if len(self.__playlist_ids) == 1 and\
                 playlist_id in self.__playlist_ids:
-            # TODO
-            pass
+            track = Track(App().tracks.get_id_by_uri(uri))
+            children = self.__view.children
+            for album_row in children:
+                if album_row.album.id == track.album.id:
+                    for track_row in album_row.children:
+                        if track_row.track.id == track.id:
+                            track_row.destroy()
+                            if len(children) == 1:
+                                album_row.destroy()
+                                break
 
     def __on_remove_from_playlist(self, view, object):
         """
