@@ -70,12 +70,12 @@ class TracksWidget(Gtk.ListBox):
         for row in self.get_children():
             row.update_number_label()
 
-    def __on_loved_playlist_changed(self, widget, playlist_id, uri, *ignore):
+    def __on_loved_playlist_changed(self, widget, playlist_id, uri):
         """
             Updates the loved icon
             @param playlist as Playlist
             @param playlist_id as int
-            @param track_id as int
+            @param uri as str
         """
         if playlist_id != Type.LOVED:
             return
