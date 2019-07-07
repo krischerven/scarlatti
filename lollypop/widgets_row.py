@@ -104,14 +104,13 @@ class Row(Gtk.ListBoxRow):
         if self._artists_label is not None:
             self._grid.add(self._artists_label)
         self._grid.add(self._duration_label)
-        if self._view_type & ViewType.DND and\
-                self._view_type & ViewType.POPOVER:
+        if self._view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                "list-remove-symbolic",
                Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
-               _("Remove from playback"))
-        elif not self._view_type & (ViewType.POPOVER | ViewType.SEARCH):
+               _("Remove from playlist"))
+        elif not self._view_type & ViewType.SEARCH:
             self.__action_button = Gtk.Button.new_from_icon_name(
                "view-more-symbolic",
                Gtk.IconSize.MENU)

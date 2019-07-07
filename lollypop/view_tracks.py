@@ -102,10 +102,10 @@ class TracksView(SizeAllocationHelper):
             self._tracks_widget_left = {}
             self._tracks_widget_right = {}
 
-            if self._view_type & (ViewType.DND | ViewType.SEARCH):
-                self.__discs = [self._album.one_disc]
-            else:
+            if self._view_type & ViewType.TWO_COLUMNS:
                 self.__discs = self._album.discs
+            else:
+                self.__discs = [self._album.one_disc]
             self.__discs_to_load = list(self.__discs)
             for disc in self.__discs:
                 self.__add_disc_container(disc.number)

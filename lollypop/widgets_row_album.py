@@ -124,12 +124,12 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
         self.__action_button = None
-        if self.__view_type & ViewType.DND:
+        if self.__view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "list-remove-symbolic",
                 Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
-                _("Remove from current playlist"))
+                _("Remove from playlist"))
         elif self._album.mtime == 0:
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "document-save-symbolic",
@@ -140,7 +140,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                     'avatar-default-symbolic',
                     Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(_("Go to artist view"))
-        elif not self.__view_type & ViewType.POPOVER:
+        else:
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "view-more-symbolic",
                 Gtk.IconSize.MENU)
@@ -202,11 +202,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             Reveal/Unreveal tracks
             @param reveal as bool or None to just change state
         """
-        context = self.get_style_context()
         if self.__revealer.get_reveal_child() and reveal is not True:
             self.__revealer.set_reveal_child(False)
-            context.remove_class("albumrow-reveal")
-            context.add_class("albumrow")
             if self.album.id == App().player.current_track.album.id:
                 self.set_state_flags(Gtk.StateFlags.VISITED, True)
         else:
@@ -216,8 +213,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                 self.__revealer.add(self._responsive_widget)
             self.__revealer.set_reveal_child(True)
             self.unset_state_flags(Gtk.StateFlags.VISITED)
-            context.add_class("albumrow-reveal")
-            context.remove_class("albumrow")
 
     def set_playing_indicator(self):
         """
