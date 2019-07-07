@@ -18,6 +18,7 @@ from lollypop.utils import get_human_duration
 from lollypop.view import LazyLoadingView
 from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
 from lollypop.define import MARGIN_SMALL
+from lollypop.objects import Album
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_playlist_banner import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
@@ -56,6 +57,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__buttons = builder.get_object("box-buttons")
         self.__widget = builder.get_object("widget")
         self.__view = AlbumsListView([], [], view_type)
+        self.__view.connect("remove-from-playlist",
+                            self.__on_remove_from_playlist)
         self.__view.show()
         self._viewport.add(self.__view)
         self.__title_label.set_margin_start(MARGIN)
@@ -293,8 +296,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         if len(self.__playlist_ids) == 1 and\
                 playlist_id in self.__playlist_ids:
-            track_id = App().tracks.get_id_by_uri(uri)
-            self.__playlists_widget.append(track_id)
+            # TODO
+            pass
 
     def __on_playlist_track_removed(self, playlists, playlist_id, uri, pos):
         """
@@ -306,8 +309,20 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         if len(self.__playlist_ids) == 1 and\
                 playlist_id in self.__playlist_ids:
-            track_id = App().tracks.get_id_by_uri(uri)
-            self.__playlists_widget.remove(track_id, pos)
+            # TODO
+            pass
+
+    def __on_remove_from_playlist(self, view, object):
+        """
+            Remove object from playlist
+            @param view as AlbumListView
+            @param object as Album/Track
+        """
+        if isinstance(object, Album):
+            tracks = object.tracks
+        else:
+            tracks = [object]
+        App().playlists.remove_tracks(self.__playlist_ids[0], tracks)
 
     def __on_playlist_populated(self, widget):
         """

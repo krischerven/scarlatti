@@ -34,6 +34,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         "insert-album-after": (GObject.SignalFlags.RUN_FIRST, None,
                                (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT)),
         "remove-album": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
+                                 (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "do-selection": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "track-activated": (GObject.SignalFlags.RUN_FIRST, None,
@@ -460,18 +462,22 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             if popover is not None:
                 popover.popdown()
             App().window.container.show_artist_view(self._album.artist_ids)
-        elif self.__view_type & ViewType.DND:
+        elif self.__view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
             if App().player.current_track.album.id == self._album.id:
-                # If not last album, skip it
-                if len(App().player.albums) > 1:
+                # Stop playback or loop for last album
+                # Else skip current
+                if len(App().player.albums) == 1:
+                    App().player.remove_album(self._album)
+                    App().player.next()
+                else:
                     App().player.skip_album()
                     App().player.remove_album(self._album)
-                # remove it and stop playback by going to next track
-                else:
-                    App().player.remove_album(self._album)
-                    App().player.stop()
             else:
                 App().player.remove_album(self._album)
+            # Remove album from playlists
+            # A playlists can't have duplicate so just remove tracks
+            if self.__view_type & ViewType.PLAYLISTS:
+                self.emit("remove-from-playlist", self._album)
             self.destroy()
         else:
             self.__popup_menu(button)

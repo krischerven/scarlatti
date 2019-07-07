@@ -29,7 +29,8 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
     """
 
     __gsignals__ = {
-        "populated": (GObject.SignalFlags.RUN_FIRST, None, ())
+        "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
+                                 (GObject.TYPE_PYOBJECT,))
     }
 
     def __init__(self, genre_ids, artist_ids, view_type):
@@ -324,6 +325,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         row.connect("remove-album", self.__on_remove_album)
         row.connect("do-selection", self.__on_do_selection)
         row.connect("track-activated", self.__on_track_activated)
+        row.connect("remove-from-playlist", self.__on_remove_from_playlist)
         return row
 
     def __auto_scroll(self, up):
@@ -520,3 +522,9 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             child.set_state_flags(Gtk.StateFlags.SELECTED, True)
         for child in children[end:]:
             child.set_state_flags(Gtk.StateFlags.NORMAL, True)
+
+    def __on_remove_from_playlist(self, row, object):
+        """
+            Pass signal to parent
+        """
+        self.emit("remove-from-playlist", object)
