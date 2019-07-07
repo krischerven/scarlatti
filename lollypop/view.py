@@ -247,6 +247,7 @@ class LazyLoadingView(View):
         """
             Load the view in a lazy way
         """
+        # He we keep id just to check we are in current load
         if self.__lazy_loading_id is None:
             self.__lazy_loading_id = GLib.idle_add(self.__lazy_loading)
 
@@ -284,7 +285,11 @@ class LazyLoadingView(View):
         if not widget.is_populated:
             widget.populate()
         else:
-            self.__lazy_loading()
+            # Looks like there is an issue with signal handling in old
+            # pygobject => https://gitlab.gnome.org/World/lollypop/issues/1884
+            # Make sense, I removed GLib.idle_add() for 1.1.4 because I
+            # couldn't understand it...
+            GLib.idle_add(self.__lazy_loading)
 
 #######################
 # PRIVATE             #
@@ -334,4 +339,3 @@ class LazyLoadingView(View):
         for child in self._lazy_queue:
             if self.__is_visible(child):
                 self.__priority_queue.append(child)
-        self.__lazy_loading()
