@@ -222,7 +222,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         """
         if self._artwork is None:
             return
-        selected = self.album.id == App().player.current_track.album.id
+        selected = self.album.id == App().player.current_track.album.id and\
+            App().player.current_track.id in self.album.track_ids
         if self.__revealer.get_reveal_child():
             TracksView.set_playing_indicator(self)
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
