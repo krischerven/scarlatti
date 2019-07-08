@@ -461,7 +461,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             popover = self.get_ancestor(Gtk.Popover)
             if popover is not None:
                 popover.popdown()
-            App().window.container.show_artist_view(self._album.artist_ids)
+            App().window.container.show_artists_albums(self._album.artist_ids)
         elif self.__view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
             if App().player.current_track.album.id == self._album.id:
                 # Stop playback or loop for last album
