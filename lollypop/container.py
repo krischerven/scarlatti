@@ -66,6 +66,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         ViewsContainer.__init__(self)
         self._view_type = view_type
         self._rounded_artists_view = None
+        self.__paned_position_id = None
         self._stack = ContainerStack()
         self._stack.show()
         self.__setup_view()
@@ -264,15 +265,22 @@ class Container(Gtk.Overlay, NotificationContainer,
             @param paned as Gtk.Paned
             @param param as GParamSpec
         """
-        position = paned.get_property(param.name)
-        # We do not want to save position while adaptive mode is set
-        # Not a good a fix but a working one
-        if position < 100:
-            return
-        if paned == self._paned_one:
-            setting = "paned-mainlist-width"
-        else:
-            setting = "paned-listview-width"
-        App().settings.set_value(setting,
-                                 GLib.Variant("i",
-                                              position))
+        def save_position():
+            self.__paned_position_id = None
+            position = paned.get_property(param.name)
+            # We do not want to save position while adaptive mode is set
+            if App().window is not None and App().window.is_adaptive:
+                return
+            if paned == self._paned_one:
+                setting = "paned-mainlist-width"
+            else:
+                setting = "paned-listview-width"
+            App().settings.set_value(setting,
+                                     GLib.Variant("i",
+                                                  position))
+        # We delay position saving
+        # Useful for adative mode where position get garbaged
+        if self.__paned_position_id is not None:
+            GLib.source_remove(self.__paned_position_id)
+        self.__paned_position_id = GLib.timeout_add(
+            1000, save_position)
