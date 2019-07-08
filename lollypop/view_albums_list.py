@@ -29,6 +29,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
     """
 
     __gsignals__ = {
+        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
                                  (GObject.TYPE_PYOBJECT,))
     }

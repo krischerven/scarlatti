@@ -50,6 +50,14 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
         self.__artwork.show()
         self.add(self.__artwork)
 
+    def set_view_type(self, view_type):
+        """
+            Update widget internals for view_type
+            @param view_type as ViewType
+        """
+        self.__view_type = view_type
+        self.set_height(self.height)
+
     def set_height(self, height):
         """
             Set height
@@ -109,7 +117,7 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
                     self.__track.album,
                     # +100 to prevent resize lag
                     allocation.width + 100,
-                    allocation.height,
+                    self.default_height,
                     self.__artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,

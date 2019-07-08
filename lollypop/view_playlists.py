@@ -37,7 +37,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
-        self.__view_type = view_type
         self.__playlist_ids = playlist_ids
         self.__signal_id1 = App().playlists.connect(
                                             "playlist-track-added",
@@ -97,16 +96,6 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self.__widget.set_vexpand(True)
             self.__title_label.set_vexpand(True)
             self.__duration_label.set_vexpand(True)
-            if App().window.is_adaptive:
-                self.__title_label.get_style_context().add_class(
-                    "text-x-large")
-                self.__duration_label.get_style_context().add_class(
-                    "text-large")
-            else:
-                self.__title_label.get_style_context().add_class(
-                    "text-xx-large")
-                self.__duration_label.get_style_context().add_class(
-                    "text-x-large")
             self.__title_label.set_property("valign", Gtk.Align.END)
             self.__duration_label.set_property("valign", Gtk.Align.START)
             self.__banner = PlaylistBannerWidget(playlist_ids[0], view_type)
@@ -122,6 +111,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         if len(playlist_ids) > 1:
             self.__menu_button.hide()
 
+        self.set_view_type(view_type)
+
         # In DB duration calculation
         if playlist_ids[0] > 0 and\
                 not App().playlists.get_smart(playlist_ids[0]):
@@ -132,6 +123,43 @@ class PlaylistsView(LazyLoadingView, ViewController):
         # Ask widget after populated
         else:
             self.__view.connect("populated", self.__on_playlist_populated)
+
+    def set_view_type(self, view_type):
+        """
+            Update view type
+            @param view_type as ViewType
+        """
+        def update_button(button, style, icon_size, icon_name):
+            context = button.get_style_context()
+            context.remove_class("menu-button-48")
+            context.remove_class("menu-button")
+            context.add_class(style)
+            button.get_image().set_from_icon_name(icon_name, icon_size)
+
+        self.__banner.set_view_type(view_type)
+        self._view_type = view_type
+        if view_type & ViewType.SMALL:
+            style = "menu-button"
+            icon_size = Gtk.IconSize.BUTTON
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+            self.__duration_label.get_style_context().add_class(
+                "text-large")
+        else:
+            style = "menu-button-48"
+            icon_size = Gtk.IconSize.LARGE_TOOLBAR
+            self.__title_label.get_style_context().add_class(
+                "text-xx-large")
+            self.__duration_label.get_style_context().add_class(
+                "text-x-large")
+        update_button(self.__play_button, style,
+                      icon_size, "media-playback-start-symbolic")
+        update_button(self.__shuffle_button, style,
+                      icon_size, "media-playlist-shuffle-symbolic")
+        update_button(self.__jump_button, style,
+                      icon_size, "go-jump-symbolic")
+        update_button(self.__menu_button, style,
+                      icon_size, "view-more-symbolic")
 
     def populate(self, albums):
         """
@@ -163,7 +191,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @param adj as Gtk.Adjustment
         """
         LazyLoadingView._on_value_changed(self, adj)
-        if not self.__view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
+        if not self._view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
             title_style_context = self.__title_label.get_style_context()
             if adj.get_value() == adj.get_lower():
                 height = self.__banner.default_height
@@ -263,6 +291,18 @@ class PlaylistsView(LazyLoadingView, ViewController):
                                  GLib.Variant("ai", self.__playlist_ids))
         App().settings.set_value("state-three-ids",
                                  GLib.Variant("ai", []))
+
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update banner style
+            @param window as Window
+            @param status as bool
+        """
+        if status:
+            view_type = self._view_type | ViewType.SMALL
+        else:
+            view_type = self._view_type & ~ViewType.SMALL
+        self.set_view_type(view_type)
 
 #######################
 # PRIVATE             #

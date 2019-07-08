@@ -241,6 +241,8 @@ class ViewsContainer:
             return get_albums_for_track_ids(track_ids)
 
         view_type = ViewType.DND | ViewType.PLAYLISTS | ViewType.SCROLLED
+        if App().window.is_adaptive:
+            view_type |= ViewType.SMALL
         if len(playlist_ids) == 1 and\
                 App().playlists.get_smart(playlist_ids[0]):
             from lollypop.view_playlists import PlaylistsView
