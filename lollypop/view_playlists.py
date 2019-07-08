@@ -223,8 +223,9 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @param button as Gtk.Button
         """
         tracks = []
-        for child in self.__playlists_widget.children:
-            tracks.append(child.track)
+        for album_row in self.__view.children:
+            for track_row in album_row.children:
+                tracks.append(track_row.track)
         if tracks:
             albums = tracks_to_albums(tracks)
             App().player.play_albums(albums, tracks[0])
@@ -235,8 +236,9 @@ class PlaylistsView(LazyLoadingView, ViewController):
             @param button as Gtk.Button
         """
         tracks = []
-        for child in self.__playlists_widget.children:
-            tracks.append(child.track)
+        for album_row in self.__view.children:
+            for track_row in album_row.children:
+                tracks.append(track_row.track)
         if tracks:
             shuffle(tracks)
             albums = tracks_to_albums(tracks)

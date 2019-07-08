@@ -29,9 +29,9 @@ class CurrentPopover(Popover):
         # No DND until https://gitlab.gnome.org/GNOME/gtk/issues/2006 is fixed
         wayland = GLib.environ_getenv(GLib.get_environ(), "WAYLAND_DISPLAY")
         if wayland:
-            view_type = ViewType.POPOVER
+            view_type = ViewType.POPOVER | ViewType.SCROLLED
         else:
-            view_type = ViewType.POPOVER | ViewType.DND
+            view_type = ViewType.POPOVER | ViewType.DND | ViewType.SCROLLED
         self.__view = App().window.container.get_view_current(view_type)
         self.__view.show()
         self.set_position(Gtk.PositionType.BOTTOM)
