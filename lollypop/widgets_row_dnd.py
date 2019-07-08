@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk, GLib
 
-from lollypop.define import ArtSize
+from lollypop.define import ArtSize, ViewType
 from lollypop.logger import Logger
 
 
@@ -203,6 +203,8 @@ class DNDRow:
         elif y > row_height / 2:
             row.get_style_context().add_class("drag-down")
             row.get_style_context().remove_class("drag-up")
+        if not self._view_type & ViewType.SCROLLED:
+            return
         scrolled = row.get_ancestor(Gtk.ScrolledWindow)
         (row_x, row_y) = row.translate_coordinates(scrolled, 0, 0)
         auto_scroll = False

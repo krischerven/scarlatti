@@ -114,7 +114,7 @@ class ViewsContainer:
         if switch:
             self._stack.set_visible_child(view)
 
-    def get_view_current(self, view_type=ViewType.DND):
+    def get_view_current(self, view_type=ViewType.DND | ViewType.SCROLLED):
         """
             Get view for current playlist
             @return View
