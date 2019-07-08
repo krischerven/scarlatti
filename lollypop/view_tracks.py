@@ -549,7 +549,8 @@ class TracksView(SizeAllocationHelper):
             row.track.album.insert_track(track, position)
             if new_row.previous_row is not None and\
                     new_row.previous_row.track.id ==\
-                    App().player.current_track.id:
+                    App().player.current_track.id and\
+                    not self._view_type & ViewType.PLAYLISTS:
                 App().player.set_next()
                 App().player.set_prev()
         # Else, we need to insert a new album with the track
@@ -599,8 +600,10 @@ class TracksView(SizeAllocationHelper):
         """
         empty = row.track.album.remove_track(row.track)
         if empty:
-            App().player.remove_album(row.track.album)
-        if row.track.id == App().player.current_track.id:
+            if not self._view_type & ViewType.PLAYLISTS:
+                App().player.remove_album(row.track.album)
+        if row.track.id == App().player.current_track.id and\
+                not self._view_type & ViewType.PLAYLISTS:
             App().player.set_next()
             App().player.set_prev()
         if row.previous_row is None:
@@ -614,7 +617,8 @@ class TracksView(SizeAllocationHelper):
                 row.next_row.set_previous_row(row.previous_row)
             if row.previous_row is not None:
                 row.previous_row.set_next_row(row.next_row)
-            if row.previous_row.track.id == App().player.current_track.id:
+            if row.previous_row.track.id == App().player.current_track.id and\
+                    not self._view_type & ViewType.PLAYLISTS:
                 App().player.set_next()
                 App().player.set_prev()
 

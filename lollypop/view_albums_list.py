@@ -449,10 +449,12 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             new_row.populate()
             new_row.show()
             self._box.insert(new_row, position)
-            App().player.add_album(album, position)
+            if not self._view_type & ViewType.PLAYLISTS:
+                App().player.add_album(album, position)
             if row.previous_row is not None and\
                     row.previous_row.album.id ==\
-                    App().player.current_track.album.id:
+                    App().player.current_track.album.id and\
+                    not self._view_type & ViewType.PLAYLISTS:
                 App().player.set_next()
                 App().player.set_prev()
         if self.__track_position_id is not None:
@@ -478,7 +480,8 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         new_row.populate()
         new_row.show()
         self._box.insert(new_row, position)
-        App().player.add_album(album, position)
+        if not self._view_type & ViewType.PLAYLISTS:
+            App().player.add_album(album, position)
         if self.__track_position_id is not None:
             GLib.source_remove(self.__track_position_id)
         self.__track_position_id = GLib.idle_add(
@@ -509,7 +512,8 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             new_row.next_row.set_previous_row(new_row)
         new_row.show()
         self._box.insert(new_row, position + 1)
-        App().player.add_album(album, position + 1)
+        if not self._view_type & ViewType.PLAYLISTS:
+            App().player.add_album(album, position + 1)
         if self.__track_position_id is not None:
             GLib.source_remove(self.__track_position_id)
         self.__track_position_id = GLib.idle_add(
@@ -520,7 +524,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             Remove album from player
             @param row as AlbumRow
         """
-        if self._view_type & ViewType.POPOVER:
+        if not self._view_type & ViewType.PLAYLISTS:
             App().player.remove_album(row.album)
 
     def __on_do_selection(self, row):
