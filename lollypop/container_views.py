@@ -190,17 +190,6 @@ class ViewsContainer:
                 items += App().albums.get_ids([], genre_ids)
         return items
 
-    def show_artist_view(self, artist_ids):
-        """
-            Go to artist view
-            @param artist_ids as [int]
-        """
-        if App().settings.get_value("show-sidebar") and\
-                not App().window.is_adaptive:
-            App().window.container.show_artists_albums(artist_ids)
-        else:
-            App().window.container.show_view(artist_ids)
-
 ##############
 # PROTECTED  #
 ##############
