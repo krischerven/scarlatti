@@ -324,6 +324,21 @@ def translate_artist_name(name):
     return name
 
 
+def tracks_to_albums(tracks):
+    """
+        Convert tracks list to albums list
+    """
+    albums = []
+    for track in tracks:
+        if albums and albums[-1].id == track.album.id:
+            albums[-1].insert_track(track)
+        else:
+            album = track.album
+            album.set_tracks([track])
+            albums.append(album)
+    return albums
+
+
 def get_position_list(items, position):
     """
         Return a list with item and position

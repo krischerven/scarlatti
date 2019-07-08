@@ -14,8 +14,8 @@ from lollypop.shown import ShownLists
 from lollypop.loader import Loader
 from lollypop.objects import Track, Album
 from lollypop.define import App, Type, ViewType, SelectionListMask
-from lollypop.define import MARGIN_SMALL
-from lollypop.define import SidebarContent
+from lollypop.define import MARGIN_SMALL, SidebarContent
+from lollypop.utils import tracks_to_albums
 
 
 class ViewsContainer:
@@ -199,35 +199,25 @@ class ViewsContainer:
             @param playlist_ids as [int]
             @return View
         """
-        def get_albums_for_track_ids(track_ids):
-            albums = []
-            for track_id in track_ids:
-                track = Track(track_id)
-                if albums and albums[-1].id == track.album.id:
-                    albums[-1].insert_track(track)
-                else:
-                    album = track.album
-                    album.set_tracks([track])
-                    albums.append(album)
-            return albums
-
         def load():
             track_ids = []
             for playlist_id in playlist_ids:
                 if playlist_id == Type.LOVED:
-                    _track_ids = App().tracks.get_loved_track_ids()
+                    for track_id in App().tracks.get_loved_track_ids():
+                        if track_id not in track_ids:
+                            track_ids.append(track_id)
                 else:
-                    _track_ids = App().playlists.get_track_ids(playlist_id)
-                for track_id in _track_ids:
-                    if track_id in track_ids:
-                        continue
-                    track_ids.append(track_id)
-            return get_albums_for_track_ids(track_ids)
+                    for track_id in App().playlists.get_track_ids(playlist_id):
+                        if track_id not in track_ids:
+                            track_ids.append(track_id)
+            return tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
 
         def load_smart():
             request = App().playlists.get_smart_sql(playlist_ids[0])
             track_ids = App().db.execute(request)
-            return get_albums_for_track_ids(track_ids)
+            return tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
 
         view_type = ViewType.DND | ViewType.PLAYLISTS | ViewType.SCROLLED
         if App().window.is_adaptive:

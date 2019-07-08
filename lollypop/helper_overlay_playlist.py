@@ -17,7 +17,7 @@ from random import choice
 
 from lollypop.define import App, Shuffle
 from lollypop.objects import Track, Album, Disc
-from lollypop.utils import on_realize
+from lollypop.utils import on_realize, tracks_to_albums
 from lollypop.helper_overlay import OverlayHelper
 
 
@@ -119,9 +119,8 @@ class OverlayPlaylistHelper(OverlayHelper):
                     track = choice(tracks)
                 else:
                     track = tracks[0]
-                App().player.populate_playlist_by_tracks(tracks,
-                                                         [self._data],
-                                                         track)
+                albums = tracks_to_albums(tracks)
+                App().player.play_albums(albums, track)
         else:
             if isinstance(self._obj, Disc):
                 tracks = self._obj.tracks
