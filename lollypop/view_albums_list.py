@@ -18,7 +18,7 @@ from lollypop.utils import get_icon_name
 from lollypop.view import LazyLoadingView
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.objects import Album, Track
-from lollypop.define import ArtSize, App, ViewType, MARGIN, Type
+from lollypop.define import ArtSize, App, ViewType, MARGIN, Type, Sizing
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 
@@ -59,6 +59,9 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         # We may need to listen to screen changes
         self.__height = AlbumRow.get_best_height(self)
         self._box = Gtk.ListBox()
+        if view_type & ViewType.PLAYLISTS:
+            self._box.set_margin_top(MARGIN)
+            self._box.set_margin_bottom(MARGIN)
         self._box.set_margin_end(MARGIN)
         self._box.get_style_context().add_class("trackswidget")
         self._box.set_vexpand(True)
@@ -202,8 +205,8 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            if App().window.is_adaptive:
-                margin = 0
+            if allocation.width < Sizing.BIG:
+                margin = MARGIN
             else:
                 margin = allocation.width / 4
             self._box.set_margin_start(margin)
