@@ -14,10 +14,9 @@ from gi.repository import Gtk, GLib
 
 from random import shuffle
 
-from lollypop.utils import get_human_duration
+from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
 from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
-from lollypop.define import MARGIN_SMALL
 from lollypop.objects import Album, Track
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_playlist_banner import PlaylistBannerWidget
@@ -62,48 +61,28 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__view.show()
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
-        if view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
-            self.__title_label.get_style_context().add_class("dim-label")
-            self.__duration_label.get_style_context().add_class("dim-label")
-            self.__widget.add(self.__title_label)
-            self.__jump_button = Gtk.Button.new_from_icon_name(
-                "go-jump-symbolic", Gtk.IconSize.BUTTON)
-            self.__jump_button.connect("clicked", self._on_jump_button_clicked)
-            self.__jump_button.set_relief(Gtk.ReliefStyle.NONE)
-            self.__jump_button.show()
-            self.__jump_button.set_margin_end(MARGIN_SMALL)
-            self.__widget.add(self.__duration_label)
-            self.__widget.add(self.__jump_button)
-            self.__widget.set_margin_bottom(MARGIN_SMALL)
-            self.add(self.__widget)
-            if view_type & ViewType.SCROLLED:
-                self._viewport.add(self.__view)
-                self.add(self._scrolled)
-            else:
-                self.add(self.__view)
+        self.__duration_label.set_margin_start(MARGIN)
+        self._overlay = Gtk.Overlay.new()
+        if view_type & ViewType.SCROLLED:
+            self._viewport.add(self.__view)
+            self._overlay.add(self._scrolled)
         else:
-            self.__duration_label.set_margin_start(MARGIN)
-            self._overlay = Gtk.Overlay.new()
-            if view_type & ViewType.SCROLLED:
-                self._viewport.add(self.__view)
-                self._overlay.add(self._scrolled)
-            else:
-                self._overlay.Add(self._view)
-            self._overlay.show()
-            self.__widget.attach(self.__title_label, 0, 0, 1, 1)
-            self.__widget.attach(self.__duration_label, 0, 1, 1, 1)
-            self.__widget.attach(self.__buttons, 1, 0, 1, 2)
-            self.__widget.set_vexpand(True)
-            self.__title_label.set_vexpand(True)
-            self.__duration_label.set_vexpand(True)
-            self.__title_label.set_property("valign", Gtk.Align.END)
-            self.__duration_label.set_property("valign", Gtk.Align.START)
-            self.__banner = PlaylistBannerWidget(playlist_ids[0], view_type)
-            self.__banner.show()
-            self._overlay.add_overlay(self.__banner)
-            self.__banner.add_overlay(self.__widget)
-            self.__view.set_margin_top(self.__banner.default_height)
-            self.add(self._overlay)
+            self._overlay.Add(self._view)
+        self._overlay.show()
+        self.__widget.attach(self.__title_label, 0, 0, 1, 1)
+        self.__widget.attach(self.__duration_label, 0, 1, 1, 1)
+        self.__widget.attach(self.__buttons, 1, 0, 1, 2)
+        self.__widget.set_vexpand(True)
+        self.__title_label.set_vexpand(True)
+        self.__duration_label.set_vexpand(True)
+        self.__title_label.set_property("valign", Gtk.Align.END)
+        self.__duration_label.set_property("valign", Gtk.Align.START)
+        self.__banner = PlaylistBannerWidget(playlist_ids[0], view_type)
+        self.__banner.show()
+        self._overlay.add_overlay(self.__banner)
+        self.__banner.add_overlay(self.__widget)
+        self.__view.set_margin_top(self.__banner.default_height)
+        self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
         builder.connect_signals(self)
@@ -249,9 +228,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
         for child in self.__playlists_widget.children:
             tracks.append(child.track)
         if tracks:
-            App().player.populate_playlist_by_tracks(tracks,
-                                                     self.__playlist_ids,
-                                                     tracks[0])
+            albums = tracks_to_albums(tracks)
+            App().player.play_albums(albums, tracks[0])
 
     def _on_shuffle_button_clicked(self, button):
         """
@@ -263,9 +241,8 @@ class PlaylistsView(LazyLoadingView, ViewController):
             tracks.append(child.track)
         if tracks:
             shuffle(tracks)
-            App().player.populate_playlist_by_tracks(tracks,
-                                                     self.__playlist_ids,
-                                                     tracks[0])
+            albums = tracks_to_albums(tracks)
+            App().player.play_albums(albums, tracks[0])
 
     def _on_menu_button_clicked(self, button):
         """
