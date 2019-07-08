@@ -264,7 +264,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             @param eventbox as Gtk.EventBox
             @param event as Gdk.EventButton
         """
-        App().window.container.show_artist_view(self._album.artist_ids)
+        App().window.container.show_artists_albums(self._album.artist_ids)
         return True
 
     def __on_destroy(self, widget):
