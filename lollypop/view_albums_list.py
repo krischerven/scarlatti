@@ -171,13 +171,16 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             ctx.remove_class("drag-up")
             ctx.remove_class("drag-down")
 
-    def jump_to_current(self):
+    def jump_to_current(self, scrolled=None):
         """
             Scroll to album
+            @param scrolled as Gtk.Scrolled/None
         """
+        if scrolled is None:
+            scrolled = self._scrolled
         y = self.__get_current_ordinate()
         if y is not None:
-            self._scrolled.get_vadjustment().set_value(y)
+            scrolled.get_vadjustment().set_value(y)
 
     def clear(self, clear_albums=False):
         """

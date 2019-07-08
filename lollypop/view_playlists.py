@@ -215,9 +215,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
             Scroll to current track
             @param button as Gtk.Button
         """
-        y = self.__playlists_widget.get_current_ordinate()
-        if y is not None:
-            self._scrolled.get_vadjustment().set_value(y)
+        self.__view.jump_to_current(self._scrolled)
 
     def _on_play_button_clicked(self, button):
         """
