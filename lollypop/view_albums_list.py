@@ -470,22 +470,48 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             @param track_ids as [int]
             @param down as bool
         """
+        # Merge albums if same id
         position = self._box.get_children().index(row)
-        if down:
-            position += 1
-        album = Album(new_album_id)
-        album.set_tracks([Track(track_id) for track_id in track_ids])
-        new_row = self.__row_for_album(album,
+        # Check previous row and invert merge
+        if not down and position > 0:
+            previous_row = self._box.get_children()[position - 1]
+            if previous_row.album.id == new_album_id:
+                row = previous_row
+                down = not down
+        if row.album.id == new_album_id:
+            tracks = []
+            for track_id in track_ids:
+                track = Track(track_id)
+                if down:
+                    position = -1
+                else:
+                    position = 0
+                row.album.insert_track(track, position)
+                tracks.insert(position, track)
+            if down:
+                row.append_rows(tracks)
+            else:
+                row.prepend_rows(tracks)
+            if App().player.current_track.album.id == row.album.id:
+                App().player.set_next()
+        # Add a new row
+        else:
+            if down:
+                position += 1
+            album = Album(new_album_id)
+            album.set_tracks([Track(track_id) for track_id in track_ids])
+            new_row = self.__row_for_album(
+                                       album,
                                        self._view_type & ViewType.PLAYLISTS)
-        new_row.populate()
-        new_row.show()
-        self._box.insert(new_row, position)
-        if not self._view_type & ViewType.PLAYLISTS:
-            App().player.add_album(album, position)
-        if self.__track_position_id is not None:
-            GLib.source_remove(self.__track_position_id)
-        self.__track_position_id = GLib.idle_add(
-            self.__update_albums_positions)
+            new_row.populate()
+            new_row.show()
+            self._box.insert(new_row, position)
+            if not self._view_type & ViewType.PLAYLISTS:
+                App().player.add_album(album, position)
+            if self.__track_position_id is not None:
+                GLib.source_remove(self.__track_position_id)
+            self.__track_position_id = GLib.idle_add(
+                self.__update_albums_positions)
 
     def __on_insert_album_after(self, view, after_album, album):
         """
