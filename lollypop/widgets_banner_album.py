@@ -33,7 +33,6 @@ class AlbumBannerWidget(BannerWidget):
             @param view_type as ViewType
         """
         BannerWidget.__init__(self, view_type)
-        self._view_type = view_type
         self.__cloud_image = None
         self.__album = album
         self.set_property("valign", Gtk.Align.START)
@@ -106,9 +105,9 @@ class AlbumBannerWidget(BannerWidget):
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
         if view_type & ViewType.ALBUM:
-            self.add(self.__widget)
-        else:
             self.add_overlay(self.__widget)
+        else:
+            self.add(self.__widget)
 
     def set_view_type(self, view_type):
         """
