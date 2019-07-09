@@ -12,6 +12,8 @@
 
 from gi.repository import Gdk
 
+from random import shuffle
+
 from lollypop.objects import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
 from lollypop.widgets_banner import BannerWidget
@@ -79,6 +81,7 @@ class ArtistBannerWidget(BannerWidget):
                 else:
                     self.__album_ids = App().albums.get_ids(
                         [self.__artist_id], [])
+                shuffle(self.__album_ids)
             if self.__album_ids:
                 self.__album_id = self.__album_ids.pop(0)
         # Get artwork
