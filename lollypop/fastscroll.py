@@ -140,9 +140,9 @@ class FastScroll(Gtk.ScrolledWindow):
                 else:
                     name = row.name
                 if values[1] >= start and start_value is None:
-                    start_value = noaccents(name[0]).upper()
+                    start_value = name[0]
                 elif values[1] <= end:
-                    end_value = noaccents(name[0]).upper()
+                    end_value = name[0]
                 else:
                     break
         if start_value is not None and end_value is not None:
@@ -154,6 +154,8 @@ class FastScroll(Gtk.ScrolledWindow):
             @param start as char
             @param end as char
         """
+        start = noaccents(index_of(start)).upper()
+        end = noaccents(index_of(end)).upper()
         chars = sorted(self.__chars, key=strxfrm)
         start_idx = chars.index(start)
         end_idx = chars.index(end)
