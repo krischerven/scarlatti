@@ -51,6 +51,8 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         self.__set_artwork()
         if view_type & ViewType.SCROLLED:
             self._scrolled.get_vscrollbar().set_margin_top(self._banner.height)
+        if len(self._artist_ids) > 1:
+            self._banner.collapse(True)
 
     def jump_to_current(self):
         """
@@ -228,6 +230,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
                                         self.__on_artist_artwork)
         else:
             self._title_label.set_margin_start(MARGIN)
+            self._banner.collapse(True)
             self._album_box.set_margin_top(self._banner.height)
 
     def __update_jump_button(self):

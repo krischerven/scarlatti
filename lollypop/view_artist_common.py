@@ -13,6 +13,7 @@
 from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
+from random import choice
 
 from lollypop.define import App, MARGIN
 from lollypop.utils import on_query_tooltip, on_realize
@@ -43,7 +44,7 @@ class ArtistViewCommon:
         self._add_button = builder.get_object("add-button")
         self._play_button = builder.get_object("play-button")
         self._buttons = builder.get_object("buttons")
-        self._banner = ArtistBannerWidget(self._artist_ids[0])
+        self._banner = ArtistBannerWidget(choice(self._artist_ids))
         self._banner.init_background()
         self._banner.add_overlay(self._buttons)
         self._banner.show()
