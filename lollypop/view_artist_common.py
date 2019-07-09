@@ -44,6 +44,7 @@ class ArtistViewCommon:
         self._play_button = builder.get_object("play-button")
         self._buttons = builder.get_object("buttons")
         self._banner = ArtistBannerWidget(self._artist_ids[0])
+        self._banner.init_background()
         self._banner.add_overlay(self._buttons)
         self._banner.show()
         builder.get_object("box-button").set_margin_end(MARGIN)

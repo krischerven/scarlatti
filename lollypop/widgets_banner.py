@@ -28,10 +28,15 @@ class BannerWidget(Gtk.Overlay, SizeAllocationHelper):
             @param view_type as ViewType
         """
         Gtk.Overlay.__init__(self)
-        SizeAllocationHelper.__init__(self)
         self._view_type = view_type
         self._collapsed = False
         self.set_property("valign", Gtk.Align.START)
+
+    def init_background(self):
+        """
+            Init banner background
+        """
+        SizeAllocationHelper.__init__(self)
         self.get_style_context().add_class("black")
         self._artwork = Gtk.Image()
         self._artwork.get_style_context().add_class("black")

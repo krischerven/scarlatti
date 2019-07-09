@@ -71,6 +71,7 @@ class AlbumBannerWidget(BannerWidget):
         self.__duration_label.set_text(get_human_duration(duration))
         self.__widget = builder.get_object("widget")
         if view_type & ViewType.ALBUM:
+            self.init_background()
             self.__menu_button.get_style_context().add_class(
                 "black-transparent")
             self.get_style_context().add_class("black")
@@ -99,12 +100,15 @@ class AlbumBannerWidget(BannerWidget):
         self.__loved_widget.set_property("valign", Gtk.Align.CENTER)
         self.__loved_widget.show()
         self.__rating_grid.attach(self.__loved_widget, 3, 0, 1, 1)
-        self.add_overlay(self.__widget)
         self.__cover_widget.set_margin_start(MARGIN)
         self.__year_label.set_margin_end(MARGIN)
         self.__duration_label.set_margin_start(MARGIN)
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
+        if view_type & ViewType.ALBUM:
+            self.add(self.__widget)
+        else:
+            self.add_overlay(self.__widget)
 
     def set_view_type(self, view_type):
         """
