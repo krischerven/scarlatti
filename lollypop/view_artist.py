@@ -77,9 +77,11 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         title_style_context = self._title_label.get_style_context()
         if adj.get_value() == adj.get_lower() and self.__show_artwork:
             self._artwork.show()
+            self._banner.collapse(False)
             title_style_context.remove_class("text-x-large")
             title_style_context.add_class("text-xx-large")
         else:
+            self._banner.collapse(True)
             self._artwork.hide()
             title_style_context.remove_class("text-xx-large")
             title_style_context.add_class("text-x-large")
