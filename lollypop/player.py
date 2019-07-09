@@ -201,9 +201,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         self._albums = []
         album_ids = []
         self.reset_history()
-        # We are not playing a user playlist anymore
-        self._playlist_tracks = []
-        self._playlist_ids = []
         # We are in all artists
         if (filter1_ids and filter1_ids[0] == Type.ALL) or\
            (filter2_ids and filter2_ids[0] == Type.ALL):
@@ -392,16 +389,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                             if track.id == self._current_playback_track.id:
                                 self._load_track(track)
                                 break
-                    else:
-                        tracks = []
-                        track = Track()
-                        for playlist_id in playlist_ids:
-                            tracks += App().playlists.get_tracks(playlist_id)
-                            for track in tracks:
-                                if track.id == self._current_playback_track.id:
-                                    break
-                        self.populate_playlist_by_tracks(
-                            tracks, playlist_ids, track)
                     if is_playing:
                         self.play()
                     else:
