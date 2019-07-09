@@ -15,7 +15,7 @@ from gi.repository import Gtk, GObject
 from lollypop.widgets_album import AlbumWidget
 from lollypop.view_tracks import TracksView
 from lollypop.define import App, Sizing, ArtSize, ViewType
-from lollypop.widgets_album_banner import AlbumBannerWidget
+from lollypop.widgets_banner_album import AlbumBannerWidget
 
 
 class AlbumDetailedWidget(Gtk.Grid, AlbumWidget, TracksView):

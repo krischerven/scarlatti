@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, MARGIN
 from lollypop.utils import on_query_tooltip, on_realize
 from lollypop.objects import Album
-from lollypop.widgets_artist_banner import ArtistBannerWidget
+from lollypop.widgets_banner_artist import ArtistBannerWidget
 from lollypop.logger import Logger
 
 

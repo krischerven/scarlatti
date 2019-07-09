@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ViewType, Type, MARGIN
 from lollypop.objects import Album
 from lollypop.view_tracks import TracksView
-from lollypop.widgets_album_banner import AlbumBannerWidget
+from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view import LazyLoadingView
 
