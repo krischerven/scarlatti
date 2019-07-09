@@ -423,7 +423,7 @@ class ToolbarEnd(Gtk.Bin):
             Update playback button status
             @param player as Player
         """
-        if player.albums or player.playlist_ids or player.queue:
+        if player.albums:
             self.__list_button.set_sensitive(True)
         else:
             self.__list_button.set_sensitive(False)

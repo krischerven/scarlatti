@@ -386,10 +386,8 @@ class Application(Gtk.Application, ApplicationActions):
         # Save current playlist
         if self.player.current_track.id == Type.RADIOS:
             playlist_ids = [Type.RADIOS]
-        elif not self.player.playlist_ids:
-            playlist_ids = []
         else:
-            playlist_ids = self.player.playlist_ids
+            playlist_ids = []
         dump(playlist_ids,
              open(LOLLYPOP_DATA_PATH + "/playlist_ids.bin", "wb"))
         if self.player.current_track.id is not None:
