@@ -214,6 +214,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         if self.__show_artwork:
             self._artwork.set_margin_start(MARGIN)
             artist = App().artists.get_name(self._artist_ids[0])
+            self._album_box.set_margin_top(self._banner.height + MARGIN)
             App().art_helper.set_artist_artwork(
                                         artist,
                                         ArtSize.BANNER,
@@ -225,6 +226,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
                                         self.__on_artist_artwork)
         else:
             self._title_label.set_margin_start(MARGIN)
+            self._album_box.set_margin_top(self._banner.height)
 
     def __update_jump_button(self):
         """
