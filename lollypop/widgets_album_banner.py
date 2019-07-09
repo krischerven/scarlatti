@@ -17,11 +17,11 @@ from lollypop.define import ArtBehaviour
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip, on_realize
 
 
-class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
+class AlbumBannerWidget(BannerWidget):
     """
         Banner for album
     """
@@ -32,9 +32,8 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             @param album
             @param view_type as ViewType
         """
-        Gtk.Bin.__init__(self)
-        self.__view_type = view_type
-        self.__height = None
+        BannerWidget.__init__(self, view_type)
+        self._view_type = view_type
         self.__cloud_image = None
         self.__album = album
         self.set_property("valign", Gtk.Align.START)
@@ -70,22 +69,19 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
         duration = App().albums.get_duration(self.__album.id,
                                              self.__album.genre_ids)
         self.__duration_label.set_text(get_human_duration(duration))
-        self.__artwork = builder.get_object("artwork")
-        self.__grid = builder.get_object("grid")
         self.__widget = builder.get_object("widget")
         if view_type & ViewType.ALBUM:
-            SizeAllocationHelper.__init__(self)
             self.__menu_button.get_style_context().add_class(
                 "black-transparent")
             self.get_style_context().add_class("black")
-            self.__artwork.get_style_context().add_class("black")
+            self._artwork.get_style_context().add_class("black")
             self.connect("destroy", self.__on_destroy)
             self.__art_signal_id = App().art.connect(
                                                "album-artwork-changed",
                                                self.__on_album_artwork_changed)
         else:
-            self.__grid.get_style_context().add_class("banner-frame")
-        self.__grid.attach(self.__cover_widget, 0, 0, 1, 3)
+            self.__widget.get_style_context().add_class("banner-frame")
+        self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
         if album.mtime <= 0:
             self.__cloud_image = Gtk.Image.new()
@@ -103,7 +99,7 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
         self.__loved_widget.set_property("valign", Gtk.Align.CENTER)
         self.__loved_widget.show()
         self.__rating_grid.attach(self.__loved_widget, 3, 0, 1, 1)
-        self.add(self.__widget)
+        self.add_overlay(self.__widget)
         self.__cover_widget.set_margin_start(MARGIN)
         self.__year_label.set_margin_end(MARGIN)
         self.__duration_label.set_margin_start(MARGIN)
@@ -115,7 +111,7 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             Update widget internals for view_type
             @param view_type as ViewType
         """
-        self.__view_type = view_type
+        BannerWidget.set_view_type(self, view_type)
         art_size = 0
         if view_type & ViewType.SMALL:
             art_size = ArtSize.LARGE
@@ -154,45 +150,25 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
         self.__menu_button.get_image().set_from_icon_name(
                                                    "view-more-symbolic",
                                                    icon_size)
-        self.set_height(self.height)
+        self.__set_text_height(self._collapsed)
 
-    def set_height(self, height):
+    def collapse(self, collapsed):
         """
-            Set height
-            @param height as int
+            Collapse banner
+            @param collapse as bool
         """
-        if height < self.default_height:
-            self.__height = height
-            # Make grid cover artwork
-            # No idea why...
-            self.__grid.set_size_request(-1, height + 1)
+        BannerWidget.collapse(self, collapsed)
+        self.__set_text_height(collapsed)
+        if collapsed:
             self.__cover_widget.hide()
             self.__duration_label.hide()
             self.__rating_grid.hide()
             self.__year_label.set_vexpand(True)
-            self.__set_text_height(True)
         else:
-            self.__height = None
-            # Make grid cover artwork
-            # No idea why...
-            self.__grid.set_size_request(-1, height + 1)
             self.__cover_widget.show()
             self.__duration_label.show()
             self.__rating_grid.show()
             self.__year_label.set_vexpand(False)
-            self.__set_text_height(False)
-
-    def do_get_preferred_width(self):
-        """
-            Force preferred width
-        """
-        return (0, 0)
-
-    def do_get_preferred_height(self):
-        """
-            Force preferred height
-        """
-        return (self.height, self.height)
 
     def set_selected(self, selected):
         """
@@ -200,30 +176,9 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             @param selected as bool
         """
         if selected:
-            self.__grid.set_state_flags(Gtk.StateFlags.SELECTED, True)
+            self.__widget.set_state_flags(Gtk.StateFlags.SELECTED, True)
         else:
-            self.__grid.set_state_flags(Gtk.StateFlags.NORMAL, True)
-
-    @property
-    def height(self):
-        """
-            Get height
-            @return int
-        """
-        return self.__height if self.__height is not None\
-            else self.default_height
-
-    @property
-    def default_height(self):
-        """
-            Get default height
-        """
-        if self.__view_type & ViewType.SMALL:
-            return ArtSize.LARGE + 40
-        elif self.__view_type & ViewType.MEDIUM:
-            return ArtSize.BANNER + 40
-        else:
-            return ArtSize.BANNER + 40
+            self.__widget.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
 #######################
 # PROTECTED           #
@@ -233,13 +188,13 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if BannerWidget._handle_size_allocate(self, allocation):
             App().art_helper.set_album_artwork(
                     self.__album,
                     # +100 to prevent resize lag
                     allocation.width + 100,
-                    self.default_height,
-                    self.__artwork.get_scale_factor(),
+                    ArtSize.BANNER + MARGIN * 2,
+                    self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
                     self.__on_album_artwork)
@@ -250,7 +205,7 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             @param button as Gtk.Button
         """
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self.__album, self.__view_type)
+        menu = AlbumMenu(self.__album, self._view_type)
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
 
@@ -268,16 +223,10 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             title_context.remove_class(c)
         for c in year_context.list_classes():
             title_context.remove_class(c)
-        if self.__view_type & ViewType.SMALL:
-            if not collapsed:
-                self.__title_label.get_style_context().add_class("text-large")
-        # Collapsed not implemented for MEDIUM
-        elif self.__view_type & ViewType.MEDIUM:
+        if collapsed:
             self.__title_label.get_style_context().add_class(
-                "text-x-large")
-            self.__year_label.get_style_context().add_class(
                 "text-large")
-        elif collapsed:
+        elif self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
             self.__year_label.get_style_context().add_class(
@@ -308,7 +257,7 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
                             # +100 to prevent resize lag
                             self.get_allocated_width() + 100,
                             self.default_height,
-                            self.__artwork.get_scale_factor(),
+                            self._artwork.get_scale_factor(),
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
                             self.__on_album_artwork)
@@ -319,7 +268,7 @@ class AlbumBannerWidget(Gtk.Bin, SizeAllocationHelper):
             @param surface as str
         """
         if surface is not None:
-            self.__artwork.set_from_surface(surface)
+            self._artwork.set_from_surface(surface)
 
     def __on_year_button_release_event(self, widget, event):
         """

@@ -76,20 +76,15 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         ArtistAlbumsView._on_value_changed(self, adj)
         title_style_context = self._title_label.get_style_context()
         if adj.get_value() == adj.get_lower() and self.__show_artwork:
-            height = self._banner.default_height
             self._artwork.show()
             title_style_context.remove_class("text-x-large")
             title_style_context.add_class("text-xx-large")
         else:
-            height = self._banner.default_height // 3
             self._artwork.hide()
             title_style_context.remove_class("text-xx-large")
             title_style_context.add_class("text-x-large")
-        # Make grid cover artwork
-        # No idea why...
-        self._banner.set_height(height)
-        self._scrolled.get_vscrollbar().set_margin_top(height)
-        self._buttons.set_size_request(-1, height + 1)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(self._banner.height)
 
     def _on_label_realize(self, eventbox):
         """
@@ -204,6 +199,10 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
                 self._genre_ids, self._artist_ids, True)
             # Destroy after any animation
             GLib.idle_add(self.destroy, priority=GLib.PRIORITY_LOW)
+        if self.__show_artwork:
+            self._album_box.set_margin_top(self._banner.height + MARGIN)
+        else:
+            self._album_box.set_margin_top(self._banner.height)
 
 #######################
 # PRIVATE             #
@@ -224,18 +223,8 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
                                         ArtBehaviour.CROP_SQUARE |
                                         ArtBehaviour.CACHE,
                                         self.__on_artist_artwork)
-            height = self._banner.default_height
         else:
             self._title_label.set_margin_start(MARGIN)
-            height = self._banner.default_height // 3
-        self._banner.set_height(height)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(height)
-        if self.__show_artwork:
-            self._album_box.set_margin_top(self._banner.default_height + 15)
-        else:
-            self._album_box.set_margin_top(self._banner.default_height // 3 +
-                                           15)
 
     def __update_jump_button(self):
         """

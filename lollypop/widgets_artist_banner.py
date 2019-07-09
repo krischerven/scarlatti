@@ -10,78 +10,32 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gdk
 
 from lollypop.objects import Album
-from lollypop.define import App, ArtSize, ArtBehaviour
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
+from lollypop.widgets_banner import BannerWidget
 
 
-class ArtistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
+class ArtistBannerWidget(BannerWidget):
     """
         Banner for artist
     """
 
-    def __init__(self, artist_id):
+    def __init__(self, artist_id, view_type=ViewType.DEFAULT):
         """
             Init artist banner
             @param artist_id as int
+            @param view_type as ViewType (Unused)
         """
-        Gtk.Overlay.__init__(self)
-        SizeAllocationHelper.__init__(self)
+        BannerWidget.__init__(self, view_type)
         self.__album_ids = None
         self.__album_id = None
-        self.__height = self.default_height
         self.__artist_id = artist_id
-        self.set_property("valign", Gtk.Align.START)
-        self.__artwork = Gtk.Image()
-        self.__artwork.get_style_context().add_class("black")
-        self.get_style_context().add_class("black")
-        self.__artwork.show()
-        self.add(self.__artwork)
         self.connect("destroy", self.__on_destroy)
         self.__art_signal_id = App().art.connect(
                                            "artist-artwork-changed",
                                            self.__on_artist_artwork_changed)
-
-    def set_height(self, height):
-        """
-            Set height
-            @param height as int
-        """
-        self.__height = height
-
-    def do_get_preferred_width(self):
-        """
-            Force preferred width
-        """
-        (min, nat) = Gtk.Bin.do_get_preferred_width(self)
-        # Allow resizing
-        return (0, 0)
-
-    def do_get_preferred_height(self):
-        """
-            Force preferred height
-        """
-        return (self.__height, self.__height)
-
-    @property
-    def height(self):
-        """
-            Get height
-            @return int
-        """
-        return self.__height
-
-    @property
-    def default_height(self):
-        """
-            Get default height
-        """
-        if App().window.is_adaptive:
-            return ArtSize.LARGE + 40
-        else:
-            return ArtSize.BANNER + 40
 
 #######################
 # PROTECTED           #
@@ -91,20 +45,21 @@ class ArtistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if BannerWidget._handle_size_allocate(self, allocation):
             if App().settings.get_value("artist-artwork"):
                 artist = App().artists.get_name(self.__artist_id)
                 App().art_helper.set_artist_artwork(
                                             artist,
                                             # +100 to prevent resize lag
                                             allocation.width + 100,
-                                            allocation.height,
+                                            ArtSize.BANNER + MARGIN * 2,
                                             self.get_scale_factor(),
                                             ArtBehaviour.BLUR_HARD |
                                             ArtBehaviour.DARKER,
                                             self.__on_artist_artwork)
             else:
-                self.__use_album_artwork(allocation.width, allocation.height)
+                self.__use_album_artwork(allocation.width,
+                                         ArtSize.BANNER + MARGIN * 2)
 
 #######################
 # PRIVATE             #
@@ -134,7 +89,7 @@ class ArtistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
                 # +100 to prevent resize lag
                 width + 100,
                 height,
-                self.__artwork.get_scale_factor(),
+                self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR_HARD |
                 ArtBehaviour.DARKER,
                 self.__on_album_artwork)
@@ -171,7 +126,7 @@ class ArtistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
             self.__use_album_artwork(self.get_allocated_width(),
                                      self.get_allocated_height())
         else:
-            self.__artwork.set_from_surface(surface)
+            self._artwork.set_from_surface(surface)
 
     def __on_artist_artwork(self, surface):
         """
@@ -182,4 +137,4 @@ class ArtistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
             self.__use_album_artwork(self.get_allocated_width(),
                                      self.get_allocated_height())
         else:
-            self.__artwork.set_from_surface(surface)
+            self._artwork.set_from_surface(surface)

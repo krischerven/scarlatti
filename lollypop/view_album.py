@@ -81,11 +81,15 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
         """
         LazyLoadingView._on_value_changed(self, adj)
         if adj.get_value() == adj.get_lower():
-            height = self.__banner.default_height
+            self.__banner.collapse(False)
+            self._responsive_widget.set_margin_top(
+                self.__banner.height + MARGIN)
         else:
-            height = self.__banner.default_height // 3
-        self.__banner.set_height(height)
-        self._scrolled.get_vscrollbar().set_margin_top(height)
+            self._responsive_widget.set_margin_top(self.__banner.height)
+            self.__banner.collapse(True)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                self.__banner.height)
 
     def _on_current_changed(self, player):
         """
@@ -121,7 +125,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
         """
         LazyLoadingView._on_map(self, widget)
         self._responsive_widget.set_margin_top(
-            self.__banner.default_height + 15)
+            self.__banner.height + 15)
         App().window.emit("show-can-go-back", True)
         App().window.emit("can-go-back-changed", True)
         App().settings.set_value("state-one-ids",
@@ -186,3 +190,8 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
         else:
             view_type = self._view_type & ~ViewType.SMALL
         self.__banner.set_view_type(view_type)
+        if status:
+            self._responsive_widget.set_margin_top(self.__banner.height)
+        else:
+            self._responsive_widget.set_margin_top(
+                self.__banner.height + MARGIN)

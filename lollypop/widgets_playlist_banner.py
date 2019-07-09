@@ -10,16 +10,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
 
 from random import choice
 
 from lollypop.objects import Track
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
+from lollypop.widgets_banner import BannerWidget
 
 
-class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
+class PlaylistBannerWidget(BannerWidget):
     """
         Banner for playlist
     """
@@ -30,9 +29,7 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
             @param playlist_id as int
             @param view_type as ViewType
         """
-        Gtk.Overlay.__init__(self)
-        SizeAllocationHelper.__init__(self)
-        self.__view_type = view_type
+        BannerWidget.__init__(self, view_type)
         self.__track = None
         self.__track_ids = []
         if App().playlists.get_smart(playlist_id):
@@ -41,63 +38,7 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
                 self.__track_ids = App().db.execute(request)
         else:
             self.__track_ids = App().playlists.get_track_ids(playlist_id)
-        self.__height = self.default_height
         self.__playlist_id = playlist_id
-        self.set_property("valign", Gtk.Align.START)
-        self.get_style_context().add_class("black")
-        self.__artwork = Gtk.Image()
-        self.__artwork.get_style_context().add_class("black")
-        self.__artwork.show()
-        self.add(self.__artwork)
-
-    def set_view_type(self, view_type):
-        """
-            Update widget internals for view_type
-            @param view_type as ViewType
-        """
-        self.__view_type = view_type
-        self.set_height(self.height)
-
-    def set_height(self, height):
-        """
-            Set height
-            @param height as int
-        """
-        self.__height = height
-
-    def do_get_preferred_width(self):
-        """
-            Force preferred width
-        """
-        (min, nat) = Gtk.Bin.do_get_preferred_width(self)
-        # Allow resizing
-        return (0, 0)
-
-    def do_get_preferred_height(self):
-        """
-            Force preferred height
-        """
-        return (self.__height, self.__height)
-
-    @property
-    def height(self):
-        """
-            Get height
-            @return int
-        """
-        return self.__height
-
-    @property
-    def default_height(self):
-        """
-            Get default height
-        """
-        if self.__view_type & ViewType.SMALL:
-            return ArtSize.LARGE + 40
-        elif self.__view_type & ViewType.MEDIUM:
-            return ArtSize.BANNER + 40
-        else:
-            return ArtSize.BANNER + 40
 
 #######################
 # PROTECTED           #
@@ -107,7 +48,7 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if BannerWidget._handle_size_allocate(self, allocation):
             if self.__track_ids and self.__track is None:
                 track_id = choice(self.__track_ids)
                 self.__track_ids.remove(track_id)
@@ -117,8 +58,8 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
                     self.__track.album,
                     # +100 to prevent resize lag
                     allocation.width + 100,
-                    self.default_height,
-                    self.__artwork.get_scale_factor(),
+                    ArtSize.BANNER + MARGIN * 2,
+                    self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
                     self.__on_album_artwork)
@@ -132,4 +73,4 @@ class PlaylistBannerWidget(Gtk.Overlay, SizeAllocationHelper):
             @param surface as str
         """
         if surface is not None:
-            self.__artwork.set_from_surface(surface)
+            self._artwork.set_from_surface(surface)

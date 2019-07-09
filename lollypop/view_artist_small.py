@@ -45,9 +45,8 @@ class ArtistViewSmall(View, ArtistViewCommon):
                                          ViewType.MEDIUM |
                                          ViewType.SCROLLED |
                                          ViewType.NOT_ADAPTIVE)
-        height = self._banner.default_height // 3
-        self._banner.set_height(height)
-        self.__album_box.set_margin_top(height)
+        self._banner.collapse(True)
+        self.__album_box.set_margin_top(self._banner.height)
         self.__album_box.populate([Album(id) for id in album_ids])
         self.__album_box.show()
         self.__overlay.add_overlay(self.__album_box)

@@ -81,7 +81,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
         self.__banner.add_overlay(self.__widget)
-        self.__view.set_margin_top(self.__banner.default_height)
+        self.__view.set_margin_top(self.__banner.height)
         self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
@@ -116,6 +116,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
             button.get_image().set_from_icon_name(icon_name, icon_size)
 
         self.__banner.set_view_type(view_type)
+        self.__view.set_margin_top(self.__banner.height)
         self._view_type = view_type
         if view_type & ViewType.SMALL:
             style = "menu-button"
@@ -173,22 +174,18 @@ class PlaylistsView(LazyLoadingView, ViewController):
         if not self._view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
             title_style_context = self.__title_label.get_style_context()
             if adj.get_value() == adj.get_lower():
-                height = self.__banner.default_height
+                self.__banner.collapse(False)
                 self.__duration_label.show()
                 self.__title_label.set_property("valign", Gtk.Align.END)
                 if not App().window.is_adaptive:
                     title_style_context.remove_class("text-x-large")
                     title_style_context.add_class("text-xx-large")
             else:
+                self.__banner.collapse(True)
                 self.__duration_label.hide()
                 title_style_context.remove_class("text-xx-large")
                 title_style_context.add_class("text-x-large")
                 self.__title_label.set_property("valign", Gtk.Align.CENTER)
-                height = self.__banner.default_height // 3
-            # Make grid cover artwork
-            # No idea why...
-            self.__banner.set_height(height)
-            self.__widget.set_size_request(-1, height + 1)
 
     def _on_current_changed(self, player):
         """
