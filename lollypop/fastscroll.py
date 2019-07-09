@@ -75,9 +75,10 @@ class FastScroll(Gtk.ScrolledWindow):
             Add a char to widget, will not be shown
             @param c as char
         """
-        to_add = noaccents(index_of(c)).upper()
-        if to_add not in self.__chars:
-            self.__chars.append(to_add)
+        if c:
+            to_add = noaccents(index_of(c)).upper()
+            if to_add not in self.__chars:
+                self.__chars.append(to_add)
 
     def populate(self):
         """
@@ -134,10 +135,14 @@ class FastScroll(Gtk.ScrolledWindow):
                 continue
             values = row.translate_coordinates(self.__listbox, 0, 0)
             if values is not None:
+                if row.sortname:
+                    name = row.sortname
+                else:
+                    name = row.name
                 if values[1] >= start and start_value is None:
-                    start_value = noaccents(row.sortname[0]).upper()
+                    start_value = noaccents(name[0]).upper()
                 elif values[1] <= end:
-                    end_value = noaccents(row.sortname[0]).upper()
+                    end_value = noaccents(name[0]).upper()
                 else:
                     break
         if start_value is not None and end_value is not None:
