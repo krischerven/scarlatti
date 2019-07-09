@@ -58,8 +58,7 @@ class ShufflePlayer(BasePlayer):
         if self._shuffle == Shuffle.TRACKS or self.__is_party:
             if self.shuffle_has_next:
                 track = self.__history.next.value
-            elif self._albums or (self._playlist_tracks and
-                                  self._shuffle == Shuffle.TRACKS):
+            elif self._albums:
                 track = self.__get_next()
         return track
 
@@ -205,7 +204,7 @@ class ShufflePlayer(BasePlayer):
 
         if self._plugins1.rgvolume is not None and\
            self._plugins2.rgvolume is not None:
-            if self._shuffle == Shuffle.TRACKS or self._playlist_tracks:
+            if self._shuffle == Shuffle.TRACKS:
                 self._plugins1.rgvolume.props.album_mode = 0
                 self._plugins2.rgvolume.props.album_mode = 0
             else:
@@ -223,35 +222,18 @@ class ShufflePlayer(BasePlayer):
             if self._shuffle == Shuffle.TRACKS or self.__is_party:
                 if self._albums:
                     track = self.__get_tracks_random()
-                else:
-                    track = self.__get_playlists_random()
-                # All track dones
-                # Try to get another one track after reseting history
-                if track.id is None:
-                    self.__already_played_albums = []
-                    self.__already_played_tracks = {}
-                    self.__history = []
-                    repeat = App().settings.get_enum("repeat")
-                    if repeat == Repeat.ALL:
-                        return self.__get_next()
-                return track
+                    # All track dones
+                    # Try to get another one track after reseting history
+                    if track.id is None:
+                        self.__already_played_albums = []
+                        self.__already_played_tracks = {}
+                        self.__history = []
+                        repeat = App().settings.get_enum("repeat")
+                        if repeat == Repeat.ALL:
+                            return self.__get_next()
+                    return track
         except Exception as e:  # Recursion error
             Logger.error("ShufflePLayer::__get_next(): %s", e)
-        return Track()
-
-    def __get_playlists_random(self):
-        """
-            Return a track from current playlist
-            @return Track
-        """
-        for track in sorted(
-                self._playlist_tracks, key=lambda *args: random.random()):
-            # Ignore current track, not an issue if playing one track
-            # in shuffle because LinearPlayer will handle next()
-            if track != App().player.current_track and (
-                   track.album not in self.__already_played_tracks.keys() or
-                   track not in self.__already_played_tracks[track.album]):
-                return track
         return Track()
 
     def __get_tracks_random(self):
