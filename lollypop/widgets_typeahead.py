@@ -42,7 +42,7 @@ class TypeAheadWidget(Gtk.Revealer):
         self.__list_one_toggle = builder.get_object("list_one_toggle")
         self.__list_two_toggle = builder.get_object("list_two_toggle")
         self.__view_toggle = builder.get_object("view_toggle")
-        self.__view_toggle.set_active(True)
+        self.__list_one_toggle.set_active(True)
         self.add(widget)
 
     def update_buttons(self):
@@ -63,6 +63,7 @@ class TypeAheadWidget(Gtk.Revealer):
                                    not App().window.is_adaptive)
         if App().window.container.list_one is None:
             self.__list_one_toggle.hide()
+            self.__view_toggle.set_active(True)
         else:
             self.__list_one_toggle.show()
         if App().window.container.list_two is not None:

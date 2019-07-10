@@ -87,16 +87,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _scroll_to_row(self, row):
-        """
-            Scroll to row
-            @param row as SelectionListRow
-        """
-        if self._view_type & ViewType.SCROLLED:
-            coordinates = row.translate_coordinates(self._box, 0, 0)
-            if coordinates:
-                self._scrolled.get_vadjustment().set_value(coordinates[1])
-
     def _get_label_height(self):
         """
             Get wanted label height

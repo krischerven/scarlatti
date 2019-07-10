@@ -83,6 +83,14 @@ class AlbumDetailedWidget(Gtk.Grid, AlbumWidget, TracksView):
         self.__banner.set_selected(selected)
 
     @property
+    def name(self):
+        """
+            Get album name
+            @return str
+        """
+        return self._album.name
+
+    @property
     def requested_height(self):
         """
             Requested height: Internal tracks

@@ -106,6 +106,11 @@ Gtk.ListBoxRow .menu-button:hover {
     color: white;
 }
 
+.typeahead *{
+    background-color: #ed333b;
+    color: white;
+}
+
 .progress-bottom {
     border: none;
     border-radius: 0px;

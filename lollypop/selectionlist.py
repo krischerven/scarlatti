@@ -451,7 +451,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _scroll_to_row(self, row):
+    def _scroll_to_child(self, row):
         """
             Scroll to row
             @param row as SelectionListRow
@@ -481,7 +481,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             self.lazy_loading()
             # Scroll to first selected item
             for row in self._box.get_selected_rows():
-                GLib.idle_add(self._scroll_to_row, row)
+                GLib.idle_add(self._scroll_to_child, row)
                 break
 
     def __add_value(self, rowid, name, sortname):

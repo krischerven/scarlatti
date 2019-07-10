@@ -12,10 +12,12 @@
 
 from gi.repository import Gtk, GLib
 
+from lollypop.define import ViewType
+
 
 class FilteringHelper(Gtk.Revealer):
     """
-        Helper for filtered Gtk.FlowBox/Gtk.ListBox
+        Helper for filtering widgets Boxes
     """
 
     def __init__(self):
@@ -26,64 +28,81 @@ class FilteringHelper(Gtk.Revealer):
 
     def search_for_child(self, text):
         """
-            Search row and scroll
+            Search child and scroll
             @param text as str
         """
-        for row in self._box.get_children():
-            style_context = row.get_style_context()
+        for child in self.children:
+            style_context = child.get_style_context()
             style_context.remove_class("typeahead")
         if not text:
             return
-        for row in self._box.get_children():
-            if row.name.lower().find(text) != -1:
-                style_context = row.get_style_context()
+        for child in self.children:
+            if child.name.lower().find(text) != -1:
+                style_context = child.get_style_context()
                 style_context.add_class("typeahead")
-                GLib.idle_add(self._scroll_to_row, row)
+                GLib.idle_add(self._scroll_to_child, child)
                 break
 
     def search_prev(self, text):
         """
-            Search previous row and scroll
+            Search previous child and scroll
             @param text as str
         """
-        previous_rows = []
-        found_row = None
-        for row in self._box.get_children():
-            style_context = row.get_style_context()
+        previous_children = []
+        found_child = None
+        for child in self.children:
+            style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
-                found_row = row
+                found_child = child
                 break
-            previous_rows.insert(0, row)
-        if previous_rows and found_row is not None:
-            for row in previous_rows:
-                if row.name.lower().find(text) != -1:
-                    found_row.get_style_context().remove_class("typeahead")
-                    row.get_style_context().add_class("typeahead")
-                    GLib.idle_add(self._scroll_to_row, row)
+            previous_children.insert(0, child)
+        if previous_children and found_child is not None:
+            for child in previous_children:
+                if child.name.lower().find(text) != -1:
+                    found_child.get_style_context().remove_class("typeahead")
+                    child.get_style_context().add_class("typeahead")
+                    GLib.idle_add(self._scroll_to_child, child)
                     break
 
     def search_next(self, text):
         """
-            Search previous row and scroll
+            Search previous child and scroll
             @param text as str
         """
         found = False
         previous_style_context = None
-        for row in self._box.get_children():
-            style_context = row.get_style_context()
+        for child in self.children:
+            style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
                 previous_style_context = style_context
                 found = True
                 continue
-            if found and row.name.lower().find(text) != -1:
+            if found and child.name.lower().find(text) != -1:
                 previous_style_context.remove_class("typeahead")
                 style_context.add_class("typeahead")
-                GLib.idle_add(self._scroll_to_row, row)
+                GLib.idle_add(self._scroll_to_child, child)
                 break
+
+    @property
+    def children(self):
+        """
+            Get children
+            @return [Gtk.Widget]
+        """
+        return self._box.get_children()
 
 #######################
 # PROTECTED           #
 #######################
+    def _scroll_to_child(self, child):
+        """
+            Scroll to child
+            @param child as Gtk.Widget
+        """
+        if self._view_type & ViewType.SCROLLED:
+            coordinates = child.translate_coordinates(self._box, 0, 0)
+            if coordinates:
+                self._scrolled.get_vadjustment().set_value(coordinates[1])
 
 #######################
 # PRIVATE             #

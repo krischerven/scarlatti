@@ -16,9 +16,10 @@ from lollypop.view import LazyLoadingView
 from lollypop.define import ViewType
 from lollypop.widgets_album_detailed import AlbumDetailedWidget
 from lollypop.controller_view import ViewController, ViewControllerType
+from lollypop.helper_filtering import FilteringHelper
 
 
-class ArtistAlbumsView(LazyLoadingView, ViewController):
+class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
     """
         Show artist albums and tracks
     """
@@ -32,20 +33,21 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
         """
         LazyLoadingView.__init__(self, view_type | ViewType.FILTERED)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        FilteringHelper.__init__(self)
         self._artist_ids = artist_ids
         self._genre_ids = genre_ids
-        self._album_box = Gtk.Grid()
-        self._album_box.set_row_spacing(50)
-        self._album_box.set_orientation(Gtk.Orientation.VERTICAL)
-        self._album_box.set_property("valign", Gtk.Align.START)
-        self._album_box.show()
+        self._box = Gtk.Grid()
+        self._box.set_row_spacing(50)
+        self._box.set_orientation(Gtk.Orientation.VERTICAL)
+        self._box.set_property("valign", Gtk.Align.START)
+        self._box.show()
         self._overlay = Gtk.Overlay.new()
         self._overlay.show()
         if self._view_type & ViewType.SCROLLED:
             self._overlay.add(self._scrolled)
-            self._viewport.add(self._album_box)
+            self._viewport.add(self._box)
         else:
-            self._overlay.add(self._album_box)
+            self._overlay.add(self._box)
         self.add(self._overlay)
 
     def populate(self, albums):
@@ -70,7 +72,7 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
             @return AlbumDetailedwidget
         """
         children = []
-        for child in self._album_box.get_children():
+        for child in reversed(self._box.get_children()):
             if isinstance(child, AlbumDetailedWidget):
                 children.append(child)
         return children
@@ -126,7 +128,7 @@ class ArtistAlbumsView(LazyLoadingView, ViewController):
             widget.set_opacity(0)
             widget.show()
             self._lazy_queue.append(widget)
-            self._album_box.add(widget)
+            self._box.add(widget)
             GLib.idle_add(self.__add_albums, albums)
         else:
             self.lazy_loading()

@@ -102,7 +102,7 @@ class ArtistViewCommon:
             self.__pop_info.populate(self._artist_ids[0])
             self.__pop_info.show()
 
-    def _on_play_clicked(self, widget):
+    def _on_play_clicked(self, *ignore):
         """
             Play artist albums
         """
@@ -117,7 +117,7 @@ class ArtistViewCommon:
         except Exception as e:
             Logger.error("ArtistView::_on_play_clicked: %s" % e)
 
-    def _on_add_clicked(self, widget):
+    def _on_add_clicked(self, *ignore):
         """
             Add artist albums
         """

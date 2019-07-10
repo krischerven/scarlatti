@@ -46,25 +46,41 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             self._title_label.get_style_context().add_class("text-xx-large")
         else:
             self._title_label.get_style_context().add_class("text-x-large")
-        self._album_box.set_margin_start(MARGIN)
-        self._album_box.set_margin_end(MARGIN)
+        self._box.set_margin_start(MARGIN)
+        self._box.set_margin_end(MARGIN)
         self.__set_artwork()
         if view_type & ViewType.SCROLLED:
             self._scrolled.get_vscrollbar().set_margin_top(self._banner.height)
         if len(self._artist_ids) > 1:
             self._banner.collapse(True)
 
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        try:
+            if App().player.is_party:
+                App().lookup_action("party").change_state(
+                    GLib.Variant("b", False))
+            for child in self._box.get_children():
+                style_context = child.get_style_context()
+                if style_context.has_class("typeahead"):
+                    App().player.play_album(child.album)
+                style_context.remove_class("typeahead")
+        except Exception as e:
+            Logger.error("ArtistView::activate_child: %s" % e)
+
     def jump_to_current(self):
         """
             Jump to current album
         """
         widget = None
-        for child in self._album_box.get_children():
+        for child in self._box.get_children():
             if child.album.id == App().player.current_track.album.id:
                 widget = child
                 break
         if widget is not None:
-            y = widget.get_current_ordinate(self._album_box)
+            y = widget.get_current_ordinate(self._box)
             self._scrolled.get_vadjustment().set_value(y)
 
 #######################
@@ -204,9 +220,9 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             # Destroy after any animation
             GLib.idle_add(self.destroy, priority=GLib.PRIORITY_LOW)
         if self.__show_artwork:
-            self._album_box.set_margin_top(self._banner.height + MARGIN)
+            self._box.set_margin_top(self._banner.height + MARGIN)
         else:
-            self._album_box.set_margin_top(self._banner.height)
+            self._box.set_margin_top(self._banner.height)
 
 #######################
 # PRIVATE             #
@@ -218,7 +234,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         if self.__show_artwork:
             self._artwork.set_margin_start(MARGIN)
             artist = App().artists.get_name(self._artist_ids[0])
-            self._album_box.set_margin_top(self._banner.height + MARGIN)
+            self._box.set_margin_top(self._banner.height + MARGIN)
             App().art_helper.set_artist_artwork(
                                         artist,
                                         ArtSize.BANNER,
@@ -231,7 +247,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         else:
             self._title_label.set_margin_start(MARGIN)
             self._banner.collapse(True)
-            self._album_box.set_margin_top(self._banner.height)
+            self._box.set_margin_top(self._banner.height)
 
     def __update_jump_button(self):
         """
