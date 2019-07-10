@@ -13,11 +13,12 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.view import LazyLoadingView
+from lollypop.helper_filtering import FilteringHelper
 from lollypop.define import ViewType
 from lollypop.utils import get_font_height
 
 
-class FlowBoxView(LazyLoadingView):
+class FlowBoxView(LazyLoadingView, FilteringHelper):
     """
         Lazy loading FlowBox
     """
@@ -28,6 +29,7 @@ class FlowBoxView(LazyLoadingView):
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, view_type | ViewType.FILTERED)
+        FilteringHelper.__init__(self)
         self.__adaptive_signal_id = None
         self._widget_class = None
         self.__font_height = get_font_height()
@@ -54,23 +56,6 @@ class FlowBoxView(LazyLoadingView):
             GLib.idle_add(self._add_items, items)
         else:
             LazyLoadingView.populate(self)
-
-    def search_for_child(self, text):
-        """
-            Search row and scroll down
-            @param text as str
-        """
-        for row in self._box.get_children():
-            style_context = row.get_style_context()
-            style_context.remove_class("typeahead")
-        if not text:
-            return
-        for row in self._box.get_children():
-            if row.name.lower().find(text) != -1:
-                style_context = row.get_style_context()
-                style_context.add_class("typeahead")
-                GLib.idle_add(self.__scroll_to_row, row)
-                break
 
     def activate_child(self):
         """
@@ -102,6 +87,16 @@ class FlowBoxView(LazyLoadingView):
 #######################
 # PROTECTED           #
 #######################
+    def _scroll_to_row(self, row):
+        """
+            Scroll to row
+            @param row as SelectionListRow
+        """
+        if self._view_type & ViewType.SCROLLED:
+            coordinates = row.translate_coordinates(self._box, 0, 0)
+            if coordinates:
+                self._scrolled.get_vadjustment().set_value(coordinates[1])
+
     def _get_label_height(self):
         """
             Get wanted label height
@@ -173,12 +168,3 @@ class FlowBoxView(LazyLoadingView):
 #######################
 # PRIVATE             #
 #######################
-    def __scroll_to_row(self, row):
-        """
-            Scroll to row
-            @param row as SelectionListRow
-        """
-        if self._view_type & ViewType.SCROLLED:
-            coordinates = row.translate_coordinates(self._box, 0, 0)
-            if coordinates:
-                self._scrolled.get_vadjustment().set_value(coordinates[1])

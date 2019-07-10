@@ -114,8 +114,10 @@ class TypeAheadWidget(Gtk.Revealer):
             @param entry as Gtk.Entry
             @param Event as Gdk.EventKey
         """
-        if event.state & Gdk.ModifierType.SHIFT_MASK and\
-                event.state & Gdk.ModifierType.CONTROL_MASK:
+        if (event.state & Gdk.ModifierType.SHIFT_MASK and
+                event.state & Gdk.ModifierType.CONTROL_MASK) or\
+                event.keyval == Gdk.KEY_Up or\
+                event.keyval == Gdk.KEY_Down:
             return True
 
     def _on_entry_key_release_event(self, entry, event):
@@ -128,10 +130,12 @@ class TypeAheadWidget(Gtk.Revealer):
                           Gdk.ModifierType.CONTROL_MASK):
             if event.keyval == Gdk.KEY_Right:
                 self.__activate_next_button()
-                return True
             elif event.keyval == Gdk.KEY_Left:
                 self.__activate_prev_button()
-                return True
+        elif event.keyval == Gdk.KEY_Up:
+            self.__search_prev()
+        elif event.keyval == Gdk.KEY_Down:
+            self.__search_next()
 
     def _on_button_toggled(self, button):
         """
@@ -148,6 +152,22 @@ class TypeAheadWidget(Gtk.Revealer):
 #######################
 # PRIVATE             #
 #######################
+    def __search_prev(self):
+        """
+            Search previous item
+        """
+        widget = self.__get_widget()
+        if widget is not None:
+            widget.search_prev(self.__entry.get_text().lower())
+
+    def __search_next(self):
+        """
+            Search next item
+        """
+        widget = self.__get_widget()
+        if widget is not None:
+            widget.search_next(self.__entry.get_text().lower())
+
     def __show_toggle_buttons(self, show):
         """
             Show toggle buttons

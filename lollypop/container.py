@@ -45,6 +45,16 @@ class ContainerStack(AdaptiveStack):
         if view is not None and hasattr(view, "activate_child"):
             view.activate_child()
 
+    def search_prev(self, text):
+        view = self.get_visible_child()
+        if view is not None and hasattr(view, "search_prev"):
+            view.search_prev(text)
+
+    def search_next(self, text):
+        view = self.get_visible_child()
+        if view is not None and hasattr(view, "search_next"):
+            view.search_next(text)
+
 
 class Container(Gtk.Overlay, NotificationContainer,
                 ScannerContainer, PlaylistsContainer,
