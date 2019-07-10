@@ -15,7 +15,7 @@ from gi.repository import Gio
 from gettext import gettext as _
 
 from lollypop.define import App
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 
 
 class PlaybackMenu(Gio.Menu):

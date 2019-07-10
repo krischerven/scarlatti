@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from gettext import gettext as _
 
 from lollypop.define import App
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.utils import on_realize
 from lollypop.helper_overlay import OverlayHelper
 

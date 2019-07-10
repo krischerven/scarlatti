@@ -30,7 +30,7 @@ from pickle import load, dump
 import re
 
 from lollypop.define import App, LOLLYPOP_DATA_PATH
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.utils import get_network_available
 from lollypop.logger import Logger
 from lollypop.goa import GoaSyncedAccount

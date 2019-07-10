@@ -14,7 +14,7 @@ from gi.repository import Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, Type, ArtBehaviour, ViewType
 from lollypop.utils import on_query_tooltip
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.helper_overlay_radio import OverlayRadioHelper
 
 

@@ -21,7 +21,7 @@ from lollypop.define import GstPlayFlags, App
 from lollypop.codecs import Codecs
 from lollypop.define import Type
 from lollypop.logger import Logger
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 
 
 class BinPlayer(BasePlayer):

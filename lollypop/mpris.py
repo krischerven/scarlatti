@@ -20,7 +20,7 @@ from random import randint
 
 from lollypop.logger import Logger
 from lollypop.define import App, ArtSize, Type, Shuffle, Repeat
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 
 
 class Server:

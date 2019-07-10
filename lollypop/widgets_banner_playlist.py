@@ -13,7 +13,7 @@
 
 from random import choice
 
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
 from lollypop.widgets_banner import BannerWidget
 

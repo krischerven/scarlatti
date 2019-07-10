@@ -12,7 +12,7 @@
 
 from lollypop.define import Repeat, App
 from lollypop.player_base import BasePlayer
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.logger import Logger
 
 

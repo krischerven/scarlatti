@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.widgets_row_queue import QueueRow
 

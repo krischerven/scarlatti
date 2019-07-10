@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gio
 
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.widgets_rating import RatingWidget
 from lollypop.define import App
 from lollypop.widgets_utils import Popover

@@ -21,7 +21,7 @@ import json
 
 from lollypop.database import Database
 from lollypop.define import App, Type
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.logger import Logger
 from lollypop.sqlcursor import SqlCursor
 from lollypop.localized import LocalizedCollation

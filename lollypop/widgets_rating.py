@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 from time import time
 
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.define import App, Type
 from lollypop.logger import Logger
 

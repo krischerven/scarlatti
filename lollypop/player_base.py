@@ -13,7 +13,7 @@
 from gi.repository import GObject
 
 from lollypop.define import App
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 
 
 class BasePlayer(GObject.GObject):

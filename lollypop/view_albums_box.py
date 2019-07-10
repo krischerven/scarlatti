@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height

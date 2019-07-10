@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 
 
 class QueuePlayer:

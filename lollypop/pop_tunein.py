@@ -19,7 +19,7 @@ from lollypop.logger import Logger
 from lollypop.define import App, ArtSize
 from lollypop.utils import get_network_available
 from lollypop.list import LinkedList
-from lollypop.objects import Track
+from lollypop.objects_track import Track
 from lollypop.helper_task import TaskHelper
 
 
