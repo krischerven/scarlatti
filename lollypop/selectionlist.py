@@ -25,7 +25,7 @@ from lollypop.utils import get_icon_name, on_query_tooltip
 from lollypop.shown import ShownLists, ShownPlaylists
 
 
-class SelectionListRow(Gtk.ListBoxRow, FilteringHelper):
+class SelectionListRow(Gtk.ListBoxRow):
     """
         A selection list row
     """
@@ -55,7 +55,6 @@ class SelectionListRow(Gtk.ListBoxRow, FilteringHelper):
             @param height as str
         """
         Gtk.ListBoxRow.__init__(self)
-        FilteringHelper.__init__(self)
         self.__rowid = rowid
         self.__name = name
         self.__sortname = sortname
@@ -200,7 +199,7 @@ class SelectionListRow(Gtk.ListBoxRow, FilteringHelper):
         self.emit("populated")
 
 
-class SelectionList(LazyLoadingView):
+class SelectionList(LazyLoadingView, FilteringHelper):
     """
         A list for artists/genres
     """
@@ -216,6 +215,7 @@ class SelectionList(LazyLoadingView):
         """
         LazyLoadingView.__init__(self, ViewType.NOT_ADAPTIVE |
                                  ViewType.SCROLLED)
+        FilteringHelper.__init__(self)
         self.__base_type = base_type
         self.__sort = False
         self.__mask = 0
