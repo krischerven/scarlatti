@@ -144,11 +144,12 @@ class OverlayHelper:
         self._lock_overlay = False
         GLib.idle_add(self.show_overlay, False)
 
-    def _on_loading_changed(self, player, status):
+    def _on_loading_changed(self, player, status, track_id):
         """
             Show a spinner while loading
             @param player as Player
             @param status as bool
+            @param track_id as int
         """
         if status and not self._show_overlay:
             return

@@ -263,7 +263,7 @@ class BinPlayer(BasePlayer):
             # Will not work if we add another music provider one day
             track_uri = App().tracks.get_uri(track.id)
             if track.is_web and track.uri == track_uri:
-                self.emit("loading-changed", True)
+                self.emit("loading-changed", True, track.id)
                 App().task_helper.run(self._load_from_web, track)
                 return False
             else:
@@ -316,7 +316,7 @@ class BinPlayer(BasePlayer):
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        self.emit("loading-changed", False)
+        self.emit("loading-changed", False, self._current_track.id)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)
@@ -370,7 +370,7 @@ class BinPlayer(BasePlayer):
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        self.emit("loading-changed", False)
+        self.emit("loading-changed", False, 0)
         Logger.info("Player::_on_bus_error(): %s" % message.parse_error()[1])
         if self.current_track.id is not None and self.current_track.id >= 0:
             if self.__codecs.is_missing_codec(message):

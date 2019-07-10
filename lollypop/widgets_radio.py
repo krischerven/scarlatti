@@ -181,6 +181,16 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _on_loading_changed(self, player, status, track_id):
+        """
+            Show a spinner while loading
+            @param player as Player
+            @param status as bool
+            @param track_id as int
+        """
+        if track_id != self._radio_id:
+            return
+        OverlayRadioHelper._on_loading_changed(self, player, status, track_id)
 
 #######################
 # PRIVATE             #

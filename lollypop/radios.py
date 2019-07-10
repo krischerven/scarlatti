@@ -145,7 +145,7 @@ class Radios(GObject.GObject):
 
     def get_uri(self, radio_id):
         """
-            Return uri for radio_id
+            Get URI for id
             @param radio_id as int
             @return uri as str
         """

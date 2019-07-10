@@ -21,10 +21,6 @@ from lollypop.logger import Logger
 class RadioPlayer(BasePlayer):
     """
         Radio player
-        This class neeed the parent object to be a BinPlayer
-        We keep a version of available radios (set_radios()) because we
-        need to be in sync with current/last view and not with db (popularity
-        changes)
     """
 
     def __init__(self):
@@ -42,7 +38,8 @@ class RadioPlayer(BasePlayer):
         """
         if Gio.NetworkMonitor.get_default().get_network_available():
             try:
-                self.emit("loading-changed", True)
+                radio_id = Radios().get_id(track.name)
+                self.emit("loading-changed", True, radio_id)
                 self.__current = track
                 if track.uri.find("youtu.be") != -1 or\
                         track.uri.find("youtube.com") != -1:
