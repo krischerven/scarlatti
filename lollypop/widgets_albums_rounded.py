@@ -16,7 +16,7 @@ import cairo
 from random import shuffle
 
 from lollypop.define import App, Type
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.utils import get_round_surface
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 

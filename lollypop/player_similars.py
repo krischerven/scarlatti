@@ -14,7 +14,7 @@ from gi.repository import Gio
 
 from random import shuffle
 
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.define import App, Repeat
 from lollypop.utils import get_network_available

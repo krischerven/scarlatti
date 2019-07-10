@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.loader import Loader
 from lollypop.logger import Logger
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask, SidebarContent
 

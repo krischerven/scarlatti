@@ -14,7 +14,8 @@ import random
 
 from lollypop.define import Shuffle, Repeat, App, Type
 from lollypop.player_base import BasePlayer
-from lollypop.objects import Track, Album
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 from lollypop.list import LinkedList
 from lollypop.logger import Logger
 

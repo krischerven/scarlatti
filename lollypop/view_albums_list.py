@@ -17,7 +17,8 @@ from gettext import gettext as _
 from lollypop.utils import get_icon_name
 from lollypop.view import LazyLoadingView
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.objects import Album, Track
+from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.define import ArtSize, App, ViewType, MARGIN, Type, Sizing
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow

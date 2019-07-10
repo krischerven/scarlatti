@@ -18,7 +18,8 @@ from collections import OrderedDict
 from lollypop.define import Sizing
 from lollypop.widgets_tracks import TracksWidget
 from lollypop.widgets_row_track import TrackRow
-from lollypop.objects import Album, Track
+from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.utils import get_position_list, on_realize

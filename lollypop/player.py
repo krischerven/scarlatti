@@ -22,7 +22,8 @@ from lollypop.player_radio import RadioPlayer
 from lollypop.player_similars import SimilarsPlayer
 from lollypop.radios import Radios
 from lollypop.logger import Logger
-from lollypop.objects import Track, Album
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 from lollypop.define import App, Type, LOLLYPOP_DATA_PATH, Shuffle
 
 

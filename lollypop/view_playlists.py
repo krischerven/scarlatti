@@ -17,7 +17,8 @@ from random import shuffle
 from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
 from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
-from lollypop.objects import Album, Track
+from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView

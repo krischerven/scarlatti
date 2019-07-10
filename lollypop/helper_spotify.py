@@ -17,7 +17,8 @@ from base64 import b64encode
 from time import time, sleep
 
 from lollypop.logger import Logger
-from lollypop.objects import Album, Track
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App
 

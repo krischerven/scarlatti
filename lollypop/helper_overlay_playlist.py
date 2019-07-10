@@ -16,7 +16,8 @@ from gettext import gettext as _
 from random import choice
 
 from lollypop.define import App, Shuffle
-from lollypop.objects import Track, Album, Disc
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album, Disc
 from lollypop.utils import on_realize, tracks_to_albums
 from lollypop.helper_overlay import OverlayHelper
 

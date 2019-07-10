@@ -19,7 +19,7 @@ from lollypop.define import App, GOOGLE_API_ID, Type, AUDIODB_CLIENT_ID
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET
 from lollypop.utils import get_network_available, noaccents
 from lollypop.logger import Logger
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.downloader import Downloader
 from lollypop.helper_task import TaskHelper
 

@@ -20,7 +20,8 @@ import json
 from lollypop.logger import Logger
 from lollypop.utils import escape
 from lollypop.define import App, Type
-from lollypop.objects import Track, Album
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 
 
 class MtpSyncDb:

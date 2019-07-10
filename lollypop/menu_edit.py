@@ -15,7 +15,8 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.define import App
-from lollypop.objects import Track, Album
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 from lollypop.logger import Logger
 
 

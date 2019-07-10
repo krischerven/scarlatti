@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 
 
 from lollypop.define import App, ViewType
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.view import View
 from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.view_artist_common import ArtistViewCommon

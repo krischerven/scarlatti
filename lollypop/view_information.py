@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Gio, Gdk
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import escape
 from lollypop.helper_art import ArtBehaviour

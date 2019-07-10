@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.define import App, SelectionListMask, ArtBehaviour, Type
 from lollypop.utils import get_icon_name
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 
 

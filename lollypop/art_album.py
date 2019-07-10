@@ -16,7 +16,7 @@ from random import choice
 
 from lollypop.tagreader import TagReader
 from lollypop.define import App, ArtSize, ArtBehaviour
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import escape, is_readonly
 from lollypop.helper_task import TaskHelper

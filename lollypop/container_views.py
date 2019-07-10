@@ -12,7 +12,8 @@
 
 from lollypop.shown import ShownLists
 from lollypop.loader import Loader
-from lollypop.objects import Track, Album
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 from lollypop.define import App, Type, ViewType, SelectionListMask
 from lollypop.define import MARGIN_SMALL, SidebarContent
 from lollypop.utils import tracks_to_albums

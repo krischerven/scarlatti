@@ -49,7 +49,8 @@ from lollypop.database_genres import GenresDatabase
 from lollypop.database_tracks import TracksDatabase
 from lollypop.notification import NotificationManager
 from lollypop.playlists import Playlists
-from lollypop.objects import Album, Track
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
 from lollypop.collectionscanner import CollectionScanner

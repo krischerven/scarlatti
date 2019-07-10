@@ -14,7 +14,7 @@ from gi.repository import Gdk
 
 from random import shuffle
 
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
 from lollypop.widgets_banner import BannerWidget
 

@@ -11,7 +11,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import App
-from lollypop.objects import Album, Track
+from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 
 
 class Search:

@@ -13,7 +13,7 @@
 from gi.repository import GLib
 
 from lollypop.define import Type, App, ArtBehaviour
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 
 
 class InformationController:

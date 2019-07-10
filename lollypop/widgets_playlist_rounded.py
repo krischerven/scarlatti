@@ -15,7 +15,8 @@ from gi.repository import Gtk
 from random import sample
 
 from lollypop.define import App, Type, SelectionListMask
-from lollypop.objects import Track, Album, Disc
+from lollypop.objects_track import Track
+from lollypop.objects_album import Album, Disc
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
 from lollypop.helper_overlay_playlist import OverlayPlaylistHelper
 

@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 
 from lollypop.define import App, ViewType, Type, MARGIN
-from lollypop.objects import Album
+from lollypop.objects_album import Album
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
