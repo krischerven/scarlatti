@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk, GLib
 
-from lollypop.define import App
+from lollypop.define import App, MARGIN_SMALL
 
 
 class TypeAheadWidget(Gtk.Revealer):
@@ -30,10 +30,13 @@ class TypeAheadWidget(Gtk.Revealer):
         builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
         builder.connect_signals(self)
         widget = builder.get_object("widget")
+        widget.set_hexpand(True)
+        widget.set_property("halign", Gtk.Align.CENTER)
+        widget.set_margin_top(MARGIN_SMALL)
+        widget.set_margin_bottom(MARGIN_SMALL)
         self.__entry = builder.get_object("entry")
         self.__next_button = builder.get_object("next_button")
         self.__prev_button = builder.get_object("prev_button")
-        self.__toggle_grid = builder.get_object("toggle_grid")
         self.__list_one_toggle = builder.get_object("list_one_toggle")
         self.__list_two_toggle = builder.get_object("list_two_toggle")
         self.__view_toggle = builder.get_object("view_toggle")
@@ -54,10 +57,8 @@ class TypeAheadWidget(Gtk.Revealer):
         def show_button(l):
             self.__list_two_toggle.show()
 
-        if not App().settings.get_value("show-sidebar"):
-            self.__toggle_grid.hide()
-        else:
-            self.__toggle_grid.show()
+        self.__show_toggle_buttons(App().settings.get_value("show-sidebar") and
+                                   not App().window.is_adaptive)
         if App().window.container.list_one is None:
             self.__list_one_toggle.hide()
         else:
@@ -147,6 +148,20 @@ class TypeAheadWidget(Gtk.Revealer):
 #######################
 # PRIVATE             #
 #######################
+    def __show_toggle_buttons(self, show):
+        """
+            Show toggle buttons
+            @param show as bool
+        """
+        if show:
+            self.__list_one_toggle.show()
+            self.__list_two_toggle.show()
+            self.__view_toggle.show()
+        else:
+            self.__list_one_toggle.hide()
+            self.__list_two_toggle.hide()
+            self.__view_toggle.hide()
+
     def __get_widget(self):
         """
             Get widget for activated button
