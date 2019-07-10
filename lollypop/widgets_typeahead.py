@@ -37,6 +37,8 @@ class TypeAheadWidget(Gtk.Revealer):
         self.__entry = builder.get_object("entry")
         self.__next_button = builder.get_object("next_button")
         self.__prev_button = builder.get_object("prev_button")
+        self.__next_button.connect("clicked", lambda x: self.__search_next())
+        self.__prev_button.connect("clicked", lambda x: self.__search_prev())
         self.__list_one_toggle = builder.get_object("list_one_toggle")
         self.__list_two_toggle = builder.get_object("list_two_toggle")
         self.__view_toggle = builder.get_object("view_toggle")
