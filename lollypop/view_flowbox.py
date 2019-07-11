@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
-from lollypop.define import ViewType
+from lollypop.define import ViewType, App
 from lollypop.utils import get_font_height
 
 
@@ -30,7 +30,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
         """
         LazyLoadingView.__init__(self, view_type | ViewType.FILTERED)
         FilteringHelper.__init__(self)
-        self.__adaptive_signal_id = None
+        self.__loading_changed_id = None
         self._widget_class = None
         self.__font_height = get_font_height()
         self._box = Gtk.FlowBox()
@@ -87,6 +87,25 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _on_map(self, widget):
+        """
+            Connect signals
+            @param widget as Gtk.Widget
+        """
+        LazyLoadingView._on_map(self, widget)
+        if self.__loading_changed_id is None:
+            self.__loading_changed_id = App().player.connect(
+                "loading-changed", self.__on_loading_changed)
+
+    def __on_unmap(self, widget):
+        """
+            Disconnect signals
+            @param widget as Gtk.Widget
+        """
+        if self.__loading_changed_id is not None:
+            App().player.disconnect(self.__loading_changed_id)
+            self.__loading_changed_id = None
+
     def _get_label_height(self):
         """
             Get wanted label height
@@ -158,3 +177,18 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_loading_changed(self, player, status, track_id):
+        """
+            Show a spinner while loading
+            @param player as Player
+            @param status as bool
+            @param track_id as int
+        """
+        for child in self._box.get_children():
+            if hasattr(child, "album"):
+                if track_id not in child.album.track_ids:
+                    continue
+            elif child.track.id != track_id:
+                continue
+            if hasattr(child, "show_spinner"):
+                child.show_spinner(status)

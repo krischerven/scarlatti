@@ -316,7 +316,8 @@ class BinPlayer(BasePlayer):
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        self.emit("loading-changed", False, self._current_track.id)
+        if self._current_track.is_web:
+            self.emit("loading-changed", False, self._current_track.id)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)
@@ -370,7 +371,8 @@ class BinPlayer(BasePlayer):
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        self.emit("loading-changed", False, self.current_track.id)
+        if self._current_track.is_web:
+            self.emit("loading-changed", False, self.current_track.id)
         Logger.info("Player::_on_bus_error(): %s" % message.parse_error()[1])
         if self.current_track.id is not None and self.current_track.id >= 0:
             if self.__codecs.is_missing_codec(message):
