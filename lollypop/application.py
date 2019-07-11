@@ -369,9 +369,6 @@ class Application(Gtk.Application, ApplicationActions):
         if self.player.current_track.id is None or\
                 self.player.current_track.mtime == 0:
             track_id = None
-        elif isinstance(self.player.current_track, Radio):
-            track_id = self.radios.get_id(
-                self.player.current_track.radio_name)
         else:
             track_id = self.player.current_track.id
             # Save albums context

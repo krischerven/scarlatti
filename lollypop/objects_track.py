@@ -53,8 +53,6 @@ class Track(Base):
         """
         Base.__init__(self, App().tracks)
         self.id = track_id
-        self._radio_id = None
-        self._radio_name = ""
         self._uri = None
         self._number = 0
 

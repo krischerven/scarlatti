@@ -162,7 +162,7 @@ class MiniPlayer(Gtk.Bin, InformationController,
         """
         if isinstance(App().player.current_track, Radio):
             App().art_helper.set_radio_artwork(
-                App().player.current_track.radio_name,
+                App().player.current_track.name,
                 ArtSize.MINIPLAYER,
                 ArtSize.MINIPLAYER,
                 self._artwork.get_scale_factor(),
