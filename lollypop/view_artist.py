@@ -67,6 +67,13 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
                 if style_context.has_class("typeahead"):
                     App().player.play_album(child.album)
                 style_context.remove_class("typeahead")
+                for subchild in child.children:
+                    style_context = subchild.get_style_context()
+                    if style_context.has_class("typeahead"):
+                        track = subchild.track
+                        App().player.add_album(track.album)
+                        App().player.load(track.album.get_track(track.id))
+                    style_context.remove_class("typeahead")
         except Exception as e:
             Logger.error("ArtistView::activate_child: %s" % e)
 

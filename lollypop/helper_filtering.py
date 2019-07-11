@@ -31,12 +31,16 @@ class FilteringHelper(Gtk.Revealer):
             Search child and scroll
             @param text as str
         """
+        children = self.children
         for child in self.children:
+            if hasattr(child, "children"):
+                children += child.children
+        for child in children:
             style_context = child.get_style_context()
             style_context.remove_class("typeahead")
         if not text:
             return
-        for child in self.children:
+        for child in children:
             if child.name.lower().find(text) != -1:
                 style_context = child.get_style_context()
                 style_context.add_class("typeahead")
@@ -50,7 +54,11 @@ class FilteringHelper(Gtk.Revealer):
         """
         previous_children = []
         found_child = None
+        children = self.children
         for child in self.children:
+            if hasattr(child, "children"):
+                children += child.children
+        for child in children:
             style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
                 found_child = child
@@ -71,7 +79,11 @@ class FilteringHelper(Gtk.Revealer):
         """
         found = False
         previous_style_context = None
+        children = self.children
         for child in self.children:
+            if hasattr(child, "children"):
+                children += child.children
+        for child in children:
             style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
                 previous_style_context = style_context

@@ -235,6 +235,14 @@ class Row(Gtk.ListBoxRow):
         return self._row_widget
 
     @property
+    def name(self):
+        """
+            Get row name
+            @return str
+        """
+        return self._title_label.get_text()
+
+    @property
     def track(self):
         """
             Get row track
