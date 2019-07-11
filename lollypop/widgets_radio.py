@@ -31,7 +31,6 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             Init radio widget
             @param radio_id as int
-            @param radios as Radios
             @param view_type as ViewType
             @param font_height as int
         """
@@ -160,6 +159,14 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             @return bool
         """
         return True
+
+    @property
+    def name(self):
+        """
+            Get name
+            @return str
+        """
+        return self.__label.get_text()
 
     @property
     def track(self):

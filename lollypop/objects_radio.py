@@ -73,7 +73,7 @@ class Radio(Base):
             Set uri
             @param uri as string
         """
-        self._uri = uri
+        self.uri = uri
 
     @property
     def title(self):

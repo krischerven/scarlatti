@@ -13,8 +13,9 @@
 from gi.repository import Gdk, GLib, Gio
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, Type
+from lollypop.define import App, ArtSize
 from lollypop.utils import is_gnome
+from lollypop.objects_radio import Radio
 
 
 class NotificationManager:
@@ -91,9 +92,9 @@ class NotificationManager:
 
         if self.__is_gnome:
             cover_path = None
-        elif player.current_track.id == Type.RADIOS:
+        elif isinstance(player.current_track, Radio):
             cover_path = App().art.get_radio_cache_path(
-                player.current_track.radio_name,
+                player.current_track.name,
                 ArtSize.BIG, ArtSize.BIG)
         else:
             cover_path = App().art.get_album_cache_path(

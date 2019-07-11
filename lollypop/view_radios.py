@@ -80,7 +80,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param widget as Gtk.Widget
         """
         if self.__pop_tunein is None:
-            self.__pop_tunein = TuneinPopover(App().radios)
+            self.__pop_tunein = TuneinPopover()
             self.__pop_tunein.populate()
         self.__pop_tunein.set_relative_to(widget)
         self.__pop_tunein.popup()

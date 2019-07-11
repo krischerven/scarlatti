@@ -19,8 +19,9 @@ from gi.repository import Gio, Gst, GLib, Gtk
 from random import randint
 
 from lollypop.logger import Logger
-from lollypop.define import App, ArtSize, Type, Shuffle, Repeat
+from lollypop.define import App, ArtSize, Shuffle, Repeat
 from lollypop.objects_track import Track
+from lollypop.objects_radio import Radio
 
 
 class Server:
@@ -392,44 +393,30 @@ class MPRIS(Server):
                 "/org/mpris/MediaPlayer2/TrackList/NoTrack")}
         else:
             self.__metadata["mpris:trackid"] = self.__track_id
-            if App().player.current_track.id == Type.RADIOS:
-                self.__metadata["xesam:title"] = GLib.Variant(
-                    "s",
-                    App().player.current_track.name)
-                self.__metadata["xesam:artist"] = GLib.Variant(
-                    "as",
-                    [App().player.current_track.radio_name])
-                self.__metadata["xesam:trackNumber"] = GLib.Variant(
-                    "i", 0)
-                self.__metadata["xesam:album"] = GLib.Variant("s", "")
-                self.__metadata["xesam:albumArtist"] = GLib.Variant("as",  [])
-                self.__metadata["mpris:length"] = GLib.Variant("x", 0)
-                self.__metadata["xesam:genre"] = GLib.Variant("as", [])
-            else:
-                track_number = App().player.current_track.number
-                if track_number is None:
-                    track_number = 1
-                self.__metadata["xesam:trackNumber"] = GLib.Variant(
-                    "i",
-                    track_number)
-                self.__metadata["xesam:title"] = GLib.Variant(
-                    "s",
-                    App().player.current_track.name)
-                self.__metadata["xesam:album"] = GLib.Variant(
-                    "s",
-                    App().player.current_track.album.name)
-                self.__metadata["xesam:artist"] = GLib.Variant(
-                    "as",
-                    App().player.current_track.artists)
-                self.__metadata["xesam:albumArtist"] = GLib.Variant(
-                    "as",
-                    App().player.current_track.album_artists)
-                self.__metadata["mpris:length"] = GLib.Variant(
-                    "x",
-                    App().player.current_track.duration * 1000 * 1000)
-                self.__metadata["xesam:genre"] = GLib.Variant(
-                    "as",
-                    App().player.current_track.genres)
+            track_number = App().player.current_track.number
+            if track_number is None:
+                track_number = 1
+            self.__metadata["xesam:trackNumber"] = GLib.Variant(
+                "i",
+                track_number)
+            self.__metadata["xesam:title"] = GLib.Variant(
+                "s",
+                App().player.current_track.name)
+            self.__metadata["xesam:album"] = GLib.Variant(
+                "s",
+                App().player.current_track.album.name)
+            self.__metadata["xesam:artist"] = GLib.Variant(
+                "as",
+                App().player.current_track.artists)
+            self.__metadata["xesam:albumArtist"] = GLib.Variant(
+                "as",
+                App().player.current_track.album_artists)
+            self.__metadata["mpris:length"] = GLib.Variant(
+                "x",
+                App().player.current_track.duration * 1000 * 1000)
+            self.__metadata["xesam:genre"] = GLib.Variant(
+                "as",
+                App().player.current_track.genres)
             self.__metadata["xesam:url"] = GLib.Variant(
                 "s",
                 App().player.current_track.uri)
@@ -437,9 +424,9 @@ class MPRIS(Server):
             self.__metadata["xesam:userRating"] = GLib.Variant(
                 "d",
                 self.__rating / 5)
-            if App().player.current_track.id == Type.RADIOS:
+            if isinstance(App().player.current_track, Radio):
                 cover_path = App().art.get_radio_cache_path(
-                    App().player.current_track.radio_name,
+                    App().player.current_track.name,
                     ArtSize.MONSTER, ArtSize.MONSTER)
             else:
                 cover_path = App().art.get_album_cache_path(
@@ -493,8 +480,6 @@ class MPRIS(Server):
     def __on_current_changed(self, player):
         if App().player.current_track.id is None:
             self.__lollypop_id = 0
-        elif App().player.current_track.id == Type.RADIOS:
-            self.__lollypop_id = App().player.current_track.radio_id
         else:
             self.__lollypop_id = App().player.current_track.id
         # We only need to recalculate a new trackId at song changes.

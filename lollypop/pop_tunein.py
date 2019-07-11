@@ -14,12 +14,11 @@ from gi.repository import Gtk, GLib, Gio, GdkPixbuf, Gdk, Pango
 
 from gettext import gettext as _
 
-from lollypop.radios import Radios
 from lollypop.logger import Logger
-from lollypop.define import App, ArtSize
+from lollypop.define import App, ArtSize, Type
 from lollypop.utils import get_network_available
 from lollypop.list import LinkedList
-from lollypop.objects_track import Track
+from lollypop.objects_radio import Radio
 from lollypop.helper_task import TaskHelper
 
 
@@ -34,17 +33,12 @@ class TuneinPopover(Gtk.Popover):
         Popover showing tunin radios
     """
 
-    def __init__(self, radios=None):
+    def __init__(self):
         """
             Init Popover
-            @param radios as Radios
         """
         Gtk.Popover.__init__(self)
         self.__cancellable = Gio.Cancellable()
-        if radios is not None:
-            self.__radios = radios
-        else:
-            self.__radios = Radios()
         self.__timeout_id = None
         self.__history = None
         self.__covers_to_download = []
@@ -307,7 +301,7 @@ class TuneinPopover(Gtk.Popover):
         """
         if status and content:
             uri = content.decode("utf-8").split("\n")[0]
-        self.__radios.add(name.replace("/", "-"), uri)
+        App().radios.add(name.replace("/", "-"), uri)
 
     def __on_image_downloaded(self, uri, status, content, image):
         """
@@ -354,8 +348,9 @@ class TuneinPopover(Gtk.Popover):
                 App().task_helper.run(App().art.copy_uri_to_cache,
                                       item.LOGO, item.TEXT,
                                       ArtSize.MONSTER, ArtSize.MONSTER)
-            track = Track()
-            track.set_radio(item.TEXT, item.URL)
+            track = Radio(Type.RADIOS)
+            track.name = item.TEXT
+            track.set_uri(item.URL)
             App().player.load(track)
         return True
 
