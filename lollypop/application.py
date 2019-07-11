@@ -51,6 +51,7 @@ from lollypop.notification import NotificationManager
 from lollypop.playlists import Playlists
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
+from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
 from lollypop.collectionscanner import CollectionScanner
@@ -181,6 +182,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.artists = ArtistsDatabase()
         self.genres = GenresDatabase()
         self.tracks = TracksDatabase()
+        self.radios = Radios()
         self.player = Player()
         self.inhibitor = Inhibitor()
         self.scanner = CollectionScanner()

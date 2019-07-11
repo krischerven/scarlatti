@@ -15,7 +15,6 @@ from gi.repository import Gtk, GLib
 from lollypop.define import App, Type, ViewType
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_radio import RadioWidget
-from lollypop.radios import Radios
 from lollypop.pop_tunein import TuneinPopover
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.utils import get_icon_name, get_network_available
@@ -35,7 +34,6 @@ class RadiosView(FlowBoxView, ViewController):
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._widget_class = RadioWidget
         self._empty_icon_name = get_icon_name(Type.RADIOS)
-        self.__radios = Radios()
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/RadiosView.ui")
         builder.connect_signals(self)
@@ -62,8 +60,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param radio ids as [int]
         """
         self._remove_placeholder()
-        widget = FlowBoxView._add_items(self, radio_ids,
-                                        self.__radios, self._view_type)
+        widget = FlowBoxView._add_items(self, radio_ids, self._view_type)
         if widget is not None:
             widget.connect("overlayed", self.on_overlayed)
 
@@ -73,7 +70,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param widget as Gtk.Widget
         """
         from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover(None, self.__radios)
+        popover = RadioPopover(None, App().radios)
         popover.set_relative_to(widget)
         popover.popup()
 
@@ -83,7 +80,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param widget as Gtk.Widget
         """
         if self.__pop_tunein is None:
-            self.__pop_tunein = TuneinPopover(self.__radios)
+            self.__pop_tunein = TuneinPopover(App().radios)
             self.__pop_tunein.populate()
         self.__pop_tunein.set_relative_to(widget)
         self.__pop_tunein.popup()
@@ -106,8 +103,8 @@ class RadiosView(FlowBoxView, ViewController):
         if not App().settings.get_value("show-sidebar"):
             App().window.emit("show-can-go-back", True)
             App().window.emit("can-go-back-changed", True)
-        self.__signal_id = self.__radios.connect("radio-changed",
-                                                 self.__on_radio_changed)
+        self.__signal_id = App().radios.connect("radio-changed",
+                                                self.__on_radio_changed)
         App().settings.set_value("state-one-ids",
                                  GLib.Variant("ai", [Type.RADIOS]))
         App().settings.set_value("state-two-ids",
@@ -122,7 +119,7 @@ class RadiosView(FlowBoxView, ViewController):
         """
         FlowBoxView._on_unmap(self, widget)
         if self.__signal_id is not None:
-            self.__radios.disconnect(self.__signal_id)
+            App().radios.disconnect(self.__signal_id)
             self.__signal_id = None
         if self.__pop_tunein is not None:
             self.__pop_tunein.destroy()
@@ -147,7 +144,7 @@ class RadiosView(FlowBoxView, ViewController):
             if item is None:
                 self._add_items([radio_id])
             else:
-                name = self.__radios.get_name(radio_id)
+                name = App().radios.get_name(radio_id)
                 item.rename(name)
         else:
             for child in self._box.get_children():

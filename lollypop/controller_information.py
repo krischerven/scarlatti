@@ -12,8 +12,9 @@
 
 from gi.repository import GLib
 
-from lollypop.define import Type, App, ArtBehaviour
+from lollypop.define import App, ArtBehaviour
 from lollypop.objects_album import Album
+from lollypop.objects_radio import Radio
 
 
 class InformationController:
@@ -54,8 +55,8 @@ class InformationController:
             Update labels
             @param font_size as int
         """
-        if App().player.current_track.id == Type.RADIOS:
-            artist_text = App().player.current_track.radio_name
+        if isinstance(App().player.current_track, Radio):
+            artist_text = App().player.current_track.name
         else:
             artist_text = ", ".join(App().player.current_track.artists)
         if font_size is None:
@@ -89,9 +90,9 @@ class InformationController:
             return
         self._previous_artwork_id = App().player.current_track.album.id
         scale_factor = self._artwork.get_scale_factor()
-        if App().player.current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             App().art_helper.set_radio_artwork(
-                App().player.current_track.radio_name,
+                App().player.current_track.name,
                 width,
                 height,
                 scale_factor,

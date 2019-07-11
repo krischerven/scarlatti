@@ -91,7 +91,7 @@ class Album(Base):
                 "artists": [],
                 "artist_ids": [],
                 "year": None,
-                "timestamp": None,
+                "timestamp": 0,
                 "uri": "",
                 "tracks_count": 1,
                 "duration": 0,

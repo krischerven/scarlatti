@@ -16,7 +16,7 @@ from gi.repository import GLib, Gio
 import json
 
 from urllib.parse import urlparse
-from lollypop.define import App, Type
+from lollypop.define import App
 from lollypop.logger import Logger
 from lollypop.utils import escape
 from lollypop.objects import Base
@@ -39,7 +39,7 @@ class Track(Base):
                 "discnumber": 0,
                 "discname": "",
                 "year": None,
-                "timestamp": None,
+                "timestamp": 0,
                 "mtime": 1,
                 "loved": False,
                 "mb_track_id": None,
@@ -77,35 +77,6 @@ class Track(Base):
             @param uri as string
         """
         self._uri = uri
-
-    def set_radio(self, name, uri):
-        """
-            Set radio for non DB radios (Tunein)
-            @param name as string
-            @param uri as string
-        """
-        from lollypop.radios import Radios
-        radios = Radios()
-        self.id = Type.RADIOS
-        self._radio_id = radios.get_id(name)
-        self._radio_name = name
-        self._uri = uri
-        # Generate a tmp album id, needed by InfoController
-        album_id = 0
-        for i in list(map(ord, name)):
-            album_id += i
-        self.album.id = album_id
-
-    def set_radio_id(self, radio_id):
-        """
-            Set radio id
-            @param radio_id as int
-        """
-        from lollypop.radios import Radios
-        radios = Radios()
-        name = radios.get_name(radio_id)
-        uri = radios.get_uri(radio_id)
-        self.set_radio(name, uri)
 
     def set_number(self, number):
         """
@@ -232,22 +203,6 @@ class Track(Base):
             Alias to Track.name
         """
         return self.name
-
-    @property
-    def radio_id(self):
-        """
-            Get radio id
-            @return int
-        """
-        return self._radio_id
-
-    @property
-    def radio_name(self):
-        """
-            Get radio name
-            @return str
-        """
-        return self._radio_name
 
     @property
     def uri(self):

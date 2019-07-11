@@ -15,7 +15,6 @@ from gi.repository import Gtk
 from gettext import gettext as _
 
 from lollypop.define import App
-from lollypop.objects_track import Track
 from lollypop.utils import on_realize
 from lollypop.helper_overlay import OverlayHelper
 
@@ -25,13 +24,11 @@ class OverlayRadioHelper(OverlayHelper):
         An overlay helper for a radio
     """
 
-    def __init__(self, radios):
+    def __init__(self):
         """
             Init helper
-            @param radios as Radios
         """
         OverlayHelper.__init__(self)
-        self.__radios = radios
 
 #######################
 # PROTECTED           #
@@ -86,9 +83,7 @@ class OverlayRadioHelper(OverlayHelper):
             Play radio
             @param button as Gtk.Button
         """
-        track = Track()
-        track.set_radio_id(self._radio_id)
-        App().player.load(track)
+        App().player.load(self._track)
 
     def __on_edit_clicked(self, button):
         """
@@ -96,7 +91,7 @@ class OverlayRadioHelper(OverlayHelper):
             @param button as Gtk.Button
         """
         from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover(self._radio_id, self.__radios)
+        popover = RadioPopover(self._track.id, App().radios)
         popover.set_relative_to(button)
         popover.connect("closed", self._on_popover_closed)
         self._lock_overlay = True

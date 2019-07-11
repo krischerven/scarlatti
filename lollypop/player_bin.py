@@ -19,9 +19,9 @@ from lollypop.tagreader import TagReader
 from lollypop.player_plugins import PluginsPlayer
 from lollypop.define import GstPlayFlags, App
 from lollypop.codecs import Codecs
-from lollypop.define import Type
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
+from lollypop.objects_radio import Radio
 
 
 class BinPlayer(BasePlayer):
@@ -79,7 +79,7 @@ class BinPlayer(BasePlayer):
         if self._crossfading and\
            self._current_track.id is not None and\
            self.is_playing and\
-           self._current_track.id != Type.RADIOS:
+           not isinstance(track, Radio):
             duration = App().settings.get_value(
                 "transition-duration").get_int32()
             self.__do_crossfade(duration, track)
@@ -102,7 +102,7 @@ class BinPlayer(BasePlayer):
         """
             Change player state to PAUSED
         """
-        if self._current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             self._playbin.set_state(Gst.State.NULL)
         else:
             self._playbin.set_state(Gst.State.PAUSED)
@@ -390,7 +390,7 @@ class BinPlayer(BasePlayer):
         # Don't do anything if crossfade on, track already changed
         if self._crossfading:
             return
-        if self._current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             return
         if self.is_playing and self._playbin.get_bus() == bus:
             if self._next_track.id is None:
@@ -411,7 +411,7 @@ class BinPlayer(BasePlayer):
         # Don't do anything if crossfade on, track already changed
         if self._crossfading:
             return
-        if self._current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             return
         self._scrobble(self._current_track, self._start_time)
         # Increment popularity

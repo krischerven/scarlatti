@@ -12,7 +12,6 @@
 
 from gi.repository import TotemPlParser, Gst, Gio, GLib
 
-from lollypop.radios import Radios
 from lollypop.define import App
 from lollypop.player_base import BasePlayer
 from lollypop.logger import Logger
@@ -28,7 +27,6 @@ class RadioPlayer(BasePlayer):
             Init radio player
         """
         BasePlayer.__init__(self)
-        self.__current = None
 
     def load(self, track, play=True):
         """
@@ -38,9 +36,8 @@ class RadioPlayer(BasePlayer):
         """
         if Gio.NetworkMonitor.get_default().get_network_available():
             try:
-                radio_id = Radios().get_id(track.name)
-                self.emit("loading-changed", True, radio_id)
-                self.__current = track
+                self.emit("loading-changed", True, track.id)
+                self._current_track = track
                 if track.uri.find("youtu.be") != -1 or\
                         track.uri.find("youtube.com") != -1:
                     App().task_helper.run(self.__load_youtube_track, track)
@@ -83,9 +80,8 @@ class RadioPlayer(BasePlayer):
         self._plugins.volume.props.volume = 1.0
         self._playbin.set_state(Gst.State.NULL)
         self._playbin.set_property("uri", track.uri)
-        Radios().set_more_popular(track.radio_id)
+        App().radios.set_more_popular(track.id)
         self._current_track = track
-        self.__current = None
         if play:
             self._playbin.set_state(Gst.State.PLAYING)
             self.emit("status-changed")
@@ -101,8 +97,10 @@ class RadioPlayer(BasePlayer):
             @param play as bool
         """
         # Only start playing if context always True
-        if self.__current == track:
+        if self._current_track == track:
             self.__start_playback(track, play)
+        else:
+            self.emit("loading-changed", False, track.id)
 
     def __on_entry_parsed(self, parser, uri, metadata, track, play):
         """
@@ -114,5 +112,7 @@ class RadioPlayer(BasePlayer):
             @param play as bool
         """
         # Only start playing if context always True
-        if self.__current == track:
+        if self._current_track == track:
             track.set_uri(uri)
+        else:
+            self.emit("loading-changed", False, track.id)

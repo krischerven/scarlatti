@@ -24,6 +24,7 @@ from lollypop.radios import Radios
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
+from lollypop.objects_radio import Radio
 from lollypop.define import App, Type, LOLLYPOP_DATA_PATH, Shuffle
 
 
@@ -78,7 +79,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             @param track as Track
             @param play as bool, ignored for radios
         """
-        if track.id == Type.RADIOS:
+        if isinstance(track, Radio):
             RadioPlayer.load(self, track, play)
         else:
             if play:
@@ -416,7 +417,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
             Set previous track
         """
-        if self.current_track.id == Type.RADIOS:
+        if isinstance(self.current_track, Radio):
             return
         try:
             prev_track = ShufflePlayer.prev(self)
@@ -433,7 +434,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
             Play next track
         """
-        if self.current_track.id == Type.RADIOS or\
+        if isinstance(self.current_track, Radio) or\
                 self._current_track.id == self.__stop_after_track_id:
             self.__stop_after_track_id = None
             self._next_track = Track()
