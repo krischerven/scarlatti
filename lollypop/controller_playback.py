@@ -51,7 +51,7 @@ class PlaybackController:
             self._prev_button.set_sensitive(False)
             self._next_button.set_sensitive(False)
         else:
-            is_radio = isinstance(App().player.current_track.id, Radio)
+            is_radio = isinstance(App().player.current_track, Radio)
             self._play_button.set_sensitive(True)
             self._prev_button.set_sensitive(not is_radio)
             self._next_button.set_sensitive(not is_radio)

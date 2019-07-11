@@ -69,9 +69,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self._play_button = builder.get_object("play_btn")
         self._next_button = builder.get_object("next_btn")
         self._prev_button = builder.get_object("prev_btn")
-        if isinstance(App().player.current_track, Radio):
-            self._next_button.hide()
-            self._prev_button.hide()
         self._play_image = builder.get_object("play_image")
         self._pause_image = builder.get_object("pause_image")
         close_btn = builder.get_object("close_btn")
@@ -190,6 +187,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             Update controllers
             @param player as Player
         """
+        PlaybackController.on_current_changed(self, player)
         InformationController.on_current_changed(self,
                                                  self.__art_size,
                                                  self.__font_size)
