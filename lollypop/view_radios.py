@@ -138,7 +138,7 @@ class RadiosView(FlowBoxView, ViewController):
         if exists:
             item = None
             for child in self._box.get_children():
-                if child.id == radio_id:
+                if child.track.id == radio_id:
                     item = child
                     break
             if item is None:
@@ -148,5 +148,5 @@ class RadiosView(FlowBoxView, ViewController):
                 item.rename(name)
         else:
             for child in self._box.get_children():
-                if child.id == radio_id:
+                if child.track.id == radio_id:
                     child.destroy()
