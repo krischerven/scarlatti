@@ -15,10 +15,11 @@ from gi.repository import Gtk, Gdk, GLib, Gio, Gst
 from datetime import datetime
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour, Type, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.controller_information import InformationController
 from lollypop.controller_playback import PlaybackController
 from lollypop.controller_progress import ProgressController
+from lollypop.objects_radio import Radio
 from lollypop.container import Container
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.logger import Logger
@@ -68,7 +69,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self._play_button = builder.get_object("play_btn")
         self._next_button = builder.get_object("next_btn")
         self._prev_button = builder.get_object("prev_btn")
-        if App().player.current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             self._next_button.hide()
             self._prev_button.hide()
         self._play_image = builder.get_object("play_image")
@@ -232,7 +233,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             @param surface as str
         """
         if surface is None:
-            if App().player.current_track.id == Type.RADIOS:
+            if isinstance(App().player.current_track, Radio):
                 icon_name = "audio-input-microphone-symbolic"
             else:
                 icon_name = "folder-music-symbolic"
@@ -336,7 +337,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             behaviour |= (ArtBehaviour.CROP | ArtBehaviour.DARKER)
             # We don't want this for background, stored for album cover
             behaviour &= ~ArtBehaviour.ROUNDED
-            if App().player.current_track.id == Type.RADIOS:
+            if isinstance(App().player.current_track, Radio):
                 App().art_helper.set_radio_artwork(
                                     App().player.current_track.radio_name,
                                     allocation.width,

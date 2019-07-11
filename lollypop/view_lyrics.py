@@ -15,7 +15,8 @@ from gi.repository import Gtk, GLib, Gio, Pango
 from gettext import gettext as _
 
 from lollypop.view import View
-from lollypop.define import App, Sizing, Type, ArtBehaviour
+from lollypop.objects_radio import Radio
+from lollypop.define import App, Sizing, ArtBehaviour
 from lollypop.controller_information import InformationController
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
@@ -239,7 +240,7 @@ class LyricsView(View, InformationController):
         """
         self.__downloads_running += 1
         # Update lyrics
-        if self.__current_track.id == Type.RADIOS:
+        if isinstance(self.__current_track, Radio):
             split = self.__current_track.name.split(" - ")
             if len(split) < 2:
                 return
@@ -279,7 +280,7 @@ class LyricsView(View, InformationController):
         """
         self.__downloads_running += 1
         # Update lyrics
-        if self.__current_track.id == Type.RADIOS:
+        if isinstance(self.__current_track, Radio):
             split = App().player.current_track.name.split(" - ")
             if len(split) < 2:
                 return

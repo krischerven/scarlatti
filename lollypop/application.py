@@ -51,6 +51,7 @@ from lollypop.notification import NotificationManager
 from lollypop.playlists import Playlists
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
+from lollypop.objects_radio import Radio
 from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
@@ -368,10 +369,8 @@ class Application(Gtk.Application, ApplicationActions):
         if self.player.current_track.id is None or\
                 self.player.current_track.mtime == 0:
             track_id = None
-        elif self.player.current_track.id == Type.RADIOS:
-            from lollypop.radios import Radios
-            radios = Radios()
-            track_id = radios.get_id(
+        elif isinstance(self.player.current_track, Radio):
+            track_id = self.radios.get_id(
                 self.player.current_track.radio_name)
         else:
             track_id = self.player.current_track.id
@@ -387,7 +386,7 @@ class Application(Gtk.Application, ApplicationActions):
         dump(self.player.queue,
              open(LOLLYPOP_DATA_PATH + "/queue.bin", "wb"))
         # Save current playlist
-        if self.player.current_track.id == Type.RADIOS:
+        if isinstance(self.player.current_track, Radio):
             playlist_ids = [Type.RADIOS]
         else:
             playlist_ids = []

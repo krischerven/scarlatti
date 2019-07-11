@@ -14,7 +14,8 @@ from gi.repository import GLib, Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import Type, App
+from lollypop.objects_radio import Radio
+from lollypop.define import App
 
 
 class PlaybackController:
@@ -50,7 +51,7 @@ class PlaybackController:
             self._prev_button.set_sensitive(False)
             self._next_button.set_sensitive(False)
         else:
-            is_radio = App().player.current_track.id == Type.RADIOS
+            is_radio = isinstance(App().player.current_track.id, Radio)
             self._play_button.set_sensitive(True)
             self._prev_button.set_sensitive(not is_radio)
             self._next_button.set_sensitive(not is_radio)
@@ -60,10 +61,7 @@ class PlaybackController:
             Update prev button
             @param player as Player
         """
-        if player.prev_track.id == Type.RADIOS:
-            self._prev_button.set_tooltip_text(
-                ", ".join(player.prev_track.album_artists))
-        elif player.prev_track.id is not None:
+        if player.prev_track.id is not None:
             prev_artists = GLib.markup_escape_text(
                 ", ".join(player.prev_track.artists))
             prev_title = GLib.markup_escape_text(player.prev_track.title)
@@ -78,10 +76,7 @@ class PlaybackController:
             Update toolbar
             @param player as Player
         """
-        if player.next_track.id == Type.RADIOS:
-            self._next_button.set_tooltip_text(
-                ", ".join(player.next_track.album_artists))
-        elif player.next_track.id is not None:
+        if player.next_track.id is not None:
             next_artists = GLib.markup_escape_text(
                 ", ".join(player.next_track.artists))
             next_title = GLib.markup_escape_text(player.next_track.title)

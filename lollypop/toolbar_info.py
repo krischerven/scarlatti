@@ -15,9 +15,10 @@ from gi.repository import Gtk, Gdk, GLib
 from gettext import gettext as _
 
 from lollypop.logger import Logger
+from lollypop.objects_radio import Radio
 from lollypop.widgets_utils import Popover
 from lollypop.controller_information import InformationController
-from lollypop.define import App, Type, ArtBehaviour
+from lollypop.define import App, ArtBehaviour
 
 
 class ToolbarInfo(Gtk.Bin, InformationController):
@@ -132,7 +133,7 @@ class ToolbarInfo(Gtk.Bin, InformationController):
             @param surface as str
         """
         if surface is None:
-            if App().player.current_track.id == Type.RADIOS:
+            if isinstance(App().player.current_track, Radio):
                 icon_name = "audio-input-microphone-symbolic"
             else:
                 icon_name = "folder-music-symbolic"
@@ -179,7 +180,7 @@ class ToolbarInfo(Gtk.Bin, InformationController):
             from lollypop.pop_menu import TrackMenuPopover
             popover = TrackMenuPopover(App().player.current_track, menu)
             popover.set_relative_to(self._infobox)
-        elif App().player.current_track.id == Type.RADIOS:
+        elif isinstance(App().player.current_track, Radio):
             popover = Popover.new_from_model(self._infobox, menu)
         popover.popup()
 
@@ -201,7 +202,7 @@ class ToolbarInfo(Gtk.Bin, InformationController):
         """
         if App().window.is_adaptive or not self._artwork.get_visible():
             return
-        if App().player.current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             from lollypop.pop_tunein import TuneinPopover
             popover = TuneinPopover()
             popover.populate()

@@ -12,7 +12,8 @@
 
 from gi.repository import GLib, Gst
 
-from lollypop.define import Type, App
+from lollypop.objects_radio import Radio
+from lollypop.define import App
 from lollypop.utils import seconds_to_string
 
 
@@ -46,7 +47,7 @@ class ProgressController:
 
         self._progress.set_value(0.0)
         self._timelabel.set_text("0:00")
-        if player.current_track.id == Type.RADIOS:
+        if isinstance(player.current_track, Radio):
             self._progress.set_sensitive(False)
             self._progress.set_opacity(0)
             self._timelabel.set_opacity(0)

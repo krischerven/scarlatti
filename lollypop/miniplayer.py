@@ -12,13 +12,14 @@
 
 from gi.repository import Gtk, GObject
 
+from lollypop.objects_radio import Radio
 from lollypop.helper_art import ArtBehaviour
 from lollypop.controller_information import InformationController
 from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.utils import on_realize
-from lollypop.define import App, ArtSize, Type
+from lollypop.define import App, ArtSize
 
 
 class MiniPlayer(Gtk.Bin, InformationController,
@@ -159,7 +160,7 @@ class MiniPlayer(Gtk.Bin, InformationController,
         """
             Update artwork based on current track
         """
-        if App().player.current_track.id == Type.RADIOS:
+        if isinstance(App().player.current_track, Radio):
             App().art_helper.set_radio_artwork(
                 App().player.current_track.radio_name,
                 ArtSize.MINIPLAYER,
@@ -234,7 +235,7 @@ class MiniPlayer(Gtk.Bin, InformationController,
         """
         if surface is None:
             self.__cover.get_style_context().add_class("white")
-            if App().player.current_track.id == Type.RADIOS:
+            if isinstance(App().player.current_track, Radio):
                 icon_name = "audio-input-microphone-symbolic"
             else:
                 icon_name = "folder-music-symbolic"

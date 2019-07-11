@@ -12,9 +12,10 @@
 
 import random
 
-from lollypop.define import Shuffle, Repeat, App, Type
+from lollypop.define import Shuffle, Repeat, App
 from lollypop.player_base import BasePlayer
 from lollypop.objects_track import Track
+from lollypop.objects_radio import Radio
 from lollypop.objects_album import Album
 from lollypop.list import LinkedList
 from lollypop.logger import Logger
@@ -101,13 +102,14 @@ class ShufflePlayer(BasePlayer):
 
         if party:
             self.set_party_ids()
-            # Start a new song if not playing
-            if (self._current_playback_track.id in [None, Type.RADIOS])\
-                    and self._albums:
-                track = self.__get_tracks_random()
-                self.load(track)
-            elif not self.is_playing:
-                self.play()
+            if self._albums:
+                # Start a new song if not playing
+                if self._current_playback_track.id is None or\
+                        isinstance(self._current_playback_track, Radio):
+                    track = self.__get_tracks_random()
+                    self.load(track)
+                elif not self.is_playing:
+                    self.play()
         else:
             # We want current album to continue playback
             self._albums = [self._current_playback_track.album]
