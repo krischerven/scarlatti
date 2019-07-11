@@ -31,8 +31,9 @@ class FilteringHelper(Gtk.Revealer):
             Search child and scroll
             @param text as str
         """
-        children = self.children
+        children = []
         for child in self.children:
+            children.append(child)
             if hasattr(child, "children"):
                 children += child.children
         for child in children:
@@ -54,8 +55,9 @@ class FilteringHelper(Gtk.Revealer):
         """
         previous_children = []
         found_child = None
-        children = self.children
+        children = []
         for child in self.children:
+            children.append(child)
             if hasattr(child, "children"):
                 children += child.children
         for child in children:
@@ -79,8 +81,9 @@ class FilteringHelper(Gtk.Revealer):
         """
         found = False
         previous_style_context = None
-        children = self.children
+        children = []
         for child in self.children:
+            children.append(child)
             if hasattr(child, "children"):
                 children += child.children
         for child in children:
