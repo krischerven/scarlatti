@@ -177,18 +177,18 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __on_loading_changed(self, player, status, track_id):
+    def __on_loading_changed(self, player, status, album):
         """
             Show a spinner while loading
             @param player as Player
             @param status as bool
-            @param track_id as int
+            @param album as Album
         """
         for child in self._box.get_children():
             if hasattr(child, "album"):
-                if track_id not in child.album.track_ids:
+                if album.id != child.album.id:
                     continue
-            elif child.track.id != track_id:
+            elif child.track.album.id != album.id:
                 continue
             if hasattr(child, "show_spinner"):
                 child.show_spinner(status)

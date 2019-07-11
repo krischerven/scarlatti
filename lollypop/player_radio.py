@@ -36,7 +36,10 @@ class RadioPlayer(BasePlayer):
         """
         if Gio.NetworkMonitor.get_default().get_network_available():
             try:
-                self.emit("loading-changed", True, track.id)
+                if self._current_track.is_web:
+                    self.emit("loading-changed", False,
+                              self._current_track.album)
+                self.emit("loading-changed", True, track.album)
                 self._current_track = track
                 if track.uri.find("youtu.be") != -1 or\
                         track.uri.find("youtube.com") != -1:
@@ -100,7 +103,7 @@ class RadioPlayer(BasePlayer):
         if self._current_track == track:
             self.__start_playback(track, play)
         else:
-            self.emit("loading-changed", False, track.id)
+            self.emit("loading-changed", False, track.album)
 
     def __on_entry_parsed(self, parser, uri, metadata, track, play):
         """
@@ -115,4 +118,4 @@ class RadioPlayer(BasePlayer):
         if self._current_track == track:
             track.set_uri(uri)
         else:
-            self.emit("loading-changed", False, track.id)
+            self.emit("loading-changed", False, track.album)
