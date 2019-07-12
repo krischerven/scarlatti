@@ -24,7 +24,11 @@ class FilteringHelper(Gtk.Revealer):
         """
             Init helper
         """
-        pass
+        self.__indicator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+        self.__indicator.set_margin_bottom(5)
+        context = self.__indicator.get_style_context()
+        self.__indicator.set_hexpand(True)
+        context.add_class("typeahead-indicator")
 
     def search_for_child(self, text):
         """
@@ -97,6 +101,14 @@ class FilteringHelper(Gtk.Revealer):
                 style_context.add_class("typeahead")
                 GLib.idle_add(self._scroll_to_child, child)
                 break
+
+    @property
+    def indicator(self):
+        """
+            Get indicator
+            @return Gtk.Widget
+        """
+        return self.__indicator
 
     @property
     def children(self):

@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.view import LazyLoadingView
-from lollypop.define import ViewType
+from lollypop.define import ViewType, App
 from lollypop.widgets_album_detailed import AlbumDetailedWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_filtering import FilteringHelper
@@ -48,6 +48,9 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
             self._viewport.add(self._box)
         else:
             self._overlay.add(self._box)
+        if App().window.container.type_ahead.get_reveal_child():
+            self.indicator.show()
+        self.add(self.indicator)
         self.add(self._overlay)
 
     def populate(self, albums):

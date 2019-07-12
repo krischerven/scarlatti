@@ -30,54 +30,41 @@ class TypeAheadWidget(Gtk.Revealer):
         builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
         builder.connect_signals(self)
         widget = builder.get_object("widget")
-        widget.set_hexpand(True)
-        widget.set_property("halign", Gtk.Align.CENTER)
         widget.set_margin_top(MARGIN_SMALL)
-        widget.set_margin_bottom(MARGIN_SMALL)
+        widget.set_margin_bottom(2)
         self.__entry = builder.get_object("entry")
         self.__next_button = builder.get_object("next_button")
         self.__prev_button = builder.get_object("prev_button")
         self.__next_button.connect("clicked", lambda x: self.__search_next())
         self.__prev_button.connect("clicked", lambda x: self.__search_prev())
-        self.__list_one_toggle = builder.get_object("list_one_toggle")
-        self.__list_two_toggle = builder.get_object("list_two_toggle")
-        self.__view_toggle = builder.get_object("view_toggle")
-        self.__list_one_toggle.set_active(True)
         self.add(widget)
 
-    def update_buttons(self):
+    def update_indicators(self, show):
         """
-            Show hide buttons
+            Update list/views indicator
+            @param show as bool
         """
-        def hide_button(l):
-            App().window.container.list_two.disconnect(
-                self.__list_two_map_signal_id)
-            App().window.container.list_two.disconnect_by_func(hide_button)
-            self.__list_two_map_signal_id = None
-            self.__list_two_toggle.hide()
-
-        def show_button(l):
-            self.__list_two_toggle.show()
-
-        self.__show_toggle_buttons(App().settings.get_value("show-sidebar") and
-                                   not App().window.is_adaptive)
-        if App().window.container.list_one is None:
-            self.__list_one_toggle.hide()
-            self.__view_toggle.set_active(True)
-        else:
-            self.__list_one_toggle.show()
-        if App().window.container.list_two is not None:
-            if App().window.container.list_two.get_visible():
-                self.__list_two_toggle.show()
+        indicators = self.__get_indicators(True)
+        for indicator in indicators:
+            if show:
+                indicator.show()
             else:
-                self.__list_two_toggle.hide()
-            if self.__list_two_map_signal_id is None:
-                self.__list_two_map_signal_id =\
-                    App().window.container.list_two.connect("map",
-                                                            show_button)
-                App().window.container.list_two.connect("unmap", hide_button)
-        else:
-            self.__list_two_toggle.hide()
+                indicator.hide()
+
+    def set_active_indicator(self, view):
+        """
+            Mark view indicator as active
+            @param widget as View
+        """
+        for _view in [App().window.container.list_one,
+                      App().window.container.list_two,
+                      App().window.container.view]:
+            if _view is None:
+                continue
+            if view == _view:
+                _view.indicator.set_state_flags(Gtk.StateFlags.SELECTED, True)
+            else:
+                _view.indicator.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
     @property
     def entry(self):
@@ -107,7 +94,7 @@ class TypeAheadWidget(Gtk.Revealer):
         widget = self.__get_widget()
         if widget is not None:
             widget.activate_child()
-            GLib.idle_add(self.__activate_next_button)
+            GLib.idle_add(self.__activate_next_view)
             self.__entry.set_text("")
             self.__entry.grab_focus()
 
@@ -132,25 +119,13 @@ class TypeAheadWidget(Gtk.Revealer):
         if event.state & (Gdk.ModifierType.SHIFT_MASK |
                           Gdk.ModifierType.CONTROL_MASK):
             if event.keyval == Gdk.KEY_Right:
-                self.__activate_next_button()
+                self.__activate_next_view()
             elif event.keyval == Gdk.KEY_Left:
-                self.__activate_prev_button()
+                self.__activate_prev_view()
         elif event.keyval == Gdk.KEY_Up:
             self.__search_prev()
         elif event.keyval == Gdk.KEY_Down:
             self.__search_next()
-
-    def _on_button_toggled(self, button):
-        """
-            Untoggle other buttons
-            @param button as Gtk.Button
-        """
-        if not button.get_active():
-            return
-        buttons = self.__get_buttons()
-        for _button in buttons:
-            if _button != button:
-                _button.set_active(False)
 
 #######################
 # PRIVATE             #
@@ -171,69 +146,66 @@ class TypeAheadWidget(Gtk.Revealer):
         if widget is not None:
             widget.search_next(self.__entry.get_text().lower())
 
-    def __show_toggle_buttons(self, show):
-        """
-            Show toggle buttons
-            @param show as bool
-        """
-        if show:
-            self.__list_one_toggle.show()
-            self.__list_two_toggle.show()
-            self.__view_toggle.show()
-        else:
-            self.__list_one_toggle.hide()
-            self.__list_two_toggle.hide()
-            self.__view_toggle.hide()
-
     def __get_widget(self):
         """
             Get widget for activated button
             @return Gtk.Widget
         """
-        if self.__list_one_toggle.get_active():
+        if App().window.container.list_one.indicator.get_state_flags() &\
+                Gtk.StateFlags.SELECTED:
             return App().window.container.list_one
-        elif self.__list_two_toggle.get_active():
+        elif App().window.container.list_two.indicator.get_state_flags() &\
+                Gtk.StateFlags.SELECTED:
             return App().window.container.list_two
         else:
             return App().window.container.stack
 
-    def __get_buttons(self):
+    def __get_indicators(self, show_hidden=False):
         """
-            Get current buttons
-            @return [Gtk.ToggleButton]
+            Get indicator
+            @param show_hidden as bool
+            @return Gtk.Widget
         """
-        buttons = []
-        for button in [self.__list_one_toggle,
-                       self.__list_two_toggle,
-                       self.__view_toggle]:
-            if button.get_visible():
-                buttons.append(button)
-        return buttons
+        indicators = []
+        for view in [App().window.container.list_one,
+                     App().window.container.list_two,
+                     App().window.container.view]:
+            if view is not None and\
+                    (view.get_visible() or show_hidden) and\
+                    hasattr(view, "indicator"):
+                indicators.append(view.indicator)
+        return indicators
 
-    def __activate_next_button(self):
+    def __activate_next_view(self):
         """
-            Activate next button
+            Activate next view
         """
         active = None
-        buttons = self.__get_buttons()
-        for button in buttons:
-            if button.get_active():
-                active = button
+        indicators = self.__get_indicators()
+        for indicator in indicators:
+            if indicator.get_state_flags() &\
+                    Gtk.StateFlags.SELECTED:
+                active = indicator
                 break
-        index = buttons.index(active)
-        if index + 1 < len(buttons):
-            buttons[index + 1].set_active(True)
+        index = indicators.index(active)
+        if index + 1 < len(indicators):
+            indicators[index + 1].set_state_flags(Gtk.StateFlags.SELECTED,
+                                                  True)
+            active.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
-    def __activate_prev_button(self):
+    def __activate_prev_view(self):
         """
-            Activate prev button
+            Activate prev view
         """
         active = None
-        buttons = self.__get_buttons()
-        for button in buttons:
-            if button.get_active():
-                active = button
+        indicators = self.__get_indicators()
+        for indicator in indicators:
+            if indicator.get_state_flags() &\
+                    Gtk.StateFlags.SELECTED:
+                active = indicator
                 break
-        index = buttons.index(active)
+        index = indicators.index(active)
         if index > 0:
-            buttons[index - 1].set_active(True)
+            indicators[index - 1].set_state_flags(Gtk.StateFlags.SELECTED,
+                                                  True)
+            active.set_state_flags(Gtk.StateFlags.NORMAL, True)

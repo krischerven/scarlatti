@@ -23,7 +23,6 @@ class FilterContainer:
         """
             Init container
         """
-        self.__widgets = []
         self.__index = 0
         self.__type_ahead = TypeAheadWidget()
         self.__type_ahead.show()
@@ -36,15 +35,21 @@ class FilterContainer:
         """
         reveal = not self.__type_ahead.get_reveal_child()
         self.__type_ahead.set_reveal_child(reveal)
+        self.__type_ahead.update_indicators(reveal)
         if reveal:
             App().enable_special_shortcuts(False)
             self.__type_ahead.entry.grab_focus()
-            self.__type_ahead.update_buttons()
         else:
             App().enable_special_shortcuts(True)
             self.__type_ahead.entry.set_text("")
-            for widget in self.__widgets:
-                widget.get_style_context().remove_class("filtered-view")
+
+    @property
+    def type_ahead(self):
+        """
+            Get typeahead widget
+            @return TypeAheadWidget
+        """
+        return self.__type_ahead
 
 ############
 # PRIVATE  #

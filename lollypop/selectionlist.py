@@ -237,6 +237,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self.__fastscroll = FastScroll(self._box,
                                        self._scrolled)
         overlay.add_overlay(self.__fastscroll)
+        self.add(self.indicator)
         self.add(overlay)
         self.get_style_context().add_class("sidebar")
         App().art.connect("artist-artwork-changed",

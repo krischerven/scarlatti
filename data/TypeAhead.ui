@@ -15,54 +15,7 @@
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-        <child>
-      <object class="GtkToggleButton" id="list_one_toggle">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="image">image3</property>
-        <signal name="toggled" handler="_on_button_toggled" swapped="no"/>
-        <style>
-          <class name="small-padding"/>
-        </style>
-      </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkToggleButton" id="list_two_toggle">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="image">image4</property>
-        <signal name="toggled" handler="_on_button_toggled" swapped="no"/>
-        <style>
-          <class name="small-padding"/>
-        </style>
-      </object>
-      <packing>
-        <property name="left_attach">1</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkToggleButton" id="view_toggle">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="image">image5</property>
-        <signal name="toggled" handler="_on_button_toggled" swapped="no"/>
-        <style>
-          <class name="small-padding"/>
-        </style>
-      </object>
-      <packing>
-        <property name="left_attach">2</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
+    <property name="halign">center</property>
     <child>
       <object class="GtkSearchEntry" id="entry">
         <property name="visible">True</property>
@@ -76,7 +29,7 @@
         <signal name="key-release-event" handler="_on_entry_key_release_event" swapped="no"/>
       </object>
       <packing>
-        <property name="left_attach">3</property>
+        <property name="left_attach">0</property>
         <property name="top_attach">0</property>
       </packing>
     </child>
@@ -88,7 +41,7 @@
         <property name="image">image1</property>
       </object>
       <packing>
-        <property name="left_attach">4</property>
+        <property name="left_attach">1</property>
         <property name="top_attach">0</property>
       </packing>
     </child>
@@ -100,27 +53,12 @@
         <property name="image">image2</property>
       </object>
       <packing>
-        <property name="left_attach">5</property>
+        <property name="left_attach">2</property>
         <property name="top_attach">0</property>
       </packing>
     </child>
     <style>
       <class name="linked"/>
     </style>
-  </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">view-list-symbolic</property>
-  </object>
-  <object class="GtkImage" id="image4">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">view-list-bullet-symbolic</property>
-  </object>
-  <object class="GtkImage" id="image5">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">view-grid-symbolic</property>
   </object>
 </interface>
