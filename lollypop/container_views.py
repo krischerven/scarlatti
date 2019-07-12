@@ -145,7 +145,7 @@ class ViewsContainer:
             if isinstance(child, SearchView):
                 child.set_search(search)
                 return child
-        view = SearchView()
+        view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
         view.set_search(search)

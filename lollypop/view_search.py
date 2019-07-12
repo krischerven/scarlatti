@@ -16,7 +16,7 @@ from gettext import gettext as _
 from random import shuffle
 from urllib.parse import urlparse
 
-from lollypop.define import App, ViewType, Type, Shuffle, MARGIN_SMALL
+from lollypop.define import App, Type, Shuffle, MARGIN_SMALL
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
@@ -29,9 +29,10 @@ class SearchView(BaseView, Gtk.Bin):
         View for searching albums/tracks
     """
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init Popover
+            @param view_type as ViewType
         """
         BaseView.__init__(self)
         Gtk.Bin.__init__(self)
@@ -66,7 +67,7 @@ class SearchView(BaseView, Gtk.Bin):
         self.__button_stack = builder.get_object("button_stack")
         self.__stack = builder.get_object("stack")
         self.__placeholder = builder.get_object("placeholder")
-        self.__view = AlbumsListView([], [], ViewType.SEARCH)
+        self.__view = AlbumsListView([], [], view_type)
         self.__view.set_margin_start(MARGIN_SMALL)
         self.__view.show()
         self.__stack.add_named(self.__view, "view")
