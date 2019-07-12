@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from gettext import gettext as _
 
 from lollypop.view import View
-from lollypop.define import App, Type
+from lollypop.define import App, Type, ViewType
 
 
 class SettingsViewRow(Gtk.ListBoxRow):
@@ -77,11 +77,12 @@ class SettingsView(View):
         Show settings selector
     """
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init view
+            @param view_type as ViewType
         """
-        View.__init__(self)
+        View.__init__(self, view_type)
         self.__listbox = Gtk.ListBox()
         self.__listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         self.__listbox.get_style_context().add_class("sidebar")
@@ -95,9 +96,12 @@ class SettingsView(View):
             row = SettingsViewRow(row_type)
             row.show()
             self.__listbox.add(row)
-        self._viewport.add(self.__listbox)
-        self._scrolled.set_property("expand", True)
-        self.add(self._scrolled)
+        if view_type & ViewType.SCROLLED:
+            self._viewport.add(self.__listbox)
+            self._scrolled.set_property("expand", True)
+            self.add(self._scrolled)
+        else:
+            self.add(self.__listbox)
 
     @property
     def type(self):

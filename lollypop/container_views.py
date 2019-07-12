@@ -496,7 +496,7 @@ class ViewsContainer:
         """
         if item_id == Type.SETTINGS:
             from lollypop.view_settings import SettingsView
-            view = SettingsView()
+            view = SettingsView(ViewType.SCROLLED)
         else:
             from lollypop.view_settings import SettingsChildView
             view = SettingsChildView(item_id)
