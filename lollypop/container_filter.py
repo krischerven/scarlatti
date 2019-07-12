@@ -34,14 +34,18 @@ class FilterContainer:
             Show filtering widget
         """
         reveal = not self.__type_ahead.get_reveal_child()
-        self.__type_ahead.set_reveal_child(reveal)
-        self.__type_ahead.update_indicators(reveal)
         if reveal:
+            self.__type_ahead.set_reveal_child(True)
+            self.__type_ahead.update_indicators(True)
             App().enable_special_shortcuts(False)
             self.__type_ahead.entry.grab_focus()
-        else:
+        elif self.__type_ahead.entry.has_focus():
+            self.__type_ahead.set_reveal_child(False)
+            self.__type_ahead.update_indicators(False)
             App().enable_special_shortcuts(True)
             self.__type_ahead.entry.set_text("")
+        else:
+            self.__type_ahead.entry.grab_focus()
 
     @property
     def type_ahead(self):
