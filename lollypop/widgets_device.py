@@ -157,6 +157,7 @@ class DeviceWidget(Gtk.ListBoxRow):
             else:
                 self.__switch_normalize.set_sensitive(True)
                 self.__mtp_sync.db.set_encoder(encoder)
+        self.__mtp_sync.db.save()
 
     def _on_normalize_state_set(self, widget, state):
         """
@@ -165,6 +166,7 @@ class DeviceWidget(Gtk.ListBoxRow):
             @param state as bool
         """
         self.__mtp_sync.db.set_normalize(state)
+        self.__mtp_sync.db.save()
 
     def _on_combobox_changed(self, combobox):
         """
