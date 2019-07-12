@@ -12,7 +12,6 @@
 
 from gi.repository import Gtk, Gio
 
-from lollypop.objects_track import Track
 from lollypop.widgets_rating import RatingWidget
 from lollypop.define import App
 from lollypop.widgets_utils import Popover
@@ -26,16 +25,14 @@ class RadioPopover(Popover):
         Popover with radio logos from the web
     """
 
-    def __init__(self, radio_id, radios):
+    def __init__(self, radio):
         """
             Init Popover
-            @param radio_id as int
-            @param radios as Radios
+            @param radio as Radio
         """
         Popover.__init__(self)
         self.__uri_artwork_id = None
-        self.__radio_id = radio_id
-        self.__radios = radios
+        self.__radio = radio
 
         self.__stack = Gtk.Stack()
         self.__stack.set_transition_duration(1000)
@@ -54,18 +51,14 @@ class RadioPopover(Popover):
         self.__stack.set_visible_child_name("widget")
         self.add(self.__stack)
 
-        track = Track()
-        if radio_id is not None:
-            name = self.__radios.get_name(radio_id)
-            track.set_radio_id(radio_id)
-            rating = RatingWidget(track)
+        if radio.id is not None:
+            rating = RatingWidget(radio)
             rating.show()
             builder.get_object("widget").attach(rating, 0, 2, 2, 1)
             builder.get_object("delete_button").show()
-            self.__name_entry.set_text(name)
-            uri = self.__radios.get_uri(radio_id)
-            if uri:
-                self.__uri_entry.set_text(uri)
+            self.__name_entry.set_text(radio.name)
+            if radio.uri:
+                self.__uri_entry.set_text(radio.uri)
 
 #######################
 # PROTECTED           #
@@ -86,8 +79,8 @@ class RadioPopover(Popover):
         self.popdown()
         if self.__radio_id is not None:
             store = Art._RADIOS_PATH
-            name = self.__radios.get_name(self.__radio_id)
-            self.__radios.remove(self.__radio_id)
+            name = App().radios.get_name(self.__radio_id)
+            App().radios.remove(self.__radio_id)
             App().art.uncache_radio_artwork(name)
             f = Gio.File.new_for_path(store + "/%s.png" % name)
             if f.query_exists():
@@ -114,7 +107,7 @@ class RadioPopover(Popover):
         """
         self.__stack.get_visible_child().hide()
         self.__save_radio()
-        name = self.__radios.get_name(self.__radio_id)
+        name = App().radios.get_name(self.__radio_id)
         artwork_widget = RadioArtworkSearchWidget(name)
         artwork_widget.populate()
         artwork_widget.show()
@@ -133,10 +126,10 @@ class RadioPopover(Popover):
         new_uri = self.__uri_entry.get_text()
         if new_name != "" and new_uri != "":
             if self.__radio_id is None:
-                self.__radio_id = self.__radios.add(
+                self.__radio_id = App().radios.add(
                     new_name, new_uri.lstrip().rstrip())
             else:
-                name = self.__radios.get_name(self.__radio_id)
-                self.__radios.rename(self.__radio_id, new_name)
-                self.__radios.set_uri(self.__radio_id, new_uri)
+                name = App().radios.get_name(self.__radio_id)
+                App().radios.rename(self.__radio_id, new_name)
+                App().radios.set_uri(self.__radio_id, new_uri)
                 App().art.rename_radio(name, new_name)
