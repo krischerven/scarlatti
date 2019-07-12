@@ -12,7 +12,8 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import ViewType
+from lollypop.define import ViewType, App
+from lollypop.utils import on_realize
 
 
 class FilteringHelper(Gtk.Revealer):
@@ -24,11 +25,18 @@ class FilteringHelper(Gtk.Revealer):
         """
             Init helper
         """
-        self.__indicator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+        separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+        separator.set_size_request(-1, 10)
+        separator.show()
+        self.__indicator = Gtk.EventBox.new()
+        self.__indicator.add(separator)
         self.__indicator.set_margin_bottom(5)
-        context = self.__indicator.get_style_context()
         self.__indicator.set_hexpand(True)
+        self.__indicator.connect("realize", on_realize)
+        context = self.__indicator.get_style_context()
         context.add_class("typeahead-indicator")
+        self.__indicator.connect("button-release-event",
+                                 self.__on_button_release_event)
 
     def search_for_child(self, text):
         """
@@ -134,3 +142,10 @@ class FilteringHelper(Gtk.Revealer):
 #######################
 # PRIVATE             #
 #######################
+    def __on_button_release_event(self, widget, event):
+        """
+            Mark self indicator as active
+            @param widget as Gtk.Widget
+            @param event as Gdk.EventButton
+        """
+        App().window.container.type_ahead.set_active_indicator(self)

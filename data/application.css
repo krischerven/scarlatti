@@ -103,14 +103,12 @@ Gtk.ListBoxRow .menu-button:hover {
 
 .typeahead-indicator
 {
-    background-color: alpha(#ed333b, 0.2);
-    min-height: 5px;
+    background-color: alpha(#ed333b, 0.3);
 }
 
 .typeahead-indicator:selected
 {
     background-color: #ed333b;
-    min-height: 5px;
 }
 
 .typeahead {
