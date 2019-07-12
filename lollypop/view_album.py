@@ -20,9 +20,10 @@ from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view import LazyLoadingView
+from lollypop.helper_filtering import FilteringHelper
 
 
-class AlbumView(LazyLoadingView, TracksView, ViewController):
+class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
     """
         Show artist albums and tracks
     """
@@ -38,36 +39,40 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
         LazyLoadingView.__init__(self, view_type)
         TracksView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        FilteringHelper.__init__(self)
         self._album = album
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
-        self.__grid = Gtk.Grid()
-        self.__grid.set_property("vexpand", True)
-        self.__grid.set_row_spacing(10)
-        self.__grid.set_margin_start(MARGIN)
-        self.__grid.set_margin_end(MARGIN)
-        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__grid.show()
+        self._box = Gtk.Grid()
+        self._box.set_property("vexpand", True)
+        self._box.set_row_spacing(10)
+        self._box.set_margin_start(MARGIN)
+        self._box.set_margin_end(MARGIN)
+        self._box.set_orientation(Gtk.Orientation.VERTICAL)
+        self._box.show()
 
     def populate(self):
         """
             Populate the view with album
         """
         TracksView.populate(self)
-        self.__grid.add(self._responsive_widget)
+        self._box.add(self._responsive_widget)
         self.__banner = AlbumBannerWidget(self._album,
                                           self._view_type | ViewType.ALBUM)
         self._overlay = Gtk.Overlay.new()
         if self._view_type & ViewType.SCROLLED:
             self._overlay.add(self._scrolled)
-            self._viewport.add(self.__grid)
+            self._viewport.add(self._box)
             self._scrolled.get_vscrollbar().set_margin_top(
                 self.__banner.height)
         else:
-            self._overlay.add(self.__grid)
+            self._overlay.add(self._box)
         self._overlay.show()
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
+        if App().window.container.type_ahead.get_reveal_child():
+            self.indicator.show()
+        self.add(self.indicator)
         self.add(self._overlay)
         self._responsive_widget.show()
 
@@ -170,11 +175,11 @@ class AlbumView(LazyLoadingView, TracksView, ViewController):
                 label.set_property("halign", Gtk.Align.START)
                 label.set_margin_top(40)
                 label.show()
-                self.__grid.add(label)
+                self._box.add(label)
                 self.__others_box = AlbumsBoxView([], [artist_id],
                                                   ViewType.SMALL)
                 self.__others_box.show()
-                self.__grid.add(self.__others_box)
+                self._box.add(self.__others_box)
                 self.__others_box.populate([Album(id) for id in album_ids])
         else:
             TracksView.populate(self)
