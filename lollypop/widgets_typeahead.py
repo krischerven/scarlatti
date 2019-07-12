@@ -84,7 +84,7 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         widget = self.__get_widget()
         if widget is not None:
-            widget.search_for_child(entry.get_text().lower())
+            widget.search_for_child(entry.get_text())
 
     def _on_type_ahead_activate(self, entry):
         """
@@ -136,7 +136,7 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         widget = self.__get_widget()
         if widget is not None:
-            widget.search_prev(self.__entry.get_text().lower())
+            widget.search_prev(self.__entry.get_text())
 
     def __search_next(self):
         """
@@ -144,7 +144,7 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         widget = self.__get_widget()
         if widget is not None:
-            widget.search_next(self.__entry.get_text().lower())
+            widget.search_next(self.__entry.get_text())
 
     def __get_widget(self):
         """
