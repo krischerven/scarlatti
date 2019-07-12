@@ -364,7 +364,9 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
                                     allocation.width,
                                     allocation.height,
                                     self.get_scale_factor(),
-                                    behaviour | ArtBehaviour.BLUR_MAX,
+                                    ArtBehaviour.BLUR_MAX |
+                                    ArtBehaviour.CROP |
+                                    ArtBehaviour.DARKER,
                                     self.__on_artwork,
                                     True)
         except Exception as e:
