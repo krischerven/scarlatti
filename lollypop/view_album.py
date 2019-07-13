@@ -21,6 +21,7 @@ from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
+from lollypop.logger import Logger
 
 
 class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
@@ -43,30 +44,31 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         self._album = album
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
-        self._box = Gtk.Grid()
-        self._box.set_property("vexpand", True)
-        self._box.set_row_spacing(10)
-        self._box.set_margin_start(MARGIN)
-        self._box.set_margin_end(MARGIN)
-        self._box.set_orientation(Gtk.Orientation.VERTICAL)
-        self._box.show()
+        self.__others_box = None
+        self.__grid = Gtk.Grid()
+        self.__grid.set_property("vexpand", True)
+        self.__grid.set_row_spacing(10)
+        self.__grid.set_margin_start(MARGIN)
+        self.__grid.set_margin_end(MARGIN)
+        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__grid.show()
 
     def populate(self):
         """
             Populate the view with album
         """
         TracksView.populate(self)
-        self._box.add(self._responsive_widget)
+        self.__grid.add(self._responsive_widget)
         self.__banner = AlbumBannerWidget(self._album,
                                           self._view_type | ViewType.ALBUM)
         self._overlay = Gtk.Overlay.new()
         if self._view_type & ViewType.SCROLLED:
             self._overlay.add(self._scrolled)
-            self._viewport.add(self._box)
+            self._viewport.add(self.__grid)
             self._scrolled.get_vscrollbar().set_margin_top(
                 self.__banner.height)
         else:
-            self._overlay.add(self._box)
+            self._overlay.add(self.__grid)
         self._overlay.show()
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
@@ -75,6 +77,38 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         self.add(self.indicator)
         self.add(self._overlay)
         self._responsive_widget.show()
+
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        try:
+            if App().player.is_party:
+                App().lookup_action("party").change_state(
+                    GLib.Variant("b", False))
+            for child in self.filtered:
+                style_context = child.get_style_context()
+                if style_context.has_class("typeahead"):
+                    if hasattr(child, "album"):
+                        child.activate()
+                    else:
+                        track = child.track
+                        App().player.add_album(track.album)
+                        App().player.load(track.album.get_track(track.id))
+        except Exception as e:
+            Logger.error("AlbumView::activate_child: %s" % e)
+
+    @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = self.children
+        if self.__others_box is not None:
+            for child in self.__others_box.children:
+                filtered.append(child)
+        return filtered
 
 #######################
 # PROTECTED           #
@@ -175,11 +209,11 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
                 label.set_property("halign", Gtk.Align.START)
                 label.set_margin_top(40)
                 label.show()
-                self._box.add(label)
+                self.__grid.add(label)
                 self.__others_box = AlbumsBoxView([], [artist_id],
                                                   ViewType.SMALL)
                 self.__others_box.show()
-                self._box.add(self.__others_box)
+                self.__grid.add(self.__others_box)
                 self.__others_box.populate([Album(id) for id in album_ids])
         else:
             TracksView.populate(self)

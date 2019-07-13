@@ -43,17 +43,12 @@ class FilteringHelper(Gtk.Revealer):
             Search child and scroll
             @param text as str
         """
-        children = []
-        for child in self.children:
-            children.append(child)
-            if hasattr(child, "children"):
-                children += child.children
-        for child in children:
+        for child in self.filtered:
             style_context = child.get_style_context()
             style_context.remove_class("typeahead")
         if not text:
             return
-        for child in children:
+        for child in self.filtered:
             if noaccents(child.name).find(noaccents(text)) != -1:
                 style_context = child.get_style_context()
                 style_context.add_class("typeahead")
@@ -67,12 +62,7 @@ class FilteringHelper(Gtk.Revealer):
         """
         previous_children = []
         found_child = None
-        children = []
-        for child in self.children:
-            children.append(child)
-            if hasattr(child, "children"):
-                children += child.children
-        for child in children:
+        for child in self.filtered:
             style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
                 found_child = child
@@ -93,12 +83,7 @@ class FilteringHelper(Gtk.Revealer):
         """
         found = False
         previous_style_context = None
-        children = []
-        for child in self.children:
-            children.append(child)
-            if hasattr(child, "children"):
-                children += child.children
-        for child in children:
+        for child in self.filtered:
             style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
                 previous_style_context = style_context
@@ -119,12 +104,12 @@ class FilteringHelper(Gtk.Revealer):
         return self.__indicator
 
     @property
-    def children(self):
+    def filtered(self):
         """
-            Get children
+            Return widget that we should filter
             @return [Gtk.Widget]
         """
-        return self._box.get_children()
+        return self.children
 
 #######################
 # PROTECTED           #
@@ -135,7 +120,7 @@ class FilteringHelper(Gtk.Revealer):
             @param child as Gtk.Widget
         """
         if self._view_type & ViewType.SCROLLED:
-            coordinates = child.translate_coordinates(self._box, 0, 0)
+            coordinates = child.translate_coordinates(self, 0, 0)
             if coordinates:
                 self._scrolled.get_vadjustment().set_value(coordinates[1])
 

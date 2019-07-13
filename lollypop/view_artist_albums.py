@@ -69,6 +69,20 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
             child.stop()
 
     @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = []
+        for child in self.children:
+            filtered.append(child)
+            if hasattr(child, "children"):
+                for subchild in child.children:
+                    filtered.append(subchild)
+        return filtered
+
+    @property
     def children(self):
         """
             Get children

@@ -410,6 +410,18 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             row.set_artwork()
 
     @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = []
+        for child in self._box.get_children():
+            if isinstance(child, SelectionListRow):
+                filtered.append(child)
+        return filtered
+
+    @property
     def listbox(self):
         """
             Get listbox
