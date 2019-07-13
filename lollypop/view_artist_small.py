@@ -52,6 +52,26 @@ class ArtistViewSmall(View, ArtistViewCommon):
         self.__overlay.add_overlay(self.__album_box)
         self.add(self.__overlay)
 
+    def search_for_child(self, text):
+        return self.__album_box.search_for_child(text)
+
+    def activate_child(self):
+        self.__album_box.activate_child()
+
+    def search_prev(self, text):
+        self.__album_box.search_prev(text)
+
+    def search_next(self, text):
+        self.__album_box.search_next(text)
+
+    @property
+    def indicator(self):
+        return self.__album_box.indicator
+
+    @property
+    def filtered(self):
+        return self.__album_box.filtered
+
 #######################
 # PROTECTED           #
 #######################

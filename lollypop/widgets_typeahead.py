@@ -44,12 +44,17 @@ class TypeAheadWidget(Gtk.Revealer):
             Update list/views indicator
             @param show as bool
         """
+        if App().window.is_adaptive:
+            show = False
         indicators = self.__get_indicators(True)
+        active = self.__get_active_indicator()
         for indicator in indicators:
             if show:
                 indicator.show()
             else:
                 indicator.hide()
+        if active is None:
+            indicators[0].set_state_flags(Gtk.StateFlags.SELECTED, True)
 
     def set_active_indicator(self, view):
         """
@@ -188,8 +193,6 @@ class TypeAheadWidget(Gtk.Revealer):
                     Gtk.StateFlags.SELECTED:
                 active = indicator
                 break
-        if active is None:
-            active = indicators[-1]
         return active
 
     def __activate_next_view(self):
@@ -198,11 +201,14 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         indicators = self.__get_indicators()
         active = self.__get_active_indicator()
-        index = indicators.index(active)
-        if index + 1 < len(indicators):
-            indicators[index + 1].set_state_flags(Gtk.StateFlags.SELECTED,
-                                                  True)
-            active.set_state_flags(Gtk.StateFlags.NORMAL, True)
+        if active is None:
+            indicators[-1].set_state_flags(Gtk.StateFlags.SELECTED, True)
+        else:
+            index = indicators.index(active)
+            if index + 1 < len(indicators):
+                indicators[index + 1].set_state_flags(Gtk.StateFlags.SELECTED,
+                                                      True)
+                active.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
     def __activate_prev_view(self):
         """
@@ -210,8 +216,11 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         indicators = self.__get_indicators()
         active = self.__get_active_indicator()
-        index = indicators.index(active)
-        if index > 0:
-            indicators[index - 1].set_state_flags(Gtk.StateFlags.SELECTED,
-                                                  True)
-            active.set_state_flags(Gtk.StateFlags.NORMAL, True)
+        if active is None:
+            indicators[0].set_state_flags(Gtk.StateFlags.SELECTED, True)
+        else:
+            index = indicators.index(active)
+            if index > 0:
+                indicators[index - 1].set_state_flags(Gtk.StateFlags.SELECTED,
+                                                      True)
+                active.set_state_flags(Gtk.StateFlags.NORMAL, True)

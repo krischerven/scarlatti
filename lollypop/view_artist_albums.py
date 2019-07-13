@@ -48,7 +48,8 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
             self._viewport.add(self._box)
         else:
             self._overlay.add(self._box)
-        if App().window.container.type_ahead.get_reveal_child():
+        if not App().window.is_adaptive and\
+                App().window.container.type_ahead.get_reveal_child():
             self.indicator.show()
         self.add(self.indicator)
         self.add(self._overlay)
