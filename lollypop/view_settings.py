@@ -145,30 +145,31 @@ class SettingsChildView(View):
         Show settings widget
     """
 
-    def __init__(self, view_type):
+    def __init__(self, view_id, view_type):
         """
             Init view
-            @param view_type as int
+            @param view_id as int
+            @param view_type as ViewType
         """
-        View.__init__(self)
-        self.__view_type = view_type
-        if view_type == Type.SETTINGS_APPEARANCE:
+        View.__init__(self, view_type)
+        self.__view_id = view_id
+        if view_id == Type.SETTINGS_APPEARANCE:
             from lollypop.widgets_settings_appearance\
                 import AppearanceSettingsWidget
             widget = AppearanceSettingsWidget()
-        elif view_type == Type.SETTINGS_BEHAVIOUR:
+        elif view_id == Type.SETTINGS_BEHAVIOUR:
             from lollypop.widgets_settings_behaviour\
                 import BehaviourSettingsWidget
             widget = BehaviourSettingsWidget()
-        elif view_type == Type.SETTINGS_COLLECTIONS:
+        elif view_id == Type.SETTINGS_COLLECTIONS:
             from lollypop.widgets_settings_collections\
                 import CollectionsSettingsWidget
             widget = CollectionsSettingsWidget()
-        elif view_type == Type.SETTINGS_WEB:
+        elif view_id == Type.SETTINGS_WEB:
             from lollypop.widgets_settings_web\
                 import WebSettingsWidget
             widget = WebSettingsWidget()
-        elif view_type == Type.SETTINGS_DEVICES:
+        elif view_id == Type.SETTINGS_DEVICES:
             from lollypop.widgets_settings_devices\
                 import DevicesSettingsWidget
             widget = DevicesSettingsWidget()
@@ -176,9 +177,12 @@ class SettingsChildView(View):
         if isinstance(child, Gtk.Box):
             child.set_spacing(20)
         widget.show()
-        self._viewport.add(widget)
-        self._scrolled.set_property("expand", True)
-        self.add(self._scrolled)
+        if view_type & ViewType.SCROLLED:
+            self._viewport.add(widget)
+            self._scrolled.set_property("expand", True)
+            self.add(self._scrolled)
+        else:
+            self.add(widget)
 
     @property
     def type(self):
@@ -186,7 +190,7 @@ class SettingsChildView(View):
             Get type
             @return type as int
         """
-        return self.__view_type
+        return self.__view_id
 
 ##############
 # PROTECTED  #

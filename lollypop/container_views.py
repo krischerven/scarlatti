@@ -499,7 +499,7 @@ class ViewsContainer:
             view = SettingsView(ViewType.SCROLLED)
         else:
             from lollypop.view_settings import SettingsChildView
-            view = SettingsChildView(item_id)
+            view = SettingsChildView(item_id, ViewType.SCROLLED)
         return view
 
     def _restore_state(self):
