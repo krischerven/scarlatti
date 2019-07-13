@@ -47,14 +47,11 @@ class TypeAheadWidget(Gtk.Revealer):
         if App().window.is_adaptive:
             show = False
         indicators = self.__get_indicators(True)
-        active = self.__get_active_indicator()
         for indicator in indicators:
             if show:
                 indicator.show()
             else:
                 indicator.hide()
-        if active is None:
-            indicators[0].set_state_flags(Gtk.StateFlags.SELECTED, True)
 
     def set_active_indicator(self, view):
         """
@@ -156,14 +153,17 @@ class TypeAheadWidget(Gtk.Revealer):
             Get widget for activated button
             @return Gtk.Widget
         """
-        if App().window.container.list_one.indicator.get_state_flags() &\
-                Gtk.StateFlags.SELECTED:
-            return App().window.container.list_one
-        elif App().window.container.list_two.indicator.get_state_flags() &\
-                Gtk.StateFlags.SELECTED:
-            return App().window.container.list_two
+        if App().window.is_adaptive:
+            return App().window.container.view
         else:
-            return App().window.container.stack
+            if App().window.container.list_one.indicator.get_state_flags() &\
+                    Gtk.StateFlags.SELECTED:
+                return App().window.container.list_one
+            elif App().window.container.list_two.indicator.get_state_flags() &\
+                    Gtk.StateFlags.SELECTED:
+                return App().window.container.list_two
+            else:
+                return App().window.container.stack
 
     def __get_indicators(self, show_hidden=False):
         """
@@ -201,9 +201,7 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         indicators = self.__get_indicators()
         active = self.__get_active_indicator()
-        if active is None:
-            indicators[-1].set_state_flags(Gtk.StateFlags.SELECTED, True)
-        else:
+        if active is not None:
             index = indicators.index(active)
             if index + 1 < len(indicators):
                 indicators[index + 1].set_state_flags(Gtk.StateFlags.SELECTED,
@@ -216,9 +214,7 @@ class TypeAheadWidget(Gtk.Revealer):
         """
         indicators = self.__get_indicators()
         active = self.__get_active_indicator()
-        if active is None:
-            indicators[0].set_state_flags(Gtk.StateFlags.SELECTED, True)
-        else:
+        if active is not None:
             index = indicators.index(active)
             if index > 0:
                 indicators[index - 1].set_state_flags(Gtk.StateFlags.SELECTED,
