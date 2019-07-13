@@ -164,7 +164,7 @@ class TypeAheadWidget(Gtk.Revealer):
         """
             Get indicator
             @param show_hidden as bool
-            @return Gtk.Widget
+            @return [Gtk.Widget]
         """
         indicators = []
         for view in [App().window.container.list_one,
@@ -176,9 +176,10 @@ class TypeAheadWidget(Gtk.Revealer):
                 indicators.append(view.indicator)
         return indicators
 
-    def __activate_next_view(self):
+    def __get_active_indicator(self):
         """
-            Activate next view
+            Get active indicator
+            @return Gtk.Widget
         """
         active = None
         indicators = self.__get_indicators()
@@ -187,6 +188,16 @@ class TypeAheadWidget(Gtk.Revealer):
                     Gtk.StateFlags.SELECTED:
                 active = indicator
                 break
+        if active is None:
+            active = indicators[-1]
+        return active
+
+    def __activate_next_view(self):
+        """
+            Activate next view
+        """
+        indicators = self.__get_indicators()
+        active = self.__get_active_indicator()
         index = indicators.index(active)
         if index + 1 < len(indicators):
             indicators[index + 1].set_state_flags(Gtk.StateFlags.SELECTED,
@@ -197,13 +208,8 @@ class TypeAheadWidget(Gtk.Revealer):
         """
             Activate prev view
         """
-        active = None
         indicators = self.__get_indicators()
-        for indicator in indicators:
-            if indicator.get_state_flags() &\
-                    Gtk.StateFlags.SELECTED:
-                active = indicator
-                break
+        active = self.__get_active_indicator()
         index = indicators.index(active)
         if index > 0:
             indicators[index - 1].set_state_flags(Gtk.StateFlags.SELECTED,

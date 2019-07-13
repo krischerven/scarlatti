@@ -40,10 +40,10 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
         self._box.set_max_children_per_line(1000)
         self._box.connect("child-activated", self._on_item_activated)
         self._box.show()
-        if App().window.container.type_ahead.get_reveal_child():
-            self.indicator.show()
-        self.add(self.indicator)
         if view_type & ViewType.SCROLLED:
+            if App().window.container.type_ahead.get_reveal_child():
+                self.indicator.show()
+            self.add(self.indicator)
             self._viewport.set_property("valign", Gtk.Align.START)
             self._viewport.set_property("margin", 5)
             self._scrolled.set_property("expand", True)
