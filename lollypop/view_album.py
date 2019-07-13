@@ -111,6 +111,14 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
                 filtered.append(child)
         return filtered
 
+    @property
+    def scroll_relative_to(self):
+        """
+            Relative to scrolled widget
+            @return Gtk.Widget
+        """
+        return self._responsive_widget
+
 #######################
 # PROTECTED           #
 #######################
