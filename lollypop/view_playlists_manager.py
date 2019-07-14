@@ -44,8 +44,8 @@ class PlaylistsManagerView(FlowBoxView):
             new_playlist_button.set_hexpand(True)
             new_playlist_button.set_margin_top(5)
             new_playlist_button.show()
-            self.insert_row(0)
-            self.attach(new_playlist_button, 0, 0, 1, 1)
+            self.insert_row(1)
+            self.attach(new_playlist_button, 0, 1, 1, 1)
         self._widget_class = PlaylistRoundedWidget
 
     def populate(self, items=None):
