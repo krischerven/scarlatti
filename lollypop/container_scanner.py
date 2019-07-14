@@ -79,7 +79,8 @@ class ScannerContainer:
         genre_ids = []
         if App().settings.get_value("show-sidebar"):
             sidebar_content = App().settings.get_enum("sidebar-content")
-            if sidebar_content == SidebarContent.DEFAULT:
+            if sidebar_content in [SidebarContent.DEFAULT,
+                                   SidebarContent.ICONS]:
                 return
             elif sidebar_content == SidebarContent.GENRES:
                 genre_ids = self._list_one.selected_ids

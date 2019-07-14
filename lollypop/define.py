@@ -128,6 +128,7 @@ class SidebarContent:
 
 
 class SelectionListMask:
+    NONE = 1 << 0
     LIST_ONE = 1 << 1
     LIST_TWO = 1 << 2
     LIST_DEVICE = 1 << 3
@@ -136,6 +137,7 @@ class SelectionListMask:
     PLAYLISTS = 1 << 6
     COMPILATIONS = 1 << 7
     ARTISTS_VIEW = 1 << 8
+    ICONS = 1 << 10
 
 
 class Shuffle:

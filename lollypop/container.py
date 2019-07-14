@@ -157,7 +157,8 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         sidebar_content = App().settings.get_enum("sidebar-content")
         if App().settings.get_value("show-sidebar") and\
-                not sidebar_content == SidebarContent.DEFAULT and\
+                sidebar_content not in [SidebarContent.DEFAULT,
+                                        SidebarContent.ICONS] and\
                 not App().window.is_adaptive:
             if sidebar_content == SidebarContent.GENRES:
                 # Get artist genres
@@ -173,7 +174,8 @@ class Container(Gtk.Overlay, NotificationContainer,
                 # Select artists on list one
                 self.show_lists(artist_ids, [])
         else:
-            if sidebar_content == SidebarContent.DEFAULT and\
+            if sidebar_content in [SidebarContent.DEFAULT,
+                                   SidebarContent.ICONS] and\
                     self._stack.get_children():
                 App().window.emit("show-can-go-back", True)
             self.show_view([Type.ARTISTS], artist_ids)

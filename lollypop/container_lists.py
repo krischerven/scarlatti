@@ -44,7 +44,7 @@ class ListsContainer:
             elif sidebar_content == SidebarContent.ARTISTS:
                 self.__update_list_artists(self._list_one, [Type.ALL], update)
             else:
-                self.__update_list_artists(self._list_one, None, update)
+                self.__update_list_default(self._list_one, update)
 
     def update_list_two(self, update=False):
         """
@@ -55,7 +55,7 @@ class ListsContainer:
             sidebar_content = App().settings.get_enum("sidebar-content")
             ids = self._list_one.selected_ids
             if ids and ids[0] in [Type.PLAYLISTS, Type.YEARS]:
-                self.__update_list_playlists(update, ids[0])
+                self.__update_list_playlists(self._list_two, update, ids[0])
             elif sidebar_content == SidebarContent.GENRES and ids:
                 self.__update_list_artists(self._list_two, ids, update)
 
@@ -110,7 +110,7 @@ class ListsContainer:
         self._list_two.connect("pass-focus", self.__on_pass_focus)
         self._list_two.connect("map", self.__on_list_two_mapped)
         self._paned_two.add1(self._list_two)
-        self._paned_one.add1(self._list_one)
+        self._paned_one.pack1(self._list_one, False, False)
         App().window.add_paned(self._paned_one, self._list_one)
         App().window.add_paned(self._paned_two, self._list_two)
         if App().window.is_adaptive:
@@ -141,7 +141,8 @@ class ListsContainer:
                 sidebar_content = App().settings.get_enum("sidebar-content")
                 if state_two_ids and (
                                   App().window.is_adaptive or
-                                  sidebar_content == SidebarContent.DEFAULT):
+                                  sidebar_content in [SidebarContent.DEFAULT,
+                                                      SidebarContent.ICONS]):
                     self.show_view(state_one_ids, state_two_ids)
                 # Wait for list to be populated and select item
                 elif state_two_ids and not state_three_ids:
@@ -162,15 +163,16 @@ class ListsContainer:
 ############
 # PRIVATE  #
 ############
-    def __update_list_playlists(self, update, type):
+    def __update_list_playlists(self, selection_list, update, type):
         """
             Setup list for playlists
+            @param list as SelectionList
             @param update as bool
             @param type as int
         """
-        self._list_two.mark_as(SelectionListMask.PLAYLISTS)
+        selection_list.set_mask(SelectionListMask.PLAYLISTS)
         if type == Type.PLAYLISTS:
-            items = self._list_two.get_playlist_headers()
+            items = selection_list.get_playlist_headers()
             items += App().playlists.get()
         else:
             (years, unknown) = App().albums.get_years()
@@ -178,9 +180,9 @@ class ListsContainer:
             if unknown:
                 items.insert(0, (Type.NONE, _("Unknown"), ""))
         if update:
-            self._list_two.update_values(items)
+            selection_list.update_values(items)
         else:
-            self._list_two.populate(items)
+            selection_list.populate(items)
 
     def __update_list_genres(self, selection_list, update):
         """
@@ -193,7 +195,7 @@ class ListsContainer:
             return genres
 
         def setup(genres):
-            selection_list.mark_as(SelectionListMask.GENRES)
+            selection_list.set_mask(SelectionListMask.GENRES)
             items = selection_list.get_headers(selection_list.mask)
             items += genres
             if update:
@@ -224,10 +226,9 @@ class ListsContainer:
             return (artists, compilations)
 
         def setup(artists, compilations):
-            mask = SelectionListMask.ARTISTS
+            selection_list.set_mask(SelectionListMask.ARTISTS)
             if compilations:
-                mask |= SelectionListMask.COMPILATIONS
-            selection_list.mark_as(mask)
+                selection_list.add_mask(SelectionListMask.COMPILATIONS)
             items = selection_list.get_headers(selection_list.mask)
             items += artists
             if update:
@@ -241,6 +242,16 @@ class ListsContainer:
         loader = Loader(target=load, view=selection_list,
                         on_finished=lambda r: setup(*r))
         loader.start()
+
+    def __update_list_default(self, selection_list, update):
+        """
+            Setup list for artists
+            @param list as SelectionList
+            @param update as bool, if True, just update entries
+        """
+        selection_list.set_mask(SelectionListMask.ICONS)
+        selection_list.populate(
+            selection_list.get_headers(selection_list.mask))
 
     def __on_list_one_activated(self, listbox, row):
         """

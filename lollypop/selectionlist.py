@@ -19,7 +19,7 @@ from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.fastscroll import FastScroll
 from lollypop.define import Type, App, ArtSize, SelectionListMask
-from lollypop.define import SidebarContent, ArtBehaviour, ViewType
+from lollypop.define import ArtBehaviour, ViewType
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, on_query_tooltip
 from lollypop.shown import ShownLists, ShownPlaylists
@@ -63,7 +63,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         if rowid == Type.SEPARATOR:
             height = -1
             self.set_sensitive(False)
-        elif self.__mask & SelectionListMask.ARTISTS and\
+        elif mask & SelectionListMask.ARTISTS and\
                 self.__rowid >= 0 and\
                 App().settings.get_value("artist-artwork"):
             self.get_style_context().add_class("row")
@@ -71,8 +71,7 @@ class SelectionListRow(Gtk.ListBoxRow):
                 height = ArtSize.ARTIST_SMALL
             # Padding => application.css
             height += 12
-        elif App().settings.get_enum("sidebar-content") ==\
-                SidebarContent.DEFAULT:
+        elif mask & SelectionListMask.ICONS:
             self.get_style_context().add_class("row-big")
             # Padding => application.css
             height += 30
@@ -93,17 +92,20 @@ class SelectionListRow(Gtk.ListBoxRow):
         else:
             self.__grid = Gtk.Grid()
             self.__grid.set_column_spacing(7)
+            self.__grid.show()
             self.__artwork = Gtk.Image.new()
-            self.__label = Gtk.Label.new()
-            self.__label.set_markup(GLib.markup_escape_text(self.__name))
-            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-            self.__label.set_property("has-tooltip", True)
-            self.__label.connect("query-tooltip", on_query_tooltip)
-            self.__label.show()
-            self.__grid.show()
-            self.__grid.show()
             self.__grid.add(self.__artwork)
-            self.__grid.add(self.__label)
+            if self.__mask & SelectionListMask.ICONS:
+                self.__artwork.set_property("halign", Gtk.Align.CENTER)
+                self.__artwork.set_hexpand(True)
+            else:
+                self.__label = Gtk.Label.new()
+                self.__label.set_markup(GLib.markup_escape_text(self.__name))
+                self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+                self.__label.set_property("has-tooltip", True)
+                self.__label.connect("query-tooltip", on_query_tooltip)
+                self.__label.show()
+                self.__grid.add(self.__label)
             if self.__mask & SelectionListMask.ARTISTS:
                 self.__grid.set_margin_end(20)
             self.add(self.__grid)
@@ -115,7 +117,8 @@ class SelectionListRow(Gtk.ListBoxRow):
             @param string as str
         """
         self.__name = string
-        self.__label.set_markup(GLib.markup_escape_text(string))
+        if not self.__mask & SelectionListMask.ICONS:
+            self.__label.set_markup(GLib.markup_escape_text(string))
 
     def set_artwork(self):
         """
@@ -208,15 +211,15 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         "pass-focus": (GObject.SignalFlags.RUN_FIRST, None, ())
     }
 
-    def __init__(self, base_type):
+    def __init__(self, base_mask):
         """
             Init Selection list ui
-            @param base_type as SelectionListMask
+            @param base_mask as SelectionListMask
         """
         LazyLoadingView.__init__(self, ViewType.NOT_ADAPTIVE |
                                  ViewType.SCROLLED)
         FilteringHelper.__init__(self)
-        self.__base_type = base_type
+        self.__base_mask = base_mask
         self.__sort = False
         self.__mask = 0
         self.__height = SelectionListRow.get_best_height(self)
@@ -243,12 +246,19 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         App().art.connect("artist-artwork-changed",
                           self.__on_artist_artwork_changed)
 
-    def mark_as(self, type):
+    def set_mask(self, mask):
         """
             Mark list as artists list
-            @param type as SelectionListMask
+            @param mask as SelectionListMask
         """
-        self.__mask = self.__base_type | type
+        self.__mask = self.__base_mask | mask
+
+    def add_mask(self, mask):
+        """
+            Mark list as artists list
+            @param mask as SelectionListMask
+        """
+        self.__mask = self.__base_mask | mask
 
     def populate(self, values):
         """
@@ -362,9 +372,9 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             lists += [(Type.SEARCH, _("Search"), _("Search"))]
             lists += [
                 (Type.CURRENT, _("Current playlist"), _("Current playlist"))]
-        if lists and\
-                App().settings.get_enum("sidebar-content") !=\
-                SidebarContent.DEFAULT:
+        if lists and mask & (SelectionListMask.ARTISTS |
+                             SelectionListMask.GENRES |
+                             SelectionListMask.PLAYLISTS):
             lists.append((Type.SEPARATOR, "", ""))
         return lists
 
@@ -374,9 +384,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             @return items as [(int, str)]
         """
         lists = ShownPlaylists.get()
-        if lists and\
-                App().settings.get_enum("sidebar-content") !=\
-                SidebarContent.DEFAULT:
+        if lists:
             lists.append((Type.SEPARATOR, "", ""))
         return lists
 
@@ -560,7 +568,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             @param event as Gdk.Event
         """
         if event.button != 1 and\
-                self.__base_type in [SelectionListMask.LIST_ONE,
+                self.__base_mask in [SelectionListMask.LIST_ONE,
                                      SelectionListMask.LIST_TWO]:
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
