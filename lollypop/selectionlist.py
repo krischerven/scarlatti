@@ -55,6 +55,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             @param height as str
         """
         Gtk.ListBoxRow.__init__(self)
+        self.__artwork = None
         self.__rowid = rowid
         self.__name = name
         self.__sortname = sortname
@@ -95,17 +96,13 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__grid.show()
             self.__artwork = Gtk.Image.new()
             self.__grid.add(self.__artwork)
-            if self.__mask & SelectionListMask.ICONS:
-                self.__artwork.set_property("halign", Gtk.Align.CENTER)
-                self.__artwork.set_hexpand(True)
-            else:
-                self.__label = Gtk.Label.new()
-                self.__label.set_markup(GLib.markup_escape_text(self.__name))
-                self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-                self.__label.set_property("has-tooltip", True)
-                self.__label.connect("query-tooltip", on_query_tooltip)
-                self.__label.show()
-                self.__grid.add(self.__label)
+            self.__label = Gtk.Label.new()
+            self.__label.set_markup(GLib.markup_escape_text(self.__name))
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+            self.__label.set_property("has-tooltip", True)
+            self.__label.connect("query-tooltip", on_query_tooltip)
+            self.__grid.add(self.__label)
+            self.update_internals()
             if self.__mask & SelectionListMask.ARTISTS:
                 self.__grid.set_margin_end(20)
             self.add(self.__grid)
@@ -148,6 +145,22 @@ class SelectionListRow(Gtk.ListBoxRow):
         else:
             self.__artwork.hide()
             self.emit("populated")
+
+    def update_internals(self):
+        """
+            Update label visiblity
+        """
+        if self.__artwork is None:
+            return
+        if self.__mask & SelectionListMask.ICONS and\
+                not App().window.is_adaptive:
+            self.__artwork.set_property("halign", Gtk.Align.CENTER)
+            self.__artwork.set_hexpand(True)
+            self.__label.hide()
+        else:
+            self.__artwork.set_property("halign", Gtk.Align.FILL)
+            self.__artwork.set_hexpand(False)
+            self.__label.show()
 
     @property
     def is_populated(self):
@@ -415,7 +428,9 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             Redraw list
         """
         for row in self._box.get_children():
-            row.set_artwork()
+            if self.__mask & SelectionListMask.ARTISTS:
+                row.set_artwork()
+            row.update_internals()
 
     @property
     def filtered(self):

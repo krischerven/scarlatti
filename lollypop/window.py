@@ -419,6 +419,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             widget = self.__container.list_one
         else:
             widget = self.__container.rounded_artists_view
+        self.__container.list_one.redraw()
         if adaptive_stack:
             self.__toolbar.end.set_mini(True)
             widget.add_value((Type.SEARCH, _("Search"), _("Search")))
