@@ -157,10 +157,14 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork.set_property("halign", Gtk.Align.CENTER)
             self.__artwork.set_hexpand(True)
             self.__label.hide()
+            self.set_tooltip_text(self.__label.get_text())
+            self.set_has_tooltip(True)
         else:
             self.__artwork.set_property("halign", Gtk.Align.FILL)
             self.__artwork.set_hexpand(False)
             self.__label.show()
+            self.set_tooltip_text("")
+            self.set_has_tooltip(False)
 
     @property
     def is_populated(self):
