@@ -180,6 +180,20 @@ class Container(Gtk.Overlay, NotificationContainer,
                 App().window.emit("show-can-go-back", True)
             self.show_view([Type.ARTISTS], artist_ids)
 
+    def set_paned_position_from_sidebar_content(self, sidebar_content):
+        """
+            Update paned position based on current
+            @param sidebar_content as int
+        """
+        if sidebar_content == SidebarContent.DEFAULT:
+            App().settings.set_value("paned-mainlist-width",
+                                     GLib.Variant("i", 0))
+        else:
+            App().settings.reset("paned-mainlist-width")
+        position = App().settings.get_value(
+            "paned-mainlist-width").get_int32()
+        self._paned_one.set_position(position)
+
     @property
     def view(self):
         """

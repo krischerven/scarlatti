@@ -150,7 +150,9 @@ class AppearanceSettingsWidget(Gtk.Bin):
             Update orderby setting
             @param widget as Gtk.ComboBoxText
         """
-        App().settings.set_enum("sidebar-content", widget.get_active())
+        active = widget.get_active()
+        App().settings.set_enum("sidebar-content", active)
+        App().window.container.set_paned_position_from_sidebar_content(active)
         App().window.container.update_list_one()
 
     def _on_clean_artwork_cache_clicked(self, button):

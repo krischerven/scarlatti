@@ -242,7 +242,7 @@
             <description></description>
         </key>
         <key type="i" name="paned-mainlist-width">
-            <default>150</default>
+            <default>200</default>
             <summary>INTERNAL</summary>
             <description></description>
         </key>
