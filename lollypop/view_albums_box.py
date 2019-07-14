@@ -125,8 +125,11 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             return
         if album_widget.artwork is None:
             return
-        album = Album(album_widget.album.id,
-                      self.__genre_ids, self.__artist_ids)
+        if self.__genre_ids and self.__genre_ids[0] == Type.YEARS:
+            album = Album(album_widget.album.id)
+        else:
+            album = Album(album_widget.album.id,
+                          self.__genre_ids, self.__artist_ids)
         App().window.container.show_view([Type.ALBUM], album)
 
     def _on_map(self, widget):
