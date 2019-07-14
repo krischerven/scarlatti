@@ -582,12 +582,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             @param listbox as Gtk.ListBox
             @param event as Gdk.Event
         """
+        row = listbox.get_row_at_y(event.y)
         if event.button != 1 and\
                 self.__base_mask in [SelectionListMask.LIST_ONE,
                                      SelectionListMask.LIST_TWO]:
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
-            row = listbox.get_row_at_y(event.y)
             if row is not None:
                 menu = SelectionListMenu(self, row.id, self.mask)
                 popover = Popover()
@@ -601,19 +601,19 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 popover.popup()
                 return True
         elif event.button == 1:
-            state = event.get_state()
-            static_selected = self.selected_ids and self.selected_ids[0] < 0
-            if (not state & Gdk.ModifierType.CONTROL_MASK and
-                    not state & Gdk.ModifierType.SHIFT_MASK) or\
-                    static_selected:
-                listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-            row = listbox.get_row_at_y(event.y)
-            if row is not None and not (row.id < 0 and self.selected_ids):
-                # User clicked on random, clear cached one
+            if row is not None:
+                state = event.get_state()
+                static_selected = self.selected_ids and\
+                    self.selected_ids[0] < 0
+                if (not state & Gdk.ModifierType.CONTROL_MASK and
+                        not state & Gdk.ModifierType.SHIFT_MASK) or\
+                        static_selected:
+                    listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+                # User clicked on random, clear cached random
                 if row.id == Type.RANDOMS:
                     App().albums.clear_cached_randoms()
                     App().tracks.clear_cached_randoms()
-            listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+                listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
 
     def __on_artist_artwork_changed(self, art, artist):
         """
