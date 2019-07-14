@@ -112,6 +112,14 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         return filtered
 
     @property
+    def scroll_shift(self):
+        """
+            Add scroll shift on y axes
+            @return int
+        """
+        return self.__banner.height + MARGIN
+
+    @property
     def scroll_relative_to(self):
         """
             Relative to scrolled widget

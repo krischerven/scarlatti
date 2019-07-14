@@ -55,6 +55,14 @@ class ArtistViewCommon:
         self._title_label.set_markup(
             GLib.markup_escape_text(", ".join(artists)))
 
+    @property
+    def scroll_shift(self):
+        """
+            Add scroll shift on y axes
+            @return int
+        """
+        return self._banner.height + MARGIN
+
 #######################
 # PROTECTED           #
 #######################

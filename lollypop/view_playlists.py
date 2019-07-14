@@ -22,9 +22,11 @@ from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
+from lollypop.logger import Logger
+from lollypop.helper_filtering import FilteringHelper
 
 
-class PlaylistsView(LazyLoadingView, ViewController):
+class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
     """
         Show playlist tracks
     """
@@ -37,6 +39,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        FilteringHelper.__init__(self)
         self.__playlist_ids = playlist_ids
         self.__signal_id1 = App().playlists.connect(
                                             "playlist-track-added",
@@ -68,7 +71,7 @@ class PlaylistsView(LazyLoadingView, ViewController):
             self._viewport.add(self.__view)
             self._overlay.add(self._scrolled)
         else:
-            self._overlay.Add(self._view)
+            self._overlay.add(self._view)
         self._overlay.show()
         self.__widget.attach(self.__title_label, 0, 0, 1, 1)
         self.__widget.attach(self.__duration_label, 0, 1, 1, 1)
@@ -84,6 +87,10 @@ class PlaylistsView(LazyLoadingView, ViewController):
         self._overlay.add_overlay(self.__banner)
         self.__banner.add_overlay(self.__widget)
         self.__view.set_margin_top(self.__banner.height)
+        if not App().window.is_adaptive and\
+                App().window.container.type_ahead.get_reveal_child():
+            self.indicator.show()
+        self.add(self.indicator)
         self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
@@ -155,6 +162,56 @@ class PlaylistsView(LazyLoadingView, ViewController):
             Stop populating
         """
         self.__view.stop()
+
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        try:
+            if App().player.is_party:
+                App().lookup_action("party").change_state(
+                    GLib.Variant("b", False))
+            for child in self.filtered:
+                style_context = child.get_style_context()
+                if style_context.has_class("typeahead"):
+                    if hasattr(child, "album"):
+                        App().player.play_album(child.album)
+                    else:
+                        track = child.track
+                        App().player.add_album(track.album)
+                        App().player.load(track.album.get_track(track.id))
+                style_context.remove_class("typeahead")
+        except Exception as e:
+            Logger.error("PlaylistsView::activate_child: %s" % e)
+
+    @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = []
+        for child in self.__view.children:
+            filtered.append(child)
+            for subchild in child.children:
+                filtered.append(subchild)
+        return filtered
+
+    @property
+    def scroll_shift(self):
+        """
+            Add scroll shift on y axes
+            @return int
+        """
+        return self.__banner.height + MARGIN
+
+    @property
+    def scroll_relative_to(self):
+        """
+            Relative to scrolled widget
+            @return Gtk.Widget
+        """
+        return self.__view
 
     @property
     def playlist_ids(self):

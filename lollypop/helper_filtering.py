@@ -112,6 +112,14 @@ class FilteringHelper(Gtk.Revealer):
         return self.children
 
     @property
+    def scroll_shift(self):
+        """
+            Add scroll shift on y axes
+            @return int
+        """
+        return 0
+
+    @property
     def scroll_relative_to(self):
         """
             Relative to scrolled widget
@@ -130,7 +138,7 @@ class FilteringHelper(Gtk.Revealer):
         """
         if self._view_type & ViewType.SCROLLED:
             coordinates = child.translate_coordinates(
-                self.scroll_relative_to, 0, 0)
+                self.scroll_relative_to, 0, -self.scroll_shift)
             if coordinates:
                 self._scrolled.get_vadjustment().set_value(coordinates[1])
 

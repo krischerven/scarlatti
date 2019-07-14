@@ -314,6 +314,14 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             else TracksView.get_populated(self)
 
     @property
+    def name(self):
+        """
+            Get row name
+            @return str
+        """
+        return self.__title_label.get_text() + self.__artist_label.get_text()
+
+    @property
     def album(self):
         """
             Get album
