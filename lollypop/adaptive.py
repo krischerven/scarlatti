@@ -214,7 +214,7 @@ class AdaptiveWindow:
             # Move wanted child to paned
             for (p, c) in self.__paned:
                 self.__stack.remove(c)
-                p.add1(c)
+                p.pack1(c, False, False)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 
     def go_back(self):

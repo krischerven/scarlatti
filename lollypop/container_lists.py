@@ -109,7 +109,7 @@ class ListsContainer:
         self._list_one.connect("pass-focus", self.__on_pass_focus)
         self._list_two.connect("pass-focus", self.__on_pass_focus)
         self._list_two.connect("map", self.__on_list_two_mapped)
-        self._paned_two.add1(self._list_two)
+        self._paned_two.pack1(self._list_two, False, False)
         self._paned_one.pack1(self._list_one, False, False)
         App().window.add_paned(self._paned_one, self._list_one)
         App().window.add_paned(self._paned_two, self._list_two)
