@@ -35,6 +35,11 @@ class FilterContainer:
         """
         reveal = not self.__type_ahead.get_reveal_child()
         if reveal:
+            # Do not show filter if nothing to filter
+            if App().window.is_adaptive and (
+                    App().window.container.view is None or
+                    not hasattr(App().window.container.view, "indicator")):
+                return
             self.__type_ahead.set_reveal_child(True)
             self.__type_ahead.update_indicators(True)
             App().enable_special_shortcuts(False)
