@@ -249,7 +249,6 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_list_one_activated()")
-        self.type_ahead.set_active_indicator(self._list_one)
         self._stack.destroy_children()
         if App().window.is_adaptive:
             App().window.emit("can-go-back-changed", True)
@@ -313,6 +312,10 @@ class ListsContainer:
             self._stack.set_visible_child(self._list_two)
         elif view is not None:
             self._stack.set_visible_child(view)
+        if self._list_two.get_visible():
+            self.type_ahead.set_active_indicator(self._list_two)
+        else:
+            self.type_ahead.set_active_indicator(view)
 
     def __on_list_one_populated(self, selection_list):
         """
@@ -327,7 +330,6 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_list_two_activated()")
-        self.type_ahead.set_active_indicator(self._list_two)
         self._stack.destroy_children()
         if not App().window.is_adaptive:
             App().window.emit("show-can-go-back", False)
@@ -346,6 +348,7 @@ class ListsContainer:
             view = self._get_view_artists(genre_ids, selected_ids)
         self._stack.add(view)
         self._stack.set_visible_child(view)
+        self.type_ahead.set_active_indicator(view)
 
     def __on_pass_focus(self, selection_list):
         """
