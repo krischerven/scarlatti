@@ -12,10 +12,8 @@
 
 from gi.repository import Gtk, Gio, Gdk, GLib
 
-from gettext import gettext as _
-
 from lollypop.container import Container
-from lollypop.define import App, Sizing, Type, ScanType
+from lollypop.define import App, Sizing, ScanType
 from lollypop.toolbar import Toolbar
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveWindow
@@ -394,24 +392,16 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
                 self.__save_size_position,
                 window)
 
-    def __on_adaptive_changed(self, window, adaptive_stack):
+    def __on_adaptive_changed(self, window, status):
         """
             Handle adaptive mode
             @param window as AdaptiveWindow
-            @param adaptive_stack as bool
+            @param status as bool
         """
-        if adaptive_stack:
+        if status:
             self.__toolbar.end.set_mini(True)
-            self.container.list_one.add_value((Type.SEARCH,
-                                              _("Search"),
-                                              _("Search")))
-            self.container.list_one.add_value((Type.CURRENT,
-                                              _("Current playlist"),
-                                              _("Current playlist")))
             self.emit("show-can-go-back", True)
         else:
             self.__toolbar.end.set_mini(False)
-            self.container.list_one.remove_value(Type.CURRENT)
-            self.container.list_one.remove_value(Type.SEARCH)
             self.emit("show-can-go-back", self.can_go_back)
         self.emit("can-go-back-changed", self.can_go_back)

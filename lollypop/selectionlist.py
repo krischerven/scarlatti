@@ -13,6 +13,7 @@
 from gi.repository import Gtk, Gdk, GLib, GObject, Pango
 
 from locale import strcoll
+from gettext import gettext as _
 
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
@@ -232,8 +233,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             Init Selection list ui
             @param base_mask as SelectionListMask
         """
-        LazyLoadingView.__init__(self, ViewType.NOT_ADAPTIVE |
-                                 ViewType.SCROLLED)
+        LazyLoadingView.__init__(self, ViewType.SCROLLED)
         FilteringHelper.__init__(self)
         self.__base_mask = base_mask
         self.__sort = False
@@ -262,11 +262,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             self.add(overlay)
         else:
             self.add(self._scrolled)
-            self._scrolled.set_vexpand(True)
-            self._scrolled.set_hexpand(False)
         self.get_style_context().add_class("sidebar")
-        App().art.connect("artist-artwork-changed",
-                          self.__on_artist_artwork_changed)
+        if self.__base_mask & SelectionListMask.LIST_TWO:
+            App().settings.connect("changed::artist-artwork",
+                                   self.__update_children_artwork)
+            App().art.connect("artist-artwork-changed",
+                              self.__on_artist_artwork_changed)
 
     def set_mask(self, mask):
         """
@@ -417,14 +418,13 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 row.activate()
             style_context.remove_class("typeahead")
 
-    def redraw(self):
+    def __update_children_artwork(self):
         """
-            Redraw list
+            Update rows artwork
         """
         for row in self._box.get_children():
             if self.__mask & SelectionListMask.ARTISTS:
                 row.set_artwork()
-            row.update_internals()
 
     @property
     def filtered(self):
@@ -489,6 +489,25 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         coordinates = row.translate_coordinates(self._box, 0, 0)
         if coordinates:
             self._scrolled.get_vadjustment().set_value(coordinates[1])
+
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update internals
+            @param window as Window
+            @param status as bool
+        """
+        for row in self._box.get_children():
+            row.update_internals()
+        self._scrolled.set_vexpand(True)
+        self._scrolled.set_hexpand(status)
+        if self.__mask & SelectionListMask.LIST_ONE:
+            if status:
+                self.add_value((Type.SEARCH, _("Search"), _("Search")))
+                self.add_value((Type.CURRENT, _("Current playlist"),
+                                _("Current playlist")))
+            else:
+                self.remove_value(Type.CURRENT)
+                self.remove_value(Type.SEARCH)
 
 #######################
 # PRIVATE             #

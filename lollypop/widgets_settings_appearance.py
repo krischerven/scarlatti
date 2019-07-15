@@ -99,7 +99,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
         """
         App().settings.set_value("artist-artwork",
                                  GLib.Variant("b", state))
-        App().window.container.list_two.redraw()
         if state:
             App().art.cache_artists_artwork()
 

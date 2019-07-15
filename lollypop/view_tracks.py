@@ -254,7 +254,7 @@ class TracksView(SizeAllocationHelper):
             if not self._view_type & ViewType.TWO_COLUMNS and\
                     self._orientation is not None:
                 return
-            redraw = False
+            update = False
             # We want vertical orientation
             # when not enought place for cover or tracks
             if allocation.width < Sizing.BIG:
@@ -263,9 +263,9 @@ class TracksView(SizeAllocationHelper):
                 orientation = Gtk.Orientation.HORIZONTAL
             if orientation != self._orientation:
                 self._orientation = orientation
-                redraw = True
+                update = True
 
-            if redraw:
+            if update:
                 for child in self._responsive_widget.get_children():
                     self._responsive_widget.remove(child)
                 idx = 0
