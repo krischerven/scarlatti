@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gdk, Gio
 
 import cairo
-from random import shuffle
+from random import shuffle, randint
 
 from lollypop.define import App, Type
 from lollypop.objects_album import Album
@@ -69,16 +69,17 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                                                    self._art_size,
                                                    self._art_size)
         if surface is None:
-            App().task_helper.run(self._create_surface)
+            App().task_helper.run(self._create_surface, True)
         else:
-            self.__set_surface(surface, False)
+            self.__set_surface(surface, False, True)
 
 #######################
 # PROTECTED           #
 #######################
-    def _create_surface(self):
+    def _create_surface(self, set_surface):
         """
             Get artwork surface
+            @param set_surface as bool
             @return cairo.Surface
         """
         surface = cairo.ImageSurface(cairo.FORMAT_RGB24,
@@ -90,32 +91,39 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         ctx.fill()
         album_ids = list(self.__album_ids)
         positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
-        self.__draw_surface(surface, ctx, positions, album_ids)
+        self.__draw_surface(surface, ctx, positions, album_ids, set_surface)
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_surface(self, surface, cache=True):
+    def __set_surface(self, surface, cache, set_surface):
         """
             Set artwork from surface
             @param surface as cairo.Surface
             @param cache as bool
+            @param set_surface as bool
         """
         if self.__cancellable.is_cancelled():
             return
-        self._artwork.set_from_surface(
-            get_round_surface(surface, self._scale_factor, 50))
+        if set_surface:
+            self._artwork.set_from_surface(
+                get_round_surface(surface, self._scale_factor, 50))
         if cache:
             App().art.add_artwork_to_cache("ROUNDED_%s" % self.name, surface)
+        elif set_surface:
+            random_int = randint(0, 10)
+            if random_int == 5:
+                App().task_helper.run(self._create_surface, False)
         self.emit("populated")
 
-    def __draw_surface(self, surface, ctx, positions, album_ids):
+    def __draw_surface(self, surface, ctx, positions, album_ids, set_surface):
         """
             Draw surface for first available album
             @param surface as cairo.Surface
             @param ctx as Cairo.context
             @param positions as {}
             @param album_ids as [int]
+            @param set_surface as bool
             @thread safe
         """
         # Workaround Gdk not being thread safe
@@ -131,7 +139,8 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             ctx.set_source_surface(subsurface, 0, 0)
             ctx.paint()
             ctx.translate(-x, -y)
-            self.__draw_surface(surface, ctx, positions, album_ids)
+            self.__draw_surface(surface, ctx, positions,
+                                album_ids, set_surface)
         if self.__cancellable.is_cancelled():
             return
         elif album_ids and len(positions) > 0:
@@ -142,12 +151,12 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                                                  self._scale_factor)
             if pixbuf is None:
                 GLib.idle_add(self.__draw_surface, surface,
-                              ctx, positions, album_ids)
+                              ctx, positions, album_ids, set_surface)
             else:
                 GLib.idle_add(draw_pixbuf, surface,
                               ctx, pixbuf, positions, album_ids)
         else:
-            GLib.idle_add(self.__set_surface, surface)
+            GLib.idle_add(self.__set_surface, surface, True, set_surface)
 
     def __on_unmap(self, widget):
         """
