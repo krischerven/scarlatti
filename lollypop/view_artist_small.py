@@ -76,8 +76,8 @@ class ArtistViewSmall(View, ArtistViewCommon):
             Get default args for __class__ and populate()
             @return ({}, {})
         """
-        return ({"genre_ids": self.__genre_ids,
-                 "artist_ids": self.__artist_ids}, {"albums": self._albums})
+        return ({"genre_ids": self._genre_ids,
+                 "artist_ids": self._artist_ids}, {"albums": self._albums})
 
     @property
     def indicator(self):

@@ -94,8 +94,8 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             Get default args for __class__ and populate()
             @return ({}, {})
         """
-        return ({"genre_ids": self.__genre_ids,
-                 "artist_ids": self.__artist_ids,
+        return ({"genre_ids": self._genre_ids,
+                 "artist_ids": self._artist_ids,
                  "view_type": self._view_type}, {"albums": self._albums})
 
 #######################
