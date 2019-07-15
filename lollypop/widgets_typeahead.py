@@ -58,8 +58,7 @@ class TypeAheadWidget(Gtk.Revealer):
             Mark view indicator as active
             @param widget as View
         """
-        for _view in [App().window.container.list_one,
-                      App().window.container.list_two,
+        for _view in [App().window.container.list_two,
                       App().window.container.view]:
             if _view is None:
                 continue
@@ -156,10 +155,7 @@ class TypeAheadWidget(Gtk.Revealer):
         if App().window.is_adaptive:
             return App().window.container.view
         else:
-            if App().window.container.list_one.indicator.get_state_flags() &\
-                    Gtk.StateFlags.SELECTED:
-                return App().window.container.list_one
-            elif App().window.container.list_two.indicator.get_state_flags() &\
+            if App().window.container.list_two.indicator.get_state_flags() &\
                     Gtk.StateFlags.SELECTED:
                 return App().window.container.list_two
             else:
@@ -172,8 +168,7 @@ class TypeAheadWidget(Gtk.Revealer):
             @return [Gtk.Widget]
         """
         indicators = []
-        for view in [App().window.container.list_one,
-                     App().window.container.list_two,
+        for view in [App().window.container.list_two,
                      App().window.container.view]:
             if view is not None and\
                     (view.get_visible() or show_hidden) and\
