@@ -130,7 +130,6 @@ class SelectionListMask:
     GENRES = 1 << 5
     PLAYLISTS = 1 << 6
     COMPILATIONS = 1 << 7
-    ARTISTS_VIEW = 1 << 8
 
 
 class Shuffle:
@@ -188,6 +187,7 @@ class Type:
     # WEB is stored in DB, can't be changed
     WEB = -22
     ALBUM = -23
+    ARTISTS_LIST = -24
     ALL = -100
     CURRENT = -101
     DEVICE_ALBUMS = -1000

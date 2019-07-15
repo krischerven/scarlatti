@@ -249,7 +249,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self._box.show()
         self._viewport.add(self._box)
 
-        if self.__base_mask & SelectionListMask.ARTISTS:
+        if self.__base_mask & SelectionListMask.LIST_TWO:
             overlay = Gtk.Overlay.new()
             overlay.set_hexpand(True)
             overlay.set_vexpand(True)

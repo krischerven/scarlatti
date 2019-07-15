@@ -22,40 +22,31 @@ class ShownLists:
 
     IDS = {
         Type.POPULARS: (_("Popular albums"),
-                        SelectionListMask.LIST_ONE |
-                        SelectionListMask.ARTISTS_VIEW),
+                        SelectionListMask.LIST_ONE),
         Type.RANDOMS: (_("Random albums"),
-                       SelectionListMask.LIST_ONE |
-                       SelectionListMask.ARTISTS_VIEW),
+                       SelectionListMask.LIST_ONE),
         Type.LOVED: (_("Loved albums"),
-                     SelectionListMask.LIST_ONE |
-                     SelectionListMask.ARTISTS_VIEW),
+                     SelectionListMask.LIST_ONE),
         Type.RECENTS: (_("Recently added albums"),
-                       SelectionListMask.LIST_ONE |
-                       SelectionListMask.ARTISTS_VIEW),
+                       SelectionListMask.LIST_ONE),
         Type.NEVER: (_("Unplayed albums"),
-                     SelectionListMask.LIST_ONE |
-                     SelectionListMask.ARTISTS_VIEW),
+                     SelectionListMask.LIST_ONE),
         Type.PLAYLISTS: (_("Playlists"),
-                         SelectionListMask.LIST_ONE |
-                         SelectionListMask.ARTISTS_VIEW),
+                         SelectionListMask.LIST_ONE),
         Type.RADIOS: (_("Radios"),
-                      SelectionListMask.LIST_ONE |
-                      SelectionListMask.ARTISTS_VIEW),
+                      SelectionListMask.LIST_ONE),
         Type.YEARS: (_("Years"),
-                     SelectionListMask.LIST_ONE |
-                     SelectionListMask.ARTISTS_VIEW),
+                     SelectionListMask.LIST_ONE),
         Type.GENRES: (_("Genres"),
-                      SelectionListMask.LIST_ONE |
-                      SelectionListMask.ARTISTS_VIEW),
+                      SelectionListMask.LIST_ONE),
         Type.WEB: (_("Web"),
-                   SelectionListMask.LIST_ONE |
-                   SelectionListMask.ARTISTS_VIEW),
+                   SelectionListMask.LIST_ONE),
         Type.ALL: (_("All albums"),
-                   SelectionListMask.LIST_ONE |
-                   SelectionListMask.ARTISTS_VIEW),
+                   SelectionListMask.LIST_ONE),
         Type.ARTISTS: (_("All artists"), SelectionListMask.LIST_ONE),
-        Type.COMPILATIONS: (_("Compilations"), SelectionListMask.COMPILATIONS),
+        Type.ARTISTS_LIST: (_("All Artists in list"),
+                            SelectionListMask.LIST_ONE),
+        Type.COMPILATIONS: (_("Compilations"), SelectionListMask.LIST_ONE),
     }
 
     def get(mask, get_all=False):

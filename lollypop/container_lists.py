@@ -135,42 +135,20 @@ class ListsContainer:
         loader = Loader(target=load, view=selection_list, on_finished=setup)
         loader.start()
 
-    def __update_list_artists(self, selection_list, genre_ids, update):
+    def __show_artists_list(self, selection_list):
         """
             Setup list for artists
             @param list as SelectionList
-            @param genre_ids as [int]
-            @param update as bool, if True, just update entries
         """
         def load():
-            if genre_ids is None:
-                compilations = App().albums.get_compilation_ids([])
-                artists = []
-            elif App().settings.get_value("show-performers"):
-                artists = App().artists.get_all(genre_ids)
-                compilations = App().albums.get_compilation_ids(genre_ids)
+            if App().settings.get_value("show-performers"):
+                artists = App().artists.get_all([])
             else:
-                artists = App().artists.get(genre_ids)
-                compilations = App().albums.get_compilation_ids(genre_ids)
-            return (artists, compilations)
-
-        def setup(artists, compilations):
-            selection_list.set_mask(SelectionListMask.ARTISTS)
-            if compilations:
-                selection_list.add_mask(SelectionListMask.COMPILATIONS)
-            items = selection_list.get_headers(selection_list.mask)
-            items += artists
-            if update:
-                selection_list.update_values(items)
-            else:
-                selection_list.populate(items)
-        if selection_list == self._list_one:
-            if self._list_two.is_visible():
-                self._list_two.hide()
-            self._list_two_restore = Type.NONE
-        loader = Loader(target=load, view=selection_list,
-                        on_finished=lambda r: setup(*r))
+                artists = App().artists.get([])
+            return artists
+        loader = Loader(target=load, view=selection_list)
         loader.start()
+        selection_list.set_mask(SelectionListMask.ARTISTS)
 
     def __on_list_one_activated(self, listbox, row):
         """
@@ -190,18 +168,19 @@ class ListsContainer:
         if not selected_ids:
             return
         # Update lists
-        if selected_ids[0] in [Type.PLAYLISTS, Type.YEARS] and\
-                self._list_one.mask & SelectionListMask.GENRES:
-            self.__update_list_playlists(False, selected_ids[0])
+        if selected_ids[0] == Type.ARTISTS_LIST:
+            self.__show_artists_list(self._list_two)
             self._list_two.show()
         elif (selected_ids[0] > 0 or selected_ids[0] == Type.ALL) and\
                 self._list_one.mask & SelectionListMask.GENRES:
-            self.__update_list_artists(self._list_two, selected_ids, False)
+            self.__show_artists_list(self._list_two)
             self._list_two.show()
         else:
             self._list_two.hide()
         # Update view
-        if selected_ids[0] == Type.PLAYLISTS:
+        if selected_ids[0] == Type.ARTISTS_LIST:
+            self.view.destroy()
+        elif selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()
         elif selected_ids[0] == Type.CURRENT:
             view = self.get_view_current()
@@ -235,10 +214,8 @@ class ListsContainer:
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted
         if App().window.is_adaptive\
-                and self._list_two.is_visible()\
-                and (
-                    selected_ids[0] >= 0 or
-                    selected_ids[0] == Type.ALL):
+                and self._list_two.get_visible()\
+                and selected_ids[0] == Type.ARTISTS_LIST:
             self._stack.set_visible_child(self._list_two)
         elif view is not None:
             self._stack.set_visible_child(view)

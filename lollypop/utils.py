@@ -414,7 +414,7 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
         icon = "emblem-documents-symbolic"
     elif object_id == Type.ALL:
         icon = "media-optical-cd-audio-symbolic"
-    elif object_id == Type.ARTISTS:
+    elif object_id in [Type.ARTISTS, Type.ARTISTS_LIST]:
         icon = "avatar-default-symbolic"
     elif object_id == Type.COMPILATIONS:
         icon = "system-users-symbolic"

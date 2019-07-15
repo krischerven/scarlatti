@@ -88,11 +88,10 @@ class Container(Gtk.Overlay, NotificationContainer,
         search_action = App().lookup_action("search")
         search_action.connect("activate", self.__on_search_activate)
         self._sidebar_one = Gtk.Grid()
-        self._sidebar_one.attach(self._stack, 0, 0, 1, 1)
-        self._sidebar_one.show()
         self._sidebar_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
         self._sidebar_two.connect("notify::position", self.__on_paned_position)
         self._sidebar_two.add2(self._stack)
+        self._sidebar_one.attach(self._sidebar_two, 0, 0, 1, 1)
         position = App().settings.get_value(
             "paned-listview-width").get_int32()
         self._sidebar_two.set_position(position)

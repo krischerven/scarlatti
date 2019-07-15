@@ -38,8 +38,7 @@ class SelectionListMenu(Gio.Menu):
         section = None
 
         if not App().devices and mask & (SelectionListMask.LIST_ONE |
-                                         SelectionListMask.LIST_TWO |
-                                         SelectionListMask.ARTISTS_VIEW):
+                                         SelectionListMask.LIST_TWO):
             section = Gio.Menu()
             section.append(_("No connected devices"), "app.none")
         elif mask & SelectionListMask.PLAYLISTS:
@@ -84,8 +83,7 @@ class SelectionListMenu(Gio.Menu):
             self.append_section(_("Startup"), startup_menu)
         # Shown menu
         if mask & (SelectionListMask.LIST_ONE |
-                   SelectionListMask.LIST_TWO |
-                   SelectionListMask.ARTISTS_VIEW) and rowid < 0:
+                   SelectionListMask.LIST_TWO) and rowid < 0:
             shown_menu = Gio.Menu()
             if mask & SelectionListMask.PLAYLISTS:
                 lists = ShownPlaylists.get(True)
@@ -157,8 +155,7 @@ class SelectionListMenu(Gio.Menu):
             @param variant as GVariant
             @param rowid as int
         """
-        if self.__mask & (SelectionListMask.LIST_ONE |
-                          SelectionListMask.ARTISTS_VIEW):
+        if self.__mask & SelectionListMask.LIST_ONE:
             if variant:
                 startup_one_ids = [rowid]
                 startup_two_ids = []
