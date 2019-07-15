@@ -12,8 +12,6 @@
 
 from gi.repository import GLib
 
-from gettext import gettext as _
-
 from lollypop.loader import Loader
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
@@ -49,17 +47,6 @@ class ListsContainer:
         self._list_one.set_mask(SelectionListMask.LIST_ONE)
         items = ShownLists.get(SelectionListMask.LIST_ONE)
         self._list_one.populate(items)
-
-    def update_list_two(self, update=False):
-        """
-            Update list two
-            @param update as bool
-        """
-        return
-        if self._list_one.get_visible():
-            ids = self._list_one.selected_ids
-            if ids and ids[0] in [Type.PLAYLISTS, Type.YEARS]:
-                self.__update_list_playlists(self._list_two, update, ids[0])
 
     def show_lists(self, list_one_ids, list_two_ids):
         """
@@ -126,27 +113,6 @@ class ListsContainer:
 ############
 # PRIVATE  #
 ############
-    def __update_list_playlists(self, selection_list, update, type):
-        """
-            Setup list for playlists
-            @param list as SelectionList
-            @param update as bool
-            @param type as int
-        """
-        selection_list.set_mask(SelectionListMask.PLAYLISTS)
-        if type == Type.PLAYLISTS:
-            items = selection_list.get_playlist_headers()
-            items += App().playlists.get()
-        else:
-            (years, unknown) = App().albums.get_years()
-            items = [(year, str(year), str(year)) for year in sorted(years)]
-            if unknown:
-                items.insert(0, (Type.NONE, _("Unknown"), ""))
-        if update:
-            selection_list.update_values(items)
-        else:
-            selection_list.populate(items)
-
     def __update_list_genres(self, selection_list, update):
         """
             Setup list for genres

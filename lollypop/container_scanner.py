@@ -40,8 +40,6 @@ class ScannerContainer:
             @param modifications as bool
         """
         if modifications:
-            self.update_list_one(True)
-            self.update_list_two(True)
             from lollypop.app_notification import AppNotification
             notification = AppNotification(_("New tracks available"),
                                            [_("Refresh")],
