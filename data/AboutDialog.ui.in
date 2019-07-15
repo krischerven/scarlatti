@@ -27,7 +27,7 @@ Jordi Romera
     <property name="translator_credits" translatable="yes" context="Translation credits here, put your name here!" comments="Replace me with your names">Cédric Bellegarde &lt;cedric.bellegarde@adishatz.org&gt;</property>
     <property name="artists">
 Reda Lazri (Lollypop icon)
-https://github.com/PapirusDevelopmentTeam/papirus-icon-theme
+Geary Development Team (tag symbolic icon)
     </property>
     <property name="logo_icon_name">org.gnome.Lollypop</property>
     <property name="license_type">gpl-3-0</property>
