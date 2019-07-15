@@ -402,14 +402,18 @@ class ViewsContainer:
                     for album_id in album_ids]
 
         from lollypop.view_albums_box import AlbumsBoxView
-        view_type = ViewType.SCROLLED
+        view_type = ViewType.SCROLLED | self._view_type
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = AlbumsBoxView(genre_ids, artist_ids,
-                             view_type | self._view_type)
-        loader = Loader(target=load, view=view)
-        loader.start()
-        view.show()
+        view = self._stack.history.search(AlbumsBoxView,
+                                          {"genre_ids": genre_ids,
+                                           "artist_ids": artist_ids,
+                                           "view_type": view_type})
+        if view is None:
+            view = AlbumsBoxView(genre_ids, artist_ids, view_type)
+            loader = Loader(target=load, view=view)
+            loader.start()
+            view.show()
         return view
 
     def _get_view_device_albums(self, index):

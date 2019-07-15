@@ -68,10 +68,9 @@ class ViewType:
     SMALL = 1 << 8
     MEDIUM = 1 << 9
     SCROLLED = 1 << 10
-    FILTERED = 1 << 11
-    FULLSCREEN = 1 << 12
-    DEVICES = 1 << 13
-    NOT_ADAPTIVE = 1 << 14
+    FULLSCREEN = 1 << 11
+    DEVICES = 1 << 12
+    NOT_ADAPTIVE = 1 << 13
 
 
 NetworkAccessACL = {

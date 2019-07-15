@@ -31,7 +31,7 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
             @param genre_ids as [int]
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type | ViewType.FILTERED)
+        LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._artist_ids = artist_ids

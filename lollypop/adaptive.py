@@ -52,7 +52,7 @@ class AdaptiveHistory:
         Offload old items and reload them on the fly
     """
 
-    __MAX_HISTORY_ITEMS = 5
+    __MAX_HISTORY_ITEMS = 10
 
     def __init__(self):
         """
@@ -66,7 +66,7 @@ class AdaptiveHistory:
             Offload old views
             @param view as View
         """
-        if hasattr(view, "args"):
+        if "args" in dir(view):
             self.__history.append((view, view.__class__, view.args))
         if self.count >= self.__MAX_HISTORY_ITEMS:
             (view, _class, args) = self.__history[-self.__MAX_HISTORY_ITEMS]
@@ -93,6 +93,25 @@ class AdaptiveHistory:
             return view
         except Exception as e:
             Logger.warning("AdaptiveHistory::pop(): %s, %s", _class, e)
+
+    def search(self, view_class, view_args):
+        """
+            Search view with class and args
+            @param view_class as class
+            @param view_args as {}
+            @return View
+        """
+        index = 0
+        found = False
+        for (_view, _class, args) in self.__history:
+            if _class == view_class and args[0] == view_args:
+                found = True
+                break
+            index += 1
+        if found:
+            view = self.pop(index)
+            return view
+        return None
 
     def remove(self, view):
         """

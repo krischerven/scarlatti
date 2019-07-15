@@ -28,7 +28,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
             Init flowbox view
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type | ViewType.FILTERED)
+        LazyLoadingView.__init__(self, view_type)
         FilteringHelper.__init__(self)
         self.__loading_changed_id = None
         self._widget_class = None
