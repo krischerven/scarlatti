@@ -163,11 +163,6 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_list_one_activated()")
-        self._stack.destroy_children()
-        if App().window.is_adaptive:
-            App().window.emit("can-go-back-changed", True)
-        else:
-            App().window.emit("can-go-back-changed", False)
         view = None
         selected_ids = self._list_one.selected_ids
         if not selected_ids:
@@ -237,9 +232,6 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_list_two_activated()")
-        self._stack.destroy_children()
-        if not App().window.is_adaptive:
-            App().window.emit("can-go-back-changed", False)
         genre_ids = self._list_one.selected_ids
         selected_ids = self._list_two.selected_ids
         if not selected_ids or not genre_ids:

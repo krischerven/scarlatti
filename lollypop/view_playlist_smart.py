@@ -220,7 +220,6 @@ class SmartPlaylistView(View):
         """
         View._on_map(self, widget)
         App().enable_special_shortcuts(False)
-        App().window.emit("can-go-back-changed", True)
 
     def _on_unmap(self, widget):
         """

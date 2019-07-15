@@ -174,7 +174,6 @@ class LyricsView(View, InformationController):
             Set active ids
             @param widget as Gtk.Widget
         """
-        App().window.emit("can-go-back-changed", True)
         self.__current_changed_id = App().player.connect(
             "current-changed", self.__on_current_changed)
 

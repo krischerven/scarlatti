@@ -11,7 +11,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.view import View
-from lollypop.define import App
 from lollypop.widgets_equalizer import EqualizerWidget
 
 
@@ -32,18 +31,6 @@ class EqualizerView(View):
 ##############
 # PROTECTED  #
 ##############
-    def _on_map(self, widget):
-        """
-            Show buttons
-        """
-        App().window.emit("can-go-back-changed", True)
-
-    def _on_unmap(self, widget):
-        """
-            Destroy self
-            @param widget as Gtk.Widget
-        """
-        self.destroy_later()
 
 ############
 # PRIVATE  #

@@ -49,6 +49,10 @@ class AdaptiveStack(Gtk.Stack):
         A Gtk.Stack handling navigation
     """
 
+    __gsignals__ = {
+        "new-child-in-history": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
     def __init__(self):
         """
             Init stack
@@ -68,7 +72,6 @@ class AdaptiveStack(Gtk.Stack):
         """
         if widget not in self.get_children():
             Gtk.Stack.add(self, widget)
-            widget.connect("destroy", self.__on_child_destroy)
 
     def reset_history(self):
         """
@@ -91,6 +94,7 @@ class AdaptiveStack(Gtk.Stack):
             return
         if visible_child is not None:
             self.__history.append(visible_child)
+            self.emit("new-child-in-history")
             visible_child.stop()
         Gtk.Stack.set_visible_child(self, widget)
 
@@ -115,13 +119,6 @@ class AdaptiveStack(Gtk.Stack):
         if widget in self.__history:
             self.__history.remove(widget)
         Gtk.Stack.remove(self, widget)
-
-    def destroy_children(self):
-        """
-            Destroy not visible children
-        """
-        for child in self.get_children():
-            child.destroy_later()
 
     @property
     def history(self):
@@ -175,6 +172,8 @@ class AdaptiveWindow:
             @param stack as AdaptiveStack
         """
         self.__stack = stack
+        self.__stack.connect("new-child-in-history",
+                             self.__on_new_child_in_history)
 
     def add_adaptive_child(self, parent, child):
         """
@@ -195,7 +194,6 @@ class AdaptiveWindow:
             return
         if adaptive_stack:
             self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            self.__stack.reset_history()
             children = self.__stack.get_children()
             for child in children:
                 self.__stack.remove(child)
@@ -302,11 +300,19 @@ class AdaptiveWindow:
         self.update_layout(b)
         self.emit("adaptive-changed", b)
 
+    def __on_new_child_in_history(self, stack):
+        """
+            Emit can-go-back-changed if can go back
+        """
+        if self.can_go_back:
+            self.emit("can-go-back-changed", True)
+
     def __on_child_destroy(self, widget):
         """
             Remove widget from paned
             @param widget as Gtk.Widget
         """
+        # FIXME needed?
         for (p, c) in self.__children:
             if c == widget:
                 self.__children.remove((p, c))

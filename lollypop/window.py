@@ -404,4 +404,3 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             self.__toolbar.end.set_mini(True)
         else:
             self.__toolbar.end.set_mini(False)
-        self.emit("can-go-back-changed", self.can_go_back)

@@ -44,7 +44,6 @@ class PlaylistsContainer:
             Show a view allowing user to edit smart view
             @param playlist_id as int
         """
-        App().window.emit("can-go-back-changed", True)
         from lollypop.view_playlist_smart import SmartPlaylistView
         current = self._stack.get_visible_child()
         view = SmartPlaylistView(playlist_id)

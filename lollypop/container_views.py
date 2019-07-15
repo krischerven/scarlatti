@@ -52,7 +52,6 @@ class ViewsContainer:
             @param data as object
             @param switch as bool
         """
-        App().window.emit("can-go-back-changed", True)
         view = None
         if item_ids:
             if item_ids[0] in [Type.POPULARS,

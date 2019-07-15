@@ -314,7 +314,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         """
             Set active ids
         """
-        App().window.emit("can-go-back-changed", True)
         App().settings.set_value("state-one-ids",
                                  GLib.Variant("ai", [Type.PLAYLISTS]))
         App().settings.set_value("state-two-ids",

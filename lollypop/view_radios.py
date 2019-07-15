@@ -100,7 +100,6 @@ class RadiosView(FlowBoxView, ViewController):
             Set active ids
         """
         FlowBoxView._on_map(self, widget)
-        App().window.emit("can-go-back-changed", True)
         self.__signal_id = App().radios.connect("radio-changed",
                                                 self.__on_radio_changed)
         App().settings.set_value("state-one-ids",
