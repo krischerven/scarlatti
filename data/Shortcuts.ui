@@ -49,13 +49,6 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">True</property>
-                <property name="title" translatable="yes" context="shortcut window">Show/Hide navigation list</property>
-                <property name="accelerator">F9</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkShortcutsShortcut">
-                <property name="visible">True</property>
                 <property name="title" translatable="yes" context="shortcut window">Show equalizer</property>
                 <property name="accelerator">&lt;Shift&gt;&lt;Alt&gt;e</property>
               </object>
