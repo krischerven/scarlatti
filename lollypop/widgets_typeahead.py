@@ -120,4 +120,4 @@ class TypeAheadWidget(Gtk.Revealer):
             if App().window.container.list_view.has_focus():
                 return App().window.container.list_view
             else:
-                return App().window.container.stack
+                return App().window.container.view
