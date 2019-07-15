@@ -10,11 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.shown import ShownLists
 from lollypop.loader import Loader
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
-from lollypop.define import App, Type, ViewType, SelectionListMask
+from lollypop.define import App, Type, ViewType
 from lollypop.define import MARGIN_SMALL
 from lollypop.utils import tracks_to_albums
 
@@ -101,13 +100,6 @@ class ViewsContainer:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.COMPILATIONS:
                 view = self._get_view_albums([], item_ids)
-            elif item_ids[0] == Type.ARTISTS:
-                # Here we handle static items for RoundedArtistView
-                if data and data[0] < 0:
-                    self.show_view(data)
-                    return
-                elif data is None:
-                    view = self._rounded_artists_view
         if view is None:
             view = self._get_view_artists(item_ids, data)
         view.show()
@@ -263,7 +255,7 @@ class ViewsContainer:
         loader.start()
         return view
 
-    def _get_view_artists_rounded(self, static):
+    def _get_view_artists_rounded(self):
         """
             Get rounded artists view
             @return view
@@ -273,31 +265,15 @@ class ViewsContainer:
                 ids = App().artists.get_all()
             else:
                 ids = App().artists.get()
-            compilations = App().albums.get_compilation_ids([])
-            return (ids, compilations)
-
-        def get_items(artist_ids, compilation_ids):
-            items = []
-            if static:
-                mask = SelectionListMask.ARTISTS_VIEW |\
-                       SelectionListMask.ARTISTS
-                if compilation_ids:
-                    mask |= SelectionListMask.COMPILATIONS
-                items = ShownLists.get(mask)
-            items += artist_ids
-            return items
-
-        def setup(artist_ids, compilation_ids):
-            view.populate(get_items(artist_ids, compilation_ids))
+            return ids
 
         from lollypop.view_artists_rounded import RoundedArtistsView
         view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
-        view = RoundedArtistsView(view_type | self._view_type, not static)
+        view = RoundedArtistsView(view_type | self._view_type)
         self._stack.add(view)
-        loader = Loader(target=load, view=view,
-                        on_finished=lambda r: setup(*r))
+        loader = Loader(target=load, view=view)
         loader.start()
         view.show()
         return view

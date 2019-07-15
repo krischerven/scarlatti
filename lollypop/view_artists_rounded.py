@@ -24,7 +24,7 @@ class RoundedArtistsView(FlowBoxView):
         Show artists in a FlowBox
     """
 
-    def __init__(self, view_type, destroy=True):
+    def __init__(self, view_type):
         """
             Init artist view
             @param view_type as ViewType
@@ -32,7 +32,6 @@ class RoundedArtistsView(FlowBoxView):
         """
         FlowBoxView.__init__(self)
         self.__view_type = view_type
-        self.__destroy = destroy
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
@@ -61,16 +60,6 @@ class RoundedArtistsView(FlowBoxView):
             if child.data == item_id:
                 child.destroy()
                 break
-
-    def make_destroyable(self):
-        """
-            Mark view as destroyable
-        """
-        self.__destroy = True
-
-    @property
-    def should_destroy(self):
-        return self.__destroy
 
 #######################
 # PROTECTED           #
@@ -124,18 +113,7 @@ class RoundedArtistsView(FlowBoxView):
             @param widget1 as RoundedArtistWidget
             @param widget2 as RoundedArtistWidget
         """
-        # Static vs static
-        if widget1.data < 0 and widget2.data < 0:
-            return widget1.data < widget2.data
-        # Static entries always on top
-        elif widget2.data < 0:
-            return True
-        # Static entries always on top
-        if widget1.data < 0:
-            return False
-        # String comparaison for non static
-        else:
-            return strcoll(widget1.sortname, widget2.sortname)
+        return strcoll(widget1.sortname, widget2.sortname)
 
     def __on_destroy(self, widget):
         """
