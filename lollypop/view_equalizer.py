@@ -36,7 +36,6 @@ class EqualizerView(View):
         """
             Show buttons
         """
-        App().window.emit("show-can-go-back", True)
         App().window.emit("can-go-back-changed", True)
 
     def _on_unmap(self, widget):

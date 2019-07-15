@@ -167,7 +167,6 @@ class ListsContainer:
         if App().window.is_adaptive:
             App().window.emit("can-go-back-changed", True)
         else:
-            App().window.emit("show-can-go-back", False)
             App().window.emit("can-go-back-changed", False)
         view = None
         selected_ids = self._list_one.selected_ids
@@ -240,7 +239,6 @@ class ListsContainer:
         Logger.debug("Container::__on_list_two_activated()")
         self._stack.destroy_children()
         if not App().window.is_adaptive:
-            App().window.emit("show-can-go-back", False)
             App().window.emit("can-go-back-changed", False)
         genre_ids = self._list_one.selected_ids
         selected_ids = self._list_two.selected_ids

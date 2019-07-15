@@ -136,7 +136,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__sidebar.add(self.__container)
         self.__sidebar.set_size_request(450, -1)
         self.connect("can-go-back-changed", self.__on_can_go_back_changed)
-        self.connect("show-can-go-back", self.__on_show_can_go_back)
         self.connect("size-allocate", self.__on_size_allocate)
         self.__sidebar.get_style_context().add_class("background-opacity")
         self.__revealer.add(self.__sidebar)
@@ -429,17 +428,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             @param button as Gtk.Button
         """
         self.go_back()
-
-    def __on_show_can_go_back(self, window, back):
-        """
-            Show back button
-            @param window as Gtk.Window
-            @param back as bool
-        """
-        if back:
-            self.__back_button.show()
-        else:
-            self.__back_button.hide()
 
     def __on_can_go_back_changed(self, window, back):
         """

@@ -122,8 +122,6 @@ class Container(Gtk.Overlay, NotificationContainer,
             Show albums from artists
             @param artist_ids as [int]
         """
-        if self._stack.get_children():
-            App().window.emit("show-can-go-back", True)
         self.show_view([Type.ARTISTS], artist_ids)
 
     @property

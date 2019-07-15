@@ -152,7 +152,6 @@ class AdaptiveWindow:
 
     gsignals = {
         "adaptive-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
-        "show-can-go-back": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
         "can-go-back-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
     for signal in gsignals:

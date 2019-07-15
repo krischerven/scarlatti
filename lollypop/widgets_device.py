@@ -109,7 +109,6 @@ class DeviceWidget(Gtk.ListBoxRow):
         """
         index = self.__get_device_index()
         if index is not None:
-            App().window.emit("show-can-go-back", True)
             App().window.container.show_view([Type.DEVICE_ALBUMS], index)
         elif App().notify is not None:
             App().notify.send(_("No synchronized albums"))
@@ -121,7 +120,6 @@ class DeviceWidget(Gtk.ListBoxRow):
         """
         index = self.__get_device_index()
         if index is not None:
-            App().window.emit("show-can-go-back", True)
             App().window.container.show_view([Type.DEVICE_PLAYLISTS], index)
         elif App().notify is not None:
             App().notify.send(_("No synchronized playlists"))

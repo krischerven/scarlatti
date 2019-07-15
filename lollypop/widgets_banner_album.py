@@ -280,5 +280,4 @@ class AlbumBannerWidget(BannerWidget):
             @param event as Gdk.event
         """
         App().window.emit("can-go-back-changed", True)
-        App().window.emit("show-can-go-back", True)
         App().window.container.show_view([Type.YEARS], [self.__album.year])

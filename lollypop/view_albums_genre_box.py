@@ -66,6 +66,5 @@ class AlbumsGenreBoxView(FlowBoxView):
         if not self._view_type & ViewType.SMALL and\
                 FlowBoxView._on_item_activated(self, flowbox, widget):
             return
-        App().window.emit("show-can-go-back", True)
         App().window.emit("can-go-back-changed", True)
         App().window.container.show_view([Type.GENRES], widget.data)
