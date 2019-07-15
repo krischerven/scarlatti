@@ -65,7 +65,13 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             Set artwork
         """
         RoundedFlowBoxWidget.set_artwork(self)
-        App().task_helper.run(self._create_surface)
+        surface = App().art.get_artwork_from_cache("ROUNDED_%s" % self.name,
+                                                   self._art_size,
+                                                   self._art_size)
+        if surface is None:
+            App().task_helper.run(self._create_surface)
+        else:
+            self.__set_surface(surface, False)
 
 #######################
 # PROTECTED           #
@@ -89,15 +95,18 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
 #######################
 # PRIVATE             #
 #######################
-    def __set_surface(self, surface):
+    def __set_surface(self, surface, cache=True):
         """
             Set artwork from surface
             @param surface as cairo.Surface
+            @param cache as bool
         """
         if self.__cancellable.is_cancelled():
             return
         self._artwork.set_from_surface(
             get_round_surface(surface, self._scale_factor, 50))
+        if cache:
+            App().art.add_artwork_to_cache("@ROUNDED@%s" % self.name, surface)
         self.emit("populated")
 
     def __draw_surface(self, surface, ctx, positions, album_ids):

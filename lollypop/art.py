@@ -16,8 +16,9 @@ from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
-from lollypop.utils import create_dir
+from lollypop.utils import create_dir, escape
 
+import cairo
 from shutil import rmtree
 
 
@@ -38,6 +39,42 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         create_dir(self._CACHE_PATH)
         create_dir(self._STORE_PATH)
         create_dir(self._WEB_PATH)
+
+    def add_artwork_to_cache(self, name, surface):
+        """
+            Add artwork to cache
+            @param name as str
+            @param surface as cairo.Surface
+            @thread safe
+        """
+        try:
+            width = surface.get_width()
+            height = surface.get_height()
+            cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH,
+                                                  escape(name),
+                                                  width, height)
+            surface.write_to_png(cache_path_png)
+        except Exception as e:
+            Logger.error("Art::add_artwork_to_cache(): %s" % e)
+
+    def get_artwork_from_cache(self, name, width, height):
+        """
+            Get artwork from cache
+            @param name as str
+            @param width as int
+            @param height as int
+            @return cairo surface
+            @thread safe
+        """
+        try:
+            cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH,
+                                                  escape(name),
+                                                  width, height)
+            surface = cairo.ImageSurface.create_from_png(cache_path_png)
+            return surface
+        except Exception as e:
+            Logger.warning("Art::get_artwork_from_cache(): %s" % e)
+            return None
 
     def clean_web(self):
         """
