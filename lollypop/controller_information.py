@@ -86,7 +86,7 @@ class InformationController:
         """
         same_artwork = self._previous_artwork_id ==\
             App().player.current_track.album.id and not self.__per_track_cover
-        if width < 1 or height < 1 or same_artwork:
+        if width <= 1 or height <= 1 or same_artwork:
             return
         self._previous_artwork_id = App().player.current_track.album.id
         scale_factor = self._artwork.get_scale_factor()

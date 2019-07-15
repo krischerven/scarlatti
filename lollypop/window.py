@@ -44,6 +44,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
         self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
+        self.__setup_content()
         App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure = None
         # FIXME Remove this, handled by MPRIS in GNOME 3.26
@@ -88,7 +89,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         pos = App().settings.get_value("window-position")
         self.__setup_size(size)
         self.__setup_pos(pos)
-        self.__setup_content()
         if App().settings.get_value("window-maximized"):
             # Lets resize happen
             GLib.idle_add(self.maximize)
@@ -223,6 +223,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             Setup window content
         """
         self.__container = Container()
+        self.set_stack(self.container.stack)
         self.__container.show()
         self.__vgrid = Gtk.Grid()
         self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
@@ -286,6 +287,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             Run scanner on realize
             @param widget as Gtk.Widget
         """
+        self.container.setup_lists()
         self.__setup()
         if App().settings.get_value("auto-update") or App().tracks.is_empty():
             # Delayed, make python segfault on sys.exit() otherwise

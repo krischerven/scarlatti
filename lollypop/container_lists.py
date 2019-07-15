@@ -29,6 +29,12 @@ class ListsContainer:
         """
             Init container
         """
+        pass
+
+    def setup_lists(self):
+        """
+            Setup container lists
+        """
         self._list_one = SelectionList(SelectionListMask.LIST_ONE)
         self._list_one.show()
         self._list_two = SelectionList(SelectionListMask.LIST_TWO)

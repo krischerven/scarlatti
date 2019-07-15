@@ -66,7 +66,6 @@ class Container(Gtk.Overlay, NotificationContainer,
     def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init container
-            @param window as Window
             @param view_type as ViewType, will be appended to any created view
         """
         Gtk.Overlay.__init__(self)
@@ -79,7 +78,6 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._sidebar_two = None
         self.__paned_position_id = None
         self._stack = ContainerStack()
-        App().window.set_stack(self._stack)
         self._stack.show()
         self.__progress = ProgressBar()
         self.__progress.get_style_context().add_class("progress-bottom")
