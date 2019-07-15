@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, ViewType
 
 
 class PlaylistsContainer:
@@ -22,7 +22,7 @@ class PlaylistsContainer:
         """
             Init container
         """
-        App().playlists.connect("playlists-changed", self.__update_playlists)
+        pass
 
     def show_playlist_manager(self, obj):
         """
@@ -60,17 +60,3 @@ class PlaylistsContainer:
 ############
 # PRIVATE  #
 ############
-    def __update_playlists(self, playlists, playlist_id):
-        """
-            Update playlists in second list
-            @param playlists as Playlists
-            @param playlist_id as int
-        """
-        ids = self._list_one.selected_ids
-        if ids and ids[0] == Type.PLAYLISTS:
-            if App().playlists.exists(playlist_id):
-                self._list_two.update_value(playlist_id,
-                                            App().playlists.get_name(
-                                                 playlist_id))
-            else:
-                self._list_two.remove_value(playlist_id)

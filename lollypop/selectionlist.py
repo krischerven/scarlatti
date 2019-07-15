@@ -72,7 +72,7 @@ class SelectionListRow(Gtk.ListBoxRow):
                 height = ArtSize.ARTIST_SMALL
             # Padding => application.css
             height += 12
-        elif mask & SelectionListMask.LIST_ONE:
+        elif mask & SelectionListMask.SIDEBAR:
             self.get_style_context().add_class("row-big")
             # Padding => application.css
             height += 30
@@ -114,7 +114,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             @param string as str
         """
         self.__name = string
-        if not self.__mask & SelectionListMask.LIST_ONE:
+        if not self.__mask & SelectionListMask.SIDEBAR:
             self.__label.set_markup(GLib.markup_escape_text(string))
 
     def set_artwork(self):
@@ -152,7 +152,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         """
         if self.__artwork is None:
             return
-        if self.__mask & SelectionListMask.LIST_ONE and\
+        if self.__mask & SelectionListMask.SIDEBAR and\
                 not App().window.is_adaptive:
             self.__artwork.set_property("halign", Gtk.Align.CENTER)
             self.__artwork.set_hexpand(True)
@@ -249,7 +249,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self._box.show()
         self._viewport.add(self._box)
 
-        if self.__base_mask & SelectionListMask.LIST_TWO:
+        if self.__base_mask & SelectionListMask.LIST_VIEW:
             overlay = Gtk.Overlay.new()
             overlay.set_hexpand(True)
             overlay.set_vexpand(True)
@@ -263,7 +263,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         else:
             self.add(self._scrolled)
             self.get_style_context().add_class("sidebar")
-        if self.__base_mask & SelectionListMask.LIST_TWO:
+        if self.__base_mask & SelectionListMask.LIST_VIEW:
             App().settings.connect("changed::artist-artwork",
                                    self.__update_children_artwork)
             App().art.connect("artist-artwork-changed",
@@ -500,7 +500,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             row.update_internals()
         self._scrolled.set_vexpand(True)
         self._scrolled.set_hexpand(status)
-        if self.__mask & SelectionListMask.LIST_ONE:
+        if self.__mask & SelectionListMask.SIDEBAR:
             if status:
                 self.add_value((Type.SEARCH, _("Search"), _("Search")))
                 self.add_value((Type.CURRENT, _("Current playlist"),
@@ -597,8 +597,8 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         """
         row = listbox.get_row_at_y(event.y)
         if event.button != 1 and\
-                self.__base_mask in [SelectionListMask.LIST_ONE,
-                                     SelectionListMask.LIST_TWO]:
+                self.__base_mask in [SelectionListMask.SIDEBAR,
+                                     SelectionListMask.LIST_VIEW]:
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
             if row is not None:

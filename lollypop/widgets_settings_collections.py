@@ -234,9 +234,9 @@ class CollectionsSettingsWidget(Gtk.Bin):
             App().player.stop()
             App().db.drop_db()
             App().db = Database()
-            App().window.container.list_two.hide()
+            App().window.container.list_view.hide()
             App().window.container.stack.destroy_children()
-            App().window.container.update_list_one()
+            App().window.container.update_sidebar()
             App().scanner.update(ScanType.FULL)
             self.__progress.get_toplevel().set_deletable(True)
 

@@ -234,13 +234,13 @@ class Application(Gtk.Application, ApplicationActions):
             # Special case, we can't handle this earlier
             if self.window.is_adaptive:
                 visible = self.window.container.stack.get_visible_child()
-                if visible == self.window.container.list_one:
+                if visible == self.window.container.sidebar:
                     self.settings.set_value("state-one-ids",
                                             GLib.Variant("ai", []))
                     self.settings.set_value("state-two-ids",
                                             GLib.Variant("ai", []))
-                elif visible == self.window.container.list_two:
-                    selected_ids = self.window.container.list_one.selected_ids
+                elif visible == self.window.container.list_view:
+                    selected_ids = self.window.container.sidebar.selected_ids
                     self.settings.set_value("state-one-ids",
                                             GLib.Variant("ai", selected_ids))
                     self.settings.set_value("state-two-ids",

@@ -122,13 +122,12 @@ class ScanType:
 
 class SelectionListMask:
     NONE = 1 << 0
-    LIST_ONE = 1 << 1
-    LIST_TWO = 1 << 2
-    LIST_DEVICE = 1 << 3
-    ARTISTS = 1 << 4
-    GENRES = 1 << 5
-    PLAYLISTS = 1 << 6
-    COMPILATIONS = 1 << 7
+    SIDEBAR = 1 << 1
+    LIST_VIEW = 1 << 2
+    ARTISTS = 1 << 3
+    GENRES = 1 << 4
+    PLAYLISTS = 1 << 5
+    COMPILATIONS = 1 << 6
 
 
 class Shuffle:

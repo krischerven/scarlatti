@@ -25,7 +25,7 @@ class TypeAheadWidget(Gtk.Revealer):
             Init widget
         """
         Gtk.Revealer.__init__(self)
-        self.__list_two_map_signal_id = None
+        self.__list_view_map_signal_id = None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
         builder.connect_signals(self)
@@ -58,7 +58,7 @@ class TypeAheadWidget(Gtk.Revealer):
             Mark view indicator as active
             @param widget as View
         """
-        for _view in [App().window.container.list_two,
+        for _view in [App().window.container.list_view,
                       App().window.container.view]:
             if _view is None:
                 continue
@@ -155,9 +155,9 @@ class TypeAheadWidget(Gtk.Revealer):
         if App().window.is_adaptive:
             return App().window.container.view
         else:
-            if App().window.container.list_two.indicator.get_state_flags() &\
+            if App().window.container.list_view.indicator.get_state_flags() &\
                     Gtk.StateFlags.SELECTED:
-                return App().window.container.list_two
+                return App().window.container.list_view
             else:
                 return App().window.container.stack
 
@@ -168,7 +168,7 @@ class TypeAheadWidget(Gtk.Revealer):
             @return [Gtk.Widget]
         """
         indicators = []
-        for view in [App().window.container.list_two,
+        for view in [App().window.container.list_view,
                      App().window.container.view]:
             if view is not None and\
                     (view.get_visible() or show_hidden) and\

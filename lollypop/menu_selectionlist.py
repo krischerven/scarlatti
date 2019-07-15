@@ -37,8 +37,8 @@ class SelectionListMenu(Gio.Menu):
         self.__mask = mask
         section = None
 
-        if not App().devices and mask & (SelectionListMask.LIST_ONE |
-                                         SelectionListMask.LIST_TWO):
+        if not App().devices and mask & (SelectionListMask.SIDEBAR |
+                                         SelectionListMask.LIST_VIEW):
             section = Gio.Menu()
             section.append(_("No connected devices"), "app.none")
         elif mask & SelectionListMask.PLAYLISTS:
@@ -65,7 +65,7 @@ class SelectionListMenu(Gio.Menu):
                            Type.PLAYLISTS, Type.ARTISTS, Type.WEB] or
                  mask & SelectionListMask.PLAYLISTS):
             startup_menu = Gio.Menu()
-            if self.__mask & SelectionListMask.LIST_TWO:
+            if self.__mask & SelectionListMask.LIST_VIEW:
                 exists = rowid in App().settings.get_value("startup-two-ids")
             else:
                 exists = rowid in App().settings.get_value("startup-one-ids")
@@ -82,8 +82,8 @@ class SelectionListMenu(Gio.Menu):
             startup_menu.append_item(item)
             self.append_section(_("Startup"), startup_menu)
         # Shown menu
-        if mask & (SelectionListMask.LIST_ONE |
-                   SelectionListMask.LIST_TWO) and rowid < 0:
+        if mask & (SelectionListMask.SIDEBAR |
+                   SelectionListMask.LIST_VIEW) and rowid < 0:
             shown_menu = Gio.Menu()
             if mask & SelectionListMask.PLAYLISTS:
                 lists = ShownPlaylists.get(True)
@@ -139,7 +139,7 @@ class SelectionListMenu(Gio.Menu):
                     break
         else:
             self.__widget.remove_value(rowid)
-            if self.__mask & SelectionListMask.LIST_ONE:
+            if self.__mask & SelectionListMask.SIDEBAR:
                 ids = list(App().settings.get_value("startup-one-ids"))
                 if rowid in ids:
                     ids.remove(rowid)
@@ -155,13 +155,13 @@ class SelectionListMenu(Gio.Menu):
             @param variant as GVariant
             @param rowid as int
         """
-        if self.__mask & SelectionListMask.LIST_ONE:
+        if self.__mask & SelectionListMask.SIDEBAR:
             if variant:
                 startup_one_ids = [rowid]
                 startup_two_ids = []
             else:
                 startup_one_ids = startup_two_ids = []
-        elif self.__mask & SelectionListMask.LIST_TWO:
+        elif self.__mask & SelectionListMask.LIST_VIEW:
             if variant:
                 startup_one_ids = None
                 startup_two_ids = [rowid]

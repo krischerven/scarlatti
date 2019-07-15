@@ -57,12 +57,12 @@ class ScannerContainer:
             @param genre_id as int
             @param add as bool
         """
-        if self.__list_two.mask & SelectionListMask.GENRES:
+        if self.__list_view.mask & SelectionListMask.GENRES:
             if add:
                 genre_name = App().genres.get_name(genre_id)
-                self._list_two.add_value((genre_id, genre_name, genre_name))
+                self._list_view.add_value((genre_id, genre_name, genre_name))
             elif not App().artists.get_ids([genre_id]):
-                self._list_two.remove_value(genre_id)
+                self._list_view.remove_value(genre_id)
 
     def __on_artist_updated(self, scanner, artist_id, add):
         """
@@ -74,9 +74,9 @@ class ScannerContainer:
         artist_name = App().artists.get_name(artist_id)
         sortname = App().artists.get_sortname(artist_id)
         genre_ids = []
-        if self._list_two.get_visible() and\
-                self._list_two.mask & SelectionListMask.ARTISTS:
+        if self._list_view.get_visible() and\
+                self._list_view.mask & SelectionListMask.ARTISTS:
             if add:
-                self._list_two.add_value((artist_id, artist_name, sortname))
+                self._list_view.add_value((artist_id, artist_name, sortname))
             elif not App().albums.get_ids([artist_id], genre_ids):
-                self._list_two.remove_value(artist_id)
+                self._list_view.remove_value(artist_id)

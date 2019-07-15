@@ -35,57 +35,40 @@ class ListsContainer:
         """
             Setup container lists
         """
-        self._list_one = SelectionList(SelectionListMask.LIST_ONE)
-        self._list_one.show()
-        self._list_two = SelectionList(SelectionListMask.LIST_TWO)
-        self._list_one.listbox.connect("row-activated",
-                                       self.__on_list_one_activated)
-        self._list_two.listbox.connect("row-activated",
-                                       self.__on_list_two_activated)
-        self._list_one.connect("populated", self.__on_list_one_populated)
-        self._list_one.connect("pass-focus", self.__on_pass_focus)
-        self._list_two.connect("pass-focus", self.__on_pass_focus)
-        self._list_two.connect("map", self.__on_list_two_mapped)
+        self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
+        self._sidebar.show()
+        self._list_view = SelectionList(SelectionListMask.LIST_VIEW)
+        self._sidebar.listbox.connect("row-activated",
+                                      self.__on_sidebar_activated)
+        self._list_view.listbox.connect("row-activated",
+                                        self.__on_list_view_activated)
+        self._sidebar.connect("populated", self.__on_sidebar_populated)
+        self._sidebar.connect("pass-focus", self.__on_pass_focus)
+        self._list_view.connect("pass-focus", self.__on_pass_focus)
+        self._list_view.connect("map", self.__on_list_view_mapped)
 
-        App().window.add_adaptive_child(self._sidebar_one, self._list_one)
-        App().window.add_adaptive_child(self._sidebar_two, self._list_two)
+        App().window.add_adaptive_child(self._sidebar_one, self._sidebar)
+        App().window.add_adaptive_child(self._sidebar_two, self._list_view)
         App().window.update_layout(True)
-        self._list_one.set_mask(SelectionListMask.LIST_ONE)
-        items = ShownLists.get(SelectionListMask.LIST_ONE)
-        self._list_one.populate(items)
-
-    def show_lists(self, list_one_ids, list_two_ids):
-        """
-            Show list one and two
-            @param list_one_ids as [int]
-            @param list_two_ids as [int]
-        """
-        def select_list_two(selection_list, list_two_ids):
-            self._list_two.select_ids(list_two_ids)
-            self._list_two.disconnect_by_func(select_list_two)
-
-        if list_two_ids:
-            # Select genres on list one
-            self._list_two.connect("populated", select_list_two, list_two_ids)
-            self._list_one.select_ids(list_one_ids)
-        else:
-            self._list_one.select_ids(list_one_ids)
+        self._sidebar.set_mask(SelectionListMask.SIDEBAR)
+        items = ShownLists.get(SelectionListMask.SIDEBAR)
+        self._sidebar.populate(items)
 
     @property
-    def list_one(self):
+    def sidebar(self):
         """
             Get first SelectionList
             @return SelectionList
         """
-        return self._list_one
+        return self._sidebar
 
     @property
-    def list_two(self):
+    def list_view(self):
         """
             Get second SelectionList
             @return SelectionList
         """
-        return self._list_two
+        return self._list_view
 
 ##############
 # PROTECTED  #
@@ -103,7 +86,7 @@ class ListsContainer:
                 state_one_ids = state_two_ids
                 state_two_ids = state_three_ids
             if state_one_ids:
-                self._list_one.select_ids(state_one_ids)
+                self._sidebar.select_ids(state_one_ids)
                 if state_two_ids:
                     self.show_view(state_one_ids, state_two_ids)
                 if state_three_ids:
@@ -112,7 +95,7 @@ class ListsContainer:
                                   state_two_ids)
                     self.show_view([Type.ALBUM], album)
             elif not App().window.is_adaptive:
-                self._list_one.select_first()
+                self._sidebar.select_first()
         except Exception as e:
             Logger.error("ListsContainer::_restore_state(): %s", e)
 
@@ -156,27 +139,27 @@ class ListsContainer:
         loader.start()
         selection_list.set_mask(SelectionListMask.ARTISTS)
 
-    def __on_list_one_activated(self, listbox, row):
+    def __on_sidebar_activated(self, listbox, row):
         """
             Update view based on selected object
             @param listbox as Gtk.ListBox
             @param row as Gtk.ListBoxRow
         """
-        Logger.debug("Container::__on_list_one_activated()")
+        Logger.debug("Container::__on_sidebar_activated()")
         view = None
-        selected_ids = self._list_one.selected_ids
+        selected_ids = self._sidebar.selected_ids
         if not selected_ids:
             return
         # Update lists
         if selected_ids[0] == Type.ARTISTS_LIST:
-            self.__show_artists_list(self._list_two)
-            self._list_two.show()
+            self.__show_artists_list(self._list_view)
+            self._list_view.show()
         elif (selected_ids[0] > 0 or selected_ids[0] == Type.ALL) and\
-                self._list_one.mask & SelectionListMask.GENRES:
-            self.__show_artists_list(self._list_two)
-            self._list_two.show()
+                self._sidebar.mask & SelectionListMask.GENRES:
+            self.__show_artists_list(self._list_view)
+            self._list_view.show()
         else:
-            self._list_two.hide()
+            self._list_view.hide()
         # Update view
         if selected_ids[0] == Type.ARTISTS_LIST:
             self.view.destroy()
@@ -209,31 +192,31 @@ class ListsContainer:
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted
         if App().window.is_adaptive\
-                and self._list_two.get_visible()\
+                and self._list_view.get_visible()\
                 and selected_ids[0] == Type.ARTISTS_LIST:
-            self._stack.set_visible_child(self._list_two)
+            self._stack.set_visible_child(self._list_view)
         elif view is not None:
             self._stack.set_visible_child(view)
-        if self._list_two.get_visible():
-            self.type_ahead.set_active_indicator(self._list_two)
+        if self._list_view.get_visible():
+            self.type_ahead.set_active_indicator(self._list_view)
         else:
             self.type_ahead.set_active_indicator(view)
 
-    def __on_list_one_populated(self, selection_list):
+    def __on_sidebar_populated(self, selection_list):
         """
             @param selection_list as SelectionList
         """
         self._restore_state()
 
-    def __on_list_two_activated(self, listbox, row):
+    def __on_list_view_activated(self, listbox, row):
         """
             Update view based on selected object
             @param listbox as Gtk.ListBox
             @param row as Gtk.ListBoxRow
         """
-        Logger.debug("Container::__on_list_two_activated()")
-        genre_ids = self._list_one.selected_ids
-        selected_ids = self._list_two.selected_ids
+        Logger.debug("Container::__on_list_view_activated()")
+        genre_ids = self._sidebar.selected_ids
+        selected_ids = self._list_view.selected_ids
         if not selected_ids or not genre_ids:
             return
         if genre_ids[0] == Type.PLAYLISTS:
@@ -253,13 +236,13 @@ class ListsContainer:
             Pass focus to other list
             @param selection_list as SelectionList
         """
-        if selection_list == self._list_one:
-            if self._list_two.is_visible():
-                self._list_two.grab_focus()
+        if selection_list == self._sidebar:
+            if self._list_view.is_visible():
+                self._list_view.grab_focus()
         else:
-            self._list_one.grab_focus()
+            self._sidebar.grab_focus()
 
-    def __on_list_two_mapped(self, widget):
+    def __on_list_view_mapped(self, widget):
         """
             Force paned width, see ignore in container.py
         """
