@@ -162,7 +162,8 @@ class ListsContainer:
             self._list_view.hide()
         # Update view
         if selected_ids[0] == Type.ARTISTS_LIST:
-            self.view.destroy()
+            if self.view is not None:
+                self.view.destroy()
         elif selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()
         elif selected_ids[0] == Type.CURRENT:
