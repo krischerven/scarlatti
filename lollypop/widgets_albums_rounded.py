@@ -106,7 +106,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         self._artwork.set_from_surface(
             get_round_surface(surface, self._scale_factor, 50))
         if cache:
-            App().art.add_artwork_to_cache("@ROUNDED@%s" % self.name, surface)
+            App().art.add_artwork_to_cache("ROUNDED_%s" % self.name, surface)
         self.emit("populated")
 
     def __draw_surface(self, surface, ctx, positions, album_ids):
