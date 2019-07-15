@@ -72,10 +72,6 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         self._overlay.show()
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
-        if not App().window.is_adaptive and\
-                App().window.container.type_ahead.get_reveal_child():
-            self.indicator.show()
-        self.add(self.indicator)
         self.add(self._overlay)
         self._responsive_widget.show()
 

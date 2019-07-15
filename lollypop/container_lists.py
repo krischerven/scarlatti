@@ -197,10 +197,6 @@ class ListsContainer:
             self._stack.set_visible_child(self._list_view)
         elif view is not None:
             self._stack.set_visible_child(view)
-        if self._list_view.get_visible():
-            self.type_ahead.set_active_indicator(self._list_view)
-        else:
-            self.type_ahead.set_active_indicator(view)
 
     def __on_sidebar_populated(self, selection_list):
         """
@@ -229,7 +225,6 @@ class ListsContainer:
             view = self._get_view_artists(genre_ids, selected_ids)
         self._stack.add(view)
         self._stack.set_visible_child(view)
-        self.type_ahead.set_active_indicator(view)
 
     def __on_pass_focus(self, selection_list):
         """

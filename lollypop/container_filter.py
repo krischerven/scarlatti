@@ -41,12 +41,10 @@ class FilterContainer:
                     not hasattr(App().window.container.view, "indicator")):
                 return
             self.__type_ahead.set_reveal_child(True)
-            self.__type_ahead.update_indicators(True)
             App().enable_special_shortcuts(False)
             self.__type_ahead.entry.grab_focus()
         elif self.__type_ahead.entry.has_focus():
             self.__type_ahead.set_reveal_child(False)
-            self.__type_ahead.update_indicators(False)
             App().enable_special_shortcuts(True)
             self.__type_ahead.entry.set_text("")
         else:

@@ -88,10 +88,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         self._overlay.add_overlay(self.__banner)
         self.__banner.add_overlay(self.__widget)
         self.__view.set_margin_top(self.__banner.height)
-        if not App().window.is_adaptive and\
-                App().window.container.type_ahead.get_reveal_child():
-            self.indicator.show()
-        self.add(self.indicator)
         self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))

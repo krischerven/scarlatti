@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk
 
 from lollypop.define import App, MARGIN_SMALL
 
@@ -38,34 +38,6 @@ class TypeAheadWidget(Gtk.Revealer):
         self.__next_button.connect("clicked", lambda x: self.__search_next())
         self.__prev_button.connect("clicked", lambda x: self.__search_prev())
         self.add(widget)
-
-    def update_indicators(self, show):
-        """
-            Update list/views indicator
-            @param show as bool
-        """
-        if App().window.is_adaptive:
-            show = False
-        indicators = self.__get_indicators(True)
-        for indicator in indicators:
-            if show:
-                indicator.show()
-            else:
-                indicator.hide()
-
-    def set_active_indicator(self, view):
-        """
-            Mark view indicator as active
-            @param widget as View
-        """
-        for _view in [App().window.container.list_view,
-                      App().window.container.view]:
-            if _view is None:
-                continue
-            if view == _view:
-                _view.indicator.set_state_flags(Gtk.StateFlags.SELECTED, True)
-            else:
-                _view.indicator.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
     @property
     def entry(self):
@@ -95,7 +67,6 @@ class TypeAheadWidget(Gtk.Revealer):
         widget = self.__get_widget()
         if widget is not None:
             widget.activate_child()
-            GLib.idle_add(self.__activate_next_view)
             self.__entry.set_text("")
             self.__entry.grab_focus()
 
@@ -105,10 +76,7 @@ class TypeAheadWidget(Gtk.Revealer):
             @param entry as Gtk.Entry
             @param Event as Gdk.EventKey
         """
-        if (event.state & Gdk.ModifierType.SHIFT_MASK and
-                event.state & Gdk.ModifierType.CONTROL_MASK) or\
-                event.keyval == Gdk.KEY_Up or\
-                event.keyval == Gdk.KEY_Down:
+        if event.keyval == Gdk.KEY_Up or event.keyval == Gdk.KEY_Down:
             return True
 
     def _on_entry_key_release_event(self, entry, event):
@@ -117,13 +85,7 @@ class TypeAheadWidget(Gtk.Revealer):
             @param entry as Gtk.Entry
             @param Event as Gdk.EventKey
         """
-        if event.state & (Gdk.ModifierType.SHIFT_MASK |
-                          Gdk.ModifierType.CONTROL_MASK):
-            if event.keyval == Gdk.KEY_Right:
-                self.__activate_next_view()
-            elif event.keyval == Gdk.KEY_Left:
-                self.__activate_prev_view()
-        elif event.keyval == Gdk.KEY_Up:
+        if event.keyval == Gdk.KEY_Up:
             self.__search_prev()
         elif event.keyval == Gdk.KEY_Down:
             self.__search_next()
@@ -155,63 +117,7 @@ class TypeAheadWidget(Gtk.Revealer):
         if App().window.is_adaptive:
             return App().window.container.view
         else:
-            if App().window.container.list_view.indicator.get_state_flags() &\
-                    Gtk.StateFlags.SELECTED:
+            if App().window.container.list_view.has_focus():
                 return App().window.container.list_view
             else:
                 return App().window.container.stack
-
-    def __get_indicators(self, show_hidden=False):
-        """
-            Get indicator
-            @param show_hidden as bool
-            @return [Gtk.Widget]
-        """
-        indicators = []
-        for view in [App().window.container.list_view,
-                     App().window.container.view]:
-            if view is not None and\
-                    (view.get_visible() or show_hidden) and\
-                    hasattr(view, "indicator"):
-                indicators.append(view.indicator)
-        return indicators
-
-    def __get_active_indicator(self):
-        """
-            Get active indicator
-            @return Gtk.Widget
-        """
-        active = None
-        indicators = self.__get_indicators()
-        for indicator in indicators:
-            if indicator.get_state_flags() &\
-                    Gtk.StateFlags.SELECTED:
-                active = indicator
-                break
-        return active
-
-    def __activate_next_view(self):
-        """
-            Activate next view
-        """
-        indicators = self.__get_indicators()
-        active = self.__get_active_indicator()
-        if active is not None:
-            index = indicators.index(active)
-            if index + 1 < len(indicators):
-                indicators[index + 1].set_state_flags(Gtk.StateFlags.SELECTED,
-                                                      True)
-                active.set_state_flags(Gtk.StateFlags.NORMAL, True)
-
-    def __activate_prev_view(self):
-        """
-            Activate prev view
-        """
-        indicators = self.__get_indicators()
-        active = self.__get_active_indicator()
-        if active is not None:
-            index = indicators.index(active)
-            if index > 0:
-                indicators[index - 1].set_state_flags(Gtk.StateFlags.SELECTED,
-                                                      True)
-                active.set_state_flags(Gtk.StateFlags.NORMAL, True)

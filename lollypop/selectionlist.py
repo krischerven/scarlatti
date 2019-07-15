@@ -258,7 +258,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             self.__fastscroll = FastScroll(self._box,
                                            self._scrolled)
             overlay.add_overlay(self.__fastscroll)
-            self.add(self.indicator)
             self.add(overlay)
         else:
             self.add(self._scrolled)
