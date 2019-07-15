@@ -201,15 +201,10 @@ class ListsContainer:
             view = self._get_view_genres()
         elif selected_ids[0] == Type.ARTISTS:
             view = self._get_view_artists_rounded()
-        elif self._list_one.mask & SelectionListMask.ARTISTS:
-            if selected_ids[0] == Type.ALL:
-                view = self._get_view_albums(selected_ids, [])
-            elif selected_ids[0] == Type.COMPILATIONS:
-                view = self._get_view_albums([], selected_ids)
-            else:
-                view = self._get_view_artists([], selected_ids)
-        elif not App().window.is_adaptive:
+        elif selected_ids[0] == Type.ALL:
             view = self._get_view_albums(selected_ids, [])
+        elif selected_ids[0] == Type.COMPILATIONS:
+            view = self._get_view_albums([], selected_ids)
         if view is not None and view not in self._stack.get_children():
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted

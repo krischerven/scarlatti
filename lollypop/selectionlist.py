@@ -262,7 +262,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             self.add(overlay)
         else:
             self.add(self._scrolled)
-        self.get_style_context().add_class("sidebar")
+            self.get_style_context().add_class("sidebar")
         if self.__base_mask & SelectionListMask.LIST_TWO:
             App().settings.connect("changed::artist-artwork",
                                    self.__update_children_artwork)
