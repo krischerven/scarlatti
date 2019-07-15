@@ -97,7 +97,7 @@ class InformationController:
                 height,
                 scale_factor,
                 self.__effect,
-                self._on_artwork,)
+                self._on_artwork)
         elif App().player.current_track.id is not None:
             if self.__per_track_cover:
                 effect = self.__effect | ArtBehaviour.NO_CACHE
@@ -115,7 +115,7 @@ class InformationController:
                 height,
                 scale_factor,
                 effect,
-                self._on_artwork,)
+                self._on_artwork)
             if self.__show_tooltip:
                 self._artwork.set_tooltip_text(
                     App().player.current_track.album.name)
@@ -126,6 +126,7 @@ class InformationController:
             @param surface as str
         """
         self._artwork.set_from_surface(surface)
+
 #######################
 # PRIVATE             #
 #######################
