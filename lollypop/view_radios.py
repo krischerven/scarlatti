@@ -50,6 +50,14 @@ class RadiosView(FlowBoxView, ViewController):
         """
         FlowBoxView.populate(self, radio_ids)
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"view_type": self._view_type}, {"radio_ids": self._items})
+
 #######################
 # PROTECTED           #
 #######################

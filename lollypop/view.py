@@ -139,6 +139,14 @@ class View(BaseView, Gtk.Grid):
             self.__overlayed = None
 
     @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({}, [])
+
+    @property
     def destroyed(self):
         """
             True if widget has been destroyed

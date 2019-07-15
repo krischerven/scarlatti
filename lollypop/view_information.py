@@ -21,11 +21,11 @@ from lollypop.utils import escape
 from lollypop.helper_art import ArtBehaviour
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.view import BaseView
+from lollypop.view import View
 from lollypop.utils import on_realize
 
 
-class InformationView(BaseView, Gtk.Bin):
+class InformationView(View):
     """
         View with artist information
     """
@@ -35,21 +35,21 @@ class InformationView(BaseView, Gtk.Bin):
             Init artist infos
             @param follow_player as bool
         """
-        BaseView.__init__(self)
-        Gtk.Bin.__init__(self)
+        View.__init__(self)
         self.__information_store = InformationStore()
         self.__information_store.connect("artist-info-changed",
                                          self.__on_artist_info_changed)
         self.__cancellable = Gio.Cancellable()
         self.__minimal = minimal
         self.__artist_name = ""
-        self.connect("unmap", self.__on_unmap)
+        self.__artist_id = None
 
     def populate(self, artist_id=None):
         """
             Show information for artists
             @param artist_id as int
         """
+        self.__artist_id = artist_id
         builder = Gtk.Builder()
         builder.add_from_resource(
             "/org/gnome/Lollypop/ArtistInformation.ui")
@@ -113,9 +113,24 @@ class InformationView(BaseView, Gtk.Bin):
                               self.__artist_name,
                               callback=(self.__set_information_content, True))
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"minimal": self.__minimal}, {"artist_id": self.__artist_id})
+
 #######################
 # PROTECTED           #
 #######################
+    def _on_unmap(self, widget):
+        """
+            Cancel operations
+            @param widget as Gtk.Widget
+        """
+        self.__cancellable.cancel()
+
     def _on_label_realize(self, eventbox):
         """
             @param eventbox as Gtk.EventBox
@@ -197,13 +212,6 @@ class InformationView(BaseView, Gtk.Bin):
         Gtk.show_uri_on_window(App().window,
                                uri,
                                Gdk.CURRENT_TIME)
-
-    def __on_unmap(self, widget):
-        """
-            Cancel operations
-            @param widget as Gtk.Widget
-        """
-        self.__cancellable.cancel()
 
     def __on_artist_artwork(self, surface):
         """

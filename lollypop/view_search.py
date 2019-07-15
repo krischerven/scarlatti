@@ -75,6 +75,9 @@ class SearchView(BaseView, Gtk.Bin):
         self.add(self.__widget)
         builder.connect_signals(self)
 
+    def populate(self):
+        pass
+
     def set_search(self, search):
         """
             Set search text
@@ -97,6 +100,14 @@ class SearchView(BaseView, Gtk.Bin):
         """
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"view_type": self._view_type}, {})
 
     @property
     def should_destroy(self):

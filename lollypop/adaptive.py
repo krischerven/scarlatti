@@ -12,6 +12,8 @@
 
 from gi.repository import GObject, Gtk, GLib
 
+from lollypop.logger import Logger
+
 
 class AdaptiveView:
     """
@@ -44,6 +46,92 @@ class AdaptiveView:
         return True
 
 
+class AdaptiveHistory:
+    """
+        Navigation history
+        Offload old items and reload them on the fly
+    """
+
+    __MAX_HISTORY_ITEMS = 5
+
+    def __init__(self):
+        """
+            Init history
+        """
+        self.__history = []
+
+    def add_view(self, view):
+        """
+            Add view to history
+            Offload old views
+            @param view as View
+        """
+        if hasattr(view, "args"):
+            self.__history.append((view, view.__class__, view.args))
+        if self.count >= self.__MAX_HISTORY_ITEMS:
+            (view, _class, args) = self.__history[-self.__MAX_HISTORY_ITEMS]
+            if view is not None:
+                view.destroy()
+                self.__history[
+                    -self.__MAX_HISTORY_ITEMS] = (None, _class, args)
+
+    def pop(self, index=-1):
+        """
+            Pop last view from history
+            @param index as int
+            @return view
+        """
+        if not self.__history:
+            return None
+        (view, _class, args) = self.__history.pop(index)
+        try:
+            if view is None:
+                view = _class(**args[0])
+                if hasattr(view, "populate"):
+                    view.populate(**args[1])
+                view.show()
+            return view
+        except Exception as e:
+            Logger.warning("AdaptiveHistory::pop(): %s, %s", _class, e)
+
+    def remove(self, view):
+        """
+            Remove view from history
+            @param view as View
+        """
+        for (_view, _class, args) in self.__history:
+            if _view == view:
+                self.__history.remove((_view, _class, args))
+                break
+
+    def reset(self):
+        """
+            Reset history
+        """
+        for (view, _class, args) in self.__history:
+            view.stop()
+            view.destroy_later()
+        self.__history = []
+
+    def exists(self, view):
+        """
+            True if view exists in history
+            @return bool
+        """
+        for (_view, _class, args) in self.__history:
+            if _view == view:
+                return True
+        return False
+
+    @property
+    def count(self):
+        """
+            Get history item count
+            @return int
+        """
+        return len(self.__history)
+
+
 class AdaptiveStack(Gtk.Stack):
     """
         A Gtk.Stack handling navigation
@@ -63,7 +151,7 @@ class AdaptiveStack(Gtk.Stack):
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.set_hexpand(True)
         self.set_vexpand(True)
-        self.__history = []
+        self.__history = AdaptiveHistory()
 
     def add(self, widget):
         """
@@ -72,17 +160,6 @@ class AdaptiveStack(Gtk.Stack):
         """
         if widget not in self.get_children():
             Gtk.Stack.add(self, widget)
-
-    def reset_history(self):
-        """
-            Reset history
-        """
-        children = self.get_children()
-        for item in self.__history:
-            if item in children:
-                item.stop()
-                item.destroy_later()
-        self.__history = []
 
     def set_visible_child(self, widget):
         """
@@ -93,7 +170,7 @@ class AdaptiveStack(Gtk.Stack):
         if visible_child == widget:
             return
         if visible_child is not None:
-            self.__history.append(visible_child)
+            self.__history.add_view(visible_child)
             self.emit("new-child-in-history")
             visible_child.stop()
         Gtk.Stack.set_visible_child(self, widget)
@@ -104,9 +181,12 @@ class AdaptiveStack(Gtk.Stack):
         """
         if self.__history:
             visible_child = self.get_visible_child()
-            widget = self.__history[-1]
+            widget = self.__history.pop()
+            if widget is None:
+                return
+            if widget not in self.get_children():
+                self.add(widget)
             Gtk.Stack.set_visible_child(self, widget)
-            self.__history.remove(widget)
             if visible_child is not None:
                 visible_child.stop()
                 visible_child.destroy_later()
@@ -116,7 +196,7 @@ class AdaptiveStack(Gtk.Stack):
             Remove from stack and history
             @param widget as Gtk.Widget
         """
-        if widget in self.__history:
+        if self.__history.exists(widget):
             self.__history.remove(widget)
         Gtk.Stack.remove(self, widget)
 
@@ -136,7 +216,7 @@ class AdaptiveStack(Gtk.Stack):
             Remove from history
             @param widget as Gtk.Widget
         """
-        if widget in self.__history:
+        if self.__history.exists(widget):
             self.__history.remove(widget)
 
 
@@ -222,16 +302,15 @@ class AdaptiveWindow:
             Go back in container stack
         """
         self.__stack.go_back()
-        if not self.__stack.history:
-            self.emit("can-go-back-changed", False)
+        self.emit("can-go-back-changed", self.__stack.history.count > 0)
 
     def go_home(self):
         """
             Go back to first page
         """
-        if self.__stack.history:
-            widget = self.__stack.history[0]
-            self.__stack.reset_history()
+        if self.__stack.history.count > 0:
+            widget = self.__stack.history.pop(0)
+            self.__stack.history.reset()
             self.__stack.set_visible_child(widget)
             self.emit("can-go-back-changed", False)
 
@@ -274,7 +353,7 @@ class AdaptiveWindow:
             True if can go back
             @return bool
         """
-        return len(self.__stack.history) > 0
+        return self.__stack.history.count > 0
 
     @property
     def is_adaptive(self):

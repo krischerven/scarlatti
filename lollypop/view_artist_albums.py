@@ -36,6 +36,7 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
         FilteringHelper.__init__(self)
         self._artist_ids = artist_ids
         self._genre_ids = genre_ids
+        self._albums = []
         self._box = Gtk.Grid()
         self._box.set_row_spacing(50)
         self._box.set_orientation(Gtk.Orientation.VERTICAL)
@@ -59,7 +60,8 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
             Populate the view
             @param albums as [Album]
         """
-        self.__add_albums(albums)
+        self._albums = albums
+        self.__add_albums(list(albums))
 
     def stop(self):
         """

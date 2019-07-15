@@ -100,6 +100,16 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             Logger.error("AlbumView::activate_child: %s" % e)
 
     @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"album": self._album, "genre_ids": self.__genre_ids,
+                 "artist_ids": self.__artist_ids,
+                 "view_type": self._view_type}, {})
+
+    @property
     def filtered(self):
         """
             Get filtered children

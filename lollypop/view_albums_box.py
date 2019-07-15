@@ -73,6 +73,16 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         widget.show()
         widget.populate()
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"genre_ids": self.__genre_ids,
+                 "artist_ids": self.__artist_ids,
+                 "view_type": self._view_type}, {"items": self._items})
+
 #######################
 # PROTECTED           #
 #######################

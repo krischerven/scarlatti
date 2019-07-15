@@ -16,7 +16,7 @@ from gi.repository import Gtk
 from lollypop.widgets_playlist_smart import SmartPlaylistRow
 from lollypop.view import View
 from lollypop.logger import Logger
-from lollypop.define import App
+from lollypop.define import App, ViewType
 
 
 class SmartPlaylistView(View):
@@ -29,7 +29,7 @@ class SmartPlaylistView(View):
             Init PlaylistView
             @param playlist_id as int
         """
-        View.__init__(self)
+        View.__init__(self, ViewType.SCROLLED)
         self.__playlist_id = playlist_id
         self.__size_group = Gtk.SizeGroup()
         self.__size_group.set_mode(Gtk.SizeGroupMode.BOTH)
@@ -96,6 +96,14 @@ class SmartPlaylistView(View):
         except Exception as e:
             self.__select_combobox.set_active(0)
             Logger.warning("SmartPlaylistView::populate: %s", e)
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"playlist_id": self.__playlist_id}, {})
 
 #######################
 # PROTECTED           #

@@ -41,6 +41,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self.__playlist_ids = playlist_ids
+        self.__albums = []
         self.__signal_id1 = App().playlists.connect(
                                             "playlist-track-added",
                                             self.__on_playlist_track_added)
@@ -155,6 +156,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             Populate view with albums
             @param albums as [Album]
         """
+        self.__albums = albums
         self.__view.populate(albums)
 
     def stop(self):
@@ -183,6 +185,15 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
                 style_context.remove_class("typeahead")
         except Exception as e:
             Logger.error("PlaylistsView::activate_child: %s" % e)
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"playlist_ids": self.__playlist_ids},
+                {"albums": self.__albums})
 
     @property
     def filtered(self):

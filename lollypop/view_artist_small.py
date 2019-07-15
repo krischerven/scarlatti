@@ -14,7 +14,6 @@ from gi.repository import Gtk, GLib
 
 
 from lollypop.define import App, ViewType
-from lollypop.objects_album import Album
 from lollypop.view import View
 from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.view_artist_common import ArtistViewCommon
@@ -25,21 +24,21 @@ class ArtistViewSmall(View, ArtistViewCommon):
         Show artist albums and tracks
     """
 
-    def __init__(self, artist_ids, genre_ids):
+    def __init__(self, genre_ids, artist_ids):
         """
             Init ArtistView
-            @param artist_id as int (Current if None)
-            @param genre_id as int
+            @param genre_ids as [int]
+            @param artist_ids as [int]
         """
         View.__init__(self)
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
+        self._albums = []
         ArtistViewCommon.__init__(self)
         self._jump_button.hide()
         self.__overlay = Gtk.Overlay()
         self.__overlay.show()
         self.__overlay.add_overlay(self._banner)
-        album_ids = App().albums.get_ids(artist_ids, genre_ids)
         self.__album_box = AlbumsBoxView(genre_ids,
                                          artist_ids,
                                          ViewType.MEDIUM |
@@ -47,10 +46,17 @@ class ArtistViewSmall(View, ArtistViewCommon):
                                          ViewType.NOT_ADAPTIVE)
         self._banner.collapse(True)
         self.__album_box.set_margin_top(self._banner.height)
-        self.__album_box.populate([Album(id) for id in album_ids])
         self.__album_box.show()
         self.__overlay.add_overlay(self.__album_box)
         self.add(self.__overlay)
+
+    def populate(self, albums):
+        """
+            Populate view
+            @param albums as [album]
+        """
+        self._albums = albums
+        self.__album_box.populate(list(albums))
 
     def search_for_child(self, text):
         return self.__album_box.search_for_child(text)
@@ -63,6 +69,15 @@ class ArtistViewSmall(View, ArtistViewCommon):
 
     def search_next(self, text):
         self.__album_box.search_next(text)
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"genre_ids": self.__genre_ids,
+                 "artist_ids": self.__artist_ids}, {"albums": self._albums})
 
     @property
     def indicator(self):

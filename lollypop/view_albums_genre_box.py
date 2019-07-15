@@ -32,6 +32,14 @@ class AlbumsGenreBoxView(FlowBoxView):
         self._widget_class = AlbumsGenreWidget
         self._empty_icon_name = get_icon_name(Type.GENRES)
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"view_type": self._view_type}, {"items": self._items})
+
 #######################
 # PROTECTED           #
 #######################

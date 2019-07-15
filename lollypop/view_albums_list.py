@@ -46,6 +46,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
+        self._albums = []
         self.__position = 0
         self.__track_position_id = None
         if genre_ids and genre_ids[0] < 0:
@@ -132,6 +133,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             for child in self._box.get_children():
                 GLib.idle_add(child.destroy)
             self.__add_albums(list(albums))
+            self._albums = albums
         else:
             LazyLoadingView.populate(self)
 
@@ -197,6 +199,16 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
             GLib.idle_add(child.destroy)
         if clear_albums:
             App().player.clear_albums()
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"genre_ids": self.__genre_ids,
+                 "artist_ids": self.__artist_ids,
+                 "view_type": self._view_type}, {"albums": self._albums})
 
     @property
     def children(self):

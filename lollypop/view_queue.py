@@ -63,6 +63,14 @@ class QueueView(View):
             self.__clear_button.set_sensitive(True)
         self.__add_items(list(App().player.queue))
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"view_type": self._view_type}, {})
+
 #######################
 # PROTECTED           #
 #######################

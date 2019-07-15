@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.objects_radio import Radio
-from lollypop.define import App, Sizing, ArtBehaviour
+from lollypop.define import App, Sizing, ArtBehaviour, ViewType
 from lollypop.controller_information import InformationController
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
@@ -84,7 +84,7 @@ class LyricsView(View, InformationController):
         """
             Init view
         """
-        View.__init__(self)
+        View.__init__(self, ViewType.SCROLLED)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |
                                        ArtBehaviour.CROP |
@@ -154,6 +154,14 @@ class LyricsView(View, InformationController):
             if self.__downloads_running == 0:
                 self.__lyrics_label.set_text(
                     _("You have disabled lyrics search in network settings !"))
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({}, {"track": self.__current_track})
 
 ##############
 # PROTECTED  #

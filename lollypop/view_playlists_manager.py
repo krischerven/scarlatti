@@ -89,6 +89,15 @@ class PlaylistsManagerView(FlowBoxView):
                 child.destroy()
                 break
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"obj": self.__obj, "view_type": self._view_type},
+                {"items": self._items})
+
 #######################
 # PROTECTED           #
 #######################

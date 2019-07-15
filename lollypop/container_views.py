@@ -298,12 +298,12 @@ class ViewsContainer:
                     for album_id in items]
         if App().window.is_adaptive:
             from lollypop.view_artist_small import ArtistViewSmall
-            view = ArtistViewSmall(artist_ids, genre_ids)
+            view = ArtistViewSmall(genre_ids, artist_ids)
         else:
             from lollypop.view_artist import ArtistView
-            view = ArtistView(artist_ids, genre_ids)
-            loader = Loader(target=load, view=view)
-            loader.start()
+            view = ArtistView(genre_ids, artist_ids)
+        loader = Loader(target=load, view=view)
+        loader.start()
         view.show()
         return view
 

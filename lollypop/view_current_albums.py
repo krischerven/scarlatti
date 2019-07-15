@@ -76,6 +76,14 @@ class CurrentAlbumsView(AlbumsListView):
         self.insert_row(0)
         self.attach(grid, 0, 0, 1, 1)
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"view_type": self._view_type}, {"albums": self._albums})
+
 #######################
 # PRIVATE             #
 #######################

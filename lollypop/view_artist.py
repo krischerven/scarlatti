@@ -26,12 +26,12 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         Show artist albums and tracks
     """
 
-    def __init__(self, artist_ids, genre_ids,
+    def __init__(self, genre_ids, artist_ids,
                  view_type=ViewType.TWO_COLUMNS | ViewType.SCROLLED):
         """
             Init ArtistView
-            @param artist_id as int (Current if None)
-            @param genre_id as int
+            @param genre_ids as [int]
+            @param artist_ids as [int]
             @param view_type as ViewType
         """
         ArtistAlbumsView.__init__(self, artist_ids, genre_ids, view_type)
@@ -87,6 +87,16 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         if widget is not None:
             y = widget.get_current_ordinate(self._box)
             self._scrolled.get_vadjustment().set_value(y)
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"genre_ids": self.__genre_ids,
+                 "artist_ids": self.__artist_ids,
+                 "view_type": self._view_type}, {"albums": self._albums})
 
 #######################
 # PROTECTED           #

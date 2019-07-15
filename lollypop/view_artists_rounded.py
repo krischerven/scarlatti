@@ -61,6 +61,14 @@ class RoundedArtistsView(FlowBoxView):
                 child.destroy()
                 break
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__ and populate()
+            @return ({}, {})
+        """
+        return ({"view_type": self._view_type}, {"items": self._items})
+
 #######################
 # PROTECTED           #
 #######################

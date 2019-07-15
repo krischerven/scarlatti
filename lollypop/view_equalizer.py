@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.view import View
+from lollypop.define import ViewType
 from lollypop.widgets_equalizer import EqualizerWidget
 
 
@@ -23,7 +24,7 @@ class EqualizerView(View):
         """
             Init view
         """
-        View.__init__(self)
+        View.__init__(self, ViewType.SCROLLED)
         widget = EqualizerWidget()
         widget.show()
         self.add(widget)
