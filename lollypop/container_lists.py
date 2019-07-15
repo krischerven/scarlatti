@@ -19,6 +19,7 @@ from lollypop.logger import Logger
 from lollypop.objects_album import Album
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
+from lollypop.shown import ShownLists
 
 
 class ListsContainer:
@@ -46,8 +47,8 @@ class ListsContainer:
         App().window.add_adaptive_child(self._sidebar_two, self._list_two)
         App().window.update_layout(True)
         self._list_one.set_mask(SelectionListMask.LIST_ONE)
-        self._list_one.populate(
-            self._list_one.get_headers(self._list_one.mask))
+        items = ShownLists.get(SelectionListMask.LIST_ONE)
+        self._list_one.populate(items)
 
     def update_list_two(self, update=False):
         """

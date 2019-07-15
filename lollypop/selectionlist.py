@@ -12,7 +12,6 @@
 
 from gi.repository import Gtk, Gdk, GLib, GObject, Pango
 
-from gettext import gettext as _
 from locale import strcoll
 
 from lollypop.view import LazyLoadingView
@@ -22,7 +21,7 @@ from lollypop.define import Type, App, ArtSize, SelectionListMask
 from lollypop.define import ArtBehaviour, ViewType
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, on_query_tooltip
-from lollypop.shown import ShownLists, ShownPlaylists
+from lollypop.shown import ShownPlaylists
 
 
 class SelectionListRow(Gtk.ListBoxRow):
@@ -385,23 +384,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         if self.__base_mask & SelectionListMask.ARTISTS:
             self.__fastscroll.clear()
             self.__fastscroll.clear_chars()
-
-    def get_headers(self, mask):
-        """
-            Return headers
-            @param mask as SelectionListMask
-            @return items as [(int, str)]
-        """
-        lists = ShownLists.get(mask)
-        if mask & SelectionListMask.LIST_ONE and App().window.is_adaptive:
-            lists += [(Type.SEARCH, _("Search"), _("Search"))]
-            lists += [
-                (Type.CURRENT, _("Current playlist"), _("Current playlist"))]
-        if lists and mask & (SelectionListMask.ARTISTS |
-                             SelectionListMask.GENRES |
-                             SelectionListMask.PLAYLISTS):
-            lists.append((Type.SEPARATOR, "", ""))
-        return lists
 
     def get_playlist_headers(self):
         """

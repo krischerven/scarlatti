@@ -413,6 +413,5 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             self.__toolbar.end.set_mini(False)
             self.container.list_one.remove_value(Type.CURRENT)
             self.container.list_one.remove_value(Type.SEARCH)
-            if not self.__container.stack.get_children():
-                self.emit("show-can-go-back", False)
+            self.emit("show-can-go-back", self.can_go_back)
         self.emit("can-go-back-changed", self.can_go_back)
