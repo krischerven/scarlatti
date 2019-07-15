@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, SidebarContent, Type, ViewType
+from lollypop.define import App, Type, ViewType
 from lollypop.view import View
 from lollypop.adaptive import AdaptiveStack
 from lollypop.container_notification import NotificationContainer
@@ -66,26 +66,45 @@ class Container(Gtk.Overlay, NotificationContainer,
     def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init container
+            @param window as Window
             @param view_type as ViewType, will be appended to any created view
         """
         Gtk.Overlay.__init__(self)
         NotificationContainer.__init__(self)
         ScannerContainer.__init__(self)
         PlaylistsContainer.__init__(self)
-        ListsContainer.__init__(self)
         ViewsContainer.__init__(self)
         self._view_type = view_type
-        self._rounded_artists_view = None
+        self._sidebar_one = None
+        self._sidebar_two = None
         self.__paned_position_id = None
         self._stack = ContainerStack()
+        App().window.set_stack(self._stack)
         self._stack.show()
-        self.__setup_view()
+        self.__progress = ProgressBar()
+        self.__progress.get_style_context().add_class("progress-bottom")
+        self.__progress.set_property("valign", Gtk.Align.END)
+        self.add_overlay(self.__progress)
+        search_action = App().lookup_action("search")
+        search_action.connect("activate", self.__on_search_activate)
+        self._sidebar_one = Gtk.Grid()
+        self._sidebar_one.attach(self._stack, 0, 0, 1, 1)
+        self._sidebar_one.show()
+        self._sidebar_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+        self._sidebar_two.connect("notify::position", self.__on_paned_position)
+        self._sidebar_two.add2(self._stack)
+        position = App().settings.get_value(
+            "paned-listview-width").get_int32()
+        self._sidebar_two.set_position(position)
+        self._sidebar_one.show()
+        self._sidebar_two.show()
         self._grid = Gtk.Grid()
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
         self._grid.set_column_spacing(2)
         self._grid.show()
         self.add(self._grid)
         FilterContainer.__init__(self)
+        ListsContainer.__init__(self)
 
     def stop_all(self):
         """
@@ -99,100 +118,16 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
             Reload current view
         """
-        if App().settings.get_value("show-sidebar"):
-            ListsContainer._restore_state(self)
-        else:
-            ViewsContainer._restore_state(self)
-
-    def show_sidebar(self, show):
-        """
-            Show/Hide navigation sidebar
-            @param show as bool
-        """
-        def select_list_one(selection_list):
-            ListsContainer._restore_state(self)
-            self._list_one.disconnect_by_func(select_list_one)
-
-        if self._rounded_artists_view is not None:
-            self._rounded_artists_view.destroy()
-            self._rounded_artists_view = None
-
-        if show:
-            self._setup_lists()
-            self._list_one.show()
-            if len(self._stack.get_children()) == 1:
-                App().window.emit("can-go-back-changed", False)
-            self._list_one.connect("populated", select_list_one)
-            self.update_list_one()
-            self.__show_settings_dialog()
-        else:
-            if self._list_one is not None:
-                self._list_one.destroy()
-                self._list_two.destroy()
-                self._list_one = self._list_two = None
-            App().window.emit("show-can-go-back", True)
-            empty = len(self._stack.get_children()) == 0
-            App().window.emit("can-go-back-changed", not empty)
-            # Remove any existing child
-            children = self._stack.get_children()
-            for child in children:
-                self._stack.remove(child)
-            # Be sure to have an initial artist view
-            if self._rounded_artists_view is None:
-                self._rounded_artists_view = self._get_view_artists_rounded(
-                    True)
-                self._stack.set_visible_child(self._rounded_artists_view)
-            if empty:
-                ViewsContainer._restore_state(self)
-            else:
-                # Add children now we have an initial artist view
-                for child in children:
-                    self._stack.add(child)
-                    self._stack.set_visible_child(child)
+        self._restore_state()
 
     def show_artists_albums(self, artist_ids):
         """
             Show albums from artists
             @param artist_ids as [int]
         """
-        sidebar_content = App().settings.get_enum("sidebar-content")
-        if App().settings.get_value("show-sidebar") and\
-                sidebar_content not in [SidebarContent.DEFAULT,
-                                        SidebarContent.ICONS] and\
-                not App().window.is_adaptive:
-            if sidebar_content == SidebarContent.GENRES:
-                # Get artist genres
-                genre_ids = []
-                for artist_id in artist_ids:
-                    album_ids = App().artists.get_albums(artist_ids)
-                    for album_id in album_ids:
-                        for genre_id in App().albums.get_genre_ids(album_id):
-                            if genre_id not in genre_ids:
-                                genre_ids.append(genre_id)
-                self.show_lists(genre_ids, artist_ids)
-            elif sidebar_content == SidebarContent.ARTISTS:
-                # Select artists on list one
-                self.show_lists(artist_ids, [])
-        else:
-            if sidebar_content in [SidebarContent.DEFAULT,
-                                   SidebarContent.ICONS] and\
-                    self._stack.get_children():
-                App().window.emit("show-can-go-back", True)
-            self.show_view([Type.ARTISTS], artist_ids)
-
-    def set_paned_position_from_sidebar_content(self, sidebar_content):
-        """
-            Update paned position based on current
-            @param sidebar_content as int
-        """
-        if sidebar_content == SidebarContent.DEFAULT:
-            App().settings.set_value("paned-mainlist-width",
-                                     GLib.Variant("i", 0))
-        else:
-            App().settings.reset("paned-mainlist-width")
-        position = App().settings.get_value(
-            "paned-mainlist-width").get_int32()
-        self._paned_one.set_position(position)
+        if self._stack.get_children():
+            App().window.emit("show-can-go-back", True)
+        self.show_view([Type.ARTISTS], artist_ids)
 
     @property
     def view(self):
@@ -221,49 +156,9 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         return self.__progress
 
-    @property
-    def rounded_artists_view(self):
-        """
-            Get rounder artists view
-            @return RoundedArtistsView
-        """
-        return self._rounded_artists_view
-
 ############
 # PRIVATE  #
 ############
-    def __setup_view(self):
-        """
-            Setup window main view:
-                - genre list
-                - artist list
-                - main view as artist view or album view
-        """
-        self._paned_one = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-        self._paned_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-
-        self._paned_one.connect("notify::position", self.__on_paned_position)
-        self._paned_two.connect("notify::position", self.__on_paned_position)
-
-        self.__progress = ProgressBar()
-        self.__progress.get_style_context().add_class("progress-bottom")
-        self.__progress.set_property("valign", Gtk.Align.END)
-        self.add_overlay(self.__progress)
-
-        self._paned_two.add2(self._stack)
-        self._paned_one.add2(self._paned_two)
-        position1 = App().settings.get_value(
-            "paned-mainlist-width").get_int32()
-        position2 = App().settings.get_value(
-            "paned-listview-width").get_int32()
-        self._paned_one.set_position(position1)
-        # GTK does not like paned inside paned set_position()
-        GLib.timeout_add(100, self._paned_two.set_position, position2)
-        self._paned_one.show()
-        self._paned_two.show()
-        search_action = App().lookup_action("search")
-        search_action.connect("activate", self.__on_search_activate)
-
     def __show_settings_dialog(self):
         """
             Show settings dialog if view exists in stack
@@ -297,11 +192,7 @@ class Container(Gtk.Overlay, NotificationContainer,
             # We do not want to save position while adaptive mode is set
             if App().window is not None and App().window.is_adaptive:
                 return
-            if paned == self._paned_one:
-                setting = "paned-mainlist-width"
-            else:
-                setting = "paned-listview-width"
-            App().settings.set_value(setting,
+            App().settings.set_value("paned-listview-width",
                                      GLib.Variant("i",
                                                   position))
         # We delay position saving

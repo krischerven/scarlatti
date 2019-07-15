@@ -48,9 +48,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.connect("unmap", self.__on_unmap)
         App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure = None
-
-        self.__setup_content()
-
         # FIXME Remove this, handled by MPRIS in GNOME 3.26
         self.__setup_media_keys()
         self.set_auto_startup_notification(False)
@@ -93,6 +90,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         pos = App().settings.get_value("window-position")
         self.__setup_size(size)
         self.__setup_pos(pos)
+        self.__setup_content()
         if App().settings.get_value("window-maximized"):
             # Lets resize happen
             GLib.idle_add(self.maximize)
@@ -227,7 +225,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             Setup window content
         """
         self.__container = Container()
-        self.set_stack(self.container.stack)
         self.__container.show()
         self.__vgrid = Gtk.Grid()
         self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
@@ -258,16 +255,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         else:
             self.__show_miniplayer(False)
             self.__container.show()
-
-    def __show_sidebar(self, show):
-        """
-            Show sidebar if needed
-            @param show as bool
-        """
-        if self.__sidebar_shown:
-            return
-        self.__sidebar_shown = True
-        self.__container.show_sidebar(show)
 
     def __save_size_position(self, widget):
         """
@@ -413,24 +400,19 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             @param window as AdaptiveWindow
             @param adaptive_stack as bool
         """
-        show_sidebar = App().settings.get_value("show-sidebar")
-        self.__show_sidebar(show_sidebar)
-        if show_sidebar:
-            widget = self.__container.list_one
-        else:
-            widget = self.__container.rounded_artists_view
-        self.__container.list_one.redraw()
         if adaptive_stack:
             self.__toolbar.end.set_mini(True)
-            widget.add_value((Type.SEARCH, _("Search"), _("Search")))
-            widget.add_value((Type.CURRENT,
-                              _("Current playlist"),
-                              _("Current playlist")))
+            self.container.list_one.add_value((Type.SEARCH,
+                                              _("Search"),
+                                              _("Search")))
+            self.container.list_one.add_value((Type.CURRENT,
+                                              _("Current playlist"),
+                                              _("Current playlist")))
             self.emit("show-can-go-back", True)
         else:
             self.__toolbar.end.set_mini(False)
-            widget.remove_value(Type.CURRENT)
-            widget.remove_value(Type.SEARCH)
-            if App().settings.get_value("show-sidebar"):
+            self.container.list_one.remove_value(Type.CURRENT)
+            self.container.list_one.remove_value(Type.SEARCH)
+            if not self.__container.stack.get_children():
                 self.emit("show-can-go-back", False)
         self.emit("can-go-back-changed", self.can_go_back)

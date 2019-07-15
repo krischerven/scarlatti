@@ -220,9 +220,8 @@ class SmartPlaylistView(View):
         """
         View._on_map(self, widget)
         App().enable_special_shortcuts(False)
-        if App().settings.get_value("show-sidebar"):
-            App().window.emit("can-go-back-changed", True)
-            App().window.emit("show-can-go-back", True)
+        App().window.emit("can-go-back-changed", True)
+        App().window.emit("show-can-go-back", True)
 
     def _on_unmap(self, widget):
         """

@@ -47,14 +47,6 @@ class ApplicationActions:
         App().set_accels_for_action("app.equalizer", ["<Shift><Alt>e"])
         App().add_action(equalizer_action)
 
-        show_sidebar = App().settings.get_value("show-sidebar")
-        sidebar_action = Gio.SimpleAction.new_stateful(
-            "sidebar",
-            None,
-            GLib.Variant.new_boolean(show_sidebar))
-        sidebar_action.connect("change-state", self.__on_sidebar_change_state)
-        App().add_action(sidebar_action)
-
         about_action = Gio.SimpleAction.new("about", None)
         about_action.connect("activate", self.__on_about_activate)
         App().add_action(about_action)
@@ -133,7 +125,6 @@ class ApplicationActions:
         App().set_accels_for_action("app.shortcut::next_album", ["<Control>n"])
         App().set_accels_for_action("app.shortcut::current_artist",
                                     ["<Control><Alt>a"])
-        App().set_accels_for_action("app.shortcut::show_sidebar", ["F9"])
         App().set_accels_for_action("app.update_db", ["<Control>u"])
         App().set_accels_for_action("app.settings(-14)", ["<Control>comma"])
         App().set_accels_for_action("app.fullscreen", ["F11", "F7"])
@@ -177,17 +168,6 @@ class ApplicationActions:
             @param response id as int
         """
         dialog.destroy()
-
-    def __on_sidebar_change_state(self, action, value):
-        """
-            Show/hide sidebar
-            @param action as Gio.SimpleAction
-            @param value as bool
-        """
-        action.set_state(value)
-        App().settings.set_value("show-sidebar",
-                                 GLib.Variant("b", value))
-        App().window.container.show_sidebar(value)
 
     def __on_fullscreen_activate(self, action, param):
         """
@@ -294,11 +274,6 @@ class ApplicationActions:
             App().player.set_volume(App().player.volume + 0.1)
         elif string == "volume_down":
             App().player.set_volume(App().player.volume - 0.1)
-        elif string == "show_sidebar":
-            value = App().settings.get_value("show-sidebar")
-            App().settings.set_value("show-sidebar",
-                                     GLib.Variant("b", not value))
-            App().main_window.container.show_sidebar(not value)
         elif string == "filter":
             App().window.container.show_filter()
         elif string == "volume":

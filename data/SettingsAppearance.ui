@@ -69,51 +69,6 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkLabel" id="genres">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="hexpand">True</property>
-            <property name="label" translatable="yes">Items in sidebar</property>
-            <property name="wrap">True</property>
-            <property name="xalign">0</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkComboBoxText" id="sidebar_combo">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <items>
-              <item id="default" translatable="yes">Default</item>
-              <item id="genres" translatable="yes">Genres</item>
-              <item id="artists" translatable="yes">Artists</item>
-            </items>
-            <signal name="changed" handler="_on_sidebar_combo_changed" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="valign">center</property>
         <property name="spacing">5</property>
         <child>

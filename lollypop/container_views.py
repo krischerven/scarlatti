@@ -15,7 +15,7 @@ from lollypop.loader import Loader
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.define import App, Type, ViewType, SelectionListMask
-from lollypop.define import MARGIN_SMALL, SidebarContent
+from lollypop.define import MARGIN_SMALL
 from lollypop.utils import tracks_to_albums
 
 
@@ -501,30 +501,6 @@ class ViewsContainer:
             from lollypop.view_settings import SettingsChildView
             view = SettingsChildView(item_id, ViewType.SCROLLED)
         return view
-
-    def _restore_state(self):
-        """
-            Restore state
-        """
-        self._stack.destroy_children()
-        state_one_ids = App().settings.get_value("state-one-ids")
-        state_two_ids = App().settings.get_value("state-two-ids")
-        state_three_ids = App().settings.get_value("state-three-ids")
-        sidebar_content = App().settings.get_enum("sidebar-content")
-        if state_one_ids and state_two_ids and state_three_ids:
-            self.show_view(state_one_ids, None, False)
-            album = Album(state_three_ids[0], state_one_ids, state_two_ids)
-            self.show_view([Type.ALBUM], album)
-        elif state_one_ids and state_two_ids:
-            if sidebar_content == SidebarContent.GENRES:
-                self.show_view([Type.GENRES], None, False)
-                self.show_view([Type.GENRES], state_one_ids[0], False)
-                self.show_view(state_two_ids)
-            else:
-                self.show_view(state_one_ids, None, False)
-                self.show_view(state_one_ids, state_two_ids)
-        elif state_one_ids:
-            self.show_view(state_one_ids)
 
 ############
 # PRIVATE  #

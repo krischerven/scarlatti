@@ -72,7 +72,7 @@ class SelectionListRow(Gtk.ListBoxRow):
                 height = ArtSize.ARTIST_SMALL
             # Padding => application.css
             height += 12
-        elif mask & SelectionListMask.ICONS:
+        elif mask & SelectionListMask.LIST_ONE:
             self.get_style_context().add_class("row-big")
             # Padding => application.css
             height += 30
@@ -114,7 +114,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             @param string as str
         """
         self.__name = string
-        if not self.__mask & SelectionListMask.ICONS:
+        if not self.__mask & SelectionListMask.LIST_ONE:
             self.__label.set_markup(GLib.markup_escape_text(string))
 
     def set_artwork(self):
@@ -152,7 +152,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         """
         if self.__artwork is None:
             return
-        if self.__mask & SelectionListMask.ICONS and\
+        if self.__mask & SelectionListMask.LIST_ONE and\
                 not App().window.is_adaptive:
             self.__artwork.set_property("halign", Gtk.Align.CENTER)
             self.__artwork.set_hexpand(True)
@@ -249,16 +249,22 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self._box.show()
         self._viewport.add(self._box)
-        overlay = Gtk.Overlay.new()
-        overlay.set_hexpand(True)
-        overlay.set_vexpand(True)
-        overlay.show()
-        overlay.add(self._scrolled)
-        self.__fastscroll = FastScroll(self._box,
-                                       self._scrolled)
-        overlay.add_overlay(self.__fastscroll)
-        self.add(self.indicator)
-        self.add(overlay)
+
+        if self.__base_mask & SelectionListMask.ARTISTS:
+            overlay = Gtk.Overlay.new()
+            overlay.set_hexpand(True)
+            overlay.set_vexpand(True)
+            overlay.show()
+            overlay.add(self._scrolled)
+            self.__fastscroll = FastScroll(self._box,
+                                           self._scrolled)
+            overlay.add_overlay(self.__fastscroll)
+            self.add(self.indicator)
+            self.add(overlay)
+        else:
+            self.add(self._scrolled)
+            self._scrolled.set_vexpand(True)
+            self._scrolled.set_hexpand(False)
         self.get_style_context().add_class("sidebar")
         App().art.connect("artist-artwork-changed",
                           self.__on_artist_artwork_changed)
@@ -323,7 +329,8 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 found = True
                 break
         if not found:
-            self.__fastscroll.clear()
+            if self.__base_mask & SelectionListMask.ARTISTS:
+                self.__fastscroll.clear()
             row = self.__add_value(object_id, name, name)
             row.populate()
             if self.__mask & SelectionListMask.ARTISTS:
@@ -375,8 +382,9 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         """
         for child in self._box.get_children():
             child.destroy()
-        self.__fastscroll.clear()
-        self.__fastscroll.clear_chars()
+        if self.__base_mask & SelectionListMask.ARTISTS:
+            self.__fastscroll.clear()
+            self.__fastscroll.clear_chars()
 
     def get_headers(self, mask):
         """

@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from random import shuffle
 
-from lollypop.define import App, SelectionListMask, ArtBehaviour, Type
+from lollypop.define import App, ArtBehaviour, Type
 from lollypop.utils import get_icon_name
 from lollypop.objects_album import Album
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
@@ -130,24 +130,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget):
-        """
-            Popup menu for track
-            @param widget as Gtk.Widget
-        """
-        if App().settings.get_value("show-sidebar"):
-            return
-        from lollypop.view_artists_rounded import RoundedArtistsView
-        from lollypop.menu_selectionlist import SelectionListMenu
-        from lollypop.widgets_utils import Popover
-        menu = SelectionListMenu(self.get_ancestor(RoundedArtistsView),
-                                 self.data,
-                                 SelectionListMask.ARTISTS_VIEW)
-        popover = Popover()
-        popover.bind_model(menu, None)
-        popover.set_relative_to(widget)
-        popover.popup()
-
     def __on_artist_artwork(self, surface):
         """
             Finish widget initialisation
@@ -171,7 +153,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             @param x as float
             @param y as float
         """
-        self.__popup_menu(self)
+        pass
 
     def __on_button_release_event(self, widget, event):
         """
@@ -186,7 +168,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
                 App().tracks.clear_cached_randoms()
             self.activate()
         elif event.button == 3:
-            self.__popup_menu(self)
+            pass
         return True
 
     def __on_destroy(self, widget):

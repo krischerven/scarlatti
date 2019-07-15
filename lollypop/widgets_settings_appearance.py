@@ -52,9 +52,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
         switch_artwork = builder.get_object("switch_artwork")
         switch_artwork.set_state(App().settings.get_value("artist-artwork"))
 
-        sidebar_combo = builder.get_object("sidebar_combo")
-        sidebar_combo.set_active(App().settings.get_enum(("sidebar-content")))
-
         orderby_combo = builder.get_object("orderby_combo")
         orderby_combo.set_active(App().settings.get_enum(("orderby")))
 
@@ -102,16 +99,7 @@ class AppearanceSettingsWidget(Gtk.Bin):
         """
         App().settings.set_value("artist-artwork",
                                  GLib.Variant("b", state))
-        if App().settings.get_value("show-sidebar"):
-            App().window.container.list_one.redraw()
-            App().window.container.list_two.redraw()
-        else:
-            from lollypop.view_artists_rounded import RoundedArtistsView
-            for child in App().window.container.stack.get_children():
-                if isinstance(child, RoundedArtistsView):
-                    child.destroy()
-                    break
-            App().window.container.reload_view()
+        App().window.container.list_two.redraw()
         if state:
             App().art.cache_artists_artwork()
 
@@ -144,16 +132,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
         if not App().player.is_party:
             settings = Gtk.Settings.get_default()
             settings.set_property("gtk-application-prefer-dark-theme", state)
-
-    def _on_sidebar_combo_changed(self, widget):
-        """
-            Update orderby setting
-            @param widget as Gtk.ComboBoxText
-        """
-        active = widget.get_active()
-        App().settings.set_enum("sidebar-content", active)
-        App().window.container.set_paned_position_from_sidebar_content(active)
-        App().window.container.update_list_one()
 
     def _on_clean_artwork_cache_clicked(self, button):
         """

@@ -146,8 +146,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         """
             Setup window for current screen
         """
-        show_sidebar = App().settings.get_value("show-sidebar")
-        self.__container.show_sidebar(show_sidebar)
         self.__signal1_id = App().player.connect("current-changed",
                                                  self.on_current_changed)
         self.__signal2_id = App().player.connect("status-changed",

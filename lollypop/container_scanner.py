@@ -14,7 +14,7 @@ from gi.repository import GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, SidebarContent
+from lollypop.define import App, SelectionListMask
 
 
 class ScannerContainer:
@@ -59,13 +59,12 @@ class ScannerContainer:
             @param genre_id as int
             @param add as bool
         """
-        sidebar_content = App().settings.get_enum("sidebar-content")
-        if sidebar_content == SidebarContent.GENRES:
+        if self.__list_two.mask & SelectionListMask.GENRES:
             if add:
                 genre_name = App().genres.get_name(genre_id)
-                self._list_one.add_value((genre_id, genre_name, genre_name))
+                self._list_two.add_value((genre_id, genre_name, genre_name))
             elif not App().artists.get_ids([genre_id]):
-                self._list_one.remove_value(genre_id)
+                self._list_two.remove_value(genre_id)
 
     def __on_artist_updated(self, scanner, artist_id, add):
         """
@@ -77,28 +76,9 @@ class ScannerContainer:
         artist_name = App().artists.get_name(artist_id)
         sortname = App().artists.get_sortname(artist_id)
         genre_ids = []
-        if App().settings.get_value("show-sidebar"):
-            sidebar_content = App().settings.get_enum("sidebar-content")
-            if sidebar_content in [SidebarContent.DEFAULT,
-                                   SidebarContent.ICONS]:
-                return
-            elif sidebar_content == SidebarContent.GENRES:
-                genre_ids = self._list_one.selected_ids
-                l = self._list_two
-                artist_ids = App().artists.get_ids(genre_ids)
-                if artist_id not in artist_ids:
-                    l.remove_value(artist_id)
-                    return
-            else:
-                l = self._list_one
+        if self.__list_two.get_visible() and\
+                self.__list_two.mask & SelectionListMask.ARTISTS:
             if add:
-                l.add_value((artist_id, artist_name, sortname))
+                self._list_two.add_value((artist_id, artist_name, sortname))
             elif not App().albums.get_ids([artist_id], genre_ids):
-                l.remove_value(artist_id)
-        elif self._rounded_artists_view is not None:
-            if add:
-                self._rounded_artists_view.add_value((artist_id,
-                                                     artist_name,
-                                                     sortname))
-            else:
-                self._rounded_artists_view.remove_value(artist_id)
+                self._list_two.remove_value(artist_id)

@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
-from lollypop.define import App, Type, ViewType, SidebarContent, MARGIN
+from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -314,10 +314,8 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         """
             Set active ids
         """
-        sidebar_content = App().settings.get_enum("sidebar-content")
-        if sidebar_content != SidebarContent.GENRES:
-            App().window.emit("show-can-go-back", True)
-            App().window.emit("can-go-back-changed", True)
+        App().window.emit("show-can-go-back", True)
+        App().window.emit("can-go-back-changed", True)
         App().settings.set_value("state-one-ids",
                                  GLib.Variant("ai", [Type.PLAYLISTS]))
         App().settings.set_value("state-two-ids",

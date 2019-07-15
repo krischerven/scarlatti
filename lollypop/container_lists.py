@@ -18,7 +18,7 @@ from lollypop.loader import Loader
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
 from lollypop.selectionlist import SelectionList
-from lollypop.define import App, Type, SelectionListMask, SidebarContent
+from lollypop.define import App, Type, SelectionListMask
 
 
 class ListsContainer:
@@ -30,34 +30,35 @@ class ListsContainer:
         """
             Init container
         """
-        self._list_one = self._list_two = None
+        self._list_one = SelectionList(SelectionListMask.LIST_ONE)
+        self._list_one.show()
+        self._list_two = SelectionList(SelectionListMask.LIST_TWO)
+        self._list_one.listbox.connect("row-activated",
+                                       self.__on_list_one_activated)
+        self._list_two.listbox.connect("row-activated",
+                                       self.__on_list_two_activated)
+        self._list_one.connect("populated", self.__on_list_one_populated)
+        self._list_one.connect("pass-focus", self.__on_pass_focus)
+        self._list_two.connect("pass-focus", self.__on_pass_focus)
+        self._list_two.connect("map", self.__on_list_two_mapped)
 
-    def update_list_one(self, update=False):
-        """
-            Update list one
-            @param update as bool
-        """
-        if self._list_one.get_visible():
-            sidebar_content = App().settings.get_enum("sidebar-content")
-            if sidebar_content == SidebarContent.GENRES:
-                self.__update_list_genres(self._list_one, update)
-            elif sidebar_content == SidebarContent.ARTISTS:
-                self.__update_list_artists(self._list_one, [Type.ALL], update)
-            else:
-                self.__update_list_default(self._list_one, update)
+        App().window.add_adaptive_child(self._sidebar_one, self._list_one)
+        App().window.add_adaptive_child(self._sidebar_two, self._list_two)
+        App().window.update_layout(True)
+        self._list_one.set_mask(SelectionListMask.LIST_ONE)
+        self._list_one.populate(
+            self._list_one.get_headers(self._list_one.mask))
 
     def update_list_two(self, update=False):
         """
             Update list two
             @param update as bool
         """
+        return
         if self._list_one.get_visible():
-            sidebar_content = App().settings.get_enum("sidebar-content")
             ids = self._list_one.selected_ids
             if ids and ids[0] in [Type.PLAYLISTS, Type.YEARS]:
                 self.__update_list_playlists(self._list_two, update, ids[0])
-            elif sidebar_content == SidebarContent.GENRES and ids:
-                self.__update_list_artists(self._list_two, ids, update)
 
     def show_lists(self, list_one_ids, list_two_ids):
         """
@@ -95,38 +96,10 @@ class ListsContainer:
 ##############
 # PROTECTED  #
 ##############
-    def _setup_lists(self):
-        """
-            Add and setup list one and list two
-        """
-        self._list_one = SelectionList(SelectionListMask.LIST_ONE)
-        self._list_two = SelectionList(SelectionListMask.LIST_TWO)
-        self._list_one.listbox.connect("row-activated",
-                                       self.__on_list_one_activated)
-        self._list_two.listbox.connect("row-activated",
-                                       self.__on_list_two_activated)
-        self._list_one.connect("populated", self.__on_list_one_populated)
-        self._list_one.connect("pass-focus", self.__on_pass_focus)
-        self._list_two.connect("pass-focus", self.__on_pass_focus)
-        self._list_two.connect("map", self.__on_list_two_mapped)
-        self._paned_two.pack1(self._list_two, False, False)
-        self._paned_one.pack1(self._list_one, False, False)
-        App().window.add_paned(self._paned_one, self._list_one)
-        App().window.add_paned(self._paned_two, self._list_two)
-        if App().window.is_adaptive:
-            self._list_one.show()
-            App().window.update_layout(True)
-
     def _restore_state(self):
         """
             Restore list state
         """
-        def select_list_two(selection_list, ids):
-            # For some reasons, we need to delay this
-            # If list two is short, we may receive list two selected-item
-            # signal before list one
-            GLib.idle_add(self._list_two.select_ids, ids)
-            self._list_two.disconnect_by_func(select_list_two)
         try:
             state_one_ids = App().settings.get_value("state-one-ids")
             state_two_ids = App().settings.get_value("state-two-ids")
@@ -137,19 +110,8 @@ class ListsContainer:
                 state_two_ids = state_three_ids
             if state_one_ids:
                 self._list_one.select_ids(state_one_ids)
-                # If list two not available, directly show view
-                sidebar_content = App().settings.get_enum("sidebar-content")
-                if state_two_ids and (
-                                  App().window.is_adaptive or
-                                  sidebar_content in [SidebarContent.DEFAULT,
-                                                      SidebarContent.ICONS]):
+                if state_two_ids:
                     self.show_view(state_one_ids, state_two_ids)
-                # Wait for list to be populated and select item
-                elif state_two_ids and not state_three_ids:
-                    self._list_two.connect("populated",
-                                           select_list_two,
-                                           state_two_ids)
-
                 if state_three_ids:
                     album = Album(state_three_ids[0],
                                   state_one_ids,
@@ -243,16 +205,6 @@ class ListsContainer:
                         on_finished=lambda r: setup(*r))
         loader.start()
 
-    def __update_list_default(self, selection_list, update):
-        """
-            Setup list for artists
-            @param list as SelectionList
-            @param update as bool, if True, just update entries
-        """
-        selection_list.set_mask(SelectionListMask.ICONS)
-        selection_list.populate(
-            selection_list.get_headers(selection_list.mask))
-
     def __on_list_one_activated(self, listbox, row):
         """
             Update view based on selected object
@@ -332,7 +284,7 @@ class ListsContainer:
         """
             @param selection_list as SelectionList
         """
-        pass
+        self._restore_state()
 
     def __on_list_two_activated(self, listbox, row):
         """
@@ -378,4 +330,4 @@ class ListsContainer:
         """
         position = App().settings.get_value(
             "paned-listview-width").get_int32()
-        GLib.timeout_add(100, self._paned_two.set_position, position)
+        GLib.timeout_add(100, self._sidebar_two.set_position, position)

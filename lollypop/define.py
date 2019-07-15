@@ -121,12 +121,6 @@ class ScanType:
     FULL = 2
 
 
-class SidebarContent:
-    DEFAULT = 0
-    GENRES = 1
-    ARTISTS = 2
-
-
 class SelectionListMask:
     NONE = 1 << 0
     LIST_ONE = 1 << 1
@@ -137,7 +131,6 @@ class SelectionListMask:
     PLAYLISTS = 1 << 6
     COMPILATIONS = 1 << 7
     ARTISTS_VIEW = 1 << 8
-    ICONS = 1 << 10
 
 
 class Shuffle:

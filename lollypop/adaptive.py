@@ -168,7 +168,7 @@ class AdaptiveWindow:
         self.__configure_event_connected = False
         self.__adaptive_timeout_id = None
         self.__stack = None
-        self.__paned = []
+        self.__children = []
 
     def set_stack(self, stack):
         """
@@ -177,13 +177,13 @@ class AdaptiveWindow:
         """
         self.__stack = stack
 
-    def add_paned(self, paned, child):
+    def add_adaptive_child(self, parent, child):
         """
-            Add paned to adaptive mode
-            @param paned as Gtk.Paned
+            Add an adaptive child
+            @param parent as Gtk.Container
             @param child as Gtk.Widget
         """
-        self.__paned.append((paned, child))
+        self.__children.append((parent, child))
         child.connect("destroy", self.__on_child_destroy)
 
     def update_layout(self, adaptive_stack):
@@ -192,7 +192,7 @@ class AdaptiveWindow:
             @param adaptive_mode as bool
         """
         self._adaptive_stack = adaptive_stack
-        if not self.__paned:
+        if not self.__children:
             return
         if adaptive_stack:
             self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
@@ -200,7 +200,7 @@ class AdaptiveWindow:
             children = self.__stack.get_children()
             for child in children:
                 self.__stack.remove(child)
-            for (p, c) in self.__paned:
+            for (p, c) in self.__children:
                 p.remove(c)
                 self.__stack.add(c)
                 if c.get_visible():
@@ -211,10 +211,13 @@ class AdaptiveWindow:
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         else:
             self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            # Move wanted child to paned
-            for (p, c) in self.__paned:
+            for (p, c) in self.__children:
                 self.__stack.remove(c)
-                p.pack1(c, False, False)
+                if isinstance(p, Gtk.Paned):
+                    p.pack1(c, False, False)
+                else:
+                    p.insert_column(0)
+                    p.attach(c, 0, 0, 1, 1)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 
     def go_back(self):
@@ -305,9 +308,9 @@ class AdaptiveWindow:
             Remove widget from paned
             @param widget as Gtk.Widget
         """
-        for (p, c) in self.__paned:
+        for (p, c) in self.__children:
             if c == widget:
-                self.__paned.remove((p, c))
+                self.__children.remove((p, c))
                 break
 
     def __on_configure_event(self, widget, event):
