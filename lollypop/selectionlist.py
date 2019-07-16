@@ -512,6 +512,14 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 self.remove_value(Type.CURRENT)
                 self.remove_value(Type.SEARCH)
 
+    def _on_map(self, widget):
+        """
+            Unselect all if adaptive
+            @param widget as Gtk.Widget
+        """
+        if App().window.is_adaptive:
+            self._box.unselect_all()
+
 #######################
 # PRIVATE             #
 #######################
