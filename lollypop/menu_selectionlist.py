@@ -84,7 +84,7 @@ class SelectionListMenu(Gio.Menu):
             self.append_section(_("Startup"), startup_menu)
         # Shown menu
         if mask & (SelectionListMask.SIDEBAR |
-                   SelectionListMask.LIST_VIEW) and rowid < 0:
+                   SelectionListMask.PLAYLISTS) and rowid < 0:
             shown_menu = Gio.Menu()
             if mask & SelectionListMask.PLAYLISTS:
                 lists = ShownPlaylists.get(True)
