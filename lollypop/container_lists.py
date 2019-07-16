@@ -207,6 +207,8 @@ class ListsContainer:
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
+        self._stack.history.reset()
+        App().window.emit("can-go-back-changed", False)
 
     def __on_pass_focus(self, selection_list):
         """
