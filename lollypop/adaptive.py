@@ -142,8 +142,9 @@ class AdaptiveHistory:
             Reset history
         """
         for (view, _class, args) in self.__history:
-            view.stop()
-            view.destroy_later()
+            if view is not None:
+                view.stop()
+                view.destroy_later()
         self.__history = []
 
     def save(self):
