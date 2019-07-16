@@ -434,7 +434,7 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
         icon = "view-list-symbolic"
     elif object_id == Type.SEARCH:
         icon = "edit-find-symbolic"
-    elif object_id == Type.GENRES:
+    elif object_id in [Type.GENRES, Type.GENRES_LIST]:
         icon = "org.gnome.Lollypop-tag-symbolic"
     elif object_id == Type.WEB:
         icon = "goa-panel-symbolic"
