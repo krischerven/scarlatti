@@ -62,7 +62,8 @@ class SelectionListMenu(Gio.Menu):
                 (rowid in [Type.POPULARS, Type.RADIOS, Type.LOVED,
                            Type.ALL, Type.RECENTS, Type.YEARS,
                            Type.RANDOMS, Type.NEVER, Type.GENRES,
-                           Type.PLAYLISTS, Type.ARTISTS, Type.WEB] or
+                           Type.PLAYLISTS, Type.ARTISTS, Type.WEB,
+                           Type.GENRES_LIST, Type.ARTISTS_LIST] or
                  mask & SelectionListMask.PLAYLISTS):
             startup_menu = Gio.Menu()
             if self.__mask & SelectionListMask.LIST_VIEW:
