@@ -164,9 +164,16 @@ class ListsContainer:
         """
             @param selection_list as SelectionList
         """
-        self._stack.load_history()
-        if self._stack.history.count > 0:
-            App().window.emit("can-go-back-changed", True)
+        if App().settings.get_value("save-state"):
+            self._stack.load_history()
+            if self._stack.history.count > 0:
+                App().window.emit("can-go-back-changed", True)
+        else:
+            startup_id = App().settings.get_value("startup-id").get_int32()
+            if startup_id == -1:
+                selection_list.select_first()
+            else:
+                selection_list.select_ids([startup_id], True)
 
     def __on_list_view_activated(self, listbox, row):
         """
