@@ -246,8 +246,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         # We want to get release event after gesture
         self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.__gesture.set_button(0)
-        self._box.connect("button-press-event",
-                          self.__on_button_press_event)
         self._box.set_sort_func(self.__sort_func)
         self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self._box.show()
@@ -643,17 +641,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self._box.connect("button-release-event",
                           self.__on_button_release_event)
 
-    def __on_button_press_event(self, listbox, event):
-        """
-            Block event if activating current row
-        """
-        if event.button == 1:
-            row = listbox.get_row_at_y(event.y)
-            if row is not None:
-                selected_ids = self.selected_ids
-                if len(selected_ids) == 1 and selected_ids[0] == row.id:
-                    return True
-
     def __on_button_release_event(self, listbox, event):
         """
             Handle right click and modifier
@@ -673,8 +660,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             if (not state & Gdk.ModifierType.CONTROL_MASK and
                     not state & Gdk.ModifierType.SHIFT_MASK) or\
                     static_selected:
-                if len(selected_ids) == 1 and selected_ids[0] == row.id:
-                    return True
                 listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
             # User clicked on random, clear cached random
             if row.id == Type.RANDOMS:
