@@ -53,7 +53,7 @@ class AdaptiveHistory:
         Offload old items and reload them on the fly
     """
 
-    __MAX_HISTORY_ITEMS = 10
+    __MAX_HISTORY_ITEMS = 1
 
     def __init__(self):
         """
@@ -86,12 +86,21 @@ class AdaptiveHistory:
             return None
         (view, _class, args) = self.__history.pop(index)
         try:
+            # Here, we are restoring an offloaded view
             if view is None:
                 view = _class(**args[0])
+                # Restore scrolled position
+                # For LazyLoadingView, we can't restore this too soon
+                if hasattr(view, "_scrolled"):
+                    if hasattr(view, "_on_populated"):
+                        view.set_populated_scrolled_position(args[3])
+                    else:
+                        adj = view._scrolled.get_vadjustment()
+                        GLib.idle_add(adj.set_value, args[3])
+                # Start populating the view
                 if hasattr(view, "populate"):
                     view.populate(**args[1])
                 view.show()
-            print(args[2])
             App().window.container.sidebar.select_ids([args[2]], False)
             return view
         except Exception as e:

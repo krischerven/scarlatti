@@ -245,6 +245,7 @@ class LazyLoadingView(View):
         View.__init__(self, view_type)
         self._lazy_queue = []
         self.__priority_queue = []
+        self.__scrolled_position = None
         self.__lazy_loading_id = None
         if self._view_type & ViewType.SCROLLED:
             self.__scroll_timeout_id = None
@@ -271,6 +272,14 @@ class LazyLoadingView(View):
         if self.__lazy_loading_id is None:
             self.__lazy_loading_id = GLib.idle_add(self.__lazy_loading)
 
+    def set_populated_scrolled_position(self, position):
+        """
+            Set scrolled position on populated
+            @param position as int
+        """
+        if self._view_type & ViewType.SCROLLED:
+            self.__scrolled_position = position
+
 #######################
 # PROTECTED           #
 #######################
@@ -280,6 +289,10 @@ class LazyLoadingView(View):
             @param widget as Gtk.Widget
         """
         View._on_map(self, widget)
+        # Wait for viewport allocation to restore scrolled position
+        if self.__scrolled_position is not None:
+            self._viewport.connect("size-allocate",
+                                   self.__on_viewport_size_allocated)
         if self._lazy_queue:
             self.lazy_loading()
 
@@ -359,3 +372,16 @@ class LazyLoadingView(View):
         for child in self._lazy_queue:
             if self.__is_visible(child):
                 self.__priority_queue.append(child)
+
+    def __on_viewport_size_allocated(self, viewport, allocation):
+        """
+            Restore scrolled position
+            @param viewport as Gtk.Viewport
+            @param allocation as Gdk.Rectangle
+        """
+        if allocation.height > 1 and self.__scrolled_position is not None:
+            self._viewport.disconnect_by_func(
+                self.__on_viewport_size_allocated)
+            self._scrolled.get_vadjustment().set_value(
+                self.__scrolled_position)
+            self.__scrolled_position = None
