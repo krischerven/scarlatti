@@ -106,7 +106,6 @@ class View(BaseView, Gtk.Grid):
         grid.set_hexpand(True)
         grid.set_property("halign", Gtk.Align.CENTER)
         grid.set_property("valign", Gtk.Align.CENTER)
-        self._scrolled.hide()
         grid.set_name("lollypop_placeholder")
         grid.show_all()
         self.add(grid)

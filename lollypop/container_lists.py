@@ -162,8 +162,11 @@ class ListsContainer:
             self._list_view.hide()
         # Update view
         if selected_ids[0] == Type.ARTISTS_LIST:
-            if self.view is not None:
-                self.view.destroy()
+            from lollypop.view import View
+            view = View()
+            view.populate()
+            view.show()
+            self._stack.history.reset()
         elif selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()
         elif selected_ids[0] == Type.CURRENT:
