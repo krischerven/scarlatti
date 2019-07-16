@@ -36,6 +36,8 @@ class ViewsContainer:
         """
         if track is None and App().player.current_track.id is None:
             return
+        self._list_view.hide()
+        self._sidebar.select_ids([], False)
         from lollypop.view_lyrics import LyricsView
         current = self._stack.get_visible_child()
         view = LyricsView()
@@ -52,6 +54,7 @@ class ViewsContainer:
             @param data as object
             @param switch as bool
         """
+        self._list_view.hide()
         view = None
         if item_ids:
             if item_ids[0] in [Type.POPULARS,
