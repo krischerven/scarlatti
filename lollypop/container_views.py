@@ -54,7 +54,6 @@ class ViewsContainer:
             @param data as object
             @param switch as bool
         """
-        self._list_view.hide()
         view = None
         if item_ids:
             if item_ids[0] in [Type.POPULARS,
