@@ -113,11 +113,11 @@ class ViewsContainer:
         """
         if App().player.queue and not view_type & ViewType.FULLSCREEN:
             from lollypop.view_queue import QueueView
-            view = QueueView(view_type | self._view_type)
+            view = QueueView(view_type)
             view.populate()
         else:
             from lollypop.view_current_albums import CurrentAlbumsView
-            view = CurrentAlbumsView(view_type | self._view_type)
+            view = CurrentAlbumsView(view_type)
             view.populate(App().player.albums)
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
@@ -461,7 +461,7 @@ class ViewsContainer:
             return [Album(album_id) for album_id in album_ids]
 
         from lollypop.view_albums_box import AlbumsBoxView
-        view_type = ViewType.SCROLLED
+        view_type = ViewType.SCROLLED | ViewType.DEVICES
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
         view = AlbumsBoxView([], [], view_type)
