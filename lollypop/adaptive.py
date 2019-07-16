@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import App, LOLLYPOP_DATA_PATH
+from lollypop.define import App, LOLLYPOP_DATA_PATH, Type
 
 
 class AdaptiveView:
@@ -273,12 +273,35 @@ class AdaptiveStack(Gtk.Stack):
         """
             Load history from disk
         """
-        self.__history.load()
-        (view, sidebar_id) = self.__history.pop()
-        if view is not None:
-            App().window.container.sidebar.select_ids([sidebar_id], True)
-            self.add(view)
-            Gtk.Stack.set_visible_child(self, view)
+        def on_populated(selection_list, ids):
+            selection_list.disconnect_by_func(on_populated)
+            selection_list.select_ids(ids, False)
+
+        try:
+            self.__history.load()
+            (view, sidebar_id) = self.__history.pop()
+            if view is not None:
+                App().window.container.sidebar.select_ids([sidebar_id], True)
+                self.add(view)
+                Gtk.Stack.set_visible_child(self, view)
+                # Restore list view if needed
+                if sidebar_id == Type.GENRES_LIST:
+                    genre_ids = []
+                    albums = view.args[1]["items"]
+                    for album in albums:
+                        for genre_id in album.genre_ids:
+                            if genre_id not in genre_ids:
+                                genre_ids.append(genre_id)
+                    App().window.container.list_view.connect("populated",
+                                                             on_populated,
+                                                             genre_ids)
+                elif sidebar_id == Type.ARTISTS_LIST:
+                    artist_ids = view.args[0]["artist_ids"]
+                    App().window.container.list_view.connect("populated",
+                                                             on_populated,
+                                                             artist_ids)
+        except Exception as e:
+            Logger.error("AdaptiveStack::load_history(): %s", e)
 
     @property
     def history(self):
