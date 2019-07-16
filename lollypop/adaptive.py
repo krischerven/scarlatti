@@ -82,10 +82,10 @@ class AdaptiveHistory:
         """
             Pop last view from history
             @param index as int
-            @return view
+            @return (view as View, sidebar_id as int)
         """
         if not self.__history:
-            return None
+            return (None, None)
         (view, _class, args) = self.__history.pop(index)
         try:
             # Here, we are restoring an offloaded view
@@ -103,10 +103,10 @@ class AdaptiveHistory:
                 if hasattr(view, "populate"):
                     view.populate(**args[1])
                 view.show()
-            App().window.container.sidebar.select_ids([args[2]], False)
-            return view
+            return (view, args[2])
         except Exception as e:
             Logger.warning("AdaptiveHistory::pop(): %s, %s", _class, e)
+        return (None, None)
 
     def search(self, view_class, view_args):
         """
@@ -123,7 +123,7 @@ class AdaptiveHistory:
                 break
             index += 1
         if found:
-            view = self.pop(index)
+            (view, sidebar_id) = self.pop(index)
             return view
         return None
 
@@ -157,7 +157,7 @@ class AdaptiveHistory:
                                                    -self.__MAX_HISTORY_ITEMS:]:
                 no_widget_history.append((None, _class, args))
             with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
-                dump(list(no_widget_history), f)
+                dump(no_widget_history, f)
         except Exception as e:
             Logger.error("Application::__save_state(): %s" % e)
 
@@ -241,15 +241,15 @@ class AdaptiveStack(Gtk.Stack):
         """
         if self.__history:
             visible_child = self.get_visible_child()
-            widget = self.__history.pop()
-            if widget is None:
-                return
-            if widget not in self.get_children():
-                self.add(widget)
-            Gtk.Stack.set_visible_child(self, widget)
-            if visible_child is not None:
-                visible_child.stop()
-                visible_child.destroy_later()
+            (view, sidebar_id) = self.__history.pop()
+            if view is not None:
+                if view not in self.get_children():
+                    self.add(view)
+                App().window.container.sidebar.select_ids([sidebar_id], False)
+                Gtk.Stack.set_visible_child(self, view)
+                if visible_child is not None:
+                    visible_child.stop()
+                    visible_child.destroy_later()
 
     def remove(self, widget):
         """
@@ -274,10 +274,11 @@ class AdaptiveStack(Gtk.Stack):
             Load history from disk
         """
         self.__history.load()
-        view = self.__history.pop()
+        (view, sidebar_id) = self.__history.pop()
         if view is not None:
+            App().window.container.sidebar.select_ids([sidebar_id], True)
             self.add(view)
-            self.set_visible_child(view)
+            Gtk.Stack.set_visible_child(self, view)
 
     @property
     def history(self):
@@ -355,9 +356,10 @@ class AdaptiveWindow:
             Go back to first page
         """
         if self.__stack.history.count > 0:
-            widget = self.__stack.history.pop(0)
+            (view, sidebar_id) = self.__stack.history.pop(0)
+            if view is not None:
+                self.__stack.set_visible_child(view)
             self.__stack.history.reset()
-            self.__stack.set_visible_child(widget)
             self.emit("can-go-back-changed", False)
 
     def set_adaptive_stack(self, b):
