@@ -258,7 +258,7 @@ class ViewsContainer:
             playlist_ids += App().playlists.get_synced_ids(index)
             return playlist_ids
 
-        view_type = ViewType.SCROLLED | ViewType.DEVICES
+        view_type = ViewType.SCROLLED | ViewType.NO_HISTORY
         from lollypop.view_playlists_manager import PlaylistsManagerView
         view = PlaylistsManagerView(None, view_type)
         loader = Loader(target=load, view=view)
@@ -463,7 +463,7 @@ class ViewsContainer:
             return [Album(album_id) for album_id in album_ids]
 
         from lollypop.view_albums_box import AlbumsBoxView
-        view_type = ViewType.SCROLLED | ViewType.DEVICES
+        view_type = ViewType.SCROLLED | ViewType.NO_HISTORY
         if App().window.is_adaptive:
             view_type |= ViewType.MEDIUM
         view = AlbumsBoxView([], [], view_type)

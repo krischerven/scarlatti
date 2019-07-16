@@ -36,7 +36,7 @@ class PlaylistsManagerView(FlowBoxView):
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__obj = obj
         self.__signal_id = None
-        if not view_type & ViewType.DEVICES:
+        if not view_type & ViewType.NO_HISTORY:
             new_playlist_button = Gtk.Button(_("New playlist"))
             new_playlist_button.connect("clicked",
                                         self.__on_new_button_clicked)
@@ -96,7 +96,7 @@ class PlaylistsManagerView(FlowBoxView):
             scrolled position
             @return ({}, {}, int, int)
         """
-        if self._view_type & ViewType.DEVICES:
+        if self._view_type & ViewType.NO_HISTORY:
             return None
         elif self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
