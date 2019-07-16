@@ -53,7 +53,7 @@ class AdaptiveHistory:
         Offload old items and reload them on the fly
     """
 
-    __MAX_HISTORY_ITEMS = 1
+    __MAX_HISTORY_ITEMS = 10
 
     def __init__(self):
         """
