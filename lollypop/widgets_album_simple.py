@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.widgets_album import AlbumWidget
 from lollypop.helper_overlay_album import OverlayAlbumHelper
-from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour
+from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour, Type
 from lollypop.utils import on_query_tooltip, on_realize
 
 
@@ -272,7 +272,8 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             @param eventbox as Gtk.EventBox
             @param event as Gdk.EventButton
         """
-        App().window.container.show_artists_albums(self._album.artist_ids)
+        App().window.container.show_view([Type.ARTISTS],
+                                         self._album.artist_ids)
         return True
 
     def __on_destroy(self, widget):

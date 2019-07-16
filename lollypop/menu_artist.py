@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, ViewType
+from lollypop.define import App, ViewType, Type
 
 
 class ArtistMenu(Gio.Menu):
@@ -68,4 +68,5 @@ class ArtistMenu(Gio.Menu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        App().window.container.show_artists_albums(self.__album.artist_ids)
+        App().window.container.show_view([Type.ARTISTS],
+                                         self._album.artist_ids)

@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gdk, Gio, GLib, GObject, Pango
 from gettext import gettext as _
 
 from lollypop.view_tracks import TracksView
-from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL
+from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_row_dnd import DNDRow
 from lollypop.logger import Logger
@@ -470,7 +470,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             popover = self.get_ancestor(Gtk.Popover)
             if popover is not None:
                 popover.popdown()
-            App().window.container.show_artists_albums(self._album.artist_ids)
+            App().window.container.show_view([Type.ARTISTS],
+                                             self._album.artist_ids)
         elif self.__view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
             if App().player.current_track.album.id == self._album.id:
                 # Stop playback or loop for last album

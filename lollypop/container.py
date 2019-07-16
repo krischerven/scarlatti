@@ -117,13 +117,6 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         self._restore_state()
 
-    def show_artists_albums(self, artist_ids):
-        """
-            Show albums from artists
-            @param artist_ids as [int]
-        """
-        self.show_view([Type.ARTISTS], artist_ids)
-
     @property
     def view(self):
         """
