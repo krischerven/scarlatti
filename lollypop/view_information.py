@@ -113,16 +113,6 @@ class InformationView(View):
                               self.__artist_name,
                               callback=(self.__set_information_content, True))
 
-    @property
-    def args(self):
-        """
-            Get default args for __class__, populate(), sidebar_id and
-            scrolled position
-            @return ({}, {}, int, int)
-        """
-        return ({"minimal": self.__minimal}, {"artist_id": self.__artist_id},
-                Type.NONE, 0)
-
 #######################
 # PROTECTED           #
 #######################

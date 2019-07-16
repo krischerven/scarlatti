@@ -104,7 +104,7 @@ class SearchView(BaseView, Gtk.Bin):
     @property
     def args(self):
         """
-            Get default args for __class__, populate(), sidebar_id and
+            Get default args for __class__, populate() plus sidebar_id and
             scrolled position
             @return ({}, {}, int, int)
         """

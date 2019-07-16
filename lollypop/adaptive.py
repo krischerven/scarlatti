@@ -67,7 +67,7 @@ class AdaptiveHistory:
             Offload old views
             @param view as View
         """
-        if "args" in dir(view):
+        if view.args is not None:
             self.__history.append((view, view.__class__, view.args))
         if self.count >= self.__MAX_HISTORY_ITEMS:
             (view, _class, args) = self.__history[-self.__MAX_HISTORY_ITEMS]
@@ -204,6 +204,8 @@ class AdaptiveStack(Gtk.Stack):
             self.__history.add_view(visible_child)
             self.emit("new-child-in-history")
             visible_child.stop()
+            if visible_child.args is None:
+                visible_child.destroy_later()
         Gtk.Stack.set_visible_child(self, widget)
 
     def go_back(self):

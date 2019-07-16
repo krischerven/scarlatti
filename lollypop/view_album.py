@@ -94,11 +94,13 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
     @property
     def args(self):
         """
-            Get default args for __class__, populate(), sidebar_id and
+            Get default args for __class__, populate() plus sidebar_id and
             scrolled position
             @return ({}, {}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
+        if self._view_type & ViewType.DEVICE:
+            return None
+        elif self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0

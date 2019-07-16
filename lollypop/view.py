@@ -140,11 +140,11 @@ class View(BaseView, Gtk.Grid):
     @property
     def args(self):
         """
-            Get default args for __class__, populate(), sidebar_id and
+            Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int)
+            @return ({}, {}, int, int) or None
         """
-        return ({}, {}, Type.NONE, 0)
+        return None
 
     @property
     def destroyed(self):
