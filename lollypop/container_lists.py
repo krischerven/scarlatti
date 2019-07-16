@@ -215,18 +215,9 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_list_view_activated()")
-        genre_ids = self._sidebar.selected_ids
         selected_ids = self._list_view.selected_ids
-        if not selected_ids or not genre_ids:
-            return
-        if genre_ids[0] == Type.PLAYLISTS:
-            view = self._get_view_playlists(selected_ids)
-        elif genre_ids[0] == Type.YEARS:
-            view = self._get_view_albums_years(selected_ids)
-        elif selected_ids[0] == Type.COMPILATIONS:
-            view = self._get_view_albums(genre_ids, selected_ids)
-        else:
-            view = self._get_view_artists(genre_ids, selected_ids)
+        view = self._get_view_artists([], selected_ids)
+        view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
 
