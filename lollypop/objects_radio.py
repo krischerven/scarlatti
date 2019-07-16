@@ -68,10 +68,17 @@ class Radio(Base):
         self.mb_artist_ids = []
         self.is_web = self.is_http = self.first = True
 
+    def set_name(self, name):
+        """
+            Set uri
+            @param uri as str
+        """
+        self.name = name
+
     def set_uri(self, uri):
         """
             Set uri
-            @param uri as string
+            @param uri as str
         """
         self.uri = uri
 

@@ -17,6 +17,7 @@ from lollypop.define import App
 from lollypop.widgets_utils import Popover
 from lollypop.widgets_artwork_radio import RadioArtworkSearchWidget
 from lollypop.art import Art
+from lollypop.objects_radio import Radio
 
 
 # Show a popover with radio logos from the web
@@ -77,10 +78,10 @@ class RadioPopover(Popover):
             @param widget as Gtk.Widget
         """
         self.popdown()
-        if self.__radio_id is not None:
+        if self.__radio.id is not None:
             store = Art._RADIOS_PATH
-            name = App().radios.get_name(self.__radio_id)
-            App().radios.remove(self.__radio_id)
+            name = self.__radio.name
+            App().radios.remove(self.__radio.id)
             App().art.uncache_radio_artwork(name)
             f = Gio.File.new_for_path(store + "/%s.png" % name)
             if f.query_exists():
@@ -107,7 +108,7 @@ class RadioPopover(Popover):
         """
         self.__stack.get_visible_child().hide()
         self.__save_radio()
-        name = App().radios.get_name(self.__radio_id)
+        name = App().radios.get_name(self.__radio.id)
         artwork_widget = RadioArtworkSearchWidget(name)
         artwork_widget.populate()
         artwork_widget.show()
@@ -125,11 +126,14 @@ class RadioPopover(Popover):
         new_name = self.__name_entry.get_text()
         new_uri = self.__uri_entry.get_text()
         if new_name != "" and new_uri != "":
-            if self.__radio_id is None:
-                self.__radio_id = App().radios.add(
-                    new_name, new_uri.lstrip().rstrip())
+            if self.__radio.id is None:
+                radio_id = App().radios.add(new_name,
+                                            new_uri.lstrip().rstrip())
+                self.__radio = Radio(radio_id)
             else:
-                name = App().radios.get_name(self.__radio_id)
-                App().radios.rename(self.__radio_id, new_name)
-                App().radios.set_uri(self.__radio_id, new_uri)
+                name = App().radios.get_name(self.__radio.id)
+                App().radios.rename(self.__radio.id, new_name)
+                App().radios.set_uri(self.__radio.id, new_uri)
                 App().art.rename_radio(name, new_name)
+                self.__radio.set_uri(new_uri)
+                self.__radio.set_name(new_name)
