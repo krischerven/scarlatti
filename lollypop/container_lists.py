@@ -49,7 +49,6 @@ class ListsContainer:
 
         App().window.add_adaptive_child(self._sidebar_one, self._sidebar)
         App().window.add_adaptive_child(self._sidebar_two, self._list_view)
-        App().window.update_layout(True)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         self._sidebar.populate(items)

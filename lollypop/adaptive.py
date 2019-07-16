@@ -283,39 +283,6 @@ class AdaptiveWindow:
         self.__children.append((parent, child))
         child.connect("destroy", self.__on_child_destroy)
 
-    def update_layout(self, adaptive_stack):
-        """
-            Update internal layout
-            @param adaptive_mode as bool
-        """
-        self._adaptive_stack = adaptive_stack
-        if not self.__children:
-            return
-        if adaptive_stack:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            children = self.__stack.get_children()
-            for child in children:
-                self.__stack.remove(child)
-            for (p, c) in self.__children:
-                p.remove(c)
-                self.__stack.add(c)
-                if c.get_visible():
-                    self.__stack.set_visible_child(c)
-            for child in children:
-                self.__stack.add(child)
-                self.__stack.set_visible_child(child)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        else:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            for (p, c) in self.__children:
-                self.__stack.remove(c)
-                if isinstance(p, Gtk.Paned):
-                    p.pack1(c, False, False)
-                else:
-                    p.insert_column(0)
-                    p.attach(c, 0, 0, 1, 1)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-
     def go_back(self):
         """
             Go back in container stack
@@ -389,13 +356,46 @@ class AdaptiveWindow:
 ############
 # PRIVATE  #
 ############
+    def __update_layout(self, adaptive_stack):
+        """
+            Update internal layout
+            @param adaptive_mode as bool
+        """
+        self._adaptive_stack = adaptive_stack
+        if not self.__children:
+            return
+        if adaptive_stack:
+            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
+            children = self.__stack.get_children()
+            for child in children:
+                self.__stack.remove(child)
+            for (p, c) in self.__children:
+                p.remove(c)
+                self.__stack.add(c)
+                if c.get_visible():
+                    self.__stack.set_visible_child(c)
+            for child in children:
+                self.__stack.add(child)
+                self.__stack.set_visible_child(child)
+            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        else:
+            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
+            for (p, c) in self.__children:
+                self.__stack.remove(c)
+                if isinstance(p, Gtk.Paned):
+                    p.pack1(c, False, False)
+                else:
+                    p.insert_column(0)
+                    p.attach(c, 0, 0, 1, 1)
+            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+
     def __set_adaptive_stack(self, b):
         """
             Handle adaptive switch
             @param b as bool
         """
         self.__adaptive_timeout_id = None
-        self.update_layout(b)
+        self.__update_layout(b)
         self.emit("adaptive-changed", b)
 
     def __on_new_child_in_history(self, stack):
