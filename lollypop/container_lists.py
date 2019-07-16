@@ -101,27 +101,18 @@ class ListsContainer:
 ############
 # PRIVATE  #
 ############
-    def __update_list_genres(self, selection_list, update):
+    def __show_genres_list(self, selection_list):
         """
             Setup list for genres
             @param list as SelectionList
-            @param update as bool, if True, just update entries
         """
         def load():
             genres = App().genres.get()
             return genres
 
-        def setup(genres):
-            selection_list.set_mask(SelectionListMask.GENRES)
-            items = selection_list.get_headers(selection_list.mask)
-            items += genres
-            if update:
-                selection_list.update_values(items)
-            else:
-                selection_list.populate(items)
-
-        loader = Loader(target=load, view=selection_list, on_finished=setup)
+        loader = Loader(target=load, view=selection_list)
         loader.start()
+        selection_list.set_mask(SelectionListMask.GENRES)
 
     def __show_artists_list(self, selection_list):
         """
@@ -153,9 +144,8 @@ class ListsContainer:
         if selected_ids[0] == Type.ARTISTS_LIST:
             self.__show_artists_list(self._list_view)
             self._list_view.show()
-        elif (selected_ids[0] > 0 or selected_ids[0] == Type.ALL) and\
-                self._sidebar.mask & SelectionListMask.GENRES:
-            self.__show_artists_list(self._list_view)
+        elif selected_ids[0] == Type.GENRES_LIST:
+            self.__show_genres_list(self._list_view)
             self._list_view.show()
         else:
             self._list_view.hide()
@@ -216,7 +206,10 @@ class ListsContainer:
         """
         Logger.debug("Container::__on_list_view_activated()")
         selected_ids = self._list_view.selected_ids
-        view = self._get_view_artists([], selected_ids)
+        if self._list_view.mask & SelectionListMask.GENRES:
+            view = self._get_view_albums(selected_ids, [])
+        else:
+            view = self._get_view_artists([], selected_ids)
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
