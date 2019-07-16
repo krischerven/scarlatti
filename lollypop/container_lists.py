@@ -155,7 +155,8 @@ class ListsContainer:
         # If we are in paned stack mode, show list two if wanted
         if App().window.is_adaptive\
                 and self._list_view.get_visible()\
-                and selected_ids[0] == Type.ARTISTS_LIST:
+                and selected_ids[0] in [Type.ARTISTS_LIST,
+                                        Type.GENRES_LIST]:
             self._stack.set_visible_child(self._list_view)
         elif view is not None:
             self._stack.set_visible_child(view)
@@ -190,8 +191,9 @@ class ListsContainer:
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
-        self._stack.history.reset()
-        App().window.emit("can-go-back-changed", False)
+        if not App().window.is_adaptive:
+            self._stack.history.reset()
+            App().window.emit("can-go-back-changed", False)
 
     def __on_pass_focus(self, selection_list):
         """
