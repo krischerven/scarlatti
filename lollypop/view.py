@@ -85,6 +85,8 @@ class View(BaseView, Gtk.Grid):
         """
             Populate view with default message
         """
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.hide()
         grid = Gtk.Grid()
         grid.set_margin_start(20)
         grid.set_margin_end(20)
