@@ -240,10 +240,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self.__mask = 0
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
-        self._box.connect("button-release-event",
-                          self.__on_button_release_event)
-        self._box.connect("key-press-event",
-                          self.__on_key_press_event)
+        self.__gesture = Gtk.GestureLongPress.new(self._box)
+        self.__gesture.connect("pressed", self.__on_gesture_pressed)
+        self.__gesture.connect("end", self.__on_gesture_end)
+        # We want to get release event after gesture
+        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self.__gesture.set_button(0)
         self._box.set_sort_func(self.__sort_func)
         self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self._box.show()
@@ -579,6 +581,29 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 b = row_b.name
             return strcoll(a, b)
 
+    def __popup_menu(self, x, y):
+        """
+            Show menu at (x, y)
+            @param x as int
+            @param y as int
+        """
+        if self.__base_mask in [SelectionListMask.SIDEBAR,
+                                SelectionListMask.LIST_VIEW]:
+            from lollypop.menu_selectionlist import SelectionListMenu
+            from lollypop.widgets_utils import Popover
+            row = self._box.get_row_at_y(y)
+            if row is not None:
+                menu = SelectionListMenu(self, row.id, self.mask)
+                popover = Popover()
+                popover.bind_model(menu, None)
+                popover.set_relative_to(self._box)
+                rect = Gdk.Rectangle()
+                rect.x = x
+                rect.y = y
+                rect.width = rect.height = 1
+                popover.set_pointing_to(rect)
+                popover.popup()
+
     def __on_key_press_event(self, listbox, event):
         """
             Pass focus as signal
@@ -588,44 +613,49 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         if event.keyval in [Gdk.KEY_Left, Gdk.KEY_Right]:
             self.emit("pass-focus")
 
+    def __on_gesture_pressed(self, gesture, x, y):
+        """
+            Show menu
+            @param gesture as Gtk.GestureLongPress
+            @param x as float
+            @param y as float
+        """
+        self.__popup_menu(x, y)
+
+    def __on_gesture_end(self, gesture, sequence):
+        """
+            Connect button release event
+            Here because we only want this if a gesture was recognized
+            This allow touch scrolling
+        """
+        self._box.connect("button-release-event",
+                          self.__on_button_release_event)
+
     def __on_button_release_event(self, listbox, event):
         """
-            Handle modifier
+            Handle right click and modifier
+            TODO: use a gesture
             @param listbox as Gtk.ListBox
             @param event as Gdk.Event
         """
+        listbox.disconnect_by_func(self.__on_button_release_event)
         row = listbox.get_row_at_y(event.y)
-        if event.button != 1 and\
-                self.__base_mask in [SelectionListMask.SIDEBAR,
-                                     SelectionListMask.LIST_VIEW]:
-            from lollypop.menu_selectionlist import SelectionListMenu
-            from lollypop.widgets_utils import Popover
-            if row is not None:
-                menu = SelectionListMenu(self, row.id, self.mask)
-                popover = Popover()
-                popover.bind_model(menu, None)
-                popover.set_relative_to(listbox)
-                rect = Gdk.Rectangle()
-                rect.x = event.x
-                rect.y = event.y
-                rect.width = rect.height = 1
-                popover.set_pointing_to(rect)
-                popover.popup()
-                return True
-        elif event.button == 1:
-            if row is not None:
-                state = event.get_state()
-                selected_ids = self.selected_ids
-                static_selected = selected_ids and selected_ids[0] < 0
-                if (not state & Gdk.ModifierType.CONTROL_MASK and
-                        not state & Gdk.ModifierType.SHIFT_MASK) or\
-                        static_selected:
-                    listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-                # User clicked on random, clear cached random
-                if row.id == Type.RANDOMS:
-                    App().albums.clear_cached_randoms()
-                    App().tracks.clear_cached_randoms()
-                listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+        if event.button != 1:
+            self.__popup_menu(event.x, event.y)
+            return True
+        elif row is not None:
+            state = event.get_state()
+            selected_ids = self.selected_ids
+            static_selected = selected_ids and selected_ids[0] < 0
+            if (not state & Gdk.ModifierType.CONTROL_MASK and
+                    not state & Gdk.ModifierType.SHIFT_MASK) or\
+                    static_selected:
+                listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+            # User clicked on random, clear cached random
+            if row.id == Type.RANDOMS:
+                App().albums.clear_cached_randoms()
+                App().tracks.clear_cached_randoms()
+            listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
 
     def __on_artist_artwork_changed(self, art, artist):
         """
