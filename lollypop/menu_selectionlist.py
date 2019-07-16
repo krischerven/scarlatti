@@ -58,22 +58,20 @@ class SelectionListMenu(Gio.Menu):
             self.append_section(_("Synchronization"), section)
 
         # Startup menu
-        if not App().settings.get_value("save-state") and\
+        if mask & SelectionListMask.SIDEBAR and\
+                not App().settings.get_value("save-state") and\
                 (rowid in [Type.POPULARS, Type.RADIOS, Type.LOVED,
                            Type.ALL, Type.RECENTS, Type.YEARS,
                            Type.RANDOMS, Type.NEVER, Type.GENRES,
                            Type.PLAYLISTS, Type.ARTISTS, Type.WEB,
-                           Type.GENRES_LIST, Type.ARTISTS_LIST] or
-                 mask & SelectionListMask.PLAYLISTS):
+                           Type.GENRES_LIST, Type.ARTISTS_LIST]):
             startup_menu = Gio.Menu()
-            if self.__mask & SelectionListMask.LIST_VIEW:
-                exists = rowid in App().settings.get_value("startup-two-ids")
-            else:
-                exists = rowid in App().settings.get_value("startup-one-ids")
+            selected = rowid == App().settings.get_value(
+                "startup-id").get_int32()
             action = Gio.SimpleAction.new_stateful(
                                            "default_selection_id",
                                            None,
-                                           GLib.Variant.new_boolean(exists))
+                                           GLib.Variant.new_boolean(selected))
             App().add_action(action)
             action.connect("change-state",
                            self.__on_default_change_state,
@@ -141,13 +139,10 @@ class SelectionListMenu(Gio.Menu):
         else:
             self.__widget.remove_value(rowid)
             if self.__mask & SelectionListMask.SIDEBAR:
-                ids = list(App().settings.get_value("startup-one-ids"))
-                if rowid in ids:
-                    ids.remove(rowid)
-                App().settings.set_value("startup-one-ids",
-                                         GLib.Variant("ai", ids))
-                App().settings.set_value("startup-two-ids",
-                                         GLib.Variant("ai", []))
+                startup_id = list(App().settings.get_value("startup-id"))
+                if startup_id == rowid:
+                    App().settings.set_value("startup-id",
+                                             GLib.Variant("ai", -1))
 
     def __on_default_change_state(self, action, variant, rowid):
         """
@@ -156,22 +151,10 @@ class SelectionListMenu(Gio.Menu):
             @param variant as GVariant
             @param rowid as int
         """
-        if self.__mask & SelectionListMask.SIDEBAR:
-            if variant:
-                startup_one_ids = [rowid]
-                startup_two_ids = []
-            else:
-                startup_one_ids = startup_two_ids = []
-        elif self.__mask & SelectionListMask.LIST_VIEW:
-            if variant:
-                startup_one_ids = None
-                startup_two_ids = [rowid]
-            else:
-                startup_one_ids = None
-                startup_two_ids = [rowid]
-
-        if startup_one_ids is not None:
-            App().settings.set_value("startup-one-ids",
-                                     GLib.Variant("ai", startup_one_ids))
-        App().settings.set_value("startup-two-ids",
-                                 GLib.Variant("ai", startup_two_ids))
+        action.set_state(variant)
+        if variant:
+            App().settings.set_value("startup-id",
+                                     GLib.Variant("i", rowid))
+        else:
+            App().settings.set_value("startup-id",
+                                     GLib.Variant("i", -1))
