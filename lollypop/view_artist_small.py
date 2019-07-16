@@ -24,11 +24,12 @@ class ArtistViewSmall(View, ArtistViewCommon):
         Show artist albums and tracks
     """
 
-    def __init__(self, genre_ids, artist_ids):
+    def __init__(self, genre_ids, artist_ids, view_type):
         """
             Init ArtistView
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param view_type as ViewType
         """
         View.__init__(self)
         self._genre_ids = genre_ids
@@ -41,9 +42,7 @@ class ArtistViewSmall(View, ArtistViewCommon):
         self.__overlay.add_overlay(self._banner)
         self.__album_box = AlbumsBoxView(genre_ids,
                                          artist_ids,
-                                         ViewType.MEDIUM |
-                                         ViewType.SCROLLED |
-                                         ViewType.NOT_ADAPTIVE)
+                                         view_type)
         self._banner.collapse(True)
         self.__album_box.set_margin_top(self._banner.height)
         self.__album_box.show()

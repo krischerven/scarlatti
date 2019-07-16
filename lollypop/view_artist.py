@@ -26,8 +26,7 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         Show artist albums and tracks
     """
 
-    def __init__(self, genre_ids, artist_ids,
-                 view_type=ViewType.TWO_COLUMNS | ViewType.SCROLLED):
+    def __init__(self, genre_ids, artist_ids, view_type):
         """
             Init ArtistView
             @param genre_ids as [int]

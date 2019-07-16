@@ -70,7 +70,6 @@ class ViewType:
     SCROLLED = 1 << 10
     FULLSCREEN = 1 << 11
     DEVICES = 1 << 12
-    NOT_ADAPTIVE = 1 << 13
 
 
 NetworkAccessACL = {

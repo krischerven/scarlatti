@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gdk, GLib, Gio, Gst
 from datetime import datetime
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.controller_information import InformationController
 from lollypop.controller_playback import PlaybackController
 from lollypop.controller_progress import ProgressController
@@ -124,7 +124,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__back_button.set_margin_bottom(5)
         self.__back_button.show()
         self.__background_artwork = builder.get_object("background_artwork")
-        self.__container = Container(ViewType.NOT_ADAPTIVE)
+        self.__container = Container()
         self.set_stack(self.__container.stack)
         self.__container.show()
         self.__sidebar = Gtk.Grid()

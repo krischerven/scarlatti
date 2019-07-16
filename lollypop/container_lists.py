@@ -192,6 +192,7 @@ class ListsContainer:
         elif selected_ids[0] == Type.COMPILATIONS:
             view = self._get_view_albums([], selected_ids)
         if view is not None and view not in self._stack.get_children():
+            view.show()
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted
         if App().window.is_adaptive\

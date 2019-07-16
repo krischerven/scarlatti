@@ -71,7 +71,7 @@ class AdaptiveHistory:
             self.__history.append((view, view.__class__, view.args))
         if self.count >= self.__MAX_HISTORY_ITEMS:
             (view, _class, args) = self.__history[-self.__MAX_HISTORY_ITEMS]
-            if view is not None:
+            if view is not None and view.should_destroy:
                 view.destroy()
                 self.__history[
                     -self.__MAX_HISTORY_ITEMS] = (None, _class, args)

@@ -29,12 +29,10 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         Show artist albums and tracks
     """
 
-    def __init__(self, album, artist_ids, genre_ids, view_type):
+    def __init__(self, album, view_type):
         """
             Init ArtistView
             @param album as Album
-            @param artist_ids as [int]
-            @param genre_ids as [int]
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, view_type)
@@ -42,8 +40,6 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
-        self.__genre_ids = genre_ids
-        self.__artist_ids = artist_ids
         self.__others_box = None
         self.__grid = Gtk.Grid()
         self.__grid.set_property("vexpand", True)
@@ -106,8 +102,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"album": self._album, "genre_ids": self.__genre_ids,
-                 "artist_ids": self.__artist_ids,
+        return ({"album": self._album,
                  "view_type": self._view_type}, {},
                 self._sidebar_id,
                 position)
@@ -196,9 +191,9 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         self._responsive_widget.set_margin_top(
             self.__banner.height + 15)
         App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", self.__genre_ids))
+                                 GLib.Variant("ai", self._album.genre_ids))
         App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", self.__artist_ids))
+                                 GLib.Variant("ai", self._album.artist_ids))
         App().settings.set_value("state-three-ids",
                                  GLib.Variant("ai", [self._album.id]))
 
@@ -216,10 +211,10 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         """
         if TracksView.get_populated(self):
             from lollypop.view_albums_box import AlbumsBoxView
-            for artist_id in self.__artist_ids:
+            for artist_id in self._album.artist_ids:
                 if artist_id == Type.COMPILATIONS:
                     album_ids = App().albums.get_compilation_ids(
-                        self.__genre_ids)
+                        self._album.genre_ids)
                 else:
                     album_ids = App().albums.get_ids(
                         [artist_id], [])

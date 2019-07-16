@@ -75,10 +75,9 @@ class View(BaseView, Gtk.Grid):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-        if not self._view_type & ViewType.NOT_ADAPTIVE:
-            self.__adaptive_signal_id = App().window.connect(
-                                                    "adaptive-changed",
-                                                    self._on_adaptive_changed)
+        self.__adaptive_signal_id = App().window.connect(
+                                                "adaptive-changed",
+                                                self._on_adaptive_changed)
         if not view_type & (ViewType.POPOVER | ViewType.SEARCH):
             self.get_style_context().add_class("view")
 
