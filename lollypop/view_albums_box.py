@@ -80,7 +80,9 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             scrolled position
             @return ({}, {}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
+        if self._view_type & ViewType.DEVICES:
+            return None
+        elif self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
