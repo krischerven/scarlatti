@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from lollypop.define import App, Type, ViewType
 from lollypop.view_flowbox import FlowBoxView
@@ -116,12 +116,6 @@ class RadiosView(FlowBoxView, ViewController):
         FlowBoxView._on_map(self, widget)
         self.__signal_id = App().radios.connect("radio-changed",
                                                 self.__on_radio_changed)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", [Type.RADIOS]))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", []))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", []))
 
     def _on_unmap(self, widget):
         """

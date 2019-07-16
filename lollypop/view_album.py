@@ -190,12 +190,6 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         LazyLoadingView._on_map(self, widget)
         self._responsive_widget.set_margin_top(
             self.__banner.height + 15)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", self._album.genre_ids))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", self._album.artist_ids))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", [self._album.id]))
 
     def _on_unmap(self, widget):
         """

@@ -95,19 +95,6 @@ class ArtistViewSmall(View, ArtistViewCommon):
 #######################
 # PROTECTED           #
 #######################
-    def _on_map(self, widget):
-        """
-            Connect signals and set active ids
-            @param widget as Gtk.Widget
-        """
-        View._on_map(self, widget)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", self._genre_ids))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", self._artist_ids))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", []))
-
     def _on_adaptive_changed(self, window, status):
         """
             Update banner style

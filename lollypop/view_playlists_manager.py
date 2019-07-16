@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from gettext import gettext as _
 from locale import strcoll
@@ -33,9 +33,11 @@ class PlaylistsManagerView(FlowBoxView):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
+        self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__obj = obj
-        self.__signal_id = None
+        if obj is None:
+            view_type |= ViewType.NO_HISTORY
         if not view_type & ViewType.NO_HISTORY:
             new_playlist_button = Gtk.Button(_("New playlist"))
             new_playlist_button.connect("clicked",
@@ -128,13 +130,6 @@ class PlaylistsManagerView(FlowBoxView):
         FlowBoxView._on_map(self, widget)
         self.__signal_id = App().playlists.connect("playlists-changed",
                                                    self.__on_playlist_changed)
-        if self.__obj is None:
-            App().settings.set_value("state-one-ids",
-                                     GLib.Variant("ai", [Type.PLAYLISTS]))
-            App().settings.set_value("state-two-ids",
-                                     GLib.Variant("ai", []))
-            App().settings.set_value("state-three-ids",
-                                     GLib.Variant("ai", []))
 
     def _on_unmap(self, widget):
         """

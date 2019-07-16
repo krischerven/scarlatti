@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_albums_genre import AlbumsGenreWidget
 from lollypop.define import App, Type, ViewType
@@ -58,18 +56,6 @@ class AlbumsGenreBoxView(FlowBoxView):
         widget = FlowBoxView._add_items(self, item_ids, self._view_type)
         if widget is not None:
             widget.connect("overlayed", self.on_overlayed)
-
-    def _on_map(self, widget):
-        """
-            Set active ids
-        """
-        FlowBoxView._on_map(self, widget)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", [Type.GENRES]))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", []))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", []))
 
     def _on_item_activated(self, flowbox, widget):
         """

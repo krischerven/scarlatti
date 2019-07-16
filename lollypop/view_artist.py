@@ -202,12 +202,6 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         self.__removed_signal_id = App().player.connect(
                                                   "album-removed",
                                                   self.__on_album_changed)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", self._genre_ids))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", self._artist_ids))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", []))
 
     def _on_unmap(self, widget):
         """

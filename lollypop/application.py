@@ -204,13 +204,6 @@ class Application(Gtk.Application, ApplicationActions):
             dark = self.settings.get_value("dark-ui")
             settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
-        startup_one_ids = self.settings.get_value("startup-one-ids")
-        startup_two_ids = self.settings.get_value("startup-two-ids")
-        if startup_one_ids:
-            self.settings.set_value("state-one-ids", startup_one_ids)
-            self.settings.set_value("state-three-ids", GLib.Variant("ai", []))
-        if startup_two_ids:
-            self.settings.set_value("state-two-ids", startup_two_ids)
 
     def do_startup(self):
         """
@@ -231,23 +224,7 @@ class Application(Gtk.Application, ApplicationActions):
             @param vacuum as bool
         """
         if self.settings.get_value("save-state"):
-            # Special case, we can't handle this earlier
-            if self.window.is_adaptive:
-                visible = self.window.container.stack.get_visible_child()
-                if visible == self.window.container.sidebar:
-                    self.settings.set_value("state-one-ids",
-                                            GLib.Variant("ai", []))
-                    self.settings.set_value("state-two-ids",
-                                            GLib.Variant("ai", []))
-                elif visible == self.window.container.list_view:
-                    selected_ids = self.window.container.sidebar.selected_ids
-                    self.settings.set_value("state-one-ids",
-                                            GLib.Variant("ai", selected_ids))
-                    self.settings.set_value("state-two-ids",
-                                            GLib.Variant("ai", []))
-        else:
-            self.settings.set_value("state-one-ids", GLib.Variant("ai", []))
-            self.settings.set_value("state-two-ids", GLib.Variant("ai", []))
+            pass
         # Then vacuum db
         if vacuum:
             self.__vacuum()

@@ -271,28 +271,8 @@
             <summary>INTERNAL</summary>
             <description></description>
         </key>
-        <key type="ai" name="state-one-ids">
-            <default>[]</default>
-            <summary>INTERNAL</summary>
-            <description></description>
-        </key>
-        <key type="ai" name="state-two-ids">
-            <default>[]</default>
-            <summary>INTERNAL</summary>
-            <description></description>
-        </key>
-        <key type="ai" name="state-three-ids">
-            <default>[]</default>
-            <summary>INTERNAL</summary>
-            <description></description>
-        </key>
-        <key type="ai" name="startup-one-ids">
-            <default>[]</default>
-            <summary>INTERNAL</summary>
-            <description></description>
-        </key>
-        <key type="ai" name="startup-two-ids">
-            <default>[]</default>
+        <key type="ai" name="startup-id">
+            <default>-1</default>
             <summary>INTERNAL</summary>
             <description></description>
         </key>

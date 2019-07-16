@@ -18,7 +18,6 @@ from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType
 from lollypop.objects_album import Album
-from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -149,31 +148,6 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             album = Album(album_widget.album.id,
                           self.__genre_ids, self.__artist_ids)
         App().window.container.show_view([Type.ALBUM], album)
-
-    def _on_map(self, widget):
-        """
-            Set active ids
-        """
-        try:
-            FlowBoxView._on_map(self, widget)
-            # Others albums from ...
-            if self._view_type & ViewType.SMALL:
-                return
-            if self.__genre_ids:
-                App().settings.set_value("state-one-ids",
-                                         GLib.Variant("ai", self.__genre_ids))
-                App().settings.set_value("state-two-ids",
-                                         GLib.Variant("ai", self.__artist_ids))
-            else:
-                App().settings.set_value("state-one-ids",
-                                         GLib.Variant("ai", self.__artist_ids))
-                App().settings.set_value("state-two-ids",
-                                         GLib.Variant("ai", []))
-            App().settings.set_value("state-three-ids",
-                                     GLib.Variant("ai", []))
-        except Exception as e:
-            Logger.warning(
-                "https://gitlab.gnome.org/World/lollypop/issues/1864 %s", e)
 
 #######################
 # PRIVATE             #

@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
-from lollypop.define import App, Type, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -321,18 +321,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         menu = PlaylistMenu(self.__playlist_ids[0])
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
-
-    def _on_map(self, widget):
-        """
-            Set active ids
-        """
-        LazyLoadingView._on_map(self, widget)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", [Type.PLAYLISTS]))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", self.__playlist_ids))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", []))
 
     def _on_adaptive_changed(self, window, status):
         """

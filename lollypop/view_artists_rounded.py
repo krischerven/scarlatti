@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
 from locale import strcoll
@@ -98,12 +96,6 @@ class RoundedArtistsView(FlowBoxView):
             Set active ids
         """
         FlowBoxView._on_map(self, widget)
-        App().settings.set_value("state-one-ids",
-                                 GLib.Variant("ai", [Type.ARTISTS]))
-        App().settings.set_value("state-two-ids",
-                                 GLib.Variant("ai", []))
-        App().settings.set_value("state-three-ids",
-                                 GLib.Variant("ai", []))
         self.__art_signal_id = App().art.connect(
                                               "artist-artwork-changed",
                                               self.__on_artist_artwork_changed)
