@@ -12,8 +12,10 @@
 
 from gi.repository import GObject, Gtk, GLib
 
+from pickle import dump, load
+
 from lollypop.logger import Logger
-from lollypop.define import App
+from lollypop.define import App, LOLLYPOP_DATA_PATH
 
 
 class AdaptiveView:
@@ -144,6 +146,30 @@ class AdaptiveHistory:
             view.destroy_later()
         self.__history = []
 
+    def save(self):
+        """
+            Save history
+        """
+        try:
+            no_widget_history = []
+            for (_view, _class, args) in self.__history[
+                                                   -self.__MAX_HISTORY_ITEMS:]:
+                no_widget_history.append((None, _class, args))
+            with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
+                dump(list(no_widget_history), f)
+        except Exception as e:
+            Logger.error("Application::__save_state(): %s" % e)
+
+    def load(self):
+        """
+            Load history
+        """
+        try:
+            self.__history = load(
+                open(LOLLYPOP_DATA_PATH + "/history.bin", "rb"))
+        except Exception as e:
+            Logger.error("Application::__save_state(): %s" % e)
+
     def exists(self, view):
         """
             True if view exists in history
@@ -232,6 +258,25 @@ class AdaptiveStack(Gtk.Stack):
         if self.__history.exists(widget):
             self.__history.remove(widget)
         Gtk.Stack.remove(self, widget)
+
+    def save_history(self):
+        """
+            Save history to disk
+        """
+        visible_child = self.get_visible_child()
+        if visible_child is not None:
+            self.__history.add_view(visible_child)
+        self.__history.save()
+
+    def load_history(self):
+        """
+            Load history from disk
+        """
+        self.__history.load()
+        view = self.__history.pop()
+        if view is not None:
+            self.add(view)
+            self.set_visible_child(view)
 
     @property
     def history(self):

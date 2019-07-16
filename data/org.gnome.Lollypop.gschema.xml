@@ -271,7 +271,7 @@
             <summary>INTERNAL</summary>
             <description></description>
         </key>
-        <key type="ai" name="startup-id">
+        <key type="i" name="startup-id">
             <default>-1</default>
             <summary>INTERNAL</summary>
             <description></description>

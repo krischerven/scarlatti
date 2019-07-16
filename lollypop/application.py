@@ -224,7 +224,7 @@ class Application(Gtk.Application, ApplicationActions):
             @param vacuum as bool
         """
         if self.settings.get_value("save-state"):
-            pass
+            self.__window.container.stack.save_history()
         # Then vacuum db
         if vacuum:
             self.__vacuum()

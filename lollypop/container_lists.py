@@ -164,7 +164,9 @@ class ListsContainer:
         """
             @param selection_list as SelectionList
         """
-        self._restore_state()
+        self._stack.load_history()
+        if self._stack.history.count > 0:
+            App().window.emit("can-go-back-changed", True)
 
     def __on_list_view_activated(self, listbox, row):
         """
