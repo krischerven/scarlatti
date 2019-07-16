@@ -279,7 +279,8 @@ class ToolbarEnd(Gtk.Bin):
                 GLib.Variant.new_boolean(in_party_ids))
             action.connect("change-state", on_change_state, genre_id)
             App().add_action(action)
-            item = Gio.MenuItem.new(name, "app.%s" % action_name)
+            menu_str = name if len(name) < 20 else name[0:20] + "…"
+            item = Gio.MenuItem.new(menu_str, "app.%s" % action_name)
             menu.append_item(item)
             if i > 10:
                 submenu = Gio.Menu()
