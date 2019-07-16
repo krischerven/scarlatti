@@ -615,8 +615,8 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         elif event.button == 1:
             if row is not None:
                 state = event.get_state()
-                static_selected = self.selected_ids and\
-                    self.selected_ids[0] < 0
+                selected_ids = self.selected_ids
+                static_selected = selected_ids and selected_ids[0] < 0
                 if (not state & Gdk.ModifierType.CONTROL_MASK and
                         not state & Gdk.ModifierType.SHIFT_MASK) or\
                         static_selected:
