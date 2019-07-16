@@ -114,7 +114,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
             Reload current view
         """
-        self._restore_state()
+        pass
 
     @property
     def view(self):

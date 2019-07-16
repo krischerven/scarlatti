@@ -14,7 +14,6 @@ from gi.repository import GLib
 
 from lollypop.loader import Loader
 from lollypop.logger import Logger
-from lollypop.objects_album import Album
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
 from lollypop.shown import ShownLists
@@ -72,31 +71,6 @@ class ListsContainer:
 ##############
 # PROTECTED  #
 ##############
-    def _restore_state(self):
-        """
-            Restore list state
-        """
-        try:
-            state_one_ids = App().settings.get_value("state-one-ids")
-            state_two_ids = App().settings.get_value("state-two-ids")
-            state_three_ids = App().settings.get_value("state-three-ids")
-            # Empty because we do not have any genre set
-            if not state_one_ids:
-                state_one_ids = state_two_ids
-                state_two_ids = state_three_ids
-            if state_one_ids:
-                self._sidebar.select_ids(state_one_ids)
-                if state_two_ids:
-                    self.show_view(state_one_ids, state_two_ids)
-                if state_three_ids:
-                    album = Album(state_three_ids[0],
-                                  state_one_ids,
-                                  state_two_ids)
-                    self.show_view([Type.ALBUM], album)
-            elif not App().window.is_adaptive:
-                self._sidebar.select_first()
-        except Exception as e:
-            Logger.error("ListsContainer::_restore_state(): %s", e)
 
 ############
 # PRIVATE  #

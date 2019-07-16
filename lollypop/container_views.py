@@ -101,12 +101,11 @@ class ViewsContainer:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.COMPILATIONS:
                 view = self._get_view_albums([], item_ids)
-        # if view is None:
-        #    view = self._get_view_artists(item_ids, data)
-        view.show()
-        self._stack.add(view)
-        if switch:
-            self._stack.set_visible_child(view)
+        if view is not None:
+            view.show()
+            self._stack.add(view)
+            if switch:
+                self._stack.set_visible_child(view)
 
     def get_view_current(self, view_type=ViewType.DND | ViewType.SCROLLED):
         """
@@ -227,10 +226,10 @@ class ViewsContainer:
                 loader = Loader(target=load_smart, view=view)
                 loader.start()
         elif playlist_ids:
+            from lollypop.view_playlists import PlaylistsView
             view = self._stack.history.search(PlaylistsView,
                                               {"playlist_ids": playlist_ids,
                                                "view_type": view_type})
-            from lollypop.view_playlists import PlaylistsView
             if view is None:
                 view = PlaylistsView(playlist_ids, view_type)
                 loader = Loader(target=load, view=view)
