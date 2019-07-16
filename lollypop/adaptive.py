@@ -69,8 +69,12 @@ class AdaptiveHistory:
             Offload old views
             @param view as View
         """
+        # Do not add unwanted view to history
+        # Exception for undestroyable view (sidebar + list view)
         if view.args is not None:
             self.__history.append((view, view.__class__, view.args))
+        elif not view.should_destroy:
+            self.__history.append((view, None, None))
         if self.count >= self.__MAX_HISTORY_ITEMS:
             (view, _class, args) = self.__history[-self.__MAX_HISTORY_ITEMS]
             if view is not None and view.should_destroy:
@@ -87,26 +91,11 @@ class AdaptiveHistory:
         if not self.__history:
             return (None, None)
         (view, _class, args) = self.__history.pop(index)
-        try:
-            # Here, we are restoring an offloaded view
-            if view is None:
-                view = _class(**args[0])
-                # Restore scrolled position
-                # For LazyLoadingView, we can't restore this too soon
-                if hasattr(view, "_scrolled"):
-                    if hasattr(view, "_on_populated"):
-                        view.set_populated_scrolled_position(args[3])
-                    else:
-                        adj = view._scrolled.get_vadjustment()
-                        GLib.idle_add(adj.set_value, args[3])
-                # Start populating the view
-                if hasattr(view, "populate"):
-                    view.populate(**args[1])
-                view.show()
-            return (view, args[2])
-        except Exception as e:
-            Logger.warning("AdaptiveHistory::pop(): %s, %s", _class, e)
-        return (None, None)
+        # Undestroyable view (sidebar, list_view)
+        if _class is None:
+            return (view, 0)
+        else:
+            return self.__get_view_from_class(view, _class, args)
 
     def search(self, view_class, view_args):
         """
@@ -188,6 +177,40 @@ class AdaptiveHistory:
             @return int
         """
         return len(self.__history)
+
+############
+# PRIVATE  #
+############
+    def __get_view_from_class(self, view, _class, args):
+        """
+            Get view from history
+            @param view as View
+            @param _class as class
+            @param args as {}
+            @return (View, sidebar_id)
+        """
+        try:
+            # Here, we are restoring an offloaded view
+            if view is None:
+                view = _class(**args[0])
+                # Restore scrolled position
+                # For LazyLoadingView, we can't restore this too soon
+                if hasattr(view, "_scrolled"):
+                    if hasattr(view, "_on_populated"):
+                        view.set_populated_scrolled_position(args[3])
+                    else:
+                        adj = view._scrolled.get_vadjustment()
+                        GLib.idle_add(adj.set_value, args[3])
+                # Start populating the view
+                if hasattr(view, "populate"):
+                    view.populate(**args[1])
+                view.show()
+            return (view, args[2])
+        except Exception as e:
+            Logger.warning(
+                "AdaptiveHistory::__get_view_from_class(): %s, %s",
+                _class, e)
+        return (None, None)
 
 
 class AdaptiveStack(Gtk.Stack):
@@ -473,6 +496,7 @@ class AdaptiveWindow:
                     p.insert_column(0)
                     p.attach(c, 0, 0, 1, 1)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+            self.emit("can-go-back-changed", self.can_go_back)
 
     def __set_adaptive_stack(self, b):
         """
