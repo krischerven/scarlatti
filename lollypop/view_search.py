@@ -16,7 +16,7 @@ from gettext import gettext as _
 from random import shuffle
 from urllib.parse import urlparse
 
-from lollypop.define import App, Type, Shuffle, MARGIN_SMALL
+from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, ViewType
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
@@ -104,10 +104,16 @@ class SearchView(BaseView, Gtk.Bin):
     @property
     def args(self):
         """
-            Get default args for __class__ and populate()
-            @return ({}, {})
+            Get default args for __class__, populate(), sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int)
         """
-        return ({"view_type": self._view_type}, {})
+        if self._view_type & ViewType.SCROLLED:
+            position = self._scrolled.get_vadjustment().get_value()
+        else:
+            position = 0
+        return ({"view_type": self._view_type}, {},
+                self._sidebar_id, position)
 
     @property
     def should_destroy(self):

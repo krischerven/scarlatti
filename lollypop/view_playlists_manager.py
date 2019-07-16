@@ -92,11 +92,16 @@ class PlaylistsManagerView(FlowBoxView):
     @property
     def args(self):
         """
-            Get default args for __class__ and populate()
-            @return ({}, {})
+            Get default args for __class__, populate(), sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int)
         """
+        if self._view_type & ViewType.SCROLLED:
+            position = self._scrolled.get_vadjustment().get_value()
+        else:
+            position = 0
         return ({"obj": self.__obj, "view_type": self._view_type},
-                {"items": self._items})
+                {"items": self._items}, self._sidebar_id, position)
 
 #######################
 # PROTECTED           #

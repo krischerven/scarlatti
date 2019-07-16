@@ -360,18 +360,20 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         if self.__mask & SelectionListMask.ARTISTS:
             self.__fastscroll.populate()
 
-    def select_ids(self, ids=[]):
+    def select_ids(self, ids=[], activate=True):
         """
             Select listbox items
             @param ids as [int]
+            @param activate as bool
         """
         self._box.unselect_all()
         for row in self._box.get_children():
             if row.id in ids:
                 self._box.select_row(row)
-        for row in self._box.get_selected_rows():
-            row.activate()
-            break
+        if activate:
+            for row in self._box.get_selected_rows():
+                row.activate()
+                break
 
     def grab_focus(self):
         """

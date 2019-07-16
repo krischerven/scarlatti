@@ -16,7 +16,7 @@ from time import time
 from gettext import gettext as _
 import gc
 
-from lollypop.define import ViewType, App
+from lollypop.define import ViewType, Type, App
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 
@@ -55,6 +55,7 @@ class View(BaseView, Gtk.Grid):
         self.__adaptive_signal_id = None
         self.__overlayed = None
         self.__destroyed = False
+        self._sidebar_id = Type.NONE
         self.__scanner_signal_id = App().scanner.connect(
             "album-updated", self._on_album_updated)
         self.set_orientation(Gtk.Orientation.VERTICAL)
@@ -140,10 +141,11 @@ class View(BaseView, Gtk.Grid):
     @property
     def args(self):
         """
-            Get default args for __class__ and populate()
-            @return ({}, {})
+            Get default args for __class__, populate(), sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int)
         """
-        return ({}, [])
+        return ({}, {}, Type.NONE, 0)
 
     @property
     def destroyed(self):
@@ -188,7 +190,9 @@ class View(BaseView, Gtk.Grid):
             Handles special shortcuts
             @param widget as Gtk.Widget
         """
-        pass
+        selected_ids = App().window.container.sidebar.selected_ids
+        if selected_ids:
+            self._sidebar_id = selected_ids[0]
 
     def _on_unmap(self, widget):
         """

@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Gio, Gdk
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL, Type
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import escape
@@ -116,10 +116,12 @@ class InformationView(View):
     @property
     def args(self):
         """
-            Get default args for __class__ and populate()
-            @return ({}, {})
+            Get default args for __class__, populate(), sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int)
         """
-        return ({"minimal": self.__minimal}, {"artist_id": self.__artist_id})
+        return ({"minimal": self.__minimal}, {"artist_id": self.__artist_id},
+                Type.NONE, 0)
 
 #######################
 # PROTECTED           #

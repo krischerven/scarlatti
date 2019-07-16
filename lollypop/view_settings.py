@@ -119,6 +119,7 @@ class SettingsView(View):
             Disable settings action
             @param widget as Gtk.Widget
         """
+        View._on_map(self, widget)
         App().lookup_action("settings").set_enabled(False)
 
     def _on_unmap(self, widget):
@@ -126,6 +127,7 @@ class SettingsView(View):
             Enable settings action
             @param widget as Gtk.Widget
         """
+        View._on_unmap(self, widget)
         App().lookup_action("settings").set_enabled(True)
 
 ############

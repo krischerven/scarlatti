@@ -13,6 +13,7 @@
 from gi.repository import GObject, Gtk, GLib
 
 from lollypop.logger import Logger
+from lollypop.define import App
 
 
 class AdaptiveView:
@@ -90,6 +91,8 @@ class AdaptiveHistory:
                 if hasattr(view, "populate"):
                     view.populate(**args[1])
                 view.show()
+            print(args[2])
+            App().window.container.sidebar.select_ids([args[2]], False)
             return view
         except Exception as e:
             Logger.warning("AdaptiveHistory::pop(): %s, %s", _class, e)

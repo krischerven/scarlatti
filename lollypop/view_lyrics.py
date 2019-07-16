@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.objects_radio import Radio
-from lollypop.define import App, Sizing, ArtBehaviour, ViewType
+from lollypop.define import App, Sizing, ArtBehaviour, ViewType, Type
 from lollypop.controller_information import InformationController
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
@@ -161,7 +161,7 @@ class LyricsView(View, InformationController):
             Get default args for __class__ and populate()
             @return ({}, {})
         """
-        return ({}, {"track": self.__current_track})
+        return ({}, {"track": self.__current_track}, Type.NONE, 0)
 
 ##############
 # PROTECTED  #
@@ -182,6 +182,7 @@ class LyricsView(View, InformationController):
             Set active ids
             @param widget as Gtk.Widget
         """
+        View._on_map(self, widget)
         self.__current_changed_id = App().player.connect(
             "current-changed", self.__on_current_changed)
 
@@ -190,6 +191,7 @@ class LyricsView(View, InformationController):
             Connect player signal
             @param widget as Gtk.Widget
         """
+        View._on_unmap(self, widget)
         if self.__lyrics_timeout_id is not None:
             GLib.source_remove(self.__lyrics_timeout_id)
             self.__lyrics_timeout_id = None

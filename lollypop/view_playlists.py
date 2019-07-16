@@ -185,11 +185,16 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
     @property
     def args(self):
         """
-            Get default args for __class__ and populate()
-            @return ({}, {})
+            Get default args for __class__, populate(), sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int)
         """
+        if self._view_type & ViewType.SCROLLED:
+            position = self._scrolled.get_vadjustment().get_value()
+        else:
+            position = 0
         return ({"playlist_ids": self.__playlist_ids},
-                {"albums": self.__albums})
+                {"albums": self.__albums}, self._sidebar_id, position)
 
     @property
     def filtered(self):
@@ -321,6 +326,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         """
             Set active ids
         """
+        LazyLoadingView._on_map(self, widget)
         App().settings.set_value("state-one-ids",
                                  GLib.Variant("ai", [Type.PLAYLISTS]))
         App().settings.set_value("state-two-ids",
