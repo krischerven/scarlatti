@@ -12,10 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from gettext import gettext as _
-
 from lollypop.define import App, ViewType, Type, MARGIN
-from lollypop.objects_album import Album
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -40,7 +37,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
-        self.__others_box = None
+        self.__others_boxes = []
         self.__grid = Gtk.Grid()
         self.__grid.set_property("vexpand", True)
         self.__grid.set_row_spacing(10)
@@ -114,8 +111,8 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @return [Gtk.Widget]
         """
         filtered = self.children
-        if self.__others_box is not None:
-            for child in self.__others_box.children:
+        for box in self.__others_boxes:
+            for child in box.children:
                 filtered.append(child)
         return filtered
 
@@ -217,35 +214,14 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @param disc_number as int
         """
         if TracksView.get_populated(self):
-            from lollypop.view_albums_box import AlbumsBoxView
+            from lollypop.view_albums_box import OthersAlbumsBoxView
             for artist_id in self._album.artist_ids:
-                if artist_id == Type.COMPILATIONS:
-                    album_ids = App().albums.get_compilation_ids(
-                        self._album.genre_ids)
-                else:
-                    album_ids = App().albums.get_ids(
-                        [artist_id], [])
-                if self._album.id in album_ids:
-                    album_ids.remove(self._album.id)
-                if not album_ids:
-                    continue
-                artist = GLib.markup_escape_text(
-                    App().artists.get_name(artist_id))
-                label = Gtk.Label.new()
-                label.set_markup(
-                                 '''<span size="large" alpha="40000"
-                                     weight="bold">%s %s</span>''' %
-                                 (_("Others albums from"), artist))
-                label.set_property("halign", Gtk.Align.START)
-                label.set_margin_top(40)
-                label.show()
-                self.__grid.add(label)
-                self.__others_box = AlbumsBoxView([], [artist_id],
-                                                  ViewType.SMALL |
-                                                  ViewType.ALBUM)
-                self.__others_box.show()
-                self.__grid.add(self.__others_box)
-                self.__others_box.populate([Album(id) for id in album_ids])
+                others_box = OthersAlbumsBoxView(self._album, artist_id,
+                                                 ViewType.SMALL |
+                                                 ViewType.ALBUM)
+                others_box.populate()
+                self.__grid.add(others_box)
+                self.__others_boxes.append(others_box)
         else:
             TracksView.populate(self)
 

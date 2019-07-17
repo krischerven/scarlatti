@@ -229,6 +229,58 @@ class AlbumsYearsBoxView(AlbumsBoxView):
         App().task_helper.run(load, callback=(on_load,))
 
 
+class OthersAlbumsBoxView(AlbumsBoxView):
+    """
+        Others album box
+    """
+
+    def __init__(self, album, artist_id, view_type):
+        """
+            Init view
+            @param album as Album
+            @param artist_id as int
+            @param view_type as ViewType
+            @param index as int
+        """
+        AlbumsBoxView.__init__(self, [], [artist_id], view_type)
+        self.__album = album
+        self.__artist_id = artist_id
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            if items:
+                artist = GLib.markup_escape_text(
+                    App().artists.get_name(self.__artist_id))
+                label = Gtk.Label.new()
+                label.set_markup(
+                                 '''<span size="large" alpha="40000"
+                                     weight="bold">%s %s</span>''' %
+                                 (_("Others albums from"), artist))
+                label.set_property("halign", Gtk.Align.START)
+                label.set_margin_top(40)
+                label.show()
+                self.insert_row(0)
+                self.attach(label, 0, 0, 1, 1)
+                FlowBoxView.populate(self, items)
+                self.show()
+
+        def load():
+            if self.__artist_id == Type.COMPILATIONS:
+                album_ids = App().albums.get_compilation_ids(
+                    self.__album.genre_ids)
+            else:
+                album_ids = App().albums.get_ids(
+                    [self.__artist_id], [])
+            if self.__album.id in album_ids:
+                album_ids.remove(self.__album.id)
+            return [Album(album_id) for album_id in album_ids]
+
+        App().task_helper.run(load, callback=(on_load,))
+
+
 class AlbumsDeviceBoxView(AlbumsBoxView):
     """
         Device album box
