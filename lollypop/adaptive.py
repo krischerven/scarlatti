@@ -55,8 +55,6 @@ class AdaptiveHistory:
         Offload old items and reload them on the fly
     """
 
-    __MAX_HISTORY_ITEMS = 10
-
     def __init__(self):
         """
             Init history
@@ -72,15 +70,10 @@ class AdaptiveHistory:
         # Do not add unwanted view to history
         # Exception for undestroyable view (sidebar + list view)
         if view.args is not None:
-            self.__items.append((view, view.__class__, view.args))
+            self.__items.append((None, view.__class__, view.args))
+            view.destroy_later()
         elif not view.should_destroy:
             self.__items.append((view, None, None))
-        if self.count >= self.__MAX_HISTORY_ITEMS:
-            (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
-            if view is not None and view.should_destroy:
-                view.destroy()
-                self.__items[
-                    -self.__MAX_HISTORY_ITEMS] = (None, _class, args)
 
     def pop(self, index=-1):
         """
@@ -92,7 +85,7 @@ class AdaptiveHistory:
             return (None, None)
         (view, _class, args) = self.__items.pop(index)
         # Undestroyable view (sidebar, list_view)
-        if _class is None:
+        if view is not None:
             return (view, 0)
         else:
             return self.__get_view_from_class(view, _class, args)
@@ -204,15 +197,15 @@ class AdaptiveHistory:
                 # For LazyLoadingView, we can't restore this too soon
                 if hasattr(view, "_scrolled"):
                     if hasattr(view, "_on_populated"):
-                        view.set_populated_scrolled_position(args[3])
+                        view.set_populated_scrolled_position(args[2])
                     else:
                         adj = view._scrolled.get_vadjustment()
-                        GLib.idle_add(adj.set_value, args[3])
+                        GLib.idle_add(adj.set_value, args[2])
                 # Start populating the view
                 if hasattr(view, "populate"):
-                    view.populate(**args[1])
+                    view.populate()
                 view.show()
-            return (view, args[2])
+            return (view, args[1])
         except Exception as e:
             Logger.warning(
                 "AdaptiveHistory::__get_view_from_class(): %s, %s",

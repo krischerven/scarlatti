@@ -12,7 +12,6 @@
 
 from gi.repository import GLib
 
-from lollypop.loader import Loader
 from lollypop.logger import Logger
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
@@ -84,8 +83,7 @@ class ListsContainer:
             genres = App().genres.get()
             return genres
 
-        loader = Loader(target=load, view=selection_list)
-        loader.start()
+        App().task_helper.run(load, callback=(selection_list.populate,))
         selection_list.set_mask(SelectionListMask.GENRES)
 
     def __show_artists_list(self, selection_list):
@@ -99,8 +97,7 @@ class ListsContainer:
             else:
                 artists = App().artists.get([])
             return artists
-        loader = Loader(target=load, view=selection_list)
-        loader.start()
+        App().task_helper.run(load, callback=(selection_list.populate,))
         selection_list.set_mask(SelectionListMask.ARTISTS)
 
     def __on_sidebar_activated(self, listbox, row):

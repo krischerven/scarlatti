@@ -30,6 +30,18 @@ class AlbumsGenreBoxView(FlowBoxView):
         self._widget_class = AlbumsGenreWidget
         self._empty_icon_name = get_icon_name(Type.GENRES)
 
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            return App().genres.get_ids()
+
+        App().task_helper.run(load, callback=(on_load,))
+
     @property
     def args(self):
         """
@@ -41,8 +53,7 @@ class AlbumsGenreBoxView(FlowBoxView):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"view_type": self._view_type}, {"items": self._items},
-                self._sidebar_id, position)
+        return ({"view_type": self._view_type}, self._sidebar_id, position)
 
 #######################
 # PROTECTED           #

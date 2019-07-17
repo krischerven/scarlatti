@@ -30,6 +30,32 @@ class AlbumsDecadeBoxView(FlowBoxView):
         self._widget_class = AlbumsDecadeWidget
         self._empty_icon_name = get_icon_name(Type.YEARS)
 
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            (years, unknown) = App().albums.get_years()
+            decades = []
+            decade = []
+            current_d = None
+            for year in sorted(years):
+                d = year // 10
+                if current_d is not None and current_d != d:
+                    current_d = d
+                    decades.append(decade)
+                    decade = []
+                current_d = d
+                decade.append(year)
+            if decade:
+                decades.append(decade)
+            return decades
+
+        App().task_helper.run(load, callback=(on_load,))
+
     @property
     def args(self):
         """
@@ -41,8 +67,7 @@ class AlbumsDecadeBoxView(FlowBoxView):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"view_type": self._view_type}, {"items": self._items},
-                self._sidebar_id, position)
+        return ({"view_type": self._view_type}, self._sidebar_id, position)
 
 #######################
 # PROTECTED           #

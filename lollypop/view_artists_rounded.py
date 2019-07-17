@@ -34,6 +34,22 @@ class RoundedArtistsView(FlowBoxView):
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
 
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            if App().settings.get_value("show-performers"):
+                ids = App().artists.get_all()
+            else:
+                ids = App().artists.get()
+            return ids
+
+        App().task_helper.run(load, callback=(on_load,))
+
     def add_value(self, item):
         """
             Insert item

@@ -43,12 +43,18 @@ class RadiosView(FlowBoxView, ViewController):
         if not get_network_available("TUNEIN"):
             builder.get_object("search_btn").hide()
 
-    def populate(self, radio_ids):
+    def populate(self):
         """
             Add radio widgets
             @param radio_ids as [int]
         """
-        FlowBoxView.populate(self, radio_ids)
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            return App().radios.get_ids()
+
+        App().task_helper.run(load, callback=(on_load,))
 
     @property
     def args(self):

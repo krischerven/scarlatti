@@ -50,21 +50,26 @@ class PlaylistsManagerView(FlowBoxView):
             self.attach(new_playlist_button, 0, 1, 1, 1)
         self._widget_class = PlaylistRoundedWidget
 
-    def populate(self, items=None):
+    def populate(self):
         """
-            Populate items
-            @param items
+            Populate view
         """
-        if self.__obj is not None:
-            new_items = []
-            for item in App().playlists.get_ids():
-                if not App().playlists.get_smart(item):
-                    new_items.append(item)
-            items = new_items
-        elif items is None:
-            items = [i[0] for i in ShownPlaylists.get()]
-            items += App().playlists.get_ids()
-        FlowBoxView.populate(self, items)
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            items = []
+            if self.__obj is not None:
+                items = []
+                for item in App().playlists.get_ids():
+                    if not App().playlists.get_smart(item):
+                        items.append(item)
+            else:
+                items = [i[0] for i in ShownPlaylists.get()]
+                items += App().playlists.get_ids()
+            return items
+
+        App().task_helper.run(load, callback=(on_load,))
 
     def add_value(self, item):
         """
@@ -215,3 +220,33 @@ class PlaylistsManagerView(FlowBoxView):
             count += 1
             name = _("New playlist ") + str(count)
         App().playlists.add(name)
+
+
+class PlaylistsManagerDeviceView(PlaylistsManagerView):
+    """
+        Show playlists in a FlowBox
+    """
+
+    def __init__(self, index, view_type=ViewType.SCROLLED):
+        """
+            Init decade view
+            @param index as int
+            @param view_type as ViewType
+        """
+        PlaylistsManagerView.__init__(self, None, view_type)
+        self.__index = index
+
+    def populate(self):
+        """
+            Populate items
+            @param items
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            items = App().playlists.get_synced_ids(0)
+            items += App().playlists.get_synced_ids(self.__index)
+            return items
+
+        App().task_helper.run(load, callback=(on_load,))

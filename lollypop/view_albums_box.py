@@ -38,8 +38,8 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         FlowBoxView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self._widget_class = AlbumSimpleWidget
-        self.__genre_ids = genre_ids
-        self.__artist_ids = artist_ids
+        self._genre_ids = genre_ids
+        self._artist_ids = artist_ids
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
                 if not Gio.NetworkMonitor.get_default(
@@ -59,14 +59,29 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
                                       Gtk.PolicyType.NEVER)
 
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            album_ids = App().window.container.get_view_album_ids(
+                self._genre_ids, self._artist_ids)
+            return [Album(album_id, self._genre_ids, self._artist_ids)
+                    for album_id in album_ids]
+
+        App().task_helper.run(load, callback=(on_load,))
+
     def insert_album(self, album, position):
         """
             Add a new album
             @param album as Album
             @param position as int
         """
-        widget = AlbumSimpleWidget(album, self.__genre_ids,
-                                   self.__artist_ids, self._view_type,
+        widget = AlbumSimpleWidget(album, self._genre_ids,
+                                   self._artist_ids, self._view_type,
                                    get_font_height())
         self._box.insert(widget, position)
         widget.show()
@@ -85,9 +100,9 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"genre_ids": self.__genre_ids,
-                 "artist_ids": self.__artist_ids,
-                 "view_type": self._view_type}, {"items": self._items},
+        return ({"genre_ids": self._genre_ids,
+                 "artist_ids": self._artist_ids,
+                 "view_type": self._view_type},
                 self._sidebar_id, position)
 
 #######################
@@ -100,8 +115,8 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             @param albums as [Album]
         """
         widget = FlowBoxView._add_items(self, albums,
-                                        self.__genre_ids,
-                                        self.__artist_ids,
+                                        self._genre_ids,
+                                        self._artist_ids,
                                         self._view_type)
         if widget is not None:
             widget.connect("overlayed", self.on_overlayed)
@@ -135,8 +150,8 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             @param added as bool
         """
         album_ids = App().window.container.get_view_album_ids(
-                                            self.__genre_ids,
-                                            self.__artist_ids)
+                                            self._genre_ids,
+                                            self._artist_ids)
         if album_id not in album_ids:
             return
         index = album_ids.index(album_id)
@@ -163,11 +178,11 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             return
         if album_widget.artwork is None:
             return
-        if self.__genre_ids and self.__genre_ids[0] == Type.YEARS:
+        if self._genre_ids and self._genre_ids[0] == Type.YEARS:
             album = Album(album_widget.album.id)
         else:
             album = Album(album_widget.album.id,
-                          self.__genre_ids, self.__artist_ids)
+                          self._genre_ids, self._artist_ids)
         App().window.container.show_view([Type.ALBUM], album)
 
 #######################
@@ -181,3 +196,64 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         """
         album_widget.lock_overlay(False)
         album_widget.artwork.set_opacity(1)
+
+
+class AlbumsYearsBoxView(AlbumsBoxView):
+    """
+        Years album box
+    """
+
+    def __init__(self, genre_ids, artist_ids, view_type):
+        """
+            Init view
+            @param genre_ids as [int]
+            @param artist_ids as [int]
+            @param view_type as ViewType
+        """
+        AlbumsBoxView.__init__(self, genre_ids, artist_ids, view_type)
+
+    def do_populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            items = []
+            for year in self._artist_ids:
+                items += App().albums.get_compilations_for_year(year)
+                items += App().albums.get_albums_for_year(year)
+            return [Album(album_id, [Type.YEARS], []) for album_id in items]
+
+        App().task_helper.run(load, callback=(on_load,))
+
+
+class AlbumsDeviceBoxView(AlbumsBoxView):
+    """
+        Device album box
+    """
+
+    def __init__(self, index, view_type):
+        """
+            Init view
+            @param index as int
+            @param view_type as ViewType
+            @param index as int
+        """
+        AlbumsBoxView.__init__(self, [], [], view_type)
+        self.__index = index
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            album_ids = App().albums.get_synced_ids(0)
+            album_ids += App().albums.get_synced_ids(self.__index)
+            return [Album(album_id) for album_id in album_ids]
+
+        App().task_helper.run(load, callback=(on_load,))

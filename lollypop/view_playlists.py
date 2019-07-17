@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN, Type
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -28,7 +28,7 @@ from lollypop.helper_filtering import FilteringHelper
 
 class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
     """
-        Show playlist tracks
+        View showing playlists
     """
 
     def __init__(self, playlist_ids, view_type):
@@ -40,8 +40,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
-        self.__playlist_ids = playlist_ids
-        self.__albums = []
+        self._playlist_ids = playlist_ids
         self.__signal_id1 = App().playlists.connect(
                                             "playlist-track-added",
                                             self.__on_playlist_track_added)
@@ -60,16 +59,16 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         self.__buttons = builder.get_object("box-buttons")
         self.__widget = builder.get_object("widget")
         # We remove SCROLLED because we want to be the scrolled view
-        self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self.__view.connect("remove-from-playlist",
-                            self.__on_remove_from_playlist)
-        self.__view.show()
+        self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
+        self._view.connect("remove-from-playlist",
+                           self.__on_remove_from_playlist)
+        self._view.show()
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
         self.__duration_label.set_margin_start(MARGIN)
         self._overlay = Gtk.Overlay.new()
         if view_type & ViewType.SCROLLED:
-            self._viewport.add(self.__view)
+            self._viewport.add(self._view)
             self._overlay.add(self._scrolled)
         else:
             self._overlay.add(self._view)
@@ -87,7 +86,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
         self.__banner.add_overlay(self.__widget)
-        self.__view.set_margin_top(self.__banner.height)
+        self._view.set_margin_top(self.__banner.height)
         self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
@@ -102,12 +101,12 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         if playlist_ids[0] > 0 and\
                 not App().playlists.get_smart(playlist_ids[0]):
             duration = 0
-            for playlist_id in self.__playlist_ids:
+            for playlist_id in self._playlist_ids:
                 duration += App().playlists.get_duration(playlist_id)
             self.__set_duration(duration)
         # Ask widget after populated
         else:
-            self.__view.connect("populated", self.__on_playlist_populated)
+            self._view.connect("populated", self.__on_playlist_populated)
 
     def set_view_type(self, view_type):
         """
@@ -122,7 +121,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             button.get_image().set_from_icon_name(icon_name, icon_size)
 
         self.__banner.set_view_type(view_type)
-        self.__view.set_margin_top(self.__banner.height)
+        self._view.set_margin_top(self.__banner.height)
         self._view_type = view_type
         if view_type & ViewType.SMALL:
             style = "menu-button"
@@ -147,19 +146,31 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         update_button(self.__menu_button, style,
                       icon_size, "view-more-symbolic")
 
-    def populate(self, albums):
+    def populate(self):
         """
-            Populate view with albums
-            @param albums as [Album]
+            Populate view
         """
-        self.__albums = albums
-        self.__view.populate(albums)
+        def load():
+            track_ids = []
+            for playlist_id in self._playlist_ids:
+                if playlist_id == Type.LOVED:
+                    for track_id in App().tracks.get_loved_track_ids():
+                        if track_id not in track_ids:
+                            track_ids.append(track_id)
+                else:
+                    for track_id in App().playlists.get_track_ids(playlist_id):
+                        if track_id not in track_ids:
+                            track_ids.append(track_id)
+            return tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
+
+        App().task_helper.run(load, callback=(self._view.populate,))
 
     def stop(self):
         """
             Stop populating
         """
-        self.__view.stop()
+        self._view.stop()
 
     def activate_child(self):
         """
@@ -187,15 +198,14 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int)
+            @return ({}, int, int)
         """
         if self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"playlist_ids": self.__playlist_ids,
-                 "view_type": self._view_type},
-                {"albums": self.__albums}, self._sidebar_id, position)
+        return ({"playlist_ids": self._playlist_ids,
+                 "view_type": self._view_type}, self._sidebar_id, position)
 
     @property
     def filtered(self):
@@ -204,7 +214,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @return [Gtk.Widget]
         """
         filtered = []
-        for child in self.__view.children:
+        for child in self._view.children:
             filtered.append(child)
             for subchild in child.children:
                 filtered.append(subchild)
@@ -224,7 +234,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             Relative to scrolled widget
             @return Gtk.Widget
         """
-        return self.__view
+        return self._view
 
     @property
     def playlist_ids(self):
@@ -232,7 +242,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             Return playlist ids
             @return id as [int]
         """
-        return self.__playlist_ids
+        return self._playlist_ids
 
 #######################
 # PROTECTED           #
@@ -284,7 +294,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             Scroll to current track
             @param button as Gtk.Button
         """
-        self.__view.jump_to_current(self._scrolled)
+        self._view.jump_to_current(self._scrolled)
 
     def _on_play_button_clicked(self, button):
         """
@@ -292,7 +302,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param button as Gtk.Button
         """
         tracks = []
-        for album_row in self.__view.children:
+        for album_row in self._view.children:
             for track_row in album_row.children:
                 tracks.append(track_row.track)
         if tracks:
@@ -305,7 +315,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param button as Gtk.Button
         """
         tracks = []
-        for album_row in self.__view.children:
+        for album_row in self._view.children:
             for track_row in album_row.children:
                 tracks.append(track_row.track)
         if tracks:
@@ -319,7 +329,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param button as Gtk.Button
         """
         from lollypop.menu_playlist import PlaylistMenu
-        menu = PlaylistMenu(self.__playlist_ids[0])
+        menu = PlaylistMenu(self._playlist_ids[0])
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
 
@@ -350,7 +360,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             Update jump button status
         """
         track_ids = []
-        for child in self.__view.children:
+        for child in self._view.children:
             track_ids += child.album.track_ids
         if App().player.current_track.id in track_ids:
             self.__jump_button.set_sensitive(True)
@@ -371,12 +381,12 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param playlist_id as int
             @param uri as str
         """
-        if len(self.__playlist_ids) == 1 and\
-                playlist_id in self.__playlist_ids:
+        if len(self._playlist_ids) == 1 and\
+                playlist_id in self._playlist_ids:
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
-            self.__view.insert_album(album, True, -1)
+            self._view.insert_album(album, True, -1)
 
     def __on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
@@ -385,10 +395,10 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param playlist_id as int
             @param uri as str
         """
-        if len(self.__playlist_ids) == 1 and\
-                playlist_id in self.__playlist_ids:
+        if len(self._playlist_ids) == 1 and\
+                playlist_id in self._playlist_ids:
             track = Track(App().tracks.get_id_by_uri(uri))
-            children = self.__view.children
+            children = self._view.children
             for album_row in children:
                 if album_row.album.id == track.album.id:
                     for track_row in album_row.children:
@@ -408,7 +418,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             tracks = object.tracks
         else:
             tracks = [object]
-        App().playlists.remove_tracks(self.__playlist_ids[0], tracks)
+        App().playlists.remove_tracks(self._playlist_ids[0], tracks)
 
     def __on_playlist_populated(self, widget):
         """
@@ -416,3 +426,29 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param widget as PlaylistsWidget
         """
         self.__set_duration(widget.duration)
+
+
+class SmartPlaylistsView(PlaylistsView):
+    """
+        View showing smart playlists
+    """
+
+    def __init__(self, playlist_ids, view_type):
+        """
+            Init PlaylistView
+            @parma playlist ids as [int]
+            @param view_type as ViewType
+        """
+        PlaylistsView.__init__(self, playlist_ids, view_type)
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def load():
+            request = App().playlists.get_smart_sql(self._playlist_ids[0])
+            track_ids = App().db.execute(request)
+            return tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
+
+        App().task_helper.run(load, callback=(self._view.populate,))
