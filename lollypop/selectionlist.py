@@ -264,6 +264,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         else:
             self.add(self._scrolled)
             self.get_style_context().add_class("sidebar")
+            button = Gtk.Button.new_from_icon_name(
+                "view-more-horizontal-symbolic", Gtk.IconSize.BUTTON)
+            button.get_style_context().add_class("no-border")
+            button.connect("clicked", lambda x: self.__popup_menu(0, 0, x))
+            button.show()
+            self.add(button)
         if self.__base_mask & SelectionListMask.LIST_VIEW:
             App().settings.connect("changed::artist-artwork",
                                    self.__update_children_artwork)
@@ -594,27 +600,31 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 b = row_b.name
             return strcoll(a, b)
 
-    def __popup_menu(self, x, y):
+    def __popup_menu(self, x, y, relative=None):
         """
             Show menu at (x, y)
             @param x as int
             @param y as int
+            @param relative as Gtk.Widget
         """
         if self.__base_mask in [SelectionListMask.SIDEBAR,
                                 SelectionListMask.LIST_VIEW]:
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
+            if relative is None:
+                relative = self._box
             row = self._box.get_row_at_y(y)
             if row is not None:
                 menu = SelectionListMenu(self, row.id, self.mask)
                 popover = Popover()
                 popover.bind_model(menu, None)
-                popover.set_relative_to(self._box)
-                rect = Gdk.Rectangle()
-                rect.x = x
-                rect.y = y
-                rect.width = rect.height = 1
-                popover.set_pointing_to(rect)
+                popover.set_relative_to(relative)
+                if x != y != 0:
+                    rect = Gdk.Rectangle()
+                    rect.x = x
+                    rect.y = y
+                    rect.width = rect.height = 1
+                    popover.set_pointing_to(rect)
                 popover.popup()
 
     def __on_key_press_event(self, listbox, event):

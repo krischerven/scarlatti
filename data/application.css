@@ -185,16 +185,16 @@ Gtk.ListBoxRow .menu-button:hover {
     opacity: 0.99;
 }
 
-.miniplayer-buttons {
+.no-border {
     background: transparent;
     background-image: none;
     border: none;
-    color: alpha(white, 0.6);
     box-shadow: none;
+    color: alpha(@theme_fg_color, 0.8);
 }
 
-.miniplayer-buttons:hover {
-    color: white;
+.no-border:hover {
+    color: @theme_fg_color;
 }
 
 .gnome-shell {
