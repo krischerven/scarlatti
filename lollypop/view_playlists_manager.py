@@ -101,7 +101,7 @@ class PlaylistsManagerView(FlowBoxView):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int)
+            @return ({}, int, int)
         """
         if self._view_type & ViewType.NO_HISTORY:
             return None
@@ -110,7 +110,7 @@ class PlaylistsManagerView(FlowBoxView):
         else:
             position = 0
         return ({"obj": self.__obj, "view_type": self._view_type},
-                {"items": self._items}, self._sidebar_id, position)
+                self._sidebar_id, position)
 
 #######################
 # PROTECTED           #

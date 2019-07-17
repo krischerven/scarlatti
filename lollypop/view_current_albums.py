@@ -81,14 +81,13 @@ class CurrentAlbumsView(AlbumsListView):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int)
+            @return ({}, int, int)
         """
         if self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"view_type": self._view_type}, {"albums": self._albums},
-                self._sidebar_id, position)
+        return ({"view_type": self._view_type}, self._sidebar_id, position)
 
 #######################
 # PRIVATE             #

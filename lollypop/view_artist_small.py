@@ -74,14 +74,14 @@ class ArtistViewSmall(View, ArtistViewCommon):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int)
+            @return ({}, int, int)
         """
         if self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
         return ({"genre_ids": self._genre_ids,
-                 "artist_ids": self._artist_ids}, {"albums": self._albums},
+                 "artist_ids": self._artist_ids},
                 self._sidebar_id, position)
 
     @property

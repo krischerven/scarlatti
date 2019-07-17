@@ -47,7 +47,7 @@ class AlbumsGenreBoxView(FlowBoxView):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int)
+            @return ({}, int, int)
         """
         if self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
