@@ -62,6 +62,7 @@ class AdaptiveHistory:
             Init history
         """
         self.__history = []
+        self.__reset_flags = []
 
     def add_view(self, view):
         """
@@ -113,6 +114,9 @@ class AdaptiveHistory:
             index += 1
         if found:
             (view, sidebar_id) = self.pop(index)
+            if view is not None and view.sidebar_id in self.reset_flags:
+                view.destroy()
+                view = None
             return view
         return None
 
@@ -169,6 +173,23 @@ class AdaptiveHistory:
             if _view == view:
                 return True
         return False
+
+    def reset_flag(self, sidebar_id):
+        """
+            Add sidebar id to reset flags, allow to not get view from history
+            @param sidebar_id as int
+        """
+        if sidebar_id not in self.__reset_flags:
+            self.__reset_flags.append(sidebar_id)
+
+    @property
+    def reset_flags(self):
+        """
+            Get reset flags
+            @return [int]
+        """
+        # Always reset randoms
+        return self.__reset_flags + [Type.RANDOMS]
 
     @property
     def count(self):

@@ -140,6 +140,14 @@ class View(BaseView, Gtk.Grid):
             self.__overlayed = None
 
     @property
+    def sidebar_id(self):
+        """
+            Get sidebar id
+            @return int
+        """
+        return self._sidebar_id
+
+    @property
     def args(self):
         """
             Get default args for __class__, populate() plus sidebar_id and
