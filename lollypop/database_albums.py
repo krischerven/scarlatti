@@ -28,7 +28,6 @@ class AlbumsDatabase:
             Init albums database object
         """
         self.__max_count = 1
-        self.__cached_randoms = []
 
     def add(self, album_name, mb_album_id, artist_ids,
             uri, loved, popularity, rate, synced, mtime):
@@ -609,8 +608,6 @@ class AlbumsDatabase:
             Return random albums
             @return [int]
         """
-        if self.__cached_randoms:
-            return self.__cached_randoms
         with SqlCursor(App().db) as sql:
             albums = []
             request = "SELECT DISTINCT albums.rowid FROM albums\
@@ -618,14 +615,7 @@ class AlbumsDatabase:
                        albums.mtime != 0 ORDER BY random() LIMIT 100"
             result = sql.execute(request)
             albums = list(itertools.chain(*result))
-            self.__cached_randoms = list(albums)
             return albums
-
-    def clear_cached_randoms(self):
-        """
-            Clear cached random albums
-        """
-        self.__cached_randoms = []
 
     def get_disc_names(self, album_id, disc):
         """

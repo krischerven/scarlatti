@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from random import shuffle
 
-from lollypop.define import App, ArtBehaviour, Type
+from lollypop.define import App, ArtBehaviour
 from lollypop.utils import get_icon_name
 from lollypop.objects_album import Album
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
@@ -162,10 +162,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             @param event as Gdk.Event
         """
         if event.button == 1:
-            # User clicked on random, clear cached one
-            if self._data == Type.RANDOMS:
-                App().albums.clear_cached_randoms()
-                App().tracks.clear_cached_randoms()
             self.activate()
         elif event.button == 3:
             pass

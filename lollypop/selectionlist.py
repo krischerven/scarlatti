@@ -664,10 +664,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                     not state & Gdk.ModifierType.SHIFT_MASK) or\
                     static_selected:
                 listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-            # User clicked on random, clear cached random
-            if row.id == Type.RANDOMS:
-                App().albums.clear_cached_randoms()
-                App().tracks.clear_cached_randoms()
             listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
 
     def __on_artist_artwork_changed(self, art, artist):

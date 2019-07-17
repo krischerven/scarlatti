@@ -29,7 +29,7 @@ class TracksDatabase:
         """
             Init tracks database object
         """
-        self.__cached_randoms = []
+        pass
 
     def add(self, name, uri, duration, tracknumber, discnumber, discname,
             album_id, year, timestamp, popularity, rate, loved, ltime, mtime,
@@ -829,21 +829,12 @@ class TracksDatabase:
             Return random tracks
             @return array of track ids as int
         """
-        if self.__cached_randoms:
-            return self.__cached_randoms
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT tracks.rowid\
                                   FROM tracks WHERE mtime != 0\
                                   ORDER BY random() LIMIT 100")
             tracks = list(itertools.chain(*result))
-            self.__cached_randoms = list(tracks)
             return tracks
-
-    def clear_cached_randoms(self):
-        """
-            Clear cached random albums
-        """
-        self.__cached_randoms = []
 
     def set_popularity(self, track_id, popularity):
         """
