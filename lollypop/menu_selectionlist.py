@@ -139,7 +139,7 @@ class SelectionListMenu(Gio.Menu):
         else:
             self.__widget.remove_value(rowid)
             if self.__mask & SelectionListMask.SIDEBAR:
-                startup_id = list(App().settings.get_value("startup-id"))
+                startup_id = App().settings.get_value("startup-id")
                 if startup_id == rowid:
                     App().settings.set_value("startup-id",
                                              GLib.Variant("i", -1))
