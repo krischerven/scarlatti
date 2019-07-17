@@ -187,9 +187,22 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             Set initial state and connect signals
             @param widget as Gtk.Widget
         """
+        def on_populated(selection_list, ids):
+            selection_list.disconnect_by_func(on_populated)
+            selection_list.select_ids(ids, False)
+
         LazyLoadingView._on_map(self, widget)
         self._responsive_widget.set_margin_top(
             self.__banner.height + 15)
+
+        # Restore list view if needed
+        if self._sidebar_id == Type.GENRES_LIST:
+            genre_ids = []
+            for genre_id in self._album.genre_ids:
+                if genre_id not in genre_ids:
+                    genre_ids.append(genre_id)
+            selection_list = App().window.container.list_view
+            selection_list.connect("populated", on_populated, genre_ids)
 
     def _on_unmap(self, widget):
         """
@@ -228,7 +241,8 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
                 label.show()
                 self.__grid.add(label)
                 self.__others_box = AlbumsBoxView([], [artist_id],
-                                                  ViewType.SMALL)
+                                                  ViewType.SMALL |
+                                                  ViewType.ALBUM)
                 self.__others_box.show()
                 self.__grid.add(self.__others_box)
                 self.__others_box.populate([Album(id) for id in album_ids])

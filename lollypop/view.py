@@ -244,6 +244,7 @@ class LazyLoadingView(View):
             @param view_type as ViewType
         """
         View.__init__(self, view_type)
+        self.__is_populated = False
         self._lazy_queue = []
         self.__priority_queue = []
         self.__scrolled_position = None
@@ -280,6 +281,14 @@ class LazyLoadingView(View):
         """
         if self._view_type & ViewType.SCROLLED:
             self.__scrolled_position = position
+
+    @property
+    def is_populated(self):
+        """
+            True if populated
+            @return bool
+        """
+        return self.__is_populated
 
 #######################
 # PROTECTED           #
@@ -345,6 +354,7 @@ class LazyLoadingView(View):
             widget.populate()
         else:
             self.__lazy_loading_id = None
+            self.__is_populated = True
             Logger.debug("LazyLoadingView::lazy_loading(): %s",
                          time() - self.__start_time)
 

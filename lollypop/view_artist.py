@@ -14,7 +14,7 @@ from gi.repository import Gtk, Gdk, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ViewType, MARGIN, ArtBehaviour
+from lollypop.define import App, ArtSize, ViewType, MARGIN, ArtBehaviour, Type
 from lollypop.pop_artwork import ArtworkPopover
 from lollypop.view_artist_albums import ArtistAlbumsView
 from lollypop.view_artist_common import ArtistViewCommon
@@ -188,6 +188,10 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             Connect signals and set active ids
             @param widget as Gtk.Widget
         """
+        def on_populated(selection_list, ids):
+            selection_list.disconnect_by_func(on_populated)
+            selection_list.select_ids(ids, False)
+
         ArtistAlbumsView._on_map(self, widget)
         self.__on_album_changed(App().player)
         self.__art_signal_id = App().art.connect(
@@ -202,6 +206,10 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
         self.__removed_signal_id = App().player.connect(
                                                   "album-removed",
                                                   self.__on_album_changed)
+        if self._sidebar_id == Type.ARTISTS_LIST:
+            App().window.container.list_view.connect("populated",
+                                                     on_populated,
+                                                     self._artist_ids)
 
     def _on_unmap(self, widget):
         """
