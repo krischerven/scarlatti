@@ -193,7 +193,8 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"playlist_ids": self.__playlist_ids},
+        return ({"playlist_ids": self.__playlist_ids,
+                 "view_type": self._view_type},
                 {"albums": self.__albums}, self._sidebar_id, position)
 
     @property
