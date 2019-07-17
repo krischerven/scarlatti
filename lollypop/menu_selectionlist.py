@@ -142,7 +142,7 @@ class SelectionListMenu(Gio.Menu):
                 startup_id = list(App().settings.get_value("startup-id"))
                 if startup_id == rowid:
                     App().settings.set_value("startup-id",
-                                             GLib.Variant("ai", -1))
+                                             GLib.Variant("i", -1))
 
     def __on_default_change_state(self, action, variant, rowid):
         """
