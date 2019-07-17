@@ -61,7 +61,7 @@ class AdaptiveHistory:
         """
             Init history
         """
-        self.__history = []
+        self.__items = []
         self.__reset_flags = []
 
     def add_view(self, view):
@@ -73,14 +73,14 @@ class AdaptiveHistory:
         # Do not add unwanted view to history
         # Exception for undestroyable view (sidebar + list view)
         if view.args is not None:
-            self.__history.append((view, view.__class__, view.args))
+            self.__items.append((view, view.__class__, view.args))
         elif not view.should_destroy:
-            self.__history.append((view, None, None))
+            self.__items.append((view, None, None))
         if self.count >= self.__MAX_HISTORY_ITEMS:
-            (view, _class, args) = self.__history[-self.__MAX_HISTORY_ITEMS]
+            (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
             if view is not None and view.should_destroy:
                 view.destroy()
-                self.__history[
+                self.__items[
                     -self.__MAX_HISTORY_ITEMS] = (None, _class, args)
 
     def pop(self, index=-1):
@@ -89,56 +89,34 @@ class AdaptiveHistory:
             @param index as int
             @return (view as View, sidebar_id as int)
         """
-        if not self.__history:
+        if not self.__items:
             return (None, None)
-        (view, _class, args) = self.__history.pop(index)
+        (view, _class, args) = self.__items.pop(index)
         # Undestroyable view (sidebar, list_view)
         if _class is None:
             return (view, 0)
         else:
             return self.__get_view_from_class(view, _class, args)
 
-    def search(self, view_class, view_args):
-        """
-            Search view with class and args
-            @param view_class as class
-            @param view_args as {}
-            @return View
-        """
-        index = 0
-        found = False
-        for (_view, _class, args) in self.__history:
-            if _class == view_class and args[0] == view_args:
-                found = True
-                break
-            index += 1
-        if found:
-            (view, sidebar_id) = self.pop(index)
-            if view is not None and view.sidebar_id in self.reset_flags:
-                view.destroy()
-                view = None
-            return view
-        return None
-
     def remove(self, view):
         """
             Remove view from history
             @param view as View
         """
-        for (_view, _class, args) in self.__history:
+        for (_view, _class, args) in self.__items:
             if _view == view:
-                self.__history.remove((_view, _class, args))
+                self.__items.remove((_view, _class, args))
                 break
 
     def reset(self):
         """
             Reset history
         """
-        for (view, _class, args) in self.__history:
+        for (view, _class, args) in self.__items:
             if view is not None:
                 view.stop()
                 view.destroy_later()
-        self.__history = []
+        self.__items = []
 
     def save(self):
         """
@@ -146,7 +124,7 @@ class AdaptiveHistory:
         """
         try:
             no_widget_history = []
-            for (_view, _class, args) in self.__history[
+            for (_view, _class, args) in self.__items[
                                                    -self.__MAX_HISTORY_ITEMS:]:
                 no_widget_history.append((None, _class, args))
             with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
@@ -159,7 +137,7 @@ class AdaptiveHistory:
             Load history
         """
         try:
-            self.__history = load(
+            self.__items = load(
                 open(LOLLYPOP_DATA_PATH + "/history.bin", "rb"))
         except Exception as e:
             Logger.error("Application::__save_state(): %s" % e)
@@ -169,7 +147,7 @@ class AdaptiveHistory:
             True if view exists in history
             @return bool
         """
-        for (_view, _class, args) in self.__history:
+        for (_view, _class, args) in self.__items:
             if _view == view:
                 return True
         return False
@@ -181,6 +159,14 @@ class AdaptiveHistory:
         """
         if sidebar_id not in self.__reset_flags:
             self.__reset_flags.append(sidebar_id)
+
+    @property
+    def items(self):
+        """
+            Get history items
+            @return [(View, class, {})]
+        """
+        return self.__items
 
     @property
     def reset_flags(self):
@@ -197,7 +183,7 @@ class AdaptiveHistory:
             Get history item count
             @return int
         """
-        return len(self.__history)
+        return len(self.__items)
 
 ############
 # PRIVATE  #
@@ -278,6 +264,35 @@ class AdaptiveStack(Gtk.Stack):
             if visible_child.args is None:
                 visible_child.destroy_later()
         Gtk.Stack.set_visible_child(self, widget)
+
+    def search_history(self, view_class, view_args):
+        """
+            Search in history view with class and args
+            @param view_class as class
+            @param view_args as {}
+            @return View
+        """
+        index = 0
+        found = False
+        # First check current view
+        current_view = self.get_visible_child()
+        if current_view is not None and\
+                current_view.args[0] == view_args and\
+                current_view.sidebar_id not in self.__history.reset_flags:
+            return current_view
+        for (_view, _class, args) in self.__history.items:
+            if _class == view_class and args[0] == view_args:
+                found = True
+                break
+            index += 1
+        if found:
+            (view, sidebar_id) = self.__history.pop(index)
+            if view is not None and\
+                    view.sidebar_id in self.__history.reset_flags:
+                view.destroy()
+                view = None
+            return view
+        return None
 
     def go_back(self):
         """
