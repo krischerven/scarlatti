@@ -93,7 +93,6 @@ class LovedWidget(Gtk.Bin):
                                                      self.__set_lastfm_status,
                                                      lastfm_status)
         self.__set_artwork(self.__object.loved)
-        App().window.container.stack.add_to_reset_flag(Type.LOVED)
         return True
 
 #######################

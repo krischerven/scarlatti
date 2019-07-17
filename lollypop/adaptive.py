@@ -240,7 +240,6 @@ class AdaptiveStack(Gtk.Stack):
         self.set_hexpand(True)
         self.set_vexpand(True)
         self.__history = AdaptiveHistory()
-        self.__reset_flags = []
 
     def add(self, widget):
         """
@@ -273,20 +272,18 @@ class AdaptiveStack(Gtk.Stack):
             @param view_args as {}
             @return View
         """
+        return None
         sidebar_id = None
         view = None
         # First check current view
         current_view = self.get_visible_child()
         if current_view is not None and\
-                current_view.args[0] == view_args and\
-                current_view.sidebar_id not in self.reset_flags:
+                current_view.args[0] == view_args:
             sidebar_id = current_view.sidebar_id
             view = current_view
         # Then search in history
         if view is None:
             (view, sidebar_id) = self.__history.search(view_class, view_args)
-        if sidebar_id is not None:
-            self.remove_from_reset_flag(sidebar_id)
         return view
 
     def go_back(self):
@@ -338,30 +335,6 @@ class AdaptiveStack(Gtk.Stack):
                 Gtk.Stack.set_visible_child(self, view)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
-
-    def add_to_reset_flag(self, sidebar_id):
-        """
-            Add sidebar id to reset flags, allow to not get view from history
-            @param sidebar_id as int
-        """
-        if sidebar_id not in self.__reset_flags:
-            self.__reset_flags.append(sidebar_id)
-
-    def remove_from_reset_flag(self, sidebar_id):
-        """
-            Remove sidebar id from reset flags
-        """
-        if sidebar_id in self.__reset_flags:
-            self.__reset_flags.remove(sidebar_id)
-
-    @property
-    def reset_flags(self):
-        """
-            Get reset flags
-            @return [int]
-        """
-        # Always reset randoms
-        return self.__reset_flags + [Type.RANDOMS]
 
     @property
     def history(self):
