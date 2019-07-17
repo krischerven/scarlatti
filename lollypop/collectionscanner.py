@@ -466,6 +466,10 @@ class CollectionScanner(GObject.GObject, TagReader):
         if scan_type == ScanType.EPHEMERAL:
             App().player.play_uris(new_tracks)
 
+        for type_id in [Type.RECENTS, Type.NEVER, Type.ARTISTS,
+                        Type.ARTISTS_LIST, Type.GENRES, Type.GENRES_LIST]:
+            App().window.container.stack.add_to_reset_flag(type_id)
+
     def __scan_to_handle(self, uri):
         """
             Check if file has to be handle by scanner

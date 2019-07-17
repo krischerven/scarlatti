@@ -62,7 +62,6 @@ class AdaptiveHistory:
             Init history
         """
         self.__items = []
-        self.__reset_flags = []
 
     def add_view(self, view):
         """
@@ -118,6 +117,24 @@ class AdaptiveHistory:
                 view.destroy_later()
         self.__items = []
 
+    def search(self, view_class, view_args):
+        """
+            Search in history view with class and args
+            @param view_class as class
+            @param view_args as {}
+            @return (view as View, sidebar_id as int)
+        """
+        index = 0
+        found = False
+        for (_view, _class, args) in self.__items:
+            if _class == view_class and args[0] == view_args:
+                found = True
+                break
+            index += 1
+        if found:
+            return self.pop(index)
+        return (None, None)
+
     def save(self):
         """
             Save history
@@ -152,14 +169,6 @@ class AdaptiveHistory:
                 return True
         return False
 
-    def reset_flag(self, sidebar_id):
-        """
-            Add sidebar id to reset flags, allow to not get view from history
-            @param sidebar_id as int
-        """
-        if sidebar_id not in self.__reset_flags:
-            self.__reset_flags.append(sidebar_id)
-
     @property
     def items(self):
         """
@@ -167,15 +176,6 @@ class AdaptiveHistory:
             @return [(View, class, {})]
         """
         return self.__items
-
-    @property
-    def reset_flags(self):
-        """
-            Get reset flags
-            @return [int]
-        """
-        # Always reset randoms
-        return self.__reset_flags + [Type.RANDOMS]
 
     @property
     def count(self):
@@ -240,6 +240,7 @@ class AdaptiveStack(Gtk.Stack):
         self.set_hexpand(True)
         self.set_vexpand(True)
         self.__history = AdaptiveHistory()
+        self.__reset_flags = []
 
     def add(self, widget):
         """
@@ -272,27 +273,21 @@ class AdaptiveStack(Gtk.Stack):
             @param view_args as {}
             @return View
         """
-        index = 0
-        found = False
+        sidebar_id = None
+        view = None
         # First check current view
         current_view = self.get_visible_child()
         if current_view is not None and\
                 current_view.args[0] == view_args and\
-                current_view.sidebar_id not in self.__history.reset_flags:
-            return current_view
-        for (_view, _class, args) in self.__history.items:
-            if _class == view_class and args[0] == view_args:
-                found = True
-                break
-            index += 1
-        if found:
-            (view, sidebar_id) = self.__history.pop(index)
-            if view is not None and\
-                    view.sidebar_id in self.__history.reset_flags:
-                view.destroy()
-                view = None
-            return view
-        return None
+                current_view.sidebar_id not in self.reset_flags:
+            sidebar_id = current_view.sidebar_id
+            view = current_view
+        # Then search in history
+        if view is None:
+            (view, sidebar_id) = self.__history.search(view_class, view_args)
+        if sidebar_id is not None:
+            self.remove_from_reset_flag(sidebar_id)
+        return view
 
     def go_back(self):
         """
@@ -343,6 +338,30 @@ class AdaptiveStack(Gtk.Stack):
                 Gtk.Stack.set_visible_child(self, view)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
+
+    def add_to_reset_flag(self, sidebar_id):
+        """
+            Add sidebar id to reset flags, allow to not get view from history
+            @param sidebar_id as int
+        """
+        if sidebar_id not in self.__reset_flags:
+            self.__reset_flags.append(sidebar_id)
+
+    def remove_from_reset_flag(self, sidebar_id):
+        """
+            Remove sidebar id from reset flags
+        """
+        if sidebar_id in self.__reset_flags:
+            self.__reset_flags.remove(sidebar_id)
+
+    @property
+    def reset_flags(self):
+        """
+            Get reset flags
+            @return [int]
+        """
+        # Always reset randoms
+        return self.__reset_flags + [Type.RANDOMS]
 
     @property
     def history(self):
