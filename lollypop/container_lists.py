@@ -124,7 +124,8 @@ class ListsContainer:
         else:
             self._list_view.hide()
 
-        if selected_ids[0] == Type.ARTISTS_LIST:
+        if selected_ids[0] == Type.ARTISTS_LIST and\
+                not App().window.is_adaptive:
             view = self._get_preview_artists_rounded()
         elif selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()
