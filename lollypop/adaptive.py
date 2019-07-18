@@ -402,12 +402,12 @@ class AdaptiveWindow:
         """
             Go back in container stack
         """
-        if self.is_adaptive:
+        if self.__stack.history.count > 0:
+            self.__stack.go_back()
+        else:
             for child in reversed(self.__children):
                 if child[1].get_visible():
                     self.__stack.set_visible_child(child[1])
-        else:
-            self.__stack.go_back()
         self.emit("can-go-back-changed", self.can_go_back)
 
     def go_home(self):
