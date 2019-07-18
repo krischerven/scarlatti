@@ -99,7 +99,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        view_type = self._view_type & ~self.view_type_mask
+        view_type = self._view_type & ~self.view_sizing_mask
         return ({"album": self._album,
                  "view_type": view_type},
                 self._sidebar_id,
