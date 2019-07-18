@@ -146,13 +146,18 @@ class SelectionListRow(Gtk.ListBoxRow):
         else:
             self.__mask = mask
 
-        if mask & SelectionListMask.LABEL:
+        if mask & (SelectionListMask.LABEL |
+                   SelectionListMask.ARTISTS |
+                   SelectionListMask.GENRES):
             self.__artwork.set_property("halign", Gtk.Align.FILL)
             self.__artwork.set_hexpand(False)
             self.__label.show()
             self.set_tooltip_text("")
             self.set_has_tooltip(False)
-            self.__label.set_ellipsize(Pango.EllipsizeMode.NONE)
+            if self.__mask & SelectionListMask.SIDEBAR:
+                self.__label.set_ellipsize(Pango.EllipsizeMode.NONE)
+            else:
+                self.__label.set_ellipsize(Pango.EllipsizeMode.END)
         else:
             self.__artwork.set_property("halign", Gtk.Align.CENTER)
             self.__artwork.set_hexpand(True)
