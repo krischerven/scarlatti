@@ -405,9 +405,15 @@ class AdaptiveWindow:
         if self.__stack.history.count > 0:
             self.__stack.go_back()
         else:
+            visible_child = self.__stack.get_visible_child()
             for child in reversed(self.__children):
-                if child[1].get_visible():
-                    self.__stack.set_visible_child(child[1])
+                if child[1] == visible_child:
+                    visible_child = None
+                elif child[1].get_visible():
+                    Gtk.Stack.set_visible_child(self.__stack, child[1])
+                    break
+            if visible_child is not None:
+                visible_child.destroy_later()
         self.emit("can-go-back-changed", self.can_go_back)
 
     def go_home(self):
