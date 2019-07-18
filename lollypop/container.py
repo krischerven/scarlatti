@@ -77,6 +77,8 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._sidebar_two = None
         self.__paned_position_id = None
         self._stack = ContainerStack()
+        self._stack.connect("visible-child-changed",
+                            self.__on_visible_child_changed)
         self._stack.show()
         self.__progress = ProgressBar()
         self.__progress.get_style_context().add_class("progress-bottom")
@@ -166,6 +168,14 @@ class Container(Gtk.Overlay, NotificationContainer,
         if App().window.is_adaptive:
             search = variant.get_string()
             App().window.container.show_view([Type.SEARCH], search)
+
+    def __on_visible_child_changed(self, stack, sidebar_id):
+        """
+            Active sidebar selected id
+            @param stack as ContainerStack
+            @param sidebar_id as int
+        """
+        self._sidebar.select_ids([sidebar_id], False)
 
     def __on_paned_position(self, paned, param):
         """

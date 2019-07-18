@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import App, LOLLYPOP_DATA_PATH
+from lollypop.define import LOLLYPOP_DATA_PATH
 
 
 class AdaptiveView:
@@ -213,6 +213,7 @@ class AdaptiveStack(Gtk.Stack):
 
     __gsignals__ = {
         "history-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "visible-child-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
     def __init__(self):
@@ -262,8 +263,8 @@ class AdaptiveStack(Gtk.Stack):
             if view is not None:
                 if view not in self.get_children():
                     self.add(view)
-                App().window.container.sidebar.select_ids([sidebar_id], False)
                 Gtk.Stack.set_visible_child(self, view)
+                self.emit("visible-child-changed", sidebar_id)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()
@@ -294,9 +295,9 @@ class AdaptiveStack(Gtk.Stack):
             self.__history.load()
             (view, sidebar_id) = self.__history.pop()
             if view is not None:
-                App().window.container.sidebar.select_ids([sidebar_id], True)
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
+                self.emit("visible-child-changed", sidebar_id)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 
