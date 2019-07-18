@@ -97,6 +97,8 @@ class ViewsContainer:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.COMPILATIONS:
                 view = self._get_view_albums([], item_ids)
+            elif item_ids[0] == Type.ARTISTS:
+                view = self._get_view_artists([], data)
         if view is not None:
             view.show()
             self._stack.add(view)
