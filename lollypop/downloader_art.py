@@ -502,21 +502,30 @@ class ArtDownloader(Downloader):
             @param loaded as bool
             @param content as bytes
         """
+        import re
+
+        def search_in_data(lines, found_uris=[]):
+            if lines:
+                line = lines.pop(0)
+                # Do not call findall if nothing to find
+                if line.find("oiu=") != -1:
+                    res = re.findall(r'.*oiu=([^&]*).*', line)
+                    for data in res:
+                        uri = GLib.uri_unescape_string(data, "")
+                        if uri in found_uris or uri is None:
+                            continue
+                        found_uris.append(uri)
+                GLib.idle_add(search_in_data, lines, found_uris)
+            else:
+                results = [(uri, "Startpage") for uri in found_uris]
+                self.emit("uri-artwork-found", results)
+
         try:
             if not loaded:
                 self.emit("uri-artwork-found", [])
                 return
-            found_uris = []
-            import re
-            data = content.decode("utf-8")
-            res = re.findall(r'.*oiu=([^&]*).*', data)
-            for data in res:
-                uri = GLib.uri_unescape_string(data, "")
-                if uri in found_uris or uri is None:
-                    continue
-                found_uris.append(uri)
-            results = [(uri, "Startpage") for uri in found_uris]
-            self.emit("uri-artwork-found", results)
+            lines = content.decode("utf-8").splitlines()
+            search_in_data(lines)
         except Exception as e:
             self.emit("uri-artwork-found", [])
             Logger.error("ArtDownloader::__on_load_startpage_content(): %s"
