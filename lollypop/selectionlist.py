@@ -612,20 +612,22 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
             if relative is None:
+                row = self._box.get_row_at_y(y)
+                row_id = row.id
                 relative = self._box
-            row = self._box.get_row_at_y(y)
-            if row is not None:
-                menu = SelectionListMenu(self, row.id, self.mask)
-                popover = Popover()
-                popover.bind_model(menu, None)
-                popover.set_relative_to(relative)
-                if x != y != 0:
-                    rect = Gdk.Rectangle()
-                    rect.x = x
-                    rect.y = y
-                    rect.width = rect.height = 1
-                    popover.set_pointing_to(rect)
-                popover.popup()
+            else:
+                row_id = None
+            menu = SelectionListMenu(self, row_id, self.mask)
+            popover = Popover()
+            popover.bind_model(menu, None)
+            popover.set_relative_to(relative)
+            if x != y != 0:
+                rect = Gdk.Rectangle()
+                rect.x = x
+                rect.y = y
+                rect.width = rect.height = 1
+                popover.set_pointing_to(rect)
+            popover.popup()
 
     def __on_key_press_event(self, listbox, event):
         """

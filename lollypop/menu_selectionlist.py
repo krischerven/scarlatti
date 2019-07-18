@@ -37,22 +37,23 @@ class SelectionListMenu(Gio.Menu):
         self.__mask = mask
         section = None
 
-        if not App().devices and mask & (SelectionListMask.SIDEBAR |
-                                         SelectionListMask.LIST_VIEW):
-            section = Gio.Menu()
-            section.append(_("No connected devices"), "app.none")
-        elif mask & SelectionListMask.PLAYLISTS:
-            from lollypop.menu_sync import SyncPlaylistsMenu
-            section = SyncPlaylistsMenu(rowid)
-        elif rowid > 0:
-            from lollypop.menu_sync import SyncAlbumsMenu
-            if mask & SelectionListMask.GENRES:
-                section = SyncAlbumsMenu([rowid], [])
-            else:
-                section = SyncAlbumsMenu([], [rowid])
-        elif rowid == Type.ALL or rowid == Type.ARTISTS:
-            from lollypop.menu_sync import SyncAlbumsMenu
-            section = SyncAlbumsMenu([], [])
+        if rowid is not None:
+            if not App().devices and mask & (SelectionListMask.SIDEBAR |
+                                             SelectionListMask.LIST_VIEW):
+                section = Gio.Menu()
+                section.append(_("No connected devices"), "app.none")
+            elif mask & SelectionListMask.PLAYLISTS:
+                from lollypop.menu_sync import SyncPlaylistsMenu
+                section = SyncPlaylistsMenu(rowid)
+            elif rowid > 0:
+                from lollypop.menu_sync import SyncAlbumsMenu
+                if mask & SelectionListMask.GENRES:
+                    section = SyncAlbumsMenu([rowid], [])
+                else:
+                    section = SyncAlbumsMenu([], [rowid])
+            elif rowid == Type.ALL or rowid == Type.ARTISTS:
+                from lollypop.menu_sync import SyncAlbumsMenu
+                section = SyncAlbumsMenu([], [])
 
         if section is not None:
             self.append_section(_("Synchronization"), section)
@@ -82,7 +83,7 @@ class SelectionListMenu(Gio.Menu):
             self.append_section(_("Startup"), startup_menu)
         # Shown menu
         if mask & (SelectionListMask.SIDEBAR |
-                   SelectionListMask.PLAYLISTS) and rowid < 0:
+                   SelectionListMask.PLAYLISTS):
             shown_menu = Gio.Menu()
             if mask & SelectionListMask.PLAYLISTS:
                 lists = ShownPlaylists.get(True)
