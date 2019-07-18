@@ -109,10 +109,12 @@ class ListsContainer:
         Logger.debug("Container::__on_sidebar_activated()")
         view = None
         selected_ids = self._sidebar.selected_ids
-        if not selected_ids:
+        visible = self._stack.get_visible_child()
+        if not selected_ids or (visible is not None and
+                                visible.sidebar_id != Type.RANDOMS and
+                                visible.sidebar_id in selected_ids):
             return
         self._stack.history.offload()
-        visible = self._stack.get_visible_child()
         if visible is not None:
             visible.destroy_later()
         # Update lists
