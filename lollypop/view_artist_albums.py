@@ -55,7 +55,7 @@ class ArtistAlbumsView(LazyLoadingView, ViewController, FilteringHelper):
             Populate the view
             @param albums as [Album]
         """
-        self.__add_albums(list(albums))
+        self.__add_albums(albums)
 
     def stop(self):
         """

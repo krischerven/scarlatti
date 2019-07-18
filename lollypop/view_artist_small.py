@@ -34,7 +34,6 @@ class ArtistViewSmall(View, ArtistViewCommon):
         View.__init__(self)
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
-        self._albums = []
         ArtistViewCommon.__init__(self)
         self._jump_button.hide()
         self.__overlay = Gtk.Overlay()
@@ -49,13 +48,12 @@ class ArtistViewSmall(View, ArtistViewCommon):
         self.__overlay.add_overlay(self.__album_box)
         self.add(self.__overlay)
 
-    def populate(self, albums):
+    def populate(self):
         """
             Populate view
             @param albums as [album]
         """
-        self._albums = albums
-        self.__album_box.populate(list(albums))
+        self.__album_box.populate()
 
     def search_for_child(self, text):
         return self.__album_box.search_for_child(text)

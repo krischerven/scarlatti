@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ViewType, MARGIN, ArtBehaviour, Type
 from lollypop.pop_artwork import ArtworkPopover
+from lollypop.objects_album import Album
 from lollypop.view_artist_albums import ArtistAlbumsView
 from lollypop.view_artist_common import ArtistViewCommon
 from lollypop.logger import Logger
@@ -52,6 +53,31 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             self._scrolled.get_vscrollbar().set_margin_top(self._banner.height)
         if len(self._artist_ids) > 1:
             self._banner.collapse(True)
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            ArtistAlbumsView.populate(self, items)
+
+        def load():
+            if self._genre_ids and self._genre_ids[0] == Type.ALL:
+                if App().settings.get_value("show-performers"):
+                    items = App().tracks.get_album_ids(self._artist_ids, [])
+                else:
+                    items = App().albums.get_ids(self._artist_ids, [])
+            else:
+                if App().settings.get_value("show-performers"):
+                    items = App().tracks.get_album_ids(self._artist_ids,
+                                                       self._genre_ids)
+                else:
+                    items = App().albums.get_ids(self._artist_ids,
+                                                 self._genre_ids)
+            return [Album(album_id, self._genre_ids, self._artist_ids)
+                    for album_id in items]
+
+        App().task_helper.run(load, callback=(on_load,))
 
     def activate_child(self):
         """

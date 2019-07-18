@@ -263,7 +263,7 @@ class ViewsContainer:
                                                "view_type": view_type})
             if view is None:
                 view = ArtistViewSmall(genre_ids, artist_ids, view_type)
-                view.do_populate()
+                view.populate()
         else:
             view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED
             from lollypop.view_artist import ArtistView
@@ -273,7 +273,7 @@ class ViewsContainer:
                                                "view_type": view_type})
             if view is None:
                 view = ArtistView(genre_ids, artist_ids, view_type)
-                view.do_populate()
+                view.populate()
         view.show()
         return view
 

@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 from random import choice
 
-from lollypop.define import App, MARGIN, Type
+from lollypop.define import App, MARGIN
 from lollypop.utils import on_query_tooltip, on_realize
 from lollypop.objects_album import Album
 from lollypop.widgets_banner_artist import ArtistBannerWidget
@@ -54,28 +54,6 @@ class ArtistViewCommon:
             artists.append(App().artists.get_name(artist_id))
         self._title_label.set_markup(
             GLib.markup_escape_text(", ".join(artists)))
-
-    def do_populate(self):
-        """
-            Populate view
-        """
-        def load():
-            if self._genre_ids and self._genre_ids[0] == Type.ALL:
-                if App().settings.get_value("show-performers"):
-                    items = App().tracks.get_album_ids(self._artist_ids, [])
-                else:
-                    items = App().albums.get_ids(self._artist_ids, [])
-            else:
-                if App().settings.get_value("show-performers"):
-                    items = App().tracks.get_album_ids(self._artist_ids,
-                                                       self._genre_ids)
-                else:
-                    items = App().albums.get_ids(self._artist_ids,
-                                                 self._genre_ids)
-            return [Album(album_id, self._genre_ids, self._artist_ids)
-                    for album_id in items]
-
-        App().task_helper.run(load, callback=(self.populate,))
 
     @property
     def scroll_shift(self):
