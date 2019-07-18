@@ -115,24 +115,6 @@ class AdaptiveHistory:
         self.offload()
         self.__items = []
 
-    def search(self, view_class, view_args):
-        """
-            Search in history view with class and args
-            @param view_class as class
-            @param view_args as {}
-            @return (view as View, sidebar_id as int)
-        """
-        index = 0
-        found = False
-        for (_view, _class, args) in self.__items:
-            if _class == view_class and args[0] == view_args:
-                found = True
-                break
-            index += 1
-        if found:
-            return self.pop(index)
-        return (None, None)
-
     def save(self):
         """
             Save history
@@ -277,27 +259,6 @@ class AdaptiveStack(Gtk.Stack):
             else:
                 visible_child.destroy_later()
         Gtk.Stack.set_visible_child(self, view)
-
-    def search_history(self, view_class, view_args):
-        """
-            Search in history view with class and args
-            @param view_class as class
-            @param view_args as {}
-            @return View
-        """
-        return None
-        sidebar_id = None
-        view = None
-        # First check current view
-        current_view = self.get_visible_child()
-        if current_view is not None and\
-                current_view.args[0] == view_args:
-            sidebar_id = current_view.sidebar_id
-            view = current_view
-        # Then search in history
-        if view is None:
-            (view, sidebar_id) = self.__history.search(view_class, view_args)
-        return view
 
     def go_back(self):
         """
