@@ -10,6 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import Gtk
+
+from gettext import gettext as _
+
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
 from locale import strcoll
@@ -26,9 +30,8 @@ class RoundedArtistsView(FlowBoxView):
         """
             Init artist view
             @param view_type as ViewType
-            @param destroy as bool
         """
-        FlowBoxView.__init__(self)
+        FlowBoxView.__init__(self, view_type)
         self.__view_type = view_type
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
@@ -151,3 +154,42 @@ class RoundedArtistsView(FlowBoxView):
         for child in self._box.get_children():
             if child.name == prefix:
                 child.set_artwork()
+
+
+class RoundedArtistsPreview(RoundedArtistsView):
+    """
+        Show 6 artists in a FlowBox
+    """
+
+    def __init__(self, view_type):
+        """
+            Init artist view
+            @param view_type as ViewType
+        """
+        RoundedArtistsView.__init__(self, view_type)
+        self.insert_row(0)
+        label = Gtk.Label.new(_("Some artists in your collection:"))
+        label.get_style_context().add_class("text-xx-large")
+        label.get_style_context().add_class("dim-label")
+        label.set_vexpand(True)
+        label.set_property("valign", Gtk.Align.END)
+        label.show()
+        self.attach(label, 0, 0, 1, 1)
+        self._box.set_max_children_per_line(3)
+        self._box.set_property("valign", Gtk.Align.CENTER)
+        self._box.set_property("halign", Gtk.Align.CENTER)
+        self._box.set_vexpand(True)
+        self._box.set_hexpand(True)
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            ids = App().artists.get_randoms(6)
+            return ids
+
+        App().task_helper.run(load, callback=(on_load,))

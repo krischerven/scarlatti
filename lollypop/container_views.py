@@ -229,6 +229,18 @@ class ViewsContainer:
         view.show()
         return view
 
+    def _get_preview_artists_rounded(self):
+        """
+            Get rounded artists view
+            @return view
+        """
+        from lollypop.view_artists_rounded import RoundedArtistsPreview
+        view = RoundedArtistsPreview(ViewType.DEFAULT)
+        self._stack.add(view)
+        view.populate()
+        view.show()
+        return view
+
     def _get_view_artists(self, genre_ids, artist_ids):
         """
             Get artists view for genres/artists

@@ -249,6 +249,25 @@ class ArtistsDatabase:
                 result = sql.execute(request % select, genres)
             return [(row[0], row[1], row[2]) for row in result]
 
+    def get_randoms(self, limit):
+        """
+            Return random albums
+            @param limit as int
+            @return [int, str, str]
+        """
+        with SqlCursor(App().db) as sql:
+            request = "SELECT DISTINCT artists.rowid,\
+                                       artists.name,\
+                                       artists.sortname\
+                                  FROM artists, albums, album_artists\
+                                  WHERE album_artists.artist_id=artists.rowid\
+                                  AND album_artists.album_id=albums.rowid\
+                                  AND albums.mtime!=0\
+                                  ORDER BY random() LIMIT ?\
+                                  COLLATE NOCASE COLLATE LOCALIZED"
+            result = sql.execute(request, (limit,))
+            return [(row[0], row[1], row[2]) for row in result]
+
     def get_ids(self, genre_ids=[]):
         """
             Get all available album artists
