@@ -72,7 +72,6 @@ class AdaptiveHistory:
         added = False
         # Do not add unwanted view to history
         if view.args is not None:
-            view.connect("destroy", self.__on_child_destroy)
             self.__items.append((view, view.__class__, view.args))
             added = True
         # Offload history if too many items
@@ -80,6 +79,7 @@ class AdaptiveHistory:
             (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
             if view is not None:
                 view.destroy()
+                self.__items[-self.__MAX_HISTORY_ITEMS] = (None, _class, args)
         return added
 
     def pop(self, index=-1):
@@ -204,16 +204,6 @@ class AdaptiveHistory:
 ############
 # PRIVATE  #
 ############
-    def __on_child_destroy(self, view):
-        """
-            Remove from history
-            @param view as View
-        """
-        for i in reversed(range(0, len(self.__items))):
-            (_view, _class, args) = self.__items[i]
-            if _view == view:
-                self.__items[i] = (None, _class, args)
-                break
 
 
 class AdaptiveStack(Gtk.Stack):
