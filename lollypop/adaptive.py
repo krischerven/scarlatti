@@ -64,16 +64,15 @@ class AdaptiveHistory:
     def add_view(self, view):
         """
             Add view to history
-            Offload old views
             @param view as View
+            @return True if view has been added
         """
         # Do not add unwanted view to history
         if view.args is not None:
             view.connect("destroy", self.__on_child_destroy)
             self.__items.append((view, view.__class__, view.args))
-        # Exception for undestroyable view (sidebar + list view)
-        elif not view.should_destroy:
-            self.__items.append((view, None, None))
+            return True
+        return False
 
     def pop(self, index=-1):
         """
@@ -100,14 +99,21 @@ class AdaptiveHistory:
                 self.__items.remove((_view, _class, args))
                 break
 
-    def reset(self):
+    def offload(self):
         """
-            Reset history
+            Offload history from memory
         """
         for (view, _class, args) in self.__items:
             if view is not None:
                 view.stop()
                 view.destroy_later()
+
+    def reset(self):
+        """
+            Reset history
+        """
+        self.offload()
+        self.__items = []
 
     def search(self, view_class, view_args):
         """
@@ -264,10 +270,10 @@ class AdaptiveStack(Gtk.Stack):
         if visible_child == view:
             return
         if visible_child is not None:
-            self.__history.add_view(visible_child)
-            self.emit("new-child-in-history")
             visible_child.stop()
-            if visible_child.args is None:
+            added = self.__history.add_view(visible_child)
+            if added:
+                self.emit("new-child-in-history")
                 visible_child.destroy_later()
         Gtk.Stack.set_visible_child(self, view)
 
@@ -398,19 +404,22 @@ class AdaptiveWindow:
         """
             Go back in container stack
         """
-        self.__stack.go_back()
-        self.emit("can-go-back-changed", self.__stack.history.count > 0)
+        if self.__stack.history.count > 0:
+            self.__stack.go_back()
+        else:
+            for child in reversed(self.__children):
+                if child[1].get_visible():
+                    self.__stack.set_visible_child(child[1])
+        self.emit("can-go-back-changed", self.can_go_back)
 
     def go_home(self):
         """
             Go back to first page
         """
-        if self.__stack.history.count > 0:
-            (view, sidebar_id) = self.__stack.history.pop(0)
-            if view is not None:
-                self.__stack.set_visible_child(view)
-            self.__stack.history.reset()
-            self.emit("can-go-back-changed", False)
+        view = self.__children[0][1]
+        self.__stack.set_visible_child(view)
+        self.__stack.history.reset()
+        self.emit("can-go-back-changed", False)
 
     def set_adaptive_stack(self, b):
         """
@@ -451,7 +460,10 @@ class AdaptiveWindow:
             True if can go back
             @return bool
         """
-        return self.__stack.history.count > 0
+        if self.is_adaptive:
+            return self.__stack.get_visible_child() != self.__children[0][1]
+        else:
+            return self.__stack.history.count > 0
 
     @property
     def is_adaptive(self):
@@ -500,7 +512,7 @@ class AdaptiveWindow:
                     p.insert_column(0)
                     p.attach(c, 0, 0, 1, 1)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-            self.emit("can-go-back-changed", self.can_go_back)
+        self.emit("can-go-back-changed", self.can_go_back)
 
     def __set_adaptive_stack(self, b):
         """

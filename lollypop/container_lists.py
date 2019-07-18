@@ -111,7 +111,7 @@ class ListsContainer:
         selected_ids = self._sidebar.selected_ids
         if not selected_ids:
             return
-        self._stack.history.reset()
+        self._stack.history.offload()
         visible = self._stack.get_visible_child()
         if visible is not None:
             visible.destroy_later()
@@ -168,8 +168,7 @@ class ListsContainer:
         """
         if App().settings.get_value("save-state"):
             self._stack.load_history()
-            if self._stack.history.count > 0:
-                App().window.emit("can-go-back-changed", True)
+            App().window.emit("can-go-back-changed", App().window.can_go_back)
         else:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:
