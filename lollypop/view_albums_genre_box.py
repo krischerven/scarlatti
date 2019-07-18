@@ -53,7 +53,8 @@ class AlbumsGenreBoxView(FlowBoxView):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        return ({"view_type": self._view_type}, self._sidebar_id, position)
+        view_type = self._view_type & ~self.view_type_mask
+        return ({"view_type": view_type}, self._sidebar_id, position)
 
 #######################
 # PROTECTED           #

@@ -64,6 +64,8 @@ class View(BaseView, Gtk.Grid):
         self._empty_message = _("No items to show")
         self._empty_icon_name = "emblem-music-symbolic"
 
+        if App().window.is_adaptive:
+            self._view_type |= self.view_type_mask
         if self._view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
             self._scrolled.connect("leave-notify-event",
@@ -164,6 +166,14 @@ class View(BaseView, Gtk.Grid):
         """
         return self.__destroyed
 
+    @property
+    def view_type_mask(self):
+        """
+            Get mask relative to adaptive mode
+            @return ViewType
+        """
+        return ViewType.SMALL
+
 #######################
 # PROTECTED           #
 #######################
@@ -183,7 +193,10 @@ class View(BaseView, Gtk.Grid):
         """
             Handle adaptive mode for views
         """
-        pass
+        if status:
+            self._view_type |= self.view_type_mask
+        else:
+            self._view_type &= ~self.view_type_mask
 
     def _on_album_updated(self, scanner, album_id, added):
         """

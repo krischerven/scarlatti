@@ -191,8 +191,6 @@ class ViewsContainer:
             @return View
         """
         view_type = ViewType.DND | ViewType.PLAYLISTS | ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.SMALL
         if len(playlist_ids) == 1 and\
                 App().playlists.get_smart(playlist_ids[0]):
             from lollypop.view_playlists import SmartPlaylistsView
@@ -210,8 +208,6 @@ class ViewsContainer:
                 view = PlaylistsView(playlist_ids, view_type)
         else:
             view_type = ViewType.SCROLLED
-            if App().window.is_adaptive:
-                view_type |= ViewType.MEDIUM
             from lollypop.view_playlists_manager import PlaylistsManagerView
             view = self._stack.search_history(PlaylistsManagerView,
                                               {"obj": None,
@@ -239,8 +235,6 @@ class ViewsContainer:
         """
         from lollypop.view_artists_rounded import RoundedArtistsView
         view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = self._stack.search_history(RoundedArtistsView,
                                           {"view_type": view_type})
         if view is None:
@@ -256,8 +250,8 @@ class ViewsContainer:
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
+        view_type = ViewType.SCROLLED
         if App().window.is_adaptive:
-            view_type = ViewType.MEDIUM | ViewType.SCROLLED
             from lollypop.view_artist_small import ArtistViewSmall
             view = self._stack.search_history(ArtistViewSmall,
                                               {"genre_ids": genre_ids,
@@ -267,7 +261,7 @@ class ViewsContainer:
                 view = ArtistViewSmall(genre_ids, artist_ids, view_type)
                 view.populate()
         else:
-            view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED
+            view_type |= ViewType.TWO_COLUMNS
             from lollypop.view_artist import ArtistView
             view = self._stack.search_history(ArtistView,
                                               {"genre_ids": genre_ids,
@@ -285,8 +279,6 @@ class ViewsContainer:
         """
         from lollypop.view_albums_decade_box import AlbumsDecadeBoxView
         view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = self._stack.search_history(AlbumsDecadeBoxView,
                                           {"view_type": view_type})
         if view is None:
@@ -302,8 +294,6 @@ class ViewsContainer:
         """
         from lollypop.view_album import AlbumView
         view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.SMALL
         view = self._stack.search_history(AlbumView,
                                           {"album": album,
                                            "view_type": view_type})
@@ -318,8 +308,6 @@ class ViewsContainer:
         """
         from lollypop.view_albums_genre_box import AlbumsGenreBoxView
         view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = self._stack.search_history(AlbumsGenreBoxView,
                                           {"view_type": view_type})
         if view is None:
@@ -335,8 +323,6 @@ class ViewsContainer:
         """
         from lollypop.view_albums_box import AlbumsYearsBoxView
         view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = self._stack.search_history(AlbumsYearsBoxView,
                                           {"genre_ids": [Type.YEARS],
                                            "artist_ids": years,
@@ -354,8 +340,6 @@ class ViewsContainer:
         """
         from lollypop.view_albums_box import AlbumsBoxView
         view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = self._stack.search_history(AlbumsBoxView,
                                           {"genre_ids": genre_ids,
                                            "artist_ids": artist_ids,
@@ -372,8 +356,6 @@ class ViewsContainer:
         """
         from lollypop.view_albums_box_load import AlbumsDeviceBoxView
         view_type = ViewType.SCROLLED | ViewType.NO_HISTORY
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = AlbumsDeviceBoxView(index, view_type)
         view.populate()
         return view
@@ -385,8 +367,6 @@ class ViewsContainer:
         """
         from lollypop.view_radios import RadiosView
         view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            view_type |= ViewType.MEDIUM
         view = self._stack.search_history(RadiosView,
                                           {"view_type": view_type})
         if view is None:

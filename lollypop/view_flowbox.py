@@ -85,6 +85,14 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
         """
         return self._box.get_children()
 
+    @property
+    def view_type_mask(self):
+        """
+            Get mask for adaptive mode
+            @return ViewType
+        """
+        return ViewType.MEDIUM
+
 #######################
 # PROTECTED           #
 #######################
@@ -164,13 +172,10 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
                 GLib.idle_add(update_artwork, children)
 
         self.stop(True)
-        if status:
-            view_type = self._view_type | ViewType.MEDIUM
-        else:
-            view_type = self._view_type & ~ViewType.MEDIUM
+        LazyLoadingView._on_adaptive_changed(self, window, status)
         children = self._box.get_children()
         for child in children:
-            child.set_view_type(view_type)
+            child.set_view_type(self._view_type)
             child.disable_artwork()
             self._lazy_queue.append(child)
         self.lazy_loading()

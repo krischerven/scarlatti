@@ -204,8 +204,9 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
+        view_type = self._view_type & ~self.view_type_mask
         return ({"playlist_ids": self._playlist_ids,
-                 "view_type": self._view_type}, self._sidebar_id, position)
+                 "view_type": view_type}, self._sidebar_id, position)
 
     @property
     def filtered(self):
@@ -339,11 +340,8 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param window as Window
             @param status as bool
         """
-        if status:
-            view_type = self._view_type | ViewType.SMALL
-        else:
-            view_type = self._view_type & ~ViewType.SMALL
-        self.set_view_type(view_type)
+        LazyLoadingView._on_adaptive_changed(self, window, status)
+        self.set_view_type(self._view_type)
 
 #######################
 # PRIVATE             #

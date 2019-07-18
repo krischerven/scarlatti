@@ -99,8 +99,9 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
+        view_type = self._view_type & ~self.view_type_mask
         return ({"album": self._album,
-                 "view_type": self._view_type},
+                 "view_type": view_type},
                 self._sidebar_id,
                 position)
 
@@ -231,11 +232,8 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @param window as Window
             @param status as bool
         """
-        if status:
-            view_type = self._view_type | ViewType.SMALL
-        else:
-            view_type = self._view_type & ~ViewType.SMALL
-        self.__banner.set_view_type(view_type)
+        LazyLoadingView._on_adaptive_changed(self, window, status)
+        self.__banner.set_view_type(self._view_type)
         if status:
             self._responsive_widget.set_margin_top(self.__banner.height)
         else:

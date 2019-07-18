@@ -52,7 +52,8 @@ class TracksView(SizeAllocationHelper):
         """
         if App().settings.get_value("force-single-column"):
             view_type &= ~ViewType.TWO_COLUMNS
-        self._view_type = view_type
+        if not hasattr(self, "_view_type"):
+            self._view_type = view_type
         self.__position = position
         self.__discs = []
         self._responsive_widget = None
