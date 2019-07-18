@@ -111,6 +111,10 @@ class ListsContainer:
         selected_ids = self._sidebar.selected_ids
         if not selected_ids:
             return
+        self._stack.history.reset()
+        visible = self._stack.get_visible_child()
+        if visible is not None:
+            visible.destroy_later()
         # Update lists
         if selected_ids[0] == Type.ARTISTS_LIST:
             self.__show_artists_list(self._list_view)
@@ -189,9 +193,6 @@ class ListsContainer:
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
-        if not App().window.is_adaptive:
-            self._stack.history.reset()
-            App().window.emit("can-go-back-changed", False)
 
     def __on_pass_focus(self, selection_list):
         """

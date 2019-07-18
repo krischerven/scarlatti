@@ -68,10 +68,10 @@ class AdaptiveHistory:
             @param view as View
         """
         # Do not add unwanted view to history
-        # Exception for undestroyable view (sidebar + list view)
         if view.args is not None:
-            self.__items.append((None, view.__class__, view.args))
-            view.destroy_later()
+            view.connect("destroy", self.__on_child_destroy)
+            self.__items.append((view, view.__class__, view.args))
+        # Exception for undestroyable view (sidebar + list view)
         elif not view.should_destroy:
             self.__items.append((view, None, None))
 
@@ -108,7 +108,6 @@ class AdaptiveHistory:
             if view is not None:
                 view.stop()
                 view.destroy_later()
-        self.__items = []
 
     def search(self, view_class, view_args):
         """
@@ -212,6 +211,20 @@ class AdaptiveHistory:
                 _class, e)
         return (None, None)
 
+############
+# PRIVATE  #
+############
+    def __on_child_destroy(self, view):
+        """
+            Remove from history
+            @param view as View
+        """
+        for i in reversed(range(0, len(self.__items))):
+            (_view, _class, args) = self.__items[i]
+            if _view == view:
+                self.__items[i] = (None, _class, args)
+                break
+
 
 class AdaptiveStack(Gtk.Stack):
     """
@@ -234,21 +247,21 @@ class AdaptiveStack(Gtk.Stack):
         self.set_vexpand(True)
         self.__history = AdaptiveHistory()
 
-    def add(self, widget):
+    def add(self, view):
         """
-            Add widget to stack
-            @param widget as Gtk.Widget
+            Add view to stack
+            @param view as View
         """
-        if widget not in self.get_children():
-            Gtk.Stack.add(self, widget)
+        if view not in self.get_children():
+            Gtk.Stack.add(self, view)
 
-    def set_visible_child(self, widget):
+    def set_visible_child(self, view):
         """
             Set visible child in stack
-            @param widget as Gtk.Widget
+            @param view as View
         """
         visible_child = self.get_visible_child()
-        if visible_child == widget:
+        if visible_child == view:
             return
         if visible_child is not None:
             self.__history.add_view(visible_child)
@@ -256,7 +269,7 @@ class AdaptiveStack(Gtk.Stack):
             visible_child.stop()
             if visible_child.args is None:
                 visible_child.destroy_later()
-        Gtk.Stack.set_visible_child(self, widget)
+        Gtk.Stack.set_visible_child(self, view)
 
     def search_history(self, view_class, view_args):
         """
@@ -297,14 +310,14 @@ class AdaptiveStack(Gtk.Stack):
                     visible_child.stop()
                     visible_child.destroy_later()
 
-    def remove(self, widget):
+    def remove(self, view):
         """
             Remove from stack and history
-            @param widget as Gtk.Widget
+            @param view as View
         """
-        if self.__history.exists(widget):
-            self.__history.remove(widget)
-        Gtk.Stack.remove(self, widget)
+        if self.__history.exists(view):
+            self.__history.remove(view)
+        Gtk.Stack.remove(self, view)
 
     def save_history(self):
         """
@@ -336,17 +349,6 @@ class AdaptiveStack(Gtk.Stack):
             @return [AdaptiveView]
         """
         return self.__history
-
-############
-# PRIVATE  #
-############
-    def __on_child_destroy(self, widget):
-        """
-            Remove from history
-            @param widget as Gtk.Widget
-        """
-        if self.__history.exists(widget):
-            self.__history.remove(widget)
 
 
 class AdaptiveWindow:
@@ -391,7 +393,6 @@ class AdaptiveWindow:
             @param child as Gtk.Widget
         """
         self.__children.append((parent, child))
-        child.connect("destroy", self.__on_child_destroy)
 
     def go_back(self):
         """
@@ -516,17 +517,6 @@ class AdaptiveWindow:
         """
         if self.can_go_back:
             self.emit("can-go-back-changed", True)
-
-    def __on_child_destroy(self, widget):
-        """
-            Remove widget from paned
-            @param widget as Gtk.Widget
-        """
-        # FIXME needed?
-        for (p, c) in self.__children:
-            if c == widget:
-                self.__children.remove((p, c))
-                break
 
     def __on_configure_event(self, widget, event):
         """
