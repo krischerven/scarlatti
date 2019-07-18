@@ -132,8 +132,12 @@ class SelectionListRow(Gtk.ListBoxRow):
             Show label
             @param mask as SelectionListMask
         """
-        # Do nothing if widget not populated or mask does not changed
-        if self.__artwork is None or mask == self.__mask:
+        # Do nothing if widget not populated
+        if self.__artwork is None:
+            self.__mask = mask
+            return
+        # Do not update widget if mask does not changed
+        elif mask == self.__mask:
             return
         # If no mask, use current one
         elif mask is None:
@@ -141,6 +145,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         # Else use new mask
         else:
             self.__mask = mask
+
         if mask & SelectionListMask.LABEL:
             self.__artwork.set_property("halign", Gtk.Align.FILL)
             self.__artwork.set_hexpand(False)
@@ -519,9 +524,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             @param window as Window
             @param status as bool
         """
-        mask = SelectionListMask.LABEL if status else self.mask
+        if status:
+            self.__base_mask |= SelectionListMask.LABEL
+        else:
+            self.__base_mask &= ~SelectionListMask.LABEL
         for row in self._box.get_children():
-            row.show_label(mask)
+            row.show_label(self.mask)
         self._scrolled.set_vexpand(True)
         self._scrolled.set_hexpand(status)
         if self.mask & SelectionListMask.SIDEBAR:
