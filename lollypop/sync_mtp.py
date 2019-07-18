@@ -321,7 +321,7 @@ class MtpSync(GObject.Object):
 ############
 # PRIVATE  #
 ############
-    def __get_album_on_device_uri(self, track):
+    def __get_album_name(self, track):
         """
             Get on device URI for album
             @param track as Track
@@ -346,8 +346,7 @@ class MtpSync(GObject.Object):
         for track in tracks:
             f = Gio.File.new_for_uri(track.uri)
             album_device_uri = "%s/%s" % (self.__uri,
-                                          self.__get_album_on_device_uri(
-                                            track))
+                                          self.__get_album_name(track))
             album_local_uri = f.get_parent().get_uri()
             src_uri = "%s/%s" % (album_local_uri,
                                  GLib.uri_escape_string(f.get_basename(),
@@ -390,8 +389,9 @@ class MtpSync(GObject.Object):
                         break
                     f = Gio.File.new_for_uri(track.uri)
                     filename = f.get_basename()
-                    album_uri = self.__get_album_on_device_uri(track)
-                    uri = "%s/%s" % (album_uri, filename)
+                    print(filename, escape(filename))
+                    album_uri = self.__get_album_name(track)
+                    uri = "%s/%s" % (album_uri, escape(filename))
                     (convertion_needed,
                      uri) = self.__is_convertion_needed(track.uri, uri)
                     content += "%s\n" % uri
