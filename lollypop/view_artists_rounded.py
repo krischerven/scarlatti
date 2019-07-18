@@ -193,3 +193,7 @@ class RoundedArtistsPreview(RoundedArtistsView):
             return ids
 
         App().task_helper.run(load, callback=(on_load,))
+
+    @property
+    def args(self):
+        return None
