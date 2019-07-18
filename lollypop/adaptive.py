@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import App, LOLLYPOP_DATA_PATH, Type
+from lollypop.define import App, LOLLYPOP_DATA_PATH
 
 
 class AdaptiveView:
@@ -85,7 +85,7 @@ class AdaptiveHistory:
         (view, _class, args) = self.__items.pop(index)
         # Undestroyable view (sidebar, list_view)
         if view is not None:
-            return (view, 0)
+            return (view, args[1])
         else:
             return self.__get_view_from_class(view, _class, args)
 
@@ -274,6 +274,7 @@ class AdaptiveStack(Gtk.Stack):
             added = self.__history.add_view(visible_child)
             if added:
                 self.emit("new-child-in-history")
+            else:
                 visible_child.destroy_later()
         Gtk.Stack.set_visible_child(self, view)
 
@@ -308,9 +309,6 @@ class AdaptiveStack(Gtk.Stack):
             if view is not None:
                 if view not in self.get_children():
                     self.add(view)
-                activate = sidebar_id in [Type.ARTISTS_LIST, Type.GENRES_LIST]
-                App().window.container.sidebar.select_ids([sidebar_id],
-                                                          activate)
                 Gtk.Stack.set_visible_child(self, view)
                 if visible_child is not None:
                     visible_child.stop()
@@ -404,12 +402,12 @@ class AdaptiveWindow:
         """
             Go back in container stack
         """
-        if self.__stack.history.count > 0:
-            self.__stack.go_back()
-        else:
+        if self.is_adaptive:
             for child in reversed(self.__children):
                 if child[1].get_visible():
                     self.__stack.set_visible_child(child[1])
+        else:
+            self.__stack.go_back()
         self.emit("can-go-back-changed", self.can_go_back)
 
     def go_home(self):
