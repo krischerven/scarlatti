@@ -60,25 +60,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         self.__name = name
         self.__sortname = sortname
         self.__mask = mask
-
-        if rowid == Type.SEPARATOR:
-            height = -1
-            self.set_sensitive(False)
-        elif mask & SelectionListMask.ARTISTS and\
-                self.__rowid >= 0 and\
-                App().settings.get_value("artist-artwork"):
-            self.get_style_context().add_class("row")
-            if height < ArtSize.ARTIST_SMALL:
-                height = ArtSize.ARTIST_SMALL
-            # Padding => application.css
-            height += 12
-        elif mask & SelectionListMask.SIDEBAR:
-            self.get_style_context().add_class("row-big")
-            # Padding => application.css
-            height += 30
-        else:
-            self.get_style_context().add_class("row")
-        self.set_size_request(-1, height)
+        self.set_style(height)
 
     def populate(self):
         """
@@ -98,15 +80,14 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__grid.add(self.__artwork)
             self.__label = Gtk.Label.new()
             self.__label.set_markup(GLib.markup_escape_text(self.__name))
-            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
             self.__grid.add(self.__label)
-            self.update_internals()
             if self.__mask & SelectionListMask.ARTISTS:
                 self.__grid.set_margin_end(20)
             self.add(self.__grid)
             self.set_artwork()
+            self.show_label()
 
     def set_label(self, string):
         """
@@ -146,25 +127,57 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork.hide()
             self.emit("populated")
 
-    def update_internals(self):
+    def show_label(self, mask=None):
         """
-            Update label visiblity
+            Show label
+            @param mask as SelectionListMask
         """
-        if self.__artwork is None:
+        # Do nothing if widget not populated or mask does not changed
+        if self.__artwork is None or mask == self.__mask:
             return
-        if self.__mask & SelectionListMask.SIDEBAR and\
-                not App().window.is_adaptive:
-            self.__artwork.set_property("halign", Gtk.Align.CENTER)
-            self.__artwork.set_hexpand(True)
-            self.__label.hide()
-            self.set_tooltip_text(self.__label.get_text())
-            self.set_has_tooltip(True)
+        # If no mask, use current one
+        elif mask is None:
+            mask = self.__mask
+        # Else use new mask
         else:
+            self.__mask = mask
+        if mask & SelectionListMask.LABEL:
             self.__artwork.set_property("halign", Gtk.Align.FILL)
             self.__artwork.set_hexpand(False)
             self.__label.show()
             self.set_tooltip_text("")
             self.set_has_tooltip(False)
+            self.__label.set_ellipsize(Pango.EllipsizeMode.NONE)
+        else:
+            self.__artwork.set_property("halign", Gtk.Align.CENTER)
+            self.__artwork.set_hexpand(True)
+            self.__label.hide()
+            self.set_tooltip_text(self.__label.get_text())
+            self.set_has_tooltip(True)
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+
+    def set_style(self, height):
+        """
+            Set internal sizing
+        """
+        if self.__rowid == Type.SEPARATOR:
+            height = -1
+            self.set_sensitive(False)
+        elif self.__mask & SelectionListMask.ARTISTS and\
+                self.__rowid >= 0 and\
+                App().settings.get_value("artist-artwork"):
+            self.get_style_context().add_class("row")
+            if height < ArtSize.ARTIST_SMALL:
+                height = ArtSize.ARTIST_SMALL
+            # Padding => application.css
+            height += 12
+        elif self.__mask & SelectionListMask.SIDEBAR:
+            self.get_style_context().add_class("row-big")
+            # Padding => application.css
+            height += 30
+        else:
+            self.get_style_context().add_class("row")
+        self.set_size_request(-1, height)
 
     @property
     def is_populated(self):
@@ -236,8 +249,8 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         LazyLoadingView.__init__(self, ViewType.SCROLLED)
         FilteringHelper.__init__(self)
         self.__base_mask = base_mask
+        self.__mask = SelectionListMask.NONE
         self.__sort = False
-        self.__mask = 0
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
         self.__gesture = Gtk.GestureLongPress.new(self._box)
@@ -250,7 +263,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self._box.show()
         self._viewport.add(self._box)
-
         if self.__base_mask & SelectionListMask.LIST_VIEW:
             overlay = Gtk.Overlay.new()
             overlay.set_hexpand(True)
@@ -261,7 +273,10 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                                            self._scrolled)
             overlay.add_overlay(self.__fastscroll)
             self.add(overlay)
+            self.__base_mask |= SelectionListMask.LABEL
         else:
+            self._scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                      Gtk.PolicyType.AUTOMATIC)
             self.add(self._scrolled)
             self.get_style_context().add_class("sidebar")
             button = Gtk.Button.new_from_icon_name(
@@ -270,9 +285,13 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             button.connect("clicked", lambda x: self.__popup_menu(0, 0, x))
             button.show()
             self.add(button)
+            App().settings.connect("changed::show-sidebar-labels",
+                                   self.__on_show_sidebar_labels_changed)
+            if App().settings.get_value("show-sidebar-labels"):
+                self.__base_mask |= SelectionListMask.LABEL
         if self.__base_mask & SelectionListMask.LIST_VIEW:
             App().settings.connect("changed::artist-artwork",
-                                   self.__update_children_artwork)
+                                   self.__on_artist_artwork_changed)
             App().art.connect("artist-artwork-changed",
                               self.__on_artist_artwork_changed)
 
@@ -281,14 +300,14 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             Mark list as artists list
             @param mask as SelectionListMask
         """
-        self.__mask = self.__base_mask | mask
+        self.__mask = mask
 
     def add_mask(self, mask):
         """
             Mark list as artists list
             @param mask as SelectionListMask
         """
-        self.__mask = self.__base_mask | mask
+        self.__mask |= mask
 
     def populate(self, values):
         """
@@ -340,7 +359,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 self.__fastscroll.clear()
             row = self.__add_value(object_id, name, name)
             row.populate()
-            if self.__mask & SelectionListMask.ARTISTS:
+            if self.mask & SelectionListMask.ARTISTS:
                 self.__fastscroll.populate()
 
     def update_values(self, values):
@@ -348,7 +367,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             Update view with values
             @param [(int, str, optional str)]
         """
-        if self.__mask & SelectionListMask.ARTISTS:
+        if self.mask & SelectionListMask.ARTISTS:
             self.__fastscroll.clear()
         # Remove not found items
         value_ids = set([v[0] for v in values])
@@ -361,7 +380,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             if not value[0] in item_ids:
                 row = self.__add_value(value[0], value[1], value[2])
                 row.populate()
-        if self.__mask & SelectionListMask.ARTISTS:
+        if self.mask & SelectionListMask.ARTISTS:
             self.__fastscroll.populate()
 
     def select_ids(self, ids=[], activate=True):
@@ -430,14 +449,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 row.activate()
             style_context.remove_class("typeahead")
 
-    def __update_children_artwork(self):
-        """
-            Update rows artwork
-        """
-        for row in self._box.get_children():
-            if self.__mask & SelectionListMask.ARTISTS:
-                row.set_artwork()
-
     @property
     def filtered(self):
         """
@@ -472,7 +483,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             Get selection list type
             @return bit mask
         """
-        return self.__mask
+        return self.__mask | self.__base_mask
 
     @property
     def count(self):
@@ -508,11 +519,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             @param window as Window
             @param status as bool
         """
+        mask = SelectionListMask.LABEL if status else self.mask
         for row in self._box.get_children():
-            row.update_internals()
+            row.show_label(mask)
         self._scrolled.set_vexpand(True)
         self._scrolled.set_hexpand(status)
-        if self.__mask & SelectionListMask.SIDEBAR:
+        if self.mask & SelectionListMask.SIDEBAR:
             if status:
                 self.add_value((Type.SEARCH, _("Search"), _("Search")))
                 self.add_value((Type.CURRENT, _("Current playlist"),
@@ -543,7 +555,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             self._lazy_queue.append(row)
             GLib.idle_add(self.__add_values, values)
         else:
-            if self.__mask & SelectionListMask.ARTISTS:
+            if self.mask & SelectionListMask.ARTISTS:
                 self.__fastscroll.populate()
             self.__sort = True
             self.emit("populated")
@@ -561,11 +573,11 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             @param sortname as str
             @return row as SelectionListRow
         """
-        if rowid > 0 and self.__mask & SelectionListMask.ARTISTS:
+        if rowid > 0 and self.mask & SelectionListMask.ARTISTS:
             used = sortname if sortname else name
             self.__fastscroll.add_char(used[0])
         row = SelectionListRow(rowid, name, sortname,
-                               self.__mask, self.__height)
+                               self.mask, self.__height)
         row.show()
         self._box.add(row)
         return row
@@ -592,7 +604,7 @@ class SelectionList(LazyLoadingView, FilteringHelper):
             return False
         # String comparaison for non static
         else:
-            if self.__mask & SelectionListMask.ARTISTS:
+            if self.mask & SelectionListMask.ARTISTS:
                 a = row_a.sortname
                 b = row_b.sortname
             else:
@@ -678,14 +690,32 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
             listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
 
-    def __on_artist_artwork_changed(self, art, artist):
+    def __on_show_sidebar_labels_changed(self, settings, value):
         """
-            Update row
-            @param art as Art
-            @param artist as str
+            Update sidebar internals
+            @param settings as Gio.Settings
+            @param value as str
         """
-        if self.__mask & SelectionListMask.ARTISTS:
+        show_label = App().settings.get_value(value)
+        if show_label:
+            self.__base_mask |= SelectionListMask.LABEL
+        else:
+            self.__base_mask &= ~SelectionListMask.LABEL
+        for row in self._box.get_children():
+            row.show_label(self.mask)
+
+    def __on_artist_artwork_changed(self, object, value):
+        """
+            Update row artwork
+            @param object as GObject.Object
+            @param value as str
+        """
+        artist = value if object == App().art else None
+        if self.mask & SelectionListMask.ARTISTS:
             for row in self._box.get_children():
-                if row.id >= 0 and row.name == artist:
+                if artist is None:
+                    row.set_style(self.__height)
+                    row.set_artwork()
+                elif row.name == artist:
                     row.set_artwork()
                     break

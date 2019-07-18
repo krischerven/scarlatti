@@ -127,6 +127,7 @@ class SelectionListMask:
     GENRES = 1 << 4
     PLAYLISTS = 1 << 5
     COMPILATIONS = 1 << 6
+    LABEL = 1 << 7
 
 
 class Shuffle:
