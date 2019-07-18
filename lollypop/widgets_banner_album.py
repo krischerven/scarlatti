@@ -259,7 +259,7 @@ class AlbumBannerWidget(BannerWidget):
                             self.__album,
                             # +100 to prevent resize lag
                             self.get_allocated_width() + 100,
-                            self.default_height,
+                            self.height,
                             self._artwork.get_scale_factor(),
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
