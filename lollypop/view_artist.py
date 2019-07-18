@@ -62,18 +62,12 @@ class ArtistView(ArtistAlbumsView, ArtistViewCommon):
             ArtistAlbumsView.populate(self, items)
 
         def load():
-            if self._genre_ids and self._genre_ids[0] == Type.ALL:
-                if App().settings.get_value("show-performers"):
-                    items = App().tracks.get_album_ids(self._artist_ids, [])
-                else:
-                    items = App().albums.get_ids(self._artist_ids, [])
+            if App().settings.get_value("show-performers"):
+                items = App().tracks.get_album_ids(self._artist_ids,
+                                                   self._genre_ids)
             else:
-                if App().settings.get_value("show-performers"):
-                    items = App().tracks.get_album_ids(self._artist_ids,
-                                                       self._genre_ids)
-                else:
-                    items = App().albums.get_ids(self._artist_ids,
-                                                 self._genre_ids)
+                items = App().albums.get_ids(self._artist_ids,
+                                             self._genre_ids)
             return [Album(album_id, self._genre_ids, self._artist_ids)
                     for album_id in items]
 
