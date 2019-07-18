@@ -284,12 +284,13 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                                       Gtk.PolicyType.AUTOMATIC)
             self.add(self._scrolled)
             self.get_style_context().add_class("sidebar")
-            button = Gtk.Button.new_from_icon_name(
+            self.__menu_button = Gtk.Button.new_from_icon_name(
                 "view-more-horizontal-symbolic", Gtk.IconSize.BUTTON)
-            button.get_style_context().add_class("no-border")
-            button.connect("clicked", lambda x: self.__popup_menu(0, 0, x))
-            button.show()
-            self.add(button)
+            self.__menu_button.get_style_context().add_class("no-border")
+            self.__menu_button.connect("clicked",
+                                       lambda x: self.__popup_menu(0, 0, x))
+            self.__menu_button.show()
+            self.add(self.__menu_button)
             App().settings.connect("changed::show-sidebar-labels",
                                    self.__on_show_sidebar_labels_changed)
             if App().settings.get_value("show-sidebar-labels"):
@@ -534,10 +535,12 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         self._scrolled.set_hexpand(status)
         if self.mask & SelectionListMask.SIDEBAR:
             if status:
+                self.__menu_button.hide()
                 self.add_value((Type.SEARCH, _("Search"), _("Search")))
                 self.add_value((Type.CURRENT, _("Current playlist"),
                                 _("Current playlist")))
             else:
+                self.__menu_button.show()
                 self.remove_value(Type.CURRENT)
                 self.remove_value(Type.SEARCH)
 
