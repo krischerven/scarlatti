@@ -169,7 +169,7 @@ class Type:
     NEVER = -6
     PLAYLISTS = -7
     RADIOS = -8
-    SEARCH = -9
+    # FREE = -9
     INFO = -10
     YEARS = -11
     ARTISTS = -12
@@ -188,11 +188,12 @@ class Type:
     SMART = -24
     EQUALIZER = -25
     ALL = -100
-    CURRENT = -101
     DEVICE_ALBUMS = -1000
     DEVICE_PLAYLISTS = -1001
     SEPARATOR = -2000
     COMPILATIONS = -2001
+    CURRENT = -2002
+    SEARCH = -2003
 
 
 LATIN1_ENCODING = b"\x00"
