@@ -212,7 +212,7 @@ class AdaptiveStack(Gtk.Stack):
     """
 
     __gsignals__ = {
-        "new-child-in-history": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "history-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self):
@@ -247,7 +247,7 @@ class AdaptiveStack(Gtk.Stack):
             visible_child.stop()
             added = self.__history.add_view(visible_child)
             if added:
-                self.emit("new-child-in-history")
+                self.emit("history-changed")
             else:
                 visible_child.destroy_later()
         Gtk.Stack.set_visible_child(self, view)
@@ -341,8 +341,8 @@ class AdaptiveWindow:
             @param stack as AdaptiveStack
         """
         self.__stack = stack
-        self.__stack.connect("new-child-in-history",
-                             self.__on_new_child_in_history)
+        self.__stack.connect("history-changed",
+                             self.__on_history_changed)
 
     def add_adaptive_child(self, parent, child):
         """
@@ -481,9 +481,10 @@ class AdaptiveWindow:
         self.__update_layout(b)
         self.emit("adaptive-changed", b)
 
-    def __on_new_child_in_history(self, stack):
+    def __on_history_changed(self, stack):
         """
             Emit can-go-back-changed if can go back
+            @param stack as Gtk.Stack
         """
         if self.can_go_back:
             self.emit("can-go-back-changed", True)
