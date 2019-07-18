@@ -133,8 +133,7 @@ class AdaptiveHistory:
         """
         try:
             no_widget_history = []
-            for (_view, _class, args) in self.__items[
-                                                   -self.__MAX_HISTORY_ITEMS:]:
+            for (_view, _class, args) in self.__items[-50:]:
                 no_widget_history.append((None, _class, args))
             with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
                 dump(no_widget_history, f)
