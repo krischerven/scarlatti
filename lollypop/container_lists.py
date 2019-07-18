@@ -114,9 +114,6 @@ class ListsContainer:
                                 visible.sidebar_id != Type.RANDOMS and
                                 visible.sidebar_id in selected_ids):
             return
-        self._stack.history.offload()
-        if visible is not None:
-            visible.destroy_later()
         # Update lists
         if selected_ids[0] == Type.ARTISTS_LIST:
             self.__show_artists_list(self._list_view)

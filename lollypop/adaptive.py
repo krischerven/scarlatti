@@ -55,6 +55,8 @@ class AdaptiveHistory:
         Offload old items and reload them on the fly
     """
 
+    __MAX_HISTORY_ITEMS = 10
+
     def __init__(self):
         """
             Init history
@@ -67,12 +69,18 @@ class AdaptiveHistory:
             @param view as View
             @return True if view has been added
         """
+        added = False
         # Do not add unwanted view to history
         if view.args is not None:
             view.connect("destroy", self.__on_child_destroy)
             self.__items.append((view, view.__class__, view.args))
-            return True
-        return False
+            added = True
+        # Offload history if too many items
+        if self.count >= self.__MAX_HISTORY_ITEMS:
+            (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
+            if view is not None:
+                view.destroy()
+        return added
 
     def pop(self, index=-1):
         """
@@ -99,20 +107,14 @@ class AdaptiveHistory:
                 self.__items.remove((_view, _class, args))
                 break
 
-    def offload(self):
+    def reset(self):
         """
-            Offload history from memory
+            Reset history
         """
         for (view, _class, args) in self.__items:
             if view is not None:
                 view.stop()
                 view.destroy_later()
-
-    def reset(self):
-        """
-            Reset history
-        """
-        self.offload()
         self.__items = []
 
     def save(self):
