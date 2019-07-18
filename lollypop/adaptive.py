@@ -357,7 +357,7 @@ class AdaptiveWindow:
         """
         if self.__stack.history.count > 0:
             self.__stack.go_back()
-        else:
+        elif self.is_adaptive:
             visible_child = self.__stack.get_visible_child()
             for child in reversed(self.__children):
                 if child[1] == visible_child:
