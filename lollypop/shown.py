@@ -66,6 +66,7 @@ class ShownLists:
             (string, id_mask) = ShownLists.IDS[key]
             if mask & id_mask and (get_all or key in wanted):
                 lists.append((key, string, ""))
+        lists.sort(key=lambda tup: tup[0], reverse=True)
         return lists
 
 
@@ -92,4 +93,5 @@ class ShownPlaylists(ShownLists):
             string = ShownPlaylists.IDS[key]
             if get_all or key in wanted:
                 lists.append((key, string, ""))
+        lists.sort(key=lambda tup: tup[0], reverse=True)
         return lists
