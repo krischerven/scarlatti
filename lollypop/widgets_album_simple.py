@@ -74,8 +74,8 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             eventbox = Gtk.EventBox()
             eventbox.add(self.__label)
             eventbox.connect("realize", on_realize)
-            eventbox.connect("button-press-event",
-                             self.__on_artist_button_press)
+            eventbox.connect("button-release-event",
+                             self.__on_artist_button_release)
             eventbox.show()
             self.__widget.add(grid)
             self._overlay = Gtk.Overlay.new()
@@ -224,7 +224,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         self.show_all()
         self.emit("populated")
 
-    def __on_artist_button_press(self, eventbox, event):
+    def __on_artist_button_release(self, eventbox, event):
         """
             Go to artist page
             @param eventbox as Gtk.EventBox
