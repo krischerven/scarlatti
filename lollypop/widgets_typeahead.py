@@ -119,12 +119,12 @@ class TypeAheadWidget(Gtk.Revealer):
             @return Gtk.Widget
         """
         if App().window.is_adaptive:
-            return App().window.container.view
+            return App().window.container.stack
         else:
             if self.__current_focused_view is not None:
                 return self.__current_focused_view
             else:
-                return App().window.container.view
+                return App().window.container.stack
 
     def __on_map(self, widget):
         """

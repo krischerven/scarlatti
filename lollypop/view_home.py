@@ -14,12 +14,13 @@ from gi.repository import Gtk
 
 from lollypop.view import View
 from lollypop.define import ViewType
+from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
 from lollypop.view_artists_rounded import RoundedArtistsRandomView
 
 
-class HomeView(View):
+class HomeView(View, FilteringHelper):
     """
         View showing information about use collection
     """
@@ -30,6 +31,7 @@ class HomeView(View):
             @param view_type as ViewType
         """
         View.__init__(self, view_type)
+        FilteringHelper.__init__(self)
         self.__grid = Gtk.Grid()
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
@@ -52,6 +54,37 @@ class HomeView(View):
             view.populate()
             view.show()
             self.__grid.add(view)
+
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        for child in reversed(self.__grid.get_children()):
+            child._box.unselect_all()
+        for row in self.filtered:
+            style_context = row.get_style_context()
+            if style_context.has_class("typeahead"):
+                row.activate()
+            style_context.remove_class("typeahead")
+
+    @property
+    def filtered(self):
+        """
+            Get filtered widgets
+            @return [Gtk.Widget]
+        """
+        children = []
+        for child in reversed(self.__grid.get_children()):
+            children += child.children
+        return children
+
+    @property
+    def scroll_relative_to(self):
+        """
+            Relative to scrolled widget
+            @return Gtk.Widget
+        """
+        return self
 
     @property
     def args(self):
