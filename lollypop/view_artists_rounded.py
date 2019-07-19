@@ -171,9 +171,8 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
-        style_context = self._label.get_style_context()
-        style_context.add_class("text-xx-large")
-        style_context.add_class("dim-label")
+        self._label.get_style_context().add_class("dim-label")
+        self.__update_label(App().window.is_adaptive)
         self._label.set_hexpand(True)
         self._label.set_property("halign", Gtk.Align.START)
         self._backward_button = Gtk.Button.new_from_icon_name(
@@ -214,3 +213,39 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
     @property
     def args(self):
         return None
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update label
+            @param window as Window
+            @param status as bool
+        """
+        RoundedArtistsView._on_adaptive_changed(self, window, status)
+        self.__update_label(status)
+
+    def _on_populated(self, widget, lazy_loading_id):
+        """
+            Update button state
+            @param widget as Gtk.Widget
+            @parma lazy_loading_id as int
+        """
+        RoundedArtistsView._on_populated(self, widget, lazy_loading_id)
+        if self.is_populated:
+            self._update_buttons()
+
+#######################
+# PRIVATE             #
+#######################
+    def __update_label(self, is_adaptive):
+        """
+            Update label style based on current adaptive state
+            @param is_adaptive as bool
+        """
+        style_context = self._label.get_style_context()
+        if is_adaptive:
+            style_context.remove_class("text-x-large")
+        else:
+            style_context.add_class("text-x-large")

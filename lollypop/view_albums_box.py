@@ -330,6 +330,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
         self._label.set_hexpand(True)
         self._label.set_property("halign", Gtk.Align.START)
+        self._label.get_style_context().add_class("dim-label")
+        self.__update_label(App().window.is_adaptive)
         self._backward_button = Gtk.Button.new_from_icon_name(
                                                         "go-previous-symbolic",
                                                         Gtk.IconSize.BUTTON)
@@ -345,9 +347,6 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         header.add(self._forward_button)
         header.show_all()
         HorizontalScrollingHelper.__init__(self)
-        style_context = self._label.get_style_context()
-        style_context.add_class("text-xx-large")
-        style_context.add_class("dim-label")
         self.insert_row(0)
         self.attach(header, 0, 0, 1, 1)
         self.get_style_context().add_class("padding")
@@ -368,6 +367,15 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update label
+            @param window as Window
+            @param status as bool
+        """
+        AlbumsBoxView._on_adaptive_changed(self, window, status)
+        self.__update_label(status)
+
     def _on_populated(self, widget, lazy_loading_id):
         """
             Update button state
@@ -377,6 +385,20 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         AlbumsBoxView._on_populated(self, widget, lazy_loading_id)
         if self.is_populated:
             self._update_buttons()
+
+#######################
+# PRIVATE             #
+#######################
+    def __update_label(self, is_adaptive):
+        """
+            Update label style based on current adaptive state
+            @param is_adaptive as bool
+        """
+        style_context = self._label.get_style_context()
+        if is_adaptive:
+            style_context.remove_class("text-x-large")
+        else:
+            style_context.add_class("text-x-large")
 
 
 class AlbumsPopularsBoxView(AlbumsLineView):
