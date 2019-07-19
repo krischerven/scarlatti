@@ -15,7 +15,7 @@ from gi.repository import Gtk, Pango
 from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, MARGIN
 from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
@@ -188,10 +188,10 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         header.add(self._label)
         header.add(self._backward_button)
         header.add(self._forward_button)
+        header.set_margin_end(MARGIN)
         header.show_all()
         HorizontalScrollingHelper.__init__(self)
         self.attach(header, 0, 0, 1, 1)
-        self.get_style_context().add_class("padding")
         self._label.set_property("halign", Gtk.Align.START)
         self._box.set_property("halign", Gtk.Align.CENTER)
 

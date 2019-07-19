@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
@@ -345,11 +345,11 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         header.add(self._label)
         header.add(self._backward_button)
         header.add(self._forward_button)
+        header.set_margin_end(MARGIN)
         header.show_all()
         HorizontalScrollingHelper.__init__(self)
         self.insert_row(0)
         self.attach(header, 0, 0, 1, 1)
-        self.get_style_context().add_class("padding")
         self._box.set_property("halign", Gtk.Align.CENTER)
 
     def populate(self, albums):
