@@ -190,7 +190,7 @@ class RoundedArtistsRandomView(RoundedArtistsView):
             ids = App().artists.get_randoms(6)
             return ids
 
-        self._label.set_text(_("Why not listenting to?"))
+        self._label.set_text(_("Why not listening to?"))
         App().task_helper.run(load, callback=(on_load,))
 
     @property
