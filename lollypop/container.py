@@ -116,7 +116,14 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
             Reload current view
         """
-        pass
+        view = self._stack.get_visible_child()
+        if view is not None:
+            self._stack.history.add_view(view, True)
+            (view, sidebar_id) = self._stack.history.pop(-1)
+            if view is not None:
+                view.show()
+                self._stack.add(view)
+                Gtk.Stack.set_visible_child(self._stack, view)
 
     def go_home(self):
         """

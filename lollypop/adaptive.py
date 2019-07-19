@@ -63,23 +63,30 @@ class AdaptiveHistory:
         """
         self.__items = []
 
-    def add_view(self, view):
+    def add_view(self, view, force_offloading=False):
         """
             Add view to history
             @param view as View
+            @param force_offloading as bool
             @return True if view has been added
         """
         added = False
         # Do not add unwanted view to history
-        if view.args is not None:
-            self.__items.append((view, view.__class__, view.args))
-            added = True
-        # Offload history if too many items
-        if self.count >= self.__MAX_HISTORY_ITEMS:
-            (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
-            if view is not None:
+        args = view.args
+        if args is not None:
+            view_class = view.__class__
+            if force_offloading:
                 view.destroy()
-                self.__items[-self.__MAX_HISTORY_ITEMS] = (None, _class, args)
+                view = None
+            self.__items.append((view, view_class, args))
+            added = True
+            # Offload history if too many items
+            if self.count >= self.__MAX_HISTORY_ITEMS:
+                (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
+                if view is not None:
+                    view.destroy()
+                    self.__items[-self.__MAX_HISTORY_ITEMS] =\
+                        (None, _class, args)
         return added
 
     def pop(self, index=-1):
@@ -200,10 +207,6 @@ class AdaptiveHistory:
                 "AdaptiveHistory::__get_view_from_class(): %s, %s",
                 _class, e)
         return (None, None)
-
-############
-# PRIVATE  #
-############
 
 
 class AdaptiveStack(Gtk.Stack):
