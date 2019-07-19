@@ -156,9 +156,9 @@ class RoundedArtistsView(FlowBoxView):
                 child.set_artwork()
 
 
-class RoundedArtistsPreview(RoundedArtistsView):
+class RoundedArtistsRandomView(RoundedArtistsView):
     """
-        Show 6 artists in a FlowBox
+        Show 6 random artists in a FlowBox
     """
 
     def __init__(self):
@@ -168,13 +168,47 @@ class RoundedArtistsPreview(RoundedArtistsView):
         """
         RoundedArtistsView.__init__(self, ViewType.DEFAULT)
         self.insert_row(0)
-        self.set_row_spacing(5)
-        label = Gtk.Label.new(_("Some artists in your collection:"))
-        label.get_style_context().add_class("text-xx-large")
-        label.get_style_context().add_class("dim-label")
-        label.set_vexpand(True)
-        label.show()
-        self.attach(label, 0, 0, 1, 1)
+        self.set_row_spacing(10)
+        self._label = Gtk.Label.new()
+        style_context = self._label.get_style_context()
+        style_context.add_class("text-xx-large")
+        style_context.add_class("dim-label")
+        self._label.show()
+        self.attach(self._label, 0, 0, 1, 1)
+        self.get_style_context().add_class("padding")
+        self._label.set_property("halign", Gtk.Align.START)
+        self._box.set_property("halign", Gtk.Align.CENTER)
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            ids = App().artists.get_randoms(6)
+            return ids
+
+        self._label.set_text(_("Why not listenting to?"))
+        App().task_helper.run(load, callback=(on_load,))
+
+    @property
+    def args(self):
+        return None
+
+
+class RoundedArtistsPreview(RoundedArtistsRandomView):
+    """
+        Show 6 artists in a FlowBox
+    """
+
+    def __init__(self):
+        """
+            Init artist view
+            @param view_type as ViewType
+        """
+        RoundedArtistsRandomView.__init__(self)
         self._box.set_max_children_per_line(3)
         self.set_property("valign", Gtk.Align.CENTER)
         self.set_property("halign", Gtk.Align.CENTER)
@@ -191,49 +225,5 @@ class RoundedArtistsPreview(RoundedArtistsView):
             ids = App().artists.get_randoms(6)
             return ids
 
+        self._label.set_text(_("Some artists in your collection:"))
         App().task_helper.run(load, callback=(on_load,))
-
-    @property
-    def args(self):
-        return None
-
-
-class RoundedArtistsSuggestionView(RoundedArtistsView):
-    """
-        Show 6 suggested artists in a FlowBox
-    """
-
-    def __init__(self):
-        """
-            Init artist view
-            @param view_type as ViewType
-        """
-        RoundedArtistsView.__init__(self, ViewType.DEFAULT)
-        self.insert_row(0)
-        self.set_row_spacing(10)
-        label = Gtk.Label.new(_("Why not listenting to?"))
-        style_context = label.get_style_context()
-        style_context.add_class("text-x-large")
-        style_context.add_class("dim-label")
-        label.show()
-        self.attach(label, 0, 0, 1, 1)
-        self.get_style_context().add_class("padding")
-        label.set_property("halign", Gtk.Align.START)
-        self._box.set_property("halign", Gtk.Align.CENTER)
-
-    def populate(self):
-        """
-            Populate view
-        """
-        def on_load(items):
-            FlowBoxView.populate(self, items)
-
-        def load():
-            ids = App().artists.get_suggested(6)
-            return ids
-
-        App().task_helper.run(load, callback=(on_load,))
-
-    @property
-    def args(self):
-        return None

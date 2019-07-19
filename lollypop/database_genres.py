@@ -148,7 +148,16 @@ class GenresDatabase:
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT genres.rowid, genres.name FROM genres\
+            result = sql.execute("SELECT genres.rowid, genres.name\
+                                  FROM genres\
+                                  WHERE EXISTS (\
+                                    SELECT albums.rowid\
+                                    FROM albums, album_genres\
+                                    WHERE albums.loved != -1 AND\
+                                          albums.rowid =\
+                                            album_genres.album_id AND\
+                                          album_genres.genre_id =\
+                                            genres.rowid)\
                                   ORDER BY random() LIMIT 1")
             genres = list(result)
             return genres[0] if genres else []

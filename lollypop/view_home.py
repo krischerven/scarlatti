@@ -16,7 +16,7 @@ from lollypop.view import View
 from lollypop.define import ViewType
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
-from lollypop.view_artists_rounded import RoundedArtistsSuggestionView
+from lollypop.view_artists_rounded import RoundedArtistsRandomView
 
 
 class HomeView(View):
@@ -46,7 +46,7 @@ class HomeView(View):
             Populate view
         """
         for _class in [AlbumsPopularsBoxView,
-                       RoundedArtistsSuggestionView,
+                       RoundedArtistsRandomView,
                        AlbumsRandomGenreBoxView]:
             view = _class()
             view.populate()
