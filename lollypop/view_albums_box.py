@@ -400,7 +400,7 @@ class AlbumsPopularsBoxView(AlbumsLineView):
             album_ids = App().albums.get_populars_at_the_moment(20)
             return [Album(album_id) for album_id in album_ids]
 
-        self._label.set_text(_("Popular albums at the moment:"))
+        self._label.set_text(_("Popular albums at the moment"))
         App().task_helper.run(load, callback=(on_load,))
 
 
@@ -425,7 +425,7 @@ class AlbumsRandomGenreBoxView(AlbumsLineView):
         def load():
             (genre_id, genre) = App().genres.get_random()
             GLib.idle_add(self._label.set_text,
-                          _("Let's play some %s:") % genre)
+                          _("Let's play some %s!") % genre)
             album_ids = App().albums.get_randoms(genre_id, 20)
             return [Album(album_id) for album_id in album_ids]
 
