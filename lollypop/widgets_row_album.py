@@ -54,7 +54,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         layout.set_text("a", 1)
         font_height = int(AlbumRow.__MARGIN * 2 +
                           2 * layout.get_pixel_size()[1])
-        cover_height = AlbumRow.__MARGIN * 2 + ArtSize.MEDIUM
+        cover_height = AlbumRow.__MARGIN * 2 + ArtSize.SMALL
         if font_height > cover_height:
             return font_height + 2
         else:
@@ -97,7 +97,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             return
         self._artwork = Gtk.Image.new()
         App().art_helper.set_frame(self._artwork, "small-cover-frame",
-                                   ArtSize.MEDIUM, ArtSize.MEDIUM)
+                                   ArtSize.SMALL, ArtSize.SMALL)
         self._artwork.set_margin_start(self.__MARGIN)
         # Little hack: we do not set margin_bottom because already set by
         # get_best_height(): we are Align.FILL
@@ -259,8 +259,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         if self._artwork is None:
             return
         App().art_helper.set_album_artwork(self._album,
-                                           ArtSize.MEDIUM,
-                                           ArtSize.MEDIUM,
+                                           ArtSize.SMALL,
+                                           ArtSize.SMALL,
                                            self._artwork.get_scale_factor(),
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,

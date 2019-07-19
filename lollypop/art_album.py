@@ -438,8 +438,8 @@ class AlbumArt:
         bytes = GLib.Bytes(data)
         stream = Gio.MemoryInputStream.new_from_bytes(bytes)
         pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(stream,
-                                                           ArtSize.MONSTER,
-                                                           ArtSize.MONSTER,
+                                                           ArtSize.MPRIS,
+                                                           ArtSize.MPRIS,
                                                            True,
                                                            None)
         stream.close()

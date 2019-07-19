@@ -48,14 +48,14 @@ class QueueRow(Row, DNDRow):
         self.__artwork = Gtk.Image.new()
         App().art_helper.set_frame(self.__artwork,
                                    "small-cover-frame",
-                                   ArtSize.MEDIUM,
-                                   ArtSize.MEDIUM)
+                                   ArtSize.SMALL,
+                                   ArtSize.SMALL)
         self.__artwork.set_no_show_all(True)
         # We force width with a Box
         box = Gtk.Box()
         box.set_homogeneous(True)
         box.add(self.__artwork)
-        box.set_property("width-request", ArtSize.MEDIUM + 2)
+        box.set_property("width-request", ArtSize.SMALL + 2)
         self._grid.attach(box, 0, 0, 1, 2)
         self.show_all()
         self.__header = Gtk.Grid()
@@ -111,8 +111,8 @@ class QueueRow(Row, DNDRow):
             self.__artwork.set_tooltip_text(self._track.album.name)
             App().art_helper.set_album_artwork(
                                            self.track.album,
-                                           ArtSize.MEDIUM,
-                                           ArtSize.MEDIUM,
+                                           ArtSize.SMALL,
+                                           ArtSize.SMALL,
                                            self.__artwork.get_scale_factor(),
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,

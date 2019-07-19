@@ -249,7 +249,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             @param width as int
             @param height as int
         """
-        if width - self.__headerbar_buttons_width < Sizing.MONSTER:
+        if width - self.__headerbar_buttons_width < Sizing.MPRIS:
             self.__show_miniplayer(True)
         else:
             self.__show_miniplayer(False)

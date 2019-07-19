@@ -78,9 +78,9 @@ class BannerWidget(Gtk.Overlay, SizeAllocationHelper):
             Get wanted height
         """
         if self._collapsed:
-            return ArtSize.SMALL + MARGIN * 2
+            return ArtSize.SMALL
         elif self._view_type & ViewType.SMALL:
-            return ArtSize.LARGE + MARGIN * 2
+            return ArtSize.MEDIUM + MARGIN * 2
         elif self._view_type & ViewType.MEDIUM:
             return ArtSize.BANNER + MARGIN * 2
         else:

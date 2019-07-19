@@ -208,10 +208,10 @@ class DNDRow:
         scrolled = row.get_ancestor(Gtk.ScrolledWindow)
         (row_x, row_y) = row.translate_coordinates(scrolled, 0, 0)
         auto_scroll = False
-        up = row_y + y <= ArtSize.MEDIUM
+        up = row_y + y <= ArtSize.SMALL
         if up:
             auto_scroll = True
-        elif row_y + y >= scrolled.get_allocated_height() - ArtSize.MEDIUM:
+        elif row_y + y >= scrolled.get_allocated_height() - ArtSize.SMALL:
             auto_scroll = True
         if DNDRow.__autoscroll_timeout_id is None and auto_scroll:
             DNDRow.__autoscroll_timeout_id = GLib.timeout_add(

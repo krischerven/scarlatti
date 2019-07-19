@@ -114,7 +114,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
         self.__view_type = view_type
         if self.__view_type & ViewType.SMALL:
-            self.__art_size = ArtSize.LARGE
+            self.__art_size = ArtSize.MEDIUM
         elif self.__view_type & ViewType.MEDIUM:
             self.__art_size = ArtSize.BANNER
         else:

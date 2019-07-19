@@ -90,8 +90,8 @@ class InformationView(View):
             title_label.show()
             App().art_helper.set_artist_artwork(
                                     self.__artist_name,
-                                    ArtSize.ARTIST_SMALL * 3,
-                                    ArtSize.ARTIST_SMALL * 3,
+                                    ArtSize.SMALL * 3,
+                                    ArtSize.SMALL * 3,
                                     self.__artist_artwork.get_scale_factor(),
                                     ArtBehaviour.ROUNDED |
                                     ArtBehaviour.CROP_SQUARE |

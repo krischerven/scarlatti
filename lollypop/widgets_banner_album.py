@@ -111,7 +111,7 @@ class AlbumBannerWidget(BannerWidget):
         BannerWidget.set_view_type(self, view_type)
         art_size = 0
         if view_type & ViewType.SMALL:
-            art_size = ArtSize.LARGE
+            art_size = ArtSize.MEDIUM
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
             self.__title_label.get_style_context().add_class(

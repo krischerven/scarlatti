@@ -202,8 +202,8 @@ class TuneinPopover(Gtk.Popover):
                 button.show()
                 child.add(button)
                 image = Gtk.Image.new()
-                image.set_property("width-request", ArtSize.MEDIUM)
-                image.set_property("height-request", ArtSize.MEDIUM)
+                image.set_property("width-request", ArtSize.SMALL)
+                image.set_property("height-request", ArtSize.SMALL)
                 image.show()
                 child.add(image)
                 self.__covers_to_download.append((item, image))
@@ -317,8 +317,8 @@ class TuneinPopover(Gtk.Popover):
             if stream is not None:
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(
                     stream,
-                    ArtSize.MEDIUM,
-                    ArtSize.MEDIUM,
+                    ArtSize.SMALL,
+                    ArtSize.SMALL,
                     True,
                     None)
                 stream.close()
@@ -347,7 +347,7 @@ class TuneinPopover(Gtk.Popover):
                 # Cache for MPRIS
                 App().task_helper.run(App().art.copy_uri_to_cache,
                                       item.LOGO, item.TEXT,
-                                      ArtSize.MONSTER, ArtSize.MONSTER)
+                                      ArtSize.MPRIS, ArtSize.MPRIS)
             track = Radio(Type.RADIOS)
             track.name = item.TEXT
             track.set_uri(item.URL)

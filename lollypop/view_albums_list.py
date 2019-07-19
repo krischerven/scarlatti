@@ -157,11 +157,11 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
                     y < row_y or\
                     y > row_y + row_height:
                 continue
-            if y <= row_y + ArtSize.MEDIUM / 2:
+            if y <= row_y + ArtSize.SMALL / 2:
                 self.__prev_animated_rows.append(row)
                 row.get_style_context().add_class("drag-up")
                 break
-            elif y >= row_y + row_height - ArtSize.MEDIUM / 2:
+            elif y >= row_y + row_height - ArtSize.SMALL / 2:
                 self.__prev_animated_rows.append(row)
                 row.get_style_context().add_class("drag-down")
                 GLib.timeout_add(1000, self.__reveal_row, row)

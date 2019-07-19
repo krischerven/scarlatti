@@ -427,11 +427,11 @@ class MPRIS(Server):
             if isinstance(App().player.current_track, Radio):
                 cover_path = App().art.get_radio_cache_path(
                     App().player.current_track.name,
-                    ArtSize.MONSTER, ArtSize.MONSTER)
+                    ArtSize.MPRIS, ArtSize.MPRIS)
             else:
                 cover_path = App().art.get_album_cache_path(
                     App().player.current_track.album,
-                    ArtSize.MONSTER, ArtSize.MONSTER)
+                    ArtSize.MPRIS, ArtSize.MPRIS)
             if cover_path is None:
                 cover_path = ""
             self.__metadata["mpris:artUrl"] = GLib.Variant(

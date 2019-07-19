@@ -103,11 +103,12 @@ class BaseArt(GObject.GObject):
         """
         value = App().settings.get_value("cover-size").get_int32()
         # Check value as user can enter bad value via dconf
-        if value < ArtSize.SMALL or value > ArtSize.MAX:
+        if value < 170 or value > 300:
             value = 200
         ArtSize.BIG = value
         ArtSize.BANNER = int(ArtSize.BIG * 150 / 200)
-        ArtSize.ARTIST_SMALL = int(ArtSize.BIG * 60 / 200)
+        ArtSize.MEDIUM = int(ArtSize.BIG * 100 / 200)
+        ArtSize.SMALL = int(ArtSize.BIG * 50 / 200)
 
     def clean_store(self, filename):
         """

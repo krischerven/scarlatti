@@ -40,11 +40,11 @@ class ArtistRow(Gtk.ListBoxRow):
         label.set_property("halign", Gtk.Align.START)
         label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__artwork = Gtk.Image.new()
-        self.__artwork.set_size_request(ArtSize.ARTIST_SMALL,
-                                        ArtSize.ARTIST_SMALL)
+        self.__artwork.set_size_request(ArtSize.SMALL,
+                                        ArtSize.SMALL)
         App().art_helper.set_artist_artwork(artist_name,
-                                            ArtSize.ARTIST_SMALL,
-                                            ArtSize.ARTIST_SMALL,
+                                            ArtSize.SMALL,
+                                            ArtSize.SMALL,
                                             self.get_scale_factor(),
                                             ArtBehaviour.CROP |
                                             ArtBehaviour.CACHE |
@@ -80,8 +80,8 @@ class ArtistRow(Gtk.ListBoxRow):
             scale_factor = self.get_scale_factor()
             App().art.add_artist_artwork(self.__artist_name, data, True)
             App().art_helper.set_artist_artwork(self.__artist_name,
-                                                ArtSize.ARTIST_SMALL,
-                                                ArtSize.ARTIST_SMALL,
+                                                ArtSize.SMALL,
+                                                ArtSize.SMALL,
                                                 scale_factor,
                                                 ArtBehaviour.CROP |
                                                 ArtBehaviour.CACHE |
@@ -106,7 +106,7 @@ class ArtistRow(Gtk.ListBoxRow):
             self.__artwork.set_from_icon_name("avatar-default-symbolic",
                                               Gtk.IconSize.INVALID)
             # artwork-icon padding is 5px
-            self.__artwork.set_pixel_size(ArtSize.ARTIST_SMALL - 20)
+            self.__artwork.set_pixel_size(ArtSize.SMALL - 20)
         else:
             self.__artwork.get_style_context().remove_class("artwork-icon")
             self.__artwork.set_from_surface(surface)

@@ -318,7 +318,7 @@ class LyricsView(View, InformationController):
                 context.add_class("text-xx-large")
             else:
                 context.add_class("text-x-large")
-        elif width > Sizing.MONSTER:
+        elif width > Sizing.MPRIS:
             if self.__sync_lyrics_helper.available:
                 context.add_class("text-x-large")
             else:

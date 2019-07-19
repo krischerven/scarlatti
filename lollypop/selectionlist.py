@@ -109,8 +109,8 @@ class SelectionListRow(Gtk.ListBoxRow):
                 App().settings.get_value("artist-artwork"):
             App().art_helper.set_artist_artwork(
                                     self.__name,
-                                    ArtSize.ARTIST_SMALL,
-                                    ArtSize.ARTIST_SMALL,
+                                    ArtSize.SMALL,
+                                    ArtSize.SMALL,
                                     self.get_scale_factor(),
                                     ArtBehaviour.ROUNDED |
                                     ArtBehaviour.CROP_SQUARE |
@@ -172,8 +172,8 @@ class SelectionListRow(Gtk.ListBoxRow):
                 self.__rowid >= 0 and\
                 App().settings.get_value("artist-artwork"):
             self.get_style_context().add_class("row")
-            if height < ArtSize.ARTIST_SMALL:
-                height = ArtSize.ARTIST_SMALL
+            if height < ArtSize.SMALL:
+                height = ArtSize.SMALL
             # Padding => application.css
             height += 12
         elif self.__mask & SelectionListMask.SIDEBAR:
@@ -226,8 +226,8 @@ class SelectionListRow(Gtk.ListBoxRow):
         """
         if surface is None:
             self.__artwork.get_style_context().add_class("artwork-icon")
-            self.__artwork.set_size_request(ArtSize.ARTIST_SMALL,
-                                            ArtSize.ARTIST_SMALL)
+            self.__artwork.set_size_request(ArtSize.SMALL,
+                                            ArtSize.SMALL)
             self.__artwork.set_from_icon_name(
                                               "avatar-default-symbolic",
                                               Gtk.IconSize.DND)
