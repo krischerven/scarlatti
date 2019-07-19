@@ -43,6 +43,8 @@ class ShownLists:
                            SelectionListMask.SIDEBAR),
         Type.WEB: (_("Web"),
                    SelectionListMask.SIDEBAR),
+        Type.SEARCH: (_("Search"),
+                      SelectionListMask.SIDEBAR),
         Type.ALL: (_("Albums"),
                    SelectionListMask.SIDEBAR),
         Type.ARTISTS: (_("Artists"), SelectionListMask.SIDEBAR),

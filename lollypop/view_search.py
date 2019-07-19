@@ -16,15 +16,16 @@ from gettext import gettext as _
 from random import shuffle
 from urllib.parse import urlparse
 
-from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, ViewType
+from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, MARGIN, Sizing
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
-from lollypop.view import BaseView
+from lollypop.view import View
 from lollypop.logger import Logger
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class SearchView(BaseView, Gtk.Bin):
+class SearchView(View, Gtk.Bin, SizeAllocationHelper):
     """
         View for searching albums/tracks
     """
@@ -34,8 +35,9 @@ class SearchView(BaseView, Gtk.Bin):
             Init Popover
             @param view_type as ViewType
         """
-        BaseView.__init__(self)
+        View.__init__(self)
         Gtk.Bin.__init__(self)
+        SizeAllocationHelper.__init__(self)
         self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
         self.__timeout_id = None
@@ -102,29 +104,25 @@ class SearchView(BaseView, Gtk.Bin):
         self.__cancellable = Gio.Cancellable()
 
     @property
-    def args(self):
-        """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
-        """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        view_type = self._view_type & ~self.view_sizing_mask
-        return ({"view_type": view_type}, self._sidebar_id, position)
-
-    @property
     def should_destroy(self):
-        """
-            User want to get search between mode
-        """
         return False
 
 #######################
 # PROTECTED           #
 #######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Change view width
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            if allocation.width < Sizing.BIG:
+                margin = MARGIN
+            else:
+                margin = allocation.width / 4
+            self.__widget.set_margin_start(margin)
+            self.__widget.set_margin_end(margin)
+
     def _on_play_button_clicked(self, button):
         """
             Play search

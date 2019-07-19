@@ -21,25 +21,7 @@ from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 
 
-class BaseView(AdaptiveView):
-    """
-        Common views members
-    """
-
-    def __init__(self):
-        AdaptiveView.__init__(self)
-
-    def populate(self):
-        pass
-
-    def stop(self):
-        pass
-
-    def disable_overlay(self):
-        pass
-
-
-class View(BaseView, Gtk.Grid):
+class View(AdaptiveView, Gtk.Grid):
     """
         Generic view
     """
@@ -49,7 +31,7 @@ class View(BaseView, Gtk.Grid):
             Init view
             @param view_type as ViewType
         """
-        BaseView.__init__(self)
+        AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
         self._view_type = view_type
         self.__adaptive_signal_id = None
@@ -113,6 +95,9 @@ class View(BaseView, Gtk.Grid):
         grid.set_name("lollypop_placeholder")
         grid.show_all()
         self.add(grid)
+
+    def stop(self):
+        pass
 
     def enable_filter(self):
         """

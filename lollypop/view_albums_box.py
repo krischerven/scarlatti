@@ -94,9 +94,7 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.NO_HISTORY:
-            return None
-        elif self._view_type & ViewType.SCROLLED:
+        if self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
@@ -310,3 +308,7 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
+
+    @property
+    def args(self):
+        return None

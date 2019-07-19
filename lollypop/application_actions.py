@@ -72,6 +72,7 @@ class ApplicationActions:
                                              GLib.VariantType.new("s"))
         App().add_action(search_action)
         App().set_accels_for_action("app.search('')", ["<Control>f"])
+        search_action.connect("activate", self.__on_search_activate)
 
         App().scanner.connect("scan-finished", self.__on_scan_finished)
         self.__setup_global_shortcuts()
@@ -168,6 +169,14 @@ class ApplicationActions:
             @param response id as int
         """
         dialog.destroy()
+
+    def __on_search_activate(self, action, variant):
+        """
+            @param action as Gio.SimpleAction
+            @param variant as GLib.Variant
+        """
+        search = variant.get_string()
+        App().window.container.show_view([Type.SEARCH], search)
 
     def __on_fullscreen_activate(self, action, param):
         """

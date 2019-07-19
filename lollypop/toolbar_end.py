@@ -87,11 +87,6 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(scrobbling_action)
         App().set_accels_for_action("app.scrobbling", ["<Control><Shift>s"])
 
-        self.__search_button = builder.get_object("search_button")
-
-        search_action = App().lookup_action("search")
-        search_action.connect("activate", self.__on_search_activate)
-
         self.__list_button = builder.get_object("list_button")
         self.__list_button.set_property("has-tooltip", True)
         self.__list_button.connect("query-tooltip",
@@ -120,21 +115,9 @@ class ToolbarEnd(Gtk.Bin):
             @param mini as bool
         """
         if mini:
-            self.__search_button.hide()
             self.__list_button.hide()
-            self.__home_button.show()
         else:
-            self.__search_button.show()
             self.__list_button.show()
-            self.__home_button.hide()
-
-    def search(self, search):
-        """
-            Search item
-            @param search as str
-        """
-        self.__on_search_button_cancelled()
-        self.__search_popover.set_text(search)
 
     @property
     def devices_popover(self):
@@ -175,21 +158,6 @@ class ToolbarEnd(Gtk.Bin):
             @param button as Gtk.Button
         """
         App().window.go_home()
-
-    def _on_search_button_toggled(self, button):
-        """
-            Show search popover
-            @param button as Gtk.ToggleButton
-        """
-        if button.get_active():
-            if self.__search_popover is None:
-                from lollypop.pop_search import SearchPopover
-                self.__search_popover = SearchPopover()
-                self.__search_popover.connect("closed",
-                                              self.__on_popover_closed,
-                                              button)
-            self.__search_popover.set_relative_to(button)
-            self.__search_popover.popup()
 
     def _on_shuffle_button_toggled(self, button):
         """
@@ -393,17 +361,6 @@ class ToolbarEnd(Gtk.Bin):
             @param button as Gtk.Button
         """
         button.set_active(False)
-
-    def __on_search_activate(self, action, variant):
-        """
-            @param action as Gio.SimpleAction
-            @param variant as GLib.Variant
-        """
-        search = variant.get_string()
-        if self.__search_button.is_visible():
-            self.__search_button.set_active(
-                not self.__search_button.get_active())
-            self.__search_popover.set_search(search)
 
     def __on_list_button_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """

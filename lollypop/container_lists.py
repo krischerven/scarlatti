@@ -41,8 +41,6 @@ class ListsContainer:
         self._list_view.listbox.connect("row-activated",
                                         self.__on_list_view_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
-        self._sidebar.connect("pass-focus", self.__on_pass_focus)
-        self._list_view.connect("pass-focus", self.__on_pass_focus)
         self._list_view.connect("map", self.__on_list_view_mapped)
 
         App().window.add_adaptive_child(self._sidebar_one, self._sidebar)
@@ -194,17 +192,6 @@ class ListsContainer:
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
-
-    def __on_pass_focus(self, selection_list):
-        """
-            Pass focus to other list
-            @param selection_list as SelectionList
-        """
-        if selection_list == self._sidebar:
-            if self._list_view.is_visible():
-                self._list_view.grab_focus()
-        else:
-            self._sidebar.grab_focus()
 
     def __on_list_view_mapped(self, widget):
         """

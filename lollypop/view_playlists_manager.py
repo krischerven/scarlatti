@@ -36,18 +36,14 @@ class PlaylistsManagerView(FlowBoxView):
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__obj = obj
-        if obj is None:
-            view_type |= ViewType.NO_HISTORY
-        if not view_type & ViewType.NO_HISTORY:
-            new_playlist_button = Gtk.Button(_("New playlist"))
-            new_playlist_button.connect("clicked",
-                                        self.__on_new_button_clicked)
-            new_playlist_button.set_property("halign", Gtk.Align.CENTER)
-            new_playlist_button.set_hexpand(True)
-            new_playlist_button.set_margin_top(5)
-            new_playlist_button.show()
-            self.insert_row(1)
-            self.attach(new_playlist_button, 0, 1, 1, 1)
+        self._new_button = Gtk.Button(_("New playlist"))
+        self._new_button.connect("clicked", self.__on_new_button_clicked)
+        self._new_button.set_property("halign", Gtk.Align.CENTER)
+        self._new_button.set_hexpand(True)
+        self._new_button.set_margin_top(5)
+        self._new_button.show()
+        self.insert_row(1)
+        self.attach(self._new_button, 0, 1, 1, 1)
         self._widget_class = PlaylistRoundedWidget
 
     def populate(self):
@@ -103,9 +99,7 @@ class PlaylistsManagerView(FlowBoxView):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.NO_HISTORY:
-            return None
-        elif self._view_type & ViewType.SCROLLED:
+        if self._view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
@@ -236,6 +230,7 @@ class PlaylistsManagerDeviceView(PlaylistsManagerView):
         """
         PlaylistsManagerView.__init__(self, None, view_type)
         self.__index = index
+        self._new_button.hide()
 
     def populate(self):
         """
@@ -251,3 +246,7 @@ class PlaylistsManagerDeviceView(PlaylistsManagerView):
             return items
 
         App().task_helper.run(load, callback=(on_load,))
+
+    @property
+    def args(self):
+        return None

@@ -69,7 +69,7 @@ class ViewType:
     MEDIUM = 1 << 9
     SCROLLED = 1 << 10
     FULLSCREEN = 1 << 11
-    NO_HISTORY = 1 << 12
+    CENTERED = 1 << 12
 
 
 NetworkAccessACL = {

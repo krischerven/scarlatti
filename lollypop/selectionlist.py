@@ -248,7 +248,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
     """
     __gsignals__ = {
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "pass-focus": (GObject.SignalFlags.RUN_FIRST, None, ())
     }
 
     def __init__(self, base_mask):
@@ -541,13 +540,11 @@ class SelectionList(LazyLoadingView, FilteringHelper):
         if self.mask & SelectionListMask.SIDEBAR:
             if status:
                 self.__menu_button.hide()
-                self.add_value((Type.SEARCH, _("Search"), _("Search")))
                 self.add_value((Type.CURRENT, _("Current playlist"),
                                 _("Current playlist")))
             else:
                 self.__menu_button.show()
                 self.remove_value(Type.CURRENT)
-                self.remove_value(Type.SEARCH)
 
     def _on_map(self, widget):
         """
@@ -656,15 +653,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                 rect.width = rect.height = 1
                 popover.set_pointing_to(rect)
             popover.popup()
-
-    def __on_key_press_event(self, listbox, event):
-        """
-            Pass focus as signal
-            @param listbox as Gtk.ListBox
-            @param event as Gdk.Event
-        """
-        if event.keyval in [Gdk.KEY_Left, Gdk.KEY_Right]:
-            self.emit("pass-focus")
 
     def __on_gesture_pressed(self, gesture, x, y):
         """

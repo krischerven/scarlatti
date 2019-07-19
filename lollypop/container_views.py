@@ -205,7 +205,7 @@ class ViewsContainer:
             Show playlists for device at index
             @param index as int
         """
-        view_type = ViewType.SCROLLED | ViewType.NO_HISTORY
+        view_type = ViewType.SCROLLED
         from lollypop.view_playlists_manager import PlaylistsManagerDeviceView
         view = PlaylistsManagerDeviceView(index, view_type)
         view.populate()
@@ -317,7 +317,7 @@ class ViewsContainer:
             @param index as int
         """
         from lollypop.view_albums_box_load import AlbumsDeviceBoxView
-        view_type = ViewType.SCROLLED | ViewType.NO_HISTORY
+        view_type = ViewType.SCROLLED
         view = AlbumsDeviceBoxView(index, view_type)
         view.populate()
         return view
