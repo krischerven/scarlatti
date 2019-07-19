@@ -118,6 +118,10 @@ class ArtistBannerWidget(BannerWidget):
         """
         BannerWidget.collapse(self, collapsed)
         self.__set_text_height(collapsed)
+        if collapsed:
+            self.__badge_artwork.hide()
+        else:
+            self.__badge_artwork.show()
 
 #######################
 # PROTECTED           #

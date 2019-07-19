@@ -30,7 +30,7 @@ class ArtistView(View):
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        View.__init__(self)
+        View.__init__(self, view_type)
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
@@ -41,10 +41,17 @@ class ArtistView(View):
         self.__overlay.add_overlay(self.__banner)
         self.__album_box = AlbumsBoxView(genre_ids,
                                          artist_ids,
-                                         view_type)
+                                         view_type & ~ViewType.SCROLLED)
         self.__album_box.set_margin_top(self.__banner.height)
+        self.__album_box.get_style_context().add_class("padding")
         self.__album_box.show()
-        self.__overlay.add_overlay(self.__album_box)
+        if self._view_type & ViewType.SCROLLED:
+            self.__overlay.add(self._scrolled)
+            self._viewport.add(self.__album_box)
+            self._scrolled.get_vscrollbar().set_margin_top(
+                self.__banner.height)
+        else:
+            self.__overlay.add(self.__album_box)
         self.add(self.__overlay)
         if len(self._artist_ids) > 1:
             self.__banner.collapse(True)
@@ -109,17 +116,16 @@ class ArtistView(View):
             Update scroll value and check for lazy queue
             @param adj as Gtk.Adjustment
         """
-        title_style_context = self._title_label.get_style_context()
-        if adj.get_value() == adj.get_lower() and self.__show_artwork:
-            self._artwork.show()
+        if adj.get_value() == adj.get_lower():
             self.__banner.collapse(False)
-            title_style_context.remove_class("text-x-large")
-            title_style_context.add_class("text-xx-large")
+            self.__album_box.set_margin_top(
+                self.__banner.height)
         else:
+            self.__album_box.set_margin_top(self.__banner.height)
             self.__banner.collapse(True)
-            self._artwork.hide()
-            title_style_context.remove_class("text-xx-large")
-            title_style_context.add_class("text-x-large")
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                self.__banner.height)
 
     def _on_adaptive_changed(self, window, status):
         """

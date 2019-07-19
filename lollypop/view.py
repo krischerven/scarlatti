@@ -53,10 +53,13 @@ class View(AdaptiveView, Gtk.Grid):
             self._scrolled = Gtk.ScrolledWindow()
             self._scrolled.connect("leave-notify-event",
                                    self.__on_leave_notify)
+            self._scrolled.get_vadjustment().connect("value-changed",
+                                                     self._on_value_changed)
             self._scrolled.show()
             self._viewport = Gtk.Viewport()
             self._scrolled.add(self._viewport)
             self._viewport.show()
+
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
@@ -184,6 +187,13 @@ class View(AdaptiveView, Gtk.Grid):
         else:
             self._view_type &= ~self.view_sizing_mask
 
+    def _on_value_changed(self, adj):
+        """
+            Handle change on scroll
+            @param adj as Gtk.Adjustment
+        """
+        pass
+
     def _on_album_updated(self, scanner, album_id, added):
         """
             Handles changes in collection
@@ -254,12 +264,9 @@ class LazyLoadingView(View):
         self.__is_populated = False
         self._lazy_queue = []
         self.__priority_queue = []
+        self.__scroll_timeout_id = None
         self.__scrolled_position = None
         self.__lazy_loading_id = None
-        if self._view_type & ViewType.SCROLLED:
-            self.__scroll_timeout_id = None
-            self._scrolled.get_vadjustment().connect("value-changed",
-                                                     self._on_value_changed)
         self.__start_time = time()
 
     def stop(self, clear=False):
