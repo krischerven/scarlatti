@@ -249,6 +249,8 @@ Gtk.ListBoxRow .menu-button:hover {
 
 .borders {
     border: 1px solid shade(@theme_bg_color, 0.7);
+    padding: 10px;
+    border-radius: 4px;
 }
 
 .borders-left-top {

@@ -168,18 +168,17 @@ class RoundedArtistsPreview(RoundedArtistsView):
         """
         RoundedArtistsView.__init__(self, view_type)
         self.insert_row(0)
+        self.set_row_spacing(5)
         label = Gtk.Label.new(_("Some artists in your collection:"))
         label.get_style_context().add_class("text-xx-large")
         label.get_style_context().add_class("dim-label")
         label.set_vexpand(True)
-        label.set_property("valign", Gtk.Align.END)
         label.show()
         self.attach(label, 0, 0, 1, 1)
         self._box.set_max_children_per_line(3)
-        self._box.set_property("valign", Gtk.Align.CENTER)
-        self._box.set_property("halign", Gtk.Align.CENTER)
-        self._box.set_vexpand(True)
-        self._box.set_hexpand(True)
+        self.set_property("valign", Gtk.Align.CENTER)
+        self.set_property("halign", Gtk.Align.CENTER)
+        self.get_style_context().add_class("borders")
 
     def populate(self):
         """
