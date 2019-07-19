@@ -34,7 +34,7 @@ class HorizontalScrollingHelper:
                                   Gtk.PolicyType.NEVER)
 
 #######################
-# PROTECTED             #
+# PROTECTED           #
 #######################
     def _update_buttons(self):
         """
@@ -74,7 +74,7 @@ class HorizontalScrollingHelper:
             @param backward_button as Gtk.Button
         """
         backward_button.set_sensitive(False)
-        value = self._scrolled.get_allocated_width() - ArtSize.BIG / 2
+        value = self._scrolled.get_allocated_width() - ArtSize.BIG
         self.__smooth_scrolling(value, Gtk.DirectionType.LEFT)
 
     def __on_forward_button_clicked(self, forward_button):
@@ -83,5 +83,5 @@ class HorizontalScrollingHelper:
             @param forward_button as Gtk.Button
         """
         forward_button.set_sensitive(False)
-        value = self._scrolled.get_allocated_width() - ArtSize.BIG / 2
+        value = self._scrolled.get_allocated_width() - ArtSize.BIG
         self.__smooth_scrolling(value, Gtk.DirectionType.RIGHT)
