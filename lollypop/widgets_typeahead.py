@@ -20,12 +20,13 @@ class TypeAheadWidget(Gtk.Revealer):
         Type ahead widget
     """
 
-    def __init__(self):
+    def __init__(self,):
         """
             Init widget
         """
         Gtk.Revealer.__init__(self)
-        self.__list_view_map_signal_id = None
+        self.__current_focused_view = None
+        self.__focus_in_event_id = None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
         builder.connect_signals(self)
@@ -37,6 +38,8 @@ class TypeAheadWidget(Gtk.Revealer):
         self.__prev_button = builder.get_object("prev_button")
         self.__next_button.connect("clicked", lambda x: self.__search_next())
         self.__prev_button.connect("clicked", lambda x: self.__search_prev())
+        self.__entry.connect("map", self.__on_map)
+        self.__entry.connect("unmap", self.__on_unmap)
         self.add(widget)
 
     @property
@@ -69,6 +72,7 @@ class TypeAheadWidget(Gtk.Revealer):
             widget.activate_child()
             self.__entry.set_text("")
             self.__entry.grab_focus()
+            self.__current_focused_view = None
 
     def _on_entry_key_press_event(self, entry, event):
         """
@@ -117,7 +121,37 @@ class TypeAheadWidget(Gtk.Revealer):
         if App().window.is_adaptive:
             return App().window.container.view
         else:
-            if App().window.container.list_view.has_focus():
-                return App().window.container.list_view
+            if self.__current_focused_view is not None:
+                return self.__current_focused_view
             else:
                 return App().window.container.view
+
+    def __on_map(self, widget):
+        """
+            Connect signals
+            @param widget as Gtk.Widget
+        """
+        if App().window.container.list_view.get_visible():
+            self.__current_focused_view = App().window.container.list_view
+        if self.__focus_in_event_id is None:
+            self.__focus_in_event_id =\
+                App().window.container.list_view.connect(
+                    "button-press-event", self.__on_list_key_press_event)
+
+    def __on_unmap(self, widget):
+        """
+            Connect signals
+            @param widget as Gtk.Widget
+        """
+        if self.__focus_in_event_id is not None:
+            App().window.container.list_view.disconnect(
+                self.__focus_in_event_id)
+            self.__focus_in_event_id = None
+
+    def __on_list_key_press_event(self, selection_list, event):
+        """
+            Force focus on list
+            @param selection_list as SelectionList
+            @param event as Gdk.Event
+        """
+        self.__current_focused_view = selection_list

@@ -101,8 +101,8 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._grid.set_column_spacing(2)
         self._grid.show()
         self.add(self._grid)
-        FilterContainer.__init__(self)
         ListsContainer.__init__(self)
+        FilterContainer.__init__(self)
 
     def stop_all(self):
         """
