@@ -69,18 +69,15 @@ class AlbumBannerWidget(BannerWidget):
                                              self.__album.genre_ids)
         self.__duration_label.set_text(get_human_duration(duration))
         self.__widget = builder.get_object("widget")
-        if view_type & ViewType.ALBUM:
-            self.init_background()
-            self.__menu_button.get_style_context().add_class(
-                "black-transparent")
-            self.get_style_context().add_class("black")
-            self._artwork.get_style_context().add_class("black")
-            self.connect("destroy", self.__on_destroy)
-            self.__art_signal_id = App().art.connect(
-                                               "album-artwork-changed",
-                                               self.__on_album_artwork_changed)
-        else:
-            self.__widget.get_style_context().add_class("banner-frame")
+        self.init_background()
+        self.__menu_button.get_style_context().add_class(
+            "black-transparent")
+        self.get_style_context().add_class("black")
+        self._artwork.get_style_context().add_class("black")
+        self.connect("destroy", self.__on_destroy)
+        self.__art_signal_id = App().art.connect(
+                                           "album-artwork-changed",
+                                           self.__on_album_artwork_changed)
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
         if album.mtime <= 0:
@@ -104,10 +101,7 @@ class AlbumBannerWidget(BannerWidget):
         self.__duration_label.set_margin_start(MARGIN)
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
-        if view_type & ViewType.ALBUM:
-            self.add_overlay(self.__widget)
-        else:
-            self.add(self.__widget)
+        self.add_overlay(self.__widget)
 
     def set_view_type(self, view_type):
         """

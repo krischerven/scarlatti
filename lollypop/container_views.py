@@ -244,16 +244,9 @@ class ViewsContainer:
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
-        view_type = ViewType.SCROLLED
-        if App().window.is_adaptive:
-            from lollypop.view_artist_small import ArtistViewSmall
-            view = ArtistViewSmall(genre_ids, artist_ids, view_type)
-            view.populate()
-        else:
-            view_type |= ViewType.TWO_COLUMNS
-            from lollypop.view_artist import ArtistView
-            view = ArtistView(genre_ids, artist_ids, view_type)
-            view.populate()
+        from lollypop.view_artist import ArtistView
+        view = ArtistView(genre_ids, artist_ids, ViewType.SCROLLED)
+        view.populate()
         view.show()
         return view
 

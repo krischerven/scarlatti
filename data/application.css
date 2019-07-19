@@ -282,21 +282,6 @@ Gtk.ListBoxRow .menu-button:hover {
 	min-width: 48px;
 }
 
-.banner-frame {
-    border-bottom: 1px solid shade(@theme_bg_color, 0.85);
-    transition: 1000ms linear;
-    background-color: transparent;
-    padding: 3px;
-    margin-bottom: 2px;
-}
-
-.banner-frame:selected {
-    border-bottom: 1px solid @theme_selected_bg_color;
-    transition: 1000ms linear;
-    background-color: transparent;
-    color: @theme_fg_color;
-}
-
 .cover-frame {
     border: 1px solid shade(@theme_bg_color, 0.7);
     background-color: shade(@theme_bg_color, 1.5);
