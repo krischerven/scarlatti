@@ -20,6 +20,7 @@ from lollypop.define import App, Type, ViewType
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
+from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 
 
@@ -314,7 +315,70 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
         return None
 
 
-class AlbumsPopularsBoxView(AlbumsBoxView):
+class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
+    """
+        Albums on a line
+    """
+
+    def __init__(self):
+        """
+            Init view
+        """
+        AlbumsBoxView.__init__(self, [], [], ViewType.SCROLLED)
+        self.set_row_spacing(5)
+        self._label = Gtk.Label.new()
+        self._label.set_hexpand(True)
+        self._label.set_property("halign", Gtk.Align.START)
+        self._backward_button = Gtk.Button.new_from_icon_name(
+                                                        "go-previous-symbolic",
+                                                        Gtk.IconSize.BUTTON)
+        self._forward_button = Gtk.Button.new_from_icon_name(
+                                                       "go-next-symbolic",
+                                                       Gtk.IconSize.BUTTON)
+        self._backward_button.get_style_context().add_class("menu-button-48")
+        self._forward_button.get_style_context().add_class("menu-button-48")
+        header = Gtk.Grid()
+        header.set_column_spacing(10)
+        header.add(self._label)
+        header.add(self._backward_button)
+        header.add(self._forward_button)
+        header.show_all()
+        HorizontalScrollingHelper.__init__(self)
+        style_context = self._label.get_style_context()
+        style_context.add_class("text-xx-large")
+        style_context.add_class("dim-label")
+        self.insert_row(0)
+        self.attach(header, 0, 0, 1, 1)
+        self.get_style_context().add_class("padding")
+        self._box.set_property("halign", Gtk.Align.CENTER)
+
+    def populate(self, albums):
+        """
+            Configure widget based on albums
+            @param items as [Album]
+        """
+        self._box.set_min_children_per_line(len(albums))
+        FlowBoxView.populate(self, albums)
+
+    @property
+    def args(self):
+        return None
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_populated(self, widget, lazy_loading_id):
+        """
+            Update button state
+            @param widget as Gtk.Widget
+            @parma lazy_loading_id as int
+        """
+        AlbumsBoxView._on_populated(self, widget, lazy_loading_id)
+        if self.is_populated:
+            self._update_buttons()
+
+
+class AlbumsPopularsBoxView(AlbumsLineView):
     """
         Populars album box
     """
@@ -323,38 +387,24 @@ class AlbumsPopularsBoxView(AlbumsBoxView):
         """
             Init view
         """
-        AlbumsBoxView.__init__(self, [], [], ViewType.DEFAULT)
-        self.insert_row(0)
-        self.set_row_spacing(10)
-        label = Gtk.Label.new(_("Popular albums at the moment:"))
-        style_context = label.get_style_context()
-        style_context.add_class("text-xx-large")
-        style_context.add_class("dim-label")
-        label.show()
-        self.attach(label, 0, 0, 1, 1)
-        self.get_style_context().add_class("padding")
-        label.set_property("halign", Gtk.Align.START)
-        self._box.set_property("halign", Gtk.Align.CENTER)
+        AlbumsLineView.__init__(self)
 
     def populate(self):
         """
             Populate view
         """
         def on_load(items):
-            FlowBoxView.populate(self, items)
+            AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = App().albums.get_populars_at_the_moment(6)
+            album_ids = App().albums.get_populars_at_the_moment(20)
             return [Album(album_id) for album_id in album_ids]
 
+        self._label.set_text(_("Popular albums at the moment:"))
         App().task_helper.run(load, callback=(on_load,))
 
-    @property
-    def args(self):
-        return None
 
-
-class AlbumsRandomGenreBoxView(AlbumsBoxView):
+class AlbumsRandomGenreBoxView(AlbumsLineView):
     """
         Populars album box
     """
@@ -363,33 +413,20 @@ class AlbumsRandomGenreBoxView(AlbumsBoxView):
         """
             Init view
         """
-        AlbumsBoxView.__init__(self, [], [], ViewType.DEFAULT)
-        self.insert_row(0)
-        self.set_row_spacing(10)
-        (self.__genre_id, genre) = App().genres.get_random()
-        label = Gtk.Label.new(_("Let's play some %s:") % genre)
-        style_context = label.get_style_context()
-        style_context.add_class("text-xx-large")
-        style_context.add_class("dim-label")
-        label.show()
-        self.attach(label, 0, 0, 1, 1)
-        self.get_style_context().add_class("padding")
-        label.set_property("halign", Gtk.Align.START)
-        self._box.set_property("halign", Gtk.Align.CENTER)
+        AlbumsLineView.__init__(self)
 
     def populate(self):
         """
             Populate view
         """
         def on_load(items):
-            FlowBoxView.populate(self, items)
+            AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = App().albums.get_randoms(self.__genre_id, 6)
+            (genre_id, genre) = App().genres.get_random()
+            GLib.idle_add(self._label.set_text,
+                          _("Let's play some %s:") % genre)
+            album_ids = App().albums.get_randoms(genre_id, 20)
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
-
-    @property
-    def args(self):
-        return None

@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
 from locale import strcoll
+from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.utils import get_icon_name
 
@@ -156,7 +157,7 @@ class RoundedArtistsView(FlowBoxView):
                 child.set_artwork()
 
 
-class RoundedArtistsRandomView(RoundedArtistsView):
+class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
     """
         Show 6 random artists in a FlowBox
     """
@@ -164,17 +165,32 @@ class RoundedArtistsRandomView(RoundedArtistsView):
     def __init__(self):
         """
             Init artist view
-            @param view_type as ViewType
         """
-        RoundedArtistsView.__init__(self, ViewType.DEFAULT)
+        RoundedArtistsView.__init__(self, ViewType.SCROLLED)
         self.insert_row(0)
-        self.set_row_spacing(10)
+        self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         style_context = self._label.get_style_context()
         style_context.add_class("text-xx-large")
         style_context.add_class("dim-label")
-        self._label.show()
-        self.attach(self._label, 0, 0, 1, 1)
+        self._label.set_hexpand(True)
+        self._label.set_property("halign", Gtk.Align.START)
+        self._backward_button = Gtk.Button.new_from_icon_name(
+                                                    "go-previous-symbolic",
+                                                    Gtk.IconSize.BUTTON)
+        self._forward_button = Gtk.Button.new_from_icon_name(
+                                                   "go-next-symbolic",
+                                                   Gtk.IconSize.BUTTON)
+        self._backward_button.get_style_context().add_class("menu-button-48")
+        self._forward_button.get_style_context().add_class("menu-button-48")
+        header = Gtk.Grid()
+        header.set_column_spacing(10)
+        header.add(self._label)
+        header.add(self._backward_button)
+        header.add(self._forward_button)
+        header.show_all()
+        HorizontalScrollingHelper.__init__(self)
+        self.attach(header, 0, 0, 1, 1)
         self.get_style_context().add_class("padding")
         self._label.set_property("halign", Gtk.Align.START)
         self._box.set_property("halign", Gtk.Align.CENTER)
@@ -184,10 +200,11 @@ class RoundedArtistsRandomView(RoundedArtistsView):
             Populate view
         """
         def on_load(items):
+            self._box.set_min_children_per_line(len(items))
             FlowBoxView.populate(self, items)
 
         def load():
-            ids = App().artists.get_randoms(6)
+            ids = App().artists.get_randoms(15)
             return ids
 
         self._label.set_text(_("Why not listening to?"))
@@ -196,34 +213,3 @@ class RoundedArtistsRandomView(RoundedArtistsView):
     @property
     def args(self):
         return None
-
-
-class RoundedArtistsPreview(RoundedArtistsRandomView):
-    """
-        Show 6 artists in a FlowBox
-    """
-
-    def __init__(self):
-        """
-            Init artist view
-            @param view_type as ViewType
-        """
-        RoundedArtistsRandomView.__init__(self)
-        self._box.set_max_children_per_line(3)
-        self.set_property("valign", Gtk.Align.CENTER)
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.get_style_context().add_class("borders")
-
-    def populate(self):
-        """
-            Populate view
-        """
-        def on_load(items):
-            FlowBoxView.populate(self, items)
-
-        def load():
-            ids = App().artists.get_randoms(6)
-            return ids
-
-        self._label.set_text(_("Some artists in your collection:"))
-        App().task_helper.run(load, callback=(on_load,))

@@ -342,11 +342,7 @@ class LazyLoadingView(View):
         if not widget.is_populated:
             widget.populate()
         else:
-            # Looks like there is an issue with signal handling in old
-            # pygobject => https://gitlab.gnome.org/World/lollypop/issues/1884
-            # Make sense, I removed GLib.idle_add() for 1.1.4 because I
-            # couldn't understand it...
-            GLib.idle_add(self.__lazy_loading)
+            self.__lazy_loading()
 
 #######################
 # PRIVATE             #
@@ -365,7 +361,8 @@ class LazyLoadingView(View):
             widget.connect("populated",
                            self._on_populated,
                            self.__lazy_loading_id)
-            widget.populate()
+            # https://gitlab.gnome.org/World/lollypop/issues/1884
+            GLib.idle_add(widget.populate)
         else:
             self.__lazy_loading_id = None
             self.__is_populated = True
