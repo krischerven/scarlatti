@@ -49,10 +49,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
         self.__popover_compilations = builder.get_object(
             "popover-compilations")
 
-        switch_sidebar_labels = builder.get_object("switch_sidebar_labels")
-        switch_sidebar_labels.set_state(
-            App().settings.get_value("show-sidebar-labels"))
-
         switch_artwork = builder.get_object("switch_artwork")
         switch_artwork.set_state(App().settings.get_value("artist-artwork"))
 
@@ -105,15 +101,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
                                  GLib.Variant("b", state))
         if state:
             App().art.cache_artists_artwork()
-
-    def _on_switch_sidebar_labels_state_set(self, widget, state):
-        """
-            Update sidebar labels setting
-            @param widget as Gtk.Switch
-            @param state as bool
-        """
-        App().settings.set_value("show-sidebar-labels",
-                                 GLib.Variant("b", state))
 
     def _on_combo_order_by_changed(self, widget):
         """

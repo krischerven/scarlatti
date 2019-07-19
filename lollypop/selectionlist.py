@@ -154,17 +154,12 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__label.show()
             self.set_tooltip_text("")
             self.set_has_tooltip(False)
-            if self.__mask & SelectionListMask.SIDEBAR:
-                self.__label.set_ellipsize(Pango.EllipsizeMode.NONE)
-            else:
-                self.__label.set_ellipsize(Pango.EllipsizeMode.END)
         else:
             self.__artwork.set_property("halign", Gtk.Align.CENTER)
             self.__artwork.set_hexpand(True)
             self.__label.hide()
             self.set_tooltip_text(self.__label.get_text())
             self.set_has_tooltip(True)
-            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
 
     def set_style(self, height):
         """
@@ -295,10 +290,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                                        lambda x: self.__popup_menu(0, 0, x))
             self.__menu_button.show()
             self.add(self.__menu_button)
-            App().settings.connect("changed::show-sidebar-labels",
-                                   self.__on_show_sidebar_labels_changed)
-            if App().settings.get_value("show-sidebar-labels"):
-                self.__base_mask |= SelectionListMask.LABEL
         if self.__base_mask & SelectionListMask.LIST_VIEW:
             App().settings.connect("changed::artist-artwork",
                                    self.__on_artist_artwork_changed)
@@ -693,20 +684,6 @@ class SelectionList(LazyLoadingView, FilteringHelper):
                     static_selected:
                 listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
             listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-
-    def __on_show_sidebar_labels_changed(self, settings, value):
-        """
-            Update sidebar internals
-            @param settings as Gio.Settings
-            @param value as str
-        """
-        show_label = App().settings.get_value(value)
-        if show_label:
-            self.__base_mask |= SelectionListMask.LABEL
-        else:
-            self.__base_mask &= ~SelectionListMask.LABEL
-        for row in self._box.get_children():
-            row.show_label(self.mask)
 
     def __on_artist_artwork_changed(self, object, value):
         """
