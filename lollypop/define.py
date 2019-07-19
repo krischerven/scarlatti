@@ -169,7 +169,7 @@ class Type:
     NEVER = -6
     PLAYLISTS = -7
     RADIOS = -8
-    # FREE = -9
+    HOME = -9
     INFO = -10
     YEARS = -11
     ARTISTS = -12

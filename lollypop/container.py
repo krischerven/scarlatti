@@ -118,6 +118,15 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         pass
 
+    def go_home(self):
+        """
+            Go to home page
+        """
+        if App().window.is_adaptive:
+            App().window.go_home()
+        else:
+            self.show_view([Type.HOME])
+
     @property
     def view(self):
         """

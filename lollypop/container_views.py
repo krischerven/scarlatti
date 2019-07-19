@@ -59,6 +59,8 @@ class ViewsContainer:
                                Type.RANDOMS,
                                Type.WEB]:
                 view = self._get_view_albums(item_ids, [])
+            elif item_ids[0] == Type.HOME:
+                view = self._get_view_home()
             elif item_ids[0] == Type.SEARCH:
                 view = self.get_view_search(data)
             elif item_ids[0] == Type.INFO:
@@ -252,6 +254,17 @@ class ViewsContainer:
             from lollypop.view_artist import ArtistView
             view = ArtistView(genre_ids, artist_ids, view_type)
             view.populate()
+        view.show()
+        return view
+
+    def _get_view_home(self):
+        """
+            Get home view
+        """
+        from lollypop.view_home import HomeView
+        view_type = ViewType.SCROLLED
+        view = HomeView(view_type)
+        view.populate()
         view.show()
         return view
 
