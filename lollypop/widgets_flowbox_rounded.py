@@ -44,7 +44,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._scale_factor = self.get_scale_factor()
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
-        self.connect("realize", on_realize)
 
     def populate(self):
         """
@@ -70,6 +69,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._widget = Gtk.EventBox()
         self._widget.set_property("has-tooltip", True)
         self._widget.add(grid)
+        self._widget.connect("realize", on_realize)
         self.add(self._widget)
         self.show_all()
 
