@@ -44,7 +44,7 @@ class AlbumBannerWidget(BannerWidget):
         self.__year_label = builder.get_object("year_label")
         self.__duration_label = builder.get_object("duration_label")
         self.__menu_button = builder.get_object("menu_button")
-        self.__cover_widget = CoverWidget(album, view_type)
+        self.__cover_widget = CoverWidget(album, view_type | ViewType.MEDIUM)
         self.__cover_widget.set_vexpand(True)
         self.__cover_widget.show()
         album_name = GLib.markup_escape_text(album.name)

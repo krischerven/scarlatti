@@ -34,10 +34,8 @@ class OverlayAlbumHelper(OverlayHelper):
             self.__play_pixel_size = -1
         elif view_type & ViewType.MEDIUM:
             self.__play_pixel_size = self._pixel_size
-        elif not view_type & ViewType.ALBUM:
-            self.__play_pixel_size = self._pixel_size + 20
         else:
-            self.__play_pixel_size = self._pixel_size
+            self.__play_pixel_size = self._pixel_size + 20
 
 #######################
 # PROTECTED           #
