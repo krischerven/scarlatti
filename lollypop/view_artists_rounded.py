@@ -162,11 +162,12 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         Show 6 random artists in a FlowBox
     """
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init artist view
+            @param view_type as ViewType
         """
-        RoundedArtistsView.__init__(self, ViewType.SCROLLED)
+        RoundedArtistsView.__init__(self, view_type)
         self.insert_row(0)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()

@@ -41,7 +41,6 @@ class HomeView(View, FilteringHelper):
             self._viewport.set_property("valign", Gtk.Align.START)
             self._viewport.set_margin_top(MARGIN)
             self._viewport.set_margin_end(0)
-            self._viewport.set_margin_bottom(MARGIN)
             self._viewport.set_margin_start(MARGIN)
             self._scrolled.set_property("expand", True)
             self.add(self._scrolled)
@@ -53,7 +52,7 @@ class HomeView(View, FilteringHelper):
         for _class in [AlbumsPopularsBoxView,
                        RoundedArtistsRandomView,
                        AlbumsRandomGenreBoxView]:
-            view = _class()
+            view = _class(self._view_type)
             view.populate()
             view.show()
             self.__grid.add(view)
@@ -88,6 +87,14 @@ class HomeView(View, FilteringHelper):
             @return Gtk.Widget
         """
         return self
+
+    @property
+    def view_sizing_mask(self):
+        """
+            Get mask for adaptive mode
+            @return ViewType
+        """
+        return ViewType.MEDIUM
 
     @property
     def args(self):

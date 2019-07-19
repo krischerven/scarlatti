@@ -320,11 +320,12 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         Albums on a line
     """
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init view
+            @param view_type as ViewType
         """
-        AlbumsBoxView.__init__(self, [], [], ViewType.SCROLLED)
+        AlbumsBoxView.__init__(self, [], [], view_type)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -406,11 +407,12 @@ class AlbumsPopularsBoxView(AlbumsLineView):
         Populars album box
     """
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init view
+            @param view_type as ViewType
         """
-        AlbumsLineView.__init__(self)
+        AlbumsLineView.__init__(self, view_type)
 
     def populate(self):
         """
@@ -432,11 +434,12 @@ class AlbumsRandomGenreBoxView(AlbumsLineView):
         Populars album box
     """
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init view
+            @param view_type as ViewType
         """
-        AlbumsLineView.__init__(self)
+        AlbumsLineView.__init__(self, view_type)
 
     def populate(self):
         """
