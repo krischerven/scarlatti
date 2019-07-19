@@ -41,7 +41,9 @@ class ArtistView(View):
         self.__overlay.add_overlay(self.__banner)
         self.__album_box = AlbumsBoxView(genre_ids,
                                          artist_ids,
-                                         view_type & ~ViewType.SCROLLED)
+                                         (view_type |
+                                          ViewType.ALBUM) &
+                                         ~ViewType.SCROLLED)
         self.__album_box.set_margin_top(self.__banner.height)
         self.__album_box.get_style_context().add_class("padding")
         self.__album_box.show()

@@ -62,7 +62,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
             album_name = GLib.markup_escape_text(self._album.name)
-            if self.__view_type & ViewType.SMALL:
+            if self.__view_type & ViewType.ALBUM:
                 self.__label.set_markup("<span alpha='40000'>%s</span>" %
                                         album_name)
             else:
