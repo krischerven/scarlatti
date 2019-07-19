@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk, Gio
+from gi.repository import GLib, Gtk, Gio, Pango
 
 from gettext import gettext as _
 
@@ -327,6 +327,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         AlbumsBoxView.__init__(self, [], [], ViewType.SCROLLED)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
+        self._label.set_ellipsize(Pango.EllipsizeMode.END)
         self._label.set_hexpand(True)
         self._label.set_property("halign", Gtk.Align.START)
         self._backward_button = Gtk.Button.new_from_icon_name(

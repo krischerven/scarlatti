@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 
 from gettext import gettext as _
 
@@ -170,6 +170,7 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         self.insert_row(0)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
+        self._label.set_ellipsize(Pango.EllipsizeMode.END)
         style_context = self._label.get_style_context()
         style_context.add_class("text-xx-large")
         style_context.add_class("dim-label")
