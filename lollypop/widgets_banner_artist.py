@@ -27,15 +27,17 @@ class ArtistBannerWidget(BannerWidget):
         Banner for artist
     """
 
-    def __init__(self, artist_ids, view_type=ViewType.DEFAULT):
+    def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
         """
             Init artist banner
+            @parma genre_ids as [int]
             @param artist_ids as [int]
             @param view_type as ViewType (Unused)
         """
         BannerWidget.__init__(self, view_type)
         self.__album_ids = None
         self.__album_id = None
+        self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/ArtistBannerWidget.ui")
@@ -163,7 +165,7 @@ class ArtistBannerWidget(BannerWidget):
                 App().lookup_action("party").change_state(
                     GLib.Variant("b", False))
             App().player.play_albums_for_filter(None,
-                                                self._genre_ids,
+                                                self.__genre_ids,
                                                 self.__artist_ids)
             self.__update_add_icon(False)
         except Exception as e:
@@ -176,16 +178,16 @@ class ArtistBannerWidget(BannerWidget):
         try:
             if App().settings.get_value("show-performers"):
                 album_ids = App().tracks.get_album_ids(self.__artist_ids,
-                                                       self._genre_ids)
+                                                       self.__genre_ids)
             else:
                 album_ids = App().albums.get_ids(self.__artist_ids,
-                                                 self._genre_ids)
+                                                 self.__genre_ids)
             icon_name = self.__add_button.get_image().get_icon_name()[0]
             add = icon_name == "list-add-symbolic"
             for album_id in album_ids:
                 if add and album_id not in App().player.album_ids:
                     App().player.add_album(Album(album_id,
-                                                 self._genre_ids,
+                                                 self.__genre_ids,
                                                  self.__artist_ids))
                 elif not add and album_id in App().player.album_ids:
                     App().player.remove_album_by_id(album_id)
@@ -283,7 +285,7 @@ class ArtistBannerWidget(BannerWidget):
             Set icon for Artist +/-
             @param add as bool
         """
-        (name, pixel_size) = self.__add_button.get_icon_name()
+        (name, pixel_size) = self.__add_button.get_image().get_icon_name()
         if add:
             # Translators: artist context
             self.__add_button.set_tooltip_text(_("Add to current playlist"))

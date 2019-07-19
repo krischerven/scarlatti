@@ -33,7 +33,7 @@ class ArtistView(View):
         View.__init__(self)
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
-        self.__banner = ArtistBannerWidget(self._artist_ids)
+        self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
         self.__banner.init_background()
         self.__banner.show()
         self.__overlay = Gtk.Overlay()
