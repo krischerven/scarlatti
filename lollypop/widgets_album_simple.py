@@ -12,8 +12,6 @@
 
 from gi.repository import GLib, Gtk, Pango, GObject
 
-from gettext import gettext as _
-
 from lollypop.widgets_album import AlbumWidget
 from lollypop.helper_overlay_album import OverlayAlbumHelper
 from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour, Type
@@ -181,33 +179,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _show_overlay_func(self, show_overlay):
-        """
-            Set overlay
-            @param show_overlay as bool
-        """
-        if self._lock_overlay or self._show_overlay == show_overlay:
-            return
-        OverlayAlbumHelper._show_overlay_func(self, show_overlay)
-        if show_overlay:
-            # Play all button
-            self.__play_all_button = Gtk.Button.new()
-            self.__play_all_button.set_property("has-tooltip", True)
-            self.__play_all_button.set_tooltip_text(_("Play albums"))
-            self.__play_all_button.connect("realize", on_realize)
-            self.__play_all_button.connect("clicked",
-                                           self.__on_play_all_clicked)
-            self.__play_all_button.set_image(Gtk.Image())
-            self.__play_all_button.get_image().set_pixel_size(self._pixel_size)
-            self.__set_play_all_image()
-            self.__play_all_button.show()
-            self._small_grid.add(self.__play_all_button)
-            self.__play_all_button.get_style_context().add_class(
-                "overlay-button")
-        else:
-            self.__play_all_button.destroy()
-            self.__play_all_button = None
-
     def _on_album_updated(self, scanner, album_id, added):
         """
             On album modified, disable it
@@ -252,19 +223,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             self._artwork.set_from_surface(surface)
         self.show_all()
         self.emit("populated")
-
-    def __on_play_all_clicked(self, button):
-        """
-            Play album with context
-            @param button as Gtk.Button
-        """
-        self._show_append(False)
-        if App().player.is_party:
-            App().lookup_action("party").change_state(GLib.Variant("b", False))
-        App().player.play_albums_for_filter(self._album.id,
-                                            self._genre_ids,
-                                            self._artist_ids)
-        return True
 
     def __on_artist_button_press(self, eventbox, event):
         """

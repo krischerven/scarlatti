@@ -110,11 +110,11 @@ class GenresDatabase:
     def get(self):
         """
             Get all availables genres
-            @return [(id as int, name as string)]
+            @return [(int, str, str)]
         """
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT DISTINCT\
-                                  genres.rowid, genres.name,genres.name\
+                                  genres.rowid, genres.name, genres.name\
                                   FROM genres\
                                   WHERE genres.rowid IN (\
                                     SELECT album_genres.genre_id\
@@ -141,6 +141,17 @@ class GenresDatabase:
                                   ORDER BY genres.name\
                                   COLLATE NOCASE COLLATE LOCALIZED")
             return list(itertools.chain(*result))
+
+    def get_random(self):
+        """
+            Return a random genre
+            @return [int]
+        """
+        with SqlCursor(App().db) as sql:
+            result = sql.execute("SELECT genres.rowid, genres.name FROM genres\
+                                  ORDER BY random() LIMIT 1")
+            genres = list(result)
+            return genres[0] if genres else []
 
     def clean(self):
         """

@@ -312,3 +312,84 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
     @property
     def args(self):
         return None
+
+
+class AlbumsPopularsBoxView(AlbumsBoxView):
+    """
+        Populars album box
+    """
+
+    def __init__(self):
+        """
+            Init view
+        """
+        AlbumsBoxView.__init__(self, [], [], ViewType.DEFAULT)
+        self.insert_row(0)
+        self.set_row_spacing(10)
+        label = Gtk.Label.new(_("Popular albums at the moment:"))
+        style_context = label.get_style_context()
+        style_context.add_class("text-x-large")
+        style_context.add_class("dim-label")
+        label.show()
+        self.attach(label, 0, 0, 1, 1)
+        self.get_style_context().add_class("padding")
+        label.set_property("halign", Gtk.Align.START)
+        self._box.set_property("halign", Gtk.Align.CENTER)
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            album_ids = App().albums.get_populars_at_the_moment(6)
+            return [Album(album_id) for album_id in album_ids]
+
+        App().task_helper.run(load, callback=(on_load,))
+
+    @property
+    def args(self):
+        return None
+
+
+class AlbumsRandomGenreBoxView(AlbumsBoxView):
+    """
+        Populars album box
+    """
+
+    def __init__(self):
+        """
+            Init view
+        """
+        AlbumsBoxView.__init__(self, [], [], ViewType.DEFAULT)
+        self.insert_row(0)
+        self.set_row_spacing(10)
+        (self.__genre_id, genre) = App().genres.get_random()
+        label = Gtk.Label.new(_("Let's play some %s:") % genre)
+        style_context = label.get_style_context()
+        style_context.add_class("text-x-large")
+        style_context.add_class("dim-label")
+        label.show()
+        self.attach(label, 0, 0, 1, 1)
+        self.get_style_context().add_class("padding")
+        label.set_property("halign", Gtk.Align.START)
+        self._box.set_property("halign", Gtk.Align.CENTER)
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            FlowBoxView.populate(self, items)
+
+        def load():
+            album_ids = App().albums.get_randoms(self.__genre_id, 6)
+            return [Album(album_id) for album_id in album_ids]
+
+        App().task_helper.run(load, callback=(on_load,))
+
+    @property
+    def args(self):
+        return None

@@ -232,7 +232,7 @@ class ViewsContainer:
             @return view
         """
         from lollypop.view_artists_rounded import RoundedArtistsPreview
-        view = RoundedArtistsPreview(ViewType.DEFAULT)
+        view = RoundedArtistsPreview()
         self._stack.add(view)
         view.populate()
         view.show()

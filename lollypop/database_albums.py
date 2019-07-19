@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
+from time import time
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy
@@ -577,6 +578,23 @@ class AlbumsDatabase:
             result = sql.execute(request, (limit,))
             return list(itertools.chain(*result))
 
+    def get_populars_at_the_moment(self, limit=100):
+        """
+            Get popular albums at the moment
+            @param limit as int
+            @return [int]
+        """
+        # Last week
+        timestamp = time() - 25200
+        with SqlCursor(App().db) as sql:
+            request = "SELECT DISTINCT albums.rowid FROM albums, tracks\
+                       WHERE albums.mtime != 0 AND\
+                             tracks.ltime > ? AND\
+                             albums.rowid = tracks.album_id\
+                       ORDER BY albums.popularity DESC LIMIT ?"
+            result = sql.execute(request, (timestamp, limit))
+            return list(itertools.chain(*result))
+
     def get_loved_albums(self):
         """
             Get loved albums
@@ -603,17 +621,30 @@ class AlbumsDatabase:
             result = sql.execute(request)
             return list(itertools.chain(*result))
 
-    def get_randoms(self):
+    def get_randoms(self, genre_id=None, limit=100):
         """
             Return random albums
+            @param genre_id as int
+            @param limit as int
             @return [int]
         """
         with SqlCursor(App().db) as sql:
             albums = []
-            request = "SELECT DISTINCT albums.rowid FROM albums\
-                       WHERE albums.loved != -1 AND\
-                       albums.mtime != 0 ORDER BY random() LIMIT 100"
-            result = sql.execute(request)
+            if genre_id is not None:
+                filter = (genre_id, limit)
+                request = "SELECT DISTINCT albums.rowid\
+                           FROM albums, album_genres\
+                           WHERE albums.loved != -1 AND\
+                                 albums.mtime != 0 AND\
+                                 album_genres.album_id = albums.rowid AND\
+                                 album_genres.genre_id = ?\
+                                 ORDER BY random() LIMIT ?"
+            else:
+                filter = (limit,)
+                request = "SELECT DISTINCT albums.rowid FROM albums\
+                           WHERE albums.loved != -1 AND\
+                           albums.mtime != 0 ORDER BY random() LIMIT ?"
+            result = sql.execute(request, filter)
             albums = list(itertools.chain(*result))
             return albums
 

@@ -48,6 +48,7 @@ class View(AdaptiveView, Gtk.Grid):
 
         if App().window.is_adaptive:
             self._view_type |= self.view_sizing_mask
+
         if self._view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
             self._scrolled.connect("leave-notify-event",

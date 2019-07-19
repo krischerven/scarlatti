@@ -12,6 +12,7 @@
 
 from gettext import gettext as _
 import itertools
+from time import time
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type
@@ -251,7 +252,7 @@ class ArtistsDatabase:
 
     def get_randoms(self, limit):
         """
-            Return random albums
+            Return random artists
             @param limit as int
             @return [int, str, str]
         """
@@ -266,6 +267,27 @@ class ArtistsDatabase:
                                   ORDER BY random() LIMIT ?\
                                   COLLATE NOCASE COLLATE LOCALIZED"
             result = sql.execute(request, (limit,))
+            return [(row[0], row[1], row[2]) for row in result]
+
+    def get_suggested(self, limit):
+        """
+            Return suggested artist
+            @param limit as int
+            @return [int, str, str]
+        """
+        # Last 4 week
+        timestamp = time() - 100800
+        with SqlCursor(App().db) as sql:
+            request = "SELECT DISTINCT artists.rowid,\
+                                       artists.name,\
+                                       artists.sortname\
+                                  FROM artists, tracks, track_artists\
+                                  WHERE track_artists.artist_id=artists.rowid\
+                                  AND track_artists.track_id=tracks.rowid\
+                                  AND tracks.ltime < ?\
+                                  ORDER BY tracks.popularity LIMIT ?\
+                                  COLLATE NOCASE COLLATE LOCALIZED"
+            result = sql.execute(request, (timestamp, limit))
             return [(row[0], row[1], row[2]) for row in result]
 
     def get_ids(self, genre_ids=[]):
