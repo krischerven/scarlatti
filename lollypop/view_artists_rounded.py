@@ -207,7 +207,7 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
             ids = App().artists.get_randoms(15)
             return ids
 
-        self._label.set_text(_("Why not listening to?"))
+        self._label.set_text(_("Why not listen to?"))
         App().task_helper.run(load, callback=(on_load,))
 
     @property
