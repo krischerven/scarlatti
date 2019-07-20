@@ -42,10 +42,11 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         self._box.set_homogeneous(True)
         self._box.set_max_children_per_line(1000)
         self._box.show()
-        self._box.connect("selected-children-changed",
-                          self.__on_selected_children_changed)
-        self.__event_controller = Gtk.EventControllerMotion.new(self._box)
-        self.__event_controller.connect("motion", self.__on_motion)
+        if not view_type & ViewType.SMALL:
+            self._box.connect("selected-children-changed",
+                              self.__on_selected_children_changed)
+            self.__event_controller = Gtk.EventControllerMotion.new(self._box)
+            self.__event_controller.connect("motion", self.__on_motion)
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._viewport.set_property("valign", Gtk.Align.START)
