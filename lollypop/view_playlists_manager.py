@@ -189,7 +189,7 @@ class PlaylistsManagerView(FlowBoxView):
                                  SelectionListMask.PLAYLISTS)
         popover = Popover()
         popover.bind_model(menu, None)
-        popover.set_relative_to(child)
+        popover.set_relative_to(child.artwork)
         popover.popup()
 
     def __sort_func(self, widget1, widget2):

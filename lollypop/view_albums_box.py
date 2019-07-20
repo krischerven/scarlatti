@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gdk, Gtk, Gio, Pango
+from gi.repository import GLib, Gtk, Gio, Pango
 
 from gettext import gettext as _
 
@@ -203,30 +203,24 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        self.__popup_menu(child.album, x, y)
+        self.__popup_menu(child)
 
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, album, x, y):
+    def __popup_menu(self, child):
         """
             Popup album menu at position
-            @param album as Album
-            @param x as int
-            @param y as int
+            @param child ad AlbumSimpleWidget
         """
         from lollypop.widgets_utils import Popover
         from lollypop.menu_objects import AlbumMenu
         popover = Popover.new_from_model(self,
                                          AlbumMenu(
-                                            album,
+                                            child.album,
                                             ViewType.ALBUM))
+        popover.set_relative_to(child.artwork)
         popover.set_position(Gtk.PositionType.BOTTOM)
-        rect = Gdk.Rectangle()
-        rect.x = x
-        rect.y = y
-        rect.width = rect.height = 1
-        popover.set_pointing_to(rect)
         popover.popup()
 
     def __on_album_popover_closed(self, popover, album_widget):
