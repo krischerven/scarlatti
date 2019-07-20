@@ -26,6 +26,7 @@ Jordi Romera
     <property name="translator_credits" translatable="yes" context="Translation credits here, put your name here!" comments="Replace me with your names">Cédric Bellegarde &lt;cedric.bellegarde@adishatz.org&gt;</property>
     <property name="artists">Reda Lazri (Lollypop icon)
 Geary Development Team (tag symbolic icon)
+GNOME Project (unplayed albums, artists list symbolic icons)
     </property>
     <property name="logo_icon_name">org.gnome.Lollypop</property>
     <property name="license_type">gpl-3-0</property>

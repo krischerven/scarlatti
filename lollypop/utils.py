@@ -414,8 +414,10 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
         icon = "emblem-documents-symbolic"
     elif object_id == Type.ALL:
         icon = "media-optical-cd-audio-symbolic"
-    elif object_id in [Type.ARTISTS, Type.ARTISTS_LIST]:
+    elif object_id == Type.ARTISTS:
         icon = "avatar-default-symbolic"
+    elif object_id == Type.ARTISTS_LIST:
+        icon = "org.gnome.Lollypop-artists-list-symbolic"
     elif object_id == Type.COMPILATIONS:
         icon = "system-users-symbolic"
     elif object_id == Type.RECENTS:
@@ -427,15 +429,17 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
     elif object_id == Type.LOVED:
         icon = "emblem-favorite-symbolic"
     elif object_id == Type.NEVER:
-        icon = "software-update-available-symbolic"
+        icon = "org.gnome.Lollypop-unplayed-albums-symbolic"
     elif object_id == Type.YEARS:
         icon = "x-office-calendar-symbolic"
     elif object_id == Type.CURRENT:
         icon = "view-list-symbolic"
     elif object_id == Type.SEARCH:
         icon = "edit-find-symbolic"
-    elif object_id in [Type.GENRES, Type.GENRES_LIST]:
+    elif object_id == Type.GENRES:
         icon = "org.gnome.Lollypop-tag-symbolic"
+    elif object_id == Type.GENRES_LIST:
+        icon = "org.gnome.Lollypop-tag-list-symbolic"
     elif object_id == Type.WEB:
         icon = "goa-panel-symbolic"
     return icon
