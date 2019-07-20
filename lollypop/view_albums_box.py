@@ -252,7 +252,7 @@ class AlbumsYearsBoxView(AlbumsBoxView):
         """
         AlbumsBoxView.__init__(self, genre_ids, artist_ids, view_type)
 
-    def do_populate(self):
+    def populate(self):
         """
             Populate view
         """

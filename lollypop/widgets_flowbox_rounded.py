@@ -59,6 +59,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self.__label.set_markup(
             "<b>" + GLib.markup_escape_text(self.__name) + "</b>")
         self._artwork = Gtk.Image.new()
+        self._artwork.connect("realize", on_realize)
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
         self.set_artwork()
