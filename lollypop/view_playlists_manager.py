@@ -16,7 +16,7 @@ from gettext import gettext as _
 from locale import strcoll
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, SelectionListMask
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.shown import ShownPlaylists
 
@@ -141,20 +141,57 @@ class PlaylistsManagerView(FlowBoxView):
             App().playlists.disconnect(self.__signal_id)
             self.__signal_id = None
 
-    def _on_item_activated(self, flowbox, widget):
+    def _on_primary_press_gesture(self, x, y, event):
         """
             Show Context view for activated album
-            @param flowbox as Gtk.Flowbox
-            @param widget as PlaylistRoundedWidget
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
-        if not self._view_type & ViewType.SMALL and\
-                FlowBoxView._on_item_activated(self, flowbox, widget):
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
             return
-        App().window.container.show_view([Type.PLAYLISTS], [widget.data])
+        if child.is_selected():
+            App().window.container.show_view([Type.PLAYLISTS], [child.data])
+
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Show Context view for activated album
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        self._on_primary_long_gesture(x, y)
+
+    def _on_primary_long_gesture(self, x, y):
+        """
+            Show Context view for activated album
+            @param x as int
+            @param y as int
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        self.__popup_menu(child)
 
 #######################
 # PRIVATE             #
 #######################
+    def __popup_menu(self, child):
+        """
+            Popup menu for track
+            @param child as PlaylistRoundedWidget
+        """
+        from lollypop.menu_selectionlist import SelectionListMenu
+        from lollypop.widgets_utils import Popover
+        menu = SelectionListMenu(self,
+                                 child.data,
+                                 SelectionListMask.PLAYLISTS)
+        popover = Popover()
+        popover.bind_model(menu, None)
+        popover.set_relative_to(child)
+        popover.popup()
+
     def __sort_func(self, widget1, widget2):
         """
             Sort function

@@ -10,11 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-
 from random import sample
 
-from lollypop.define import App, Type, SelectionListMask
+from lollypop.define import App, Type
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album, Disc
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
@@ -59,13 +57,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         """
         if self._artwork is None:
             RoundedAlbumsWidget.populate(self)
-            self.connect("button-release-event",
-                         self.__on_button_release_event)
-            self.__gesture = Gtk.GestureLongPress.new(self)
-            self.__gesture.connect("pressed", self.__on_gesture_pressed)
-            # We want to get release event after gesture
-            self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-            self.__gesture.set_button(0)
         else:
             self.set_artwork()
 
@@ -113,22 +104,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget):
-        """
-            Popup menu for track
-            @param widget as Gtk.Widget
-        """
-        from lollypop.view_playlists_manager import PlaylistsManagerView
-        from lollypop.menu_selectionlist import SelectionListMenu
-        from lollypop.widgets_utils import Popover
-        menu = SelectionListMenu(self.get_ancestor(PlaylistsManagerView),
-                                 self.data,
-                                 SelectionListMask.PLAYLISTS)
-        popover = Popover()
-        popover.bind_model(menu, None)
-        popover.set_relative_to(widget)
-        popover.popup()
-
     def __on_gesture_pressed(self, gesture, x, y):
         """
             Show current track menu
