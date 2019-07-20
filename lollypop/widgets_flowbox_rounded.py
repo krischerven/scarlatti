@@ -66,11 +66,8 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._overlay.add(self._artwork)
         grid.add(self._overlay)
         grid.add(self.__label)
-        self._widget = Gtk.EventBox()
-        self._widget.set_property("has-tooltip", True)
-        self._widget.add(grid)
-        self._widget.connect("realize", on_realize)
-        self.add(self._widget)
+        self.connect("realize", on_realize)
+        self.add(grid)
         self.show_all()
 
     def set_view_type(self, view_type):
