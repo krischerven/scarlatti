@@ -65,9 +65,8 @@ class AlbumsGenreBoxView(FlowBoxView):
             Start lazy loading
             @param item ids as [int]
         """
-        widget = FlowBoxView._add_items(self, item_ids, self._view_type)
-        if widget is not None:
-            widget.connect("overlayed", self.on_overlayed)
+        self._remove_placeholder()
+        FlowBoxView._add_items(self, item_ids, self._view_type)
 
     def _on_primary_press_gesture(self, x, y, event):
         """

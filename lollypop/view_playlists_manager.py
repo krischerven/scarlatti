@@ -117,11 +117,7 @@ class PlaylistsManagerView(FlowBoxView):
             @param playlist_ids as [int]
         """
         self._remove_placeholder()
-        widget = FlowBoxView._add_items(self, playlist_ids,
-                                        self.__obj,
-                                        self._view_type)
-        if widget is not None:
-            widget.connect("overlayed", self.on_overlayed)
+        FlowBoxView._add_items(self, playlist_ids, self.__obj, self._view_type)
 
     def _on_map(self, widget):
         """

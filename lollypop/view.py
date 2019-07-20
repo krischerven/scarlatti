@@ -35,7 +35,6 @@ class View(AdaptiveView, Gtk.Grid):
         Gtk.Grid.__init__(self)
         self._view_type = view_type
         self.__adaptive_signal_id = None
-        self.__overlayed = None
         self.__destroyed = False
         self._sidebar_id = Type.NONE
         self.__scanner_signal_id = App().scanner.connect(
@@ -51,8 +50,6 @@ class View(AdaptiveView, Gtk.Grid):
 
         if self._view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
-            self._scrolled.connect("leave-notify-event",
-                                   self.__on_leave_notify)
             self._scrolled.get_vadjustment().connect("value-changed",
                                                      self._on_value_changed)
             self._scrolled.show()
@@ -109,26 +106,6 @@ class View(AdaptiveView, Gtk.Grid):
         """
         if self._filter is not None:
             pass
-
-    def disable_overlay(self):
-        """
-            Disable overlay widget
-        """
-        if self.__overlayed is not None:
-            self.__overlayed.show_overlay(False)
-
-    def on_overlayed(self, widget, value):
-        """
-            Disable overlay on previous overlayed widget
-            @param widget as AlbumWidget
-            @param value as bool
-        """
-        if value:
-            if self.__overlayed is not None:
-                self.__overlayed.show_overlay(False)
-            self.__overlayed = widget
-        elif self.__overlayed == widget:
-            self.__overlayed = None
 
     @property
     def sidebar_id(self):
@@ -222,19 +199,6 @@ class View(AdaptiveView, Gtk.Grid):
 #######################
 # PRIVATE             #
 #######################
-    def __on_leave_notify(self, widget, event):
-        """
-            Update overlays as internal widget may not have received the signal
-            @param widget as Gtk.Widget
-            @param event as Gdk.event
-        """
-        allocation = widget.get_allocation()
-        if event.x <= 0 or\
-           event.x >= allocation.width or\
-           event.y <= 0 or\
-           event.y >= allocation.height:
-            self.disable_overlay()
-
     def __on_destroy(self, widget):
         """
             Clean up widget

@@ -80,9 +80,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param radio ids as [int]
         """
         self._remove_placeholder()
-        widget = FlowBoxView._add_items(self, radio_ids, self._view_type)
-        if widget is not None:
-            widget.connect("overlayed", self.on_overlayed)
+        FlowBoxView._add_items(self, radio_ids, self._view_type)
 
     def _on_new_clicked(self, widget):
         """

@@ -53,7 +53,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.connect("realize", self.__on_realize)
         self.connect("adaptive-changed", self.__on_adaptive_changed)
         self.connect("button-release-event", self.__on_button_release_event)
-        self.connect("focus-out-event", self.__on_focus_out_event)
 
     @property
     def miniplayer(self):
@@ -307,15 +306,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         else:
             artists = ", ".join(player.current_track.artists)
             self.set_title("%s - %s" % (artists, "Lollypop"))
-
-    def __on_focus_out_event(self, window, event):
-        """
-            Disable overlay on children
-            @param window as Gtk.Window
-            @param event as Gdk.EventFocus
-        """
-        if self.__container.view is not None:
-            self.__container.view.disable_overlay()
 
     def __on_button_release_event(self, window, event):
         """

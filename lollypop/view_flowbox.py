@@ -134,7 +134,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             Add items to the view
             Start lazy loading
             @param items as [int]
-            @return added widget
         """
         if self._lazy_queue is None or self.destroyed:
             return
@@ -145,7 +144,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             widget.show()
             self._lazy_queue.append(widget)
             GLib.idle_add(self._add_items, items)
-            return widget
         else:
             self.lazy_loading()
             if self._view_type & ViewType.SCROLLED:
@@ -153,7 +151,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
                     self._viewport.add(self._box)
             elif self._box not in self.get_children():
                 self.add(self._box)
-        return None
 
     def _on_current_changed(self, player):
         """

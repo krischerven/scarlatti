@@ -114,12 +114,9 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             Start lazy loading
             @param albums as [Album]
         """
-        widget = FlowBoxView._add_items(self, albums,
-                                        self._genre_ids,
-                                        self._artist_ids,
-                                        self._view_type)
-        if widget is not None:
-            widget.connect("overlayed", self.on_overlayed)
+        self._remove_placeholder()
+        FlowBoxView._add_items(self, albums, self._genre_ids, self._artist_ids,
+                               self._view_type)
 
     def _on_map(self, widget):
         """
