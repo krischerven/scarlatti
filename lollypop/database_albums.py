@@ -958,11 +958,10 @@ class AlbumsDatabase:
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT DISTINCT albums.rowid\
                                   FROM albums, tracks\
-                                  WHERE tracks.ltime=0 AND\
-                                  albums.loved != -1 AND\
+                                  WHERE albums.loved != -1 AND\
                                   albums.mtime != 0 AND\
                                   albums.rowid=tracks.album_id\
-                                  AND albums.popularity < 10\
+                                  AND albums.popularity = 0\
                                   ORDER BY random() LIMIT 100")
             return list(itertools.chain(*result))
 
