@@ -39,7 +39,7 @@ class ShownLists:
                      SelectionListMask.SIDEBAR),
         Type.GENRES: (_("Genres"),
                       SelectionListMask.SIDEBAR),
-        Type.GENRES_LIST: (_("Genres ≣"),
+        Type.GENRES_LIST: (_("Genres (list)"),
                            SelectionListMask.SIDEBAR),
         Type.WEB: (_("Web"),
                    SelectionListMask.SIDEBAR),
@@ -48,7 +48,7 @@ class ShownLists:
         Type.ALL: (_("Albums"),
                    SelectionListMask.SIDEBAR),
         Type.ARTISTS: (_("Artists"), SelectionListMask.SIDEBAR),
-        Type.ARTISTS_LIST: (_("Artists ≣"),
+        Type.ARTISTS_LIST: (_("Artists (list)"),
                             SelectionListMask.SIDEBAR),
         Type.COMPILATIONS: (_("Compilations"), SelectionListMask.SIDEBAR),
     }
