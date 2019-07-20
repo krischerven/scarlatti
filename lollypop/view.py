@@ -100,13 +100,6 @@ class View(AdaptiveView, Gtk.Grid):
     def stop(self):
         pass
 
-    def enable_filter(self):
-        """
-           Filter the view
-        """
-        if self._filter is not None:
-            pass
-
     @property
     def sidebar_id(self):
         """

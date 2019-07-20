@@ -12,6 +12,8 @@
 
 from gi.repository import GLib, Gtk, Pango, GObject
 
+from gettext import gettext as _
+
 from lollypop.widgets_album import AlbumWidget
 from lollypop.helper_overlay_album import OverlayAlbumHelper
 from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour
@@ -127,6 +129,31 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         self.set_size_request(self.__art_size,
                               self.__art_size + self.__font_height * 2)
 
+    def show_overlay(self, show):
+        """
+            Set overlay
+            @param show as bool
+        """
+        OverlayAlbumHelper.show_overlay(self, show)
+        if show:
+            # Play all button
+            self.__play_all_button = Gtk.Button.new()
+            self.__play_all_button.set_property("has-tooltip", True)
+            self.__play_all_button.set_tooltip_text(_("Play albums"))
+            self.__play_all_button.connect("realize", on_realize)
+            self.__play_all_button.connect("clicked",
+                                           self.__on_play_all_clicked)
+            self.__play_all_button.set_image(Gtk.Image())
+            self.__play_all_button.get_image().set_pixel_size(self._pixel_size)
+            self.__set_play_all_image()
+            self.__play_all_button.show()
+            self._small_grid.add(self.__play_all_button)
+            self.__play_all_button.get_style_context().add_class(
+               "overlay-button")
+        else:
+            self.__play_all_button.destroy()
+            self.__play_all_button = None
+
     def do_get_preferred_width(self):
         """
             Return preferred width
@@ -207,6 +234,19 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             self._artwork.set_from_surface(surface)
         self.show_all()
         self.emit("populated")
+
+    def __on_play_all_clicked(self, button):
+        """
+            Play album with context
+            @param button as Gtk.Button
+        """
+        from lollypop.view import View
+        self._show_append(False)
+        if App().player.is_party:
+            App().lookup_action("party").change_state(GLib.Variant("b", False))
+        view = self.get_ancestor(View)
+        if view is not None:
+            view.play_all_from(self)
 
     def __on_destroy(self, widget):
         """
