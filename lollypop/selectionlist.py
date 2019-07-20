@@ -80,6 +80,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork = Gtk.Image.new()
             self.__grid.add(self.__artwork)
             self.__label = Gtk.Label.new()
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
             self.__label.set_markup(GLib.markup_escape_text(self.__name))
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
