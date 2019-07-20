@@ -239,7 +239,7 @@ class ArtistBannerWidget(BannerWidget):
             @param event as Gdk.Event
         """
         from lollypop.pop_artwork import ArtworkPopover
-        pop = ArtworkPopover(self.__artist_id)
+        pop = ArtworkPopover(self.__artist_ids[0])
         pop.set_relative_to(eventbox)
         pop.show()
 
