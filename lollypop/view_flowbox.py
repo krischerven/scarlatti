@@ -177,6 +177,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             Disconnect signals
             @param widget as Gtk.Widget
         """
+        LazyLoadingView._on_unmap(self, widget)
         if self.__loading_changed_id is not None:
             App().player.disconnect(self.__loading_changed_id)
             self.__loading_changed_id = None
