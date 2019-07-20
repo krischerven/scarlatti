@@ -103,13 +103,17 @@ class RoundedArtistsView(FlowBoxView):
         """
         FlowBoxView._add_items(self, items, self.__view_type)
 
-    def _on_item_activated(self, flowbox, widget):
+    def _on_primary_press_gesture(self, x, y, event):
         """
-            Show artist albums
-            @param flowbox as Gtk.Flowbox
-            @param widget as ArtistRoundedWidget
+            Show Context view for activated album
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
-        App().window.container.show_view([Type.ARTISTS], [widget.data])
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        App().window.container.show_view([Type.ARTISTS], [child.data])
 
     def _on_map(self, widget):
         """
