@@ -72,6 +72,7 @@ class View(AdaptiveView, Gtk.Grid):
         """
         if self._view_type & ViewType.SCROLLED:
             self._scrolled.hide()
+        self._view_type |= ViewType.PLACEHOLDER
         grid = Gtk.Grid()
         grid.set_margin_start(20)
         grid.set_margin_end(20)
@@ -140,13 +141,14 @@ class View(AdaptiveView, Gtk.Grid):
         """
             Remove any placeholder
         """
-        if self._scrolled.get_visible():
-            return
-        for child in self.get_children():
-            if child.get_name() == "lollypop_placeholder":
-                child.destroy()
-                break
-        self._scrolled.show()
+        if self._view_type & ViewType.PLACEHOLDER:
+            self._view_type & ~ViewType.PLACEHOLDER
+            if self._view_type & ViewType.SCROLLED:
+                self._scrolled.show()
+            for child in self.get_children():
+                if child.get_name() == "lollypop_placeholder":
+                    child.destroy()
+                    break
 
     def _on_adaptive_changed(self, window, status):
         """

@@ -308,7 +308,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
                 tracks.append(track_row.track)
         if tracks:
             albums = tracks_to_albums(tracks)
-            App().player.play_albums(albums, tracks[0])
+            App().player.play_track_for_albums(tracks[0], albums)
 
     def _on_shuffle_button_clicked(self, button):
         """
@@ -322,7 +322,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         if tracks:
             shuffle(tracks)
             albums = tracks_to_albums(tracks)
-            App().player.play_albums(albums, tracks[0])
+            App().player.play_track_for_albums(tracks[0], albums)
 
     def _on_menu_button_clicked(self, button):
         """

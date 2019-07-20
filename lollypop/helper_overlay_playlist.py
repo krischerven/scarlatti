@@ -116,7 +116,7 @@ class OverlayPlaylistHelper(OverlayHelper):
                 else:
                     track = tracks[0]
                 albums = tracks_to_albums(tracks)
-                App().player.play_albums(albums, track)
+                App().player.play_track_for_albums(track, albums)
         else:
             if isinstance(self._obj, Disc):
                 tracks = self._obj.tracks

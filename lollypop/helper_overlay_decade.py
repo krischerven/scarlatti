@@ -10,11 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type
 from lollypop.utils import on_realize
 from lollypop.helper_overlay import OverlayHelper
 
@@ -48,7 +47,7 @@ class OverlayDecadeHelper(OverlayHelper):
             self._big_grid.set_margin_bottom(10)
             self._big_grid.set_margin_start(10)
             self.__play_button.connect("realize", on_realize)
-            self.__play_button.connect("clicked", self.__on_play_clicked)
+            self.__play_button.connect("clicked", self._on_play_clicked)
             self.__play_button.show()
             self._big_grid.add(self.__play_button)
             self.__play_button.get_style_context().add_class(
@@ -57,16 +56,5 @@ class OverlayDecadeHelper(OverlayHelper):
             self.__play_button.destroy()
             self.__play_button = None
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_play_clicked(self, button):
-        """
-            Play decade
-            @param button as Gtk.Button
-        """
-        if App().player.is_party:
-            App().lookup_action("party").change_state(GLib.Variant("b", False))
-        App().player.play_albums_for_filter(
-            None, [Type.YEARS], self._data)
-        return True
+    def _on_play_clicked(self, button):
+        pass

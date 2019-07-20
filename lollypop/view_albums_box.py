@@ -93,12 +93,8 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             Play all children from child
             @param child as AlbumSimpleWidget
         """
-        tracks = child.album.tracks
-        if tracks:
-            albums = []
-            for child in self._box.get_children():
-                albums.append(child.album)
-            App().player.play_albums(albums, tracks[0])
+        albums = [c.album for c in self._box.get_children()]
+        App().player.play_album_for_albums(child.album, albums)
 
     @property
     def args(self):

@@ -168,9 +168,10 @@ class ArtistBannerWidget(BannerWidget):
             if App().player.is_party:
                 App().lookup_action("party").change_state(
                     GLib.Variant("b", False))
-            App().player.play_albums_for_filter(None,
-                                                self.__genre_ids,
-                                                self.__artist_ids)
+            album_ids = App().albums.get_ids(self.__artist_ids,
+                                             self.__genre_ids)
+            albums = [Album(album_id) for album_id in album_ids]
+            App().player.play_albums(albums)
             self.__update_add_icon(False)
         except Exception as e:
             Logger.error("ArtistView::_on_play_clicked: %s" % e)

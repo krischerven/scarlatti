@@ -420,7 +420,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         albums = []
         for child in self._box.get_children():
             albums.append(child.album)
-        App().player.play_albums(albums, track)
+        App().player.play_track_for_albums(track, albums)
 
     def __on_insert_track(self, row, new_track_id, down):
         """

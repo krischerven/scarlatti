@@ -10,9 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import GLib
+
 from lollypop.define import App, Type
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
 from lollypop.helper_overlay_decade import OverlayDecadeHelper
+from lollypop.objects_album import Album
 
 
 class AlbumsDecadeWidget(RoundedAlbumsWidget, OverlayDecadeHelper):
@@ -70,6 +73,20 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget, OverlayDecadeHelper):
                                                        year,
                                                        self._ALBUMS_COUNT)
         return album_ids
+
+    def _on_play_clicked(self, button):
+        """
+            Play decade
+            @param button as Gtk.Button
+        """
+        if App().player.is_party:
+            App().lookup_action("party").change_state(GLib.Variant("b", False))
+        album_ids = []
+        for year in self._data:
+            album_ids += App().albums.get_albums_for_year(year)
+            album_ids += App().albums.get_compilations_for_year(year)
+        albums = [Album(album_id) for album_id in album_ids]
+        App().player.play_albums(albums)
 
 #######################
 # PRIVATE             #

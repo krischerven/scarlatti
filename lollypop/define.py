@@ -70,6 +70,7 @@ class ViewType:
     SCROLLED = 1 << 10
     FULLSCREEN = 1 << 11
     CENTERED = 1 << 12
+    PLACEHOLDER = 1 << 13
 
 
 NetworkAccessACL = {
