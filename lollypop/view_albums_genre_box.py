@@ -69,13 +69,15 @@ class AlbumsGenreBoxView(FlowBoxView):
         if widget is not None:
             widget.connect("overlayed", self.on_overlayed)
 
-    def _on_item_activated(self, flowbox, widget):
+    def _on_primary_press_gesture(self, x, y, event):
         """
             Show Context view for activated album
-            @param flowbox as Gtk.Flowbox
-            @param widget as PlaylistRoundedWidget
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
-        if not self._view_type & ViewType.SMALL and\
-                FlowBoxView._on_item_activated(self, flowbox, widget):
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
             return
-        App().window.container.show_view([Type.GENRES], widget.data)
+        if child.is_selected():
+            App().window.container.show_view([Type.GENRES], child.data)
