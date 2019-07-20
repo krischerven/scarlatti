@@ -35,6 +35,9 @@ class OverlayRadioHelper(OverlayHelper):
             Set overlay
             @param set as bool
         """
+        if (show and self._big_grid is not None) or\
+                (not show and self._big_grid is None):
+            return
         OverlayHelper.show_overlay(self, show)
         if show:
             # Play button

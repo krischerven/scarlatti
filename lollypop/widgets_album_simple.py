@@ -134,6 +134,9 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             Set overlay
             @param show as bool
         """
+        if (show and self._big_grid is not None) or\
+                (not show and self._big_grid is None):
+            return
         OverlayAlbumHelper.show_overlay(self, show)
         if show:
             # Play all button

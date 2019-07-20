@@ -25,6 +25,8 @@ class OverlayHelper:
             Init helper
         """
         self.__spinner = None
+        self._big_grid = None
+        self._small_grid = None
         self._watch_loading = False
         self.__timeout_id = None
         self._pixel_size = ArtSize.BIG / 9
@@ -52,6 +54,9 @@ class OverlayHelper:
             Set overlay
             @param show as bool
         """
+        if (show and self._big_grid is not None) or\
+                (not show and self._big_grid is None):
+            return
         if show:
             self._big_grid = Gtk.Grid()
             self._big_grid.set_property("halign", Gtk.Align.START)
