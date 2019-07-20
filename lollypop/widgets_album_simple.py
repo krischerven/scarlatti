@@ -41,8 +41,8 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         self.__font_height = font_height
         # We do not use Gtk.Builder for speed reasons
         Gtk.FlowBoxChild.__init__(self)
-        self.set_view_type(view_type)
         AlbumWidget.__init__(self, album, genre_ids, artist_ids)
+        self.set_view_type(view_type)
 
     def populate(self):
         """
@@ -119,6 +119,8 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             Update artwork size
             @param view_type as ViewType
         """
+        if self._artwork is not None:
+            OverlayAlbumHelper.set_view_type(self, view_type)
         self.__view_type = view_type
         if self.__view_type & ViewType.SMALL:
             self.__art_size = ArtSize.MEDIUM

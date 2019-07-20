@@ -30,12 +30,20 @@ class OverlayAlbumHelper(OverlayHelper):
             @param view_type as ViewType
         """
         OverlayHelper.__init__(self)
+        OverlayAlbumHelper.set_view_type(self, view_type)
+
+    def set_view_type(self, view_type):
+        """
+            Update pixel size
+            @param view_type as ViewType
+        """
         if view_type & ViewType.SMALL:
             self.__play_pixel_size = -1
         elif view_type & ViewType.MEDIUM:
             self.__play_pixel_size = self._pixel_size
         else:
             self.__play_pixel_size = self._pixel_size + 20
+        self.show_overlay(False)
 
     def show_overlay(self, show):
         """
