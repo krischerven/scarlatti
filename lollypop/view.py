@@ -50,6 +50,8 @@ class View(AdaptiveView, Gtk.Grid):
 
         if self._view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
+            self._scrolled.connect("leave-notify-event",
+                                   self._on_leave_notify_event)
             self._scrolled.get_vadjustment().connect("value-changed",
                                                      self._on_value_changed)
             self._scrolled.show()
@@ -65,6 +67,9 @@ class View(AdaptiveView, Gtk.Grid):
                                                 self._on_adaptive_changed)
         if not view_type & (ViewType.POPOVER | ViewType.SEARCH):
             self.get_style_context().add_class("view")
+
+    def __on_leave_notify_event(self, widget, event):
+        print(event)
 
     def populate(self):
         """
@@ -188,6 +193,14 @@ class View(AdaptiveView, Gtk.Grid):
         """
             Handles special shortcuts
             @param widget as Gtk.Widget
+        """
+        pass
+
+    def _on_leave_notify_event(self, widget, event):
+        """
+            Usefull to disable overlay
+            @param widget as Gtk.Widget
+            @param event as Gdk.Event
         """
         pass
 

@@ -103,25 +103,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_map(self, widget):
-        """
-            Connect signals
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_map(self, widget)
-        if self.__loading_changed_id is None:
-            self.__loading_changed_id = App().player.connect(
-                "loading-changed", self.__on_loading_changed)
-
-    def __on_unmap(self, widget):
-        """
-            Disconnect signals
-            @param widget as Gtk.Widget
-        """
-        if self.__loading_changed_id is not None:
-            App().player.disconnect(self.__loading_changed_id)
-            self.__loading_changed_id = None
-
     def _get_label_height(self):
         """
             Get wanted label height
@@ -180,6 +161,38 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             child.disable_artwork()
             self._lazy_queue.append(child)
         self.lazy_loading()
+
+    def _on_map(self, widget):
+        """
+            Connect signals
+            @param widget as Gtk.Widget
+        """
+        LazyLoadingView._on_map(self, widget)
+        if self.__loading_changed_id is None:
+            self.__loading_changed_id = App().player.connect(
+                "loading-changed", self.__on_loading_changed)
+
+    def _on_unmap(self, widget):
+        """
+            Disconnect signals
+            @param widget as Gtk.Widget
+        """
+        if self.__loading_changed_id is not None:
+            App().player.disconnect(self.__loading_changed_id)
+            self.__loading_changed_id = None
+
+    def _on_leave_notify_event(self, widget, event):
+        """
+            Usefull to disable overlay
+            @param widget as Gtk.Widget
+            @param event as Gdk.Event
+        """
+        if self.__selected_timeout_id is not None:
+            GLib.source_remove(self.__selected_timeout_id)
+            self.__selected_timeout_id = None
+        if self.__selected_child is not None:
+            self._box.unselect_child(self.__selected_child)
+            self.__selected_child = None
 
 #######################
 # PRIVATE             #
