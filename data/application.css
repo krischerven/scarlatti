@@ -81,24 +81,10 @@
     min-height: 2px;
 }
 
-Gtk.ListBoxRow .loved-button {
-	border-color: transparent;
-	background-color: transparent;
-	color: transparent;
-}
 
-Gtk.ListBoxRow .loved-button:hover {
-	border-color: alpha(@theme_fg_color, 0.1);
-}
-
-Gtk.ListBoxRow .menu-button {
-	border-color: transparent;
-	background-color: transparent;
-	color: transparent;
-}
-
-Gtk.ListBoxRow .menu-button:hover {
-	border-color: alpha(@theme_fg_color, 0.1);
+flowboxchild:selected  {
+    background-color: @theme_bg_color;
+    color: @theme_fg_color;
 }
 
 .typeahead-indicator

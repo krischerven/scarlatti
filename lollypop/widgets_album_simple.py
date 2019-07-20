@@ -14,7 +14,7 @@ from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.widgets_album import AlbumWidget
 from lollypop.helper_overlay_album import OverlayAlbumHelper
-from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour, Type
+from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour
 from lollypop.utils import on_query_tooltip, on_realize
 
 
@@ -36,7 +36,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             @param view_type as ViewType
             @parma font_height as int
         """
-        self.__widget = None
         self.__font_height = font_height
         # We do not use Gtk.Builder for speed reasons
         Gtk.FlowBoxChild.__init__(self)
@@ -52,7 +51,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             self._watch_loading = self._album.mtime <= 0
             self.set_property("halign", Gtk.Align.CENTER)
             self.set_property("valign", Gtk.Align.CENTER)
-            self.__widget = Gtk.EventBox()
             grid = Gtk.Grid()
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             self.__label = Gtk.Label.new()
@@ -71,30 +69,16 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
                 self.__label.set_markup(
                     "<b>%s</b>\n<span alpha='40000'>%s</span>" % (album_name,
                                                                   artist_name))
-            eventbox = Gtk.EventBox()
-            eventbox.add(self.__label)
-            eventbox.connect("realize", on_realize)
-            eventbox.connect("button-release-event",
-                             self.__on_artist_button_release)
-            eventbox.show()
-            self.__widget.add(grid)
             self._overlay = Gtk.Overlay.new()
             self._artwork = Gtk.Image.new()
+            self._artwork.connect("realize", on_realize)
             self._overlay.add(self._artwork)
             grid.add(self._overlay)
-            grid.add(eventbox)
+            grid.add(self.__label)
             self.set_artwork()
             self.set_selection()
-            if not self.__view_type & ViewType.SMALL:
-                self.__widget.connect("enter-notify-event",
-                                      self._on_enter_notify)
-                self.__widget.connect("leave-notify-event",
-                                      self._on_leave_notify)
-            self.__widget.connect("button-release-event",
-                                  self._on_button_release)
-            self.__widget.connect("realize", on_realize)
             self.connect("destroy", self.__on_destroy)
-            self.add(self.__widget)
+            self.add(grid)
         else:
             self.set_artwork()
 
@@ -110,7 +94,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         """
             Set artwork
         """
-        if self.__widget is None:
+        if self._artwork is None:
             return
         if self.__art_size < ArtSize.BIG:
             frame = "small-cover-frame"
@@ -148,7 +132,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             Return preferred width
             @return (int, int)
         """
-        if self.__widget is None:
+        if self._artwork is None:
             return (0, 0)
         width = Gtk.FlowBoxChild.do_get_preferred_width(self)[0]
         return (width, width)
@@ -210,7 +194,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             Set album artwork
             @param surface as str
         """
-        if self.__widget is None:
+        if self._artwork is None:
             return
         if surface is None:
             if self.__art_size == ArtSize.BIG:
@@ -224,19 +208,9 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         self.show_all()
         self.emit("populated")
 
-    def __on_artist_button_release(self, eventbox, event):
-        """
-            Go to artist page
-            @param eventbox as Gtk.EventBox
-            @param event as Gdk.EventButton
-        """
-        App().window.container.show_view([Type.ARTISTS],
-                                         self._album.artist_ids)
-        return True
-
     def __on_destroy(self, widget):
         """
             Destroyed widget
             @param widget as Gtk.Widget
         """
-        self.__widget = None
+        self._artwork = None

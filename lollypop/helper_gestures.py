@@ -18,14 +18,23 @@ class GesturesHelper():
         Helper for gesture on widgets
     """
 
-    def __init__(self, widget):
+    def __init__(self, widget, primary_long_callback=None,
+                 secondary_long_callback=None,
+                 primary_press_callback=None,
+                 secondary_press_callback=None):
         """
             Init helper
+            @param widget as Gtk.Widget
+            @params as callbacks
         """
-        self.__long_press = Gtk.GestureLongPress.new(self._box)
+        self.__primary_long_callback = primary_long_callback
+        self.__secondary_long_callback = secondary_long_callback
+        self.__primary_press_callback = primary_press_callback
+        self.__secondary_press_callback = secondary_press_callback
+        self.__long_press = Gtk.GestureLongPress.new(widget)
         self.__long_press.connect("pressed", self.__on_long_pressed)
         self.__long_press.set_button(0)
-        self.__multi_press = Gtk.GestureMultiPress.new(self._box)
+        self.__multi_press = Gtk.GestureMultiPress.new(widget)
         self.__multi_press.connect("released", self.__on_multi_released)
         self.__multi_press.set_button(0)
 
@@ -33,16 +42,20 @@ class GesturesHelper():
 # PROTECTED           #
 #######################
     def _on_primary_long_press_gesture(self, x, y):
-        pass
+        if self.__primary_long_callback is not None:
+            self.__primary_long_callback(x, y)
 
     def _on_secondary_long_press_gesture(self, x, y):
-        pass
+        if self.__secondary_long_callback is not None:
+            self.__secondary_long_callback(x, y)
 
     def _on_primary_press_gesture(self, x, y, event):
-        pass
+        if self.__primary_press_callback is not None:
+            self.__primary_press_callback(x, y)
 
     def _on_secondary_press_gesture(self, x, y, event):
-        pass
+        if self.__secondary_press_callback is not None:
+            self.__secondary_press_callback(x, y)
 
 #######################
 # PRIVATE             #

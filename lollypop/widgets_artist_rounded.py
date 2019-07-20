@@ -75,14 +75,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         self.set_size_request(self._art_size,
                               self._art_size + self.__font_height)
 
-    @property
-    def is_overlay(self):
-        """
-            True if widget is overlayed
-            @return bool
-        """
-        return False
-
 #######################
 # PROTECTED           #
 #######################

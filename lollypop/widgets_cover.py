@@ -45,8 +45,10 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         OverlayAlbumHelper.__init__(self, view_type)
         self._overlay.add(self._artwork)
         self.add(self._overlay)
-        self.connect("enter-notify-event", self._on_enter_notify)
-        self.connect("leave-notify-event", self._on_leave_notify)
+        self.connect("enter-notify-event",
+                     lambda x, y: self.show_overlay(True))
+        self.connect("leave-notify-event",
+                     lambda x, y: self.show_overlay(False))
         self.connect("destroy", self.__on_destroy)
         self.__art_signal_id = App().art.connect(
                                               "album-artwork-changed",
@@ -70,18 +72,13 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
-#######################
-# PROTECTED           #
-#######################
-    def _show_overlay_func(self, show_overlay):
+    def show_overlay(self, show):
         """
             Set overlay
-            @param show_overlay as bool
+            @param show as bool
         """
-        if self._lock_overlay or self._show_overlay == show_overlay:
-            return
-        OverlayAlbumHelper._show_overlay_func(self, show_overlay)
-        if show_overlay:
+        OverlayAlbumHelper.show_overlay(self, show)
+        if show:
             # Image button
             self.__image_button = Gtk.Button.new_from_icon_name(
                 "image-x-generic-symbolic",
@@ -98,6 +95,10 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         else:
             self.__image_button.destroy()
             self.__image_button = None
+
+#######################
+# PROTECTED           #
+#######################
 
 #######################
 # PRIVATE             #
@@ -150,7 +151,5 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         from lollypop.pop_artwork import CoversPopover
         popover = CoversPopover(self._album)
         popover.set_relative_to(button)
-        popover.connect("closed", self._on_popover_closed)
-        self._lock_overlay = True
         popover.popup()
         return True

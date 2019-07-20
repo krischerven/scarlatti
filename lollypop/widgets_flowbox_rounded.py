@@ -147,6 +147,14 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         """
         return True
 
+    @property
+    def artwork(self):
+        """
+            Get album artwork
+            @return Gtk.Image
+        """
+        return self._artwork
+
 #######################
 # PROTECTED           #
 #######################

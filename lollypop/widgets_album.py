@@ -10,10 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
 
-from lollypop.define import App, ViewType
-from lollypop.widgets_utils import Popover
+from lollypop.define import App
 
 
 class AlbumWidget:
@@ -60,26 +59,6 @@ class AlbumWidget:
 #######################
     def _on_album_updated(self, scanner, album_id, destroy):
         pass
-
-    def _on_button_release(self, eventbox, event):
-        """
-            Handle album mouse click
-            @param eventbox as Gtk.EventBox
-            @param event as Gdk.EventButton
-        """
-        if event.button != 1:
-            from lollypop.menu_objects import AlbumMenu
-            popover = Popover.new_from_model(self._artwork,
-                                             AlbumMenu(
-                                                self._album,
-                                                ViewType.ALBUM))
-            popover.set_position(Gtk.PositionType.BOTTOM)
-            rect = Gdk.Rectangle()
-            rect.x = event.x
-            rect.y = event.y
-            rect.width = rect.height = 1
-            popover.set_pointing_to(rect)
-            popover.popup()
 
 #######################
 # PRIVATE             #

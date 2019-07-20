@@ -14,11 +14,12 @@ from gi.repository import Gtk, GLib
 
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
+from lollypop.helper_gestures import GesturesHelper
 from lollypop.define import ViewType, App
 from lollypop.utils import get_font_height
 
 
-class FlowBoxView(LazyLoadingView, FilteringHelper):
+class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
     """
         Lazy loading FlowBox
     """
@@ -33,14 +34,19 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
         self.__loading_changed_id = None
         self._widget_class = None
         self._items = []
+        self.__selected_child = None
+        self.__selected_timeout_id = None
         self.__font_height = get_font_height()
         self._box = Gtk.FlowBox()
-        self._box.set_selection_mode(Gtk.SelectionMode.NONE)
         # Allow lazy loading to not jump up and down
         self._box.set_homogeneous(True)
         self._box.set_max_children_per_line(1000)
-        self._box.connect("child-activated", self._on_item_activated)
         self._box.show()
+        self._box.connect("selected-children-changed",
+                          self.__on_selected_children_changed)
+        self.__event_controller = Gtk.EventControllerMotion.new(self._box)
+        self.__event_controller.connect("motion", self.__on_motion)
+        GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._viewport.set_property("valign", Gtk.Align.START)
             self._viewport.set_property("margin", 5)
@@ -156,9 +162,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
         for child in self._box.get_children():
             child.set_selection()
 
-    def _on_item_activated(self, flowbox, widget):
-        pass
-
     def _on_adaptive_changed(self, window, status):
         """
             Update artwork
@@ -183,6 +186,42 @@ class FlowBoxView(LazyLoadingView, FilteringHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_selected_children_changed(self, box):
+        """
+            Update overlay status
+        """
+        if self.__selected_child is not None:
+            self.__selected_child.show_overlay(False)
+        selected_children = box.get_selected_children()
+        if selected_children:
+            self.__selected_child = selected_children[0]
+            self.__selected_child.show_overlay(True)
+
+    def __on_motion(self, event_controller, x, y):
+        """
+            Update current selected child
+            @param event_controller as Gtk.EventControllerMotion
+            @param x as int
+            @param y as int
+        """
+        def select_child(child):
+            self.__selected_timeout_id = None
+            self._box.select_child(child)
+
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or\
+                child.artwork is None or\
+                child == self.__selected_child:
+            return
+        elif child != self.__selected_child:
+            if self.__selected_child is not None:
+                self._box.unselect_child(self.__selected_child)
+                self.__selected_child = None
+            if self.__selected_timeout_id is not None:
+                GLib.source_remove(self.__selected_timeout_id)
+            self.__selected_timeout_id = GLib.timeout_add(
+                50, select_child, child)
+
     def __on_loading_changed(self, player, status, album):
         """
             Show a spinner while loading

@@ -59,8 +59,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
         """
         if self._artwork is None:
             RoundedAlbumsWidget.populate(self)
-            self._widget.connect("enter-notify-event", self._on_enter_notify)
-            self._widget.connect("leave-notify-event", self._on_leave_notify)
             self.connect("button-release-event",
                          self.__on_button_release_event)
             self.__gesture = Gtk.GestureLongPress.new(self)

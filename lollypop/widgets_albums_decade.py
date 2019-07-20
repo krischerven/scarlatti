@@ -39,10 +39,7 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget, OverlayDecadeHelper):
             Populate widget content
         """
         if self._artwork is None:
-            self._lock_overlay = False
             RoundedAlbumsWidget.populate(self)
-            self._widget.connect("enter-notify-event", self._on_enter_notify)
-            self._widget.connect("leave-notify-event", self._on_leave_notify)
         else:
             self.set_artwork()
 

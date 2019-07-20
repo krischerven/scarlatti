@@ -37,18 +37,13 @@ class OverlayAlbumHelper(OverlayHelper):
         else:
             self.__play_pixel_size = self._pixel_size + 20
 
-#######################
-# PROTECTED           #
-#######################
-    def _show_overlay_func(self, show_overlay):
+    def show_overlay(self, show):
         """
             Set overlay
-            @param show_overlay as bool
+            @param show as bool
         """
-        if self._lock_overlay or self._show_overlay == show_overlay:
-            return
-        OverlayHelper._show_overlay_func(self, show_overlay)
-        if show_overlay:
+        OverlayHelper.show_overlay(self, show)
+        if show:
             if self.__play_pixel_size > 0:
                 # Play button
                 self.__play_button = Gtk.Button.new_from_icon_name(
@@ -83,6 +78,9 @@ class OverlayAlbumHelper(OverlayHelper):
             self.__action_button.destroy()
             self.__action_button = None
 
+#######################
+# PROTECTED           #
+#######################
     def _show_append(self, append):
         """
             Show append button if append, else remove button

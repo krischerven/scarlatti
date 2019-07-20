@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk, Gio, Pango
+from gi.repository import GLib, Gdk, Gtk, Gio, Pango
 
 from gettext import gettext as _
 
@@ -167,34 +167,74 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             if child.album.id == album_id:
                 child.set_artwork()
 
-    def _on_item_activated(self, flowbox, album_widget):
+    def _on_primary_press_gesture(self, x, y, event):
         """
             Show Context view for activated album
-            @param flowbox as Gtk.Flowbox
-            @param album_widget as AlbumSimpleWidget
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
-        if not self._view_type & ViewType.SMALL and\
-                FlowBoxView._on_item_activated(self, flowbox, album_widget):
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
             return
-        if album_widget.artwork is None:
+        if child.is_selected():
+            if self._genre_ids and self._genre_ids[0] == Type.YEARS:
+                album = Album(child.album.id)
+            else:
+                album = Album(child.album.id,
+                              self._genre_ids, self._artist_ids)
+            App().window.container.show_view([Type.ALBUM], album)
+
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Show Context view for activated album
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        self._on_primary_long_gesture(x, y)
+
+    def _on_primary_long_gesture(self, x, y):
+        """
+            Show Context view for activated album
+            @param x as int
+            @param y as int
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
             return
-        if self._genre_ids and self._genre_ids[0] == Type.YEARS:
-            album = Album(album_widget.album.id)
-        else:
-            album = Album(album_widget.album.id,
-                          self._genre_ids, self._artist_ids)
-        App().window.container.show_view([Type.ALBUM], album)
+        self.__popup_menu(child.album, x, y)
 
 #######################
 # PRIVATE             #
 #######################
+    def __popup_menu(self, album, x, y):
+        """
+            Popup album menu at position
+            @param album as Album
+            @param x as int
+            @param y as int
+        """
+        from lollypop.widgets_utils import Popover
+        from lollypop.menu_objects import AlbumMenu
+        popover = Popover.new_from_model(self,
+                                         AlbumMenu(
+                                            album,
+                                            ViewType.ALBUM))
+        popover.set_position(Gtk.PositionType.BOTTOM)
+        rect = Gdk.Rectangle()
+        rect.x = x
+        rect.y = y
+        rect.width = rect.height = 1
+        popover.set_pointing_to(rect)
+        popover.popup()
+
     def __on_album_popover_closed(self, popover, album_widget):
         """
             Remove overlay and restore opacity
             @param popover as Popover
             @param album_widget as AlbumWidget
         """
-        album_widget.lock_overlay(False)
         album_widget.artwork.set_opacity(1)
 
 

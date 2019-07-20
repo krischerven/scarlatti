@@ -30,18 +30,13 @@ class OverlayRadioHelper(OverlayHelper):
         """
         OverlayHelper.__init__(self)
 
-#######################
-# PROTECTED           #
-#######################
-    def _show_overlay_func(self, show_overlay):
+    def show_overlay(self, show):
         """
             Set overlay
             @param set as bool
         """
-        if self._lock_overlay or self._show_overlay == show_overlay:
-            return
-        OverlayHelper._show_overlay_func(self, show_overlay)
-        if show_overlay:
+        OverlayHelper.show_overlay(self, show)
+        if show:
             # Play button
             self.__play_button = Gtk.Button.new_from_icon_name(
                 "media-playback-start-symbolic",
@@ -93,6 +88,4 @@ class OverlayRadioHelper(OverlayHelper):
         from lollypop.pop_radio import RadioPopover
         popover = RadioPopover(self._track)
         popover.set_relative_to(button)
-        popover.connect("closed", self._on_popover_closed)
-        self._lock_overlay = True
         popover.popup()
