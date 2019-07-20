@@ -36,7 +36,6 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
         Gtk.FlowBoxChild.__init__(self)
         OverlayRadioHelper.__init__(self)
-        self.__widget = None
         self._artwork = None
         self.__font_height = font_height
         self._track = Radio(radio_id)
@@ -50,7 +49,6 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             Init widget content
         """
         if self._artwork is None:
-            self.__widget = Gtk.EventBox()
             grid = Gtk.Grid()
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             self._artwork = Gtk.Image.new()
@@ -60,12 +58,11 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             self.__label.set_text(self._track.name)
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
-            self.__widget.add(grid)
             self._overlay = Gtk.Overlay.new()
             self._overlay.add(self._artwork)
             grid.add(self._overlay)
             grid.add(self.__label)
-            self.add(self.__widget)
+            self.add(grid)
             self.set_artwork()
             self.set_selection()
             self.show_all()
@@ -86,7 +83,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             Set artwork
         """
-        if self.__widget is None:
+        if self._artwork is None:
             return
         if self.__art_size < ArtSize.BIG:
             frame = "small-cover-frame"
@@ -124,7 +121,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             Return preferred width
             @return (int, int)
         """
-        if self.__widget is None:
+        if self._artwork is None:
             return (0, 0)
         width = Gtk.FlowBoxChild.do_get_preferred_width(self)[0]
         return (width, width)
