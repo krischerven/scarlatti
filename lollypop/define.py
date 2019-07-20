@@ -176,8 +176,8 @@ class Type:
     SETTINGS_COLLECTIONS = -17
     SETTINGS_WEB = -18
     SETTINGS_DEVICES = -19
-    GENRES_LIST = -20
-    GENRES = -21
+    GENRES = -20
+    GENRES_LIST = -21
     # WEB is stored in DB, can't be changed
     WEB = -22
     ALBUM = -23
