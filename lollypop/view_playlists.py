@@ -24,12 +24,20 @@ from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.logger import Logger
 from lollypop.helper_filtering import FilteringHelper
+from lollypop.helper_signals import SignalsHelper
 
 
-class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
+class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
+                    SignalsHelper):
     """
         View showing playlists
     """
+
+    signals = [
+        (App().playlists, "playlist-track-added", "_on_playlist_track_added"),
+        (App().playlists, "playlist-track-removed",
+         "_on_playlist_track_removed")
+    ]
 
     def __init__(self, playlist_ids, view_type):
         """
@@ -39,15 +47,9 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        SignalsHelper.__init__(self)
         FilteringHelper.__init__(self)
         self._playlist_ids = playlist_ids
-        self.__signal_id1 = App().playlists.connect(
-                                            "playlist-track-added",
-                                            self.__on_playlist_track_added)
-        self.__signal_id2 = App().playlists.connect(
-                                            "playlist-track-removed",
-                                            self.__on_playlist_track_removed)
-
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/PlaylistView.ui")
         self.__title_label = builder.get_object("title")
@@ -276,19 +278,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper):
             @param player as Player
         """
         self.__update_jump_button()
-
-    def _on_destroy(self, widget):
-        """
-            Disconnect signals
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_destroy(self, widget)
-        if self.__signal_id1:
-            App().playlists.disconnect(self.__signal_id1)
-            self.__signal_id1 = None
-        if self.__signal_id2:
-            App().playlists.disconnect(self.__signal_id2)
-            self.__signal_id2 = None
 
     def _on_jump_button_clicked(self, button):
         """
