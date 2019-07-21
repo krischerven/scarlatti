@@ -53,8 +53,7 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         self.add(self._overlay)
         self.connect("enter-notify-event",
                      lambda x, y: self.show_overlay(True))
-        self.connect("leave-notify-event",
-                     lambda x, y: self.show_overlay(False))
+        self.connect("leave-notify-event", self.__on_leave_notify)
 
     def set_artwork(self, art_size):
         """
@@ -124,6 +123,19 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_leave_notify(self, widget, event):
+        """
+            Hide overlay buttons
+            @param widget as Gtk.Widget
+            @param event es Gdk.Event
+        """
+        allocation = widget.get_allocation()
+        if event.x <= 0 or\
+           event.x >= allocation.width or\
+           event.y <= 0 or\
+           event.y >= allocation.height:
+            self.show_overlay(False)
+
     def __on_album_artwork(self, surface):
         """
             Set album artwork
@@ -147,5 +159,6 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         from lollypop.pop_artwork import CoversPopover
         popover = CoversPopover(self._album)
         popover.set_relative_to(button)
+        popover.connect("unmap", lambda x: self.show_overlay(False))
         popover.popup()
         return True
