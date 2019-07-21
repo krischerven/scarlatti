@@ -34,7 +34,6 @@ from lollypop.utils import set_proxy_from_gnome
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils import is_audio, is_pls
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType
-from lollypop.window import Window
 from lollypop.database import Database
 from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
@@ -212,6 +211,7 @@ class Application(Gtk.Application, ApplicationActions):
         Gtk.Application.do_startup(self)
 
         if self.__window is None:
+            from lollypop.window import Window
             self.init()
             self.__window = Window()
             self.__window.connect("delete-event", self.__hide_on_delete)

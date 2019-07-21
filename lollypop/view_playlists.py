@@ -332,6 +332,40 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         LazyLoadingView._on_adaptive_changed(self, window, status)
         self.set_view_type(self._view_type)
 
+    def _on_playlist_track_added(self, playlists, playlist_id, uri):
+        """
+            Append track to album list
+            @param playlists as Playlists
+            @param playlist_id as int
+            @param uri as str
+        """
+        if len(self._playlist_ids) == 1 and\
+                playlist_id in self._playlist_ids:
+            track = Track(App().tracks.get_id_by_uri(uri))
+            album = Album(track.album.id)
+            album.set_tracks([track])
+            self._view.insert_album(album, True, -1)
+
+    def _on_playlist_track_removed(self, playlists, playlist_id, uri):
+        """
+            Remove track from album list
+            @param playlists as Playlists
+            @param playlist_id as int
+            @param uri as str
+        """
+        if len(self._playlist_ids) == 1 and\
+                playlist_id in self._playlist_ids:
+            track = Track(App().tracks.get_id_by_uri(uri))
+            children = self._view.children
+            for album_row in children:
+                if album_row.album.id == track.album.id:
+                    for track_row in album_row.children:
+                        if track_row.track.id == track.id:
+                            track_row.destroy()
+                            if len(children) == 1:
+                                album_row.destroy()
+                                break
+
 #######################
 # PRIVATE             #
 #######################
@@ -360,40 +394,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param playlists_widget as PlaylistsWidget
         """
         self.__update_jump_button()
-
-    def __on_playlist_track_added(self, playlists, playlist_id, uri):
-        """
-            Append track to album list
-            @param playlists as Playlists
-            @param playlist_id as int
-            @param uri as str
-        """
-        if len(self._playlist_ids) == 1 and\
-                playlist_id in self._playlist_ids:
-            track = Track(App().tracks.get_id_by_uri(uri))
-            album = Album(track.album.id)
-            album.set_tracks([track])
-            self._view.insert_album(album, True, -1)
-
-    def __on_playlist_track_removed(self, playlists, playlist_id, uri):
-        """
-            Remove track from album list
-            @param playlists as Playlists
-            @param playlist_id as int
-            @param uri as str
-        """
-        if len(self._playlist_ids) == 1 and\
-                playlist_id in self._playlist_ids:
-            track = Track(App().tracks.get_id_by_uri(uri))
-            children = self._view.children
-            for album_row in children:
-                if album_row.album.id == track.album.id:
-                    for track_row in album_row.children:
-                        if track_row.track.id == track.id:
-                            track_row.destroy()
-                            if len(children) == 1:
-                                album_row.destroy()
-                                break
 
     def __on_remove_from_playlist(self, view, object):
         """

@@ -19,12 +19,17 @@ from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, SelectionListMask
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.shown import ShownPlaylists
+from lollypop.helper_signals import SignalsHelper
 
 
-class PlaylistsManagerView(FlowBoxView):
+class PlaylistsManagerView(FlowBoxView, SignalsHelper):
     """
         Show playlists in a FlowBox
     """
+
+    signals = [
+        (App().playlists, "playlists-changed", "_on_playlist_changed")
+    ]
 
     def __init__(self, obj, view_type=ViewType.SCROLLED):
         """
@@ -33,6 +38,7 @@ class PlaylistsManagerView(FlowBoxView):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
+        SignalsHelper.__init__(self)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__obj = obj
@@ -119,24 +125,6 @@ class PlaylistsManagerView(FlowBoxView):
         self._remove_placeholder()
         FlowBoxView._add_items(self, playlist_ids, self.__obj, self._view_type)
 
-    def _on_map(self, widget):
-        """
-            Setup widget
-        """
-        FlowBoxView._on_map(self, widget)
-        self.__signal_id = App().playlists.connect("playlists-changed",
-                                                   self.__on_playlist_changed)
-
-    def _on_unmap(self, widget):
-        """
-            Disconnect signal
-            @param widget as Gtk.Widget
-        """
-        FlowBoxView._on_unmap(self, widget)
-        if self.__signal_id is not None:
-            App().playlists.disconnect(self.__signal_id)
-            self.__signal_id = None
-
     def _on_primary_press_gesture(self, x, y, event):
         """
             Show Context view for activated album
@@ -169,6 +157,31 @@ class PlaylistsManagerView(FlowBoxView):
         if child is None or child.artwork is None:
             return
         self.__popup_menu(child)
+
+    def _on_playlist_changed(self, playlists, playlist_id):
+        """
+            Update view based on playlist_id status
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        exists = playlists.exists(playlist_id)
+        if exists:
+            item = None
+            for child in self._box.get_children():
+                if child.data == playlist_id:
+                    item = child
+                    break
+            if item is None:
+                # Setup sort on insert
+                self._box.set_sort_func(self.__sort_func)
+                self._add_items([playlist_id])
+            else:
+                name = App().playlists.get_name(playlist_id)
+                item.rename(name)
+        else:
+            for child in self._box.get_children():
+                if child.data == playlist_id:
+                    child.destroy()
 
 #######################
 # PRIVATE             #
@@ -206,31 +219,6 @@ class PlaylistsManagerView(FlowBoxView):
         # String comparaison for non static
         else:
             return strcoll(widget1.name, widget2.name)
-
-    def __on_playlist_changed(self, playlists, playlist_id):
-        """
-            Update view based on playlist_id status
-            @param playlists as Playlists
-            @param playlist_id as int
-        """
-        exists = playlists.exists(playlist_id)
-        if exists:
-            item = None
-            for child in self._box.get_children():
-                if child.data == playlist_id:
-                    item = child
-                    break
-            if item is None:
-                # Setup sort on insert
-                self._box.set_sort_func(self.__sort_func)
-                self._add_items([playlist_id])
-            else:
-                name = App().playlists.get_name(playlist_id)
-                item.rename(name)
-        else:
-            for child in self._box.get_children():
-                if child.data == playlist_id:
-                    child.destroy()
 
     def __on_new_button_clicked(self, button):
         """

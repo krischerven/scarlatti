@@ -12,7 +12,6 @@
 
 from gi.repository import Gtk, Gio, Gdk, GLib
 
-from lollypop.container import Container
 from lollypop.define import App, Sizing, ScanType
 from lollypop.toolbar import Toolbar
 from lollypop.logger import Logger
@@ -44,7 +43,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
         self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
-        self.__setup_content()
         App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure = None
         # FIXME Remove this, handled by MPRIS in GNOME 3.26
@@ -221,6 +219,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         """
             Setup window content
         """
+        from lollypop.container import Container
         self.__container = Container()
         self.set_stack(self.container.stack)
         self.__container.show()
@@ -286,6 +285,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             Run scanner on realize
             @param widget as Gtk.Widget
         """
+        self.__setup_content()
         self.container.setup_lists()
         self.__setup()
         if App().settings.get_value("auto-update") or App().tracks.is_empty():
