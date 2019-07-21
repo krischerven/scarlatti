@@ -13,12 +13,17 @@
 from gi.repository import Gtk
 
 from lollypop.define import App
+from lollypop.helper_signals import SignalsHelper
 
 
-class AlbumWidget:
+class AlbumWidget(SignalsHelper):
     """
         Album widget
     """
+
+    signals = [
+        (App().scanner, "album-updated", "_on_album_updated")
+    ]
 
     def __init__(self, album, genre_ids, artist_ids):
         """
@@ -27,13 +32,11 @@ class AlbumWidget:
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
+        SignalsHelper.__init__(self)
         self._artwork = None
         self._album = album
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
-        self.connect("destroy", self.__on_destroy)
-        self._scan_signal = App().scanner.connect("album-updated",
-                                                  self._on_album_updated)
 
     def set_selection(self):
         """
@@ -59,14 +62,3 @@ class AlbumWidget:
 #######################
     def _on_album_updated(self, scanner, album_id, destroy):
         pass
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_destroy(self, widget):
-        """
-            Disconnect signal
-            @param widget as Gtk.Widget
-        """
-        if self._scan_signal is not None:
-            App().scanner.disconnect(self._scan_signal)
