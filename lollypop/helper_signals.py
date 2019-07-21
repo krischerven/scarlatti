@@ -28,7 +28,7 @@ class SignalsHelper():
         """
         self.__connected = []
         self.connect("map", self.__on_map)
-        self.connect("unmap", self.__on_unmap)
+        self.connect("destroy", self.__on_destroy)
 
 #######################
 # PRIVATE             #
@@ -48,7 +48,7 @@ class SignalsHelper():
             obj.connect(signal, callback)
             self.__connected.append(name)
 
-    def __on_unmap(self, widget):
+    def __on_destroy(self, widget):
         """
             Disconnect signals
             @param widget as Gtk.Widget

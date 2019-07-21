@@ -20,12 +20,17 @@ from lollypop.utils import on_realize, on_query_tooltip
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
+from lollypop.helper_signals import SignalsHelper
 
 
-class ArtistBannerWidget(BannerWidget):
+class ArtistBannerWidget(BannerWidget, SignalsHelper):
     """
         Banner for artist
     """
+
+    signals = [
+        (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+    ]
 
     def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
         """
@@ -35,6 +40,7 @@ class ArtistBannerWidget(BannerWidget):
             @param view_type as ViewType (Unused)
         """
         BannerWidget.__init__(self, view_type)
+        SignalsHelper.__init__(self)
         self.__album_ids = None
         self.__album_id = None
         self.__genre_ids = genre_ids
@@ -55,7 +61,6 @@ class ArtistBannerWidget(BannerWidget):
         builder.get_object("artwork_event").connect("realize", on_realize)
         builder.get_object("label_event").connect("realize", on_realize)
         widget = builder.get_object("widget")
-        self.connect("destroy", self.__on_destroy)
         artists = []
         for artist_id in self.__artist_ids:
             artists.append(App().artists.get_name(artist_id))
@@ -67,9 +72,6 @@ class ArtistBannerWidget(BannerWidget):
             self.__title_label.get_style_context().add_class("text-xx-large")
         else:
             self.__title_label.get_style_context().add_class("text-x-large")
-        self.__art_signal_id = App().art.connect(
-                                           "artist-artwork-changed",
-                                           self.__on_artist_artwork_changed)
         self.add_overlay(widget)
         self.set_view_type(view_type)
 
@@ -243,6 +245,21 @@ class ArtistBannerWidget(BannerWidget):
         pop.set_relative_to(eventbox)
         pop.show()
 
+    def _on_artist_artwork_changed(self, art, prefix):
+        """
+            Update artwork if needed
+            @param art as Art
+            @param prefix as str
+        """
+        if len(self.__artist_ids) == 1:
+            artist = App().artists.get_name(self.__artist_ids[0])
+            if prefix == artist:
+                rect = Gdk.Rectangle()
+                rect.width = self.get_allocated_width()
+                rect.height = self.get_allocated_height()
+                self.__width = 0
+                self.__handle_size_allocate(rect)
+
 #######################
 # PRIVATE             #
 #######################
@@ -335,29 +352,6 @@ class ArtistBannerWidget(BannerWidget):
                 ArtBehaviour.BLUR_HARD |
                 ArtBehaviour.DARKER,
                 self.__on_album_artwork)
-
-    def __on_destroy(self, widget):
-        """
-            Disconnect signal
-            @param widget as Gtk.Widget
-        """
-        if self.__art_signal_id is not None:
-            App().art.disconnect(self.__art_signal_id)
-
-    def __on_artist_artwork_changed(self, art, prefix):
-        """
-            Update artwork if needed
-            @param art as Art
-            @param prefix as str
-        """
-        if len(self.__artist_ids) == 1:
-            artist = App().artists.get_name(self.__artist_ids[0])
-            if prefix == artist:
-                rect = Gdk.Rectangle()
-                rect.width = self.get_allocated_width()
-                rect.height = self.get_allocated_height()
-                self.__width = 0
-                self.__handle_size_allocate(rect)
 
     def __on_album_artwork(self, surface):
         """
