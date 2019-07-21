@@ -10,6 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from lollypop.define import App
+# For lint
+App()
+
 
 class SignalsHelper():
     """
@@ -34,10 +38,11 @@ class SignalsHelper():
             Connect signals
             @param widget as Gtk.Widget
         """
-        for (object, signal, callback_str) in self.signals:
-            name = "%s_%s" % (str(object), signal)
+        for (object_str, signal, callback_str) in self.signals:
+            name = "%s_%s" % (object_str, signal)
             if name in self.__connected:
                 continue
+            object = eval(object_str)
             callback = getattr(self, callback_str)
             object.connect(signal, callback)
             self.__connected.append(name)
@@ -47,10 +52,11 @@ class SignalsHelper():
             Disconnect signals
             @param widget as Gtk.Widget
         """
-        for (object, signal, callback_str) in self.signals:
-            name = "%s_%s" % (str(object), signal)
+        for (object_str, signal, callback_str) in self.signals:
+            name = "%s_%s" % (object_str, signal)
             if name not in self.__connected:
                 continue
+            object = eval(object_str)
             callback = getattr(self, callback_str)
             object.disconnect_by_func(callback)
             self.__connected.remove(name)

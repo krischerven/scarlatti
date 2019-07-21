@@ -32,10 +32,11 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
     """
 
     signals = [
-        (App().spotify, "new-album", "_on_new_spotify_album"),
-        (App().spotify, "search-finished", "_on_search_finished"),
-        (App().settings, "changed::network-access", "_update_bottom_buttons"),
-        (App().settings, "changed::network-access-acl",
+        ("App().spotify", "new-album", "_on_new_spotify_album"),
+        ("App().spotify", "search-finished", "_on_search_finished"),
+        ("App().settings", "changed::network-access",
+         "_update_bottom_buttons"),
+        ("App().settings", "changed::network-access-acl",
          "_update_bottom_buttons")
     ]
 
@@ -121,7 +122,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         """
             Update bottom buttons based on current state
         """
-        print("plop")
         if GLib.find_program_in_path("youtube-dl") is None or\
                 not get_network_available("SPOTIFY") or\
                 not get_network_available("YOUTUBE"):
