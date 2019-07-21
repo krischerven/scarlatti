@@ -35,8 +35,7 @@ class OverlayRadioHelper(OverlayHelper):
             Set overlay
             @param set as bool
         """
-        if (show and self._big_grid is not None) or\
-                (not show and self._big_grid is None):
+        if self.is_set_overlay_valid(show):
             return
         OverlayHelper.show_overlay(self, show)
         if show:
@@ -91,4 +90,6 @@ class OverlayRadioHelper(OverlayHelper):
         from lollypop.pop_radio import RadioPopover
         popover = RadioPopover(self._track)
         popover.set_relative_to(button)
+        popover.connect("closed", self._on_popover_closed)
+        self._locked = True
         popover.popup()

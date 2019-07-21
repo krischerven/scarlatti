@@ -28,7 +28,7 @@ class OverlayHelper:
         self._big_grid = None
         self._small_grid = None
         self._watch_loading = False
-        self.__timeout_id = None
+        self._locked = False
         self._pixel_size = ArtSize.BIG / 9
 
     def show_spinner(self, status):
@@ -54,8 +54,7 @@ class OverlayHelper:
             Set overlay
             @param show as bool
         """
-        if (show and self._big_grid is not None) or\
-                (not show and self._big_grid is None):
+        if self.is_set_overlay_valid(show):
             return
         if show:
             self._big_grid = Gtk.Grid()
@@ -80,3 +79,24 @@ class OverlayHelper:
             self._big_grid = None
             self._small_grid.destroy()
             self._small_grid = None
+
+    def is_set_overlay_valid(self, show):
+        """
+            True if set overlay ok
+            @param value as bool
+            @return show
+        """
+        return self._locked or\
+            (show and self._big_grid is not None) or\
+            (not show and self._big_grid is None)
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_popover_closed(self, popover):
+        """
+            Remove lock
+            @param popover as Gtk.Popover
+        """
+        self._locked = False
+        self.show_overlay(False)

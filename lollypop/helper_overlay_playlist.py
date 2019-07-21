@@ -38,8 +38,7 @@ class OverlayPlaylistHelper(OverlayHelper):
             Set overlay
             @param show as bool
         """
-        if (show and self._big_grid is not None) or\
-                (not show and self._big_grid is None):
+        if self.is_set_overlay_valid(show):
             return
         OverlayHelper.show_overlay(self, show)
         if show:
@@ -144,6 +143,6 @@ class OverlayPlaylistHelper(OverlayHelper):
         popover = PlaylistEditPopover(self._data)
         popover.set_relative_to(button)
         popover.connect("closed", self._on_popover_closed)
-        self._lock_overlay = True
+        self._locked = True
         popover.popup()
         return True

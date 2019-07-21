@@ -18,12 +18,17 @@ from lollypop.widgets_radio import RadioWidget
 from lollypop.pop_tunein import TuneinPopover
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.utils import get_icon_name, get_network_available
+from lollypop.helper_signals import SignalsHelper
 
 
-class RadiosView(FlowBoxView, ViewController):
+class RadiosView(FlowBoxView, ViewController, SignalsHelper):
     """
         Show radios flow box
     """
+
+    signals = [
+        (App().radios, "radio-changed", "_on_radio_changed")
+    ]
 
     def __init__(self, view_type=ViewType.SCROLLED):
         """
@@ -31,6 +36,7 @@ class RadiosView(FlowBoxView, ViewController):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
+        SignalsHelper.__init__(self)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._widget_class = RadioWidget
         self._empty_icon_name = get_icon_name(Type.RADIOS)
@@ -118,8 +124,6 @@ class RadiosView(FlowBoxView, ViewController):
             Set active ids
         """
         FlowBoxView._on_map(self, widget)
-        self.__signal_id = App().radios.connect("radio-changed",
-                                                self.__on_radio_changed)
 
     def _on_unmap(self, widget):
         """
@@ -127,17 +131,11 @@ class RadiosView(FlowBoxView, ViewController):
             @param widget as Gtk.Widget
         """
         FlowBoxView._on_unmap(self, widget)
-        if self.__signal_id is not None:
-            App().radios.disconnect(self.__signal_id)
-            self.__signal_id = None
         if self.__pop_tunein is not None:
             self.__pop_tunein.destroy()
             self.__pop_tunein = None
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_radio_changed(self, radios, radio_id):
+    def _on_radio_changed(self, radios, radio_id):
         """
             Update view based on radio_id status
             @param radios as Radios
@@ -159,3 +157,7 @@ class RadiosView(FlowBoxView, ViewController):
             for child in self._box.get_children():
                 if child.track.id == radio_id:
                     child.destroy()
+
+#######################
+# PRIVATE             #
+#######################

@@ -50,8 +50,7 @@ class OverlayAlbumHelper(OverlayHelper):
             Set overlay
             @param show as bool
         """
-        if (show and self._big_grid is not None) or\
-                (not show and self._big_grid is None):
+        if self.is_set_overlay_valid(show):
             return
         OverlayHelper.show_overlay(self, show)
         if show:
