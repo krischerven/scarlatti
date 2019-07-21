@@ -19,12 +19,17 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip, on_realize
+from lollypop.helper_signals import SignalsHelper
 
 
-class AlbumBannerWidget(BannerWidget):
+class AlbumBannerWidget(BannerWidget, SignalsHelper):
     """
         Banner for album
     """
+
+    signals = [
+        (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+    ]
 
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
@@ -33,6 +38,7 @@ class AlbumBannerWidget(BannerWidget):
             @param view_type as ViewType
         """
         BannerWidget.__init__(self, view_type)
+        SignalsHelper.__init__(self)
         self.__cloud_image = None
         self.__album = album
         self.set_property("valign", Gtk.Align.START)
@@ -74,10 +80,6 @@ class AlbumBannerWidget(BannerWidget):
             "black-transparent")
         self.get_style_context().add_class("black")
         self._artwork.get_style_context().add_class("black")
-        self.connect("destroy", self.__on_destroy)
-        self.__art_signal_id = App().art.connect(
-                                           "album-artwork-changed",
-                                           self.__on_album_artwork_changed)
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
         if album.mtime <= 0:
@@ -206,6 +208,23 @@ class AlbumBannerWidget(BannerWidget):
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
 
+    def _on_album_artwork_changed(self, art, album_id):
+        """
+            Update cover for album_id
+            @param art as Art
+            @param album_id as int
+        """
+        if album_id == self.__album.id:
+            App().art_helper.set_album_artwork(
+                            self.__album,
+                            # +100 to prevent resize lag
+                            self.get_allocated_width() + 100,
+                            self.height,
+                            self._artwork.get_scale_factor(),
+                            ArtBehaviour.BLUR_HARD |
+                            ArtBehaviour.DARKER,
+                            self.__on_album_artwork)
+
 #######################
 # PRIVATE             #
 #######################
@@ -233,31 +252,6 @@ class AlbumBannerWidget(BannerWidget):
                 "text-xx-large")
             self.__year_label.get_style_context().add_class(
                 "text-x-large")
-
-    def __on_destroy(self, widget):
-        """
-            Disconnect signal
-            @param widget as Gtk.Widget
-        """
-        if self.__art_signal_id is not None:
-            App().art.disconnect(self.__art_signal_id)
-
-    def __on_album_artwork_changed(self, art, album_id):
-        """
-            Update cover for album_id
-            @param art as Art
-            @param album_id as int
-        """
-        if album_id == self.__album.id:
-            App().art_helper.set_album_artwork(
-                            self.__album,
-                            # +100 to prevent resize lag
-                            self.get_allocated_width() + 100,
-                            self.height,
-                            self._artwork.get_scale_factor(),
-                            ArtBehaviour.BLUR_HARD |
-                            ArtBehaviour.DARKER,
-                            self.__on_album_artwork)
 
     def __on_album_artwork(self, surface):
         """
