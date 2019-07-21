@@ -18,11 +18,12 @@ from lollypop.controller_information import InformationController
 from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper
 from lollypop.utils import on_realize
 from lollypop.define import App, ArtSize
 
 
-class MiniPlayer(Gtk.Bin, InformationController,
+class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
                  ProgressController, PlaybackController, SizeAllocationHelper):
     """
         Mini player shown in adaptive mode
@@ -30,6 +31,12 @@ class MiniPlayer(Gtk.Bin, InformationController,
     __gsignals__ = {
         "revealed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
+
+    signals = [
+        (App().player, "current-changed", "_on_current_changed"),
+        (App().player, "status-changed", "_on_status_changed"),
+        (App().player, "duration-changed", "on_duration_changed")
+    ]
 
     def __init__(self):
         """
@@ -42,6 +49,7 @@ class MiniPlayer(Gtk.Bin, InformationController,
         ProgressController.__init__(self)
         PlaybackController.__init__(self)
         SizeAllocationHelper.__init__(self)
+        SignalsHelper.__init__(self)
         self.__size = 0
         self.__cover = None
         builder = Gtk.Builder()
@@ -73,13 +81,7 @@ class MiniPlayer(Gtk.Bin, InformationController,
 
         self.__grid = builder.get_object("grid")
         self._artwork = builder.get_object("cover")
-        self.__signal_id1 = App().player.connect("current-changed",
-                                                 self.__on_current_changed)
-        self.__signal_id2 = App().player.connect("status-changed",
-                                                 self.__on_status_changed)
-        self.__signal_id3 = App().player.connect("duration-changed",
-                                                 self.on_duration_changed)
-        self.__on_current_changed(App().player)
+        self._on_current_changed(App().player)
         if App().player.current_track.id is not None:
             PlaybackController.on_status_changed(self, App().player)
             self.update_position()
@@ -153,6 +155,27 @@ class MiniPlayer(Gtk.Bin, InformationController,
             self.__revealer.set_reveal_child(True)
             self.emit("revealed", True)
 
+    def _on_current_changed(self, player):
+        """
+            Update controllers
+            @param player as Player
+        """
+        if App().player.current_track.id is not None:
+            self.show()
+        InformationController.on_current_changed(self, self.__size, None)
+        ProgressController.on_current_changed(self, player)
+        PlaybackController.on_current_changed(self, player)
+        if self.__cover is not None:
+            self.__update_artwork()
+
+    def _on_status_changed(self, player):
+        """
+            Update controllers
+            @param player as Player
+        """
+        ProgressController.on_status_changed(self, player)
+        PlaybackController.on_status_changed(self, player)
+
 #######################
 # PRIVATE             #
 #######################
@@ -203,30 +226,6 @@ class MiniPlayer(Gtk.Bin, InformationController,
         """
         ProgressController.on_destroy(self)
         PlaybackController.on_destroy(self)
-        App().player.disconnect(self.__signal_id1)
-        App().player.disconnect(self.__signal_id2)
-        App().player.disconnect(self.__signal_id3)
-
-    def __on_current_changed(self, player):
-        """
-            Update controllers
-            @param player as Player
-        """
-        if App().player.current_track.id is not None:
-            self.show()
-        InformationController.on_current_changed(self, self.__size, None)
-        ProgressController.on_current_changed(self, player)
-        PlaybackController.on_current_changed(self, player)
-        if self.__cover is not None:
-            self.__update_artwork()
-
-    def __on_status_changed(self, player):
-        """
-            Update controllers
-            @param player as Player
-        """
-        ProgressController.on_status_changed(self, player)
-        PlaybackController.on_status_changed(self, player)
 
     def __on_artwork(self, surface):
         """

@@ -20,13 +20,13 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
     """
         Type ahead widget
     """
-    signals = [
+    signals_map = [
         ("App().window.container.list_view",
          "button-press-event",
          "_on_list_key_press_event"),
     ]
 
-    def __init__(self,):
+    def __init__(self):
         """
             Init widget
         """

@@ -20,25 +20,30 @@ class SignalsHelper():
         Helper for autoconnect/disconnect signals on map
     """
 
-    signals = {}
-
     def __init__(self):
         """
             Init helper
         """
         self.__connected = []
-        self.connect("map", self.__on_map)
-        self.connect("destroy", self.__on_destroy)
+        if hasattr(self, "signals"):
+            self._connect_signals(self.signals)
+            self.connect("destroy",
+                         lambda x: self._disconnect_signals(self.signals))
+        elif hasattr(self, "signals_map"):
+            self.connect("map",
+                         lambda x: self._connect_signals(self.signals_map))
+            self.connect("unmap",
+                         lambda x: self._disconnect_signals(self.signals_map))
 
 #######################
-# PRIVATE             #
+# PROTECTE            #
 #######################
-    def __on_map(self, widget):
+    def _connect_signals(self, signals):
         """
             Connect signals
-            @param widget as Gtk.Widget
+            @param signals as []
         """
-        for (obj, signal, callback_str) in self.signals:
+        for (obj, signal, callback_str) in signals:
             name = "%s_%s" % (obj, signal)
             if name in self.__connected:
                 continue
@@ -48,12 +53,12 @@ class SignalsHelper():
             obj.connect(signal, callback)
             self.__connected.append(name)
 
-    def __on_destroy(self, widget):
+    def _disconnect_signals(self, signals):
         """
             Disconnect signals
-            @param widget as Gtk.Widget
+            @param signals as []
         """
-        for (obj, signal, callback_str) in self.signals:
+        for (obj, signal, callback_str) in signals:
             name = "%s_%s" % (obj, signal)
             if name not in self.__connected:
                 continue
