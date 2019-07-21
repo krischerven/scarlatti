@@ -19,12 +19,18 @@ import gc
 from lollypop.define import ViewType, Type, App
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
+from lollypop.helper_signals import SignalsHelper
 
 
-class View(AdaptiveView, Gtk.Grid):
+class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     """
         Generic view
     """
+
+    signals = [
+        (App().window, "adaptive-changed", "_on_adaptive_changed"),
+        (App().scanner, "album-updated", "_on_album_updated")
+    ]
 
     def __init__(self, view_type=ViewType.DEFAULT):
         """
@@ -33,12 +39,10 @@ class View(AdaptiveView, Gtk.Grid):
         """
         AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
+        SignalsHelper.__init__(self)
         self._view_type = view_type
-        self.__adaptive_signal_id = None
         self.__destroyed = False
         self._sidebar_id = Type.NONE
-        self.__scanner_signal_id = App().scanner.connect(
-            "album-updated", self._on_album_updated)
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
         self.__new_ids = []
@@ -62,9 +66,6 @@ class View(AdaptiveView, Gtk.Grid):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-        self.__adaptive_signal_id = App().window.connect(
-                                                "adaptive-changed",
-                                                self._on_adaptive_changed)
         if not view_type & (ViewType.POPOVER | ViewType.SEARCH):
             self.get_style_context().add_class("view")
 
@@ -212,12 +213,6 @@ class View(AdaptiveView, Gtk.Grid):
             Clean up widget
             @param widget as Gtk.Widget
         """
-        if self.__adaptive_signal_id is not None:
-            App().window.disconnect(self.__adaptive_signal_id)
-            self.__adaptive_signal_id = None
-        if self.__scanner_signal_id is not None:
-            App().scanner.disconnect(self.__scanner_signal_id)
-            self.__scanner_signal_id = None
         self.__destroyed = True
         gc.collect()
 
