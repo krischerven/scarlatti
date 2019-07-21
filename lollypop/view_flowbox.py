@@ -17,12 +17,18 @@ from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.define import ViewType, App
 from lollypop.utils import get_font_height
+from lollypop.helper_signals import SignalsHelper
 
 
-class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
+class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
+                  SignalsHelper):
     """
         Lazy loading FlowBox
     """
+
+    signals = [
+        (App().player, "loading-changed", "_on_loading_changed")
+    ]
 
     def __init__(self, view_type=ViewType.SCROLLED):
         """
@@ -31,7 +37,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         LazyLoadingView.__init__(self, view_type)
         FilteringHelper.__init__(self)
-        self.__loading_changed_id = None
+        SignalsHelper.__init__(self)
         self._widget_class = None
         self._items = []
         self.__selected_child = None
@@ -162,26 +168,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             self._lazy_queue.append(child)
         self.lazy_loading()
 
-    def _on_map(self, widget):
-        """
-            Connect signals
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_map(self, widget)
-        if self.__loading_changed_id is None:
-            self.__loading_changed_id = App().player.connect(
-                "loading-changed", self.__on_loading_changed)
-
-    def _on_unmap(self, widget):
-        """
-            Disconnect signals
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_unmap(self, widget)
-        if self.__loading_changed_id is not None:
-            App().player.disconnect(self.__loading_changed_id)
-            self.__loading_changed_id = None
-
     def _on_leave_notify_event(self, widget, event):
         """
             Usefull to disable overlay
@@ -194,6 +180,22 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         if self.__selected_child is not None:
             self._box.unselect_child(self.__selected_child)
             self.__selected_child = None
+
+    def _on_loading_changed(self, player, status, album):
+        """
+            Show a spinner while loading
+            @param player as Player
+            @param status as bool
+            @param album as Album
+        """
+        for child in self._box.get_children():
+            if hasattr(child, "album"):
+                if album.id != child.album.id:
+                    continue
+            elif child.track.album.id != album.id:
+                continue
+            if hasattr(child, "show_spinner"):
+                child.show_spinner(status)
 
 #######################
 # PRIVATE             #
@@ -233,19 +235,3 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
                 GLib.source_remove(self.__selected_timeout_id)
             self.__selected_timeout_id = GLib.timeout_add(
                 50, select_child, child)
-
-    def __on_loading_changed(self, player, status, album):
-        """
-            Show a spinner while loading
-            @param player as Player
-            @param status as bool
-            @param album as Album
-        """
-        for child in self._box.get_children():
-            if hasattr(child, "album"):
-                if album.id != child.album.id:
-                    continue
-            elif child.track.album.id != album.id:
-                continue
-            if hasattr(child, "show_spinner"):
-                child.show_spinner(status)
