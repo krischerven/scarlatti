@@ -29,18 +29,12 @@ class ViewController:
             Init controller
             @param controller_type as ViewControllerType
         """
-        self.__signals_ids = {}
-        self.__type = controller_type
-        self.connect("destroy", self.__on_destroy)
-        self.__signals_ids[
-            App().player.connect("current-changed",
-                                 self._on_current_changed)] = App().player
-        self.__signals_ids[
-            App().player.connect("duration-changed",
-                                 self._on_duration_changed)] = App().player
-        self.__signals_ids[
-            App().art.connect("%s-artwork-changed" % self.__type,
-                              self._on_artwork_changed)] = App().art
+        self.signals = [
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "duration-changed", "_on_duration_changed"),
+            (App().player, "%s-artwork-changed" % controller_type,
+             "_on_artwork_changed")
+        ]
 
 #######################
 # PROTECTED           #
@@ -57,11 +51,3 @@ class ViewController:
 #######################
 # PRIVATE             #
 #######################
-    def __on_destroy(self, widget):
-        """
-            Disconnect signals
-            @param widget as Gtk.Widget
-        """
-        for signal_id in self.__signals_ids.keys():
-            self.__signals_ids[signal_id].disconnect(signal_id)
-        self.__signals_ids = {}
