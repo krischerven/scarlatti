@@ -38,13 +38,12 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.__timeout = None
         self.__miniplayer = None
         self.__mediakeys = None
-        self.__sidebar_shown = False
         self.__media_keys_busnames = []
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
         self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
         App().player.connect("current-changed", self.__on_current_changed)
-        self.__timeout_configure = None
+        self.__timeout_configure_id = None
         # FIXME Remove this, handled by MPRIS in GNOME 3.26
         self.__setup_media_keys()
         self.set_auto_startup_notification(False)
@@ -258,7 +257,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             Save window state, update current view content size
             @param: widget as Gtk.Window
         """
-        self.__timeout_configure = None
+        if self.is_maximized():
+            return
         (width, height) = widget.get_size()
         # Keep a minimal height
         if height < Sizing.MEDIUM:
@@ -372,17 +372,19 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             @param window as Gtk.Window
             @param event as Gdk.Event
         """
+        def on_configure_event(width, height):
+            self.__timeout_configure_id = None
+            self.__handle_miniplayer(width, height)
+            self.__toolbar.set_content_width(width)
+            self.__save_size_position(window)
+
         (width, height) = window.get_size()
-        self.__handle_miniplayer(width, height)
-        self.__toolbar.set_content_width(width)
-        if self.__timeout_configure:
-            GLib.source_remove(self.__timeout_configure)
-            self.__timeout_configure = None
-        if not self.is_maximized():
-            self.__timeout_configure = GLib.timeout_add(
-                1000,
-                self.__save_size_position,
-                window)
+        if self.__timeout_configure_id:
+            GLib.source_remove(self.__timeout_configure_id)
+            self.__timeout_configure_id = None
+        self.__timeout_configure_id = GLib.idle_add(on_configure_event,
+                                                    width, height,
+                                                    priority=GLib.PRIORITY_LOW)
 
     def __on_adaptive_changed(self, window, status):
         """
