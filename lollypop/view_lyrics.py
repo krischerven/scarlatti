@@ -22,6 +22,7 @@ from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_lyrics import SyncLyricsHelper
+from lollypop.helper_signals import SignalsHelper
 
 
 class LyricsLabel(Gtk.Stack):
@@ -75,21 +76,25 @@ class LyricsLabel(Gtk.Stack):
                 break
 
 
-class LyricsView(View, InformationController):
+class LyricsView(View, InformationController, SignalsHelper):
     """
         Show lyrics for track
     """
+
+    signals = [
+        (App().player, "current-changed", "_on_current_changed")
+    ]
 
     def __init__(self):
         """
             Init view
         """
         View.__init__(self, ViewType.SCROLLED)
+        SignalsHelper.__init__(self)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |
                                        ArtBehaviour.CROP |
                                        ArtBehaviour.DARKER)
-        self.__current_changed_id = None
         self.__size_allocate_timeout_id = None
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
@@ -169,15 +174,6 @@ class LyricsView(View, InformationController):
         else:
             self.__lyrics_label.set_text(self.__lyrics_text)
 
-    def _on_map(self, widget):
-        """
-            Set active ids
-            @param widget as Gtk.Widget
-        """
-        View._on_map(self, widget)
-        self.__current_changed_id = App().player.connect(
-            "current-changed", self.__on_current_changed)
-
     def _on_unmap(self, widget):
         """
             Connect player signal
@@ -187,9 +183,14 @@ class LyricsView(View, InformationController):
         if self.__lyrics_timeout_id is not None:
             GLib.source_remove(self.__lyrics_timeout_id)
             self.__lyrics_timeout_id = None
-        if self.__current_changed_id is not None:
-            App().player.disconnect(self.__current_changed_id)
-            self.__current_changed_id = None
+
+    def _on_current_changed(self, player):
+        """
+            Update lyrics
+            @param player as Player
+        """
+        self.populate(App().player.current_track)
+        self.__translate_button.set_sensitive(True)
 
 ############
 # PRIVATE  #
@@ -379,11 +380,3 @@ class LyricsView(View, InformationController):
         if not self.__lyrics_text and self.__downloads_running == 0:
             self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
             self.__translate_button.set_sensitive(False)
-
-    def __on_current_changed(self, player):
-        """
-            Update lyrics
-            @param player as Player
-        """
-        self.populate(App().player.current_track)
-        self.__translate_button.set_sensitive(True)
