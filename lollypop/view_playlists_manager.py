@@ -27,16 +27,15 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         Show playlists in a FlowBox
     """
 
-    signals = [
-        (App().playlists, "playlists-changed", "_on_playlist_changed")
-    ]
-
     def __init__(self, obj, view_type=ViewType.SCROLLED):
         """
             Init decade view
             @param obj as Track/Album
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().playlists, "playlists-changed", "_on_playlist_changed")
+        ]
         FlowBoxView.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__signal_id = None

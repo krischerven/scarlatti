@@ -28,15 +28,14 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
-    signals = [
-        (App().art, "album-artwork-changed", "_on_album_artwork_changed")
-    ]
-
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+        ]
         Gtk.EventBox.__init__(self)
         SignalsHelper.__init__(self)
         self.set_property("halign", Gtk.Align.CENTER)

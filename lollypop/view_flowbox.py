@@ -26,15 +26,14 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         Lazy loading FlowBox
     """
 
-    signals = [
-        (App().player, "loading-changed", "_on_loading_changed")
-    ]
-
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init flowbox view
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().player, "loading-changed", "_on_loading_changed")
+        ]
         LazyLoadingView.__init__(self, view_type)
         FilteringHelper.__init__(self)
         SignalsHelper.__init__(self)

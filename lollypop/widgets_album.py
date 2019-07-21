@@ -21,10 +21,6 @@ class AlbumWidget(SignalsHelper):
         Album widget
     """
 
-    signals = [
-        (App().scanner, "album-updated", "_on_album_updated")
-    ]
-
     def __init__(self, album, genre_ids, artist_ids):
         """
             Init Album widget
@@ -32,6 +28,9 @@ class AlbumWidget(SignalsHelper):
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
+        self.signals = [
+            (App().scanner, "album-updated", "_on_album_updated")
+        ]
         SignalsHelper.__init__(self)
         self._artwork = None
         self._album = album

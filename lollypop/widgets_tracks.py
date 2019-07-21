@@ -26,14 +26,13 @@ class TracksWidget(Gtk.ListBox, SignalsHelper):
                       None, (GObject.TYPE_PYOBJECT,))
     }
 
-    signals = [
-        (App().player, "queue-changed", "_on_queue_changed")
-    ]
-
     def __init__(self):
         """
             Init track widget
         """
+        self.signals = [
+            (App().player, "queue-changed", "_on_queue_changed")
+        ]
         Gtk.ListBox.__init__(self)
         SignalsHelper.__init__(self)
         self.get_style_context().add_class("trackswidget")

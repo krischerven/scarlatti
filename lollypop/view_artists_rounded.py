@@ -28,15 +28,14 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         Show artists in a FlowBox
     """
 
-    signals = [
-        (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
-    ]
-
     def __init__(self, view_type):
         """
             Init artist view
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+        ]
         FlowBoxView.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__view_type = view_type

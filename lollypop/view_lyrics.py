@@ -81,14 +81,13 @@ class LyricsView(View, InformationController, SignalsHelper):
         Show lyrics for track
     """
 
-    signals = [
-        (App().player, "current-changed", "_on_current_changed")
-    ]
-
     def __init__(self):
         """
             Init view
         """
+        self.signals = [
+            (App().player, "current-changed", "_on_current_changed")
+        ]
         View.__init__(self, ViewType.SCROLLED)
         SignalsHelper.__init__(self)
         InformationController.__init__(self, False,

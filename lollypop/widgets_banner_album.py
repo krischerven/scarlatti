@@ -27,16 +27,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         Banner for album
     """
 
-    signals = [
-        (App().art, "album-artwork-changed", "_on_album_artwork_changed")
-    ]
-
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
             @param album
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+        ]
         BannerWidget.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__cloud_image = None

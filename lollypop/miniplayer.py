@@ -32,16 +32,15 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
         "revealed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
-    signals = [
-        (App().player, "current-changed", "_on_current_changed"),
-        (App().player, "status-changed", "_on_status_changed"),
-        (App().player, "duration-changed", "on_duration_changed")
-    ]
-
     def __init__(self):
         """
             Init mini player
         """
+        self.signals = [
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "status-changed", "_on_status_changed"),
+            (App().player, "duration-changed", "on_duration_changed")
+        ]
         Gtk.Bin.__init__(self)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |

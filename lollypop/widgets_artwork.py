@@ -99,14 +99,13 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
         Search for artwork
     """
 
-    signals = [
-        (App().art, "uri-artwork-found", "_on_uri_artwork_found")
-    ]
-
     def __init__(self):
         """
             Init widget
         """
+        self.signals = [
+            (App().art, "uri-artwork-found", "_on_uri_artwork_found")
+        ]
         Gtk.Bin.__init__(self)
         SignalsHelper.__init__(self)
         self.__timeout_id = None

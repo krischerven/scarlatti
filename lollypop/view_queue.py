@@ -24,15 +24,14 @@ class QueueView(View, SignalsHelper):
         View showing queue
     """
 
-    signals = [
-        (App().player, "current-changed", "_on_current_changed")
-    ]
-
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init Popover
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().player, "current-changed", "_on_current_changed")
+        ]
         View.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__view_type = view_type

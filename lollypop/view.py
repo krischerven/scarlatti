@@ -27,16 +27,15 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         Generic view
     """
 
-    signals = [
-        (App().window, "adaptive-changed", "_on_adaptive_changed"),
-        (App().scanner, "album-updated", "_on_album_updated")
-    ]
-
     def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init view
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().window, "adaptive-changed", "_on_adaptive_changed"),
+            (App().scanner, "album-updated", "_on_album_updated")
+        ]
         AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
         SignalsHelper.__init__(self)

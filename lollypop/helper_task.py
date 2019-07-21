@@ -28,7 +28,6 @@ class TaskHelper:
         """
             Init helper
         """
-        self.__signals = {}
         self.__headers = []
 
     def add_header(self, name, value):

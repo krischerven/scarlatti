@@ -26,15 +26,14 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         Show radios flow box
     """
 
-    signals = [
-        (App().radios, "radio-changed", "_on_radio_changed")
-    ]
-
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init view
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().radios, "radio-changed", "_on_radio_changed")
+        ]
         FlowBoxView.__init__(self, view_type)
         SignalsHelper.__init__(self)
         ViewController.__init__(self, ViewControllerType.RADIO)

@@ -28,10 +28,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         Banner for artist
     """
 
-    signals = [
-        (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
-    ]
-
     def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
         """
             Init artist banner
@@ -39,6 +35,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param artist_ids as [int]
             @param view_type as ViewType (Unused)
         """
+        self.signals = [
+            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+        ]
         BannerWidget.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__album_ids = None

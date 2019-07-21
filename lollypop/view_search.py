@@ -31,20 +31,19 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         View for searching albums/tracks
     """
 
-    signals = [
-        (App().spotify, "new-album", "_on_new_spotify_album"),
-        (App().spotify, "search-finished", "_on_search_finished"),
-        (App().settings, "changed::network-access",
-         "_update_bottom_buttons"),
-        (App().settings, "changed::network-access-acl",
-         "_update_bottom_buttons")
-    ]
-
     def __init__(self, view_type):
         """
             Init Popover
             @param view_type as ViewType
         """
+        self.signals = [
+            (App().spotify, "new-album", "_on_new_spotify_album"),
+            (App().spotify, "search-finished", "_on_search_finished"),
+            (App().settings, "changed::network-access",
+             "_update_bottom_buttons"),
+            (App().settings, "changed::network-access-acl",
+             "_update_bottom_buttons")
+        ]
         View.__init__(self)
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
