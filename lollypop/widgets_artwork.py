@@ -13,11 +13,11 @@
 from gi.repository import Gtk, Gdk, GLib, Gio, GdkPixbuf
 
 from gettext import gettext as _
+
 from lollypop.widgets_utils import Popover
-
 from lollypop.logger import Logger
-
 from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.helper_signals import SignalsHelper
 
 
 class ArtworkSearchChild(Gtk.FlowBoxChild):
@@ -94,16 +94,21 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         return self.__bytes
 
 
-class ArtworkSearchWidget(Gtk.Bin):
+class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
     """
         Search for artwork
     """
+
+    signals = [
+        (App().art, "uri-artwork-found", "_on_uri_artwork_found")
+    ]
 
     def __init__(self):
         """
             Init widget
         """
         Gtk.Bin.__init__(self)
+        SignalsHelper.__init__(self)
         self.__timeout_id = None
         self.__uri_artwork_id = None
         self.__uris = []
@@ -136,7 +141,6 @@ class ArtworkSearchWidget(Gtk.Bin):
         self.__stack.add_named(builder.get_object("scrolled"), "main")
         self.__stack.set_visible_child_name("main")
         self.add(widget)
-        self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
 
     def populate(self):
@@ -246,6 +250,24 @@ class ArtworkSearchWidget(Gtk.Bin):
         # GTK 3.20 https://bugzilla.gnome.org/show_bug.cgi?id=710888
         self.__infobar.queue_resize()
 
+    def _on_uri_artwork_found(self, art, uris):
+        """
+            Load content in view
+            @param art as Art
+            @param uris as (str, str)
+        """
+        if uris:
+            (uri, api) = uris.pop(0)
+            App().task_helper.load_uri_content(uri,
+                                               self._cancellable,
+                                               self.__on_load_uri_content,
+                                               api,
+                                               uris)
+        else:
+            self.__loaders -= 1
+            if self.__loaders == 0:
+                self.__spinner.stop()
+
 #######################
 # PRIVATE             #
 #######################
@@ -281,41 +303,12 @@ class ArtworkSearchWidget(Gtk.Bin):
         else:
             child.destroy()
 
-    def __on_map(self, widget):
+    def __on_unmap(self, widget):
         """
             Cancel loading
             @param widget as Gtk.Widget
         """
-        self.__uri_artwork_id = App().art.connect(
-            "uri-artwork-found", self.__on_uri_artwork_found)
-
-    def __on_unmap(self, widget):
-        """
-            Cancel loading and disconnect signals
-            @param widget as Gtk.Widget
-        """
         self._cancellable.cancel()
-        if self.__uri_artwork_id is not None:
-            App().art.disconnect(self.__uri_artwork_id)
-            self.__uri_artwork_id = None
-
-    def __on_uri_artwork_found(self, art, uris):
-        """
-            Load content in view
-            @param art as Art
-            @param uris as (str, str)
-        """
-        if uris:
-            (uri, api) = uris.pop(0)
-            App().task_helper.load_uri_content(uri,
-                                               self._cancellable,
-                                               self.__on_load_uri_content,
-                                               api,
-                                               uris)
-        else:
-            self.__loaders -= 1
-            if self.__loaders == 0:
-                self.__spinner.stop()
 
     def __on_load_uri_content(self, uri, loaded, content, api, uris):
         """
