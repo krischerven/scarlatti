@@ -199,7 +199,7 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         """
         self._on_primary_long_gesture(x, y)
 
-    def _on_primary_long_gesture(self, x, y):
+    def _on_primary_long_press_gesture(self, x, y):
         """
             Show Context view for activated album
             @param x as int
