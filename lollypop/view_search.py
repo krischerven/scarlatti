@@ -32,11 +32,11 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
     """
 
     signals = [
-        ("App().spotify", "new-album", "_on_new_spotify_album"),
-        ("App().spotify", "search-finished", "_on_search_finished"),
-        ("App().settings", "changed::network-access",
+        (App().spotify, "new-album", "_on_new_spotify_album"),
+        (App().spotify, "search-finished", "_on_search_finished"),
+        (App().settings, "changed::network-access",
          "_update_bottom_buttons"),
-        ("App().settings", "changed::network-access-acl",
+        (App().settings, "changed::network-access-acl",
          "_update_bottom_buttons")
     ]
 

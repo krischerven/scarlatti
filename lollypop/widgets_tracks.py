@@ -12,6 +12,7 @@
 
 from gi.repository import GObject, Gtk
 
+from lollypop.define import App
 from lollypop.helper_signals import SignalsHelper
 
 
@@ -26,7 +27,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper):
     }
 
     signals = [
-        ("App().player", "queue-changed", "_on_queue_changed")
+        (App().player, "queue-changed", "_on_queue_changed")
     ]
 
     def __init__(self):

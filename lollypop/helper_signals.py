@@ -38,13 +38,14 @@ class SignalsHelper():
             Connect signals
             @param widget as Gtk.Widget
         """
-        for (object_str, signal, callback_str) in self.signals:
-            name = "%s_%s" % (object_str, signal)
+        for (obj, signal, callback_str) in self.signals:
+            name = "%s_%s" % (obj, signal)
             if name in self.__connected:
                 continue
-            object = eval(object_str)
+            if isinstance(obj, str):
+                obj = eval(obj)
             callback = getattr(self, callback_str)
-            object.connect(signal, callback)
+            obj.connect(signal, callback)
             self.__connected.append(name)
 
     def __on_unmap(self, widget):
@@ -52,11 +53,12 @@ class SignalsHelper():
             Disconnect signals
             @param widget as Gtk.Widget
         """
-        for (object_str, signal, callback_str) in self.signals:
-            name = "%s_%s" % (object_str, signal)
+        for (obj, signal, callback_str) in self.signals:
+            name = "%s_%s" % (obj, signal)
             if name not in self.__connected:
                 continue
-            object = eval(object_str)
+            if isinstance(obj, str):
+                obj = eval(obj)
             callback = getattr(self, callback_str)
-            object.disconnect_by_func(callback)
+            obj.disconnect_by_func(callback)
             self.__connected.remove(name)

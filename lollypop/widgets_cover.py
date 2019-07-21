@@ -17,9 +17,10 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.helper_overlay_album import OverlayAlbumHelper
 from lollypop.utils import on_realize
+from lollypop.helper_signals import SignalsHelper
 
 
-class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
+class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
     """
         Widget showing current album cover
     """
@@ -27,12 +28,17 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
+    signals = [
+        (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+    ]
+
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
             @param view_type as ViewType
         """
         Gtk.EventBox.__init__(self)
+        SignalsHelper.__init__(self)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
         self._album = album
@@ -49,10 +55,6 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
                      lambda x, y: self.show_overlay(True))
         self.connect("leave-notify-event",
                      lambda x, y: self.show_overlay(False))
-        self.connect("destroy", self.__on_destroy)
-        self.__art_signal_id = App().art.connect(
-                                              "album-artwork-changed",
-                                              self.__on_album_artwork_changed)
 
     def set_artwork(self, art_size):
         """
@@ -102,19 +104,7 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
 #######################
 # PROTECTED           #
 #######################
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_destroy(self, widget):
-        """
-            Disconnect signal
-            @param widget as Gtk.Widget
-        """
-        if self.__art_signal_id is not None:
-            App().art.disconnect(self.__art_signal_id)
-
-    def __on_album_artwork_changed(self, art, album_id):
+    def _on_album_artwork_changed(self, art, album_id):
         """
             Update cover for album_id
             @param art as Art
@@ -131,6 +121,9 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper):
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
+#######################
+# PRIVATE             #
+#######################
     def __on_album_artwork(self, surface):
         """
             Set album artwork
