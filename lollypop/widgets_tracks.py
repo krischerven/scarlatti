@@ -11,10 +11,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from gi.repository import GObject, Gtk
-from lollypop.define import App, Type
+
+from lollypop.helper_signals import SignalsHelper
 
 
-class TracksWidget(Gtk.ListBox):
+class TracksWidget(Gtk.ListBox, SignalsHelper):
     """
         A list of tracks
     """
@@ -24,21 +25,16 @@ class TracksWidget(Gtk.ListBox):
                       None, (GObject.TYPE_PYOBJECT,))
     }
 
+    signals = [
+        ("App().player", "queue-changed", "_on_queue_changed")
+    ]
+
     def __init__(self):
         """
             Init track widget
         """
         Gtk.ListBox.__init__(self)
-        self.connect("destroy", self.__on_destroy)
-        self.__queue_signal_id = App().player.connect("queue-changed",
-                                                      self.__on_queue_changed)
-        self.__loved_signal_id1 = App().playlists.connect(
-            "playlist-track-added",
-            self.__on_loved_playlist_changed)
-        self.__loved_signal_id2 = App().playlists.connect(
-            "playlist-track-removed",
-            self.__on_loved_playlist_changed)
-        self.connect("row-activated", self.__on_activate)
+        SignalsHelper.__init__(self)
         self.get_style_context().add_class("trackswidget")
         self.set_property("hexpand", True)
         self.set_property("selection-mode", Gtk.SelectionMode.NONE)
@@ -61,44 +57,18 @@ class TracksWidget(Gtk.ListBox):
                 row.update_duration()
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
-    def __on_queue_changed(self, unused):
+    def _on_queue_changed(self, unused):
         """
             Update all position labels
         """
         for row in self.get_children():
             row.update_number_label()
 
-    def __on_loved_playlist_changed(self, widget, playlist_id, uri):
-        """
-            Updates the loved icon
-            @param playlist as Playlist
-            @param playlist_id as int
-            @param uri as str
-        """
-        if playlist_id != Type.LOVED:
-            return
-        track_id = App().tracks.get_id_by_uri(uri)
-        for row in self.get_children():
-            if track_id == row.track.id:
-                row.set_indicator()
-
-    def __on_destroy(self, widget):
-        """
-            Remove signals
-            @param widget as Gtk.Widget
-        """
-        if self.__queue_signal_id is not None:
-            App().player.disconnect(self.__queue_signal_id)
-            self.__queue_signal_id = None
-        if self.__loved_signal_id1 is not None:
-            App().playlists.disconnect(self.__loved_signal_id1)
-            self.__loved_signal_id1 = None
-        if self.__loved_signal_id2 is not None:
-            App().playlists.disconnect(self.__loved_signal_id2)
-            self.__loved_signal_id2 = None
-
+#######################
+# PRIVATE             #
+#######################
     def __on_activate(self, widget, row):
         """
             Play activated item
