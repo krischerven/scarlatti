@@ -16,19 +16,25 @@ from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.widgets_row_queue import QueueRow
+from lollypop.helper_signals import SignalsHelper
 
 
-class QueueView(View):
+class QueueView(View, SignalsHelper):
     """
         View showing queue
     """
 
-    def __init__(self, view_type=ViewType.DEFAULT):
+    signals = [
+        (App().player, "current-changed", "_on_current_changed")
+    ]
+
+    def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init Popover
             @param view_type as ViewType
         """
-        View.__init__(self)
+        View.__init__(self, view_type)
+        SignalsHelper.__init__(self)
         self.__view_type = view_type
         self.__last_drag_id = None
         self.__stop = False
@@ -92,6 +98,16 @@ class QueueView(View):
         if popover is not None:
             popover.popdown()
 
+    def _on_current_changed(self, player):
+        """
+            Pop first item in queue if it"s current track id
+            @param player object
+        """
+        if len(self.__view.get_children()) > 0:
+            row = self.__view.get_children()[0]
+            if row.track.id == player.current_track.id:
+                row.destroy()
+
 #######################
 # PRIVATE             #
 #######################
@@ -138,8 +154,6 @@ class QueueView(View):
         height = window_size[1]
         width = min(500, window_size[0])
         self.set_size_request(width, height * 0.7)
-        self._signal_id1 = App().player.connect("current-changed",
-                                                self.__on_current_changed)
 
     def __on_unmap(self, widget):
         """
@@ -147,19 +161,6 @@ class QueueView(View):
             @param widget as Gtk.Widget
         """
         self.__stop = True
-        if self._signal_id1 is not None:
-            App().player.disconnect(self._signal_id1)
-            self._signal_id1 = None
-
-    def __on_current_changed(self, player):
-        """
-            Pop first item in queue if it"s current track id
-            @param player object
-        """
-        if len(self.__view.get_children()) > 0:
-            row = self.__view.get_children()[0]
-            if row.track.id == player.current_track.id:
-                row.destroy()
 
     def __on_child_destroyed(self, row):
         """

@@ -89,7 +89,7 @@ class QueueRow(Row, DNDRow):
             Set previous row
             @param row as Row
         """
-        DNDRow.set_previous_row(self, row)
+        Row.set_previous_row(self, row)
         self.update_artwork_state()
         self.update_number_label()
 
