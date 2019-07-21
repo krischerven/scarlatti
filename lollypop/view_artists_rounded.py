@@ -20,12 +20,17 @@ from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.utils import get_icon_name
+from lollypop.helper_signals import SignalsHelper
 
 
-class RoundedArtistsView(FlowBoxView):
+class RoundedArtistsView(FlowBoxView, SignalsHelper):
     """
         Show artists in a FlowBox
     """
+
+    signals = [
+        (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+    ]
 
     def __init__(self, view_type):
         """
@@ -33,6 +38,7 @@ class RoundedArtistsView(FlowBoxView):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
+        SignalsHelper.__init__(self)
         self.__view_type = view_type
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
@@ -115,22 +121,15 @@ class RoundedArtistsView(FlowBoxView):
             return
         App().window.container.show_view([Type.ARTISTS], [child.data])
 
-    def _on_map(self, widget):
+    def _on_artist_artwork_changed(self, art, prefix):
         """
-            Set active ids
+            Update artwork if needed
+            @param art as Art
+            @param prefix as str
         """
-        FlowBoxView._on_map(self, widget)
-        self.__art_signal_id = App().art.connect(
-                                              "artist-artwork-changed",
-                                              self.__on_artist_artwork_changed)
-
-    def _on_unmap(self, widget):
-        """
-            Connect signals
-            @param widget as Gtk.Widget
-        """
-        if self.__art_signal_id is not None:
-            App().art.disconnect(self.__art_signal_id)
+        for child in self._box.get_children():
+            if child.name == prefix:
+                child.set_artwork()
 
 #######################
 # PRIVATE             #
@@ -149,16 +148,6 @@ class RoundedArtistsView(FlowBoxView):
             @param widget as Gtk.Widget
         """
         RoundedArtistsView.stop(self)
-
-    def __on_artist_artwork_changed(self, art, prefix):
-        """
-            Update artwork if needed
-            @param art as Art
-            @param prefix as str
-        """
-        for child in self._box.get_children():
-            if child.name == prefix:
-                child.set_artwork()
 
 
 class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
