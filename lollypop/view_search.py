@@ -23,12 +23,21 @@ from lollypop.utils import get_network_available
 from lollypop.view import View
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper
 
 
-class SearchView(View, Gtk.Bin, SizeAllocationHelper):
+class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
     """
         View for searching albums/tracks
     """
+
+    signals = [
+        (App().spotify, "new-album", "_on_new_spotify_album"),
+        (App().spotify, "search-finished", "_on_search_finished"),
+        (App().settings, "changed::network-access", "_update_bottom_buttons"),
+        (App().settings, "changed::network-access-acl",
+         "_update_bottom_buttons")
+    ]
 
     def __init__(self, view_type):
         """
@@ -38,11 +47,9 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper):
         View.__init__(self)
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
-        self.connect("map", self.__on_map)
-        self.connect("unmap", self.__on_unmap)
+        SignalsHelper.__init__(self)
         self.__timeout_id = None
-        self.__new_album_signal_id = None
-        self.__search_finished_signal_id = None
+        self.__signal_ids = {}
         self.__current_search = ""
         self.__cancellable = Gio.Cancellable()
         self.__history = []
@@ -110,6 +117,19 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _update_bottom_buttons(self, *ignore):
+        """
+            Update bottom buttons based on current state
+        """
+        print("plop")
+        if GLib.find_program_in_path("youtube-dl") is None or\
+                not get_network_available("SPOTIFY") or\
+                not get_network_available("YOUTUBE"):
+            self.__bottom_buttons.hide()
+            self.__search_type_action.change_state(GLib.Variant("s", "local"))
+        else:
+            self.__bottom_buttons.show()
+
     def _handle_size_allocate(self, allocation):
         """
             Change view width
@@ -177,6 +197,49 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper):
                                               combobox.get_active_id()))
         self.__on_search_action_change_state(self.__search_type_action,
                                              GLib.Variant("s", "charts"))
+
+    def _on_map(self, widget):
+        """
+            Init signals and grab focus
+            @param widget as Gtk.Widget
+        """
+        View._on_map(self, widget)
+        App().enable_special_shortcuts(False)
+        self._update_bottom_buttons()
+        GLib.idle_add(self.__entry.grab_focus)
+
+    def __on_unmap(self, widget):
+        """
+            Clean up
+            @param widget as Gtk.Widget
+        """
+        View._on_unmap(self, widget)
+        App().enable_special_shortcuts(True)
+        self.cancel()
+        self.__view.stop()
+        self.__button_stack.set_visible_child(self.__new_button)
+        self.__spinner.stop()
+
+    def _on_new_spotify_album(self, spotify, album, cover_uri):
+        """
+            Add album
+            @param spotify as SpotifyHelper
+            @param album as Album
+            @param cover_uri as str
+        """
+        self.__view.insert_album(album, len(album.tracks) == 1, -1, cover_uri)
+        self.__stack.set_visible_child_name("view")
+
+    def _on_search_finished(self, api):
+        """
+            Stop spinner
+            @param api ignored
+        """
+        self.__spinner.stop()
+        self.__button_stack.set_visible_child(self.__new_button)
+        if not self.__view.children:
+            self.__stack.set_visible_child_name("placeholder")
+            self.__set_no_result_placeholder()
 
 #######################
 # PRIVATE             #
@@ -253,7 +316,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper):
             Add rows for internal results
             @param result as [(int, Album, bool)]
         """
-        self.__on_search_finished(None)
+        self._on_search_finished(None)
         if result:
             albums = []
             reveal_albums = []
@@ -264,64 +327,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper):
             self.__view.set_reveal(reveal_albums)
             self.__view.populate(albums)
             self.__stack.set_visible_child_name("view")
-
-    def __on_map(self, widget):
-        """
-            Init signals and grab focus
-            @param widget as Gtk.Widget
-        """
-        App().enable_special_shortcuts(False)
-        if GLib.find_program_in_path("youtube-dl") is None or\
-                not get_network_available("SPOTIFY") or\
-                not get_network_available("YOUTUBE"):
-            self.__bottom_buttons.hide()
-        else:
-            self.__bottom_buttons.show()
-        if self.__new_album_signal_id is None:
-            self.__new_album_signal_id = App().spotify.connect(
-                "new-album", self.__on_new_spotify_album)
-        if self.__search_finished_signal_id is None:
-            self.__search_finished_signal_id = App().spotify.connect(
-                "search-finished", self.__on_search_finished)
-        GLib.idle_add(self.__entry.grab_focus)
-
-    def __on_unmap(self, widget):
-        """
-            Clean up
-            @param widget as Gtk.Widget
-        """
-        App().enable_special_shortcuts(True)
-        if self.__new_album_signal_id is not None:
-            App().spotify.disconnect(self.__new_album_signal_id)
-            self.__new_album_signal_id = None
-        if self.__search_finished_signal_id is not None:
-            App().spotify.disconnect(self.__search_finished_signal_id)
-            self.__search_finished_signal_id = None
-        self.cancel()
-        self.__view.stop()
-        self.__button_stack.set_visible_child(self.__new_button)
-        self.__spinner.stop()
-
-    def __on_new_spotify_album(self, spotify, album, cover_uri):
-        """
-            Add album
-            @param spotify as SpotifyHelper
-            @param album as Album
-            @param cover_uri as str
-        """
-        self.__view.insert_album(album, len(album.tracks) == 1, -1, cover_uri)
-        self.__stack.set_visible_child_name("view")
-
-    def __on_search_finished(self, api):
-        """
-            Stop spinner
-            @param api ignored
-        """
-        self.__spinner.stop()
-        self.__button_stack.set_visible_child(self.__new_button)
-        if not self.__view.children:
-            self.__stack.set_visible_child_name("placeholder")
-            self.__set_no_result_placeholder()
 
     def __on_search_changed_timeout(self):
         """
