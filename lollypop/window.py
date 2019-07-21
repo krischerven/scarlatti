@@ -44,6 +44,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         self.connect("unmap", self.__on_unmap)
         App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure_id = None
+        self.__setup_content()
         # FIXME Remove this, handled by MPRIS in GNOME 3.26
         self.__setup_media_keys()
         self.set_auto_startup_notification(False)
@@ -77,7 +78,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
 ############
 # PRIVATE  #
 ############
-    def __setup(self):
+    def __setup_size_and_position(self):
         """
             Setup window position and size, callbacks
         """
@@ -218,10 +219,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         """
             Setup window content
         """
-        from lollypop.container import Container
-        self.__container = Container()
-        self.set_stack(self.container.stack)
-        self.__container.show()
         self.__vgrid = Gtk.Grid()
         self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__vgrid.show()
@@ -233,7 +230,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             self.set_titlebar(self.__toolbar)
             self.__toolbar.set_show_close_button(
                 not App().settings.get_value("disable-csd"))
-        self.__vgrid.add(self.__container)
         self.add(self.__vgrid)
         self.drag_dest_set(Gtk.DestDefaults.DROP | Gtk.DestDefaults.MOTION,
                            [], Gdk.DragAction.MOVE)
@@ -285,9 +281,13 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             Run scanner on realize
             @param widget as Gtk.Widget
         """
-        self.__setup_content()
-        self.container.setup_lists()
-        self.__setup()
+        from lollypop.container import Container
+        self.__container = Container()
+        self.set_stack(self.container.stack)
+        self.__container.show()
+        self.__vgrid.add(self.__container)
+        self.__container.setup_lists()
+        self.__setup_size_and_position()
         if App().settings.get_value("auto-update") or App().tracks.is_empty():
             # Delayed, make python segfault on sys.exit() otherwise
             # No idea why, maybe scanner using Gstpbutils before Gstreamer
