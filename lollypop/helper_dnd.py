@@ -120,6 +120,43 @@ class DNDHelper:
         src_row.track.album.remove_track(src_row.track)
         src_row.destroy()
 
+    def __insert_track_row_at_track_row(self, src_row, dst_album_row,
+                                        dst_row, direction):
+        """
+            Insert src track row at dst track row
+            @param src_row as TrackRow
+            @param dst_album_row as AlbumRow
+            @param dst_row as TrackRow
+            @param direction as Gtk.DirectionType
+        """
+        from lollypop.widgets_row_album import AlbumRow
+        height = AlbumRow.get_best_height(src_row)
+        # First split dst album
+        index = dst_album_row.children.index(dst_row)
+        if direction == Gtk.DirectionType.DOWN:
+            index += 1
+        rows = dst_album_row.children[:index]
+        split_album = Album(dst_album_row.album.id)
+        split_album.set_tracks([row.track for row in rows])
+        split_album_row = AlbumRow(split_album, height, self.__view_type,
+                                   True, None, 0)
+        split_album_row.show()
+        split_album_row.populate()
+        for row in rows:
+            dst_album_row.album.remove_track(row.track)
+            row.destroy()
+        # Create new album
+        new_album = Album(src_row.track.album.id)
+        new_album.set_tracks([src_row.track])
+        new_album_row = AlbumRow(new_album, height, self.__view_type,
+                                 True, None, 0)
+        new_album_row.show()
+        new_album_row.populate()
+        self.__insert_album_row_at_album_row(new_album_row, dst_album_row,
+                                             Gtk.DirectionType.DOWN)
+        self.__insert_album_row_at_album_row(split_album_row, new_album_row,
+                                             Gtk.DirectionType.DOWN)
+
     def __unmark_all_rows(self):
         """
             Undrag all rows
@@ -209,7 +246,16 @@ class DNDHelper:
             @param timeout as bool
         """
         from lollypop.widgets_row_track import TrackRow
-        row = listbox.get_row_at_y(y)
+        album_row = listbox.get_row_at_y(y)
+        # Search for any track row at y
+        if album_row is not None:
+            track_listbox = album_row.boxes[0]
+            (tx, ty) = track_listbox.translate_coordinates(listbox, 0, 0)
+            track_row = track_listbox.get_row_at_y(y - ty)
+            if track_row is not None:
+                row = track_row
+            else:
+                row = album_row
         if row is None or self.__drag_begin_row is None:
             return
         row_height = row.get_allocated_height()
@@ -221,10 +267,10 @@ class DNDHelper:
         if isinstance(row, TrackRow):
             if isinstance(self.__drag_begin_row, TrackRow):
                 self.__insert_track_row_at_track_row(
-                    self.__drag_begin_row, row, direction)
+                    self.__drag_begin_row, album_row, row, direction)
             else:
                 self.__insert_album_row_at_track_row(
-                    self.__drag_begin_row, row, direction)
+                    self.__drag_begin_row, album_row, row, direction)
         elif isinstance(self.__drag_begin_row, TrackRow):
             self.__insert_track_row_at_album_row(
                 self.__drag_begin_row, row, direction)
