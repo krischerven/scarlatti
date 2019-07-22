@@ -251,19 +251,6 @@ class Row(Gtk.ListBoxRow):
             indicator_type |= IndicatorType.SKIP
         return indicator_type
 
-    def _get_menu(self):
-        """
-            Return TrackMenu
-        """
-        from lollypop.menu_objects import TrackMenu
-        return TrackMenu(self._track)
-
-    def _check_track(self):
-        """
-            Check track always valid, destroy if not
-        """
-        pass
-
 #######################
 # PRIVATE             #
 #######################

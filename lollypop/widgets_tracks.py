@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GObject, Gtk, Gdk, GLib
+from gi.repository import GObject, Gtk, Gdk
 
 from lollypop.define import App, ViewType, IndicatorType
 from lollypop.utils import do_shift_selection
@@ -76,7 +76,10 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             @param x as int
             @param y as int
         """
-        self.__popup_menu(self, x, y)
+        row = self.get_row_at_y(y)
+        if row is None:
+            return
+        self.__popup_menu(row, x, y)
 
     def _on_primary_press_gesture(self, x, y, event):
         """
@@ -119,33 +122,30 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget, xcoordinate=None, ycoordinate=None):
+    def __popup_menu(self, row, x, y):
         """
             Popup menu for track
-            @param widget as Gtk.Widget
-            @param xcoordinate as int (or None)
-            @param ycoordinate as int (or None)
+            @param row as Row
+            @param x as int
+            @param y as int
         """
-        def on_closed(widget):
-            self.get_style_context().remove_class("track-menu-selected")
-            self.set_indicator()
-            # Event happens before Gio.Menu activation
-            GLib.idle_add(self._check_track)
+        def on_closed(popover, row):
+            row.get_style_context().remove_class("track-menu-selected")
+            row.set_indicator()
 
         from lollypop.pop_menu import TrackMenuPopover, RemoveMenuPopover
-        if self.get_state_flags() & Gtk.StateFlags.SELECTED:
-            # Get all selected rows
-            rows = self.get_selected_rows()
-            popover = RemoveMenuPopover(rows)
+        if self.get_selected_rows():
+            popover = RemoveMenuPopover(self.get_selected_rows())
         else:
-            popover = TrackMenuPopover(self._track, self._get_menu())
-        if xcoordinate is not None and ycoordinate is not None:
-            rect = widget.get_allocation()
-            rect.x = xcoordinate
-            rect.y = ycoordinate
-            rect.width = rect.height = 1
-            popover.set_pointing_to(rect)
-        popover.set_relative_to(widget)
-        popover.connect("closed", on_closed)
-        self.get_style_context().add_class("track-menu-selected")
+            from lollypop.menu_objects import TrackMenu
+            menu = TrackMenu(row.track)
+            popover = TrackMenuPopover(row.track, menu)
+        rect = row.get_allocation()
+        rect.x = x
+        rect.y = y
+        rect.width = rect.height = 1
+        popover.set_pointing_to(rect)
+        popover.set_relative_to(self)
+        popover.connect("closed", on_closed, row)
+        row.get_style_context().add_class("track-menu-selected")
         popover.popup()
