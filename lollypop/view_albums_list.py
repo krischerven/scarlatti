@@ -22,11 +22,10 @@ from lollypop.define import ArtSize, App, ViewType, MARGIN, Type, Sizing
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.helper_signals import SignalsHelper
 
 
 class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
-                     GesturesHelper, SignalsHelper):
+                     GesturesHelper):
     """
         View showing albums
     """
@@ -46,7 +45,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
-        SignalsHelper.__init__(self)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self._albums = []
