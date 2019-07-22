@@ -37,6 +37,7 @@ class GesturesHelper():
         self.__long_press.set_button(0)
         self.__multi_press = Gtk.GestureMultiPress.new(widget)
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
+        self.__multi_press.connect("pressed", self.__on_multi_pressed)
         self.__multi_press.connect("released", self.__on_multi_released)
         self.__multi_press.set_button(0)
 
@@ -70,6 +71,9 @@ class GesturesHelper():
             self._on_primary_long_press_gesture(x, y)
         else:
             self._on_secondary_long_press_gesture(x, y)
+
+    def __on_multi_pressed(self, gesture, n_press, x, y):
+        print(x, y)
 
     def __on_multi_released(self, gesture, n_press, x, y):
         """

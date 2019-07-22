@@ -10,18 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, GLib
 
-from gettext import gettext as _
 
-from lollypop.logger import Logger
+from lollypop.utils import on_realize
 from lollypop.objects_radio import Radio
 from lollypop.widgets_utils import Popover
 from lollypop.controller_information import InformationController
 from lollypop.define import App, ArtBehaviour
+from lollypop.helper_gestures import GesturesHelper
 
 
-class ToolbarInfo(Gtk.Bin, InformationController):
+class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
     """
         Informations toolbar
     """
@@ -40,10 +40,10 @@ class ToolbarInfo(Gtk.Bin, InformationController):
         self.__timeout_id = None
         self.__width = 0
 
-        self._infobox = builder.get_object("info")
+        self._infobox = builder.get_object("widget")
+        self._infobox.connect("realize", on_realize)
         self.add(self._infobox)
-
-        self._spinner = builder.get_object("spinner")
+        GesturesHelper.__init__(self, self._infobox)
 
         self.__labels = builder.get_object("nowplaying_labels")
         self.__labels.connect("query-tooltip", self.__on_query_tooltip)
@@ -55,15 +55,9 @@ class ToolbarInfo(Gtk.Bin, InformationController):
         self._artwork.set_property("has-tooltip", True)
 
         self.connect("realize", self.__on_realize)
+
         App().art.connect("album-artwork-changed", self.__update_cover)
         App().art.connect("radio-artwork-changed", self.__update_logo)
-        self.connect("button-press-event", self.__on_button_press_event)
-        self.connect("button-release-event", self.__on_button_release_event)
-        self.__gesture = Gtk.GestureLongPress.new(self)
-        self.__gesture.connect("pressed", self.__on_gesture_pressed)
-        # We want to get release event after gesture
-        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.__gesture.set_button(0)
 
     def do_get_preferred_width(self):
         """
@@ -119,13 +113,7 @@ class ToolbarInfo(Gtk.Bin, InformationController):
 # PROTECTED           #
 #######################
     def _on_eventbox_realize(self, eventbox):
-        """
-            Show hand cursor over
-        """
-        try:
-            eventbox.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
-        except:
-            Logger.warning(_("You are using a broken cursor theme!"))
+        pass
 
     def _on_artwork(self, surface):
         """
@@ -143,6 +131,29 @@ class ToolbarInfo(Gtk.Bin, InformationController):
         else:
             InformationController._on_artwork(self, surface)
             self._artwork.set_size_request(-1, -1)
+
+    def _on_primary_long_press_gesture(self, x, y):
+        """
+            Show menu
+        """
+        self.__popup_menu()
+
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Show information popover
+        """
+        if App().window.is_adaptive or not self._artwork.get_visible():
+            return
+        if isinstance(App().player.current_track, Radio):
+            from lollypop.pop_tunein import TuneinPopover
+            popover = TuneinPopover()
+            popover.populate()
+        elif App().player.current_track.id is not None:
+            from lollypop.pop_information import InformationPopover
+            popover = InformationPopover()
+            popover.populate()
+        popover.set_relative_to(self._infobox)
+        popover.popup()
 
 #######################
 # PRIVATE             #
@@ -183,45 +194,6 @@ class ToolbarInfo(Gtk.Bin, InformationController):
         elif isinstance(App().player.current_track, Radio):
             popover = Popover.new_from_model(self._infobox, menu)
         popover.popup()
-
-    def __on_button_press_event(self, widget, event):
-        """
-            Handle right click
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        if event.button == 3:
-            self.__popup_menu()
-            return True
-
-    def __on_button_release_event(self, widget, event):
-        """
-            Handle buttons
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        if App().window.is_adaptive or not self._artwork.get_visible():
-            return
-        if isinstance(App().player.current_track, Radio):
-            from lollypop.pop_tunein import TuneinPopover
-            popover = TuneinPopover()
-            popover.populate()
-        elif App().player.current_track.id is not None:
-            from lollypop.pop_information import InformationPopover
-            popover = InformationPopover()
-            popover.populate()
-        popover.set_relative_to(self._infobox)
-        popover.popup()
-        return True
-
-    def __on_gesture_pressed(self, gesture, x, y):
-        """
-            Show current track menu
-            @param gesture as Gtk.GestureLongPress
-            @param x as int
-            @param y as int
-        """
-        self.__popup_menu()
 
     def __on_realize(self, toolbar):
         """
