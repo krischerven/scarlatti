@@ -20,6 +20,7 @@ from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip, on_realize
 from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_gestures import GesturesHelper
 
 
 class AlbumBannerWidget(BannerWidget, SignalsHelper):
@@ -68,8 +69,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__year_label.hide()
         year_eventbox = builder.get_object("year_eventbox")
         year_eventbox.connect("realize", on_realize)
-        year_eventbox.connect("button-release-event",
-                              self.__on_year_button_release_event)
+        self.__gesture = GesturesHelper(
+            year_eventbox, primary_press_callback=self._on_year_press)
         duration = App().albums.get_duration(self.__album.id,
                                              self.__album.genre_ids)
         self.__duration_label.set_text(get_human_duration(duration))
@@ -224,6 +225,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             ArtBehaviour.DARKER,
                             self.__on_album_artwork)
 
+    def _on_year_press(self, x, y, event):
+        """
+            Show years view
+            @param x as int
+            @param y as int
+            @param event as Gdk.EventButton
+        """
+        App().window.container.show_view([Type.YEARS], [self.__album.year])
+
 #######################
 # PRIVATE             #
 #######################
@@ -259,11 +269,3 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         if surface is not None:
             self._artwork.set_from_surface(surface)
-
-    def __on_year_button_release_event(self, widget, event):
-        """
-            Show year view
-            @param widget as Gtk.Widget
-            @param event as Gdk.event
-        """
-        App().window.container.show_view([Type.YEARS], [self.__album.year])
