@@ -182,7 +182,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             GLib.source_remove(self.__timeout_id)
             self.__timeout_id = None
         App().inhibitor.manual_uninhibit()
-        PlaybackController.on_destroy(self)
 
     def on_status_changed(self, player):
         """

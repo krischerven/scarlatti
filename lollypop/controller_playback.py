@@ -28,6 +28,7 @@ class PlaybackController:
             Init controller
         """
         self.__prev_button_timeout_id = None
+        self.connect("unmap", self.__on_unmap)
 
     def on_current_changed(self, player):
         """
@@ -96,14 +97,6 @@ class PlaybackController:
         else:
             self.__change_play_button_status(self._play_image, _("Play"))
 
-    def on_destroy(self):
-        """
-            Stop timeout
-        """
-        if self.__prev_button_timeout_id is not None:
-            GLib.source_remove(self.__prev_button_timeout_id)
-            self.__prev_button_timeout_id = None
-
 #######################
 # PROTECTED           #
 #######################
@@ -144,3 +137,12 @@ class PlaybackController:
         """
         self._play_button.set_image(image)
         self._play_button.set_tooltip_text(status)
+
+    def __on_unmap(self, widget):
+        """
+            Stop timeout
+            @param widget as Gtk.Widget
+        """
+        if self.__prev_button_timeout_id is not None:
+            GLib.source_remove(self.__prev_button_timeout_id)
+            self.__prev_button_timeout_id = None
