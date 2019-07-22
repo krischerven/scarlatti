@@ -332,10 +332,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             if self.__album_ids is None:
                 if App().settings.get_value("show-performers"):
                     self.__album_ids = App().tracks.get_album_ids(
-                        [self.__artist_id], [])
+                        self.__artist_ids, [])
                 else:
                     self.__album_ids = App().albums.get_ids(
-                        [self.__artist_id], [])
+                        self.__artist_ids, [])
                 shuffle(self.__album_ids)
             if self.__album_ids:
                 self.__album_id = self.__album_ids.pop(0)
