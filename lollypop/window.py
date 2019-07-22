@@ -47,7 +47,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         self.connect("adaptive-changed", self.__on_adaptive_changed)
-        self.connect("button-release-event", self.__on_button_release_event)
+        self.__multi_press = Gtk.GestureMultiPress.new(self)
+        self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
+        self.__multi_press.connect("released", self.__on_back_button_clicked)
+        self.__multi_press.set_button(8)
 
     @property
     def miniplayer(self):
@@ -248,14 +251,15 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             artists = ", ".join(player.current_track.artists)
             self.set_title("%s - %s" % (artists, "Lollypop"))
 
-    def __on_button_release_event(self, window, event):
+    def __on_back_button_clicked(self, gesture, n_press, x, y):
         """
             Handle special mouse buttons
-            @param window as Gtk.Window
-            @param event as Gdk.EventButton
+            @param gesture as Gtk.Gesture
+            @param n_press as int
+            @param x as int
+            @param y as int
         """
-        if event.button == 8:
-            App().window.go_back()
+        App().window.go_back()
 
     def __on_drag_data_received(self, widget, context, x, y, data, info, time):
         """
