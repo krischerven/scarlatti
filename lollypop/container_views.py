@@ -35,13 +35,11 @@ class ViewsContainer:
         self._list_view.hide()
         self._sidebar.select_ids([], False)
         from lollypop.view_lyrics import LyricsView
-        current = self._stack.get_visible_child()
         view = LyricsView()
         view.populate(track or App().player.current_track)
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
-        current.disable_overlay()
 
     def show_view(self, item_ids, data=None, switch=True):
         """
