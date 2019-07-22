@@ -260,6 +260,8 @@ class Row(Gtk.ListBoxRow):
             @param y as int
             @param event as Gdk.EventButton
         """
+        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
+            return True
         if self._view_type & ViewType.POPOVER:
             self._track.album.remove_track(self._track)
             self.destroy()

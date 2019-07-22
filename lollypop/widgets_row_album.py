@@ -18,6 +18,7 @@ from lollypop.view_tracks import TracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_row_dnd import DNDRow
+from lollypop.helper_gestures import GesturesHelper
 from lollypop.logger import Logger
 
 
@@ -151,8 +152,9 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             self.__action_button.get_style_context().add_class(
                 "track-menu-button")
             self.__action_button.set_property("valign", Gtk.Align.CENTER)
-            self.__action_button.connect("button-release-event",
-                                         self.__on_action_button_release_event)
+            self.__gesture_helper = GesturesHelper(
+                self.__action_button,
+                primary_press_callback=self._on_action_button_press)
         grid.attach(self._artwork, 0, 0, 1, 2)
         grid.attach(self.__artist_label, 1, 0, 1, 1)
         grid.attach(self.__title_label, 1, 1, 1, 1)
@@ -344,43 +346,12 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         else:
             TracksView._on_activated(self, widget, track)
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_cover_uri_content(self, uri, status, data):
+    def _on_action_button_press(self, x, y, event):
         """
-            Save to tmp cache
-            @param uri as str
-            @param status as bool
-            @param data as bytes
-        """
-        try:
-            if status:
-                App().art.save_album_artwork(data, self._album)
-                self.set_artwork()
-        except Exception as e:
-            Logger.error("AlbumRow::__on_cover_uri_content(): %s", e)
-
-    def __on_album_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if self._artwork is None:
-            return
-        if surface is None:
-            self._artwork.set_from_icon_name("folder-music-symbolic",
-                                             Gtk.IconSize.BUTTON)
-        else:
-            self._artwork.set_from_surface(surface)
-        self.emit("populated")
-        self.show_all()
-
-    def __on_action_button_release_event(self, button, event):
-        """
-            Handle button actions
-            @param button as Gtk.Button
-            @param event as Gdk.Event
+            Show row menu
+            @param x as int
+            @param y as int
+            @param event as Gdk.EventButton
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
@@ -413,8 +384,39 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                 self.emit("remove-from-playlist", self._album)
             self.destroy()
         else:
-            self.__popup_menu(button)
-        return True
+            self.__popup_menu(self.__action_button)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_cover_uri_content(self, uri, status, data):
+        """
+            Save to tmp cache
+            @param uri as str
+            @param status as bool
+            @param data as bytes
+        """
+        try:
+            if status:
+                App().art.save_album_artwork(data, self._album)
+                self.set_artwork()
+        except Exception as e:
+            Logger.error("AlbumRow::__on_cover_uri_content(): %s", e)
+
+    def __on_album_artwork(self, surface):
+        """
+            Set album artwork
+            @param surface as str
+        """
+        if self._artwork is None:
+            return
+        if surface is None:
+            self._artwork.set_from_icon_name("folder-music-symbolic",
+                                             Gtk.IconSize.BUTTON)
+        else:
+            self._artwork.set_from_surface(surface)
+        self.emit("populated")
+        self.show_all()
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """
