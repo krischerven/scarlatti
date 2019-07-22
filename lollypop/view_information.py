@@ -97,7 +97,8 @@ class InformationView(View):
                                     ArtBehaviour.CROP_SQUARE |
                                     ArtBehaviour.CACHE,
                                     self.__on_artist_artwork)
-            albums_view = AlbumsListView([], [], ViewType.POPOVER)
+            albums_view = AlbumsListView([], [],
+                                         ViewType.POPOVER | ViewType.SCROLLED)
             albums_view.set_size_request(300, -1)
             albums_view.show()
             albums_view.set_margin_start(5)
