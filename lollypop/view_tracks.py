@@ -19,7 +19,6 @@ from lollypop.define import Sizing
 from lollypop.widgets_tracks import TracksWidget
 from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
-from lollypop.objects_track import Track
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.utils import get_position_list, on_realize
@@ -131,10 +130,9 @@ class TracksView(SizeAllocationHelper):
             Add track rows (only works for albums with merged discs)
             @param tracks as [Track]
         """
-        previous_row = None if self.__position == 1 else self.children[-1]
         widgets = {self._tracks_widget_left[0]:
                    get_position_list(tracks, self.__position)}
-        self.__add_tracks(OrderedDict(widgets), 0, previous_row)
+        self.__add_tracks(OrderedDict(widgets), 0)
 
     def prepend_rows(self, tracks):
         """
@@ -387,19 +385,6 @@ class TracksView(SizeAllocationHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __linking(self):
-        """
-            Handle linking between left and right
-            Only used with ViewType.DND
-        """
-        if len(self._tracks_widget_left[0]) == 0 or\
-                len(self._tracks_widget_right[0]) == 0:
-            return
-        last_left = self._tracks_widget_left[0].get_children()[-1]
-        first_right = self._tracks_widget_right[0].get_children()[0]
-        last_left.set_next_row(first_right)
-        first_right.set_previous_row(last_left)
-
     def __add_disc_container(self, disc_number):
         """
             Add disc container to box
@@ -412,12 +397,11 @@ class TracksView(SizeAllocationHelper):
         self._tracks_widget_right[disc_number].connect("activated",
                                                        self._on_activated)
 
-    def __add_tracks(self, widgets, disc_number, previous_row=None):
+    def __add_tracks(self, widgets, disc_number):
         """
             Add tracks for to tracks widget
             @param widgets as OrderedDict
             @param disc number as int
-            @param previous_row as TrackRow
         """
         if self.__cancellable.is_cancelled():
             return
@@ -432,8 +416,6 @@ class TracksView(SizeAllocationHelper):
             self._on_tracks_populated(disc_number)
             self._tracks_widget_left[disc_number].show()
             self._tracks_widget_right[disc_number].show()
-            if self._view_type & ViewType.DND:
-                self.__linking()
             return
 
         (track, position) = tracks.pop(0)
@@ -441,54 +423,10 @@ class TracksView(SizeAllocationHelper):
             track.set_number(position + 1)
         row = TrackRow(track, self._album.artist_ids, self._view_type)
         if self._view_type & ViewType.DND:
-            row.set_previous_row(previous_row)
-            if previous_row is not None:
-                previous_row.set_next_row(row)
             row.connect("destroy", self.__on_row_destroy)
-            row.connect("insert-track", self.__on_insert_track)
-            row.connect("insert-album", self.__on_insert_album)
-            row.connect("remove-track", self.__on_remove_track)
         row.show()
         widget.insert(row, position)
-        GLib.idle_add(self.__add_tracks, widgets, disc_number, row)
-
-    def __get_split_tracks(self, row, down):
-        """
-            Get tracks for row split
-            @param row as Row
-            @param down as bool
-            @return [tracks]
-        """
-        # Create a new album with reminding tracks
-        if down:
-            split_tracks = []
-        else:
-            if row.previous_row is not None:
-                row.previous_row.set_next_row(None)
-            split_tracks = [Track(row.track.id)]
-        # First get tracks
-        r = row
-        while r.next_row is not None:
-            split_tracks.append(Track(r.next_row.track.id))
-            r = r.next_row
-        return split_tracks
-
-    def __destroy_split(self, row, down):
-        """
-            Destroy rows not needed after split
-            @param row as Row
-            @param down as bool
-        """
-        if down:
-            r = row.next_row
-        else:
-            r = row
-        while r is not None:
-            r.track.album.remove_track(r.track)
-            r.destroy()
-            r = r.next_row
-        if down:
-            row.set_next_row(None)
+        GLib.idle_add(self.__add_tracks, widgets, disc_number)
 
     def __on_row_destroy(self, row):
         """
@@ -514,133 +452,6 @@ class TracksView(SizeAllocationHelper):
             for child in self.children:
                 if child.get_state_flags() & Gtk.StateFlags.SELECTED:
                     Row.destroy_row(child)
-
-    def __on_insert_track(self, row, new_track_id, down):
-        """
-            Insert a new row at position
-            @param row as PlaylistRow
-            @param new_track_id as int
-            @param down as bool
-        """
-        track = Track(new_track_id)
-        # If same album, add track to album
-        if track.album.id == row.track.album.id:
-            position = self.children.index(row)
-            new_row = TrackRow(track, track.album.artist_ids, self._view_type)
-            new_row.connect("destroy", self.__on_row_destroy)
-            new_row.connect("insert-track", self.__on_insert_track)
-            new_row.connect("insert-album", self.__on_insert_album)
-            new_row.connect("remove-track", self.__on_remove_track)
-            new_row.show()
-            if down:
-                position += 1
-                new_row.set_previous_row(row)
-                new_row.set_next_row(row.next_row)
-                if row.next_row is not None:
-                    row.next_row.set_previous_row(new_row)
-                row.set_next_row(new_row)
-            else:
-                new_row.set_previous_row(row.previous_row)
-                new_row.set_next_row(row)
-                if row.previous_row is not None:
-                    row.previous_row.set_next_row(new_row)
-                row.set_previous_row(new_row)
-            row.get_parent().insert(new_row, position)
-            row.track.album.insert_track(track, position)
-            if new_row.previous_row is not None and\
-                    new_row.previous_row.track.id ==\
-                    App().player.current_track.id and\
-                    not self._view_type & ViewType.PLAYLISTS:
-                App().player.set_next()
-                App().player.set_prev()
-        # Else, we need to insert a new album with the track
-        else:
-            # Backup album as __destroy_split() will unset it
-            album = row.track.album
-            split_album = Album(album.id)
-            split_tracks = self.__get_split_tracks(row, down)
-            # Create new album
-            track.album.set_tracks([track])
-            # We use DNDRow because we know that if tracks are DND
-            # we are DND. Little hack
-            if len(self.children) == len(split_tracks):
-                if self.previous_row is not None:
-                    album = self.previous_row.album
-                else:
-                    album = Album()
-            elif not split_tracks:
-                if self.next_row is not None:
-                    album = self.next_row.album
-                else:
-                    album = Album()
-            if album.id == track.album.id:
-                track.set_album(album)
-                if down:
-                    self.next_row.prepend_rows([track])
-                else:
-                    self.previous_row.append_rows([track])
-            else:
-                self.emit("insert-album-after",
-                          album,
-                          track.album)
-            # Create split album
-            if split_tracks:
-                split_album.set_tracks(split_tracks)
-                if album.id == track.album.id:
-                    self.emit("insert-album-after", album, split_album)
-                else:
-                    self.emit("insert-album-after", track.album, split_album)
-                self.__destroy_split(row, down)
-
-    def __on_remove_track(self, row):
-        """
-            Remove track from album
-            @param row as PlaylistRow
-            @param position as int
-        """
-        empty = row.track.album.remove_track(row.track)
-        if empty:
-            if not self._view_type & ViewType.PLAYLISTS:
-                App().player.remove_album(row.track.album)
-        if row.track.id == App().player.current_track.id and\
-                not self._view_type & ViewType.PLAYLISTS:
-            App().player.set_next()
-            App().player.set_prev()
-        if row.previous_row is None:
-            if row.next_row is not None:
-                row.next_row.set_previous_row(None)
-        elif row.next_row is None:
-            if row.previous_row is not None:
-                row.previous_row.set_next_row(None)
-        else:
-            if row.next_row is not None:
-                row.next_row.set_previous_row(row.previous_row)
-            if row.previous_row is not None:
-                row.previous_row.set_next_row(row.next_row)
-            if row.previous_row.track.id == App().player.current_track.id and\
-                    not self._view_type & ViewType.PLAYLISTS:
-                App().player.set_next()
-                App().player.set_prev()
-
-    def __on_insert_album(self, row, new_album_id, track_ids, down):
-        """
-            Insert a new row at position
-            @param row as Row
-            @param new_album_id as int
-            @param track_ids as int
-            @param down as bool
-        """
-        # Backup album as __destroy_split() will unset it
-        album = row.track.album
-        new_album = Album(new_album_id)
-        tracks = [Track(track_id) for track_id in track_ids]
-        new_album.set_tracks(tracks)
-        split_album = Album(row.track.album.id)
-        split_tracks = self.__get_split_tracks(row, down)
-        split_album.set_tracks(split_tracks)
-        self.emit("insert-album-after", album, new_album)
-        self.emit("insert-album-after", new_album, split_album)
-        self.__destroy_split(row, down)
 
     def __on_disc_button_press_event(self, button, event, disc):
         """

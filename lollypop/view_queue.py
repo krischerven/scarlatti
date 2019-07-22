@@ -119,18 +119,14 @@ class QueueView(View, SignalsHelper):
         if clear_queue:
             App().player.clear_queue()
 
-    def __add_items(self, items, previous_row=None):
+    def __add_items(self, items):
         """
             Add items to the view
             @param item ids as [int]
-            @param previous_row as QueueRow
         """
         if items and not self.__stop:
             track_id = items.pop(0)
             row = self.__row_for_track_id(track_id)
-            row.set_previous_row(previous_row)
-            if previous_row is not None:
-                previous_row.set_next_row(row)
             self.__view.add(row)
             GLib.idle_add(self.__add_items, items, row)
 
@@ -140,8 +136,6 @@ class QueueView(View, SignalsHelper):
             @param track_id as int
         """
         row = QueueRow(Track(track_id), self.__view_type)
-        row.connect("insert-track", self.__on_insert_track)
-        row.connect("remove-track", self.__on_remove_track)
         return row
 
     def __on_map(self, widget):
@@ -176,47 +170,3 @@ class QueueView(View, SignalsHelper):
         """
         App().player.load(row.track)
         GLib.idle_add(row.destroy)
-
-    def __on_insert_track(self, row, new_track_id, down):
-        """
-            Insert a new row at position
-            @param row as PlaylistRow
-            @param new_track_id as int
-            @param down as bool
-        """
-        self.__last_drag_id = new_track_id
-        position = self.__view.get_children().index(row)
-        new_row = self.__row_for_track_id(new_track_id)
-        new_row.show()
-        if down:
-            position += 1
-        self.__view.insert(new_row, position)
-        App().player.insert_in_queue(new_row.track.id, position)
-        if down:
-            new_row.set_previous_row(row)
-            new_row.set_next_row(row.next_row)
-            if row.next_row is not None:
-                row.next_row.set_previous_row(new_row)
-            row.set_next_row(new_row)
-        else:
-            new_row.set_previous_row(row.previous_row)
-            new_row.set_next_row(row)
-            if row.previous_row is not None:
-                row.previous_row.set_next_row(new_row)
-            row.set_previous_row(new_row)
-
-    def __on_remove_track(self, row):
-        """
-            Remove row's track
-            @param row as PlaylistRow
-        """
-        if row.track.id != self.__last_drag_id:
-            App().player.remove_from_queue(row.track.id)
-        if row.previous_row is None:
-            row.next_row.set_previous_row(None)
-        elif row.next_row is None:
-            row.previous_row.set_next_row(None)
-        else:
-            row.next_row.set_previous_row(row.previous_row)
-            row.previous_row.set_next_row(row.next_row)
-        self.__last_drag_id = None

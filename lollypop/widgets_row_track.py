@@ -12,12 +12,10 @@
 
 from gi.repository import GObject, Pango
 
-from lollypop.define import ViewType
 from lollypop.widgets_row import Row
-from lollypop.widgets_row_dnd import DNDRow
 
 
-class TrackRow(Row, DNDRow):
+class TrackRow(Row):
     """
         A track row
     """
@@ -60,8 +58,6 @@ class TrackRow(Row, DNDRow):
         self._grid.insert_column(0)
         self._grid.attach(self._indicator, 0, 0, 1, 1)
         self.show_all()
-        if view_type & ViewType.DND:
-            DNDRow.__init__(self)
 
 #######################
 # PROTECTED           #

@@ -25,22 +25,6 @@ class Row(Gtk.ListBoxRow):
         A row
     """
 
-    def destroy_row(r):
-        """
-            Properly destroy a Row
-            @param r as Row
-        """
-        r.emit("remove-track")
-        r.destroy()
-        if r.previous_row is not None:
-            r.previous_row.set_next_row(r.next_row)
-            r.previous_row.set_position(
-                r.previous_row.track.number)
-        else:
-            r.set_position(r.track.number - 1)
-        if r.next_row is not None:
-            r.next_row.set_previous_row(r.previous_row)
-
     def __init__(self, track, album_artist_ids, view_type):
         """
             Init row widgets
@@ -53,8 +37,6 @@ class Row(Gtk.ListBoxRow):
         self._view_type = view_type
         self._artists_label = None
         self._track = track
-        self.__next_row = None
-        self.__previous_row = None
         self._indicator = IndicatorWidget(self, view_type)
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
@@ -189,36 +171,6 @@ class Row(Gtk.ListBoxRow):
             return
         self._track.set_number(position)
         self.update_number_label()
-
-    def set_next_row(self, row):
-        """
-            Set next row
-            @param row as Row
-        """
-        self.__next_row = row
-
-    def set_previous_row(self, row):
-        """
-            Set previous row
-            @param row as Row
-        """
-        self.__previous_row = row
-
-    @property
-    def next_row(self):
-        """
-            Get next row
-            @return row as Row
-        """
-        return self.__next_row
-
-    @property
-    def previous_row(self):
-        """
-            Get previous row
-            @return row as Row
-        """
-        return self.__previous_row
 
     @property
     def name(self):

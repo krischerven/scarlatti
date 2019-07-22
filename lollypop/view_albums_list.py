@@ -18,7 +18,6 @@ from lollypop.utils import get_icon_name, do_shift_selection
 from lollypop.view import LazyLoadingView
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.objects_album import Album
-from lollypop.objects_track import Track
 from lollypop.define import ArtSize, App, ViewType, MARGIN, Type, Sizing
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
@@ -103,13 +102,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
             @param cover_uri as str
         """
         row = None
-        previous_row = None
-        children = self._box.get_children()
-        if children:
-            previous_row = children[position]
-            if previous_row.album.id == album.id:
-                row = previous_row
-                previous_row = None
         if row is None:
             row = self.__row_for_album(album, reveal, cover_uri)
             row.populate()
@@ -117,9 +109,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
             self._box.insert(row, position)
         else:
             row.append_rows(album.tracks)
-        if previous_row is not None:
-            row.set_previous_row(previous_row)
-            previous_row.set_next_row(row)
         if self._view_type & ViewType.SCROLLED:
             if self._viewport.get_child() is None:
                 self._viewport.add(self._box)
@@ -372,24 +361,20 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
         if style_context.has_class("drag-down"):
             row.reveal(True)
 
-    def __add_albums(self, albums, previous_row=None):
+    def __add_albums(self, albums):
         """
             Add items to the view
             @param albums ids as [Album]
-            @param previous_row as AlbumRow
         """
         if self._lazy_queue is None or self.destroyed:
             return
         if albums:
             album = albums.pop(0)
             row = self.__row_for_album(album, album in self.__reveals)
-            row.set_previous_row(previous_row)
-            if previous_row is not None:
-                previous_row.set_next_row(row)
             row.show()
             self._box.add(row)
             self._lazy_queue.append(row)
-            GLib.idle_add(self.__add_albums, albums, row)
+            GLib.idle_add(self.__add_albums, albums)
         else:
             # If only one album, we want to reveal it
             # Stop lazy loading and populate
@@ -420,43 +405,8 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
             self.__position += len(album.tracks)
         else:
             self.__position = 0
-        row.connect("insert-track", self.__on_insert_track)
-        row.connect("insert-album", self.__on_insert_album)
-        row.connect("insert-album-after", self.__on_insert_album_after)
-        row.connect("remove-album", self.__on_remove_album)
         row.connect("remove-from-playlist", self.__on_remove_from_playlist)
         return row
-
-    def __auto_scroll(self, up):
-        """
-            Auto scroll up/down
-            @param up as bool
-        """
-        adj = self._scrolled.get_vadjustment()
-        value = adj.get_value()
-        if up:
-            adj_value = value - ArtSize.SMALL
-            adj.set_value(adj_value)
-            if adj.get_value() == 0:
-                self.__autoscroll_timeout_id = None
-                self.get_style_context().remove_class("drag-down")
-                self.get_style_context().remove_class("drag-up")
-                return False
-            else:
-                self.get_style_context().remove_class("drag-down")
-                self.get_style_context().add_class("drag-up")
-        else:
-            adj_value = value + ArtSize.SMALL
-            adj.set_value(adj_value)
-            if adj.get_value() < adj_value:
-                self.__autoscroll_timeout_id = None
-                self.get_style_context().remove_class("drag-down")
-                self.get_style_context().remove_class("drag-up")
-                return False
-            else:
-                self.get_style_context().add_class("drag-down")
-                self.get_style_context().remove_class("drag-up")
-        return True
 
     def __get_current_ordinate(self):
         """
@@ -470,154 +420,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
                 child.reveal(True)
                 y = child.translate_coordinates(self._box, 0, 0)[1]
         return y
-
-    def __update_albums_positions(self):
-        """
-            Update track position for all albums
-        """
-        self.__track_position_id = None
-        position = 1
-        for child in self._box.get_children():
-            position = child.update_tracks_position(position)
-
-    def __on_insert_track(self, row, new_track_id, down):
-        """
-            Insert a new row at position
-            @param row as PlaylistRow
-            @param new_track_id as int
-            @param down as bool
-        """
-        new_track = Track(new_track_id)
-        children = self._box.get_children()
-        position = children.index(row)
-        lenght = len(children)
-        if down:
-            position += 1
-        # Append track to current/next album
-        if position < lenght and\
-                children[position].album.id == new_track.album.id:
-            new_track.set_album(children[position].album)
-            children[position].prepend_rows([new_track])
-            children[position].album.insert_track(new_track, 0)
-        # Append track to previous/current album
-        elif position - 1 < lenght and\
-                children[position - 1].album.id == new_track.album.id:
-            new_track.set_album(children[position - 1].album)
-            children[position - 1].append_rows([new_track])
-            children[position - 1].album.insert_track(new_track)
-        # Add a new album
-        else:
-            album = Album(new_track.album.id)
-            album.set_tracks([new_track])
-            new_row = self.__row_for_album(
-                                          album,
-                                          self._view_type & ViewType.PLAYLISTS)
-            new_row.populate()
-            new_row.show()
-            self._box.insert(new_row, position)
-            if not self._view_type & ViewType.PLAYLISTS:
-                App().player.add_album(album, position)
-            if row.previous_row is not None and\
-                    row.previous_row.album.id ==\
-                    App().player.current_track.album.id and\
-                    not self._view_type & ViewType.PLAYLISTS:
-                App().player.set_next()
-                App().player.set_prev()
-        if self.__track_position_id is not None:
-            GLib.source_remove(self.__track_position_id)
-        self.__track_position_id = GLib.idle_add(
-            self.__update_albums_positions)
-
-    def __on_insert_album(self, row, new_album_id, track_ids, down):
-        """
-            Insert a new row at position
-            @param row as AlbumRow
-            @param new_track_id as int
-            @param track_ids as [int]
-            @param down as bool
-        """
-        # Merge albums if same id
-        position = self._box.get_children().index(row)
-        # Check previous row and invert merge
-        if not down and position > 0:
-            previous_row = self._box.get_children()[position - 1]
-            if previous_row.album.id == new_album_id:
-                row = previous_row
-                down = not down
-        if row.album.id == new_album_id:
-            tracks = []
-            for track_id in track_ids:
-                track = Track(track_id)
-                if down:
-                    position = -1
-                else:
-                    position = 0
-                row.album.insert_track(track, position)
-                tracks.insert(position, track)
-            if down:
-                row.append_rows(tracks)
-            else:
-                row.prepend_rows(tracks)
-            if App().player.current_track.album.id == row.album.id:
-                App().player.set_next()
-        # Add a new row
-        else:
-            if down:
-                position += 1
-            album = Album(new_album_id)
-            album.set_tracks([Track(track_id) for track_id in track_ids])
-            new_row = self.__row_for_album(
-                                       album,
-                                       self._view_type & ViewType.PLAYLISTS)
-            new_row.populate()
-            new_row.show()
-            self._box.insert(new_row, position)
-            if not self._view_type & ViewType.PLAYLISTS:
-                App().player.add_album(album, position)
-            if self.__track_position_id is not None:
-                GLib.source_remove(self.__track_position_id)
-            self.__track_position_id = GLib.idle_add(
-                self.__update_albums_positions)
-
-    def __on_insert_album_after(self, view, after_album, album):
-        """
-            Insert album after after_album
-            @param view as TracksView
-            @param after_album as Album
-            @param album as Album
-        """
-        position = 0
-        children = self._box.get_children()
-        # If after_album is undefined, prepend)
-        if after_album.id is not None:
-            for row in children:
-                if row.album == after_album:
-                    break
-                position += 1
-        new_row = self.__row_for_album(album,
-                                       self._view_type & ViewType.PLAYLISTS)
-        new_row.populate()
-        new_row.set_previous_row(children[position])
-        new_row.set_next_row(children[position].next_row)
-        children[position].set_next_row(new_row)
-        if new_row.next_row is not None:
-            new_row.next_row.set_previous_row(new_row)
-        new_row.show()
-        self._box.insert(new_row, position + 1)
-        if not self._view_type & ViewType.PLAYLISTS:
-            App().player.add_album(album, position + 1)
-        if self.__track_position_id is not None:
-            GLib.source_remove(self.__track_position_id)
-        self.__track_position_id = GLib.idle_add(
-            self.__update_albums_positions)
-
-    def __on_remove_album(self, row):
-        """
-            Remove album from player
-            @param row as AlbumRow
-        """
-        if not self._view_type & ViewType.PLAYLISTS:
-            App().player.remove_album(row.album)
 
     def __on_remove_from_playlist(self, row, object):
         """

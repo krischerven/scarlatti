@@ -14,10 +14,9 @@ from gi.repository import GObject, Gtk, Pango, GLib
 
 from lollypop.define import App, ArtSize, Type, MARGIN_SMALL, ArtBehaviour
 from lollypop.widgets_row import Row
-from lollypop.widgets_row_dnd import DNDRow
 
 
-class QueueRow(Row, DNDRow):
+class QueueRow(Row):
     """
         Queue row (a track)
     """
@@ -35,7 +34,6 @@ class QueueRow(Row, DNDRow):
             @param track as Track
         """
         Row.__init__(self, track, [], view_type)
-        DNDRow.__init__(self)
         self._grid.set_margin_start(MARGIN_SMALL)
         self._grid.set_margin_top(MARGIN_SMALL)
         self._grid.set_margin_bottom(MARGIN_SMALL)
@@ -81,25 +79,6 @@ class QueueRow(Row, DNDRow):
         else:
             self._grid.attach(self.__header, 1, 0, 4, 1)
         self.set_indicator()
-
-    def set_previous_row(self, row):
-        """
-            Set previous row
-            @param row as Row
-        """
-        Row.set_previous_row(self, row)
-        self.update_artwork_state()
-        self.update_number_label()
-
-    def update_artwork_state(self):
-        """
-            Update artwork state based on previous
-        """
-        if self.previous_row is None or\
-                self.previous_row.track.album.id != self.track.album.id:
-            self.show_artwork()
-        else:
-            self.hide_artwork()
 
     def show_artwork(self):
         """

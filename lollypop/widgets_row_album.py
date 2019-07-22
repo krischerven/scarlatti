@@ -17,24 +17,16 @@ from gettext import gettext as _
 from lollypop.view_tracks import TracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
 from lollypop.define import ArtBehaviour
-from lollypop.widgets_row_dnd import DNDRow
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.logger import Logger
 
 
-class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
+class AlbumRow(Gtk.ListBoxRow, TracksView):
     """
         Album row
     """
 
     __gsignals__ = {
-        "insert-album": (
-            GObject.SignalFlags.RUN_FIRST, None,
-            (int, GObject.TYPE_PYOBJECT, bool)),
-        "insert-track": (GObject.SignalFlags.RUN_FIRST, None, (int, bool)),
-        "insert-album-after": (GObject.SignalFlags.RUN_FIRST, None,
-                               (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT)),
-        "remove-album": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
                                  (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
@@ -73,10 +65,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         """
         Gtk.ListBoxRow.__init__(self)
         TracksView.__init__(self, view_type, position)
-        if view_type & ViewType.DND:
-            DNDRow.__init__(self)
-        self.__next_row = None
-        self.__previous_row = None
         self.__revealer = None
         self.__parent = parent
         self.__reveal = reveal
@@ -224,18 +212,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         else:
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
-    def update_tracks_position(self, position):
-        """
-            Update tracks position
-            @param position as int
-            @return new position
-        """
-        self.__position = position
-        for child in self.children:
-            child.set_position(self.__position)
-            self.__position += 1
-        return self.__position
-
     def stop(self):
         """
             Stop view loading
@@ -257,36 +233,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
-
-    def set_next_row(self, row):
-        """
-            Set next row
-            @param row as Row
-        """
-        self.__next_row = row
-
-    def set_previous_row(self, row):
-        """
-            Set previous row
-            @param row as Row
-        """
-        self.__previous_row = row
-
-    @property
-    def next_row(self):
-        """
-            Get next row
-            @return row as Row
-        """
-        return self.__next_row
-
-    @property
-    def previous_row(self):
-        """
-            Get previous row
-            @return row as Row
-        """
-        return self.__previous_row
 
     @property
     def parent(self):
