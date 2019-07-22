@@ -126,27 +126,6 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         FlowBoxView._add_items(self, albums, self._genre_ids, self._artist_ids,
                                self._view_type)
 
-    def _on_map(self, widget):
-        """
-            Restore list position if needed
-            @param widget as Gtk.Widget
-        """
-        def on_populated(selection_list, ids):
-            selection_list.disconnect_by_func(on_populated)
-            selection_list.select_ids(ids, False)
-
-        FlowBoxView._on_map(self, widget)
-        # Restore list view if needed
-        if self._sidebar_id == Type.GENRES_LIST and\
-                not self._view_type & ViewType.ALBUM:
-            genre_ids = []
-            for album in self._items:
-                for genre_id in album.genre_ids:
-                    if genre_id not in genre_ids:
-                        genre_ids.append(genre_id)
-            selection_list = App().window.container.list_view
-            selection_list.connect("populated", on_populated, genre_ids)
-
     def _on_album_updated(self, scanner, album_id, added):
         """
             Handles changes in collection
