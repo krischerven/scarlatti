@@ -14,9 +14,10 @@ from gi.repository import Gtk
 
 from lollypop.define import App
 from lollypop.controller_progress import ProgressController
+from lollypop.helper_signals import SignalsHelper
 
 
-class ToolbarTitle(Gtk.Bin, ProgressController):
+class ToolbarTitle(Gtk.Bin, ProgressController, SignalsHelper):
     """
         Title toolbar
     """
@@ -27,6 +28,7 @@ class ToolbarTitle(Gtk.Bin, ProgressController):
         """
         Gtk.Bin.__init__(self)
         ProgressController.__init__(self)
+        SignalsHelper.__init__(self)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/ToolbarTitle.ui")
         builder.connect_signals(self)
