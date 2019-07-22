@@ -17,9 +17,10 @@ from lollypop.toolbar import Toolbar
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, get_headerbar_buttons_width
+from lollypop.helper_signals import SignalsHelper
 
 
-class Window(Gtk.ApplicationWindow, AdaptiveWindow):
+class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
     """
         Main window
     """
@@ -33,15 +34,16 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
                                        title="Lollypop",
                                        icon_name="org.gnome.Lollypop")
         AdaptiveWindow.__init__(self)
-        self.__signal1 = None
-        self.__signal2 = None
+        self.signals_map = [
+            (self, "window-state-event", "_on_window_state_event"),
+            (self, "configure-event", "_on_configure_event")
+        ]
+        SignalsHelper.__init__(self)
         self.__timeout = None
         self.__miniplayer = None
         self.__mediakeys = None
         self.__media_keys_busnames = []
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
-        self.connect("map", self.__on_map)
-        self.connect("unmap", self.__on_unmap)
         App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure_id = None
         self.__setup_content()
@@ -74,6 +76,41 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
             @return Container
         """
         return self.__container
+
+##############
+# PROTECTED  #
+##############
+    def _on_configure_event(self, window, event):
+        """
+            Handle configure event
+            @param window as Gtk.Window
+            @param event as Gdk.Event
+        """
+        def on_configure_event(width, height):
+            self.__timeout_configure_id = None
+            self.__handle_miniplayer(width, height)
+            self.__toolbar.set_content_width(width)
+            self.__save_size_position(window)
+
+        (width, height) = window.get_size()
+        if self.__timeout_configure_id:
+            GLib.source_remove(self.__timeout_configure_id)
+            self.__timeout_configure_id = None
+        self.__timeout_configure_id = GLib.idle_add(on_configure_event,
+                                                    width, height,
+                                                    priority=GLib.PRIORITY_LOW)
+
+    def _on_window_state_event(self, widget, event):
+        """
+            Save maximised state
+        """
+        App().settings.set_boolean("window-maximized",
+                                   "GDK_WINDOW_STATE_MAXIMIZED" in
+                                   event.new_window_state.value_names)
+        if event.changed_mask & Gdk.WindowState.FOCUSED and \
+           event.new_window_state & Gdk.WindowState.FOCUSED:
+            # FIXME Remove this, handled by MPRIS in GNOME 3.26
+            self.__grab_media_keys()
 
 ############
 # PRIVATE  #
@@ -264,18 +301,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
         (x, y) = widget.get_position()
         App().settings.set_value("window-position", GLib.Variant("ai", [x, y]))
 
-    def __on_window_state_event(self, widget, event):
-        """
-            Save maximised state
-        """
-        App().settings.set_boolean("window-maximized",
-                                   "GDK_WINDOW_STATE_MAXIMIZED" in
-                                   event.new_window_state.value_names)
-        if event.changed_mask & Gdk.WindowState.FOCUSED and \
-           event.new_window_state & Gdk.WindowState.FOCUSED:
-            # FIXME Remove this, handled by MPRIS in GNOME 3.26
-            self.__grab_media_keys()
-
     def __on_realize(self, widget):
         """
             Run scanner on realize
@@ -341,50 +366,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow):
                                       callback=(App().scanner.update,))
         except:
             pass
-
-    def __on_map(self, window):
-        """
-            Connect signals
-            @param window as Window
-        """
-        if self.__signal1 is None:
-            self.__signal1 = self.connect("window-state-event",
-                                          self.__on_window_state_event)
-        if self.__signal2 is None:
-            self.__signal2 = self.connect("configure-event",
-                                          self.__on_configure_event)
-
-    def __on_unmap(self, window):
-        """
-            Disconnect signals
-            @param window as Window
-        """
-        if self.__signal1 is not None:
-            self.disconnect(self.__signal1)
-            self.__signal1 = None
-        if self.__signal2 is not None:
-            self.disconnect(self.__signal2)
-            self.__signal2 = None
-
-    def __on_configure_event(self, window, event):
-        """
-            Handle configure event
-            @param window as Gtk.Window
-            @param event as Gdk.Event
-        """
-        def on_configure_event(width, height):
-            self.__timeout_configure_id = None
-            self.__handle_miniplayer(width, height)
-            self.__toolbar.set_content_width(width)
-            self.__save_size_position(window)
-
-        (width, height) = window.get_size()
-        if self.__timeout_configure_id:
-            GLib.source_remove(self.__timeout_configure_id)
-            self.__timeout_configure_id = None
-        self.__timeout_configure_id = GLib.idle_add(on_configure_event,
-                                                    width, height,
-                                                    priority=GLib.PRIORITY_LOW)
 
     def __on_adaptive_changed(self, window, status):
         """
