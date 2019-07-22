@@ -350,7 +350,7 @@ def tracks_to_albums(tracks):
     albums = []
     for track in tracks:
         if albums and albums[-1].id == track.album.id:
-            albums[-1].insert_track(track)
+            albums[-1].append_tracks([track])
         else:
             album = track.album
             album.set_tracks([track])

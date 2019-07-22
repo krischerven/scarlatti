@@ -53,7 +53,6 @@ class TracksView(SizeAllocationHelper):
             view_type &= ~ViewType.TWO_COLUMNS
         if not hasattr(self, "_view_type"):
             self._view_type = view_type
-        self.__position = position
         self.__discs = []
         self._responsive_widget = None
         self._orientation = None
@@ -113,7 +112,7 @@ class TracksView(SizeAllocationHelper):
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
-            tracks = get_position_list(disc.tracks, self.__position)
+            tracks = get_position_list(disc.tracks, len(self.children))
             if self._view_type & ViewType.TWO_COLUMNS:
                 mid_tracks = int(0.5 + len(tracks) / 2)
                 widgets = {self._tracks_widget_left[disc_number]:
@@ -131,7 +130,7 @@ class TracksView(SizeAllocationHelper):
             @param tracks as [Track]
         """
         widgets = {self._tracks_widget_left[0]:
-                   get_position_list(tracks, self.__position)}
+                   get_position_list(tracks, len(self.children))}
         self.__add_tracks(OrderedDict(widgets), 0)
 
     def prepend_rows(self, tracks):
@@ -140,37 +139,8 @@ class TracksView(SizeAllocationHelper):
             @param tracks as [Track]
         """
         widgets = {self._tracks_widget_left[0]:
-                   get_position_list(tracks, 0)}
+                   get_position_list(tracks, len(self.children))}
         self.__add_tracks(OrderedDict(widgets), 0)
-
-    def rows_animation(self, x, y, widget):
-        """
-            Show animation to help user dnd
-            @param x as int
-            @param y as int
-            @param widget as Gtk.Widget
-        """
-        if self._responsive_widget is None:
-            return None
-        for row in self.children:
-            coordinates = row.translate_coordinates(widget, 0, 0)
-            if coordinates is None:
-                continue
-            (row_x, row_y) = coordinates
-            row_width = row.get_allocated_width()
-            row_height = row.get_allocated_height()
-            if x < row_x or\
-                    x > row_x + row_width or\
-                    y < row_y or\
-                    y > row_y + row_height:
-                continue
-            if y <= row_y + row_height / 2:
-                row.get_style_context().add_class("drag-up")
-                return row
-            elif y >= row_y + row_height / 2:
-                row.get_style_context().add_class("drag-down")
-                return row
-        return None
 
     def get_current_ordinate(self, parent):
         """
@@ -422,24 +392,9 @@ class TracksView(SizeAllocationHelper):
         if not App().settings.get_value("show-tag-tracknumber"):
             track.set_number(position + 1)
         row = TrackRow(track, self._album.artist_ids, self._view_type)
-        if self._view_type & ViewType.DND:
-            row.connect("destroy", self.__on_row_destroy)
         row.show()
         widget.insert(row, position)
         GLib.idle_add(self.__add_tracks, widgets, disc_number)
-
-    def __on_row_destroy(self, row):
-        """
-            Destroy self if no more row
-            @param row as Row
-        """
-        contain_children = False
-        for box in self.boxes:
-            if box.get_children():
-                contain_children = True
-                break
-        if not contain_children:
-            self.destroy()
 
     def __on_key_press_event(self, widget, event):
         """

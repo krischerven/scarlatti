@@ -53,7 +53,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             return cover_height + 2
 
     def __init__(self, album, height, view_type,
-                 reveal, cover_uri, parent, position):
+                 reveal, cover_uri, position):
         """
             Init row widgets
             @param album as Album
@@ -66,7 +66,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         Gtk.ListBoxRow.__init__(self)
         TracksView.__init__(self, view_type, position)
         self.__revealer = None
-        self.__parent = parent
         self.__reveal = reveal
         self.__cover_uri = cover_uri
         self._artwork = None
@@ -234,13 +233,25 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
 
+    def update_track_position(self, position):
+        """
+            Update track position based on current tracks
+            @param position as int
+            @return position as int
+        """
+        for row in self.children:
+            row.set_position(position)
+            position += 1
+        return position
+
     @property
-    def parent(self):
+    def revealed(self):
         """
-            Get parent view
-            @return AlbumListView
+            True if revealed
+            @return bool
         """
-        return self.__parent
+        return self.__revealer is not None and\
+            self.__revealer.get_reveal_child()
 
     @property
     def is_populated(self):

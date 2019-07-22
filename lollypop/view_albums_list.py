@@ -18,7 +18,7 @@ from lollypop.utils import get_icon_name, do_shift_selection
 from lollypop.view import LazyLoadingView
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.objects_album import Album
-from lollypop.define import ArtSize, App, ViewType, MARGIN, Type, Sizing
+from lollypop.define import App, ViewType, MARGIN, Type, Sizing
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
@@ -70,6 +70,10 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
         self._box.set_selection_mode(Gtk.SelectionMode.NONE)
         self._box.show()
         GesturesHelper.__init__(self, self._box)
+        if view_type & ViewType.DND:
+            from lollypop.helper_dnd import DNDHelper
+            self.__dnd_helper = DNDHelper(self._box, view_type)
+
         if view_type & ViewType.PLAYLISTS:
             SizeAllocationHelper.__init__(self)
         if view_type & ViewType.SCROLLED:
@@ -127,49 +131,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
             self._albums = albums
         else:
             LazyLoadingView.populate(self)
-
-    def rows_animation(self, x, y):
-        """
-            Show animation to help user dnd
-            @param x as int
-            @param y as int
-        """
-        # FIXME autoscroll continue after drop
-        self.clear_animation()
-        for row in self._box.get_children():
-            coordinates = row.translate_coordinates(self, 0, 0)
-            if coordinates is None:
-                continue
-            (row_x, row_y) = coordinates
-            row_width = row.get_allocated_width()
-            row_height = row.get_allocated_height()
-            if x < row_x or\
-                    x > row_x + row_width or\
-                    y < row_y or\
-                    y > row_y + row_height:
-                continue
-            if y <= row_y + ArtSize.SMALL / 2:
-                self.__prev_animated_rows.append(row)
-                row.get_style_context().add_class("drag-up")
-                break
-            elif y >= row_y + row_height - ArtSize.SMALL / 2:
-                self.__prev_animated_rows.append(row)
-                row.get_style_context().add_class("drag-down")
-                GLib.timeout_add(1000, self.__reveal_row, row)
-                break
-            else:
-                subrow = row.rows_animation(x, y, self)
-                if subrow is not None:
-                    self.__prev_animated_rows.append(subrow)
-
-    def clear_animation(self):
-        """
-            Clear any animation
-        """
-        for row in self.__prev_animated_rows:
-            ctx = row.get_style_context()
-            ctx.remove_class("drag-up")
-            ctx.remove_class("drag-down")
 
     def jump_to_current(self, scrolled=None):
         """
@@ -398,7 +359,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
             @param cover_uri as str
         """
         row = AlbumRow(album, self.__height, self._view_type,
-                       reveal, cover_uri, self, self.__position)
+                       reveal, cover_uri, self.__position)
         # For Playlists, we want track position not track number
         if self._view_type & ViewType.PLAYLISTS:
             self.__position += len(album.tracks)
