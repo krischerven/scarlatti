@@ -10,11 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio, Gdk, GLib
+from gi.repository import Gtk, Gdk, GLib
 
 from lollypop.define import App, Sizing, ScanType
 from lollypop.toolbar import Toolbar
-from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, get_headerbar_buttons_width
 from lollypop.helper_signals import SignalsHelper
@@ -41,14 +40,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         SignalsHelper.__init__(self)
         self.__timeout = None
         self.__miniplayer = None
-        self.__mediakeys = None
-        self.__media_keys_busnames = []
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
         App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure_id = None
         self.__setup_content()
-        # FIXME Remove this, handled by MPRIS in GNOME 3.26
-        self.__setup_media_keys()
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         self.connect("adaptive-changed", self.__on_adaptive_changed)
@@ -107,10 +102,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         App().settings.set_boolean("window-maximized",
                                    "GDK_WINDOW_STATE_MAXIMIZED" in
                                    event.new_window_state.value_names)
-        if event.changed_mask & Gdk.WindowState.FOCUSED and \
-           event.new_window_state & Gdk.WindowState.FOCUSED:
-            # FIXME Remove this, handled by MPRIS in GNOME 3.26
-            self.__grab_media_keys()
 
 ############
 # PRIVATE  #
@@ -176,81 +167,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
            isinstance(pos[0], int) and\
            isinstance(pos[1], int):
             self.move(pos[0], pos[1])
-
-    # FIXME Remove this, handled by MPRIS in GNOME 3.26
-    def __setup_media_keys(self):
-        """
-            Setup media player keys
-        """
-        self.__media_keys_busnames = [
-            "org.gnome.SettingDaemon.MediaKeys",
-            "org.gnome.SettingsDaemon",
-        ]
-
-        self.__get_media_keys_proxy()
-
-    # FIXME Remove this, handled by MPRIS in GNOME 3.26
-    def __get_media_keys_proxy(self):
-        if self.__media_keys_busnames:
-            bus_name = self.__media_keys_busnames.pop(0)
-            try:
-                bus = App().get_dbus_connection()
-                Gio.DBusProxy.new(
-                    bus,
-                    Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES,
-                    None,
-                    bus_name,
-                    "/org/gnome/SettingsDaemon/MediaKeys",
-                    "org.gnome.SettingsDaemon.MediaKeys",
-                    None,
-                    self.__on_get_proxy,
-                )
-
-            except Exception as e:
-                Logger.error("Window::__setup_media_keys(): %s" % e)
-
-    # FIXME Remove this, handled by MPRIS in GNOME 3.26
-    def __on_get_proxy(self, source, result):
-        try:
-            self.__mediakeys = source.new_finish(result)
-        except Exception as e:
-            self.__mediakeys = None
-            Logger.error("Window::__on_get_proxy(): %s" % e)
-        else:
-            if self.__mediakeys.get_name_owner():
-                self.__grab_media_keys()
-                self.__mediakeys.connect('g-signal', self.__mediakey_signal)
-            else:
-                self.__mediakeys = None
-                self.__get_media_keys_proxy()
-
-    # FIXME Remove this, handled by MPRIS in GNOME 3.26
-    def __grab_media_keys(self):
-        if not self.__mediakeys:
-            return
-        self.__mediakeys.call(
-            "GrabMediaPlayerKeys",
-            GLib.Variant("(su)", ("org.gnome.Lollypop", 0)),
-            Gio.DBusCallFlags.NONE,
-            -1,
-            None,
-            None,
-        )
-
-    def __mediakey_signal(self, proxy, sender, signal, param, userdata=None):
-        if signal != "MediaPlayerKeyPressed":
-            return
-
-        app, action = param.unpack()
-        if app == "org.gnome.Lollypop":
-            if action == "Play":
-                App().player.play_pause()
-            elif action == "Next":
-                App().player.next()
-            elif action == "Stop":
-                App().player.stop()
-            elif action == "Previous":
-                App().player.prev()
 
     def __setup_content(self):
         """
