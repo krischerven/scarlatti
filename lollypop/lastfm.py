@@ -88,11 +88,11 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             LastFMNetwork.__init__(self,
                                    api_key=self.__API_KEY,
                                    api_secret=self.__API_SECRET)
-        self.connect()
+        self.connect_service()
         Gio.NetworkMonitor.get_default().connect("notify::network-available",
                                                  self.__on_network_available)
 
-    def connect(self, full_sync=False, callback=None, *args):
+    def connect_service(self, full_sync=False, callback=None, *args):
         """
             Connect service
             @param full_sync as bool
@@ -259,7 +259,7 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             Callback for GoaSyncedAccount signal "account-switched"
             @param obj as GoaSyncedAccount
         """
-        self.connect()
+        self.connect_service()
 
     def set_loved(self, track, loved):
         """
@@ -445,4 +445,4 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
         """
         value = monitor.get_property("network-available")
         if value and not self.available:
-            self.connect()
+            self.connect_service()

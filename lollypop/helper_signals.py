@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import App
+from lollypop.logger import Logger
 # For lint
 App()
 
@@ -44,6 +45,9 @@ class SignalsHelper():
             @param signals as []
         """
         for (obj, signal, callback_str) in signals:
+            if obj is None:
+                Logger.warning("Can't connect signal: %s", signal)
+                continue
             name = "%s_%s" % (obj, signal)
             if name in self.__connected:
                 continue
@@ -59,6 +63,9 @@ class SignalsHelper():
             @param signals as []
         """
         for (obj, signal, callback_str) in signals:
+            if obj is None:
+                Logger.warning("Can't disconnect signal: %s", signal)
+                continue
             name = "%s_%s" % (obj, signal)
             if name not in self.__connected:
                 continue

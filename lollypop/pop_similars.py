@@ -10,12 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio, GLib, Pango, GObject
+from gi.repository import Gtk, Gio, GLib, Pango
 
 from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.widgets_utils import Popover
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
+from lollypop.helper_signals import SignalsHelper
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -112,7 +113,7 @@ class ArtistRow(Gtk.ListBoxRow):
             self.__artwork.set_from_surface(surface)
 
 
-class SimilarsPopover(Popover):
+class SimilarsPopover(Popover, SignalsHelper):
     """
         A popover with similar artists
     """
@@ -122,8 +123,11 @@ class SimilarsPopover(Popover):
             Init popover
         """
         Popover.__init__(self)
-        self.__lastfm_signal_id = None
-        self.__spotify_signal_id = None
+        self.signals_map = [
+            (App().lastfm, "new-artist", "_on_new_artist"),
+            (App().spotify, "new-artist", "_on_new_artist")
+        ]
+        SignalsHelper.__init__(self)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SimilarsPopover.ui")
         self.__show_all = GLib.find_program_in_path("youtube-dl") is not None
@@ -162,32 +166,9 @@ class SimilarsPopover(Popover):
             App().task_helper.run(self.__search_lastfm_similars, artists)
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
-    def __search_lastfm_similars(self, artists):
-        """
-            Search similars artists from lastfm
-            @param artists as [str]
-            @param scale_factor as int
-        """
-        for artist in artists:
-            if not self.__cancellable.is_cancelled():
-                App().lastfm.search_similar_artists(artist,
-                                                    self.__cancellable)
-
-    def __on_get_artist_id(self, artist_id):
-        """
-            Get similars
-            @param artist_id as str
-        """
-        if artist_id is None:
-            self.__stack.set_visible_child_name("no-result")
-            self.__spinner.stop()
-            return
-        App().task_helper.run(App().spotify.search_similar_artists, artist_id,
-                              self.__cancellable)
-
-    def __on_new_artist(self, provider, artist, cover_uri):
+    def _on_new_artist(self, provider, artist, cover_uri):
         """
             Add artist to view
             @param provider as Spotify/LastFM
@@ -217,16 +198,37 @@ class SimilarsPopover(Popover):
             self.__listbox.add(row)
         self.__stack.set_visible_child(self.__listbox)
 
+#######################
+# PRIVATE             #
+#######################
+    def __search_lastfm_similars(self, artists):
+        """
+            Search similars artists from lastfm
+            @param artists as [str]
+            @param scale_factor as int
+        """
+        for artist in artists:
+            if not self.__cancellable.is_cancelled():
+                App().lastfm.search_similar_artists(artist,
+                                                    self.__cancellable)
+
+    def __on_get_artist_id(self, artist_id):
+        """
+            Get similars
+            @param artist_id as str
+        """
+        if artist_id is None:
+            self.__stack.set_visible_child_name("no-result")
+            self.__spinner.stop()
+            return
+        App().task_helper.run(App().spotify.search_similar_artists, artist_id,
+                              self.__cancellable)
+
     def __on_map(self, widget):
         """
             Resize widget on map
             @param widget as Gtk.Widget
         """
-        if App().lastfm is not None:
-            self.__lastfm_signal_id = GObject.Object.connect(
-                App().lastfm, "new-artist", self.__on_new_artist)
-        self.__spotify_signal_id = App().spotify.connect(
-                "new-artist", self.__on_new_artist)
         self.set_size_request(300, 400)
 
     def __on_unmap(self, widget):
@@ -234,13 +236,6 @@ class SimilarsPopover(Popover):
             Cancel loading
             @param widget as Gtk.Widget
         """
-        if App().lastfm is not None:
-            if self.__lastfm_signal_id is not None:
-                App().lastfm.disconnect(self.__lastfm_signal_id)
-                self.__lastfm_signal_id = None
-        if self.__spotify_signal_id is not None:
-            App().spotify.disconnect(self.__spotify_signal_id)
-            self.__spotify_signal_id = None
         self.__cancellable.cancel()
 
     def __on_row_activated(self, widget, row):

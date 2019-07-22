@@ -204,7 +204,7 @@ class WebSettingsWidget(Gtk.Bin):
             @param fm as LastFM
             @param callback as function
         """
-        fm.connect(True, callback, fm)
+        fm.connect_service(True, callback, fm)
 
     def __on_get_password(self, attributes, password, name):
         """
