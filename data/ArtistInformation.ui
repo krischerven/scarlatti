@@ -36,10 +36,9 @@
             <property name="can_focus">False</property>
             <property name="valign">start</property>
             <child>
-              <object class="GtkEventBox" id="eventbox">
+              <object class="GtkEventBox" id="info_eventbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <signal name="realize" handler="_on_label_realize" swapped="no"/>
                 <child>
                   <object class="GtkLabel" id="bio_label">
                     <property name="visible">True</property>
@@ -101,10 +100,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEventBox">
+          <object class="GtkEventBox" id="artist_label_eventbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <signal name="button-release-event" handler="_on_artist_button_release_event" swapped="no"/>
             <child>
               <object class="GtkLabel" id="artist_label">
                 <property name="can_focus">False</property>

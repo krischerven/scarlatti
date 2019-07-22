@@ -16,13 +16,13 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL, Type
 from lollypop.objects_album import Album
-from lollypop.logger import Logger
 from lollypop.utils import escape
 from lollypop.helper_art import ArtBehaviour
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
 from lollypop.utils import on_realize
+from lollypop.helper_gestures import GesturesHelper
 
 
 class InformationView(View):
@@ -59,12 +59,18 @@ class InformationView(View):
         self.add(widget)
         self.__stack = builder.get_object("stack")
         self.__artist_label = builder.get_object("artist_label")
-        self.__artist_label.connect("realize", on_realize)
         title_label = builder.get_object("title_label")
         self.__artist_artwork = builder.get_object("artist_artwork")
-        eventbox = builder.get_object("eventbox")
-        eventbox.connect("button-release-event",
-                         self.__on_label_button_release_event)
+        info_eventbox = builder.get_object("info_eventbox")
+        artist_label_eventbox = builder.get_object("artist_label_eventbox")
+        info_eventbox.connect("realize", on_realize)
+        artist_label_eventbox.connect("realize", on_realize)
+        self.__gesture1 = GesturesHelper(
+            info_eventbox,
+            primary_press_callback=self._on_info_label_press)
+        self.__gesture2 = GesturesHelper(
+            artist_label_eventbox,
+            primary_press_callback=self._on_artist_label_press)
         self.__information_label = builder.get_object("bio_label")
         if artist_id is None and App().player.current_track.id is not None:
             builder.get_object("header").show()
@@ -124,14 +130,38 @@ class InformationView(View):
         """
         self.__cancellable.cancel()
 
-    def _on_label_realize(self, eventbox):
+    def _on_artist_label_press(self, x, y, event):
         """
-            @param eventbox as Gtk.EventBox
+            Go to artist view
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
-        try:
-            eventbox.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
-        except:
-            Logger.warning(_("You are using a broken cursor theme!"))
+        popover = self.get_ancestor(Gtk.Popover)
+        if popover is not None:
+            popover.popdown()
+        if App().player.current_track.id is None:
+            return
+        GLib.idle_add(App().window.container.show_view,
+                      [Type.ARTISTS],
+                      App().player.current_track.album.artist_ids)
+
+    def _on_info_label_press(self, x, y, event):
+        """
+            Show information cache (for edition)
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        uri = "file://%s/%s.txt" % (App().art._INFO_PATH,
+                                    escape(self.__artist_name))
+        f = Gio.File.new_for_uri(uri)
+        if not f.query_exists():
+            f.replace_contents(b"", None, False,
+                               Gio.FileCreateFlags.NONE, None)
+        Gtk.show_uri_on_window(App().window,
+                               uri,
+                               Gdk.CURRENT_TIME)
 
 #######################
 # PRIVATE             #
@@ -175,37 +205,6 @@ class InformationView(View):
         if popover is not None:
             popover.popdown()
         App().window.container.show_lyrics(track)
-
-    def _on_artist_button_release_event(self, eventbox, event):
-        """
-            Go to artist view
-            @param eventbox as Gtk.EventBox
-            @param event as Gdk.Event
-        """
-        popover = self.get_ancestor(Gtk.Popover)
-        if popover is not None:
-            popover.popdown()
-        if App().player.current_track.id is None:
-            return
-        GLib.idle_add(App().window.container.show_view,
-                      [Type.ARTISTS],
-                      App().player.current_track.album.artist_ids)
-
-    def __on_label_button_release_event(self, button, event):
-        """
-            Show information cache (for edition)
-            @param button as Gtk.Button
-            @param event as Gdk.Event
-        """
-        uri = "file://%s/%s.txt" % (App().art._INFO_PATH,
-                                    escape(self.__artist_name))
-        f = Gio.File.new_for_uri(uri)
-        if not f.query_exists():
-            f.replace_contents(b"", None, False,
-                               Gio.FileCreateFlags.NONE, None)
-        Gtk.show_uri_on_window(App().window,
-                               uri,
-                               Gdk.CURRENT_TIME)
 
     def __on_artist_artwork(self, surface):
         """

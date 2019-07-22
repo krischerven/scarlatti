@@ -64,7 +64,10 @@ class GesturesHelper():
 #######################
     def __on_long_pressed(self, gesture, x, y):
         """
-            Check pressed button
+            Check long pressed button
+            @param gesture as Gtk.Gesture
+            @param x as int
+            @param y as int
         """
         if gesture.get_current_button() == 1:
             self._on_primary_long_press_gesture(x, y)
@@ -74,6 +77,10 @@ class GesturesHelper():
     def __on_multi_released(self, gesture, n_press, x, y):
         """
             Check released button
+            @param gesture as Gtk.Gesture
+            @param n_press as int
+            @param x as int
+            @param y as int
         """
         sequence = gesture.get_current_sequence()
         event = gesture.get_last_event(sequence)
