@@ -117,8 +117,13 @@ class DNDHelper:
         new_album_row.populate()
         self.__insert_album_row_at_album_row(new_album_row,
                                              dst_row, direction)
-        src_row.track.album.remove_track(src_row.track)
-        src_row.destroy()
+        # If last track row, delete album row
+        album_row = src_row.get_ancestor(AlbumRow)
+        if len(album_row.children) == 1:
+            album_row.destroy()
+        else:
+            src_row.track.album.remove_track(src_row.track)
+            src_row.destroy()
 
     def __insert_track_row_at_track_row(self, src_row, dst_album_row,
                                         dst_row, direction):
