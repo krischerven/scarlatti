@@ -43,13 +43,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         if self._artwork is None:
             RoundedFlowBoxWidget.populate(self)
             self.connect("destroy", self.__on_destroy)
-            self.connect("button-release-event",
-                         self.__on_button_release_event)
-            self.__gesture = Gtk.GestureLongPress.new(self)
-            self.__gesture.connect("pressed", self.__on_gesture_pressed)
-            # We want to get release event after gesture
-            self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-            self.__gesture.set_button(0)
         else:
             self.set_artwork()
 
@@ -137,27 +130,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         if self._artwork.props.surface is None:
             self._artwork.get_style_context().add_class("artwork-icon")
         self.emit("populated")
-
-    def __on_gesture_pressed(self, gesture, x, y):
-        """
-            Show current track menu
-            @param gesture as Gtk.GestureLongPress
-            @param x as float
-            @param y as float
-        """
-        pass
-
-    def __on_button_release_event(self, widget, event):
-        """
-            Handle button release event
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        if event.button == 1:
-            self.activate()
-        elif event.button == 3:
-            pass
-        return True
 
     def __on_destroy(self, widget):
         """
