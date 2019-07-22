@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ViewType, MARGIN_SMALL, IndicatorType
 from lollypop.widgets_indicator import IndicatorWidget
+from lollypop.helper_gestures import GesturesHelper
 from lollypop.utils import seconds_to_string, on_query_tooltip
 
 
@@ -109,9 +110,10 @@ class Row(Gtk.ListBoxRow):
         else:
             self.__action_button = None
         if self.__action_button is not None:
+            self.__gesture_helper = GesturesHelper(
+                self.__action_button,
+                primary_press_callback=self._on_action_button_press)
             self.__action_button.set_margin_end(MARGIN_SMALL)
-            self.__action_button.connect("button-release-event",
-                                         self.__on_action_button_release_event)
             self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
             context = self.__action_button.get_style_context()
             context.add_class("menu-button")
@@ -251,23 +253,38 @@ class Row(Gtk.ListBoxRow):
             indicator_type |= IndicatorType.SKIP
         return indicator_type
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_action_button_release_event(self, button, event):
+    def _on_action_button_press(self, x, y, event):
         """
-           Show row menu
-            @param button as Gtk.Button
+            Show row menu
+            @param x as int
+            @param y as int
             @param event as Gdk.EventButton
         """
-        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-            return
-        if self._view_type & ViewType.DND and\
-                self._view_type & ViewType.POPOVER:
+        if self._view_type & ViewType.POPOVER:
             self._track.album.remove_track(self._track)
             self.destroy()
             App().player.set_next()
             App().player.set_prev()
         else:
-            self.__popup_menu(button)
-        return True
+            self.__popup_menu(self.__action_button)
+
+#######################
+# PRIVATE             #
+#######################
+    def __popup_menu(self, widget):
+        """
+            Popup menu for track
+            @param widget as Gtk.Widget
+        """
+        def on_closed(popover):
+            self.get_style_context().remove_class("track-menu-selected")
+            self.set_indicator()
+
+        from lollypop.pop_menu import TrackMenuPopover
+        from lollypop.menu_objects import TrackMenu
+        menu = TrackMenu(self._track)
+        popover = TrackMenuPopover(self._track, menu)
+        popover.set_relative_to(widget)
+        popover.connect("closed", on_closed)
+        self.get_style_context().add_class("track-menu-selected")
+        popover.popup()

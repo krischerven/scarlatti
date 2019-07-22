@@ -53,11 +53,11 @@ class GesturesHelper():
 
     def _on_primary_press_gesture(self, x, y, event):
         if self.__primary_press_callback is not None:
-            self.__primary_press_callback(x, y)
+            self.__primary_press_callback(x, y, event)
 
     def _on_secondary_press_gesture(self, x, y, event):
         if self.__secondary_press_callback is not None:
-            self.__secondary_press_callback(x, y)
+            self.__secondary_press_callback(x, y, event)
 
 #######################
 # PRIVATE             #
