@@ -125,6 +125,36 @@ class DNDHelper:
             src_row.track.album.remove_track(src_row.track)
             src_row.destroy()
 
+    def __insert_album_row_at_track_row(self, src_row, dst_album_row,
+                                        dst_row, direction):
+        """
+            Insert album track row at dst track row
+            @param src_row as TrackRow
+            @param dst_album_row as AlbumRow
+            @param dst_row as TrackRow
+            @param direction as Gtk.DirectionType
+        """
+        from lollypop.widgets_row_album import AlbumRow
+        height = AlbumRow.get_best_height(src_row)
+        # First split dst album
+        index = dst_album_row.children.index(dst_row)
+        if direction == Gtk.DirectionType.DOWN:
+            index += 1
+        rows = dst_album_row.children[:index]
+        split_album = Album(dst_album_row.album.id)
+        split_album.set_tracks([row.track for row in rows])
+        split_album_row = AlbumRow(split_album, height, self.__view_type,
+                                   True, None, 0)
+        split_album_row.show()
+        split_album_row.populate()
+        for row in rows:
+            dst_album_row.album.remove_track(row.track)
+            row.destroy()
+        self.__insert_album_row_at_album_row(src_row, dst_album_row,
+                                             Gtk.DirectionType.DOWN)
+        self.__insert_album_row_at_album_row(split_album_row, src_row,
+                                             Gtk.DirectionType.DOWN)
+
     def __insert_track_row_at_track_row(self, src_row, dst_album_row,
                                         dst_row, direction):
         """
