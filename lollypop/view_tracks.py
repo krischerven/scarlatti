@@ -47,13 +47,14 @@ class TracksView(SizeAllocationHelper):
         """
             Init widget
             @param view_type as ViewType
-            @param position as int
+            @param initial position as int
         """
         if App().settings.get_value("force-single-column"):
             view_type &= ~ViewType.TWO_COLUMNS
         if not hasattr(self, "_view_type"):
             self._view_type = view_type
         self.__discs = []
+        self.__position = position
         self._responsive_widget = None
         self._orientation = None
         self.__populated = False
@@ -112,7 +113,7 @@ class TracksView(SizeAllocationHelper):
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
-            tracks = get_position_list(disc.tracks, len(self.children))
+            tracks = get_position_list(disc.tracks, self.__position)
             if self._view_type & ViewType.TWO_COLUMNS:
                 mid_tracks = int(0.5 + len(tracks) / 2)
                 widgets = {self._tracks_widget_left[disc_number]:
