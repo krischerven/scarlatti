@@ -98,7 +98,7 @@ class DNDHelper:
         else:
             self.__listbox.insert(src_row, dst_index)
         # After all current events are finished
-        GLib.idle_add(self.update_album_rows)
+        GLib.idle_add(self.update_album_rows, priority=GLib.PRIORITY_LOW)
 
     def __insert_track_row_at_album_row(self, src_row, dst_row, direction):
         """
