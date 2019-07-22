@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango, GLib, Gdk
+from gi.repository import Gtk, Pango, GLib
 
 from gettext import gettext as _
 
@@ -55,17 +55,9 @@ class Row(Gtk.ListBoxRow):
         self.__next_row = None
         self.__previous_row = None
         self._indicator = IndicatorWidget(self, view_type)
-        self._row_widget = Gtk.EventBox()
-        self.__gesture = Gtk.GestureLongPress.new(self._row_widget)
-        self.__gesture.connect("pressed", self.__on_gesture_pressed)
-        self.__gesture.connect("end", self.__on_gesture_end)
-        # We want to get release event after gesture
-        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.__gesture.set_button(0)
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
         self._grid.set_column_spacing(5)
-        self._row_widget.add(self._grid)
         self._title_label = Gtk.Label.new(
             GLib.markup_escape_text(self._track.name))
         self._title_label.set_use_markup(True)
@@ -127,7 +119,7 @@ class Row(Gtk.ListBoxRow):
             self._grid.add(self.__action_button)
         else:
             self._duration_label.set_margin_end(MARGIN_SMALL)
-        self.add(self._row_widget)
+        self.add(self._grid)
         self.set_indicator(self._get_indicator_type())
         self.update_duration()
 
@@ -227,14 +219,6 @@ class Row(Gtk.ListBoxRow):
         return self.__previous_row
 
     @property
-    def row_widget(self):
-        """
-            Get row main widget
-            @return Gtk.Widget
-        """
-        return self._row_widget
-
-    @property
     def name(self):
         """
             Get row name
@@ -283,104 +267,6 @@ class Row(Gtk.ListBoxRow):
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget, xcoordinate=None, ycoordinate=None):
-        """
-            Popup menu for track
-            @param widget as Gtk.Widget
-            @param xcoordinate as int (or None)
-            @param ycoordinate as int (or None)
-        """
-        def on_closed(widget):
-            self.get_style_context().remove_class("track-menu-selected")
-            self.set_indicator()
-            # Event happens before Gio.Menu activation
-            GLib.idle_add(self._check_track)
-
-        from lollypop.pop_menu import TrackMenuPopover, RemoveMenuPopover
-        if self.get_state_flags() & Gtk.StateFlags.SELECTED:
-            # Get all selected rows
-            rows = [self]
-            r = self.previous_row
-            while r is not None:
-                if r.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    rows.append(r)
-                r = r.previous_row
-            r = self.next_row
-            while r is not None:
-                if r.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    rows.append(r)
-                r = r.next_row
-            popover = RemoveMenuPopover(rows)
-        else:
-            popover = TrackMenuPopover(self._track, self._get_menu())
-        if xcoordinate is not None and ycoordinate is not None:
-            rect = widget.get_allocation()
-            rect.x = xcoordinate
-            rect.y = ycoordinate
-            rect.width = rect.height = 1
-            popover.set_pointing_to(rect)
-        popover.set_relative_to(widget)
-        popover.connect("closed", on_closed)
-        self.get_style_context().add_class("track-menu-selected")
-        popover.popup()
-
-    def __on_button_release_event(self, widget, event):
-        """
-            Handle button release event
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        widget.disconnect_by_func(self.__on_button_release_event)
-        if event.state & Gdk.ModifierType.CONTROL_MASK and\
-                self._view_type & ViewType.DND:
-            if self.get_state_flags() & Gtk.StateFlags.SELECTED:
-                self.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            else:
-                self.set_state_flags(Gtk.StateFlags.SELECTED, True)
-                self.grab_focus()
-        elif event.state & Gdk.ModifierType.SHIFT_MASK and\
-                self._view_type & ViewType.DND:
-            self.emit("do-selection")
-        elif event.button == 3:
-            self.__popup_menu(self, event.x, event.y)
-        elif event.button == 2:
-            if self._track.id in App().player.queue:
-                App().player.remove_from_queue(self._track.id)
-            else:
-                App().player.append_to_queue(self._track.id)
-        elif event.state & Gdk.ModifierType.MOD1_MASK:
-            App().player.clear_albums()
-            App().player.reset_history()
-            App().player.load(self._track)
-        elif event.button == 1:
-            self.activate()
-            if self._track.is_web:
-                self.set_indicator(IndicatorType.LOADING)
-        return True
-
-    def __on_gesture_pressed(self, gesture, x, y):
-        """
-            Show current track menu
-            @param gesture as Gtk.GestureLongPress
-            @param x as float
-            @param y as float
-        """
-        if self._view_type & ViewType.DND and\
-                self._view_type & ViewType.POPOVER:
-            self._track.album.remove_track(self._track)
-            self.destroy()
-        else:
-            self.__popup_menu(self, x, y)
-
-    def __on_gesture_end(self, gesture, sequence):
-        """
-            Connect button release event
-            Here because we only want this if a gesture was recognized
-            This allow touch scrolling
-        """
-        self._row_widget.connect("button-release-event",
-                                 self.__on_button_release_event)
-
     def __on_action_button_release_event(self, button, event):
         """
            Show row menu

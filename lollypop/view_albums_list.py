@@ -10,11 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, GObject
+from gi.repository import Gtk, GLib, GObject, Gdk
 
 from gettext import gettext as _
 
-from lollypop.utils import get_icon_name
+from lollypop.utils import get_icon_name, do_shift_selection
 from lollypop.view import LazyLoadingView
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.objects_album import Album
@@ -22,9 +22,12 @@ from lollypop.objects_track import Track
 from lollypop.define import ArtSize, App, ViewType, MARGIN, Type, Sizing
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
+from lollypop.helper_gestures import GesturesHelper
+from lollypop.helper_signals import SignalsHelper
 
 
-class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
+class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
+                     GesturesHelper, SignalsHelper):
     """
         View showing albums
     """
@@ -44,6 +47,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        SignalsHelper.__init__(self)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self._albums = []
@@ -66,9 +70,8 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         self._box.set_margin_end(MARGIN)
         self._box.get_style_context().add_class("trackswidget")
         self._box.set_vexpand(True)
-        self._box.set_selection_mode(Gtk.SelectionMode.NONE)
-        self._box.set_activate_on_single_click(True)
         self._box.show()
+        GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.PLAYLISTS:
             SizeAllocationHelper.__init__(self)
         if view_type & ViewType.SCROLLED:
@@ -290,9 +293,77 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
                 if child.album.id == album_id:
                     child.destroy()
 
+    def _on_primary_long_press_gesture(self, x, y):
+        """
+            Show row menu
+            @param x as int
+            @param y as int
+        """
+        self.__popup_menu(self, x, y)
+
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Activate current row
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        row = self._box.get_row_at_y(y)
+        if row is None:
+            return
+        if event.state & Gdk.ModifierType.CONTROL_MASK and\
+                self._view_type & ViewType.POPOVER:
+            self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+        elif event.state & Gdk.ModifierType.SHIFT_MASK and\
+                self._view_type & ViewType.POPOVER:
+            self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+            do_shift_selection(self._box, row)
+        else:
+            self._box.set_selection_mode(Gtk.SelectionMode.NONE)
+            if self._view_type & ViewType.PLAYLISTS and row.album.tracks:
+                track = row.album.tracks[0]
+                albums = []
+                for child in self._box.get_children():
+                    albums.append(child.album)
+                App().player.play_track_for_albums(track, albums)
+            else:
+                row.reveal()
+
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Show row menu
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        self._on_primary_long_press_gesture(x, y)
+
 #######################
 # PRIVATE             #
 #######################
+    def __popup_menu(self, widget, xcoordinate=None, ycoordinate=None):
+        """
+            Popup menu for album
+            @param eventbox as Gtk.EventBox
+            @param xcoordinate as int (or None)
+            @param ycoordinate as int (or None)
+        """
+        def on_closed(widget):
+            self.get_style_context().remove_class("track-menu-selected")
+
+        from lollypop.menu_objects import AlbumMenu
+        menu = AlbumMenu(self._album, ViewType.ALBUM)
+        popover = Gtk.Popover.new_from_model(widget, menu)
+        popover.connect("closed", on_closed)
+        self.get_style_context().add_class("track-menu-selected")
+        if xcoordinate is not None and ycoordinate is not None:
+            rect = Gdk.Rectangle()
+            rect.x = xcoordinate
+            rect.y = ycoordinate
+            rect.width = rect.height = 1
+            popover.set_pointing_to(rect)
+        popover.popup()
+
     def __reveal_row(self, row):
         """
             Reveal row if style always present
@@ -353,8 +424,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         row.connect("insert-album", self.__on_insert_album)
         row.connect("insert-album-after", self.__on_insert_album_after)
         row.connect("remove-album", self.__on_remove_album)
-        row.connect("do-selection", self.__on_do_selection)
-        row.connect("track-activated", self.__on_track_activated)
         row.connect("remove-from-playlist", self.__on_remove_from_playlist)
         return row
 
@@ -410,17 +479,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         position = 1
         for child in self._box.get_children():
             position = child.update_tracks_position(position)
-
-    def __on_track_activated(self, row, track):
-        """
-            Play playlist and track
-            @param row as AlbumRow
-            @param track as Track
-        """
-        albums = []
-        for child in self._box.get_children():
-            albums.append(child.album)
-        App().player.play_track_for_albums(track, albums)
 
     def __on_insert_track(self, row, new_track_id, down):
         """
@@ -560,28 +618,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper):
         """
         if not self._view_type & ViewType.PLAYLISTS:
             App().player.remove_album(row.album)
-
-    def __on_do_selection(self, row):
-        """
-            Select rows from start (or any selected row) to track
-            @param row as AlbumRow
-        """
-        children = self._box.get_children()
-        selected = None
-        end = children.index(row) + 1
-        for child in children:
-            if child == row:
-                break
-            if child.get_state_flags() & Gtk.StateFlags.SELECTED:
-                selected = child
-        if selected is None:
-            start = 0
-        else:
-            start = children.index(selected)
-        for child in children[start:end]:
-            child.set_state_flags(Gtk.StateFlags.SELECTED, True)
-        for child in children[end:]:
-            child.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
     def __on_remove_from_playlist(self, row, object):
         """

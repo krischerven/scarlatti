@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, Gio, GLib, GObject, Pango
+from gi.repository import Gtk, Gio, GLib, GObject, Pango
 
 from gettext import gettext as _
 
@@ -37,7 +37,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
                                  (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "do-selection": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "track-activated": (GObject.SignalFlags.RUN_FIRST, None,
                             (GObject.TYPE_PYOBJECT,))
     }
@@ -106,10 +105,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         self._artwork.set_margin_top(self.__MARGIN)
         self.get_style_context().add_class("albumrow")
         self.set_sensitive(True)
-        self.set_selectable(False)
         self.set_property("has-tooltip", True)
         self.connect("query-tooltip", self.__on_query_tooltip)
-        self.__row_widget = Gtk.EventBox()
         grid = Gtk.Grid()
         grid.set_column_spacing(8)
         if self._album.artists:
@@ -164,15 +161,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
         self.__revealer = Gtk.Revealer.new()
         self.__revealer.show()
         grid.attach(self.__revealer, 0, 2, 3, 1)
-        self.__row_widget.add(grid)
-        self.add(self.__row_widget)
+        self.add(grid)
         self.set_playing_indicator()
-        self.__gesture = Gtk.GestureLongPress.new(self.__row_widget)
-        self.__gesture.connect("pressed", self.__on_gesture_pressed)
-        self.__gesture.connect("end", self.__on_gesture_end)
-        # We want to get release event after gesture
-        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.__gesture.set_button(0)
         if self.__reveal or self.__view_type & ViewType.PLAYLISTS:
             self.reveal(True)
         if self.__cover_uri is None:
@@ -357,29 +347,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget, xcoordinate=None, ycoordinate=None):
-        """
-            Popup menu for album
-            @param eventbox as Gtk.EventBox
-            @param xcoordinate as int (or None)
-            @param ycoordinate as int (or None)
-        """
-        def on_closed(widget):
-            self.get_style_context().remove_class("track-menu-selected")
-
-        from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self._album, ViewType.ALBUM)
-        popover = Gtk.Popover.new_from_model(widget, menu)
-        popover.connect("closed", on_closed)
-        self.get_style_context().add_class("track-menu-selected")
-        if xcoordinate is not None and ycoordinate is not None:
-            rect = Gdk.Rectangle()
-            rect.x = xcoordinate
-            rect.y = ycoordinate
-            rect.width = rect.height = 1
-            popover.set_pointing_to(rect)
-        popover.popup()
-
     def __on_cover_uri_content(self, uri, status, data):
         """
             Save to tmp cache
@@ -408,50 +375,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView, DNDRow):
             self._artwork.set_from_surface(surface)
         self.emit("populated")
         self.show_all()
-
-    def __on_gesture_pressed(self, gesture, x, y):
-        """
-            Show menu
-            @param gesture as Gtk.GestureLongPress
-            @param x as float
-            @param y as float
-        """
-        self.__popup_menu(self, x, y)
-
-    def __on_gesture_end(self, gesture, sequence):
-        """
-            Connect button release event
-            Here because we only want this if a gesture was recognized
-            This allow touch scrolling
-        """
-        self.__row_widget.connect("button-release-event",
-                                  self.__on_button_release_event)
-
-    def __on_button_release_event(self, widget, event):
-        """
-            Handle button release event
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        widget.disconnect_by_func(self.__on_button_release_event)
-        if event.state & Gdk.ModifierType.CONTROL_MASK and\
-                self.__view_type & ViewType.DND:
-            if self.get_state_flags() & Gtk.StateFlags.SELECTED:
-                self.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            else:
-                self.set_state_flags(Gtk.StateFlags.SELECTED, True)
-        elif event.state & Gdk.ModifierType.SHIFT_MASK and\
-                self.__view_type & ViewType.DND:
-            self.emit("do-selection")
-        elif event.button == 1:
-            if self.__view_type & ViewType.PLAYLISTS and self._album.tracks:
-                track = self._album.tracks[0]
-                self.emit("track-activated", track)
-            else:
-                self.reveal()
-        elif event.button == 3:
-            self.__popup_menu(self, event.x, event.y)
-        return True
 
     def __on_action_button_release_event(self, button, event):
         """

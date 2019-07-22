@@ -223,7 +223,6 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
             Handle widget cleanup
             @param widget as Gtk.Widget
         """
-        ProgressController.on_destroy(self)
         PlaybackController.on_destroy(self)
 
     def __on_artwork(self, surface):

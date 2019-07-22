@@ -32,7 +32,7 @@ class ViewController:
         self.signals = [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "duration-changed", "_on_duration_changed"),
-            (App().player, "%s-artwork-changed" % controller_type,
+            (App().art, "%s-artwork-changed" % controller_type,
              "_on_artwork_changed")
         ]
 

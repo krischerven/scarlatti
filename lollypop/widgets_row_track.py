@@ -30,8 +30,6 @@ class TrackRow(Row, DNDRow):
         "insert-album": (
             GObject.SignalFlags.RUN_FIRST, None, (
                 int, GObject.TYPE_PYOBJECT, bool)),
-        "do-selection": (
-            GObject.SignalFlags.RUN_FIRST, None, ())
     }
 
     def get_best_height(widget):

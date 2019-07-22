@@ -10,13 +10,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GObject, Gtk
+from gi.repository import GObject, Gtk, Gdk, GLib
 
-from lollypop.define import App
+from lollypop.define import App, ViewType, IndicatorType
+from lollypop.utils import do_shift_selection
 from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_gestures import GesturesHelper
 
 
-class TracksWidget(Gtk.ListBox, SignalsHelper):
+class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
     """
         A list of tracks
     """
@@ -26,18 +28,20 @@ class TracksWidget(Gtk.ListBox, SignalsHelper):
                       None, (GObject.TYPE_PYOBJECT,))
     }
 
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init track widget
+            @param view_type as ViewType
         """
         self.signals = [
             (App().player, "queue-changed", "_on_queue_changed")
         ]
         Gtk.ListBox.__init__(self)
         SignalsHelper.__init__(self)
+        GesturesHelper.__init__(self, self)
+        self.__view_type = view_type
         self.get_style_context().add_class("trackswidget")
         self.set_property("hexpand", True)
-        self.set_property("selection-mode", Gtk.SelectionMode.NONE)
 
     def update_playing(self, track_id):
         """
@@ -66,13 +70,82 @@ class TracksWidget(Gtk.ListBox, SignalsHelper):
         for row in self.get_children():
             row.update_number_label()
 
+    def _on_primary_long_press_gesture(self, x, y):
+        """
+            Show row menu
+            @param x as int
+            @param y as int
+        """
+        self.__popup_menu(self, x, y)
+
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Activate current row
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        row = self.get_row_at_y(y)
+        if row is None:
+            return
+
+        if event.state & Gdk.ModifierType.CONTROL_MASK and\
+                self.__view_type & ViewType.POPOVER:
+            self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+        elif event.state & Gdk.ModifierType.SHIFT_MASK and\
+                self.__view_type & ViewType.POPOVER:
+            self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+            do_shift_selection(self, row)
+        elif event.state & Gdk.ModifierType.MOD1_MASK:
+            self.set_selection_mode(Gtk.SelectionMode.NONE)
+            App().player.clear_albums()
+            App().player.reset_history()
+            App().player.load(self._track)
+        else:
+            self.set_selection_mode(Gtk.SelectionMode.NONE)
+            self.emit("activated", row.track)
+            if row.track.is_web:
+                self.set_indicator(IndicatorType.LOADING)
+
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Show row menu
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        self._on_primary_long_press_gesture(x, y)
+
 #######################
 # PRIVATE             #
 #######################
-    def __on_activate(self, widget, row):
+    def __popup_menu(self, widget, xcoordinate=None, ycoordinate=None):
         """
-            Play activated item
-            @param widget as TracksWidget
-            @param row as TrackRow
+            Popup menu for track
+            @param widget as Gtk.Widget
+            @param xcoordinate as int (or None)
+            @param ycoordinate as int (or None)
         """
-        self.emit("activated", row.track)
+        def on_closed(widget):
+            self.get_style_context().remove_class("track-menu-selected")
+            self.set_indicator()
+            # Event happens before Gio.Menu activation
+            GLib.idle_add(self._check_track)
+
+        from lollypop.pop_menu import TrackMenuPopover, RemoveMenuPopover
+        if self.get_state_flags() & Gtk.StateFlags.SELECTED:
+            # Get all selected rows
+            rows = self.get_selected_rows()
+            popover = RemoveMenuPopover(rows)
+        else:
+            popover = TrackMenuPopover(self._track, self._get_menu())
+        if xcoordinate is not None and ycoordinate is not None:
+            rect = widget.get_allocation()
+            rect.x = xcoordinate
+            rect.y = ycoordinate
+            rect.width = rect.height = 1
+            popover.set_pointing_to(rect)
+        popover.set_relative_to(widget)
+        popover.connect("closed", on_closed)
+        self.get_style_context().add_class("track-menu-selected")
+        popover.popup()
