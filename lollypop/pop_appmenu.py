@@ -14,9 +14,10 @@ from gi.repository import Gtk
 
 from lollypop.define import App
 from lollypop.widgets_utils import Popover
+from lollypop.helper_signals import SignalsHelper
 
 
-class AppMenuPopover(Popover):
+class AppMenuPopover(Popover, SignalsHelper):
     """
         Configure defaults items
     """
@@ -26,14 +27,16 @@ class AppMenuPopover(Popover):
             Init popover
         """
         Popover.__init__(self)
+        self.signals_map = [
+            (App().player, "volume-changed", "_on_volume_changed")
+        ]
+        SignalsHelper.__init__(self)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/Appmenu.ui")
         self.add(builder.get_object("widget"))
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
         builder.connect_signals(self)
-        self.connect("map", self.__on_map)
-        self.connect("unmap", self.__on_unmap)
 
 #######################
 # PROTECTED           #
@@ -50,10 +53,7 @@ class AppMenuPopover(Popover):
         if new_volume != App().player.volume:
             App().player.set_volume(scale.get_value())
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_volume_changed(self, player):
+    def _on_volume_changed(self, player):
         """
             Set scale value
             @param player as Player
@@ -61,17 +61,3 @@ class AppMenuPopover(Popover):
         volume = self.__volume.get_value()
         if player.volume != volume:
             self.__volume.set_value(player.volume)
-
-    def __on_map(self, widget):
-        """
-            Connect signals
-            @param widget as Gtk.Widget
-        """
-        App().player.connect("volume-changed", self.__on_volume_changed)
-
-    def __on_unmap(self, widget):
-        """
-            Disconnect signals
-            @param widget as Gtk.Widget
-        """
-        App().player.disconnect_by_func(self.__on_volume_changed)
