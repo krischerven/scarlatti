@@ -42,6 +42,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         self.__view_type = view_type
         self.get_style_context().add_class("trackswidget")
         self.set_property("hexpand", True)
+        self.set_selection_mode(Gtk.SelectionMode.NONE)
 
     def update_playing(self, track_id):
         """

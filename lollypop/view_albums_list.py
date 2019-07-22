@@ -67,6 +67,7 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
         self._box.set_margin_end(MARGIN)
         self._box.get_style_context().add_class("trackswidget")
         self._box.set_vexpand(True)
+        self._box.set_selection_mode(Gtk.SelectionMode.NONE)
         self._box.show()
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.PLAYLISTS:
