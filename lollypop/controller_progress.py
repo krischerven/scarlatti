@@ -30,6 +30,7 @@ class ProgressController:
         self.__seeking = False
         # Update pogress position
         self.__timeout_id = None
+        self.connect("unmap", self.__on_unmap)
         self.signals_map = [
             (App().player, "seeked", "_on_seeked")
         ]
@@ -168,3 +169,15 @@ class ProgressController:
             @param position as int
         """
         self.update_position(position)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_unmap(self, widget):
+        """
+            Stop timeout
+            @param widget as Gtk.Widget
+        """
+        if self.__timeout_id is not None:
+            GLib.source_remove(self.__timeout_id)
+            self.__timeout_id = None

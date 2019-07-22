@@ -37,18 +37,18 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             Init window for app
             @param app as Gio.Application
         """
-        self.signals = [
-            (App().player, "current-changed", "on_current_changed"),
-            (App().player, "status-changed", "on_status_changed")
-        ]
         Gtk.Window.__init__(self)
         AdaptiveWindow.__init__(self)
-        SignalsHelper.__init__(self)
         self.get_style_context().add_class("black")
         self.set_title("Lollypop")
         self.__allocation = Gdk.Rectangle()
         PlaybackController.__init__(self)
         ProgressController.__init__(self)
+        self.signals_map += [
+            (App().player, "current-changed", "on_current_changed"),
+            (App().player, "status-changed", "on_status_changed")
+        ]
+        SignalsHelper.__init__(self)
         self.set_application(app)
         self.__timeout_id = None
         self.__signal1_id = self.__signal2_id = None
@@ -115,7 +115,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self._timelabel = builder.get_object("playback")
         self._total_time_label = builder.get_object("duration")
         self.connect("key-release-event", self.__on_key_release_event)
-
         # Add a navigation widget on the right
         self.__back_button = Gtk.Button.new_from_icon_name(
             "go-previous-symbolic", Gtk.IconSize.BUTTON)
