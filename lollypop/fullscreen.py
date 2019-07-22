@@ -23,10 +23,11 @@ from lollypop.objects_radio import Radio
 from lollypop.container import Container
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.logger import Logger
+from lollypop.helper_signals import SignalsHelper
 
 
 class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
-                 PlaybackController, ProgressController):
+                 PlaybackController, ProgressController, SignalsHelper):
     """
         Show a fullscreen window showing current track context
     """
@@ -36,8 +37,13 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             Init window for app
             @param app as Gio.Application
         """
+        self.signals = [
+            (App().player, "current-changed", "on_current_changed"),
+            (App().player, "status-changed", "on_status_changed")
+        ]
         Gtk.Window.__init__(self)
         AdaptiveWindow.__init__(self)
+        SignalsHelper.__init__(self)
         self.get_style_context().add_class("black")
         self.set_title("Lollypop")
         self.__allocation = Gdk.Rectangle()
@@ -145,10 +151,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         """
             Setup window for current screen
         """
-        self.__signal1_id = App().player.connect("current-changed",
-                                                 self.on_current_changed)
-        self.__signal2_id = App().player.connect("status-changed",
-                                                 self.on_status_changed)
         self.on_status_changed(App().player)
         self.on_current_changed(App().player)
         Gtk.Window.do_show(self)
@@ -177,17 +179,11 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             Clean window
         """
         Gtk.Window.do_hide(self)
-        if self.__signal1_id is not None:
-            App().player.disconnect(self.__signal1_id)
-            self.__signal1_id = None
-        if self.__signal2_id is not None:
-            App().player.disconnect(self.__signal2_id)
-            self.__signal2_id = None
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
             self.__timeout_id = None
         App().inhibitor.manual_uninhibit()
-        ProgressController.on_destroy(self)
+        PlaybackController.on_destroy(self)
 
     def on_status_changed(self, player):
         """
