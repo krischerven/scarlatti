@@ -18,7 +18,6 @@ from lollypop.view_tracks import TracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
 from lollypop.define import ArtBehaviour
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.logger import Logger
 
 
 class AlbumRow(Gtk.ListBoxRow, TracksView):
@@ -52,8 +51,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         else:
             return cover_height + 2
 
-    def __init__(self, album, height, view_type,
-                 reveal, cover_uri, position):
+    def __init__(self, album, height, view_type, reveal, position):
         """
             Init row widgets
             @param album as Album
@@ -67,7 +65,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         TracksView.__init__(self, view_type, position)
         self.__revealer = None
         self.__reveal = reveal
-        self.__cover_uri = cover_uri
         self._artwork = None
         self._album = album
         self.__view_type = view_type
@@ -154,13 +151,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         self.set_playing_indicator()
         if self.__reveal or self.__view_type & ViewType.PLAYLISTS:
             self.reveal(True)
-        if self.__cover_uri is None:
-            self.set_artwork()
-        else:
-            self.__on_album_artwork(None)
-            App().task_helper.load_uri_content(self.__cover_uri,
-                                               self.__cancellable,
-                                               self.__on_cover_uri_content)
+        self.set_artwork()
 
     def append_rows(self, tracks):
         """
@@ -361,20 +352,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         popover.connect("closed", on_closed)
         self.get_style_context().add_class("track-menu-selected")
         popover.popup()
-
-    def __on_cover_uri_content(self, uri, status, data):
-        """
-            Save to tmp cache
-            @param uri as str
-            @param status as bool
-            @param data as bytes
-        """
-        try:
-            if status:
-                App().art.save_album_artwork(data, self._album)
-                self.set_artwork()
-        except Exception as e:
-            Logger.error("AlbumRow::__on_cover_uri_content(): %s", e)
 
     def __on_album_artwork(self, surface):
         """

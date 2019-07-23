@@ -92,17 +92,16 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         self._box.set_margin_top(margin + MARGIN)
 
-    def insert_album(self, album, reveal, position, cover_uri=None):
+    def insert_album(self, album, reveal, position):
         """
             Add an album
             @param album as Album
             @param reveal as bool
             @param position as int
-            @param cover_uri as str
         """
         row = None
         if row is None:
-            row = self.__row_for_album(album, reveal, cover_uri)
+            row = self.__row_for_album(album, reveal)
             row.populate()
             row.show()
             self._box.insert(row, position)
@@ -342,15 +341,14 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             elif self._box not in self.get_children():
                 self.add(self._box)
 
-    def __row_for_album(self, album, reveal=False, cover_uri=None):
+    def __row_for_album(self, album, reveal=False):
         """
             Get a row for track id
             @param album as Album
             @param reveal as bool
-            @param cover_uri as str
         """
         row = AlbumRow(album, self.__height, self._view_type,
-                       reveal, cover_uri, self.__position)
+                       reveal, self.__position)
         # For Playlists, we want track position not track number
         if self._view_type & ViewType.PLAYLISTS:
             self.__position += len(album.tracks)
