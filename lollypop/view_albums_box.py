@@ -545,6 +545,7 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         """
             Show view
         """
+        self._update_buttons()
         if self.get_visible():
             return
         if self._view_type & ViewType.SCROLLED:
