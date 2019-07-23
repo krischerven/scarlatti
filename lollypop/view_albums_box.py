@@ -176,7 +176,7 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             @param y as int
             @param event as Gdk.Event
         """
-        self._on_primary_long_gesture(x, y)
+        self._on_primary_long_press_gesture(x, y)
 
     def _on_primary_long_press_gesture(self, x, y):
         """

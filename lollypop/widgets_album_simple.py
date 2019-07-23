@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.widgets_album import AlbumWidget
 from lollypop.helper_overlay_album import OverlayAlbumHelper
 from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour
+from lollypop.define import MARGIN_SMALL
 from lollypop.utils import on_query_tooltip, on_realize
 
 
@@ -43,6 +44,11 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         Gtk.FlowBoxChild.__init__(self)
         AlbumWidget.__init__(self, album, genre_ids, artist_ids)
         self.set_view_type(view_type)
+        # No padding, we don't want user to activate widget while clicking
+        # on toggle button
+        self.get_style_context().add_class("no-padding")
+        self.set_margin_start(MARGIN_SMALL)
+        self.set_margin_end(MARGIN_SMALL)
 
     def populate(self):
         """
@@ -54,6 +60,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             self.set_property("halign", Gtk.Align.CENTER)
             self.set_property("valign", Gtk.Align.CENTER)
             grid = Gtk.Grid()
+            grid.set_row_spacing(2)
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)
@@ -75,8 +82,14 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
             self._artwork = Gtk.Image.new()
             self._artwork.connect("realize", on_realize)
             self._overlay.add(self._artwork)
+            toggle_button = Gtk.ToggleButton.new()
+            toggle_button.set_image(self.__label)
+            toggle_button.set_relief(Gtk.ReliefStyle.NONE)
+            toggle_button.get_style_context().add_class("light-button")
+            toggle_button.connect("toggled", self.__on_label_toggled)
+            toggle_button.show()
             grid.add(self._overlay)
-            grid.add(self.__label)
+            grid.add(toggle_button)
             self.set_artwork()
             self.set_selection()
             self.connect("destroy", self.__on_destroy)
@@ -251,6 +264,22 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         view = self.get_ancestor(View)
         if view is not None:
             view.play_all_from(self)
+
+    def __on_label_toggled(self, button):
+        """
+            Show tracks popover
+            @param button as Gtk.ToggleButton
+        """
+        def on_closed(popover):
+            button.set_active(False)
+
+        if button.get_active():
+            from lollypop.pop_tracks import TracksPopover
+            popover = TracksPopover(self._album)
+            popover.set_relative_to(button)
+            popover.set_position(Gtk.PositionType.BOTTOM)
+            popover.connect("closed", on_closed)
+            popover.popup()
 
     def __on_destroy(self, widget):
         """

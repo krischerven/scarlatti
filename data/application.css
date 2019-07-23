@@ -468,6 +468,29 @@ flowboxchild:selected  {
     font-weight: bold;
 }
 
+.light-button {
+	box-shadow: none;
+	border-radius: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	background-image: none;
+	border-style: solid;
+	border-image-source: none;
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-color: transparent;
+    background-color: transparent;
+    color: inherit;
+}
+
+.light-button:checked {
+    background-color: shade(@theme_bg_color, 0.97);
+}
+
 .trackrow {
     padding: 0px;
     min-height: 32px;

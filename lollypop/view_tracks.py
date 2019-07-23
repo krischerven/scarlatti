@@ -211,6 +211,32 @@ class TracksView(SizeAllocationHelper):
         """
         return self.get_populated()
 
+    @property
+    def requested_height(self):
+        """
+            Requested height: Internal tracks
+            @return (minimal: int, maximal: int)
+        """
+        from lollypop.widgets_row_track import TrackRow
+        track_height = TrackRow.get_best_height(self)
+        # See Banner and row spacing
+        minimal_height = maximal_height = 0
+        count = len(self._album.tracks)
+        mid_tracks = int(0.5 + count / 2)
+        left_height = track_height * mid_tracks
+        right_height = track_height * (count - mid_tracks)
+        if left_height > right_height:
+            minimal_height += left_height
+        else:
+            minimal_height += right_height
+        maximal_height += left_height + right_height
+        # Add height for disc label
+        disc_count = len(self._album.discs)
+        if disc_count > 1:
+            minimal_height += track_height * disc_count
+            maximal_height += track_height * disc_count
+        return (minimal_height, maximal_height)
+
 #######################
 # PROTECTED           #
 #######################
