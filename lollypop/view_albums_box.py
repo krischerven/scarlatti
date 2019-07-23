@@ -488,7 +488,11 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         self._label.set_text(_("New albums from Spotify"))
         self.__cancellable = Gio.Cancellable()
         return [
-            (App().spotify, "new-album", "_on_new_spotify_album")
+            (App().spotify, "new-album", "_on_new_spotify_album"),
+            (App().settings, "changed::network-access",
+             "_on_network_access_changed"),
+            (App().settings, "changed::network-access-acl",
+             "_on_network_access_changed")
         ]
 
     def populate(self):
@@ -508,6 +512,14 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         """
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
+
+    def _on_network_access_changed(self, *ignore):
+        """
+            Destroy if not allowed anymore
+        """
+        if not get_network_available("SPOTIFY") or\
+                not get_network_available("YOUTUBE"):
+            self.destroy()
 
     def _on_new_spotify_album(self, spotify, album, cover_uri):
         """
