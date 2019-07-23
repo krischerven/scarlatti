@@ -22,7 +22,7 @@ from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_lyrics import SyncLyricsHelper
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class LyricsLabel(Gtk.Stack):
@@ -81,15 +81,12 @@ class LyricsView(View, InformationController, SignalsHelper):
         Show lyrics for track
     """
 
+    @signals
     def __init__(self):
         """
             Init view
         """
         View.__init__(self, ViewType.SCROLLED)
-        self.signals += [
-            (App().player, "current-changed", "_on_current_changed")
-        ]
-        SignalsHelper.__init__(self)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |
                                        ArtBehaviour.CROP |
@@ -113,6 +110,9 @@ class LyricsView(View, InformationController, SignalsHelper):
         self.add(builder.get_object("widget"))
         self.connect("size-allocate", self.__on_size_allocate)
         self.__sync_lyrics_helper = SyncLyricsHelper()
+        return [
+            (App().player, "current-changed", "_on_current_changed")
+        ]
 
     def populate(self, track):
         """

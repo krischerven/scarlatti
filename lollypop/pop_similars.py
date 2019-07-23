@@ -16,7 +16,7 @@ from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.widgets_utils import Popover
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -118,16 +118,12 @@ class SimilarsPopover(Popover, SignalsHelper):
         A popover with similar artists
     """
 
+    @signals_map
     def __init__(self):
         """
             Init popover
         """
         Popover.__init__(self)
-        self.signals_map = [
-            (App().lastfm, "new-artist", "_on_new_artist"),
-            (App().spotify, "new-artist", "_on_new_artist")
-        ]
-        SignalsHelper.__init__(self)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SimilarsPopover.ui")
         self.__show_all = GLib.find_program_in_path("youtube-dl") is not None
@@ -147,6 +143,10 @@ class SimilarsPopover(Popover, SignalsHelper):
         self.__listbox.show()
         self.__stack.add(self.__listbox)
         self.add(builder.get_object("widget"))
+        return [
+            (App().lastfm, "new-artist", "_on_new_artist"),
+            (App().spotify, "new-artist", "_on_new_artist")
+        ]
 
     def populate(self, artist_ids):
         """

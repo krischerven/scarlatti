@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.helper_overlay_album import OverlayAlbumHelper
 from lollypop.utils import on_realize
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
@@ -28,16 +28,13 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
+    @signals
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
             @param view_type as ViewType
         """
-        self.signals = [
-            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
-        ]
         Gtk.EventBox.__init__(self)
-        SignalsHelper.__init__(self)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
         self._album = album
@@ -53,6 +50,9 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         self.connect("enter-notify-event",
                      lambda x, y: self.show_overlay(True))
         self.connect("leave-notify-event", self.__on_leave_notify)
+        return [
+            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+        ]
 
     def set_artwork(self, art_size):
         """

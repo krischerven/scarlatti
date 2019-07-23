@@ -19,7 +19,7 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip, on_realize
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -28,17 +28,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         Banner for album
     """
 
+    @signals
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
             @param album
             @param view_type as ViewType
         """
-        self.signals = [
-            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
-        ]
         BannerWidget.__init__(self, view_type)
-        SignalsHelper.__init__(self)
         self.__cloud_image = None
         self.__album = album
         self.set_property("valign", Gtk.Align.START)
@@ -104,6 +101,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
         self.add_overlay(self.__widget)
+        return [
+            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+        ]
 
     def set_view_type(self, view_type):
         """

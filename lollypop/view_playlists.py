@@ -24,7 +24,7 @@ from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.logger import Logger
 from lollypop.helper_filtering import FilteringHelper
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -34,6 +34,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         View showing playlists
     """
 
+    @signals
     def __init__(self, playlist_ids, view_type):
         """
             Init PlaylistView
@@ -41,14 +42,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, view_type)
-        self.signals += [
-            (App().playlists, "playlist-track-added",
-             "_on_playlist_track_added"),
-            (App().playlists, "playlist-track-removed",
-             "_on_playlist_track_removed")
-        ]
         ViewController.__init__(self, ViewControllerType.ALBUM)
-        SignalsHelper.__init__(self)
         FilteringHelper.__init__(self)
         SizeAllocationHelper.__init__(self)
         self._playlist_ids = playlist_ids
@@ -115,6 +109,12 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         else:
             self._view.connect("populated", self.__on_playlist_populated)
         self._view.set_property("halign", Gtk.Align.CENTER)
+        return [
+            (App().playlists, "playlist-track-added",
+             "_on_playlist_track_added"),
+            (App().playlists, "playlist-track-removed",
+             "_on_playlist_track_removed")
+         ]
 
     def set_view_type(self, view_type):
         """

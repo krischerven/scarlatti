@@ -13,25 +13,19 @@
 from gi.repository import Gtk, Gdk
 
 from lollypop.define import App, MARGIN_SMALL
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
     """
         Type ahead widget
     """
-    signals_map = [
-        ("App().window.container.list_view",
-         "button-press-event",
-         "_on_list_key_press_event"),
-    ]
-
+    @signals_map
     def __init__(self):
         """
             Init widget
         """
         Gtk.Revealer.__init__(self)
-        SignalsHelper.__init__(self)
         self.__current_focused_view = None
         self.__focus_in_event_id = None
         builder = Gtk.Builder()
@@ -47,6 +41,10 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         self.__prev_button.connect("clicked", lambda x: self.__search_prev())
         self.__entry.connect("map", self.__on_map)
         self.add(widget)
+        return [
+            ("App().window.container.list_view", "button-press-event",
+             "_on_list_key_press_event")
+        ]
 
     @property
     def entry(self):

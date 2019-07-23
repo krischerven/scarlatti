@@ -19,7 +19,7 @@ import gc
 from lollypop.define import ViewType, Type, App
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class View(AdaptiveView, Gtk.Grid, SignalsHelper):
@@ -27,18 +27,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         Generic view
     """
 
+    @signals
     def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init view
             @param view_type as ViewType
         """
-        self.signals = [
-            (App().window, "adaptive-changed", "_on_adaptive_changed"),
-            (App().scanner, "album-updated", "_on_album_updated")
-        ]
         AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
-        SignalsHelper.__init__(self)
         self._view_type = view_type
         self.__destroyed = False
         self._sidebar_id = Type.NONE
@@ -72,6 +68,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
+        return [(App().window, "adaptive-changed", "_on_adaptive_changed"),
+                (App().scanner, "album-updated", "_on_album_updated")]
 
     def populate(self):
         """

@@ -16,7 +16,7 @@ from lollypop.define import App, Sizing, ScanType
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, get_headerbar_buttons_width
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
@@ -24,6 +24,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         Main window
     """
 
+    @signals_map
     def __init__(self):
         """
             Init window
@@ -33,11 +34,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                        title="Lollypop",
                                        icon_name="org.gnome.Lollypop")
         AdaptiveWindow.__init__(self)
-        self.signals_map = [
-            (self, "window-state-event", "_on_window_state_event"),
-            (self, "configure-event", "_on_configure_event")
-        ]
-        SignalsHelper.__init__(self)
         self.__timeout = None
         self.__miniplayer = None
         self.__headerbar_buttons_width = get_headerbar_buttons_width()
@@ -50,6 +46,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("released", self.__on_back_button_clicked)
         self.__multi_press.set_button(8)
+        return [
+            (self, "window-state-event", "_on_window_state_event"),
+            (self, "configure-event", "_on_configure_event")
+        ]
 
     @property
     def miniplayer(self):

@@ -29,11 +29,7 @@ class QueueView(View, SignalsHelper):
             Init Popover
             @param view_type as ViewType
         """
-        self.signals = [
-            (App().player, "current-changed", "_on_current_changed")
-        ]
         View.__init__(self, view_type)
-        SignalsHelper.__init__(self)
         self.__view_type = view_type
         self.__last_drag_id = None
         self.__stop = False

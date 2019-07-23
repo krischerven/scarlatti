@@ -18,7 +18,7 @@ from lollypop.controller_information import InformationController
 from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.utils import on_realize
 from lollypop.define import App, ArtSize
 
@@ -32,15 +32,11 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
         "revealed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
+    @signals_map
     def __init__(self):
         """
             Init mini player
         """
-        self.signals = [
-            (App().player, "current-changed", "_on_current_changed"),
-            (App().player, "status-changed", "_on_status_changed"),
-            (App().player, "duration-changed", "on_duration_changed")
-        ]
         Gtk.Bin.__init__(self)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |
@@ -48,7 +44,6 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
         ProgressController.__init__(self)
         PlaybackController.__init__(self)
         SizeAllocationHelper.__init__(self)
-        SignalsHelper.__init__(self)
         self.__size = 0
         self.__cover = None
         builder = Gtk.Builder()
@@ -86,6 +81,11 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
             self.update_position()
             ProgressController.on_status_changed(self, App().player)
         self.add(builder.get_object("widget"))
+        return [
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "status-changed", "_on_status_changed"),
+            (App().player, "duration-changed", "on_duration_changed")
+        ]
 
     def do_get_preferred_width(self):
         """

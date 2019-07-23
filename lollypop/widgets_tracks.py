@@ -14,7 +14,7 @@ from gi.repository import GObject, Gtk, Gdk
 
 from lollypop.define import App, ViewType, IndicatorType
 from lollypop.utils import do_shift_selection
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -28,21 +28,19 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
                       None, (GObject.TYPE_PYOBJECT,))
     }
 
+    @signals
     def __init__(self, view_type):
         """
             Init track widget
             @param view_type as ViewType
         """
-        self.signals = [
-            (App().player, "queue-changed", "_on_queue_changed")
-        ]
         Gtk.ListBox.__init__(self)
-        SignalsHelper.__init__(self)
         GesturesHelper.__init__(self, self)
         self.__view_type = view_type
         self.get_style_context().add_class("trackswidget")
         self.set_property("hexpand", True)
         self.set_selection_mode(Gtk.SelectionMode.NONE)
+        return [(App().player, "queue-changed", "_on_queue_changed")]
 
     def update_playing(self, track_id):
         """

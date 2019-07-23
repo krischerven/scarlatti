@@ -23,7 +23,7 @@ from lollypop.objects_radio import Radio
 from lollypop.container import Container
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.logger import Logger
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
@@ -32,6 +32,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         Show a fullscreen window showing current track context
     """
 
+    @signals_map
     def __init__(self, app):
         """
             Init window for app
@@ -44,11 +45,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__allocation = Gdk.Rectangle()
         PlaybackController.__init__(self)
         ProgressController.__init__(self)
-        self.signals_map += [
-            (App().player, "current-changed", "on_current_changed"),
-            (App().player, "status-changed", "on_status_changed")
-        ]
-        SignalsHelper.__init__(self)
         self.set_application(app)
         self.__timeout_id = None
         self.__signal1_id = self.__signal2_id = None
@@ -145,6 +141,10 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__sidebar.get_style_context().add_class("background-opacity")
         self.__revealer.add(self.__sidebar)
         self.add(widget)
+        return [
+            (App().player, "current-changed", "on_current_changed"),
+            (App().player, "status-changed", "on_status_changed")
+        ]
 
     def do_show(self):
         """

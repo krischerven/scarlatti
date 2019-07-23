@@ -18,7 +18,7 @@ from lollypop.widgets_radio import RadioWidget
 from lollypop.pop_tunein import TuneinPopover
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.utils import get_icon_name, get_network_available
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class RadiosView(FlowBoxView, ViewController, SignalsHelper):
@@ -26,16 +26,13 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         Show radios flow box
     """
 
+    @signals
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init view
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
-        self.signals += [
-            (App().radios, "radio-changed", "_on_radio_changed")
-        ]
-        SignalsHelper.__init__(self)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._widget_class = RadioWidget
         self._empty_icon_name = get_icon_name(Type.RADIOS)
@@ -47,6 +44,9 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         self.__pop_tunein = None
         if not get_network_available("TUNEIN"):
             builder.get_object("search_btn").hide()
+        return [
+            (App().radios, "radio-changed", "_on_radio_changed")
+        ]
 
     def populate(self):
         """

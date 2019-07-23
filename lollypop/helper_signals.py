@@ -10,10 +10,38 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from functools import wraps
+
 from lollypop.define import App
 from lollypop.logger import Logger
 # For lint
 App()
+
+
+def signals(f):
+    """
+        Decorator to init signal helper
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        ret = f(*args, **kwargs)
+        SignalsHelper.__init__(args[0])
+        args[0].init(ret)
+
+    return wrapper
+
+
+def signals_map(f):
+    """
+        Decorator to init signal helper
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        ret = f(*args, **kwargs)
+        SignalsHelper.__init__(args[0])
+        args[0].init_map(ret)
+
+    return wrapper
 
 
 class SignalsHelper():
@@ -25,16 +53,27 @@ class SignalsHelper():
         """
             Init helper
         """
-        self.__connected = []
-        if hasattr(self, "signals"):
-            self._connect_signals(self.signals)
+        if not hasattr(self, "_connected"):
+            self._connected = []
+
+    def init(self, signals):
+        """
+            Init signals
+        """
+        if signals:
+            self._connect_signals(signals)
             self.connect("destroy",
-                         lambda x: self._disconnect_signals(self.signals))
-        elif hasattr(self, "signals_map"):
+                         lambda x: self._disconnect_signals(signals))
+
+    def init_map(self, signals):
+        """
+            Init map signals
+        """
+        if signals:
             self.connect("map",
-                         lambda x: self._connect_signals(self.signals_map))
+                         lambda x: self._connect_signals(signals))
             self.connect("unmap",
-                         lambda x: self._disconnect_signals(self.signals_map))
+                         lambda x: self._disconnect_signals(signals))
 
 #######################
 # PROTECTE            #
@@ -49,13 +88,13 @@ class SignalsHelper():
                 Logger.warning("Can't connect signal: %s", signal)
                 continue
             name = "%s_%s" % (obj, signal)
-            if name in self.__connected:
+            if name in self._connected:
                 continue
             if isinstance(obj, str):
                 obj = eval(obj)
             callback = getattr(self, callback_str)
             obj.connect(signal, callback)
-            self.__connected.append(name)
+            self._connected.append(name)
 
     def _disconnect_signals(self, signals):
         """
@@ -67,10 +106,10 @@ class SignalsHelper():
                 Logger.warning("Can't disconnect signal: %s", signal)
                 continue
             name = "%s_%s" % (obj, signal)
-            if name not in self.__connected:
+            if name not in self._connected:
                 continue
             if isinstance(obj, str):
                 obj = eval(obj)
             callback = getattr(self, callback_str)
             obj.disconnect_by_func(callback)
-            self.__connected.remove(name)
+            self._connected.remove(name)

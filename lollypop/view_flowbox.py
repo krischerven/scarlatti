@@ -17,7 +17,7 @@ from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.define import ViewType, App, MARGIN
 from lollypop.utils import get_font_height
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
@@ -26,17 +26,14 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         Lazy loading FlowBox
     """
 
+    @signals
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init flowbox view
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, view_type)
-        self.signals += [
-            (App().player, "loading-changed", "_on_loading_changed")
-        ]
         FilteringHelper.__init__(self)
-        SignalsHelper.__init__(self)
         self._widget_class = None
         self._items = []
         self.__selected_child = None
@@ -59,6 +56,9 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self._scrolled.set_property("expand", True)
             self._viewport.set_property("valign", Gtk.Align.START)
             self.add(self._scrolled)
+        return [
+            (App().player, "loading-changed", "_on_loading_changed")
+        ]
 
     def populate(self, items):
         """

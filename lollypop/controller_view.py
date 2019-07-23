@@ -11,7 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import App
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class ViewControllerType:
@@ -25,18 +25,18 @@ class ViewController(SignalsHelper):
         Should be herited by a Gtk.Widget
     """
 
+    @signals
     def __init__(self, controller_type):
         """
             Init controller
             @param controller_type as ViewControllerType
         """
-        self.signals = [
+        return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "duration-changed", "_on_duration_changed"),
             (App().art, "%s-artwork-changed" % controller_type,
              "_on_artwork_changed")
         ]
-        SignalsHelper.__init__(self)
 
 #######################
 # PROTECTED           #

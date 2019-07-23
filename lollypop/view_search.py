@@ -23,7 +23,7 @@ from lollypop.utils import get_network_available
 from lollypop.view import View
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
@@ -31,6 +31,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         View for searching albums/tracks
     """
 
+    @signals
     def __init__(self, view_type):
         """
             Init Popover
@@ -39,15 +40,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         View.__init__(self)
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
-        self.signals += [
-            (App().spotify, "new-album", "_on_new_spotify_album"),
-            (App().spotify, "search-finished", "_on_search_finished"),
-            (App().settings, "changed::network-access",
-             "_update_bottom_buttons"),
-            (App().settings, "changed::network-access-acl",
-             "_update_bottom_buttons")
-        ]
-        SignalsHelper.__init__(self)
         self.__timeout_id = None
         self.__signal_ids = {}
         self.__current_search = ""
@@ -85,6 +77,14 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         builder.connect_signals(self)
         self.__widget.set_property("halign", Gtk.Align.CENTER)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
+        return [
+            (App().spotify, "new-album", "_on_new_spotify_album"),
+            (App().spotify, "search-finished", "_on_search_finished"),
+            (App().settings, "changed::network-access",
+             "_update_bottom_buttons"),
+            (App().settings, "changed::network-access-acl",
+             "_update_bottom_buttons")
+         ]
 
     def populate(self):
         pass

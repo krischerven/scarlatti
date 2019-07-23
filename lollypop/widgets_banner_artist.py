@@ -20,7 +20,7 @@ from lollypop.utils import on_realize, on_query_tooltip
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class ArtistBannerWidget(BannerWidget, SignalsHelper):
@@ -28,6 +28,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         Banner for artist
     """
 
+    @signals
     def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
         """
             Init artist banner
@@ -35,11 +36,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param artist_ids as [int]
             @param view_type as ViewType (Unused)
         """
-        self.signals = [
-            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
-        ]
         BannerWidget.__init__(self, view_type)
-        SignalsHelper.__init__(self)
         self.__album_ids = None
         self.__album_id = None
         self.__genre_ids = genre_ids
@@ -73,6 +70,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__title_label.get_style_context().add_class("text-x-large")
         self.add_overlay(widget)
         self.set_view_type(view_type)
+        return [
+           (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+        ]
 
     def set_view_type(self, view_type):
         """

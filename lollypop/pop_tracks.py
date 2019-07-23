@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from lollypop.view_tracks import TracksView
 from lollypop.define import App, ViewType
 from lollypop.widgets_utils import Popover
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class TracksPopover(Popover, TracksView, SignalsHelper):
@@ -23,18 +23,15 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         A popover with tracks
     """
 
+    @signals_map
     def __init__(self, album):
         """
             Init popover
             @param album as Album
             @param width as int
         """
-        self.signals_map = [
-            (App().player, "current-changed", "_on_current_changed")
-        ]
         Popover.__init__(self)
         TracksView.__init__(self, ViewType.TWO_COLUMNS)
-        SignalsHelper.__init__(self)
         self._album = album
         self.get_style_context().add_class("box-shadow")
         view_height = self.requested_height[0]
@@ -54,6 +51,9 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         scrolled.show()
         self._responsive_widget.show()
         self.add(scrolled)
+        return [
+            (App().player, "current-changed", "_on_current_changed")
+        ]
 
 #######################
 # PROTECTED           #

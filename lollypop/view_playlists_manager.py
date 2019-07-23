@@ -19,7 +19,7 @@ from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, SelectionListMask
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.shown import ShownPlaylists
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class PlaylistsManagerView(FlowBoxView, SignalsHelper):
@@ -27,6 +27,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         Show playlists in a FlowBox
     """
 
+    @signals
     def __init__(self, obj, view_type=ViewType.SCROLLED):
         """
             Init decade view
@@ -34,10 +35,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
-        self.signals += [
-            (App().playlists, "playlists-changed", "_on_playlist_changed")
-        ]
-        SignalsHelper.__init__(self)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__obj = obj
@@ -50,6 +47,9 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self.insert_row(1)
         self.attach(self._new_button, 0, 1, 1, 1)
         self._widget_class = PlaylistRoundedWidget
+        return [
+            (App().playlists, "playlists-changed", "_on_playlist_changed")
+        ]
 
     def populate(self):
         """

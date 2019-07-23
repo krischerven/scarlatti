@@ -20,7 +20,7 @@ from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.utils import get_icon_name
-from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class RoundedArtistsView(FlowBoxView, SignalsHelper):
@@ -28,20 +28,20 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         Show artists in a FlowBox
     """
 
+    @signals
     def __init__(self, view_type):
         """
             Init artist view
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
-        self.signals += [
-            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
-        ]
-        SignalsHelper.__init__(self)
         self.__view_type = view_type
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
+        return [
+            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+        ]
 
     def populate(self):
         """
