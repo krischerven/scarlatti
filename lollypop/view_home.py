@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from lollypop.view import View
 from lollypop.utils import get_network_available
-from lollypop.define import ViewType, MARGIN
+from lollypop.define import ViewType
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
@@ -40,9 +40,6 @@ class HomeView(View, FilteringHelper):
         self._viewport.add(self.__grid)
         if view_type & ViewType.SCROLLED:
             self._viewport.set_property("valign", Gtk.Align.START)
-            self._viewport.set_margin_top(MARGIN)
-            self._viewport.set_margin_end(0)
-            self._viewport.set_margin_start(MARGIN)
             self._scrolled.set_property("expand", True)
             self.add(self._scrolled)
 
