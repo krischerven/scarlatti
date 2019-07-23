@@ -54,7 +54,8 @@ class HomeView(View, FilteringHelper):
             view.populate()
             view.show()
             self.__grid.add(view)
-        if get_network_available("SPOTIFY"):
+        if get_network_available("SPOTIFY") and\
+                get_network_available("YOUTUBE"):
             from lollypop.view_albums_box import AlbumsSpotifyBoxView
             spotify_view = AlbumsSpotifyBoxView(self._view_type)
             spotify_view.populate()
