@@ -126,6 +126,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__back_button.show()
         self.__background_artwork = builder.get_object("background_artwork")
         self.__container = Container()
+        self.__container.setup_lists()
         self.set_stack(self.__container.stack)
         self.__container.show()
         self.__sidebar = Gtk.Grid()
