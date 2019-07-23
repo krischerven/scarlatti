@@ -58,6 +58,7 @@ class ViewsContainer:
                                Type.WEB]:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.HOME:
+                self.sidebar.select_ids([])
                 view = self._get_view_home()
             elif item_ids[0] == Type.SEARCH:
                 view = self.get_view_search(data)

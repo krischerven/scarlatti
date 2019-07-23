@@ -385,9 +385,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param ids as [int]
             @param activate as bool
         """
-        selected_ids = self.selected_ids
-        if len(set(ids) & set(selected_ids)) == len(ids):
-            return
         self._box.unselect_all()
         for row in self._box.get_children():
             if row.id in ids:
