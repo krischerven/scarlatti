@@ -130,7 +130,6 @@ class ShufflePlayer(BasePlayer):
         for album_id in album_ids:
             album = Album(album_id, [], [], True)
             self._albums.append(album)
-        self.emit("playlist-changed")
 
     @property
     def is_party(self):

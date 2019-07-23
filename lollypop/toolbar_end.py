@@ -87,12 +87,7 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(scrobbling_action)
         App().set_accels_for_action("app.scrobbling", ["<Control><Shift>s"])
 
-        self.__list_button = builder.get_object("list_button")
-        self.__list_button.set_property("has-tooltip", True)
-        self.__list_button.connect("query-tooltip",
-                                   self.__on_list_button_query_tooltip)
         self.__home_button = builder.get_object("home_button")
-        App().player.connect("playlist-changed", self.__on_playlist_changed)
         self.__set_shuffle_icon()
 
         button_progress_bar = ButtonProgressBar()
@@ -108,16 +103,6 @@ class ToolbarEnd(Gtk.Bin):
                                        devices_button)
         self.__devices_popover.populate()
         builder.connect_signals(self)
-
-    def set_mini(self, mini):
-        """
-            Set mini mode
-            @param mini as bool
-        """
-        if mini:
-            self.__list_button.hide()
-        else:
-            self.__list_button.show()
 
     @property
     def devices_popover(self):
@@ -138,20 +123,6 @@ class ToolbarEnd(Gtk.Bin):
 #######################
 # PROTECTED           #
 #######################
-    def _on_list_button_toggled(self, button):
-        """
-            Show current playback context popover
-            @param button as Gtk.ToggleButton
-        """
-        if not button.get_active():
-            return
-        from lollypop.pop_current import CurrentPopover
-        popover = CurrentPopover()
-        popover.set_relative_to(button)
-        popover.popup()
-        popover.connect("closed", self.__on_popover_closed, button)
-        return True
-
     def _on_home_button_clicked(self, button):
         """
             Go home in adaptive mode
@@ -361,30 +332,6 @@ class ToolbarEnd(Gtk.Bin):
             @param button as Gtk.Button
         """
         button.set_active(False)
-
-    def __on_list_button_query_tooltip(self, widget, x, y, keyboard, tooltip):
-        """
-            Show tooltip
-            @param widget as Gtk.Widget
-            @param x as int
-            @param y as int
-            @param keyboard as bool
-            @param tooltip as Gtk.Tooltip
-        """
-        if App().player.queue:
-            widget.set_tooltip_text(_("Queue"))
-        else:
-            widget.set_tooltip_text(_("Tracks"))
-
-    def __on_playlist_changed(self, player):
-        """
-            Update playback button status
-            @param player as Player
-        """
-        if player.albums:
-            self.__list_button.set_sensitive(True)
-        else:
-            self.__list_button.set_sensitive(False)
 
     def __on_devices_content_changed(self, popover, count, devices_button):
         """

@@ -46,7 +46,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__setup_content()
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
-        self.connect("adaptive-changed", self.__on_adaptive_changed)
         self.__multi_press = Gtk.GestureMultiPress.new(self)
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("released", self.__on_back_button_clicked)
@@ -286,14 +285,3 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                       callback=(App().scanner.update,))
         except:
             pass
-
-    def __on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode
-            @param window as AdaptiveWindow
-            @param status as bool
-        """
-        if status:
-            self.__toolbar.end.set_mini(True)
-        else:
-            self.__toolbar.end.set_mini(False)
