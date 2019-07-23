@@ -84,6 +84,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.add(self.__widget)
         builder.connect_signals(self)
         self.__widget.set_property("halign", Gtk.Align.CENTER)
+        self._on_adaptive_changed(App().window, App().window.is_adaptive)
 
     def populate(self):
         pass
@@ -236,6 +237,18 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             self.__stack.set_visible_child_name("placeholder")
             self.__set_no_result_placeholder()
 
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+        """
+        style_context = self.__placeholder.get_style_context()
+        if status:
+            style_context.remove_class("text-xx-large")
+            style_context.add_class("text-x-large")
+        else:
+            style_context.remove_class("text-x-large")
+            style_context.add_class("text-xx-large")
+
 #######################
 # PRIVATE             #
 #######################
@@ -243,15 +256,13 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         """
             Set placeholder for no result
         """
-        self.__placeholder.set_markup(
-            _("<big>No results for this search</big>"))
+        self.__placeholder.set_text(_("No results for this search"))
 
     def __set_default_placeholder(self):
         """
             Set placeholder for no result
         """
-        self.__placeholder.set_markup(
-            _("<big>Search for artists, albums and tracks</big>"))
+        self.__placeholder.set_text(_("Search for artists, albums and tracks"))
 
     def __populate(self):
         """
