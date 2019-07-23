@@ -262,6 +262,12 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         self.__stop_after_track_id = track_id
 
+    def set_albums(self, albums):
+        """
+            Set player albums
+        """
+        self._albums = albums
+
     def get_current_artists(self):
         """
             Get current artist

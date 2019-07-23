@@ -29,6 +29,8 @@ class CurrentAlbumsView(AlbumsListView):
             @param view_type as ViewType
         """
         AlbumsListView.__init__(self, [], [], view_type)
+        if view_type & ViewType.DND:
+            self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
         self.__clear_button = Gtk.Button.new_from_icon_name(
             "edit-clear-all-symbolic",
             Gtk.IconSize.MENU)
@@ -136,3 +138,13 @@ class CurrentAlbumsView(AlbumsListView):
         popover = self.get_ancestor(Gtk.Popover)
         if popover is not None:
             popover.popdown()
+
+    def __on_dnd_finished(self, dnd_helper):
+        """
+            Save playlist if needed
+            @param dnd_helper as DNDHelper
+        """
+        albums = []
+        for child in self.children:
+            albums.append(child.album)
+        App().player.set_albums(albums)

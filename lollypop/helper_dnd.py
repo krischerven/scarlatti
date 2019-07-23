@@ -89,7 +89,7 @@ class DNDHelper(GObject.Object):
         position = 1
         for row in self.__listbox.get_children():
             position = row.update_track_position(position)
-        self.emit("dnd-finished")
+        GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
 
     def __insert_album_row_at_album_row(self, src_row, dst_row, direction):
         """
@@ -106,7 +106,6 @@ class DNDHelper(GObject.Object):
             self.__listbox.insert(src_row, dst_index)
         else:
             self.__listbox.insert(src_row, dst_index)
-        # After all current events are finished
         GLib.idle_add(self.update_album_rows, priority=GLib.PRIORITY_LOW)
 
     def __insert_track_row_at_album_row(self, src_row, dst_row, direction):
