@@ -240,6 +240,14 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             else:
                 self.add_album(album)
 
+    def set_albums(self, albums):
+        """
+            Set player albums
+        """
+        self._albums = albums
+        self.set_next()
+        self.set_prev()
+
     def clear_albums(self):
         """
             Clear all albums
@@ -254,12 +262,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             @param track_id as int
         """
         self.__stop_after_track_id = track_id
-
-    def set_albums(self, albums):
-        """
-            Set player albums
-        """
-        self._albums = albums
 
     def get_current_artists(self):
         """
