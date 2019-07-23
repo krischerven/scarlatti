@@ -161,13 +161,7 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        if child.is_selected() or self._view_type & ViewType.SMALL:
-            if self._genre_ids and self._genre_ids[0] == Type.YEARS:
-                album = Album(child.album.id)
-            else:
-                album = Album(child.album.id,
-                              self._genre_ids, self._artist_ids)
-            App().window.container.show_view([Type.ALBUM], album)
+        App().window.container.show_view([Type.ALBUM], child.album)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
