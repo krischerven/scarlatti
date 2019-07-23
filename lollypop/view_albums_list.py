@@ -170,6 +170,14 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
                 self._sidebar_id, position)
 
     @property
+    def dnd_helper(self):
+        """
+            Get Drag & Drop helper
+            @return DNDHelper
+        """
+        return self.__dnd_helper
+
+    @property
     def children(self):
         """
             Get view children

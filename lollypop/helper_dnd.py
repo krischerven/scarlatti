@@ -10,15 +10,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gdk, Gtk, GLib
+from gi.repository import Gdk, Gtk, GLib, GObject
 
 from lollypop.objects_album import Album
 
 
-class DNDHelper:
+class DNDHelper(GObject.Object):
     """
         Helper for DND of AlbumsListView
     """
+
+    __gsignals__ = {
+        "dnd-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     def __init__(self, listbox, view_type):
         """
@@ -26,6 +30,7 @@ class DNDHelper:
             @param listbox as Gtk.ListBox
             @params view_type as ViewType
         """
+        GObject.Object.__init__(self)
         self.__listbox = listbox
         self.__view_type = view_type
         self.__drag_begin_row = None
@@ -44,6 +49,9 @@ class DNDHelper:
 #######################
 # PROTECTED           #
 #######################
+    def _on_dnd_finished(self):
+        pass
+
 #######################
 # PRIVATE             #
 #######################
@@ -81,6 +89,7 @@ class DNDHelper:
         position = 1
         for row in self.__listbox.get_children():
             position = row.update_track_position(position)
+        self.emit("dnd-finished")
 
     def __insert_album_row_at_album_row(self, src_row, dst_row, direction):
         """

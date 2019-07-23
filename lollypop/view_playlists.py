@@ -62,6 +62,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self.__widget = builder.get_object("widget")
         # We remove SCROLLED because we want to be the scrolled view
         self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
+        self._view.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
         self._view.connect("remove-from-playlist",
                            self.__on_remove_from_playlist)
         self._view.show()
@@ -413,6 +414,19 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param widget as PlaylistsWidget
         """
         self.__set_duration(widget.duration)
+
+    def __on_dnd_finished(self, dnd_helper):
+        """
+            Save playlist if needed
+            @param dnd_helper as DNDHelper
+        """
+        if len(self._playlist_ids) == 1 and self._playlist_ids[0] >= 0:
+            uris = []
+            for child in self._view.children:
+                for track in child.album.tracks:
+                    uris.append(track.uri)
+            App().playlists.clear(self._playlist_ids[0])
+            App().playlists.add_uris(self._playlist_ids[0], uris)
 
 
 class SmartPlaylistsView(PlaylistsView):
