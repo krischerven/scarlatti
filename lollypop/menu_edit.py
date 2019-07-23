@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib
+from gi.repository import Gio, GLib, Gtk, Gdk
 
 from gettext import gettext as _
 
@@ -62,6 +62,11 @@ class EditMenu(Gio.Menu):
                                 self.__on_save_action_activate,
                                 False)
             self.append(_("Remove from collection"), "app.remove_album_action")
+            buy_action = Gio.SimpleAction(name="buy_album_action")
+            App().add_action(buy_action)
+            buy_action.connect("activate",
+                               self.__on_buy_action_activate)
+            self.append(_("Buy this album"), "app.buy_album_action")
 
     def __set_edit_action(self):
         """
@@ -71,6 +76,20 @@ class EditMenu(Gio.Menu):
         App().add_action(edit_tag_action)
         edit_tag_action.connect("activate", self.__on_edit_tag_action_activate)
         self.append(_("Modify information"), "app.edit_tag_action")
+
+    def __on_buy_action_activate(self, action, variant):
+        """
+            Launch a browser for Qobuz
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        artists = " ".join(self.__object.artists)
+        search = "%s %s" % (artists, self.__object.name)
+        uri = "https://www.qobuz.com/search?q=%s" % (
+            GLib.uri_escape_string(search, None, True))
+        Gtk.show_uri_on_window(App().window,
+                               uri,
+                               Gdk.CURRENT_TIME)
 
     def __on_save_action_activate(self, action, variant, save):
         """
