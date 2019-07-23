@@ -14,16 +14,21 @@ from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 
+from lollypop.utils import tracks_to_albums
+from lollypop.objects_track import Track
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.define import App, ViewType, MARGIN_SMALL
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
+class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
+                        SignalsHelper):
     """
         Popover showing Albums View
     """
 
+    @signals_map
     def __init__(self, view_type):
         """
             Init view
@@ -79,6 +84,20 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
         self.attach(self.__grid, 0, 0, 1, 1)
         self.__grid.set_property("halign", Gtk.Align.CENTER)
         self._box.set_property("halign", Gtk.Align.CENTER)
+        return [
+            (App().player, "queue-changed", "_on_queue_changed")
+        ]
+
+    def populate(self):
+        """
+            Populate view
+        """
+        if App().player.queue:
+            tracks = [Track(track_id) for track_id in App().player.queue]
+            albums = tracks_to_albums(tracks)
+        else:
+            albums = App().player.albums
+        AlbumsListView.populate(self, albums)
 
     @property
     def args(self):
@@ -93,6 +112,32 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
             position = 0
         view_type = self._view_type & ~self.view_sizing_mask
         return ({"view_type": view_type}, self._sidebar_id, position)
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_queue_changed(self, *ignore):
+        """
+            Clean view and reload if empty
+        """
+        queue = App().player.queue
+        if queue:
+            for row in self.children:
+                if row.revealed:
+                    for subrow in row.children:
+                        if subrow.track.id not in queue:
+                            subrow.destroy()
+                            break
+                count = len(row.album.tracks)
+                for track in row.album.tracks:
+                    if track.id not in queue:
+                        row.album.remove_track(track)
+                        if count == 1:
+                            row.destroy()
+                        break
+        else:
+            self.clear()
+            self.populate()
 
 #######################
 # PRIVATE             #

@@ -11,8 +11,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import App, Type, ViewType, MARGIN_SMALL
-from lollypop.utils import tracks_to_albums
-from lollypop.objects_track import Track
 
 
 class ViewsContainer:
@@ -114,11 +112,7 @@ class ViewsContainer:
         """
         from lollypop.view_current_albums import CurrentAlbumsView
         view = CurrentAlbumsView(view_type)
-        if App().player.queue:
-            tracks = [Track(track_id) for track_id in App().player.queue]
-            view.populate(tracks_to_albums(tracks))
-        else:
-            (App().player.albums)
+        view.populate()
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
         view.show()

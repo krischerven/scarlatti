@@ -62,7 +62,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_queue_changed(self, unused):
+    def _on_queue_changed(self, *ignore):
         """
             Update all position labels
         """
