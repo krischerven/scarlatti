@@ -13,7 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.view_tracks import TracksView
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType
 from lollypop.widgets_utils import Popover
 from lollypop.helper_signals import SignalsHelper
 
@@ -38,18 +38,20 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         self._album = album
         self.get_style_context().add_class("box-shadow")
         view_height = self.requested_height[0]
+        self.populate()
         window_width = App().window.get_allocated_width()
         window_height = App().window.get_allocated_height()
         wanted_width = min(900, window_width * 0.5)
-        wanted_height = max(200,
-                            min(window_height * 0.4, view_height + MARGIN))
-        self.populate()
+        wanted_height = min(window_height * 0.4, view_height)
+        if wanted_height < 200:
+            wanted_height = 200
+        else:
+            self._responsive_widget.set_property("valign", Gtk.Align.CENTER)
         scrolled = Gtk.ScrolledWindow()
         scrolled.add(self._responsive_widget)
         scrolled.set_property("width-request", wanted_width)
         scrolled.set_property("height-request", wanted_height)
         scrolled.show()
-        self._responsive_widget.set_property("valign", Gtk.Align.CENTER)
         self._responsive_widget.show()
         self.add(scrolled)
 
