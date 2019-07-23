@@ -12,6 +12,8 @@
 
 from gi.repository import GLib
 
+from gettext import gettext as _
+
 from lollypop.logger import Logger
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
@@ -47,6 +49,8 @@ class ListsContainer:
         App().window.add_adaptive_child(self._sidebar_two, self._list_view)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
+        items.append((Type.CURRENT, _("Current playlist"),
+                     _("Current playlist")))
         self._sidebar.populate(items)
 
     @property

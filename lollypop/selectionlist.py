@@ -13,7 +13,6 @@
 from gi.repository import Gtk, Gdk, GLib, GObject, Pango
 
 from locale import strcoll
-from gettext import gettext as _
 
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
@@ -527,11 +526,8 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         if self.mask & SelectionListMask.SIDEBAR:
             if status:
                 self.__menu_button.hide()
-                self.add_value((Type.CURRENT, _("Current playlist"),
-                                _("Current playlist")))
             else:
                 self.__menu_button.show()
-                self.remove_value(Type.CURRENT)
 
     def _on_map(self, widget):
         """
