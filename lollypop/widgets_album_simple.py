@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.widgets_album import AlbumWidget
 from lollypop.helper_overlay_album import OverlayAlbumHelper
 from lollypop.define import App, ArtSize, Shuffle, ViewType, ArtBehaviour
-from lollypop.define import MARGIN_SMALL
+from lollypop.define import MARGIN_SMALL, Type
 from lollypop.utils import on_query_tooltip, on_realize
 
 
@@ -271,7 +271,11 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         def on_closed(popover):
             button.set_active(False)
 
-        if button.get_active():
+        if not button.get_active():
+            return
+        if App().window.is_adaptive:
+            App().window.container.show_view([Type.ALBUM], self._album)
+        else:
             from lollypop.pop_tracks import TracksPopover
             popover = TracksPopover(self._album)
             popover.set_relative_to(button)
