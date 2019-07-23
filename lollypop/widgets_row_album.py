@@ -170,13 +170,14 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         if self._responsive_widget is not None:
             TracksView.append_rows(self, tracks)
 
-    def prepend_rows(self, tracks):
+    def insert_rows(self, tracks, position):
         """
             Add track rows (only works for albums with merged discs)
             @param tracks as [Track]
+            @param position as int
         """
         if self._responsive_widget is not None:
-            TracksView.prepend_rows(self, tracks)
+            TracksView.insert_rows(self, tracks, position)
 
     def reveal(self, reveal=None):
         """

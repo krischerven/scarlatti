@@ -172,33 +172,46 @@ class DNDHelper(GObject.Object):
             @param dst_row as TrackRow
             @param direction as Gtk.DirectionType
         """
-        from lollypop.widgets_row_album import AlbumRow
-        height = AlbumRow.get_best_height(src_row)
-        # First split dst album
-        index = dst_album_row.children.index(dst_row)
-        if direction == Gtk.DirectionType.DOWN:
-            index += 1
-        rows = dst_album_row.children[:index]
-        split_album = Album(dst_album_row.album.id)
-        split_album.set_tracks([row.track for row in rows])
-        split_album_row = AlbumRow(split_album, height, self.__view_type,
-                                   True, None, 0)
-        split_album_row.show()
-        split_album_row.populate()
-        for row in rows:
-            dst_album_row.album.remove_track(row.track)
-            row.destroy()
-        # Create new album
-        new_album = Album(src_row.track.album.id)
-        new_album.set_tracks([src_row.track])
-        new_album_row = AlbumRow(new_album, height, self.__view_type,
-                                 True, None, 0)
-        new_album_row.show()
-        new_album_row.populate()
-        self.__insert_album_row_at_album_row(new_album_row, dst_album_row,
-                                             Gtk.DirectionType.DOWN)
-        self.__insert_album_row_at_album_row(split_album_row, new_album_row,
-                                             Gtk.DirectionType.DOWN)
+        # Just move track
+        if src_row.track.album == dst_row.track.album:
+            index = dst_row.get_index()
+            if direction == Gtk.DirectionType.DOWN:
+                index += 1
+            dst_album_row.insert_rows([src_row.track], index)
+            dst_album_row.album.remove_track(src_row.track)
+            dst_album_row.album.insert_tracks([src_row.track], index)
+            src_row.destroy()
+            GLib.idle_add(self.update_album_rows, priority=GLib.PRIORITY_LOW)
+        else:
+            from lollypop.widgets_row_album import AlbumRow
+            height = AlbumRow.get_best_height(src_row)
+            # First split dst album
+            index = dst_album_row.children.index(dst_row)
+            if direction == Gtk.DirectionType.DOWN:
+                index += 1
+            rows = dst_album_row.children[:index]
+            split_album = Album(dst_album_row.album.id)
+            split_album.set_tracks([row.track for row in rows])
+            split_album_row = AlbumRow(split_album, height, self.__view_type,
+                                       True, None, 0)
+            split_album_row.show()
+            split_album_row.populate()
+            for row in rows:
+                dst_album_row.album.remove_track(row.track)
+                row.destroy()
+            # Create new album
+            new_album = Album(src_row.track.album.id)
+            new_album.set_tracks([src_row.track])
+            new_album_row = AlbumRow(new_album, height, self.__view_type,
+                                     True, None, 0)
+            new_album_row.show()
+            new_album_row.populate()
+            self.__insert_album_row_at_album_row(new_album_row,
+                                                 dst_album_row,
+                                                 Gtk.DirectionType.DOWN)
+            self.__insert_album_row_at_album_row(split_album_row,
+                                                 new_album_row,
+                                                 Gtk.DirectionType.DOWN)
 
     def __unmark_all_rows(self):
         """

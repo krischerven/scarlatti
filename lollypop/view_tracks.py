@@ -127,20 +127,21 @@ class TracksView(SizeAllocationHelper):
 
     def append_rows(self, tracks):
         """
-            Add track rows (only works for albums with merged discs)
+            Add track rows
             @param tracks as [Track]
         """
         widgets = {self._tracks_widget_left[0]:
                    get_position_list(tracks, len(self.children))}
         self.__add_tracks(OrderedDict(widgets), 0)
 
-    def prepend_rows(self, tracks):
+    def insert_rows(self, tracks, position):
         """
-            Add track rows (only works for albums with merged discs)
+            Insert track rows
             @param tracks as [Track]
+            @param position as int
         """
         widgets = {self._tracks_widget_left[0]:
-                   get_position_list(tracks, len(self.children))}
+                   get_position_list(tracks, position)}
         self.__add_tracks(OrderedDict(widgets), 0)
 
     def get_current_ordinate(self, parent):

@@ -158,6 +158,15 @@ class Album(Base):
             cloned.append(Track(track.id, self))
         self._tracks += cloned
 
+    def insert_tracks(self, tracks, position):
+        """
+            Insert tracks at position
+        """
+        for track in tracks:
+            clone = Track(track.id, self)
+            self._tracks.insert(position, clone)
+            position += 1
+
     def remove_track(self, track):
         """
             Remove track from album
