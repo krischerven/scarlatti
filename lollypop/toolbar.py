@@ -73,7 +73,7 @@ class Toolbar(Gtk.HeaderBar):
                 else:
                     title = available
                 self.__toolbar_title.set_width(title)
-                self.__toolbar_info.set_width((available - title) / 1.5)
+                self.__toolbar_info.set_width((available - title) / 2)
             self.__width = window.get_width()
 
     def set_mini(self, mini):
