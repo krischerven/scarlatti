@@ -126,7 +126,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__back_button.show()
         self.__background_artwork = builder.get_object("background_artwork")
         self.__container = Container()
-        self.__container.setup_lists()
         self.set_stack(self.__container.stack)
         self.__container.show()
         self.__sidebar = Gtk.Grid()
@@ -168,7 +167,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         screen = Gdk.Screen.get_default()
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         self.fullscreen_on_monitor(screen, monitor)
-
+        self.__container.setup_lists()
         # Disable screensaver (idle)
         App().inhibitor.manual_inhibit(
                 Gtk.ApplicationInhibitFlags.IDLE |
