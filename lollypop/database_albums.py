@@ -584,8 +584,8 @@ class AlbumsDatabase:
             @param limit as int
             @return [int]
         """
-        # Last 4 weeks
-        timestamp = time() - 100800
+        # Last week
+        timestamp = time() - 604800
         with SqlCursor(App().db) as sql:
             request = "SELECT DISTINCT albums.rowid FROM albums, tracks\
                        WHERE albums.mtime != 0 AND\
