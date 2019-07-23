@@ -86,7 +86,6 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
             self.update_position()
             ProgressController.on_status_changed(self, App().player)
         self.add(builder.get_object("widget"))
-        self.connect("destroy", self.__on_destroy)
 
     def do_get_preferred_width(self):
         """
@@ -217,13 +216,6 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
             self.__size = new_size
             self._previous_artwork_id = None
             InformationController.on_current_changed(self, new_size, None)
-
-    def __on_destroy(self, widget):
-        """
-            Handle widget cleanup
-            @param widget as Gtk.Widget
-        """
-        PlaybackController.on_destroy(self)
 
     def __on_artwork(self, surface):
         """

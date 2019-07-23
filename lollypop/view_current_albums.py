@@ -15,11 +15,10 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.define import App, ViewType, MARGIN_SMALL, MARGIN, Sizing
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.define import App, ViewType, MARGIN_SMALL
 
 
-class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
+class CurrentAlbumsView(AlbumsListView):
     """
         Popover showing Albums View
     """
@@ -30,7 +29,6 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
             @param view_type as ViewType
         """
         AlbumsListView.__init__(self, [], [], view_type)
-        SizeAllocationHelper.__init__(self)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
         self.__clear_button = Gtk.Button.new_from_icon_name(
@@ -66,19 +64,19 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
         label.set_margin_start(2)
         label.get_style_context().add_class("dim-label")
         label.set_property("halign", Gtk.Align.START)
-        grid = Gtk.Grid()
-        grid.set_column_spacing(5)
-        grid.add(label)
-        grid.set_property("valign", Gtk.Align.CENTER)
-        if view_type & ViewType.POPOVER:
-            grid.add(self.__jump_button)
-            grid.add(self.__save_button)
-            grid.add(self.__clear_button)
-        grid.show_all()
-        grid.set_margin_bottom(MARGIN_SMALL)
+        self.__grid = Gtk.Grid()
+        self.__grid.set_column_spacing(5)
+        self.__grid.add(label)
+        self.__grid.set_property("valign", Gtk.Align.CENTER)
+        self.__grid.add(self.__jump_button)
+        self.__grid.add(self.__save_button)
+        self.__grid.add(self.__clear_button)
+        self.__grid.show_all()
         self.set_row_spacing(2)
         self.insert_row(0)
-        self.attach(grid, 0, 0, 1, 1)
+        self.attach(self.__grid, 0, 0, 1, 1)
+        self.set_property("halign", Gtk.Align.CENTER)
+        self.get_style_context().remove_class("view")
 
     @property
     def args(self):
@@ -93,22 +91,6 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
             position = 0
         view_type = self._view_type & ~self.view_sizing_mask
         return ({"view_type": view_type}, self._sidebar_id, position)
-
-#######################
-# PROTECTED             #
-#######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Change view width
-            @param allocation as Gtk.Allocation
-        """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            if allocation.width < Sizing.BIG:
-                margin = MARGIN
-            else:
-                margin = allocation.width / 4
-            self._box.set_margin_start(margin)
-            self._box.set_margin_end(margin)
 
 #######################
 # PRIVATE             #

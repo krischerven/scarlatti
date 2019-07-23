@@ -28,7 +28,7 @@ class PlaybackController:
             Init controller
         """
         self.__prev_button_timeout_id = None
-        self.connect("unmap", self.__on_unmap)
+        self.connect("destroy", self.__on_destroy)
 
     def on_current_changed(self, player):
         """
@@ -138,7 +138,7 @@ class PlaybackController:
         self._play_button.set_image(image)
         self._play_button.set_tooltip_text(status)
 
-    def __on_unmap(self, widget):
+    def __on_destroy(self, widget):
         """
             Stop timeout
             @param widget as Gtk.Widget
