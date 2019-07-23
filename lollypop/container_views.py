@@ -10,8 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App, Type, ViewType
-from lollypop.define import MARGIN_SMALL
+from lollypop.define import App, Type, ViewType, MARGIN_SMALL
+from lollypop.utils import tracks_to_albums
+from lollypop.objects_track import Track
 
 
 class ViewsContainer:
@@ -111,14 +112,13 @@ class ViewsContainer:
             Get view for current playlist
             @return View
         """
-        if App().player.queue and not view_type & ViewType.FULLSCREEN:
-            from lollypop.view_queue import QueueView
-            view = QueueView(view_type)
-            view.populate()
+        from lollypop.view_current_albums import CurrentAlbumsView
+        view = CurrentAlbumsView(view_type)
+        if App().player.queue:
+            tracks = [Track(track_id) for track_id in App().player.queue]
+            view.populate(tracks_to_albums(tracks))
         else:
-            from lollypop.view_current_albums import CurrentAlbumsView
-            view = CurrentAlbumsView(view_type)
-            view.populate(App().player.albums)
+            (App().player.albums)
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
         view.show()
