@@ -40,13 +40,13 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @parma playlist ids as [int]
             @param view_type as ViewType
         """
-        self.signals = [
+        LazyLoadingView.__init__(self, view_type)
+        self.signals += [
             (App().playlists, "playlist-track-added",
              "_on_playlist_track_added"),
             (App().playlists, "playlist-track-removed",
              "_on_playlist_track_removed")
         ]
-        LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         SignalsHelper.__init__(self)
         FilteringHelper.__init__(self)

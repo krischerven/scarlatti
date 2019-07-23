@@ -31,10 +31,10 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        self.signals = [
+        FlowBoxView.__init__(self, view_type)
+        self.signals += [
             (App().radios, "radio-changed", "_on_radio_changed")
         ]
-        FlowBoxView.__init__(self, view_type)
         SignalsHelper.__init__(self)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._widget_class = RadioWidget

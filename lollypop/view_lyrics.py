@@ -85,10 +85,10 @@ class LyricsView(View, InformationController, SignalsHelper):
         """
             Init view
         """
-        self.signals = [
+        View.__init__(self, ViewType.SCROLLED)
+        self.signals += [
             (App().player, "current-changed", "_on_current_changed")
         ]
-        View.__init__(self, ViewType.SCROLLED)
         SignalsHelper.__init__(self)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |

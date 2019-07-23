@@ -31,10 +31,10 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             Init flowbox view
             @param view_type as ViewType
         """
-        self.signals = [
+        LazyLoadingView.__init__(self, view_type)
+        self.signals += [
             (App().player, "loading-changed", "_on_loading_changed")
         ]
-        LazyLoadingView.__init__(self, view_type)
         FilteringHelper.__init__(self)
         SignalsHelper.__init__(self)
         self._widget_class = None

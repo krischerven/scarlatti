@@ -33,10 +33,10 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param obj as Track/Album
             @param view_type as ViewType
         """
-        self.signals = [
+        FlowBoxView.__init__(self, view_type)
+        self.signals += [
             (App().playlists, "playlists-changed", "_on_playlist_changed")
         ]
-        FlowBoxView.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"

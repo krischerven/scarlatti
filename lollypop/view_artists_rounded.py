@@ -33,10 +33,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             Init artist view
             @param view_type as ViewType
         """
-        self.signals = [
+        FlowBoxView.__init__(self, view_type)
+        self.signals += [
             (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
         ]
-        FlowBoxView.__init__(self, view_type)
         SignalsHelper.__init__(self)
         self.__view_type = view_type
         self._widget_class = RoundedArtistWidget
