@@ -53,8 +53,11 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 
         if self._view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
-            self._scrolled.connect("leave-notify-event",
-                                   self._on_leave_notify_event)
+            self.__event_controller = Gtk.EventControllerMotion.new(
+                self._scrolled)
+            self.__event_controller.set_propagation_phase(
+                Gtk.PropagationPhase.TARGET)
+            self.__event_controller.connect("leave", self._on_view_leave)
             self._scrolled.get_vadjustment().connect("value-changed",
                                                      self._on_value_changed)
             self._scrolled.show()
@@ -65,9 +68,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-
-    def __on_leave_notify_event(self, widget, event):
-        print(event)
 
     def populate(self):
         """
@@ -153,6 +153,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                     child.destroy()
                     break
 
+    def _on_view_leave(self, event_controller):
+        pass
+
     def _on_adaptive_changed(self, window, status):
         """
             Handle adaptive mode for views
@@ -191,14 +194,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
             Handles special shortcuts
             @param widget as Gtk.Widget
-        """
-        pass
-
-    def _on_leave_notify_event(self, widget, event):
-        """
-            Usefull to disable overlay
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
         """
         pass
 

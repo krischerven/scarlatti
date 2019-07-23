@@ -51,11 +51,10 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self._box.connect("selected-children-changed",
                               self.__on_selected_children_changed)
             self.__event_controller = Gtk.EventControllerMotion.new(self._box)
-            self.__event_controller.connect("motion", self.__on_motion)
+            self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._viewport.set_property("valign", Gtk.Align.START)
-            self._viewport.set_property("margin", 5)
             self._scrolled.set_property("expand", True)
             self.add(self._scrolled)
 
@@ -80,6 +79,12 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             if style_context.has_class("typeahead"):
                 row.activate()
             style_context.remove_class("typeahead")
+
+    def on_view_motion(self):
+        """
+            Unselect current selected child
+        """
+        self.__unselect_selected()
 
     @property
     def font_height(self):
@@ -167,19 +172,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self._lazy_queue.append(child)
         self.lazy_loading()
 
-    def _on_leave_notify_event(self, widget, event):
-        """
-            Usefull to disable overlay
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        if self.__selected_timeout_id is not None:
-            GLib.source_remove(self.__selected_timeout_id)
-            self.__selected_timeout_id = None
-        if self.__selected_child is not None:
-            self._box.unselect_child(self.__selected_child)
-            self.__selected_child = None
-
     def _on_loading_changed(self, player, status, album):
         """
             Show a spinner while loading
@@ -196,9 +188,27 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             if hasattr(child, "show_spinner"):
                 child.show_spinner(status)
 
+    def _on_view_leave(self, event_controller):
+        """
+            Unselect selected child
+            @param event_controller as Gtk.EventControllerMotion
+        """
+        self.__unselect_selected()
+
 #######################
 # PRIVATE             #
 #######################
+    def __unselect_selected(self):
+        """
+            Unselect selected child
+        """
+        if self.__selected_timeout_id is not None:
+            GLib.source_remove(self.__selected_timeout_id)
+            self.__selected_timeout_id = None
+        if self.__selected_child is not None:
+            self._box.unselect_child(self.__selected_child)
+            self.__selected_child = None
+
     def __on_selected_children_changed(self, box):
         """
             Update overlay status
@@ -210,7 +220,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self.__selected_child = selected_children[0]
             self.__selected_child.show_overlay(True)
 
-    def __on_motion(self, event_controller, x, y):
+    def __on_box_motion(self, event_controller, x, y):
         """
             Update current selected child
             @param event_controller as Gtk.EventControllerMotion
@@ -223,17 +233,11 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
 
         child = self._box.get_child_at_pos(x, y)
         if child is None:
-            if self.__selected_child is not None:
-                self._box.unselect_child(self.__selected_child)
-                self.__selected_child = None
+            self.__unselect_selected()
         elif child.artwork is None or\
                 child == self.__selected_child:
             return
         elif child != self.__selected_child:
-            if self.__selected_child is not None:
-                self._box.unselect_child(self.__selected_child)
-                self.__selected_child = None
-            if self.__selected_timeout_id is not None:
-                GLib.source_remove(self.__selected_timeout_id)
+            self.__unselect_selected()
             self.__selected_timeout_id = GLib.timeout_add(
                 50, select_child, child)
