@@ -107,7 +107,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             self.set_selection_mode(Gtk.SelectionMode.NONE)
             self.emit("activated", row.track)
             if row.track.is_web:
-                self.set_indicator(IndicatorType.LOADING)
+                row.set_indicator(IndicatorType.LOADING)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
