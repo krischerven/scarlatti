@@ -111,5 +111,7 @@ class HomeView(View, FilteringHelper):
         return ({"view_type": view_type}, self._sidebar_id, position)
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
+    def _on_map(self, widget):
+        pass
