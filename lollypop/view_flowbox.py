@@ -57,6 +57,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._scrolled.set_property("expand", True)
+            self._viewport.set_property("valign", Gtk.Align.START)
             self.add(self._scrolled)
 
     def populate(self, items):
