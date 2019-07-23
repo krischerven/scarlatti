@@ -78,6 +78,7 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
         self.insert_row(0)
         self.attach(self.__grid, 0, 0, 1, 1)
         self.__grid.set_property("halign", Gtk.Align.CENTER)
+        self._box.set_property("halign", Gtk.Align.CENTER)
 
     @property
     def args(self):
@@ -117,7 +118,9 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            self.__grid.set_size_request(allocation.width / 2, -1)
+            width = allocation.width / 2
+            self.__grid.set_size_request(width, -1)
+            self._box.set_size_request(width, -1)
 
     def __on_jump_clicked(self, button):
         """
