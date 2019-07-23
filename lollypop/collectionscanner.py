@@ -214,12 +214,13 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
         SqlCursor.commit(App().db)
-        for genre_id in genre_ids:
-            # Be sure to not send Type.WEB
-            if genre_id >= 0:
-                GLib.idle_add(self.emit, "genre-updated", genre_id, True)
-        if album_added:
-            GLib.idle_add(self.emit, "album-updated", album_id, True)
+        if album_mtime > 0:
+            for genre_id in genre_ids:
+                # Be sure to not send Type.WEB
+                if genre_id >= 0:
+                    GLib.idle_add(self.emit, "genre-updated", genre_id, True)
+            if album_added:
+                GLib.idle_add(self.emit, "album-updated", album_id, True)
         return (track_id, album_id)
 
     def update_track(self, track_id, artist_ids, genre_ids):
