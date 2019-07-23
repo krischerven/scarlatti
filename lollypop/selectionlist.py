@@ -251,7 +251,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             Init Selection list ui
             @param base_mask as SelectionListMask
         """
-        LazyLoadingView.__init__(self, ViewType.SCROLLED)
+        LazyLoadingView.__init__(self, ViewType.SCROLLED | ViewType.NO_PADDING)
         FilteringHelper.__init__(self)
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE

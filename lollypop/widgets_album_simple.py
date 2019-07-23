@@ -57,8 +57,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, AlbumWidget, OverlayAlbumHelper):
         if self._artwork is None:
             OverlayAlbumHelper.__init__(self, self.__view_type)
             self._watch_loading = self._album.mtime <= 0
-            self.set_property("halign", Gtk.Align.CENTER)
-            self.set_property("valign", Gtk.Align.CENTER)
             grid = Gtk.Grid()
             grid.set_row_spacing(2)
             grid.set_orientation(Gtk.Orientation.VERTICAL)

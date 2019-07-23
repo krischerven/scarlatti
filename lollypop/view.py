@@ -51,7 +51,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         if App().window.is_adaptive:
             self._view_type |= self.view_sizing_mask
 
-        if self._view_type & ViewType.SCROLLED:
+        if view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
             self.__event_controller = Gtk.EventControllerMotion.new(
                 self._scrolled)
@@ -64,6 +64,10 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._viewport = Gtk.Viewport()
             self._scrolled.add(self._viewport)
             self._viewport.show()
+            if not view_type & ViewType.NO_PADDING:
+                self._viewport.get_style_context().add_class("big-padding")
+        elif not view_type & ViewType.NO_PADDING:
+            self.get_style_context().add_class("big-padding")
 
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)

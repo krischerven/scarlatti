@@ -66,8 +66,6 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             self.set_artwork()
             self.set_selection()
             self.show_all()
-            self.set_property("halign", Gtk.Align.CENTER)
-            self.set_property("valign", Gtk.Align.CENTER)
         else:
             self.set_artwork()
 

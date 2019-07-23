@@ -42,8 +42,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self.__sortname = sortname
         self.set_view_type(view_type)
         self._scale_factor = self.get_scale_factor()
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.set_property("valign", Gtk.Align.CENTER)
 
     def populate(self):
         """

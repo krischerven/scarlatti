@@ -64,13 +64,12 @@ class ViewType:
     PLAYLISTS = 1 << 4
     POPOVER = 1 << 5
     ALBUM = 1 << 6
-    NAVIGATION = 1 << 7
-    SMALL = 1 << 8
-    MEDIUM = 1 << 9
-    SCROLLED = 1 << 10
-    FULLSCREEN = 1 << 11
-    CENTERED = 1 << 12
-    PLACEHOLDER = 1 << 13
+    SMALL = 1 << 7
+    MEDIUM = 1 << 8
+    SCROLLED = 1 << 9
+    FULLSCREEN = 1 << 10
+    PLACEHOLDER = 1 << 11
+    NO_PADDING = 1 << 12
 
 
 NetworkAccessACL = {

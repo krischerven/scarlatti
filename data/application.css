@@ -380,6 +380,10 @@ flowboxchild:selected  {
     background-color: black;
 }
 
+.big-padding {
+    padding: 10px;
+}
+
 .padding {
     padding: 5px;
 }

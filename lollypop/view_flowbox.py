@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, App
+from lollypop.define import ViewType, App, MARGIN
 from lollypop.utils import get_font_height
 from lollypop.helper_signals import SignalsHelper
 
@@ -45,7 +45,9 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         self._box = Gtk.FlowBox()
         # Allow lazy loading to not jump up and down
         self._box.set_homogeneous(True)
+        self._box.set_vexpand(True)
         self._box.set_max_children_per_line(1000)
+        self._box.set_row_spacing(MARGIN)
         self._box.show()
         if not view_type & ViewType.SMALL:
             self._box.connect("selected-children-changed",
@@ -54,7 +56,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
-            self._viewport.set_property("valign", Gtk.Align.START)
             self._scrolled.set_property("expand", True)
             self.add(self._scrolled)
 
@@ -131,6 +132,8 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         if items:
             widget = self._widget_class(
                 items.pop(0), *args, self.__font_height)
+            widget.set_property("halign", Gtk.Align.START)
+            widget.set_property("valign", Gtk.Align.START)
             self._box.insert(widget, -1)
             widget.show()
             self._lazy_queue.append(widget)
