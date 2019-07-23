@@ -19,6 +19,7 @@ from time import time, sleep
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
+from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App
 
@@ -124,6 +125,7 @@ class SpotifyHelper(GObject.Object):
             Get new chat albums
             @param cancellable as Gio.Cancellable
         """
+        SqlCursor.add(App().db)
         try:
             while self.wait_for_token():
                 if cancellable.is_cancelled():
@@ -143,6 +145,8 @@ class SpotifyHelper(GObject.Object):
                                                  cancellable)
         except Exception as e:
             Logger.error("SpotifyHelper::search_new_chart_albums(): %s", e)
+        SqlCursor.commit(App().db)
+        SqlCursor.remove(App().db)
 
     def get_similar_artists(self, artist_id, cancellable):
         """
@@ -211,6 +215,7 @@ class SpotifyHelper(GObject.Object):
             @param search as str
             @param cancellable as Gio.Cancellable
         """
+        SqlCursor.add(App().db)
         try:
             while self.wait_for_token():
                 if cancellable.is_cancelled():
@@ -239,6 +244,8 @@ class SpotifyHelper(GObject.Object):
             if str(e) == "cancelled":
                 return
         GLib.idle_add(self.emit, "search-finished")
+        SqlCursor.commit(App().db)
+        SqlCursor.remove(App().db)
 
     def charts(self, cancellable, language="global"):
         """
@@ -318,6 +325,8 @@ class SpotifyHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         if not cancellable.is_cancelled():
+            SqlCursor.commit(App().db)
+            SqlCursor.allow_thread_execution(App().db)
             GLib.idle_add(self.emit, "new-album", Album(album_id), cover_uri)
 
     def __create_albums_from_tracks_payload(self, payload, album_ids,
@@ -402,6 +411,7 @@ class SpotifyHelper(GObject.Object):
             @param payload as {}
             @return track_id
         """
+        SqlCursor.allow_thread_execution(App().db)
         title = payload["name"]
         _artists = []
         for artist in payload["artists"]:
