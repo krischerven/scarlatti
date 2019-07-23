@@ -44,6 +44,7 @@ class TracksPopover(Popover, TracksView):
         scrolled.set_property("width-request", wanted_width)
         scrolled.set_property("height-request", wanted_height)
         scrolled.show()
+        self._responsive_widget.set_property("valign", Gtk.Align.CENTER)
         self._responsive_widget.show()
         self.add(scrolled)
 
