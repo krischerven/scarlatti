@@ -32,6 +32,8 @@ class SpotifyHelper(GObject.Object):
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
                       (GObject.TYPE_PYOBJECT, str)),
         "new-artist": (GObject.SignalFlags.RUN_FIRST, None, (str, str)),
+        "new-chart-album": (GObject.SignalFlags.RUN_FIRST, None,
+                            (GObject.TYPE_PYOBJECT, str)),
         "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -116,6 +118,31 @@ class SpotifyHelper(GObject.Object):
         except Exception as e:
             Logger.error("SpotifyHelper::get_artist_id(): %s", e)
             callback(None)
+
+    def search_new_chart_albums(self, cancellable):
+        """
+            Get new chat albums
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            while self.wait_for_token():
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
+                sleep(1)
+            token = "Bearer %s" % self.__token
+            helper = TaskHelper()
+            helper.add_header("Authorization", token)
+            uri = "https://api.spotify.com/v1/browse/new-releases"
+            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                album_ids = []
+                self.__create_albums_from_album_payload(
+                                                 decode["albums"]["items"],
+                                                 album_ids,
+                                                 cancellable)
+        except Exception as e:
+            Logger.error("SpotifyHelper::search_new_chart_albums(): %s", e)
 
     def get_similar_artists(self, artist_id, cancellable):
         """

@@ -24,6 +24,7 @@ from lollypop.view import View
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_spotify import SpotifyHelper
 
 
 class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
@@ -40,6 +41,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         View.__init__(self)
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
+        self.__spotify = SpotifyHelper()
         self.__timeout_id = None
         self.__signal_ids = {}
         self.__current_search = ""
@@ -78,8 +80,8 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__widget.set_property("halign", Gtk.Align.CENTER)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
         return [
-            (App().spotify, "new-album", "_on_new_spotify_album"),
-            (App().spotify, "search-finished", "_on_search_finished"),
+            (self.__spotify, "new-album", "_on_new_spotify_album"),
+            (self.__spotify, "search-finished", "_on_search_finished"),
             (App().settings, "changed::network-access",
              "_update_bottom_buttons"),
             (App().settings, "changed::network-access-acl",
@@ -282,7 +284,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
                            self.__cancellable,
                            callback=(self.__on_search_get, current_search))
             elif state == "web":
-                App().task_helper.run(App().spotify.search,
+                App().task_helper.run(self.__spotify.search,
                                       current_search,
                                       self.__cancellable)
         else:
@@ -373,7 +375,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             self.__history = []
             self.__spinner.start()
             self.__stack.set_visible_child_name("view")
-            App().task_helper.run(App().spotify.charts,
+            App().task_helper.run(self.__spotify.charts,
                                   self.__cancellable,
                                   self.__combo_locale.get_active_id())
         else:

@@ -13,6 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.view import View
+from lollypop.utils import get_network_available
 from lollypop.define import ViewType, MARGIN
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
@@ -56,6 +57,11 @@ class HomeView(View, FilteringHelper):
             view.populate()
             view.show()
             self.__grid.add(view)
+        if get_network_available("SPOTIFY"):
+            from lollypop.view_albums_box import AlbumsSpotifyBoxView
+            spotify_view = AlbumsSpotifyBoxView(self._view_type)
+            spotify_view.populate()
+            self.__grid.add(spotify_view)
 
     def activate_child(self):
         """

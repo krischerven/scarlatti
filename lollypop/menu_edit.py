@@ -62,6 +62,7 @@ class EditMenu(Gio.Menu):
                                 self.__on_save_action_activate,
                                 False)
             self.append(_("Remove from collection"), "app.remove_album_action")
+        if self.__object.mtime in [0, -1]:
             buy_action = Gio.SimpleAction(name="buy_album_action")
             App().add_action(buy_action)
             buy_action.connect("activate",

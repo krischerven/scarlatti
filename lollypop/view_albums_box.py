@@ -22,6 +22,8 @@ from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
+from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.logger import Logger
 
 
 class AlbumsBoxView(FlowBoxView, ViewController):
@@ -80,6 +82,7 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             Add a new album
             @param album as Album
             @param position as int
+            @param cover_uri as int
         """
         widget = AlbumSimpleWidget(album, self._genre_ids,
                                    self._artist_ids, self._view_type,
@@ -468,3 +471,91 @@ class AlbumsRandomGenreBoxView(AlbumsLineView):
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
+
+
+class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
+    """
+        Spotify album box
+    """
+
+    @signals
+    def __init__(self, view_type):
+        """
+            Init view
+            @param view_type as ViewType
+        """
+        AlbumsLineView.__init__(self, view_type)
+        self._label.set_text(_("New albums from Spotify"))
+        self.__cancellable = Gio.Cancellable()
+        return [
+            (App().spotify, "new-album", "_on_new_spotify_album")
+        ]
+
+    def populate(self):
+        """
+            Populate view
+        """
+        App().task_helper.run(App().spotify.search_new_chart_albums,
+                              self.__cancellable)
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_unmap(self, widget):
+        """
+            Cancel search
+            @param widget as Gtk.Widget
+        """
+        self.__cancellable.cancel()
+        self.__cancellable = Gio.Cancellable()
+
+    def _on_new_spotify_album(self, spotify, album, cover_uri):
+        """
+            Add album
+            @param spotify as SpotifyHelper
+            @param album as Album
+            @param cover_uri as str
+        """
+        if cover_uri is not None:
+            App().task_helper.load_uri_content(cover_uri,
+                                               self.__cancellable,
+                                               self.__on_cover_uri_content,
+                                               album)
+        else:
+            count = len(self._box.get_children())
+            self._box.set_min_children_per_line(count + 1)
+            self.insert_album(album, -1)
+            self.__show_view()
+
+#####################
+# PRIVATE           #
+#####################
+    def __show_view(self):
+        """
+            Show view
+        """
+        if self.get_visible():
+            return
+        if self._view_type & ViewType.SCROLLED:
+            if self._viewport.get_child() is None:
+                self._viewport.add(self._box)
+            self.show()
+
+    def __on_cover_uri_content(self, uri, status, data, album):
+        """
+            Save to tmp cache
+            @param uri as str
+            @param status as bool
+            @param data as bytes
+            @param album as Album
+        """
+        try:
+            if status:
+                App().art.save_album_artwork(data, album)
+                count = len(self._box.get_children())
+                self._box.set_min_children_per_line(count + 1)
+                self.insert_album(album, -1)
+                self.__show_view()
+        except Exception as e:
+            Logger.error(
+                "AlbumsSpotifyBoxView::__on_cover_uri_content(): %s", e)

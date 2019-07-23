@@ -187,8 +187,9 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             if hasattr(child, "album"):
                 if album.id != child.album.id:
                     continue
-            elif child.track.album.id != album.id:
-                continue
+            elif hasattr(child, "track"):
+                if child.track.album.id != album.id:
+                    continue
             if hasattr(child, "show_spinner"):
                 child.show_spinner(status)
 
