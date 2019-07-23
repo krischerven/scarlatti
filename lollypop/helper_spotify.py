@@ -125,6 +125,7 @@ class SpotifyHelper(GObject.Object):
             Get new chat albums
             @param cancellable as Gio.Cancellable
         """
+        locale = App().settings.get_value("spotify-charts-locale").get_string()
         SqlCursor.add(App().db)
         try:
             while self.wait_for_token():
@@ -135,6 +136,8 @@ class SpotifyHelper(GObject.Object):
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/browse/new-releases"
+            if locale != "global":
+                uri += "?country=%s" % locale
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
