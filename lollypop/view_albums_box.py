@@ -366,7 +366,6 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         HorizontalScrollingHelper.__init__(self)
         self.insert_row(0)
         self.attach(header, 0, 0, 1, 1)
-        self._box.set_property("halign", Gtk.Align.CENTER)
 
     def populate(self, albums):
         """
