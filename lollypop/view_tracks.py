@@ -431,10 +431,10 @@ class TracksView(SizeAllocationHelper):
             @param event as Gdk.EventKey
         """
         if event.keyval == Gdk.KEY_Delete:
-            from lollypop.widgets_row import Row
             for child in self.children:
                 if child.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    Row.destroy_row(child)
+                    pass
+                    # TODO and remove signal usage
 
     def __on_disc_button_press_event(self, button, event, disc):
         """
