@@ -317,14 +317,14 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             App().art.copy_from_web_to_store(self._album.id)
             App().art.cache_artists_artwork()
             self._album.save(True)
-            self.destroy()
+            self.__action_button.hide()
         elif self.__view_type & ViewType.SEARCH:
             popover = self.get_ancestor(Gtk.Popover)
             if popover is not None:
                 popover.popdown()
             App().window.container.show_view([Type.ARTISTS],
                                              self._album.artist_ids)
-        elif self.__view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
+        elif self.__view_type & ViewType.PLAYLISTS:
             if App().player.current_track.album.id == self._album.id:
                 # Stop playback or loop for last album
                 # Else skip current
