@@ -37,6 +37,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         Gtk.Grid.__init__(self)
         self._view_type = view_type
         self.__destroyed = False
+        self.__placeholder = None
         self._sidebar_id = Type.NONE
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
@@ -82,19 +83,22 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         grid.set_margin_start(20)
         grid.set_margin_end(20)
         grid.set_column_spacing(20)
-        label = Gtk.Label.new()
-        label.set_markup("<b>%s</b>" % GLib.markup_escape_text(
+        self.__placeholder = Gtk.Label.new()
+        self.__placeholder.set_markup("<b>%s</b>" % GLib.markup_escape_text(
             self._empty_message))
-        label_style = label.get_style_context()
-        label_style.add_class("text-xx-large")
+        label_style = self.__placeholder.get_style_context()
+        if App().window.is_adaptive:
+            label_style.add_class("text-x-large")
+        else:
+            label_style.add_class("text-xx-large")
         label_style.add_class("dim-label")
-        label.set_line_wrap_mode(Pango.WrapMode.WORD)
-        label.set_line_wrap(True)
+        self.__placeholder.set_line_wrap_mode(Pango.WrapMode.WORD)
+        self.__placeholder.set_line_wrap(True)
         image = Gtk.Image.new_from_icon_name(self._empty_icon_name,
                                              Gtk.IconSize.DIALOG)
         image.get_style_context().add_class("dim-label")
         grid.add(image)
-        grid.add(label)
+        grid.add(self.__placeholder)
         grid.set_vexpand(True)
         grid.set_hexpand(True)
         grid.set_property("halign", Gtk.Align.CENTER)
@@ -162,6 +166,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
             Handle adaptive mode for views
         """
+        if self.__placeholder is not None:
+            style_context = self.__placeholder.get_style_context()
+            if status:
+                style_context.remove_class("text-xx-large")
+                style_context.add_class("text-x-large")
+            else:
+                style_context.remove_class("text-x-large")
+                style_context.add_class("text-xx-large")
         if status:
             self._view_type |= self.view_sizing_mask
         else:
