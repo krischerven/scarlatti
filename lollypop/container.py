@@ -77,6 +77,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._sidebar_two = None
         self.__paned_position_id = None
         self._stack = ContainerStack()
+        self._stack.get_style_context().add_class("view")
         self._stack.connect("visible-child-changed",
                             self.__on_visible_child_changed)
         self._stack.show()

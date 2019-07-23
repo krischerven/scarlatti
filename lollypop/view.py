@@ -65,8 +65,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-        if not view_type & (ViewType.POPOVER | ViewType.SEARCH):
-            self.get_style_context().add_class("view")
 
     def __on_leave_notify_event(self, widget, event):
         print(event)

@@ -16,16 +16,14 @@ from gettext import gettext as _
 
 from lollypop.utils import get_icon_name, do_shift_selection
 from lollypop.view import LazyLoadingView
-from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.objects_album import Album
-from lollypop.define import App, ViewType, MARGIN, Type, Sizing
+from lollypop.define import App, ViewType, MARGIN, Type
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
 
 
-class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
-                     GesturesHelper):
+class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
     """
         View showing albums
     """
@@ -74,8 +72,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
             from lollypop.helper_dnd import DNDHelper
             self.__dnd_helper = DNDHelper(self._box, view_type)
 
-        if view_type & ViewType.PLAYLISTS:
-            SizeAllocationHelper.__init__(self)
         if view_type & ViewType.SCROLLED:
             self._scrolled.set_property("expand", True)
             self.add(self._scrolled)
@@ -188,19 +184,6 @@ class AlbumsListView(LazyLoadingView, ViewController, SizeAllocationHelper,
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Change view width
-            @param allocation as Gtk.Allocation
-        """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            if allocation.width < Sizing.BIG:
-                margin = MARGIN
-            else:
-                margin = allocation.width / 4
-            self._box.set_margin_start(margin)
-            self._box.set_margin_end(margin)
-
     def _on_current_changed(self, player):
         """
             Update children state

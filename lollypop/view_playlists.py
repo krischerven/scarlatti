@@ -25,10 +25,11 @@ from lollypop.view_albums_list import AlbumsListView
 from lollypop.logger import Logger
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_signals import SignalsHelper
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
 class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
-                    SignalsHelper):
+                    SignalsHelper, SizeAllocationHelper):
     """
         View showing playlists
     """
@@ -49,6 +50,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         ViewController.__init__(self, ViewControllerType.ALBUM)
         SignalsHelper.__init__(self)
         FilteringHelper.__init__(self)
+        SizeAllocationHelper.__init__(self)
         self._playlist_ids = playlist_ids
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/PlaylistView.ui")
@@ -112,6 +114,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         # Ask widget after populated
         else:
             self._view.connect("populated", self.__on_playlist_populated)
+        self._view.set_property("halign", Gtk.Align.CENTER)
 
     def set_view_type(self, view_type):
         """
@@ -253,6 +256,14 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
 #######################
 # PROTECTED           #
 #######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Change view width
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            self._view.set_size_request(allocation.width / 2, -1)
+
     def _on_value_changed(self, adj):
         """
             Adapt widget to current scroll value

@@ -16,7 +16,7 @@ from gettext import gettext as _
 from random import shuffle
 from urllib.parse import urlparse
 
-from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, MARGIN, Sizing
+from lollypop.define import App, Type, Shuffle, MARGIN_SMALL
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
@@ -83,6 +83,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__set_default_placeholder()
         self.add(self.__widget)
         builder.connect_signals(self)
+        self.__widget.set_property("halign", Gtk.Align.CENTER)
 
     def populate(self):
         pass
@@ -135,12 +136,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            if allocation.width < Sizing.BIG:
-                margin = MARGIN
-            else:
-                margin = allocation.width / 4
-            self.__widget.set_margin_start(margin)
-            self.__widget.set_margin_end(margin)
+            self.__widget.set_size_request(allocation.width / 2, -1)
 
     def _on_play_button_clicked(self, button):
         """

@@ -16,9 +16,10 @@ from gettext import gettext as _
 
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.define import App, ViewType, MARGIN_SMALL
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class CurrentAlbumsView(AlbumsListView):
+class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper):
     """
         Popover showing Albums View
     """
@@ -29,6 +30,7 @@ class CurrentAlbumsView(AlbumsListView):
             @param view_type as ViewType
         """
         AlbumsListView.__init__(self, [], [], view_type)
+        SizeAllocationHelper.__init__(self)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
         self.__clear_button = Gtk.Button.new_from_icon_name(
@@ -75,8 +77,7 @@ class CurrentAlbumsView(AlbumsListView):
         self.set_row_spacing(2)
         self.insert_row(0)
         self.attach(self.__grid, 0, 0, 1, 1)
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.get_style_context().remove_class("view")
+        self.__grid.set_property("halign", Gtk.Align.CENTER)
 
     @property
     def args(self):
@@ -109,6 +110,14 @@ class CurrentAlbumsView(AlbumsListView):
             App().playlists.add(date_string)
             playlist_id = App().playlists.get_id(date_string)
             App().playlists.add_tracks(playlist_id, tracks)
+
+    def _handle_size_allocate(self, allocation):
+        """
+            Change view width
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            self.__grid.set_size_request(allocation.width / 2, -1)
 
     def __on_jump_clicked(self, button):
         """
