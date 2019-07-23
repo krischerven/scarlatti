@@ -185,16 +185,16 @@ class ViewsContainer:
             @param playlist_ids as [int]
             @return View
         """
-        view_type = ViewType.DND | ViewType.PLAYLISTS | ViewType.SCROLLED
+        view_type = ViewType.PLAYLISTS | ViewType.SCROLLED
         if len(playlist_ids) == 1 and\
                 App().playlists.get_smart(playlist_ids[0]):
             from lollypop.view_playlists import SmartPlaylistsView
             view = SmartPlaylistsView(playlist_ids, view_type)
         elif playlist_ids:
             from lollypop.view_playlists import PlaylistsView
+            view_type |= ViewType.DND
             view = PlaylistsView(playlist_ids, view_type)
         else:
-            view_type = ViewType.SCROLLED
             from lollypop.view_playlists_manager import PlaylistsManagerView
             view = PlaylistsManagerView(None, view_type)
         view.populate()

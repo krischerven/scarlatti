@@ -62,7 +62,9 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self.__widget = builder.get_object("widget")
         # We remove SCROLLED because we want to be the scrolled view
         self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self._view.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
+        if view_type & ViewType.DND:
+            self._view.dnd_helper.connect("dnd-finished",
+                                          self.__on_dnd_finished)
         self._view.connect("remove-from-playlist",
                            self.__on_remove_from_playlist)
         self._view.show()
