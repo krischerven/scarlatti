@@ -347,6 +347,21 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
 #######################
 # PRIVATE             #
 #######################
+    def __popup_menu(self, widget):
+        """
+            Popup menu for album
+            @param widget as Gtk.Widget
+        """
+        def on_closed(widget):
+            self.get_style_context().remove_class("track-menu-selected")
+
+        from lollypop.menu_objects import AlbumMenu
+        menu = AlbumMenu(self._album, ViewType.ALBUM)
+        popover = Gtk.Popover.new_from_model(widget, menu)
+        popover.connect("closed", on_closed)
+        self.get_style_context().add_class("track-menu-selected")
+        popover.popup()
+
     def __on_cover_uri_content(self, uri, status, data):
         """
             Save to tmp cache
