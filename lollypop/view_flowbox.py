@@ -222,8 +222,11 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self._box.select_child(child)
 
         child = self._box.get_child_at_pos(x, y)
-        if child is None or\
-                child.artwork is None or\
+        if child is None:
+            if self.__selected_child is not None:
+                self._box.unselect_child(self.__selected_child)
+                self.__selected_child = None
+        elif child.artwork is None or\
                 child == self.__selected_child:
             return
         elif child != self.__selected_child:
