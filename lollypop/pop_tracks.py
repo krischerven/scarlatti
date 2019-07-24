@@ -56,6 +56,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         grid.set_column_spacing(MARGIN_SMALL)
         grid.show()
         overlay = Gtk.Overlay()
+        overlay.set_property("width-request", ArtSize.SMALL)
         overlay.show()
         self.__artwork = Gtk.Image()
         self.__artwork.show()
