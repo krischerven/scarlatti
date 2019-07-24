@@ -30,7 +30,7 @@ except Exception as e:
     print("$ sudo pip3 install pylast")
     LastFM = None
 
-from lollypop.utils import set_proxy_from_gnome, install_youtube_dl
+from lollypop.utils import set_proxy_from_gnome  # install_youtube_dl
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils import is_audio, is_pls
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
@@ -203,7 +203,7 @@ class Application(Gtk.Application, ApplicationActions):
             dark = self.settings.get_value("dark-ui")
             settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
-        install_youtube_dl()
+        # install_youtube_dl()
 
     def do_startup(self):
         """
