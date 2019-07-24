@@ -24,7 +24,7 @@ from time import time
 import json
 
 from lollypop.inotify import Inotify
-from lollypop.define import App, ScanType, Type
+from lollypop.define import App, ScanType, Type, StorageType
 from lollypop.sqlcursor import SqlCursor
 from lollypop.tagreader import TagReader
 from lollypop.logger import Logger
@@ -111,8 +111,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         if album_artist_ids:
             # Update UI based on previous artist calculation
-            mtime = App().albums.get_mtime(album_id)
-            if mtime != 0:
+            storage_type = App().albums.get_storage_type(album_id)
+            if storage_type & StorageType.COLLECTION:
                 for artist_id in album_artist_ids:
                     GLib.idle_add(self.emit, "artist-updated", artist_id, True)
             App().albums.set_artist_ids(album_id, album_artist_ids)
@@ -135,7 +135,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                    album_rate, album_synced, album_mtime, title, duration,
                    tracknumber, discnumber, discname, year, timestamp,
                    track_mtime, track_pop, track_rate, track_loved,
-                   track_ltime, mb_track_id, bpm):
+                   track_ltime, mb_track_id, bpm, storage_type):
         """
             Add track to DB
             @param genres as str/None
@@ -167,6 +167,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param track_ltime as int
             @param mb_track_id as str
             @param bpm as int
+            @param storage_type as int
         """
         Logger.debug(
             "CollectionScanner::save_track(): Add artists %s" % artists)
@@ -194,7 +195,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                  album_artist_ids,
                                                  uri, album_loved, album_pop,
                                                  album_rate, album_synced,
-                                                 album_mtime)
+                                                 album_mtime, storage_type)
         if genres is None:
             genre_ids = [Type.WEB]
         else:
@@ -206,7 +207,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                                     tracknumber, discnumber, discname,
                                     album_id, year, timestamp, track_pop,
                                     track_rate, track_loved, track_ltime,
-                                    track_mtime, mb_track_id, bpm)
+                                    track_mtime, mb_track_id, bpm,
+                                    storage_type)
         Logger.debug("CollectionScanner::save_track(): Update track")
         self.update_track(track_id, artist_ids, genre_ids)
         Logger.debug("CollectionScanner::save_track(): Update album")
@@ -214,7 +216,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
         SqlCursor.commit(App().db)
-        if album_mtime > 0:
+        # This make Lollypop slow, should give a look
+        if storage_type & StorageType.COLLECTION:
             for genre_id in genre_ids:
                 GLib.idle_add(self.emit, "genre-updated", genre_id, True)
             if album_added:
@@ -514,12 +517,14 @@ class CollectionScanner(GObject.GObject, TagReader):
                     if mtime > db_mtimes.get(uri, 0):
                         # If not saved, use 0 as mtime, easy delete on quit
                         if scan_type == ScanType.EPHEMERAL:
-                            mtime = 0
+                            storage_type = StorageType.EPHEMERAL
+                        else:
+                            storage_type = StorageType.COLLECTION
                         # Do not use mtime if not intial scan
-                        elif db_mtimes:
+                        if db_mtimes:
                             mtime = int(time())
                         Logger.debug("Adding file: %s" % uri)
-                        self.__add2db(uri, mtime)
+                        self.__add2db(uri, mtime, storage_type)
                         SqlCursor.allow_thread_execution(App().db)
                         new_tracks.append(uri)
                 except Exception as e:
@@ -554,11 +559,12 @@ class CollectionScanner(GObject.GObject, TagReader):
         SqlCursor.remove(App().db)
         return new_tracks
 
-    def __add2db(self, uri, track_mtime):
+    def __add2db(self, uri, track_mtime, storage_type=StorageType.COLLECTION):
         """
             Add new file(or update one) to db with information
             @param uri as string
             @param track_mtime as int
+            @param storage_type as StorageType
             @return track id as int
             @warning, be sure SqlCursor is available for App().db
         """
@@ -642,5 +648,5 @@ class CollectionScanner(GObject.GObject, TagReader):
                    album_rate, album_synced, album_mtime, title, duration,
                    tracknumber, discnumber, discname, year, timestamp,
                    track_mtime, track_pop, track_rate, track_loved,
-                   track_ltime, mb_track_id, bpm)
+                   track_ltime, mb_track_id, bpm, storage_type)
         return track_id

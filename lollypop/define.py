@@ -41,6 +41,14 @@ class GstPlayFlags:
     GST_PLAY_FLAG_TEXT = 1 << 3   # We want subtitle output
 
 
+class StorageType:
+    NONE = 1 << 0
+    COLLECTION = 1 << 1
+    EPHEMERAL = 1 << 2
+    SAVED = 1 << 3
+    SPOTIFY_NEWS = 1 << 4
+
+
 class ArtBehaviour:
     NONE = 1 << 0
     ROUNDED = 1 << 1

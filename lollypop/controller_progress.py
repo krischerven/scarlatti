@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gst
 
 from lollypop.objects_radio import Radio
-from lollypop.define import App
+from lollypop.define import App, StorageType
 from lollypop.utils import seconds_to_string
 
 
@@ -57,7 +57,7 @@ class ProgressController:
             self._total_time_label.set_opacity(0)
             self._progress.set_range(0.0, 0.0)
         else:
-            if player.current_track.mtime <= 0:
+            if not player.current_track.storage_type & StorageType.COLLECTION:
                 style_context.add_class("youtube-scale")
             self._progress.set_sensitive(True)
             self._progress.set_opacity(1)

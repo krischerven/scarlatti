@@ -68,6 +68,7 @@ class Database:
                                               rate INT NOT NULL,
                                               loved INT NOT NULL,
                                               mtime INT NOT NULL,
+                                              storage_type INT NOT NULL,
                                               synced INT NOT NULL)"""
     __create_artists = """CREATE TABLE artists (id INTEGER PRIMARY KEY,
                                                name TEXT NOT NULL,
@@ -96,6 +97,7 @@ class Database:
                                               rate INT NOT NULL,
                                               ltime INT NOT NULL,
                                               mtime INT NOT NULL,
+                                              storage_type INT NOT NULL,
                                               mb_track_id TEXT,
                                               bpm DOUBLE
                                               )"""

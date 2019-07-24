@@ -15,7 +15,7 @@ from gi.repository import GLib, GdkPixbuf, Gio, Gst
 from random import choice
 
 from lollypop.tagreader import TagReader
-from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import escape, is_readonly
@@ -80,7 +80,7 @@ class AlbumArt:
         try:
             filename = self.get_album_cache_name(album) + ".jpg"
             self.__update_album_uri(album)
-            if album.mtime == 0:
+            if album.storage_type & StorageType.EPHEMERAL:
                 store_path = self._WEB_PATH + "/" + filename
             else:
                 store_path = self._STORE_PATH + "/" + filename
@@ -256,7 +256,7 @@ class AlbumArt:
             @param album as Album
         """
         try:
-            if album.mtime == 0:
+            if album.storage_type & StorageType.EPHEMERAL:
                 self.__save_web_album_artwork(data, album)
             elif album.uri == "" or is_readonly(album.uri):
                 self.__save_ro_album_artwork(data, album)

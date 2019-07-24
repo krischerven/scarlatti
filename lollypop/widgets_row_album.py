@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view_tracks import TracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
-from lollypop.define import ArtBehaviour
+from lollypop.define import ArtBehaviour, StorageType
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -114,7 +114,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
                 Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
                 _("Remove from playlist"))
-        elif self._album.mtime == 0:
+        elif self._album.storage_type & StorageType.EPHEMERAL:
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "document-save-symbolic",
                 Gtk.IconSize.MENU)
@@ -301,7 +301,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self._album.mtime == 0:
+        if self._album.storage_type & StorageType.EPHEMERAL:
             App().art.copy_from_web_to_store(self._album.id)
             App().art.cache_artists_artwork()
             self._album.save(True)

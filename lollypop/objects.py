@@ -62,14 +62,6 @@ class Base:
         attr_value = getattr(self.db, "get_" + attr)(self.id)
         setattr(self, attr_name, attr_value)
 
-    @property
-    def is_in_user_collection(self):
-        """
-            True if track is in user collection
-            @return bool
-        """
-        return self.mtime > 0
-
     def get_popularity(self):
         """
             Get popularity

@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
-from lollypop.define import App
+from lollypop.define import App, StorageType
 from lollypop.widgets_utils import Popover
 
 
@@ -68,7 +68,7 @@ class TrackMenuPopover(Popover):
         if menu is not None:
             self.bind_model(menu, None)
 
-        if track.mtime == 0:
+        if track.storage_type & StorageType.EPHEMERAL:
             return
 
         if track.year is not None:
@@ -114,7 +114,7 @@ class TrackMenuPopover(Popover):
             hgrid.add(year_label)
         hgrid.show()
 
-        if track.mtime in [-1, 0]:
+        if not track.storage_type & StorageType.COLLECTION:
             edit = Gtk.Entry()
             edit.set_margin_top(5)
             edit.set_margin_start(5)

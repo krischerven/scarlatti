@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib, Gtk, Gdk
 
 from gettext import gettext as _
 
-from lollypop.define import App
+from lollypop.define import App, StorageType
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
@@ -38,7 +38,8 @@ class EditMenu(Gio.Menu):
             self.__object = Track(object.id)
         if isinstance(self.__object, Album):
             self.__set_save_action()
-        if self.__object.is_in_user_collection and App().art.tag_editor:
+        if self.__object.storage_type & StorageType.COLLECTION and\
+                App().art.tag_editor:
             self.__set_edit_action()
 
 #######################
@@ -48,21 +49,22 @@ class EditMenu(Gio.Menu):
         """
             Set save action
         """
-        if self.__object.mtime == 0:
+        if not self.__object.storage_type & (StorageType.SAVED |
+                                             StorageType.COLLECTION):
             save_action = Gio.SimpleAction(name="save_album_action")
             App().add_action(save_action)
             save_action.connect("activate",
                                 self.__on_save_action_activate,
                                 True)
             self.append(_("Save in collection"), "app.save_album_action")
-        elif self.__object.mtime == -1:
+        elif self.__object.storage_type & StorageType.SAVED:
             save_action = Gio.SimpleAction(name="remove_album_action")
             App().add_action(save_action)
             save_action.connect("activate",
                                 self.__on_save_action_activate,
                                 False)
             self.append(_("Remove from collection"), "app.remove_album_action")
-        if self.__object.mtime in [0, -1]:
+        if not self.__object.storage_type & StorageType.COLLECTION:
             buy_action = Gio.SimpleAction(name="buy_album_action")
             App().add_action(buy_action)
             buy_action.connect("activate",

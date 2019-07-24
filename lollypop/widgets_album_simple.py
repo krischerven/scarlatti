@@ -59,7 +59,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
             Populate widget content
         """
         if self.__artwork is None:
-            self._watch_loading = self.__album.mtime <= 0
             grid = Gtk.Grid()
             grid.set_row_spacing(2)
             grid.set_orientation(Gtk.Orientation.VERTICAL)

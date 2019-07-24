@@ -16,7 +16,7 @@ from gi.repository import GLib, Gio
 import json
 
 from urllib.parse import urlparse
-from lollypop.define import App
+from lollypop.define import App, StorageType
 from lollypop.logger import Logger
 from lollypop.utils import escape
 from lollypop.objects import Base
@@ -42,6 +42,7 @@ class Track(Base):
                 "timestamp": 0,
                 "mtime": 1,
                 "loved": False,
+                "storage_type": 0,
                 "mb_track_id": None,
                 "mb_artist_ids": []}
 
@@ -104,7 +105,7 @@ class Track(Base):
                                       escape(filename))
             f = Gio.File.new_for_path(filepath)
             if save:
-                App().tracks.set_mtime(self.id, -1)
+                App().tracks.set_storage_type(self.id, StorageType.SAVED)
                 data = {
                     "title": self.name,
                     "album_name": self.album.name,
@@ -132,7 +133,7 @@ class Track(Base):
                     fstream.write(content, None)
                     fstream.close()
             else:
-                App().tracks.set_mtime(self.id, 0)
+                App().tracks.set_storage_type(self.id, StorageType.EPHEMERAL)
                 f.delete()
             self.reset("mtime")
         except Exception as e:

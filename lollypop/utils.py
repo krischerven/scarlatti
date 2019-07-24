@@ -22,6 +22,7 @@ from functools import wraps
 
 from lollypop.logger import Logger
 from lollypop.define import App, Type, SelectionListMask, NetworkAccessACL
+from lollypop.define import StorageType
 
 
 def seconds_to_string(duration):
@@ -105,6 +106,16 @@ def set_cursor_hand2(widget):
             window.set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
     except:
         pass
+
+
+def get_default_storage_type():
+    """
+        Get default collection storage type check
+    """
+    if get_network_available("YOUTUBE"):
+        return StorageType.COLLECTION | StorageType.SAVED
+    else:
+        return StorageType.COLLECTION
 
 
 def on_query_tooltip(label, x, y, keyboard, tooltip):

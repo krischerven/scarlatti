@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App
+from lollypop.define import App, StorageType
 from lollypop.objects_track import Track
 from lollypop.objects import Base
 
@@ -99,6 +99,7 @@ class Album(Base):
                 "mtime": 1,
                 "synced": False,
                 "loved": False,
+                "storage_type": 0,
                 "mb_album_id": None}
 
     def __init__(self, album_id=None, genre_ids=[], artist_ids=[],
@@ -226,9 +227,9 @@ class Album(Base):
             @param save as bool
         """
         if save:
-            App().albums.set_mtime(self.id, -1)
+            App().albums.set_storage_type(self.id, StorageType.SAVED)
         else:
-            App().albums.set_mtime(self.id, 0)
+            App().albums.set_storage_type(self.id, StorageType.EPHEMERAL)
         for track in self.tracks:
             track.save(save)
         self.reset("mtime")

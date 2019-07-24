@@ -37,7 +37,6 @@ class RadioWidget(Gtk.FlowBoxChild):
         self.__font_height = font_height
         self._track = Radio(radio_id)
         self.__view_type = view_type
-        self._watch_loading = True
         self.set_view_type(view_type)
         self.connect("activate", self.__on_activate)
 

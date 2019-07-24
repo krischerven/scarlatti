@@ -14,7 +14,8 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, Type
+from lollypop.define import App, Type, StorageType
+from lollypop.utils import get_default_storage_type
 from lollypop.utils import format_artist_name, noaccents, remove_static
 
 
@@ -189,28 +190,31 @@ class ArtistsDatabase:
             select = "artists.rowid, artists.name, artists.sortname"
         with SqlCursor(App().db) as sql:
             result = []
+            storage_type = get_default_storage_type()
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
                 result = sql.execute(
                     "SELECT DISTINCT %s FROM artists, albums, album_artists\
                                   WHERE album_artists.artist_id=artists.rowid\
                                   AND album_artists.album_id=albums.rowid\
-                                  AND albums.mtime!=0\
+                                  AND albums.storage_type & ?\
                                   ORDER BY artists.sortname\
-                                  COLLATE NOCASE COLLATE LOCALIZED" % select)
+                                  COLLATE NOCASE COLLATE LOCALIZED" % select,
+                    (storage_type,))
             else:
-                genres = tuple(genre_ids)
+                filters = (storage_type,)
+                filters += tuple(genre_ids)
                 request = "SELECT DISTINCT %s\
                            FROM artists, albums, album_genres, album_artists\
                            WHERE artists.rowid=album_artists.artist_id\
                            AND albums.rowid=album_artists.album_id\
-                           AND albums.mtime!=0\
+                           AND albums.storage_type & ?\
                            AND album_genres.album_id=albums.rowid AND ("
                 for genre_id in genre_ids:
                     request += "album_genres.genre_id=? OR "
                 request += "1=0) ORDER BY artists.sortname\
                             COLLATE NOCASE COLLATE LOCALIZED"
-                result = sql.execute(request % select, genres)
+                result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
 
     def get_all(self, genre_ids=[]):
@@ -225,28 +229,31 @@ class ArtistsDatabase:
             select = "artists.rowid, artists.name, artists.sortname"
         with SqlCursor(App().db) as sql:
             result = []
+            storage_type = get_default_storage_type()
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
                 result = sql.execute(
                     "SELECT DISTINCT %s FROM artists, track_artists, tracks\
                                   WHERE artists.rowid=track_artists.artist_id\
                                   AND tracks.rowid=track_artists.track_id\
-                                  AND tracks.mtime!=0\
+                                  AND tracks.storage_type & ?\
                                   ORDER BY artists.sortname\
-                                  COLLATE NOCASE COLLATE LOCALIZED" % select)
+                                  COLLATE NOCASE COLLATE LOCALIZED" % select,
+                    (storage_type,))
             else:
-                genres = tuple(genre_ids)
+                filters = (storage_type,)
+                filters += tuple(genre_ids)
                 request = "SELECT DISTINCT %s\
                            FROM artists, tracks, track_genres, track_artists\
                            WHERE artists.rowid=track_artists.artist_id\
                            AND tracks.rowid=track_artists.track_id\
-                           AND tracks.mtime!=0\
+                           AND tracks.storage_type & ?\
                            AND track_genres.track_id=tracks.rowid AND ("
                 for genre_id in genre_ids:
                     request += "track_genres.genre_id=? OR "
                 request += "1=0) ORDER BY artists.sortname\
                             COLLATE NOCASE COLLATE LOCALIZED"
-                result = sql.execute(request % select, genres)
+                result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
 
     def get_randoms(self, limit):
@@ -256,16 +263,18 @@ class ArtistsDatabase:
             @return [int, str, str]
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT artists.rowid,\
                                        artists.name,\
                                        artists.sortname\
                                   FROM artists, albums, album_artists\
                                   WHERE album_artists.artist_id=artists.rowid\
                                   AND album_artists.album_id=albums.rowid\
-                                  AND albums.mtime!=0 and albums.loved != -1\
+                                  AND albums.storage_type & ?\
+                                  AND albums.loved != -1\
                                   ORDER BY random() LIMIT ?\
                                   COLLATE NOCASE COLLATE LOCALIZED"
-            result = sql.execute(request, (limit,))
+            result = sql.execute(request, (storage_type, limit))
             return [(row[0], row[1], row[2]) for row in result]
 
     def get_ids(self, genre_ids=[]):
@@ -276,6 +285,7 @@ class ArtistsDatabase:
         """
         with SqlCursor(App().db) as sql:
             result = []
+            storage_type = get_default_storage_type()
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
                 result = sql.execute(
@@ -283,22 +293,24 @@ class ArtistsDatabase:
                                   FROM artists, albums, album_artists\
                                   WHERE album_artists.artist_id=artists.rowid\
                                   AND album_artists.album_id=albums.rowid\
-                                  AND albums.mtime!=0\
+                                  AND albums.storage_type & ?\
                                   ORDER BY artists.sortname\
-                                  COLLATE NOCASE COLLATE LOCALIZED")
+                                  COLLATE NOCASE COLLATE LOCALIZED",
+                    (storage_type,))
             else:
-                genres = tuple(genre_ids)
+                filters = (storage_type,)
+                filters += tuple(genre_ids)
                 request = "SELECT DISTINCT artists.rowid\
                            FROM artists, albums, album_genres, album_artists\
                            WHERE artists.rowid=album_artists.artist_id\
-                           AND albums.mtime!=0\
+                           AND albums.storage_type & ?\
                            AND albums.rowid=album_artists.album_id\
                            AND album_genres.album_id=albums.rowid AND ("
                 for genre_id in genre_ids:
                     request += "album_genres.genre_id=? OR "
                 request += "1=0) ORDER BY artists.sortname\
                             COLLATE NOCASE COLLATE LOCALIZED"
-                result = sql.execute(request, genres)
+                result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def exists(self, artist_id):
@@ -343,7 +355,8 @@ class ArtistsDatabase:
                                   FROM artists, album_artists, albums\
                                   WHERE album_artists.album_id=albums.rowid\
                                   AND artists.rowid=album_artists.artist_id\
-                                  AND albums.mtime!=0")
+                                  AND albums.storage_type & ?",
+                                 StorageType.COLLECTION | StorageType.SAVED)
             v = result.fetchone()
             if v is not None:
                 return v[0]

@@ -33,7 +33,7 @@ except Exception as e:
 from lollypop.utils import set_proxy_from_gnome, install_youtube_dl
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils import is_audio, is_pls
-from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType
+from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
 from lollypop.database import Database
 from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
@@ -345,7 +345,7 @@ class Application(Gtk.Application, ApplicationActions):
             return
 
         if self.player.current_track.id is None or\
-                self.player.current_track.mtime == 0:
+                self.player.current_track.storage_type & StorageType.EPHEMERAL:
             track_id = None
         else:
             track_id = self.player.current_track.id

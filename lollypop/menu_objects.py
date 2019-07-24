@@ -14,7 +14,7 @@ from gi.repository import Gio
 
 from gettext import gettext as _
 
-from lollypop.define import ViewType
+from lollypop.define import ViewType, StorageType
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_artist import ArtistMenu
 from lollypop.menu_edit import EditMenu
@@ -36,7 +36,7 @@ class AlbumMenu(Gio.Menu):
         Gio.Menu.__init__(self)
         self.insert_section(0, _("Artist"),
                             ArtistMenu(album, view_type))
-        if album.mtime != 0:
+        if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
             self.insert_section(2, _("Playlists"), PlaylistsMenu(album))
         self.insert_section(3, _("Synchronization"), SyncAlbumMenu(album))
         self.insert_section(4, _("Edit"), EditMenu(album))
@@ -54,12 +54,12 @@ class TrackMenu(Gio.Menu):
             @param show artist menu as bool
         """
         Gio.Menu.__init__(self)
-        if show_artist and track.mtime != 0:
+        if show_artist and not track.storage_type & StorageType.EPHEMERAL:
             self.insert_section(0, _("Artist"),
                                 ArtistMenu(track, ViewType.ALBUM))
         self.insert_section(1, _("Playback"),
                             PlaybackMenu(track))
-        if track.mtime != 0:
+        if not track.storage_type & StorageType.EPHEMERAL:
             self.insert_section(2, _("Playlists"),
                                 PlaylistsMenu(track))
         self.insert_section(3, _("Edit"),

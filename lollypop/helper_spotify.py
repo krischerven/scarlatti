@@ -21,7 +21,7 @@ from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
-from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App
+from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
 
 
 class SpotifyHelper(GObject.Object):
@@ -442,10 +442,11 @@ class SpotifyHelper(GObject.Object):
         duration = payload["duration_ms"] // 1000
         cover_uri = payload["album"]["images"][1]["url"]
         uri = "web://%s" % payload["id"]
+        mtime = int(time())
         (track_id, album_id) = App().scanner.save_track(
                    None, artists, "", "", album_artists, "", "",
                    album_name, None, uri, 0, 0,
-                   0, 0, 0, title, duration, tracknumber,
-                   discnumber, discname, year, timestamp, 0,
-                   0, 0, 0, 0, "", 0)
+                   0, 0, mtime, title, duration, tracknumber,
+                   discnumber, discname, year, timestamp, mtime,
+                   0, 0, 0, 0, "", 0, StorageType.EPHEMERAL)
         return (album_id, track_id, cover_uri)

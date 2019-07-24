@@ -15,8 +15,8 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, OrderBy
-from lollypop.utils import noaccents, get_network_available, remove_static
+from lollypop.define import App, OrderBy, StorageType
+from lollypop.utils import noaccents, remove_static, get_default_storage_type
 
 
 class TracksDatabase:
@@ -33,7 +33,7 @@ class TracksDatabase:
 
     def add(self, name, uri, duration, tracknumber, discnumber, discname,
             album_id, year, timestamp, popularity, rate, loved, ltime, mtime,
-            mb_track_id, bpm):
+            mb_track_id, bpm, storage_type):
         """
             Add a new track to database
             @param name as string
@@ -60,8 +60,8 @@ class TracksDatabase:
                 "INSERT INTO tracks (name, uri, duration, tracknumber,\
                 discnumber, discname, album_id,\
                 year, timestamp, popularity, rate, loved,\
-                ltime, mtime, mb_track_id, bpm) VALUES\
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
+                ltime, mtime, mb_track_id, bpm, storage_type) VALUES\
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
                     name,
                     uri,
                     duration,
@@ -77,7 +77,8 @@ class TracksDatabase:
                     ltime,
                     mtime,
                     mb_track_id,
-                    bpm))
+                    bpm,
+                    storage_type))
             return result.lastrowid
 
     def add_artist(self, track_id, artist_id):
@@ -255,6 +256,21 @@ class TracksDatabase:
                 return v[0]
             return None
 
+    def get_storage_type(self, track_id):
+        """
+            Get storage type
+            @param track_id as int
+            @return int
+        """
+        with SqlCursor(App().db) as sql:
+            result = sql.execute("SELECT storage_type FROM tracks WHERE\
+                                 rowid=?", (track_id,))
+
+            v = result.fetchone()
+            if v is not None:
+                return v[0]
+            return 0
+
     def get_timestamp(self, track_id):
         """
             Get track timestamp
@@ -346,6 +362,17 @@ class TracksDatabase:
             sql.execute("UPDATE tracks SET uri=?\
                          WHERE rowid=?",
                         (uri, track_id))
+
+    def set_storage_type(self, track_id, storage_type):
+        """
+            Set storage type
+            @param track_id as int
+            @param storage_type as int
+        """
+        with SqlCursor(App().db, True) as sql:
+            sql.execute("UPDATE tracks SET storage_type=?\
+                         WHERE rowid=?",
+                        (storage_type, track_id))
 
     def set_rate(self, track_id, rate):
         """
@@ -494,57 +521,58 @@ class TracksDatabase:
 
         with SqlCursor(App().db) as sql:
             result = []
+            storage_type = get_default_storage_type()
             # Get albums for all artists
             if not artist_ids and not genre_ids:
                 request = "SELECT DISTINCT tracks.album_id\
                            FROM tracks, track_artists, artists, albums\
                            WHERE tracks.rowid = track_artists.track_id AND\
                            artists.rowid = track_artists.artist_id AND\
+                           track.storage_type & ? AND\
                            album_id=tracks.album_id"
                 if ignore:
                     request += " AND tracks.loved != -1"
-                if not get_network_available("YOUTUBE"):
-                    request += " AND tracks.mtime != -1"
                 request += order
-                result = sql.execute(request)
+                result = sql.execute(request, (storage_type,))
             # Get albums for genres
             elif not artist_ids:
-                filters = tuple(genre_ids)
+                filters = (storage_type,)
+                filters += tuple(genre_ids)
                 request = "SELECT DISTINCT tracks.album_id FROM tracks,\
                            album, track_genres, track_artists, artists\
                            WHERE tracks.rowid = track_artists.track_id AND\
                            artists.rowid = track_artists.artist_id  AND\
                            album_id=tracks.album_id AND\
+                           track.storage_type & ? AND\
                            track_genres.track_id=tracks.rowid AND ( "
                 for genre_id in genre_ids:
                     request += "track_genres.genre_id=? OR "
                 request += "1=0)"
                 if ignore:
                     request += " AND tracks.loved != -1"
-                if not get_network_available("YOUTUBE"):
-                    request += " AND tracks.mtime != -1"
                 request += order
                 result = sql.execute(request, filters)
             # Get albums for artist
             elif not genre_ids:
-                filters = tuple(artist_ids)
+                filters = (storage_type,)
+                filters += tuple(artist_ids)
                 request = "SELECT DISTINCT tracks.album_id\
                            FROM tracks, track_artists, artists, albums\
                            WHERE track_artists.track_id=tracks.rowid AND\
                            album_id=tracks.album_id AND\
+                           track.storage_type & ? AND\
                            artists.rowid = track_artists.artist_id AND ("
                 for artist_id in artist_ids:
                     request += "artists.rowid=? OR "
                 request += "1=0)"
                 if ignore:
                     request += " AND tracks.loved != -1"
-                if not get_network_available("YOUTUBE"):
-                    request += " AND tracks.mtime != -1"
                 request += order
                 result = sql.execute(request, filters)
             # Get albums for artist id and genre id
             else:
-                filters = tuple(artist_ids)
+                filters = (storage_type,)
+                filters += tuple(artist_ids)
                 filters += tuple(genre_ids)
                 request = "SELECT DISTINCT tracks.album_id\
                            FROM tracks, track_genres, albums,\
@@ -552,6 +580,7 @@ class TracksDatabase:
                            WHERE track_genres.track_id=tracks.rowid AND\
                            artists.rowid = track_artists.artist_id AND\
                            album_id=tracks.album_id AND\
+                           track.storage_type & ? AND\
                            track_artists.track_id=tracks.rowid AND ("
                 for artist_id in artist_ids:
                     request += "artists.rowid=? OR "
@@ -561,8 +590,6 @@ class TracksDatabase:
                 request += "1=0)"
                 if ignore:
                     request += " AND tracks.loved != -1"
-                if not get_network_available("YOUTUBE"):
-                    request += " AND tracks.mtime != -1"
                 request += order
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
@@ -586,7 +613,8 @@ class TracksDatabase:
             Delete non persistent tracks
         """
         with SqlCursor(App().db, True) as sql:
-            sql.execute("DELETE FROM tracks WHERE mtime=0")
+            sql.execute("DELETE FROM tracks WHERE storage_type=?",
+                        StorageType.EPHEMERAL)
 
     def get_uris(self, uris_concerned=None):
         """
@@ -601,10 +629,13 @@ class TracksDatabase:
                     result = sql.execute("SELECT uri\
                                           FROM tracks\
                                           WHERE uri LIKE ? AND\
-                                          mtime!=0", (uri + "%",))
+                                          storage_type & ?",
+                                         (uri + "%", StorageType.COLLECTION))
                     uris += list(itertools.chain(*result))
             else:
-                result = sql.execute("SELECT uri FROM tracks WHERE mtime>0")
+                result = sql.execute("SELECT uri FROM tracks\
+                                      WHERE  storage_type & ?",
+                                     (StorageType.COLLECTION,))
                 uris = list(itertools.chain(*result))
             return uris
 
@@ -748,9 +779,11 @@ class TracksDatabase:
             @return int
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             result = sql.execute("SELECT popularity\
-                                  FROM tracks WHERE mtime != 0\
-                                  ORDER BY POPULARITY DESC LIMIT 1")
+                                  FROM tracks WHERE storage_type & ?\
+                                  ORDER BY POPULARITY DESC LIMIT 1",
+                                 (storage_type,))
             v = result.fetchone()
             if v is not None:
                 return v[0]
@@ -762,11 +795,13 @@ class TracksDatabase:
             @return avarage popularity as int
         """
         with SqlCursor(App().db) as sql:
+            storage_type = StorageType.COLLECTION | StorageType.SAVED
             result = sql.execute("SELECT AVG(popularity)\
                                   FROM (SELECT popularity\
                                         FROM tracks\
-                                        WHERE mtime != 0\
-                                        ORDER BY POPULARITY DESC LIMIT 100)")
+                                        WHERE storage_type & ?\
+                                        ORDER BY POPULARITY DESC LIMIT 100)",
+                                 (storage_type,))
             v = result.fetchone()
             if v and v[0] > 5:
                 return v[0]
@@ -806,10 +841,12 @@ class TracksDatabase:
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             result = sql.execute("SELECT tracks.rowid\
                                   FROM tracks\
-                                  WHERE ltime=0 AND mtime!=0\
-                                  ORDER BY random() LIMIT 100")
+                                  WHERE ltime=0 AND storage_type & ?\
+                                  ORDER BY random() LIMIT 100",
+                                 (storage_type,))
             return list(itertools.chain(*result))
 
     def get_recently_listened_to(self):
@@ -818,10 +855,12 @@ class TracksDatabase:
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             result = sql.execute("SELECT tracks.rowid\
                                   FROM tracks\
-                                  WHERE ltime!=0 AND mtime!=0\
-                                  ORDER BY ltime DESC LIMIT 100")
+                                  WHERE ltime!=0 AND storage_type & ?\
+                                  ORDER BY ltime DESC LIMIT 100",
+                                 (storage_type,))
             return list(itertools.chain(*result))
 
     def get_randoms(self):
@@ -830,9 +869,11 @@ class TracksDatabase:
             @return array of track ids as int
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks WHERE mtime != 0\
-                                  ORDER BY random() LIMIT 100")
+                                  FROM tracks WHERE storage_type & ?\
+                                  ORDER BY random() LIMIT 100",
+                                 (storage_type,))
             tracks = list(itertools.chain(*result))
             return tracks
 
@@ -931,7 +972,8 @@ class TracksDatabase:
         """
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT COUNT(1) FROM tracks\
-                                  WHERE mtime != 0")
+                                  WHERE storage_type & ?",
+                                 StorageType.COLLECTION | StorageType.SAVED)
             v = result.fetchone()
             if v is not None:
                 return v[0]
@@ -958,13 +1000,15 @@ class TracksDatabase:
         """
         no_accents = noaccents(searched)
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             items = []
             for filter in [(no_accents + "%",),
                            ("%" + no_accents,),
-                           ("%" + no_accents + "%",)]:
+                           ("%" + no_accents + "%",),
+                           storage_type]:
                 request = "SELECT tracks.rowid FROM tracks\
                            WHERE noaccents(name) LIKE ?\
-                           AND tracks.mtime!=0 LIMIT 25"
+                           AND albums.storage_type & ? LIMIT 25"
                 result = sql.execute(request, filter)
                 items += list(itertools.chain(*result))
             return items

@@ -19,7 +19,7 @@ from lollypop.sqlcursor import SqlCursor
 from lollypop.utils import translate_artist_name
 from lollypop.database_history import History
 from lollypop.radios import Radios
-from lollypop.define import App, Type
+from lollypop.define import App, Type, StorageType
 from lollypop.logger import Logger
 
 
@@ -155,6 +155,7 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             33: "ALTER TABLE artists ADD mb_artist_id TEXT",
             34: self.__upgrade_31,
             35: "UPDATE albums SET synced=2 WHERE synced=1",
+            36: self.__upgrade_36
         }
 
 #######################
@@ -645,3 +646,19 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             f.delete(None)
         except Exception as e:
             Logger.error("DatabaseAlbumsUpgrade::__upgrade_31(): %s", e)
+
+    def __upgrade_36(self, db):
+        """
+            Restore back mtime in tracks
+        """
+        with SqlCursor(db, True) as sql:
+            sql.execute("ALTER TABLE tracks ADD storage_type INT")
+            sql.execute("ALTER TABLE albums ADD storage_type INT")
+            sql.execute("UPDATE tracks SET storage_type=?\
+                         WHERE mtime > 0", (StorageType.COLLECTION,))
+            sql.execute("UPDATE albums SET storage_type=?\
+                         WHERE mtime > 0", (StorageType.COLLECTION,))
+            sql.execute("UPDATE tracks SET storage_type=?\
+                         WHERE mtime = -1", (StorageType.SAVED,))
+            sql.execute("UPDATE albums SET storage_type=?\
+                         WHERE mtime = -1", (StorageType.SAVED,))
