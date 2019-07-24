@@ -17,6 +17,7 @@ from base64 import b64encode
 from time import time, sleep
 
 from lollypop.logger import Logger
+from lollypop.utils import cancellable_sleep
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
@@ -388,7 +389,7 @@ class SpotifyHelper(GObject.Object):
         # Populate tracks
         for item in payload:
             if not storage_type & StorageType.EPHEMERAL:
-                sleep(10)
+                cancellable_sleep(10, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             track_id = App().db.exists_in_db(item["album"]["name"],
@@ -429,7 +430,7 @@ class SpotifyHelper(GObject.Object):
         # Populate tracks
         for album_item in payload:
             if not storage_type & StorageType.EPHEMERAL:
-                sleep(10)
+                cancellable_sleep(10, cancellable)
             if cancellable.is_cancelled():
                 return
             album_id = App().db.exists_in_db(

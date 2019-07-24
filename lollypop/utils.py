@@ -25,6 +25,14 @@ from lollypop.define import App, Type, SelectionListMask, NetworkAccessACL
 from lollypop.define import StorageType
 
 
+def cancellable_sleep(seconds, cancellable):
+    while seconds:
+        time.sleep(1)
+        seconds -= 1
+        if cancellable.is_cancelled():
+            return
+
+
 def seconds_to_string(duration):
     """
         Convert seconds to a pretty string
