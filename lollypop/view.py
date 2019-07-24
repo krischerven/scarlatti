@@ -50,6 +50,11 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 
         if view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
+            self.__event_controller = Gtk.EventControllerMotion.new(
+                self._scrolled)
+            self.__event_controller.set_propagation_phase(
+                Gtk.PropagationPhase.TARGET)
+            self.__event_controller.connect("leave", self._on_view_leave)
             self._scrolled.get_vadjustment().connect("value-changed",
                                                      self._on_value_changed)
             self._scrolled.show()
@@ -153,6 +158,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 if child.get_name() == "lollypop_placeholder":
                     child.destroy()
                     break
+
+    def _on_view_leave(self, event_controller):
+        pass
 
     def _on_adaptive_changed(self, window, status):
         """

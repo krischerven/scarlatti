@@ -36,8 +36,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         FilteringHelper.__init__(self)
         self._widget_class = None
         self._items = []
-        self.__selected_child = None
-        self.__selected_timeout_id = None
+        self.__hovered_child = None
         self.__font_height = get_font_height()
         self._box = Gtk.FlowBox()
         # Allow lazy loading to not jump up and down
@@ -47,6 +46,9 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         self._box.set_row_spacing(MARGIN)
         self._box.set_column_spacing(MARGIN_SMALL)
         self._box.show()
+        if not view_type & ViewType.SMALL:
+            self.__event_controller = Gtk.EventControllerMotion.new(self._box)
+            self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._scrolled.set_property("expand", True)
@@ -183,6 +185,35 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             if hasattr(child, "show_spinner"):
                 child.show_spinner(status)
 
+    def _on_view_leave(self, event_controller):
+        """
+            Unselect selected child
+            @param event_controller as Gtk.EventControllerMotion
+        """
+        self.__unselect_selected()
+
 #######################
 # PRIVATE             #
 #######################
+    def __unselect_selected(self):
+        """
+            Unselect selected child
+        """
+        if self.__hovered_child is not None:
+            self.__hovered_child.set_opacity(1)
+            self.__hovered_child = None
+
+    def __on_box_motion(self, event_controller, x, y):
+        """
+            Update current selected child
+            @param event_controller as Gtk.EventControllerMotion
+            @param x as int
+            @param y as int
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child == self.__hovered_child:
+            return
+        elif child is not None:
+            child.set_opacity(0.9)
+            self.__unselect_selected()
+            self.__hovered_child = child
