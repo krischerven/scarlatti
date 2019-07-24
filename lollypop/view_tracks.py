@@ -21,7 +21,7 @@ from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.utils import get_position_list, on_realize
+from lollypop.utils import get_position_list, set_cursor_hand2
 from lollypop.define import App, Type, ViewType
 
 
@@ -294,7 +294,7 @@ class TracksView(SizeAllocationHelper):
                         label.get_style_context().add_class("dim-label")
                         label.show()
                         eventbox = Gtk.EventBox()
-                        eventbox.connect("realize", on_realize)
+                        eventbox.connect("realize", set_cursor_hand2)
                         eventbox.set_tooltip_text(_("Play"))
                         eventbox.connect("button-press-event",
                                          self.__on_disc_button_press_event,

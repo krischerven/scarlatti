@@ -94,7 +94,7 @@ def get_round_surface(image, scale_factor, radius):
     return surface
 
 
-def on_realize(widget):
+def set_cursor_hand2(widget):
     """
         Set cursor on widget
         @param widget as Gtk.Widget
@@ -104,7 +104,7 @@ def on_realize(widget):
         if window is not None:
             window.set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
     except:
-        Logger.warning(_("You are using a broken cursor theme!"))
+        pass
 
 
 def on_query_tooltip(label, x, y, keyboard, tooltip):

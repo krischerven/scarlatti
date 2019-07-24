@@ -19,7 +19,7 @@ from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.utils import on_realize
+from lollypop.utils import set_cursor_hand2
 from lollypop.define import App, ArtSize
 
 
@@ -55,7 +55,7 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
         self.__revealer = builder.get_object("revealer")
         self.__revealer_box = builder.get_object("revealer_box")
         self.__eventbox = builder.get_object("eventbox")
-        self.__eventbox.connect("realize", on_realize)
+        self.__eventbox.connect("realize", set_cursor_hand2)
 
         self._progress = builder.get_object("progress_scale")
         self._progress.set_sensitive(False)

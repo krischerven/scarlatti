@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.view_tracks import TracksView
 from lollypop.define import App, ViewType, Shuffle, ArtSize, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Sizing
-from lollypop.utils import on_realize
+from lollypop.utils import set_cursor_hand2
 from lollypop.widgets_utils import Popover
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -69,7 +69,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         play_button.set_tooltip_text(_("Play"))
         play_button.set_property("valign", Gtk.Align.START)
         play_button.set_property("halign", Gtk.Align.CENTER)
-        play_button.connect("realize", on_realize)
+        play_button.connect("realize", set_cursor_hand2)
         play_button.set_margin_top(MARGIN_SMALL)
         play_button.connect("clicked", self.__on_play_clicked)
         play_button.show()
@@ -88,7 +88,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         # Action button
         self.__action_button = Gtk.Button.new()
         self.__action_button.set_property("has-tooltip", True)
-        self.__action_button.connect("realize", on_realize)
+        self.__action_button.connect("realize", set_cursor_hand2)
         self.__action_button.connect("clicked", self.__on_action_clicked)
         self.__action_button.set_image(Gtk.Image())
         self.__show_append(self._album.id not in App().player.album_ids)
@@ -100,7 +100,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         play_all_button = Gtk.Button.new()
         play_all_button.set_property("has-tooltip", True)
         play_all_button.set_tooltip_text(_("Play albums"))
-        play_all_button.connect("realize", on_realize)
+        play_all_button.connect("realize", set_cursor_hand2)
         play_all_button.get_style_context().add_class("vertical-menu-button")
         play_all_button.get_style_context().add_class("black-transparent")
         play_all_button.connect("clicked", self.__on_play_all_clicked)

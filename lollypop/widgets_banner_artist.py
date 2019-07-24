@@ -16,7 +16,7 @@ from gettext import gettext as _
 from random import shuffle, choice
 
 from lollypop.objects_album import Album
-from lollypop.utils import on_realize, on_query_tooltip
+from lollypop.utils import set_cursor_hand2, on_query_tooltip
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
@@ -46,7 +46,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         builder.connect_signals(self)
         self.__badge_artwork = builder.get_object("badge_artwork")
         self.__title_label = builder.get_object("artist")
-        self.__title_label.connect("realize", on_realize)
+        self.__title_label.connect("realize", set_cursor_hand2)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__title_label.set_property("has-tooltip", True)
         self.__add_button = builder.get_object("add_button")
@@ -54,8 +54,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__jump_button = builder.get_object("jump_button")
         self.__lastfm_button = builder.get_object("lastfm_button")
         builder.get_object("buttons").set_margin_end(MARGIN)
-        builder.get_object("artwork_event").connect("realize", on_realize)
-        builder.get_object("label_event").connect("realize", on_realize)
+        builder.get_object("artwork_event").connect(
+            "realize", set_cursor_hand2)
+        builder.get_object("label_event").connect(
+            "realize", set_cursor_hand2)
         widget = builder.get_object("widget")
         artists = []
         for artist_id in self.__artist_ids:

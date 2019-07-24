@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib
 
 
-from lollypop.utils import on_realize
+from lollypop.utils import set_cursor_hand2
 from lollypop.objects_radio import Radio
 from lollypop.widgets_utils import Popover
 from lollypop.controller_information import InformationController
@@ -41,7 +41,7 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
         self.__width = 0
 
         self._infobox = builder.get_object("widget")
-        self._infobox.connect("realize", on_realize)
+        self._infobox.connect("realize", set_cursor_hand2)
         self.add(self._infobox)
         GesturesHelper.__init__(self, self._infobox)
 
