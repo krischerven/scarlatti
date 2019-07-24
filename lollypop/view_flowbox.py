@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, App, MARGIN
+from lollypop.define import ViewType, App, MARGIN, MARGIN_SMALL
 from lollypop.utils import get_font_height
 from lollypop.helper_signals import SignalsHelper, signals
 
@@ -45,6 +45,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         self._box.set_vexpand(True)
         self._box.set_max_children_per_line(1000)
         self._box.set_row_spacing(MARGIN)
+        self._box.set_column_spacing(MARGIN_SMALL)
         self._box.show()
         if not view_type & ViewType.SMALL:
             self._box.connect("selected-children-changed",
