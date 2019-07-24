@@ -53,6 +53,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         scrolled.show()
         self._responsive_widget.show()
         grid = Gtk.Grid()
+        grid.set_column_spacing(MARGIN_SMALL)
         grid.show()
         overlay = Gtk.Overlay()
         overlay.show()
