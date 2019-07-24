@@ -1096,14 +1096,13 @@ class AlbumsDatabase:
             @param searched as str
             @return album ids as [int]
         """
-        no_accents = noaccents(searched)
         with SqlCursor(App().db) as sql:
+            no_accents = noaccents(searched)
             storage_type = get_default_storage_type()
             items = []
-            for filter in [(no_accents + "%",),
-                           ("%" + no_accents,),
-                           ("%" + no_accents + "%",),
-                           storage_type]:
+            for filter in [(no_accents + "%", storage_type),
+                           ("%" + no_accents, storage_type),
+                           ("%" + no_accents + "%", storage_type)]:
                 request = "SELECT albums.rowid FROM albums\
                            WHERE noaccents(name) LIKE ?\
                            AND albums.storage_type & ? LIMIT 25"

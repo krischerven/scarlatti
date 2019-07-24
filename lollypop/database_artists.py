@@ -332,15 +332,17 @@ class ArtistsDatabase:
             @param searched as str
             @return [int]
         """
-        no_accents = noaccents(searched)
         with SqlCursor(App().db) as sql:
+            no_accents = noaccents(searched)
+            storage_type = get_default_storage_type()
             items = []
-            for filter in [(no_accents + "%",),
-                           ("%" + no_accents,),
-                           ("%" + no_accents + "%",)]:
+            for filter in [(no_accents + "%", storage_type),
+                           ("%" + no_accents, storage_type),
+                           ("%" + no_accents + "%", storage_type)]:
                 request = "SELECT artists.rowid\
                            FROM artists, albums, album_artists\
-                           WHERE noaccents(artists.name) LIKE ? LIMIT 25"
+                           WHERE noaccents(artists.name) LIKE ?\
+                           AND albums.storage_type & ? LIMIT 25"
                 result = sql.execute(request, filter)
                 items += list(itertools.chain(*result))
             return items

@@ -23,7 +23,6 @@ from lollypop.utils import get_font_height
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals
-from lollypop.logger import Logger
 
 
 class AlbumsBoxView(FlowBoxView, ViewController):
@@ -523,23 +522,16 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
                 not get_network_available("YOUTUBE"):
             self.destroy()
 
-    def _on_new_spotify_album(self, spotify, album, cover_uri):
+    def _on_new_spotify_album(self, spotify, album):
         """
             Add album
             @param spotify as SpotifyHelper
             @param album as Album
-            @param cover_uri as str
         """
-        if cover_uri is not None:
-            App().task_helper.load_uri_content(cover_uri,
-                                               self.__cancellable,
-                                               self.__on_cover_uri_content,
-                                               album)
-        else:
-            count = len(self._box.get_children())
-            self._box.set_min_children_per_line(count + 1)
-            self.insert_album(album, -1)
-            self.__show_view()
+        count = len(self._box.get_children())
+        self._box.set_min_children_per_line(count + 1)
+        self.insert_album(album, -1)
+        self.__show_view()
 
 #####################
 # PRIVATE           #
@@ -555,22 +547,3 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
             if self._viewport.get_child() is None:
                 self._viewport.add(self._box)
             self.show()
-
-    def __on_cover_uri_content(self, uri, status, data, album):
-        """
-            Save to tmp cache
-            @param uri as str
-            @param status as bool
-            @param data as bytes
-            @param album as Album
-        """
-        try:
-            if status:
-                App().art.save_album_artwork(data, album)
-                count = len(self._box.get_children())
-                self._box.set_min_children_per_line(count + 1)
-                self.insert_album(album, -1)
-                self.__show_view()
-        except Exception as e:
-            Logger.error(
-                "AlbumsSpotifyBoxView::__on_cover_uri_content(): %s", e)

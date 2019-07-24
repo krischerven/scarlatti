@@ -31,7 +31,7 @@ class SpotifyHelper(GObject.Object):
     __CHARTS = "https://spotifycharts.com/regional/%s/weekly/latest/download"
     __gsignals__ = {
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
-                      (GObject.TYPE_PYOBJECT, str)),
+                      (GObject.TYPE_PYOBJECT,)),
         "new-artist": (GObject.SignalFlags.RUN_FIRST, None, (str, str)),
         "new-chart-album": (GObject.SignalFlags.RUN_FIRST, None,
                             (GObject.TYPE_PYOBJECT, str)),
@@ -46,6 +46,7 @@ class SpotifyHelper(GObject.Object):
         self.__token_expires = 0
         self.__token = None
         self.__loading_token = False
+        self.__album_ids = {}
 
     def get_token(self):
         """
@@ -125,6 +126,7 @@ class SpotifyHelper(GObject.Object):
             Get new chat albums
             @param cancellable as Gio.Cancellable
         """
+        self.__album_ids[cancellable] = []
         locale = App().settings.get_value("spotify-charts-locale").get_string()
         SqlCursor.add(App().db)
         try:
@@ -141,15 +143,15 @@ class SpotifyHelper(GObject.Object):
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                album_ids = []
-                self.__create_albums_from_album_payload(
+                self.__create_album_from_album_payload(
                                                  decode["albums"]["items"],
-                                                 album_ids,
+                                                 True,
                                                  cancellable)
         except Exception as e:
             Logger.error("SpotifyHelper::search_new_chart_albums(): %s", e)
         SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
+        del self.__album_ids[cancellable]
 
     def get_similar_artists(self, artist_id, cancellable):
         """
@@ -218,6 +220,7 @@ class SpotifyHelper(GObject.Object):
             @param search as str
             @param cancellable as Gio.Cancellable
         """
+        self.__album_ids[cancellable] = []
         SqlCursor.add(App().db)
         try:
             while self.wait_for_token():
@@ -232,14 +235,13 @@ class SpotifyHelper(GObject.Object):
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                album_ids = []
-                self.__create_albums_from_album_payload(
+                self.__create_album_from_album_payload(
                                                  decode["albums"]["items"],
-                                                 album_ids,
+                                                 False,
                                                  cancellable)
-                self.__create_albums_from_tracks_payload(
+                self.__create_album_from_tracks_payload(
                                                  decode["tracks"]["items"],
-                                                 album_ids,
+                                                 False,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyHelper::search(): %s", e)
@@ -249,6 +251,7 @@ class SpotifyHelper(GObject.Object):
         GLib.idle_add(self.emit, "search-finished")
         SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
+        del self.__album_ids[cancellable]
 
     def charts(self, cancellable, language="global"):
         """
@@ -257,6 +260,7 @@ class SpotifyHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
             @param language as str
         """
+        self.__album_ids[cancellable] = []
         from csv import reader
         try:
             while self.wait_for_token():
@@ -284,16 +288,15 @@ class SpotifyHelper(GObject.Object):
                                 spotify_ids.append(spotify_id)
                     except Exception as e:
                         Logger.warning("SpotifyHelper::charts(): %s", e)
-            album_ids = []
             for spotify_id in spotify_ids:
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 payload = self.__get_track_payload(helper,
                                                    spotify_id,
                                                    cancellable)
-                self.__create_albums_from_tracks_payload(
+                self.__create_album_from_tracks_payload(
                                                  [payload],
-                                                 album_ids,
+                                                 False,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyHelper::charts(): %s", e)
@@ -301,6 +304,7 @@ class SpotifyHelper(GObject.Object):
             if str(e) == "cancelled":
                 return
         GLib.idle_add(self.emit, "search-finished")
+        del self.__album_ids[cancellable]
 
 #######################
 # PRIVATE             #
@@ -322,28 +326,45 @@ class SpotifyHelper(GObject.Object):
             Logger.error("SpotifyHelper::__get_track_payload(): %s", e)
         return None
 
-    def __create_album(self, album_id, cover_uri, cancellable):
+    def __download_cover(self, album_id, cover_uri, background, cancellable):
         """
             Create album and download cover
+            @param album_id as int
+            @param cover_uri as str
+            @param background as bool
             @param cancellable as Gio.Cancellable
         """
-        if not cancellable.is_cancelled():
-            SqlCursor.commit(App().db)
-            SqlCursor.allow_thread_execution(App().db)
-            GLib.idle_add(self.emit, "new-album", Album(album_id), cover_uri)
+        try:
+            if not cancellable.is_cancelled():
+                SqlCursor.commit(App().db)
+                SqlCursor.allow_thread_execution(App().db)
+                album = Album(album_id)
+                if cover_uri is not None:
+                    (status, data) = App().task_helper.load_uri_content_sync(
+                                                            cover_uri,
+                                                            cancellable)
+                    if status:
+                        App().art.save_album_artwork(data, album)
+                if not background:
+                    GLib.idle_add(self.emit, "new-album", album)
+        except Exception as e:
+            Logger.error(
+                "SpotifyHelper::__download_cover(): %s", e)
 
-    def __create_albums_from_tracks_payload(self, payload, album_ids,
-                                            cancellable):
+    def __create_album_from_tracks_payload(self, payload,
+                                           background, cancellable):
         """
             Get albums from a track payload
             @param payload as {}
-            @param album_ids as [int]
+            @param background as bool
             @param cancellable as Gio.Cancellable
         """
         new_album_ids = {}
         # Populate tracks
         for item in payload:
-            if cancellable.is_cancelled():
+            if background:
+                sleep(1)
+            elif cancellable.is_cancelled():
                 raise Exception("cancelled")
             track_id = App().db.exists_in_db(item["album"]["name"],
                                              [artist["name"]
@@ -351,48 +372,51 @@ class SpotifyHelper(GObject.Object):
                                              item["name"])
             if track_id is not None:
                 track = Track(track_id)
-                if track.album.id not in album_ids:
-                    if track.is_web:
-                        self.__create_album(track.album.id, None, cancellable)
-                    album_ids.append(track.album.id)
+                if track.is_web:
+                    self.__album_ids[cancellable].append(track.album.id)
+                    GLib.idle_add(self.emit, "new-album", track.album)
                 continue
             (album_id,
              track_id,
              cover_uri) = self.__save_track(item)
-            if album_id not in new_album_ids.keys():
+            if album_id in self.__album_ids[cancellable]:
+                continue
+            elif album_id not in new_album_ids.keys():
                 new_album_ids[album_id] = cover_uri
-        for album_id in new_album_ids.keys():
-            if album_id not in album_ids:
-                album_ids.append(album_id)
-                self.__create_album(album_id,
-                                    new_album_ids[album_id],
-                                    cancellable)
 
-    def __create_albums_from_album_payload(self, payload, album_ids,
-                                           cancellable):
+        for album_id in new_album_ids.keys():
+            self.__album_ids[cancellable].append(album_id)
+            self.__download_cover(album_id,
+                                  new_album_ids[album_id],
+                                  background,
+                                  cancellable)
+
+    def __create_album_from_album_payload(self, payload, background,
+                                          cancellable):
         """
             Get albums from an album payload
             @param payload as {}
-            @param album_ids as [int]
+            @param background as bool
             @param cancellable as Gio.Cancellable
         """
         # Populate tracks
         for album_item in payload:
-            if cancellable.is_cancelled():
+            if background:
+                sleep(1)
+            elif cancellable.is_cancelled():
                 return
             album_id = App().db.exists_in_db(
-                                     album_item["name"],
-                                     [artist["name"]
-                                      for artist in album_item["artists"]],
-                                     None)
+                                    album_item["name"],
+                                    [artist["name"]
+                                     for artist in album_item["artists"]],
+                                    None)
             if album_id is not None:
-                if album_id not in album_ids:
+                if album_id not in self.__album_ids[cancellable]:
                     album = Album(album_id)
                     if album.tracks:
                         track = album.tracks[0]
                         if track.is_web:
-                            self.__create_album(album_id, None, cancellable)
-                    album_ids.append(album_id)
+                            GLib.idle_add(self.emit, "new-album", album)
                 continue
             uri = "https://api.spotify.com/v1/albums/%s" % album_item["id"]
             token = "Bearer %s" % self.__token
@@ -404,9 +428,9 @@ class SpotifyHelper(GObject.Object):
                 track_payload = decode["tracks"]["items"]
                 for item in track_payload:
                     item["album"] = album_item
-                self.__create_albums_from_tracks_payload(track_payload,
-                                                         album_ids,
-                                                         cancellable)
+                self.__create_album_from_tracks_payload(track_payload,
+                                                        background,
+                                                        cancellable)
 
     def __save_track(self, payload):
         """

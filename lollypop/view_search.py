@@ -41,8 +41,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__timeout_id = None
-        self.__artwork_to_load = []
-        self.__artwork_loading = False
         self.__current_search = ""
         self.__cancellable = Gio.Cancellable()
         self.__search_type_action = Gio.SimpleAction.new_stateful(
@@ -216,21 +214,14 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__button_stack.set_visible_child(self.__new_button)
         self.__spinner.stop()
 
-    def _on_new_spotify_album(self, spotify, album, cover_uri):
+    def _on_new_spotify_album(self, spotify, album):
         """
             Add album
             @param spotify as SpotifyHelper
             @param album as Album
-            @param cover_uri as str
         """
         self.__stack.set_visible_child_name("view")
-        if cover_uri is None:
-            self.__view.insert_album(album, len(album.tracks) == 1, -1)
-        else:
-            self.__artwork_to_load.append((album, cover_uri))
-            if not self.__artwork_loading:
-                self.__artwork_loading = True
-                self.__load_artwork()
+        self.__view.insert_album(album, len(album.tracks) == 1, -1)
 
     def _on_search_finished(self, api):
         """
@@ -270,19 +261,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         """
         self.__placeholder.set_text(_("Search for artists, albums and tracks"))
 
-    def __load_artwork(self):
-        """
-            While artwork available, load it
-        """
-        if self.__artwork_to_load:
-            (album, cover_uri) = self.__artwork_to_load.pop(0)
-            App().task_helper.load_uri_content(cover_uri,
-                                               self.__cancellable,
-                                               self.__on_cover_uri_content,
-                                               album)
-        else:
-            self.__artwork_loading = False
-
     def __populate(self):
         """
             Populate searching items
@@ -300,7 +278,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
                            self.__cancellable,
                            callback=(self.__on_search_get, current_search))
             elif state == "web":
-                App().task_helper.run(self.__spotify.search,
+                App().task_helper.run(App().spotify.search,
                                       current_search,
                                       self.__cancellable)
         else:
@@ -390,27 +368,10 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             self.__button_stack.set_visible_child(self.__spinner)
             self.__spinner.start()
             self.__stack.set_visible_child_name("view")
-            App().task_helper.run(self.__spotify.charts,
+            App().task_helper.run(App().spotify.charts,
                                   self.__cancellable,
                                   self.__combo_locale.get_active_id())
         else:
             self.__header_stack.set_visible_child_name("entry")
             self.__populate()
             GLib.idle_add(self.__entry.grab_focus)
-
-    def __on_cover_uri_content(self, uri, status, data, album):
-        """
-            Save to tmp cache
-            @param uri as str
-            @param status as bool
-            @param data as bytes
-            @param album as Album
-        """
-        try:
-            if status:
-                App().art.save_album_artwork(data, album)
-                self.__view.insert_album(
-                    album, len(album.tracks) == 1, -1)
-                GLib.idle_add(self.__load_artwork)
-        except Exception as e:
-            Logger.error("SearchView::__on_cover_uri_content(): %s", e)
