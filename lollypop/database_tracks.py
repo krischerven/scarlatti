@@ -1005,7 +1005,7 @@ class TracksDatabase:
                            AND tracks.storage_type & ? LIMIT 25"
                 result = sql.execute(request, filter)
                 items += list(itertools.chain(*result))
-            return items
+            return list(set(items))
 
     def search_track(self, artist, title):
         """
