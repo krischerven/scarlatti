@@ -138,7 +138,8 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
                     allocation.height,
                     self.__artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_MAX |
-                    ArtBehaviour.ROUNDED_BORDER,
+                    ArtBehaviour.ROUNDED_BORDER |
+                    ArtBehaviour.LIGHTER,
                     self.__on_album_artwork)
 
     def _on_current_changed(self, player):
