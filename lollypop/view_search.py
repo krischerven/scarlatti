@@ -24,7 +24,6 @@ from lollypop.view import View
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
-from lollypop.helper_spotify import SpotifyHelper
 
 
 class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
@@ -41,7 +40,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         View.__init__(self)
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
-        self.__spotify = SpotifyHelper()
         self.__timeout_id = None
         self.__artwork_to_load = []
         self.__artwork_loading = False
@@ -79,8 +77,8 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__widget.set_property("halign", Gtk.Align.CENTER)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
         return [
-            (self.__spotify, "new-album", "_on_new_spotify_album"),
-            (self.__spotify, "search-finished", "_on_search_finished"),
+            (App().spotify, "new-album", "_on_new_spotify_album"),
+            (App().spotify, "search-finished", "_on_search_finished"),
             (App().settings, "changed::network-access",
              "_update_bottom_buttons"),
             (App().settings, "changed::network-access-acl",

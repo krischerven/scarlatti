@@ -500,6 +500,7 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         """
             Populate view
         """
+        return
         App().task_helper.run(App().spotify.search_new_chart_albums,
                               self.__cancellable)
 
