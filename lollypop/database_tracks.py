@@ -614,7 +614,7 @@ class TracksDatabase:
         """
         with SqlCursor(App().db, True) as sql:
             sql.execute("DELETE FROM tracks WHERE storage_type=?",
-                        StorageType.EPHEMERAL)
+                        (StorageType.EPHEMERAL,))
 
     def get_uris(self, uris_concerned=None):
         """
