@@ -16,10 +16,9 @@ from lollypop.define import App, Type
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album, Disc
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
-from lollypop.helper_overlay_playlist import OverlayPlaylistHelper
 
 
-class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
+class PlaylistRoundedWidget(RoundedAlbumsWidget):
     """
         Playlist widget showing cover for 4 albums
     """
@@ -32,7 +31,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, OverlayPlaylistHelper):
             @param view_type as ViewType
             @param font_height as int
         """
-        OverlayPlaylistHelper.__init__(self)
         self.__font_height = font_height
         name = sortname = App().playlists.get_name(playlist_id)
         RoundedAlbumsWidget.__init__(self, playlist_id, name,

@@ -47,9 +47,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         self._box.set_row_spacing(MARGIN)
         self._box.set_column_spacing(MARGIN_SMALL)
         self._box.show()
-        if not view_type & ViewType.SMALL:
-            self.__event_controller = Gtk.EventControllerMotion.new(self._box)
-            self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._scrolled.set_property("expand", True)
@@ -80,12 +77,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             if style_context.has_class("typeahead"):
                 row.activate()
             style_context.remove_class("typeahead")
-
-    def on_view_motion(self):
-        """
-            Unselect current selected child
-        """
-        self.__unselect_selected()
 
     @property
     def font_height(self):
@@ -192,37 +183,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             if hasattr(child, "show_spinner"):
                 child.show_spinner(status)
 
-    def _on_view_leave(self, event_controller):
-        """
-            Unselect selected child
-            @param event_controller as Gtk.EventControllerMotion
-        """
-        self.__unselect_selected()
-
 #######################
 # PRIVATE             #
 #######################
-    def __unselect_selected(self):
-        """
-            Unselect selected child
-        """
-        if self.__selected_child is not None:
-            self._box.unselect_child(self.__selected_child)
-            self.__selected_child = None
-
-    def __on_box_motion(self, event_controller, x, y):
-        """
-            Update current selected child
-            @param event_controller as Gtk.EventControllerMotion
-            @param x as int
-            @param y as int
-        """
-        child = self._box.get_child_at_pos(x, y)
-        if child is None:
-            self.__unselect_selected()
-        elif child.artwork is None or\
-                child == self.__selected_child:
-            return
-        elif child != self.__selected_child:
-            self.__unselect_selected()
-            self._box.select_child(child)

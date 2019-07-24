@@ -47,6 +47,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         """
         if self.__artwork is None:
             grid = Gtk.Grid()
+            grid.set_row_spacing(2)
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             self.__artwork = Gtk.Image.new()
             self.__artwork.connect("realize", on_realize)
@@ -63,7 +64,15 @@ class RadioWidget(Gtk.FlowBoxChild):
             toggle_button.get_style_context().add_class("light-button")
             toggle_button.connect("toggled", self.__on_label_toggled)
             toggle_button.show()
-            grid.add(self.__artwork)
+            eventbox = Gtk.EventBox()
+            eventbox.connect("enter-notify-event",
+                             lambda x, y: self.__artwork.set_opacity(0.95))
+            eventbox.connect("leave-notify-event",
+                             lambda x, y: self.__artwork.set_opacity(1))
+            eventbox.connect("realize", on_realize)
+            eventbox.show()
+            eventbox.add(self.__artwork)
+            grid.add(eventbox)
             grid.add(toggle_button)
             self.add(grid)
             self.set_artwork()

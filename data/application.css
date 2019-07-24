@@ -81,13 +81,6 @@
     min-height: 2px;
 }
 
-
-flowboxchild:selected  {
-    background-color: @theme_bg_color;
-    color: @theme_fg_color;
-    opacity: 0.95;
-}
-
 .typeahead-indicator
 {
     background-color: alpha(#ed333b, 0.3);
@@ -270,7 +263,7 @@ flowboxchild:selected  {
 }
 
 .cover-frame {
-    border: 1px solid shade(@theme_bg_color, 0.7);
+    border: 1px solid shade(@theme_bg_color, 0.8);
     background-color: shade(@theme_bg_color, 1.5);
     padding: 3px;
     border-radius: 2px;
@@ -416,12 +409,13 @@ flowboxchild:selected  {
     border-left-width: 1px;
     border-right-width: 1px;
     border-color: transparent;
-    background-color: transparent;
+    background-color: shade(@theme_bg_color, 1.2);
     color: inherit;
 }
 
-.light-button:checked {
-    background-color: shade(@theme_bg_color, 0.97);
+.light-button:hover {
+    background-color: shade(@theme_bg_color, 0.95);
+    border-color: shade(@theme_bg_color, 0.8);
 }
 
 .trackrow {
