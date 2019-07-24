@@ -81,21 +81,14 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
                     "<b>%s</b>\n<span alpha='40000'>%s</span>" % (album_name,
                                                                   artist_name))
             self.__artwork = Gtk.Image.new()
+            self.__artwork.connect("realize", on_realize)
             toggle_button = Gtk.ToggleButton.new()
             toggle_button.set_image(self.__label)
             toggle_button.set_relief(Gtk.ReliefStyle.NONE)
             toggle_button.get_style_context().add_class("light-button")
             toggle_button.connect("toggled", self.__on_label_toggled)
             toggle_button.show()
-            eventbox = Gtk.EventBox()
-            eventbox.connect("enter-notify-event",
-                             lambda x, y: self.__artwork.set_opacity(0.95))
-            eventbox.connect("leave-notify-event",
-                             lambda x, y: self.__artwork.set_opacity(1))
-            eventbox.connect("realize", on_realize)
-            eventbox.show()
-            eventbox.add(self.__artwork)
-            grid.add(eventbox)
+            grid.add(self.__artwork)
             grid.add(toggle_button)
             self.set_artwork()
             self.set_selection()

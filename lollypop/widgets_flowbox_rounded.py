@@ -60,15 +60,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
         self.set_artwork()
-        eventbox = Gtk.EventBox()
-        eventbox.connect("enter-notify-event",
-                         lambda x, y: self._artwork.set_opacity(0.95))
-        eventbox.connect("leave-notify-event",
-                         lambda x, y: self._artwork.set_opacity(1))
-        eventbox.connect("realize", on_realize)
-        eventbox.show()
-        eventbox.add(self._artwork)
-        grid.add(eventbox)
+        grid.add(self._artwork)
         grid.add(self.__label)
         self._artwork.connect("realize", on_realize)
         self.add(grid)

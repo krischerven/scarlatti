@@ -16,6 +16,12 @@
     min-width: 28px;
 }
 
+flowboxchild:selected  {
+    background-color: transparent;
+    color: @theme_fg_color;
+}
+
+
 .usagebar {
     border: none;
     background-color: transparent;

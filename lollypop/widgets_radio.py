@@ -64,15 +64,7 @@ class RadioWidget(Gtk.FlowBoxChild):
             toggle_button.get_style_context().add_class("light-button")
             toggle_button.connect("toggled", self.__on_label_toggled)
             toggle_button.show()
-            eventbox = Gtk.EventBox()
-            eventbox.connect("enter-notify-event",
-                             lambda x, y: self.__artwork.set_opacity(0.95))
-            eventbox.connect("leave-notify-event",
-                             lambda x, y: self.__artwork.set_opacity(1))
-            eventbox.connect("realize", on_realize)
-            eventbox.show()
-            eventbox.add(self.__artwork)
-            grid.add(eventbox)
+            grid.add(self.__artwork)
             grid.add(toggle_button)
             self.add(grid)
             self.set_artwork()
