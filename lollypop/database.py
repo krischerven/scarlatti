@@ -207,8 +207,8 @@ class Database:
         album_id = App().albums.get_id_by_name_artists(album, artist_ids)
         if album_id is None:
             return None
-        elif App().albums.get_storage_type(album_id) & StorageType.COLLECTION\
-                or track is None:
+        elif App().albums.get_storage_type(album_id) & (
+                StorageType.COLLECTION | StorageType.SAVED) or track is None:
             return album_id
         else:
             track_id = App().tracks.get_id_by(track,

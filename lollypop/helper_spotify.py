@@ -245,10 +245,8 @@ class SpotifyHelper(GObject.Object):
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyHelper::search(): %s", e)
-            # Do not emit search-finished on cancel
-            if str(e) == "cancelled":
-                return
-        GLib.idle_add(self.emit, "search-finished")
+        if not cancellable.is_cancelled():
+            GLib.idle_add(self.emit, "search-finished")
         SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
         del self.__album_ids[cancellable]
