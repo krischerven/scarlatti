@@ -418,6 +418,11 @@
     border-color: shade(@theme_bg_color, 0.8);
 }
 
+.light-button:visited {
+    background-color: shade(@theme_bg_color, 0.95);
+    border-color: shade(@theme_bg_color, 0.8);
+}
+
 .trackrow {
     padding: 0px;
     min-height: 32px;

@@ -242,7 +242,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
             @param button as Gtk.ToggleButton
         """
         def on_closed(popover):
-            button.set_active(False)
+            button.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
         def on_play_all_from(popover):
             view = self.get_ancestor(View)
@@ -261,6 +261,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
             popover.connect("closed", on_closed)
             popover.connect("play-all-from", on_play_all_from)
             popover.popup()
+            button.set_state_flags(Gtk.StateFlags.VISITED, True)
 
     def __on_destroy(self, widget):
         """
