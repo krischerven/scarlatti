@@ -45,11 +45,13 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         self._artist_ids = artist_ids
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
+                path = GLib.get_user_data_dir() +\
+                    "/lollypop/python/bin/youtube-dl"
                 if not Gio.NetworkMonitor.get_default(
                         ).get_network_available():
                     self._empty_message = _("Network not available")
                     self._box.hide()
-                elif GLib.find_program_in_path("youtube-dl") is None:
+                elif not GLib.file_test(path, GLib.FileTest.EXISTS):
                     self._empty_message = _("Missing youtube-dl command")
                     self._box.hide()
                 elif not get_network_available("SPOTIFY") or\

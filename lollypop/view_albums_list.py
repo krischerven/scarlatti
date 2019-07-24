@@ -12,12 +12,10 @@
 
 from gi.repository import Gtk, GLib, GObject, Gdk
 
-from gettext import gettext as _
-
-from lollypop.utils import get_icon_name, do_shift_selection
+from lollypop.utils import do_shift_selection
 from lollypop.view import LazyLoadingView
 from lollypop.objects_album import Album
-from lollypop.define import App, ViewType, MARGIN, Type
+from lollypop.define import App, ViewType, MARGIN
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
@@ -48,11 +46,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         self._albums = []
         self.__position = 0
         self.__track_position_id = None
-        if genre_ids and genre_ids[0] < 0:
-            if genre_ids[0] == Type.WEB and\
-                    GLib.find_program_in_path("youtube-dl") is None:
-                self._empty_message = _("Missing youtube-dl command")
-            self._empty_icon_name = get_icon_name(genre_ids[0])
         self.__autoscroll_timeout_id = None
         self.__reveals = []
         self.__prev_animated_rows = []

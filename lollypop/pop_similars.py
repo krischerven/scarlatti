@@ -126,7 +126,8 @@ class SimilarsPopover(Popover, SignalsHelper):
         Popover.__init__(self)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SimilarsPopover.ui")
-        self.__show_all = GLib.find_program_in_path("youtube-dl") is not None
+        path = GLib.get_user_data_dir() + "/lollypop/python/bin/youtube-dl"
+        self.__show_all = GLib.file_test(path, GLib.FileTest.EXISTS)
         self.__added = []
         self.__cancellable = Gio.Cancellable()
         self.connect("map", self.__on_map)

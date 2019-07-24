@@ -52,15 +52,17 @@ class YouTubeHelper:
             @param track as Track
             @return content uri as str/None
         """
+        python_path = GLib.get_user_data_dir() + "/lollypop/python"
+        path = "%s/bin/youtube-dl" % python_path
         # Remove playlist args
         uri = sub("list=.*", "", track.uri)
         argv_list = [
-            ["youtube-dl", "-g", "-f", "bestaudio", uri, None],
-            ["youtube-dl", "-g", uri, None]]
+            [path, "-g", "-f", "bestaudio", uri, None],
+            [path, "-g", uri, None]]
         for argv in argv_list:
             (s, o, e, s) = GLib.spawn_sync(None,
                                            argv,
-                                           None,
+                                           ["PYTHONPATH=%s" % python_path],
                                            GLib.SpawnFlags.SEARCH_PATH,
                                            None)
             if o:

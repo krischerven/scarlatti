@@ -124,7 +124,8 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         """
             Update bottom buttons based on current state
         """
-        if GLib.find_program_in_path("youtube-dl") is None or\
+        path = GLib.get_user_data_dir() + "/lollypop/python/bin/youtube-dl"
+        if not GLib.file_test(path, GLib.FileTest.EXISTS) or\
                 not get_network_available("SPOTIFY") or\
                 not get_network_available("YOUTUBE"):
             self.__bottom_buttons.hide()
