@@ -13,18 +13,16 @@
 from gi.repository import Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.utils import on_query_tooltip
+from lollypop.utils import on_query_tooltip, on_realize
 from lollypop.objects_radio import Radio
-from lollypop.helper_overlay_radio import OverlayRadioHelper
 
 
-class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
+class RadioWidget(Gtk.FlowBoxChild):
     """
         Widget with radio cover and title
     """
     __gsignals__ = {
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
     def __init__(self, radio_id, view_type, font_height):
@@ -35,8 +33,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             @param font_height as int
         """
         Gtk.FlowBoxChild.__init__(self)
-        OverlayRadioHelper.__init__(self)
-        self._artwork = None
+        self.__artwork = None
         self.__font_height = font_height
         self._track = Radio(radio_id)
         self.__view_type = view_type
@@ -48,20 +45,26 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             Init widget content
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             grid = Gtk.Grid()
             grid.set_orientation(Gtk.Orientation.VERTICAL)
-            self._artwork = Gtk.Image.new()
+            self.__artwork = Gtk.Image.new()
+            self.__artwork.connect("realize", on_realize)
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)
             self.__label.set_ellipsize(Pango.EllipsizeMode.END)
             self.__label.set_text(self._track.name)
+            self.__label.get_style_context().add_class("big-padding")
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
-            self._overlay = Gtk.Overlay.new()
-            self._overlay.add(self._artwork)
-            grid.add(self._overlay)
-            grid.add(self.__label)
+            toggle_button = Gtk.ToggleButton.new()
+            toggle_button.set_image(self.__label)
+            toggle_button.set_relief(Gtk.ReliefStyle.NONE)
+            toggle_button.get_style_context().add_class("light-button")
+            toggle_button.connect("toggled", self.__on_label_toggled)
+            toggle_button.show()
+            grid.add(self.__artwork)
+            grid.add(toggle_button)
             self.add(grid)
             self.set_artwork()
             self.set_selection()
@@ -73,28 +76,28 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             Disable widget artwork
         """
-        if self._artwork is not None:
-            self._artwork.set_size_request(self.__art_size, self.__art_size)
-            self._artwork.set_from_surface(None)
+        if self.__artwork is not None:
+            self.__artwork.set_size_request(self.__art_size, self.__art_size)
+            self.__artwork.set_from_surface(None)
 
     def set_artwork(self):
         """
             Set artwork
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             return
         if self.__art_size < ArtSize.BIG:
             frame = "small-cover-frame"
         else:
             frame = "cover-frame"
-        App().art_helper.set_frame(self._artwork,
+        App().art_helper.set_frame(self.__artwork,
                                    frame,
                                    self.__art_size,
                                    self.__art_size)
         App().art_helper.set_radio_artwork(self._track.name,
                                            self.__art_size,
                                            self.__art_size,
-                                           self._artwork.get_scale_factor(),
+                                           self.__artwork.get_scale_factor(),
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP,
                                            self.__on_radio_artwork)
@@ -119,7 +122,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             Return preferred width
             @return (int, int)
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             return (0, 0)
         width = Gtk.FlowBoxChild.do_get_preferred_width(self)[0]
         return (width, width)
@@ -135,14 +138,14 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
             Mark widget as selected if currently playing
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             return
         selected = isinstance(App().player.current_track.id, Radio) and\
             self._track.id == App().player.current_track.id
         if selected:
-            self._artwork.set_state_flags(Gtk.StateFlags.SELECTED, True)
+            self.__artwork.set_state_flags(Gtk.StateFlags.SELECTED, True)
         else:
-            self._artwork.set_state_flags(Gtk.StateFlags.NORMAL, True)
+            self.__artwork.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
     @property
     def is_populated(self):
@@ -158,7 +161,7 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             Get album artwork
             @return Gtk.Image
         """
-        return self._artwork
+        return self.__artwork
 
     @property
     def name(self):
@@ -188,7 +191,6 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
         """
         if track_id != self._track.id:
             return
-        OverlayRadioHelper._on_loading_changed(self, player, status, track_id)
 
 #######################
 # PRIVATE             #
@@ -206,9 +208,27 @@ class RadioWidget(Gtk.FlowBoxChild, OverlayRadioHelper):
             @param surface as str
         """
         if surface is None:
-            self._artwork.set_from_icon_name("audio-input-microphone-symbolic",
+            self.__artwork.set_from_icon_name(
+                                             "audio-input-microphone-symbolic",
                                              Gtk.IconSize.DIALOG)
         else:
-            self._artwork.set_from_surface(surface)
+            self.__artwork.set_from_surface(surface)
         self.show_all()
         self.emit("populated")
+
+    def __on_label_toggled(self, button):
+        """
+            Show tracks popover
+            @param button as Gtk.ToggleButton
+        """
+        def on_closed(popover):
+            button.set_active(False)
+
+        if not button.get_active():
+            return
+        from lollypop.pop_radio import RadioPopover
+        popover = RadioPopover(self._track)
+        popover.set_relative_to(button)
+        popover.connect("closed", on_closed)
+        self._locked = True
+        popover.popup()

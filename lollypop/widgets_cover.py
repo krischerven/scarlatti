@@ -10,23 +10,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject
-
-from gettext import gettext as _
+from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.helper_overlay_album import OverlayAlbumHelper
-from lollypop.utils import on_realize
 from lollypop.helper_signals import SignalsHelper, signals
 
 
-class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
+class CoverWidget(Gtk.EventBox, SignalsHelper):
     """
         Widget showing current album cover
     """
-    __gsignals__ = {
-        "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
-    }
 
     @signals
     def __init__(self, album, view_type=ViewType.DEFAULT):
@@ -39,17 +32,10 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         self.set_property("valign", Gtk.Align.CENTER)
         self._album = album
         self.__image_button = None
-        self._artwork = Gtk.Image.new()
-        self._artwork.show()
-        self._artwork.get_style_context().add_class("white")
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        OverlayAlbumHelper.__init__(self, view_type)
-        self._overlay.add(self._artwork)
-        self.add(self._overlay)
-        self.connect("enter-notify-event",
-                     lambda x, y: self.show_overlay(True))
-        self.connect("leave-notify-event", self.__on_leave_notify)
+        self.__artwork = Gtk.Image.new()
+        self.__artwork.show()
+        self.__artwork.get_style_context().add_class("white")
+        self.add(self.__artwork)
         return [
             (App().art, "album-artwork-changed", "_on_album_artwork_changed")
         ]
@@ -60,7 +46,7 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
             @param art_size as int
         """
         self.__art_size = art_size
-        App().art_helper.set_frame(self._artwork,
+        App().art_helper.set_frame(self.__artwork,
                                    "small-cover-frame",
                                    self.__art_size,
                                    self.__art_size)
@@ -68,35 +54,9 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
                 self._album,
                 self.__art_size,
                 self.__art_size,
-                self._artwork.get_scale_factor(),
+                self.__artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
-
-    def show_overlay(self, show):
-        """
-            Set overlay
-            @param show as bool
-        """
-        if self.is_set_overlay_valid(show):
-            return
-        OverlayAlbumHelper.show_overlay(self, show)
-        if show:
-            # Image button
-            self.__image_button = Gtk.Button.new_from_icon_name(
-                "image-x-generic-symbolic",
-                Gtk.IconSize.INVALID)
-            self.__image_button.set_property("has-tooltip", True)
-            self.__image_button.set_tooltip_text(_("Change artwork"))
-            self.__image_button.connect("realize", on_realize)
-            self.__image_button.connect("clicked", self.__on_artwork_clicked)
-            self.__image_button.get_image().set_pixel_size(self._pixel_size)
-            self.__image_button.show()
-            self._small_grid.add(self.__image_button)
-            self.__image_button.get_style_context().add_class(
-                "overlay-button")
-        else:
-            self.__image_button.destroy()
-            self.__image_button = None
 
 #######################
 # PROTECTED           #
@@ -114,26 +74,13 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
                 self._album,
                 self.__art_size,
                 self.__art_size,
-                self._artwork.get_scale_factor(),
+                self.__artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
 #######################
 # PRIVATE             #
 #######################
-    def __on_leave_notify(self, widget, event):
-        """
-            Hide overlay buttons
-            @param widget as Gtk.Widget
-            @param event es Gdk.Event
-        """
-        allocation = widget.get_allocation()
-        if event.x <= 0 or\
-           event.x >= allocation.width or\
-           event.y <= 0 or\
-           event.y >= allocation.height:
-            self.show_overlay(False)
-
     def __on_album_artwork(self, surface):
         """
             Set album artwork
@@ -144,10 +91,10 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
                 icon_size = Gtk.IconSize.DIALOG
             else:
                 icon_size = Gtk.IconSize.DND
-            self._artwork.set_from_icon_name("folder-music-symbolic",
-                                             icon_size)
+            self.__artwork.set_from_icon_name("folder-music-symbolic",
+                                              icon_size)
         else:
-            self._artwork.set_from_surface(surface)
+            self.__artwork.set_from_surface(surface)
 
     def __on_artwork_clicked(self, button):
         """
@@ -157,6 +104,5 @@ class CoverWidget(Gtk.EventBox, OverlayAlbumHelper, SignalsHelper):
         from lollypop.pop_artwork import CoversPopover
         popover = CoversPopover(self._album)
         popover.set_relative_to(button)
-        popover.connect("unmap", lambda x: self.show_overlay(False))
         popover.popup()
         return True

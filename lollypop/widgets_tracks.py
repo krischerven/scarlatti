@@ -129,7 +129,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             @param y as int
         """
         def on_closed(popover, row):
-            row.get_style_context().remove_class("track-menu-selected")
+            row.get_style_context().remove_class("menu-selected")
             row.set_indicator()
 
         from lollypop.pop_menu import TrackMenuPopover, RemoveMenuPopover
@@ -146,5 +146,5 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         popover.set_pointing_to(rect)
         popover.set_relative_to(self)
         popover.connect("closed", on_closed, row)
-        row.get_style_context().add_class("track-menu-selected")
+        row.get_style_context().add_class("menu-selected")
         popover.popup()

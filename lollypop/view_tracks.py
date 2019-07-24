@@ -327,6 +327,7 @@ class TracksView(SizeAllocationHelper):
                                        self._tracks_widget_right[disc.number],
                                        1, idx, 1, 1)
                     idx += 1
+            return True
 
     def _on_album_updated(self, scanner, album_id):
         """

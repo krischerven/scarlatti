@@ -48,8 +48,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         self._box.set_column_spacing(MARGIN_SMALL)
         self._box.show()
         if not view_type & ViewType.SMALL:
-            self._box.connect("selected-children-changed",
-                              self.__on_selected_children_changed)
             self.__event_controller = Gtk.EventControllerMotion.new(self._box)
             self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
@@ -208,23 +206,9 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
         """
             Unselect selected child
         """
-        if self.__selected_timeout_id is not None:
-            GLib.source_remove(self.__selected_timeout_id)
-            self.__selected_timeout_id = None
         if self.__selected_child is not None:
             self._box.unselect_child(self.__selected_child)
             self.__selected_child = None
-
-    def __on_selected_children_changed(self, box):
-        """
-            Update overlay status
-        """
-        if self.__selected_child is not None:
-            self.__selected_child.show_overlay(False)
-        selected_children = box.get_selected_children()
-        if selected_children:
-            self.__selected_child = selected_children[0]
-            self.__selected_child.show_overlay(True)
 
     def __on_box_motion(self, event_controller, x, y):
         """
@@ -233,10 +217,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             @param x as int
             @param y as int
         """
-        def select_child(child):
-            self.__selected_timeout_id = None
-            self._box.select_child(child)
-
         child = self._box.get_child_at_pos(x, y)
         if child is None:
             self.__unselect_selected()
@@ -245,5 +225,4 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             return
         elif child != self.__selected_child:
             self.__unselect_selected()
-            self.__selected_timeout_id = GLib.timeout_add(
-                50, select_child, child)
+            self._box.select_child(child)

@@ -131,10 +131,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         if self.__action_button is not None:
             self.__action_button.set_margin_end(MARGIN_SMALL)
             self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
-            self.__action_button.get_style_context().add_class(
-                "album-menu-button")
-            self.__action_button.get_style_context().add_class(
-                "track-menu-button")
+            self.__action_button.get_style_context().add_class("menu-button")
             self.__action_button.set_property("valign", Gtk.Align.CENTER)
             self.__gesture_helper = GesturesHelper(
                 self.__action_button,
@@ -344,13 +341,13 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             @param widget as Gtk.Widget
         """
         def on_closed(widget):
-            self.get_style_context().remove_class("track-menu-selected")
+            self.get_style_context().remove_class("menu-selected")
 
         from lollypop.menu_objects import AlbumMenu
         menu = AlbumMenu(self._album, ViewType.ALBUM)
         popover = Gtk.Popover.new_from_model(widget, menu)
         popover.connect("closed", on_closed)
-        self.get_style_context().add_class("track-menu-selected")
+        self.get_style_context().add_class("menu-selected")
         popover.popup()
 
     def __on_album_artwork(self, surface):

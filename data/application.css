@@ -85,6 +85,7 @@
 flowboxchild:selected  {
     background-color: @theme_bg_color;
     color: @theme_fg_color;
+    opacity: 0.95;
 }
 
 .typeahead-indicator
@@ -308,78 +309,6 @@ flowboxchild:selected  {
     border-radius: 50%;
 }
 
-.rounded-icon {
-    background: none;
-    border: none;
-    background-image: none;
-    border-image-source: none;
-    transition: 70ms linear;
-    box-shadow: 0 0 3px white;
-    background-color: alpha(black, 0.8);
-    color: alpha(white, 0.9);
-    margin: 4px;
-    border-radius: 50%;
-}
-
-.rounded-icon:hover {
-    color: white;
-    background-color: black;
-}
-
-.squared-icon-small {
-    transition: 70ms linear;
-    box-shadow: 0 0 3px white;
-    background-color: alpha(black, 0.8);
-    margin: 4px;
-    border-radius: 5px;
-}
-
-.squared-icon-small:hover {
-    background-color: black;
-}
-
-.overlay-button {
-    transition: 0ms linear;
-    background: none;
-    color: alpha(white, 0.9);
-    padding: 0px;
-    margin: 0px;
-    border: none;
-    background-image: none;
-    box-shadow: none;
-	border-image-source: none;
-	opacity: 0.9;
-	padding: 6px;
-	border-radius: 5px;
-}
-
-.overlay-button:hover {
-    transition: 500ms linear;
-    color: white;
-    background-color: black;
-}
-
-.overlay-button-rounded {
-    transition: 0ms linear;
-    background: none;
-    color: alpha(white, 0.9);
-    padding: 0px;
-    margin: 0px;
-    border: none;
-    background-image: none;
-    box-shadow: none;
-	border-image-source: none;
-	opacity: 0.9;
-	padding: 10px;
-	border-radius: 50px;
-}
-    
-.overlay-button-rounded:hover {
-    transition: 500ms linear;
-    color: white;
-    background-color: black;
-}
-
 .big-padding {
     padding: 10px;
 }
@@ -536,21 +465,6 @@ flowboxchild:selected  {
     color: @theme_selected_fg_color;
 }
 
-.trackrowplaying .loved-button {
-	background-color: transparent;
-	border-color: transparent;
-	color: transparent;
-}
-
-.trackrowplaying:hover .loved-button {
-	border-color: transparent;
-	color: inherit;
-}
-
-.trackrowplaying:hover .loved-button:hover {
-	border-color: alpha(#000000, 0.1);
-}
-
 .trackrowplaying .menu-button {
 	background-color: transparent;
     border-color: transparent;
@@ -566,50 +480,26 @@ flowboxchild:selected  {
 	border-color: alpha(#000000, 0.1);
 }
 
-.trackrow .loved-button {
-	border-color: transparent;
-	background-color: transparent;
-	color: transparent;
-}
-
 .trackrow .menu-button {
 	border-color: transparent;
 	background-color: transparent;
 	color: transparent;
 }
 
-.trackrow:hover .loved-button {
-	color: inherit;
-}
-
 .trackrow:hover .menu-button {
   	color: inherit;
-}
-
-.trackrow:hover .loved-button:hover {
-	border-color: alpha(@theme_fg_color, 0.1);
 }
 
 .trackrow:hover .menu-button:hover {
 	border-color: alpha(@theme_fg_color, 0.1);
 }
 
-.album-menu-selected .album-menu-button{
-	border-color: alpha(@theme_fg_color, 0.1);
-  	color: inherit;
-}
-
-.track-menu-selected {
+.menu-selected {
 	background-color: alpha(@theme_fg_color, 0.03);
   	color: inherit;
 }
 
-.track-menu-selected .track-loved-button {
-	border-color: alpha(@theme_fg_color, 0.1);
-	color: inherit;
-}
-
-.track-menu-selected .track-menu-button {
+.menu-selected .menu-button {
 	border-color: alpha(@theme_fg_color, 0.1);
   	color: inherit;
 }
@@ -645,7 +535,6 @@ flowboxchild:selected  {
   	opacity: 1;
 }
 
-
 .menu-button {
     opacity: 0.7;
 	box-shadow: none;
@@ -676,16 +565,15 @@ flowboxchild:selected  {
   	opacity: 1;
 }
 
-
-.album-menu-button {
+.vertical-menu-button {
     opacity: 0.7;
 	box-shadow: none;
 	min-height: 24px;
 	min-width: 24px;
 	padding-left: 4px;
 	padding-right: 4px;
-	padding-top: 0px;
-	padding-bottom: 0px;
+	padding-top: 4px;
+	padding-bottom: 4px;
 	background-image: none;
 	border-style: solid;
 	border-image-source: none;
@@ -697,24 +585,14 @@ flowboxchild:selected  {
     color: inherit;
 }
 
-.album-menu-button:hover {
+.vertical-menu-button:disabled {
+    opacity: 0.4;
+}
+
+.vertical-menu-button:hover {
+    color: inherit;
     border-color: alpha(@theme_fg_color, 0.1);
-    opacity: 1;
-  	color: inherit;
-}
-
-
-.loved-button {
-	box-shadow: none;
-	padding-top: 0px;
-	padding-bottom: 0px;
-	background-image: none;
-	color: inherit;
-}
-
-.loved-button:hover {
-	border-color: alpha(@theme_fg_color, 0.1);
-	color: inherit;
+  	opacity: 1;
 }
 
 .popover-rating-loved-grid {

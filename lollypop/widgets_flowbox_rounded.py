@@ -22,7 +22,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
     """
 
     __gsignals__ = {
-        "overlayed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -61,11 +60,9 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
         self.set_artwork()
-        self._overlay = Gtk.Overlay()
-        self._overlay.add(self._artwork)
-        grid.add(self._overlay)
+        grid.add(self._artwork)
         grid.add(self.__label)
-        self.connect("realize", on_realize)
+        self._artwork.connect("realize", on_realize)
         self.add(grid)
         self.show_all()
 

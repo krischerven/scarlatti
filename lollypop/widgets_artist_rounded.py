@@ -46,13 +46,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         else:
             self.set_artwork()
 
-    def show_overlay(self, show):
-        """
-            Show overlay
-            @param show as bool
-        """
-        pass
-
     def set_artwork(self):
         """
             Set artist artwork

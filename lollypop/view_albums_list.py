@@ -288,13 +288,13 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param ycoordinate as int (or None)
         """
         def on_closed(widget):
-            self.get_style_context().remove_class("track-menu-selected")
+            self.get_style_context().remove_class("menu-selected")
 
         from lollypop.menu_objects import AlbumMenu
         menu = AlbumMenu(self._album, ViewType.ALBUM)
         popover = Gtk.Popover.new_from_model(widget, menu)
         popover.connect("closed", on_closed)
-        self.get_style_context().add_class("track-menu-selected")
+        self.get_style_context().add_class("menu-selected")
         if xcoordinate is not None and ycoordinate is not None:
             rect = Gdk.Rectangle()
             rect.x = xcoordinate

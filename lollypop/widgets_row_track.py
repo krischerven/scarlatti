@@ -260,7 +260,7 @@ class TrackRow(Gtk.ListBoxRow):
             @param widget as Gtk.Widget
         """
         def on_closed(popover):
-            self.get_style_context().remove_class("track-menu-selected")
+            self.get_style_context().remove_class("menu-selected")
             self.set_indicator()
 
         from lollypop.pop_menu import TrackMenuPopover
@@ -269,5 +269,5 @@ class TrackRow(Gtk.ListBoxRow):
         popover = TrackMenuPopover(self._track, menu)
         popover.set_relative_to(widget)
         popover.connect("closed", on_closed)
-        self.get_style_context().add_class("track-menu-selected")
+        self.get_style_context().add_class("menu-selected")
         popover.popup()

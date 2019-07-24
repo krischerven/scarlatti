@@ -75,8 +75,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.init_background()
         self.__menu_button.get_style_context().add_class(
             "black-transparent")
-        self.get_style_context().add_class("black")
-        self._artwork.get_style_context().add_class("black")
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
         if album.mtime <= 0:

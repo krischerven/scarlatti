@@ -14,11 +14,10 @@ from gi.repository import GLib
 
 from lollypop.define import App, Type
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
-from lollypop.helper_overlay_decade import OverlayDecadeHelper
 from lollypop.objects_album import Album
 
 
-class AlbumsDecadeWidget(RoundedAlbumsWidget, OverlayDecadeHelper):
+class AlbumsDecadeWidget(RoundedAlbumsWidget):
     """
         Decade widget showing cover for 4 albums
     """
@@ -30,7 +29,6 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget, OverlayDecadeHelper):
             @param view_type as ViewType
             @param font_height as int
         """
-        OverlayDecadeHelper.__init__(self)
         self.__font_height = font_height
         decade_str = "%s - %s" % (item_ids[0], item_ids[-1])
         RoundedAlbumsWidget.__init__(self, item_ids, decade_str,

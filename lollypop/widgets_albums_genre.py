@@ -14,11 +14,10 @@ from gi.repository import GLib
 
 from lollypop.define import App, Type
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
-from lollypop.helper_overlay_genre import OverlayGenreHelper
 from lollypop.objects_album import Album
 
 
-class AlbumsGenreWidget(RoundedAlbumsWidget, OverlayGenreHelper):
+class AlbumsGenreWidget(RoundedAlbumsWidget):
     """
         Genre widget showing cover for 4 albums
     """
@@ -30,7 +29,6 @@ class AlbumsGenreWidget(RoundedAlbumsWidget, OverlayGenreHelper):
             @param view_type as ViewType
             @param font_height as int
         """
-        OverlayGenreHelper.__init__(self)
         self.__font_height = font_height
         name = sortname = App().genres.get_name(genre_id)
         RoundedAlbumsWidget.__init__(self, genre_id, name, sortname, view_type)
