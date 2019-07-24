@@ -20,7 +20,6 @@ from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
-from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
 
@@ -137,7 +136,6 @@ class SpotifyHelper(GObject.Object):
         """
         self.__album_ids[cancellable] = []
         locale = App().settings.get_value("spotify-charts-locale").get_string()
-        SqlCursor.add(App().db)
         try:
             while self.wait_for_token():
                 if cancellable.is_cancelled():
@@ -158,8 +156,6 @@ class SpotifyHelper(GObject.Object):
                                              cancellable)
         except Exception as e:
             Logger.error("SpotifyHelper::search_new_releases(): %s", e)
-        SqlCursor.commit(App().db)
-        SqlCursor.remove(App().db)
         del self.__album_ids[cancellable]
 
     def get_similar_artists(self, artist_id, cancellable):
@@ -230,7 +226,6 @@ class SpotifyHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         self.__album_ids[cancellable] = []
-        SqlCursor.add(App().db)
         try:
             while self.wait_for_token():
                 if cancellable.is_cancelled():
@@ -256,8 +251,6 @@ class SpotifyHelper(GObject.Object):
             Logger.warning("SpotifyHelper::search(): %s", e)
         if not cancellable.is_cancelled():
             GLib.idle_add(self.emit, "search-finished")
-        SqlCursor.commit(App().db)
-        SqlCursor.remove(App().db)
         del self.__album_ids[cancellable]
 
     def charts(self, cancellable, language="global"):
@@ -363,8 +356,6 @@ class SpotifyHelper(GObject.Object):
         """
         try:
             if not cancellable.is_cancelled():
-                SqlCursor.commit(App().db)
-                SqlCursor.allow_thread_execution(App().db)
                 album = Album(album_id)
                 if cover_uri is not None:
                     (status, data) = App().task_helper.load_uri_content_sync(
@@ -469,8 +460,6 @@ class SpotifyHelper(GObject.Object):
             @param storage_type as StorageType
             @return track_id
         """
-        # Add new track
-        SqlCursor.allow_thread_execution(App().db)
         title = payload["name"]
         _artists = []
         for artist in payload["artists"]:
