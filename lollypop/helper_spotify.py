@@ -304,7 +304,6 @@ class SpotifyHelper(GObject.Object):
                 self.__create_album_from_tracks_payload(
                                                  [payload],
                                                  StorageType.EPHEMERAL,
-                                                 False,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyHelper::charts(): %s", e)
