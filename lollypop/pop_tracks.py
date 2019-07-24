@@ -46,11 +46,11 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         window_width = App().window.get_allocated_width()
         wanted_width = min(900, window_width * 0.5)
         wanted_height = Sizing.MINI
-        scrolled = Gtk.ScrolledWindow()
-        scrolled.add(self._responsive_widget)
-        scrolled.set_property("width-request", wanted_width)
-        scrolled.set_property("height-request", wanted_height)
-        scrolled.show()
+        self.__scrolled = Gtk.ScrolledWindow()
+        self.__scrolled.add(self._responsive_widget)
+        self.__scrolled.set_property("width-request", wanted_width)
+        self.__scrolled.set_property("height-request", wanted_height)
+        self.__scrolled.show()
         self._responsive_widget.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN_SMALL)
@@ -117,7 +117,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         linked_grid.add(play_all_button)
         play_all_button.get_style_context().add_class("overlay-button")
         grid.add(overlay)
-        grid.add(scrolled)
+        grid.add(self.__scrolled)
         self.add(grid)
         return [
             (App().player, "current-changed", "_on_current_changed")
@@ -135,7 +135,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
             App().art_helper.set_album_artwork(
                     self._album,
                     ArtSize.SMALL,
-                    allocation.height,
+                    self.__scrolled.get_allocated_height(),
                     self.__artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_MAX |
                     ArtBehaviour.ROUNDED_BORDER |
