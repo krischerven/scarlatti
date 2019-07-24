@@ -660,6 +660,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             popover = Popover()
             popover.bind_model(menu, None)
             popover.set_relative_to(relative)
+            popover.set_position(Gtk.PositionType.RIGHT)
             if x != y != 0:
                 rect = Gdk.Rectangle()
                 rect.x = x
