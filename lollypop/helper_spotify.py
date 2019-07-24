@@ -121,9 +121,9 @@ class SpotifyHelper(GObject.Object):
             Logger.error("SpotifyHelper::get_artist_id(): %s", e)
             callback(None)
 
-    def search_new_chart_albums(self, cancellable):
+    def search_new_releases(self, cancellable):
         """
-            Get new chat albums
+            Get new released albums from spotify
             @param cancellable as Gio.Cancellable
         """
         self.__album_ids[cancellable] = []
@@ -148,7 +148,7 @@ class SpotifyHelper(GObject.Object):
                                                  True,
                                                  cancellable)
         except Exception as e:
-            Logger.error("SpotifyHelper::search_new_chart_albums(): %s", e)
+            Logger.error("SpotifyHelper::search_new_releases(): %s", e)
         SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
         del self.__album_ids[cancellable]
