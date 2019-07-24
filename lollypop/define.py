@@ -46,7 +46,7 @@ class StorageType:
     COLLECTION = 1 << 1
     EPHEMERAL = 1 << 2
     SAVED = 1 << 3
-    SPOTIFY_NEWS = 1 << 4
+    SPOTIFY_NEW_RELEASES = 1 << 4
 
 
 class ArtBehaviour:

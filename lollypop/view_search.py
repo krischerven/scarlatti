@@ -16,7 +16,7 @@ from gettext import gettext as _
 from random import shuffle
 from urllib.parse import urlparse
 
-from lollypop.define import App, Type, Shuffle, MARGIN_SMALL
+from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, StorageType
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
@@ -272,12 +272,18 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             self.__spinner.start()
             state = self.__search_type_action.get_state().get_string()
             current_search = self.__current_search.lower()
+            search = Search()
             if state == "local":
-                search = Search()
                 search.get(current_search,
+                           StorageType.COLLECTION | StorageType.SAVED,
                            self.__cancellable,
                            callback=(self.__on_search_get, current_search))
             elif state == "web":
+                search.get(current_search,
+                           StorageType.EPHEMERAL |
+                           StorageType.SPOTIFY_NEW_RELEASES,
+                           self.__cancellable,
+                           callback=(self.__on_search_get, current_search))
                 App().task_helper.run(App().spotify.search,
                                       current_search,
                                       self.__cancellable)

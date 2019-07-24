@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType, MARGIN
+from lollypop.define import App, Type, ViewType, MARGIN, StorageType
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
@@ -488,7 +488,6 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         self._label.set_text(_("New albums from Spotify"))
         self.__cancellable = Gio.Cancellable()
         return [
-            (App().spotify, "new-album", "_on_new_spotify_album"),
             (App().settings, "changed::network-access",
              "_on_network_access_changed"),
             (App().settings, "changed::network-access-acl",
@@ -499,9 +498,17 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         """
             Populate view
         """
-        return
-        App().task_helper.run(App().spotify.search_new_chart_albums,
-                              self.__cancellable)
+        def on_load(items):
+            AlbumsLineView.populate(self, items)
+            if items:
+                self.__show_view()
+
+        def load():
+            album_ids = App().albums.get_for_storage_type(
+                StorageType.SPOTIFY_NEW_RELEASES, 20)
+            return [Album(album_id) for album_id in album_ids]
+
+        App().task_helper.run(load, callback=(on_load,))
 
 #######################
 # PROTECTED           #
@@ -521,17 +528,6 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         if not get_network_available("SPOTIFY") or\
                 not get_network_available("YOUTUBE"):
             self.destroy()
-
-    def _on_new_spotify_album(self, spotify, album):
-        """
-            Add album
-            @param spotify as SpotifyHelper
-            @param album as Album
-        """
-        count = len(self._box.get_children())
-        self._box.set_min_children_per_line(count + 1)
-        self.insert_album(album, -1)
-        self.__show_view()
 
 #####################
 # PRIVATE           #

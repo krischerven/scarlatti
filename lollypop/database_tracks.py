@@ -13,6 +13,7 @@
 
 from gettext import gettext as _
 import itertools
+from time import time
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, OrderBy, StorageType
@@ -206,25 +207,6 @@ class TracksDatabase:
             request = "SELECT tracks.rowid FROM tracks, track_artists\
                        WHERE track_artists.artist_id=? AND\
                        tracks.rowid = track_artists.track_id"
-            result = sql.execute(request, filters)
-            return list(itertools.chain(*result))
-
-    def get_ids_by_performer(self, artist_id):
-        """
-            Return track id for performer
-            @param artist_id as int
-            @return [int]
-        """
-        with SqlCursor(App().db) as sql:
-            filters = (artist_id, artist_id)
-            request = "SELECT tracks.rowid\
-                       FROM tracks, track_artists\
-                       WHERE track_artists.artist_id=? AND\
-                       tracks.rowid = track_artists.track_id AND NOT EXISTS (\
-                        SELECT albums.rowid FROM albums, album_artists\
-                        WHERE albums.rowid=tracks.album_id AND\
-                        album_artists.artist_id = ? AND\
-                        album_artists.album_id = albums.rowid)"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
@@ -616,6 +598,18 @@ class TracksDatabase:
             sql.execute("DELETE FROM tracks WHERE storage_type=?",
                         (StorageType.EPHEMERAL,))
 
+    def del_old_for_storage_type(self, storage_type):
+        """
+            Delete album id tracks
+        """
+        # Last week
+        timestamp = time() - 604800
+        with SqlCursor(App().db, True) as sql:
+            sql.execute("DELETE FROM tracks\
+                         WHERE storage_type=? AND\
+                         mtime < ?",
+                        (storage_type, timestamp))
+
     def get_uris(self, uris_concerned=None):
         """
             Get all tracks uri
@@ -992,25 +986,28 @@ class TracksDatabase:
                          WHERE track_genres.track_id NOT IN (\
                             SELECT tracks.rowid FROM tracks)")
 
-    def search(self, searched):
+    def search(self, searched, storage_type):
         """
             Search for tracks looking like searched
             @param searched as str
+            @param storage_type as StorageType
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             no_accents = noaccents(searched)
-            items = []
-            for filter in [(no_accents + "%", storage_type),
-                           ("%" + no_accents, storage_type),
-                           ("%" + no_accents + "%", storage_type)]:
-                request = "SELECT tracks.rowid FROM tracks\
-                           WHERE noaccents(name) LIKE ?\
-                           AND tracks.storage_type & ? LIMIT 25"
-                result = sql.execute(request, filter)
-                items += list(itertools.chain(*result))
-            return items
+            filter1 = no_accents + "%"
+            filter2 = "%" + no_accents
+            filter3 = "%" + no_accents + "%"
+            request = "SELECT DISTINCT tracks.rowid FROM tracks\
+                       WHERE (\
+                            noaccents(tracks.name) LIKE ? OR\
+                            noaccents(tracks.name) LIKE ? OR\
+                            noaccents(tracks.name) LIKE ?) AND\
+                       tracks.storage_type & ? LIMIT 25"
+            result = sql.execute(request,
+                                 (filter1, filter2, filter3,
+                                  storage_type))
+            return list(itertools.chain(*result))
 
     def search_track(self, artist, title):
         """

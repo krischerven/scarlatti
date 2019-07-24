@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Soup, GObject
+from gi.repository import GLib, Soup, GObject, Gio
 
 import json
 from base64 import b64encode
@@ -47,6 +47,7 @@ class SpotifyHelper(GObject.Object):
         self.__token = None
         self.__loading_token = False
         self.__album_ids = {}
+        self.__cancellable = Gio.Cancellable()
 
     def get_token(self):
         """
@@ -86,6 +87,13 @@ class SpotifyHelper(GObject.Object):
             self.__loading_token = True
             App().task_helper.run(self.get_token, callback=(on_token,))
         return wait
+
+    def populate_db(self):
+        """
+            Populate DB in a background task
+        """
+        App().task_helper.run(self.__populate_db)
+        return True
 
     def get_artist_id(self, artist_name, callback):
         """
@@ -144,9 +152,9 @@ class SpotifyHelper(GObject.Object):
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 self.__create_album_from_album_payload(
-                                                 decode["albums"]["items"],
-                                                 True,
-                                                 cancellable)
+                                             decode["albums"]["items"],
+                                             StorageType.SPOTIFY_NEW_RELEASES,
+                                             cancellable)
         except Exception as e:
             Logger.error("SpotifyHelper::search_new_releases(): %s", e)
         SqlCursor.commit(App().db)
@@ -237,11 +245,11 @@ class SpotifyHelper(GObject.Object):
                 decode = json.loads(data.decode("utf-8"))
                 self.__create_album_from_album_payload(
                                                  decode["albums"]["items"],
-                                                 False,
+                                                 StorageType.EPHEMERAL,
                                                  cancellable)
                 self.__create_album_from_tracks_payload(
                                                  decode["tracks"]["items"],
-                                                 False,
+                                                 StorageType.EPHEMERAL,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyHelper::search(): %s", e)
@@ -294,6 +302,7 @@ class SpotifyHelper(GObject.Object):
                                                    cancellable)
                 self.__create_album_from_tracks_payload(
                                                  [payload],
+                                                 StorageType.EPHEMERAL,
                                                  False,
                                                  cancellable)
         except Exception as e:
@@ -304,9 +313,27 @@ class SpotifyHelper(GObject.Object):
         GLib.idle_add(self.emit, "search-finished")
         del self.__album_ids[cancellable]
 
+    def cancel(self):
+        """
+            Cancel db populate
+        """
+        self.__cancellable.cancel()
+        self.__cancellable = Gio.Cancellable()
+
 #######################
 # PRIVATE             #
 #######################
+    def __populate_db(self):
+        """
+            Populate DB in a background task
+        """
+        self.search_new_releases(self.__cancellable)
+        # Remove older albums
+        App().tracks.del_old_for_storage_type(StorageType.SPOTIFY_NEW_RELEASES)
+        App().tracks.clean()
+        App().albums.clean()
+        App().artists.clean()
+
     def __get_track_payload(self, helper, spotify_id, cancellable):
         """
             Get track payload
@@ -324,12 +351,12 @@ class SpotifyHelper(GObject.Object):
             Logger.error("SpotifyHelper::__get_track_payload(): %s", e)
         return None
 
-    def __download_cover(self, album_id, cover_uri, background, cancellable):
+    def __download_cover(self, album_id, cover_uri, storage_type, cancellable):
         """
             Create album and download cover
             @param album_id as int
             @param cover_uri as str
-            @param background as bool
+            @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
         try:
@@ -343,26 +370,26 @@ class SpotifyHelper(GObject.Object):
                                                             cancellable)
                     if status:
                         App().art.save_album_artwork(data, album)
-                if not background:
+                if storage_type & StorageType.EPHEMERAL:
                     GLib.idle_add(self.emit, "new-album", album)
         except Exception as e:
             Logger.error(
                 "SpotifyHelper::__download_cover(): %s", e)
 
-    def __create_album_from_tracks_payload(self, payload,
-                                           background, cancellable):
+    def __create_album_from_tracks_payload(self, payload, storage_type,
+                                           cancellable):
         """
             Get albums from a track payload
             @param payload as {}
-            @param background as bool
+            @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
         new_album_ids = {}
         # Populate tracks
         for item in payload:
-            if background:
-                sleep(1)
-            elif cancellable.is_cancelled():
+            if not storage_type & StorageType.EPHEMERAL:
+                sleep(10)
+            if cancellable.is_cancelled():
                 raise Exception("cancelled")
             track_id = App().db.exists_in_db(item["album"]["name"],
                                              [artist["name"]
@@ -373,11 +400,12 @@ class SpotifyHelper(GObject.Object):
                 if track.album.id not in self.__album_ids[cancellable] and\
                         track.is_web:
                     self.__album_ids[cancellable].append(track.album.id)
-                    GLib.idle_add(self.emit, "new-album", track.album)
+                    if storage_type & StorageType.EPHEMERAL:
+                        GLib.idle_add(self.emit, "new-album", track.album)
                 continue
             (album_id,
              track_id,
-             cover_uri) = self.__save_track(item)
+             cover_uri) = self.__save_track(item, storage_type)
             if album_id in self.__album_ids[cancellable]:
                 continue
             elif album_id not in new_album_ids.keys():
@@ -387,22 +415,22 @@ class SpotifyHelper(GObject.Object):
             self.__album_ids[cancellable].append(album_id)
             self.__download_cover(album_id,
                                   new_album_ids[album_id],
-                                  background,
+                                  storage_type,
                                   cancellable)
 
-    def __create_album_from_album_payload(self, payload, background,
+    def __create_album_from_album_payload(self, payload, storage_type,
                                           cancellable):
         """
             Get albums from an album payload
             @param payload as {}
-            @param background as bool
+            @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
         # Populate tracks
         for album_item in payload:
-            if background:
-                sleep(1)
-            elif cancellable.is_cancelled():
+            if not storage_type & StorageType.EPHEMERAL:
+                sleep(10)
+            if cancellable.is_cancelled():
                 return
             album_id = App().db.exists_in_db(
                                     album_item["name"],
@@ -414,7 +442,8 @@ class SpotifyHelper(GObject.Object):
                     album = Album(album_id)
                     if album.tracks:
                         track = album.tracks[0]
-                        if track.is_web:
+                        if track.is_web and\
+                                storage_type & StorageType.EPHEMERAL:
                             GLib.idle_add(self.emit, "new-album", album)
                 continue
             uri = "https://api.spotify.com/v1/albums/%s" % album_item["id"]
@@ -428,15 +457,17 @@ class SpotifyHelper(GObject.Object):
                 for item in track_payload:
                     item["album"] = album_item
                 self.__create_album_from_tracks_payload(track_payload,
-                                                        background,
+                                                        storage_type,
                                                         cancellable)
 
-    def __save_track(self, payload):
+    def __save_track(self, payload, storage_type):
         """
             Save track to DB as non persistent
             @param payload as {}
+            @param storage_type as StorageType
             @return track_id
         """
+        # Add new track
         SqlCursor.allow_thread_execution(App().db)
         title = payload["name"]
         _artists = []
@@ -471,5 +502,5 @@ class SpotifyHelper(GObject.Object):
                    album_name, None, uri, 0, 0,
                    0, 0, mtime, title, duration, tracknumber,
                    discnumber, discname, year, timestamp, mtime,
-                   0, 0, 0, 0, "", 0, StorageType.EPHEMERAL)
+                   0, 0, 0, 0, "", 0, storage_type)
         return (album_id, track_id, cover_uri)

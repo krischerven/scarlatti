@@ -270,16 +270,18 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def get_by_year(self, year):
+    def get_for_storage_type(self, storage_type, limit=100):
         """
-            Get albums with year
-            @param year as str
+            Get albums by storage type
+            @param storage_type as StorageType
+            @param limit as int
+            @return [int]
         """
         with SqlCursor(App().db) as sql:
-            filters = (year, )
-            request = "SELECT DISTINCT albums.rowid\
+            filters = (storage_type, limit)
+            request = "SELECT albums.rowid\
                        FROM albums\
-                       WHERE year=?"
+                       WHERE storage_type=? LIMIT ?"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
@@ -571,7 +573,7 @@ class AlbumsDatabase:
             @return count as int
         """
         with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT COUNT(tracks.rowid)\
+            result = sql.execute("SELECT COUNT(*)\
                                   FROM tracks WHERE album_id=?",
                                  (album_id,))
             v = result.fetchone()
@@ -1090,25 +1092,35 @@ class AlbumsDatabase:
                 result = sql.execute(request, filter)
             return list(itertools.chain(*result))
 
-    def search(self, searched):
+    def search(self, searched, storage_type):
         """
             Search for albums looking like string
             @param searched as str
+            @param storage_type as StorageType
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
             no_accents = noaccents(searched)
-            storage_type = get_default_storage_type()
-            items = []
-            for filter in [(no_accents + "%", storage_type),
-                           ("%" + no_accents, storage_type),
-                           ("%" + no_accents + "%", storage_type)]:
-                request = "SELECT albums.rowid FROM albums\
-                           WHERE noaccents(name) LIKE ?\
-                           AND albums.storage_type & ? LIMIT 25"
-                result = sql.execute(request, filter)
-                items += list(itertools.chain(*result))
-            return items
+            filter1 = no_accents + "%"
+            filter2 = "%" + no_accents
+            filter3 = "%" + no_accents + "%"
+            request = "SELECT DISTINCT albums.rowid\
+                       FROM albums, track_artists, tracks, artists\
+                       WHERE tracks.album_id=albums.rowid AND\
+                       track_artists.artist_id=artists.rowid AND\
+                       track_artists.track_id=tracks.rowid AND (\
+                            noaccents(albums.name) LIKE ? OR\
+                            noaccents(albums.name) LIKE ? OR\
+                            noaccents(albums.name) LIKE ? OR\
+                            noaccents(artists.name) LIKE ? OR\
+                            noaccents(artists.name) LIKE ? OR\
+                            noaccents(artists.name) LIKE ?) AND\
+                       albums.storage_type & ? LIMIT 25"
+            result = sql.execute(request,
+                                 (filter1, filter2, filter3,
+                                  filter1, filter2, filter3,
+                                  storage_type))
+            return list(itertools.chain(*result))
 
     def calculate_artist_ids(self, album_id):
         """
