@@ -13,10 +13,12 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.utils import on_realize
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_gestures import GesturesHelper
 
 
-class CoverWidget(Gtk.EventBox, SignalsHelper):
+class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
     """
         Widget showing current album cover
     """
@@ -28,6 +30,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper):
             @param view_type as ViewType
         """
         Gtk.EventBox.__init__(self)
+        GesturesHelper.__init__(self, self)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
         self._album = album
@@ -36,6 +39,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper):
         self.__artwork.show()
         self.__artwork.get_style_context().add_class("white")
         self.add(self.__artwork)
+        self.connect("realize", on_realize)
         return [
             (App().art, "album-artwork-changed", "_on_album_artwork_changed")
         ]
@@ -78,6 +82,18 @@ class CoverWidget(Gtk.EventBox, SignalsHelper):
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Show covers popover
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        from lollypop.pop_artwork import CoversPopover
+        popover = CoversPopover(self._album)
+        popover.set_relative_to(self)
+        popover.popup()
+
 #######################
 # PRIVATE             #
 #######################
@@ -95,14 +111,3 @@ class CoverWidget(Gtk.EventBox, SignalsHelper):
                                               icon_size)
         else:
             self.__artwork.set_from_surface(surface)
-
-    def __on_artwork_clicked(self, button):
-        """
-            Popover with album art downloaded from the web (in fact google :-/)
-            @param button as Gtk.Button
-        """
-        from lollypop.pop_artwork import CoversPopover
-        popover = CoversPopover(self._album)
-        popover.set_relative_to(button)
-        popover.popup()
-        return True
