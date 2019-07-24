@@ -995,19 +995,17 @@ class TracksDatabase:
         """
         with SqlCursor(App().db) as sql:
             no_accents = noaccents(searched)
-            filter1 = no_accents + "%"
-            filter2 = "%" + no_accents
-            filter3 = "%" + no_accents + "%"
-            request = "SELECT DISTINCT tracks.rowid FROM tracks\
-                       WHERE (\
-                            noaccents(tracks.name) LIKE ? OR\
-                            noaccents(tracks.name) LIKE ? OR\
-                            noaccents(tracks.name) LIKE ?) AND\
-                       tracks.storage_type & ? LIMIT 25"
-            result = sql.execute(request,
-                                 (filter1, filter2, filter3,
-                                  storage_type))
-            return list(itertools.chain(*result))
+            items = []
+            # From best filter to worst filter
+            for filter in [(no_accents + "%", storage_type),
+                           ("%" + no_accents, storage_type),
+                           ("%" + no_accents + "%", storage_type)]:
+                request = "SELECT tracks.rowid FROM tracks\
+                           WHERE noaccents(name) LIKE ?\
+                           AND tracks.storage_type & ? LIMIT 25"
+                result = sql.execute(request, filter)
+                items += list(itertools.chain(*result))
+            return items
 
     def search_track(self, artist, title):
         """

@@ -1101,26 +1101,29 @@ class AlbumsDatabase:
         """
         with SqlCursor(App().db) as sql:
             no_accents = noaccents(searched)
-            filter1 = no_accents + "%"
-            filter2 = "%" + no_accents
-            filter3 = "%" + no_accents + "%"
-            request = "SELECT DISTINCT albums.rowid\
+            items = []
+            # From best filter to worst filter
+            for filter in [(no_accents + "%", storage_type),
+                           ("%" + no_accents, storage_type),
+                           ("%" + no_accents + "%", storage_type)]:
+                request = "SELECT albums.rowid FROM albums\
+                           WHERE noaccents(name) LIKE ?\
+                           AND albums.storage_type & ? LIMIT 25"
+                result = sql.execute(request, filter)
+                items += list(itertools.chain(*result))
+            for filter in [(no_accents + "%", storage_type),
+                           ("%" + no_accents, storage_type),
+                           ("%" + no_accents + "%", storage_type)]:
+                request = "SELECT DISTINCT albums.rowid\
                        FROM albums, track_artists, tracks, artists\
                        WHERE tracks.album_id=albums.rowid AND\
                        track_artists.artist_id=artists.rowid AND\
-                       track_artists.track_id=tracks.rowid AND (\
-                            noaccents(albums.name) LIKE ? OR\
-                            noaccents(albums.name) LIKE ? OR\
-                            noaccents(albums.name) LIKE ? OR\
-                            noaccents(artists.name) LIKE ? OR\
-                            noaccents(artists.name) LIKE ? OR\
-                            noaccents(artists.name) LIKE ?) AND\
+                       track_artists.track_id=tracks.rowid AND\
+                       noaccents(artists.name) LIKE ? AND\
                        albums.storage_type & ? LIMIT 25"
-            result = sql.execute(request,
-                                 (filter1, filter2, filter3,
-                                  filter1, filter2, filter3,
-                                  storage_type))
-            return list(itertools.chain(*result))
+                result = sql.execute(request, filter)
+                items += list(itertools.chain(*result))
+            return items
 
     def calculate_artist_ids(self, album_id):
         """
