@@ -181,9 +181,6 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
             Play album
            @param button as Gtk.Button
         """
-        if App().player.is_party:
-            action = App().lookup_action("party")
-            action.change_state(GLib.Variant("b", False))
         App().player.play_album(self._album.clone(True))
         self.__show_append(False)
 

@@ -44,8 +44,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         builder.connect_signals(self)
         self.__title_label = builder.get_object("name_label")
         self.__title_label.connect("query-tooltip", on_query_tooltip)
-        self.__year_label = builder.get_object("year_label")
-        self.__duration_label = builder.get_object("duration_label")
+        self.__info_label = builder.get_object("info_label")
+        self.__play_button = builder.get_object("play_button")
         self.__menu_button = builder.get_object("menu_button")
         self.__cover_widget = CoverWidget(album, view_type | ViewType.MEDIUM)
         self.__cover_widget.set_vexpand(True)
@@ -60,42 +60,35 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 markup += "\n<span size='x-small' alpha='40000'>%s</span>" %\
                                                                   artist_name
         self.__title_label.set_markup(markup)
-        if album.year is not None:
-            self.__year_label.set_text(str(album.year))
-        else:
-            self.__year_label.hide()
-        year_eventbox = builder.get_object("year_eventbox")
-        year_eventbox.connect("realize", on_realize)
-        self.__gesture = GesturesHelper(
-            year_eventbox, primary_press_callback=self._on_year_press)
         duration = App().albums.get_duration(self.__album.id,
                                              self.__album.genre_ids)
-        self.__duration_label.set_text(get_human_duration(duration))
+        human_duration = get_human_duration(duration)
+        markup = ""
+        if album.year is not None:
+            markup = "<b>%s</b>" % album.year
+        markup += "\n<span alpha='40000'>%s</span>" % human_duration
+        self.__info_label.set_markup(markup)
+        info_eventbox = builder.get_object("info_eventbox")
+        info_eventbox.connect("realize", on_realize)
+        self.__gesture = GesturesHelper(
+            info_eventbox, primary_press_callback=self._on_year_press)
         self.__widget = builder.get_object("widget")
         self.init_background()
-        self.__menu_button.get_style_context().add_class(
-            "black-transparent")
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
-        if album.mtime <= 0:
-            self.__cloud_image = Gtk.Image.new()
-            self.__cloud_image.show()
-            self.__cloud_image.set_margin_start(MARGIN)
-            self.__rating_grid.attach(self.__cloud_image, 1, 0, 1, 1)
         self.__rating_widget = RatingWidget(album, Gtk.IconSize.INVALID)
         self.__rating_widget.set_property("halign", Gtk.Align.START)
         self.__rating_widget.set_property("valign", Gtk.Align.CENTER)
         self.__rating_widget.show()
-        self.__rating_grid.attach(self.__rating_widget, 2, 0, 1, 1)
+        self.__rating_grid.attach(self.__rating_widget, 1, 0, 1, 1)
         self.__loved_widget = LovedWidget(album, Gtk.IconSize.INVALID)
         self.__loved_widget.set_margin_start(10)
         self.__loved_widget.set_property("halign", Gtk.Align.START)
         self.__loved_widget.set_property("valign", Gtk.Align.CENTER)
         self.__loved_widget.show()
-        self.__rating_grid.attach(self.__loved_widget, 3, 0, 1, 1)
+        self.__rating_grid.attach(self.__loved_widget, 2, 0, 1, 1)
         self.__cover_widget.set_margin_start(MARGIN)
-        self.__year_label.set_margin_end(MARGIN)
-        self.__duration_label.set_margin_start(MARGIN)
+        self.__info_label.set_margin_end(MARGIN)
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
         self.add_overlay(self.__widget)
@@ -114,39 +107,28 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             art_size = ArtSize.MEDIUM
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
-            self.__title_label.get_style_context().add_class(
-                "text-large")
-            self.__year_label.get_style_context().add_class(
-                "text-large")
         elif view_type & ViewType.MEDIUM:
             art_size = ArtSize.BANNER
             style = "menu-button-48"
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
-            self.__year_label.get_style_context().add_class(
-                "text-large")
         else:
             art_size = ArtSize.BANNER
             style = "menu-button-48"
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            self.__title_label.get_style_context().add_class(
-                "text-xx-large")
-            self.__year_label.get_style_context().add_class(
-                "text-x-large")
         self.__rating_widget.set_icon_size(icon_size)
         self.__loved_widget.set_icon_size(icon_size)
         if self.__cloud_image is not None:
             self.__cloud_image.set_from_icon_name("goa-panel-symbolic",
                                                   icon_size)
         self.__cover_widget.set_artwork(art_size)
-        menu_button_style_context = self.__menu_button.get_style_context()
-        menu_button_style_context.remove_class("menu-button-48")
-        menu_button_style_context.remove_class("menu-button")
-        menu_button_style_context.add_class(style)
-        self.__menu_button.get_image().set_from_icon_name(
-                                                   "view-more-symbolic",
-                                                   icon_size)
+        for (button, icon_name) in [
+                       (self.__menu_button, "view-more-symbolic"),
+                       (self.__play_button, "media-playback-start-symbolic")]:
+            button_style_context = button.get_style_context()
+            button_style_context.remove_class("menu-button-48")
+            button_style_context.remove_class("menu-button")
+            button_style_context.add_class(style)
+            button.get_image().set_from_icon_name(icon_name, icon_size)
         self.__set_text_height(self._collapsed)
 
     def collapse(self, collapsed):
@@ -160,12 +142,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__cover_widget.hide()
             self.__duration_label.hide()
             self.__rating_grid.hide()
-            self.__year_label.set_vexpand(True)
+            self.__info_label.set_vexpand(True)
         else:
             self.__cover_widget.show()
             self.__duration_label.show()
             self.__rating_grid.show()
-            self.__year_label.set_vexpand(False)
+            self.__info_label.set_vexpand(False)
 
     def set_selected(self, selected):
         """
@@ -206,6 +188,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
 
+    def _on_play_button_clicked(self, button):
+        """
+            Play album
+           @param button as Gtk.Button
+        """
+        App().player.play_album(self.__album.clone(True))
+
     def _on_album_artwork_changed(self, art, album_id):
         """
             Update cover for album_id
@@ -241,23 +230,23 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param collapsed as bool
         """
         title_context = self.__title_label.get_style_context()
-        year_context = self.__year_label.get_style_context()
+        info_context = self.__info_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        for c in year_context.list_classes():
-            title_context.remove_class(c)
+        for c in info_context.list_classes():
+            info_context.remove_class(c)
         if collapsed:
             self.__title_label.get_style_context().add_class(
                 "text-large")
         elif self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
-            self.__year_label.get_style_context().add_class(
-                "text-large")
+            self.__info_label.get_style_context().add_class(
+                "text-medium")
         else:
             self.__title_label.get_style_context().add_class(
                 "text-xx-large")
-            self.__year_label.get_style_context().add_class(
+            self.__info_label.get_style_context().add_class(
                 "text-x-large")
 
     def __on_album_artwork(self, surface):
