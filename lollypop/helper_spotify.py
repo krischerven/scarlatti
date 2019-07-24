@@ -372,7 +372,8 @@ class SpotifyHelper(GObject.Object):
                                              item["name"])
             if track_id is not None:
                 track = Track(track_id)
-                if track.is_web:
+                if track.album.id not in self.__album_ids[cancellable] and\
+                        track.is_web:
                     self.__album_ids[cancellable].append(track.album.id)
                     GLib.idle_add(self.emit, "new-album", track.album)
                 continue
