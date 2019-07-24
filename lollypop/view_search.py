@@ -41,6 +41,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         Gtk.Bin.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__timeout_id = None
+        self.__search_count = 0
         self.__current_search = ""
         self.__cancellable = Gio.Cancellable()
         self.__search_type_action = Gio.SimpleAction.new_stateful(
@@ -223,16 +224,17 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__stack.set_visible_child_name("view")
         self.__view.insert_album(album, len(album.tracks) == 1, -1)
 
-    def _on_search_finished(self, api):
+    def _on_search_finished(self, *ignore):
         """
-            Stop spinner
-            @param api ignored
+            Stop spinner and show placeholder if not result
         """
-        self.__spinner.stop()
-        self.__button_stack.set_visible_child(self.__new_button)
-        if not self.__view.children:
-            self.__stack.set_visible_child_name("placeholder")
-            self.__set_no_result_placeholder()
+        self.__search_count -= 1
+        if self.__search_count == 0:
+            self.__spinner.stop()
+            self.__button_stack.set_visible_child(self.__new_button)
+            if not self.__view.children:
+                self.__stack.set_visible_child_name("placeholder")
+                self.__set_no_result_placeholder()
 
     def _on_adaptive_changed(self, window, status):
         """
@@ -274,11 +276,13 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             current_search = self.__current_search.lower()
             search = Search()
             if state == "local":
+                self.__search_count = 1
                 search.get(current_search,
                            StorageType.COLLECTION | StorageType.SAVED,
                            self.__cancellable,
                            callback=(self.__on_search_get, current_search))
             elif state == "web":
+                self.__search_count = 2
                 search.get(current_search,
                            StorageType.EPHEMERAL |
                            StorageType.SPOTIFY_NEW_RELEASES,
@@ -324,7 +328,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             Add rows for internal results
             @param result as [(int, Album, bool)]
         """
-        self._on_search_finished(None)
+        self._on_search_finished()
         if result:
             albums = []
             reveal_albums = []

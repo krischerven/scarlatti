@@ -327,6 +327,7 @@ class SpotifyHelper(GObject.Object):
             Populate DB in a background task
         """
         try:
+            return
             self.search_new_releases(self.__cancellable)
             # Remove older albums
             App().tracks.del_old_for_storage_type(
