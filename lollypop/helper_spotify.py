@@ -308,10 +308,8 @@ class SpotifyHelper(GObject.Object):
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyHelper::charts(): %s", e)
-            # Do not emit search-finished on cancel
-            if str(e) == "cancelled":
-                return
-        GLib.idle_add(self.emit, "search-finished")
+        if not cancellable.is_cancelled():
+            GLib.idle_add(self.emit, "search-finished")
         del self.__album_ids[cancellable]
 
     def cancel(self):
@@ -328,12 +326,16 @@ class SpotifyHelper(GObject.Object):
         """
             Populate DB in a background task
         """
-        self.search_new_releases(self.__cancellable)
-        # Remove older albums
-        App().tracks.del_old_for_storage_type(StorageType.SPOTIFY_NEW_RELEASES)
-        App().tracks.clean()
-        App().albums.clean()
-        App().artists.clean()
+        try:
+            self.search_new_releases(self.__cancellable)
+            # Remove older albums
+            App().tracks.del_old_for_storage_type(
+                StorageType.SPOTIFY_NEW_RELEASES)
+            App().tracks.clean()
+            App().albums.clean()
+            App().artists.clean()
+        except Exception as e:
+            Logger.error("SpotifyHelper::__populate_db(): %s", e)
 
     def __get_track_payload(self, helper, spotify_id, cancellable):
         """
@@ -350,7 +352,7 @@ class SpotifyHelper(GObject.Object):
                 return json.loads(data.decode("utf-8"))
         except Exception as e:
             Logger.error("SpotifyHelper::__get_track_payload(): %s", e)
-        return None
+        return {}
 
     def __download_cover(self, album_id, cover_uri, storage_type, cancellable):
         """
@@ -432,7 +434,7 @@ class SpotifyHelper(GObject.Object):
             if not storage_type & StorageType.EPHEMERAL:
                 cancellable_sleep(10, cancellable)
             if cancellable.is_cancelled():
-                return
+                raise Exception("cancelled")
             album_id = App().db.exists_in_db(
                                     album_item["name"],
                                     [artist["name"]

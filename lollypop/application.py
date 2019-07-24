@@ -192,7 +192,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.task_helper = TaskHelper()
         self.art_helper = ArtHelper()
         self.spotify = SpotifyHelper()
-        GLib.timeout_add(3600, self.spotify.populate_db)
+        GLib.timeout_add_seconds(3600, self.spotify.populate_db)
         self.spotify.populate_db()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
