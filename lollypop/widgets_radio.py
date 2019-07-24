@@ -232,6 +232,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         """
         def on_closed(popover):
             button.set_state_flags(Gtk.StateFlags.NORMAL, True)
+            button.set_active(False)
 
         if not button.get_active():
             return

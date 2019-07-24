@@ -243,6 +243,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
         """
         def on_closed(popover):
             button.set_state_flags(Gtk.StateFlags.NORMAL, True)
+            button.set_active(False)
 
         def on_play_all_from(popover):
             view = self.get_ancestor(View)
