@@ -139,6 +139,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
                     self.__scrolled.get_allocated_height(),
                     self.__artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_MAX |
+                    ArtBehaviour.CACHE |
                     ArtBehaviour.ROUNDED_BORDER |
                     ArtBehaviour.LIGHTER,
                     self.__on_album_artwork)
