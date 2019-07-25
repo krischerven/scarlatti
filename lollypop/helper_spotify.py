@@ -29,6 +29,7 @@ class SpotifyHelper(GObject.Object):
         Helper for Spotify
     """
     __CHARTS = "https://spotifycharts.com/regional/%s/weekly/latest/download"
+    __MAX_ITEMS_PER_STORAGE_TYPE = 20
     __gsignals__ = {
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
                       (GObject.TYPE_PYOBJECT,)),
@@ -136,7 +137,8 @@ class SpotifyHelper(GObject.Object):
             token = "Bearer %s" % self.__token
             helper = TaskHelper()
             helper.add_header("Authorization", token)
-            artist_ids = App().artists.get_randoms(20)
+            artist_ids = App().artists.get_randoms(
+                self.__MAX_ITEMS_PER_STORAGE_TYPE)
             similar_ids = []
             # Get similars spotify ids
             for (artist_id, name, sortname) in artist_ids:
@@ -152,8 +154,9 @@ class SpotifyHelper(GObject.Object):
             shuffle(similar_ids)
             for similar_id in similar_ids:
                 count = len(App().albums.get_for_storage_type(
-                                StorageType.SPOTIFY_SIMILARS, 20))
-                if count > 20:
+                                StorageType.SPOTIFY_SIMILARS,
+                                self.__MAX_ITEMS_PER_STORAGE_TYPE + 5))
+                if count == self.__MAX_ITEMS_PER_STORAGE_TYPE + 5:
                     return
                 cancellable_sleep(5, cancellable)
                 albums_payload = self.__get_artist_albums_payload(similar_id,
@@ -333,8 +336,11 @@ class SpotifyHelper(GObject.Object):
             self.search_similar_albums(self.__cancellable)
             self.search_new_releases(self.__cancellable)
             # Remove older albums
-            App().tracks.del_old_for_storage_type(
-                StorageType.SPOTIFY_NEW_RELEASES)
+            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
+                                 StorageType.SPOTIFY_SIMILARS]:
+                if len(App().albums.get_for_storage_type(storage_type)) >\
+                        self.__MAX_ITEMS_PER_STORAGE_TYPE:
+                    App().tracks.del_old_for_storage_type(storage_type)
             App().tracks.clean()
             App().albums.clean()
             App().artists.clean()
