@@ -12,11 +12,12 @@
 
 from gi.repository import Gtk, Gdk, GLib
 
-from lollypop.define import App, Sizing, ScanType
+from lollypop.define import App, Sizing, ScanType, AdaptiveSize
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, get_headerbar_buttons_width
 from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.logger import Logger
 
 
 class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
@@ -47,8 +48,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__multi_press.connect("released", self.__on_back_button_clicked)
         self.__multi_press.set_button(8)
         return [
-            (self, "window-state-event", "_on_window_state_event"),
-            (self, "configure-event", "_on_configure_event")
+            (self, "window-state-event", "_on_window_state_event")
         ]
 
     @property
@@ -77,25 +77,24 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
 ##############
 # PROTECTED  #
 ##############
-    def _on_configure_event(self, window, event):
+    def _on_configure_event_timeout(self, width, height, x, y):
         """
-            Handle configure event
-            @param window as Gtk.Window
-            @param event as Gdk.Event
+            Setup content based on current size
+            @param width as int
+            @param height as int
+            @param x as int
+            @param y as int
         """
-        def on_configure_event(width, height):
-            self.__timeout_configure_id = None
-            self.__handle_miniplayer(width, height)
-            self.__toolbar.set_content_width(width)
-            self.__save_size_position(window)
-
-        (width, height) = window.get_size()
-        if self.__timeout_configure_id:
-            GLib.source_remove(self.__timeout_configure_id)
-            self.__timeout_configure_id = None
-        self.__timeout_configure_id = GLib.idle_add(on_configure_event,
-                                                    width, height,
-                                                    priority=GLib.PRIORITY_LOW)
+        AdaptiveWindow._on_configure_event_timeout(self, width, height, x, y)
+        self.__handle_miniplayer(width, height)
+        self.__toolbar.set_content_width(width)
+        if not self.is_maximized():
+            # Keep a minimal height
+            if height < AdaptiveSize.SMALL:
+                height = AdaptiveSize.SMALL
+            App().settings.set_value("window-size",
+                                     GLib.Variant("ai", [width, height]))
+        App().settings.set_value("window-position", GLib.Variant("ai", [x, y]))
 
     def _on_window_state_event(self, widget, event):
         """
@@ -112,16 +111,22 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         """
             Setup window position and size, callbacks
         """
-        size = App().settings.get_value("window-size")
-        pos = App().settings.get_value("window-position")
-        self.__setup_size(size)
-        self.__setup_pos(pos)
-        if App().settings.get_value("window-maximized"):
-            # Lets resize happen
-            GLib.idle_add(self.maximize)
-            self.do_adaptive_mode(self._ADAPTIVE_STACK)
-        else:
-            self.do_adaptive_mode(size[0])
+        try:
+            size = App().settings.get_value("window-size")
+            pos = App().settings.get_value("window-position")
+            self.resize(size[0], size[1])
+            self.move(pos[0], pos[1])
+            self.__toolbar.set_content_width(size[0])
+            if App().settings.get_value("window-maximized"):
+                # Lets resize happen
+                GLib.idle_add(self.maximize)
+                self.set_adaptive_stack(False)
+                self.__show_miniplayer(False)
+            else:
+                self.set_adaptive_stack(size[0] < AdaptiveSize.MEDIUM)
+                self.__handle_miniplayer(size[0], size[1])
+        except Exception as e:
+            Logger.error("Window::__setup_size_and_position(): %s", e)
 
     def __show_miniplayer(self, show):
         """
@@ -149,26 +154,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__toolbar.set_mini(False)
             self.__miniplayer.destroy()
             self.__miniplayer = None
-
-    def __setup_size(self, size):
-        """
-            Set window size
-            @param size as (int, int)
-        """
-        if len(size) == 2 and\
-           isinstance(size[0], int) and\
-           isinstance(size[1], int):
-            self.resize(size[0], size[1])
-
-    def __setup_pos(self, pos):
-        """
-            Set window position
-            @param pos as (int, int)
-        """
-        if len(pos) == 2 and\
-           isinstance(pos[0], int) and\
-           isinstance(pos[1], int):
-            self.move(pos[0], pos[1])
 
     def __setup_content(self):
         """
@@ -203,26 +188,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__show_miniplayer(False)
             self.__container.show()
 
-    def __save_size_position(self, widget):
+    def __on_realize(self, window):
         """
-            Save window state, update current view content size
-            @param: widget as Gtk.Window
-        """
-        if self.is_maximized():
-            return
-        (width, height) = widget.get_size()
-        # Keep a minimal height
-        if height < Sizing.MEDIUM:
-            height = Sizing.MEDIUM
-        App().settings.set_value("window-size",
-                                 GLib.Variant("ai", [width, height]))
-        (x, y) = widget.get_position()
-        App().settings.set_value("window-position", GLib.Variant("ai", [x, y]))
-
-    def __on_realize(self, widget):
-        """
-            Run scanner on realize
-            @param widget as Gtk.Widget
+            Init window content
+            @param window as Gtk.Window
         """
         from lollypop.container import Container
         self.__container = Container()
@@ -236,8 +205,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             # No idea why, maybe scanner using Gstpbutils before Gstreamer
             # initialisation is finished...
             GLib.timeout_add(1000, App().scanner.update, ScanType.FULL)
-        # Here we ignore initial configure events
-        self.__toolbar.set_content_width(self.get_size()[0])
 
     def __on_current_changed(self, player):
         """

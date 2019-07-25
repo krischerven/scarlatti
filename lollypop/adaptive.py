@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import LOLLYPOP_DATA_PATH
+from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize
 
 
 class AdaptiveView:
@@ -318,10 +318,10 @@ class AdaptiveWindow:
         Handle window resizing and window's children workflow
         This class needs a stack and n paned
     """
-    _ADAPTIVE_STACK = 600
 
     gsignals = {
         "adaptive-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
+        "adaptive-sizing": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "can-go-back-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
     for signal in gsignals:
@@ -334,10 +334,10 @@ class AdaptiveWindow:
             Init adaptive mode, Gtk.Window should be initialised
         """
         self._adaptive_stack = None
-        self.__configure_event_connected = False
-        self.__adaptive_timeout_id = None
         self.__stack = None
         self.__children = []
+        self.__configure_timeout_id = None
+        self.connect("configure-event", self.__on_configure_event)
 
     def set_stack(self, stack):
         """
@@ -388,33 +388,9 @@ class AdaptiveWindow:
             Move paned child to stack
             @param b as bool
         """
-        # Do adaptive on init
-        if self._adaptive_stack is None:
-            self._adaptive_stack = not b
         if b == self._adaptive_stack:
             return
-        if self.__adaptive_timeout_id is not None:
-            GLib.source_remove(self.__adaptive_timeout_id)
-        self.__adaptive_timeout_id = GLib.idle_add(
-            self.__set_adaptive_stack, b)
-
-    def do_adaptive_mode(self, width):
-        """
-            Handle basic adaptive mode
-            Will start to listen to configure event
-            @param width as int
-        """
-        def connect_configure_event():
-            self.connect("configure-event", self.__on_configure_event)
-
-        if width < self._ADAPTIVE_STACK:
-            self.set_adaptive_stack(True)
-        else:
-            self.set_adaptive_stack(False)
-        # We delay connect to ignore initial configure events
-        if not self.__configure_event_connected:
-            self.__configure_event_connected = True
-            GLib.timeout_add(1000, connect_configure_event)
+        self.__set_adaptive_stack(b)
 
     @property
     def can_go_back(self):
@@ -438,6 +414,19 @@ class AdaptiveWindow:
 #############
 # PROTECTED #
 #############
+    def _on_configure_event_timeout(self, width, height, x, y):
+        """
+            Handle adaptive mode
+            @param width as int
+            @param height as int
+            @param x as int
+            @param y as int
+        """
+        self.__configure_timeout_id = None
+        if width < AdaptiveSize.MEDIUM:
+            self.set_adaptive_stack(True)
+        else:
+            self.set_adaptive_stack(False)
 
 ############
 # PRIVATE  #
@@ -493,10 +482,16 @@ class AdaptiveWindow:
         if self.can_go_back:
             self.emit("can-go-back-changed", True)
 
-    def __on_configure_event(self, widget, event):
+    def __on_configure_event(self, window, event):
         """
             Delay event
-            @param widget as Gtk.Window
+            @param window as Gtk.Window
             @param event as Gdk.EventConfigure
         """
-        self.do_adaptive_mode(widget.get_size()[0])
+        if self.__configure_timeout_id:
+            GLib.source_remove(self.__configure_timeout_id)
+        (width, height) = window.get_size()
+        (x, y) = window.get_position()
+        self.__configure_timeout_id = GLib.idle_add(
+            self._on_configure_event_timeout,
+            width, height, x, y, priority=GLib.PRIORITY_LOW)

@@ -148,6 +148,13 @@ class PowerManagement:
     BOTH = 3             # Inhibit screensaver and suspend
 
 
+class AdaptiveSize:
+    SMALL = 400
+    MEDIUM = 600  # Adpative stack switch
+    NORMAL = 800
+    BIG = 1000
+
+
 class Sizing:
     MINI = 200
     SMALL = 350
