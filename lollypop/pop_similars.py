@@ -16,7 +16,6 @@ from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.widgets_utils import Popover
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
-from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -113,12 +112,11 @@ class ArtistRow(Gtk.ListBoxRow):
             self.__artwork.set_from_surface(surface)
 
 
-class SimilarsPopover(Popover, SignalsHelper):
+class SimilarsPopover(Popover):
     """
         A popover with similar artists
     """
 
-    @signals_map
     def __init__(self):
         """
             Init popover
@@ -144,86 +142,63 @@ class SimilarsPopover(Popover, SignalsHelper):
         self.__listbox.show()
         self.__stack.add(self.__listbox)
         self.add(builder.get_object("widget"))
-        return [
-            (App().lastfm, "new-artist", "_on_new_artist"),
-            (App().spotify, "new-artist", "_on_new_artist")
-        ]
 
     def populate(self, artist_ids):
         """
-            Populate view artist ids
+            Populate view with artist ids
             @param artist_ids as int
         """
-        self.__providers = 1
+        self.__added = []
         artists = []
         for artist_id in artist_ids:
+            if self.__cancellable.is_cancelled():
+                break
             artist_name = App().artists.get_name(artist_id)
             artists.append(artist_name)
-            if get_network_available("SPOTIFY"):
-                App().spotify.get_artist_id(artist_name,
-                                            self.__on_get_artist_id)
+        providers = {}
+        if get_network_available("SPOTIFY"):
+            providers[App().spotify] = artists
         if App().lastfm is not None and get_network_available("LASTFM"):
-            self.__providers = 2
-            App().task_helper.run(self.__search_lastfm_similars, artists)
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_new_artist(self, provider, artist, cover_uri):
-        """
-            Add artist to view
-            @param provider as Spotify/LastFM
-            @param artist as str
-        """
-        if artist is None:
-            self.__providers -= 1
-            if self.__providers == 0:
-                self.__stack.set_visible_child_name("no-result")
-                self.__spinner.stop()
-            return
-        if artist in self.__added:
-            return
-        self.__added.append(artist)
-        artist_id = App().artists.get_id(artist)
-        row = None
-        if artist_id is not None:
-            # We want real artist name (with case)
-            artist_name = App().artists.get_name(artist_id)
-            albums = App().artists.get_albums([artist_id])
-            if albums:
-                row = ArtistRow(artist_name, None, self.__cancellable)
-        elif self.__show_all:
-            row = ArtistRow(artist, cover_uri, self.__cancellable)
-        if row is not None:
-            row.show()
-            self.__listbox.add(row)
-        self.__stack.set_visible_child(self.__listbox)
+            providers[App().lastfm] = artists
+        self.__populate(providers)
 
 #######################
 # PRIVATE             #
 #######################
-    def __search_lastfm_similars(self, artists):
+    def __populate(self, providers):
         """
-            Search similars artists from lastfm
-            @param artists as [str]
-            @param scale_factor as int
+            Populate view with providers
+            @param providers as {}
         """
-        for artist in artists:
-            if not self.__cancellable.is_cancelled():
-                App().lastfm.search_similar_artists(artist,
-                                                    self.__cancellable)
+        for provider in providers.keys():
+            artists = providers[provider]
+            if artists:
+                artist = artists.pop(0)
+                App().task_helper.run(provider.get_artist_id,
+                                      artist, self.__cancellable,
+                                      callback=(self.__on_get_artist_id,
+                                                providers, provider))
+                del providers[provider]
+                break
 
-    def __on_get_artist_id(self, artist_id):
+    def __on_get_artist_id(self, artist_id, providers, provider):
         """
             Get similars
             @param artist_id as str
+            @param providers as {}
+            @param provider as SpotifyHelper/LastFM
         """
         if artist_id is None:
-            self.__stack.set_visible_child_name("no-result")
-            self.__spinner.stop()
-            return
-        App().task_helper.run(App().spotify.search_similar_artists, artist_id,
-                              self.__cancellable)
+            if providers.keys():
+                self.__populate(providers)
+            else:
+                self.__stack.set_visible_child_name("no-result")
+                self.__spinner.stop()
+        else:
+            App().task_helper.run(provider.get_similar_artists,
+                                  artist_id, self.__cancellable,
+                                  callback=(self.__on_similar_artists,
+                                            providers))
 
     def __on_map(self, widget):
         """
@@ -253,3 +228,33 @@ class SimilarsPopover(Popover, SignalsHelper):
         else:
             target = "local://%s" % artist_name
         App().lookup_action("search").activate(GLib.Variant("s", target))
+
+    def __on_similar_artists(self, artists, providers):
+        """
+            Add artist to view
+            @param artists as [str]
+            @param providers as {}
+        """
+        if artists:
+            (artist, cover_uri) = artists.pop(0)
+            if artist in self.__added:
+                return
+            self.__added.append(artist)
+            artist_id = App().artists.get_id(artist)
+            row = None
+            if artist_id is not None:
+                # We want real artist name (with case)
+                artist = App().artists.get_name(artist_id)
+                albums = App().artists.get_albums([artist_id])
+                if albums:
+                    row = ArtistRow(artist, None, self.__cancellable)
+            elif self.__show_all:
+                row = ArtistRow(artist, cover_uri, self.__cancellable)
+            if row is not None:
+                row.show()
+                self.__listbox.add(row)
+            GLib.idle_add(self.__on_similar_artists, artists, providers)
+        else:
+            self.__stack.set_visible_child(self.__listbox)
+            self.__spinner.stop()
+            self.__populate(providers)

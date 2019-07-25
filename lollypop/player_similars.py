@@ -35,10 +35,25 @@ class SimilarsPlayer:
 #######################
 # PRIVATE             #
 #######################
+    def __populate(self, providers):
+        """
+            Populate view with providers
+            @param providers as {}
+        """
+        for provider in providers.keys():
+            artist = providers[provider]
+            App().task_helper.run(provider.get_artist_id,
+                                  artist, self.__cancellable,
+                                  callback=(self.__on_get_artist_id,
+                                            providers, provider))
+            del providers[provider]
+            break
+
     def __add_a_new_album(self, similar_artist_ids):
         """
             Add a new album to playback
             @param similar_artist_ids as [int]
+            @return True if added
         """
         # Get an album
         album_ids = App().albums.get_ids(similar_artist_ids, [])
@@ -47,7 +62,8 @@ class SimilarsPlayer:
             album_id = album_ids.pop(0)
             if album_id not in self.album_ids:
                 self.add_album(Album(album_id))
-                break
+                return True
+        return False
 
     def __get_artist_ids(self, artists):
         """
@@ -56,7 +72,7 @@ class SimilarsPlayer:
             @return artist_id as int
         """
         similar_artist_ids = []
-        for artist in artists:
+        for (artist, cover_uri) in artists:
             similar_artist_id = App().artists.get_id(artist)
             if similar_artist_id is not None:
                 if App().artists.get_albums([similar_artist_id]):
@@ -76,50 +92,40 @@ class SimilarsPlayer:
                 player.current_track.artist_ids:
             artist_id = player.current_track.artist_ids[0]
             artist_name = App().artists.get_name(artist_id)
+            providers = {}
+            if get_network_available("SPOTIFY"):
+                providers[App().spotify] = artist_name
             if App().lastfm is not None and get_network_available("LASTFM"):
-                App().task_helper.run(
-                              App().lastfm.get_similar_artists,
-                              artist_name, self.__cancellable,
-                              callback=(self.__on_lastfm_similar_artists,))
-            elif get_network_available("SPOTIFY"):
-                App().spotify.get_artist_id(artist_name,
-                                            self.__on_get_spotify_artist_id)
+                providers[App().lastfm] = artist_name
+            self.__populate(providers)
 
-    def __on_get_spotify_artist_id(self, artist_id):
+    def __on_get_artist_id(self, artist_id, providers, provider):
         """
             Get similars
             @param artist_id as str
+            @param providers as {}
+            @param provider as SpotifyHelper/LastFM
         """
         if artist_id is None:
-            return
-        App().task_helper.run(App().spotify.get_similar_artists,
-                              artist_id, self.__cancellable,
-                              callback=(self.__on_spotify_similar_artists,))
-
-    def __on_lastfm_similar_artists(self, artists):
-        """
-            Add one album or run a Spotify search if none
-            @param artists as [str]
-        """
-        similar_artist_ids = self.__get_artist_ids(artists)
-        if not similar_artist_ids:
-            if self.current_track.artist_ids:
-                artist_id = self.current_track.artist_ids[0]
-                artist_name = App().artists.get_name(artist_id)
-                App().spotify.get_artist_id(artist_name,
-                                            self.__on_get_spotify_artist_id)
+            if providers.keys():
+                self.__populate(providers)
         else:
-            Logger.info("Found a similar artist via Last.fm")
-            if self.albums:
-                self.__add_a_new_album(similar_artist_ids)
+            App().task_helper.run(provider.get_similar_artists,
+                                  artist_id, self.__cancellable,
+                                  callback=(self.__on_similar_artists,
+                                            providers))
 
-    def __on_spotify_similar_artists(self, artists):
+    def __on_similar_artists(self, artists, providers):
         """
-            Add one album
+            Add one album from artist to player
             @param artists as [str]
+            @param providers as {}
         """
         similar_artist_ids = self.__get_artist_ids(artists)
+        added = False
         if similar_artist_ids:
-            Logger.info("Found similar artists via Spotify:")
+            Logger.info("Found a similar artist: artists")
             if self.albums:
-                self.__add_a_new_album(similar_artist_ids)
+                added = self.__add_a_new_album(similar_artist_ids)
+        if not added:
+            self.__populate(providers)

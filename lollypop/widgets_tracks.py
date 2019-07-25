@@ -102,7 +102,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             self.set_selection_mode(Gtk.SelectionMode.NONE)
             App().player.clear_albums()
             App().player.reset_history()
-            App().player.load(self._track)
+            App().player.load(row.track)
         else:
             self.set_selection_mode(Gtk.SelectionMode.NONE)
             self.emit("activated", row.track)

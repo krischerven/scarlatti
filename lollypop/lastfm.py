@@ -12,7 +12,7 @@
 
 import gi
 gi.require_version("Secret", "1")
-from gi.repository import Gio, GLib, GObject
+from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
@@ -36,7 +36,7 @@ from lollypop.logger import Logger
 from lollypop.goa import GoaSyncedAccount
 
 
-class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
+class LastFM(LastFMNetwork, LibreFMNetwork):
     """
        Lastfm:
        We recommend you don"t distribute the API key and secret with your app,
@@ -47,16 +47,12 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
        want, and if your app isn"t written in a compiled language, you don"t
        really have much option :).
     """
-    __gsignals__ = {
-        "new-artist": (GObject.SignalFlags.RUN_FIRST, None, (str, str)),
-    }
 
     def __init__(self, name):
         """
             Init lastfm support
             @param name as str
         """
-        GObject.Object.__init__(self)
         self.__name = name
         self.__login = ""
         self.session_key = ""
@@ -220,7 +216,7 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             Search similar artists
             @param artist as str
             @param cancellable as Gio.Cancellable
-            @return [str]
+            @return [(str, str)] : list of (artist, cover_uri)
         """
         artists = []
         try:
@@ -228,31 +224,14 @@ class LastFM(GObject.Object, LastFMNetwork, LibreFMNetwork):
             for similar_item in artist_item.get_similar():
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
-                artists.append(similar_item.item.name)
+                artists.append((similar_item.item.name,
+                                similar_item.item.get_cover_image()))
         except Exception as e:
             Logger.error("LastFM::get_similar_artists(): %s", e)
         return artists
 
-    def search_similar_artists(self, artist, cancellable):
-        """
-            Search similar artists
-            @param artist as str
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            found = False
-            artist_item = self.get_artist(artist)
-            for similar_item in artist_item.get_similar():
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                found = True
-                artist_name = similar_item.item.name
-                cover_uri = similar_item.item.get_cover_image()
-                GLib.idle_add(self.emit, "new-artist", artist_name, cover_uri)
-        except Exception as e:
-            Logger.error("LastFM::search_similar_artists(): %s", e)
-        if not found:
-            GLib.idle_add(self.emit, "new-artist", None, None)
+    def get_artist_id(self, artist_name, cancellable):
+        return artist_name
 
     def on_goa_account_switched(self, obj):
         """
