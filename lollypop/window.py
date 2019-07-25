@@ -16,7 +16,7 @@ from lollypop.define import App, Sizing, ScanType, AdaptiveSize
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, get_headerbar_buttons_width
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.logger import Logger
 
 
@@ -25,7 +25,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         Main window
     """
 
-    @signals_map
+    @signals
     def __init__(self):
         """
             Init window
@@ -48,7 +48,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__multi_press.connect("released", self.__on_back_button_clicked)
         self.__multi_press.set_button(8)
         return [
-            (self, "window-state-event", "_on_window_state_event")
+            (self, "window-state-event", "_on_window_state_event"),
+            (self, "adaptive-size-changed", "_on_adaptive_size_changed"),
         ]
 
     @property
@@ -86,7 +87,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param y as int
         """
         AdaptiveWindow._on_configure_event_timeout(self, width, height, x, y)
-        self.__handle_miniplayer(width, height)
         self.__toolbar.set_content_width(width)
         if not self.is_maximized():
             # Keep a minimal height
@@ -104,6 +104,16 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                    "GDK_WINDOW_STATE_MAXIMIZED" in
                                    event.new_window_state.value_names)
 
+    def _on_adaptive_size_changed(self, window, adaptive_size):
+        """
+            Update internal widgets
+            @param window as Gtk.Window
+            @param adaptive_size as AdaptiveSize
+        """
+        self.__show_miniplayer(adaptive_size & (AdaptiveSize.SMALL |
+                                                AdaptiveSize.MEDIUM |
+                                                AdaptiveSize.NORMAL))
+
 ############
 # PRIVATE  #
 ############
@@ -114,17 +124,14 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         try:
             size = App().settings.get_value("window-size")
             pos = App().settings.get_value("window-position")
+            AdaptiveWindow._on_configure_event_timeout(
+                self, size[0], size[1], pos[0], pos[1])
             self.resize(size[0], size[1])
             self.move(pos[0], pos[1])
             self.__toolbar.set_content_width(size[0])
             if App().settings.get_value("window-maximized"):
                 # Lets resize happen
                 GLib.idle_add(self.maximize)
-                self.set_adaptive_stack(False)
-                self.__show_miniplayer(False)
-            else:
-                self.set_adaptive_stack(size[0] < AdaptiveSize.MEDIUM)
-                self.__handle_miniplayer(size[0], size[1])
         except Exception as e:
             Logger.error("Window::__setup_size_and_position(): %s", e)
 
@@ -154,6 +161,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__toolbar.set_mini(False)
             self.__miniplayer.destroy()
             self.__miniplayer = None
+            self.__container.show()
 
     def __setup_content(self):
         """
@@ -186,7 +194,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__show_miniplayer(True)
         else:
             self.__show_miniplayer(False)
-            self.__container.show()
 
     def __on_realize(self, window):
         """

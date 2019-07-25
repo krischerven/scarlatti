@@ -149,10 +149,12 @@ class PowerManagement:
 
 
 class AdaptiveSize:
-    SMALL = 400
-    MEDIUM = 600  # Adpative stack switch
-    NORMAL = 800
-    BIG = 1000
+    NONE = 1 << 0
+    SMALL = 1 << 1
+    MEDIUM = 1 << 2
+    NORMAL = 1 << 3
+    BIG = 1 << 4
+    LARGE = 1 << 5
 
 
 class Sizing:

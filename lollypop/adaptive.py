@@ -321,7 +321,7 @@ class AdaptiveWindow:
 
     gsignals = {
         "adaptive-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
-        "adaptive-sizing": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "adaptive-size-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "can-go-back-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
     for signal in gsignals:
@@ -337,6 +337,7 @@ class AdaptiveWindow:
         self.__stack = None
         self.__children = []
         self.__configure_timeout_id = None
+        self.__adaptive_size = AdaptiveSize.NONE
         self.connect("configure-event", self.__on_configure_event)
 
     def set_stack(self, stack):
@@ -423,10 +424,23 @@ class AdaptiveWindow:
             @param y as int
         """
         self.__configure_timeout_id = None
-        if width < AdaptiveSize.MEDIUM:
+        if width < 600:
             self.set_adaptive_stack(True)
         else:
             self.set_adaptive_stack(False)
+        if width < 400:
+            adaptive_size = AdaptiveSize.SMALL
+        elif width < 600:
+            adaptive_size = AdaptiveSize.MEDIUM
+        elif width < 1000:
+            adaptive_size = AdaptiveSize.NORMAL
+        elif width < 1200:
+            adaptive_size = AdaptiveSize.BIG
+        else:
+            adaptive_size = AdaptiveSize.LARGE
+        if adaptive_size != self.__adaptive_size:
+            self.__adaptive_size = adaptive_size
+            self.emit("adaptive-size-changed", adaptive_size)
 
 ############
 # PRIVATE  #
