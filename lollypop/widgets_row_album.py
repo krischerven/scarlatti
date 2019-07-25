@@ -62,12 +62,12 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             @param position as int
         """
         Gtk.ListBoxRow.__init__(self)
-        TracksView.__init__(self, view_type, position)
+        self._view_type = view_type
+        TracksView.__init__(self, None, position)
         self.__revealer = None
         self.__reveal = reveal
         self._artwork = None
         self._album = album
-        self.__view_type = view_type
         self.__cancellable = Gio.Cancellable()
         self.set_sensitive(False)
         self.set_property("height-request", height)
@@ -108,7 +108,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
         self.__action_button = None
-        if self.__view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
+        if self._view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "list-remove-symbolic",
                 Gtk.IconSize.MENU)
@@ -119,7 +119,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
                 "document-save-symbolic",
                 Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(_("Save in collection"))
-        elif self.__view_type & ViewType.SEARCH:
+        elif self._view_type & ViewType.SEARCH:
             self.__action_button = Gtk.Button.new_from_icon_name(
                     'avatar-default-symbolic',
                     Gtk.IconSize.MENU)
@@ -146,7 +146,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         grid.attach(self.__revealer, 0, 2, 3, 1)
         self.add(grid)
         self.set_playing_indicator()
-        if self.__reveal or self.__view_type & ViewType.PLAYLISTS:
+        if self.__reveal or self._view_type & ViewType.PLAYLISTS:
             self.reveal(True)
         self.set_artwork()
 
@@ -179,6 +179,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         else:
             if self._responsive_widget is None:
                 TracksView.populate(self)
+                self.set_orientation(Gtk.Orientation.VERTICAL)
                 self._responsive_widget.show()
                 self.__revealer.add(self._responsive_widget)
             self.__revealer.set_reveal_child(True)
@@ -306,13 +307,13 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             App().art.cache_artists_artwork()
             self._album.save(True)
             self.__action_button.hide()
-        elif self.__view_type & ViewType.SEARCH:
+        elif self._view_type & ViewType.SEARCH:
             popover = self.get_ancestor(Gtk.Popover)
             if popover is not None:
                 popover.popdown()
             App().window.container.show_view([Type.ARTISTS],
                                              self._album.artist_ids)
-        elif self.__view_type & ViewType.PLAYLISTS:
+        elif self._view_type & ViewType.PLAYLISTS:
             if App().player.current_track.album.id == self._album.id:
                 # Stop playback or loop for last album
                 # Else skip current
@@ -326,7 +327,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
                 App().player.remove_album(self._album)
             # Remove album from playlists
             # A playlists can't have duplicate so just remove tracks
-            if self.__view_type & ViewType.PLAYLISTS:
+            if self._view_type & ViewType.PLAYLISTS:
                 self.emit("remove-from-playlist", self._album)
             self.destroy()
         else:
