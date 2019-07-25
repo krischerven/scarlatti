@@ -300,24 +300,6 @@
       ]
     },
     {
-      "name": "youtube-dl",
-      "buildsystem": "simple",
-      "build-commands": [
-        "python3 setup.py install --prefix=/app"
-      ],
-      "ensure-writable": [
-        "/lib/python*/site-packages/easy-install.pth",
-        "/lib/python*/site-packages/setuptools.pth",
-        "/app/lib/python*/site-packages/easy-install.pth",
-        "/app/lib/python*/site-packages/setuptools.pth"
-      ],
-      "sources": [{
-        "type": "archive",
-        "url": "https://github.com/ytdl-org/youtube-dl/archive/2019.04.17.tar.gz",
-        "sha256": "93dfea11c42a3158bf8fb381bbb2a555c953e7133a8cc53c44068a8467ec19e0"
-      }]
-    },
-    {
       "name": "lollypop",
       "buildsystem": "meson",
       "sources": [{
