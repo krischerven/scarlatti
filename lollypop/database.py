@@ -16,7 +16,7 @@ import sqlite3
 from threading import Lock
 import itertools
 
-from lollypop.define import App
+from lollypop.define import App, StorageType
 from lollypop.database_upgrade import DatabaseAlbumsUpgrade
 from lollypop.sqlcursor import SqlCursor
 from lollypop.logger import Logger
@@ -192,13 +192,15 @@ class Database:
         except Exception as e:
             Logger.error("Database::drop_db():", e)
 
-    def exists_in_db(self, album, artists, track):
+    def exists_in_db(self, album, artists, track,
+                     storage_type=StorageType.NONE):
         """
             Search if item exists in db
             @param track as str
             @param album as str
             @param artists as [str]
-            @return object
+            @param storage_type as int
+            @return int
         """
         artist_ids = []
         for artist in artists:
@@ -207,7 +209,10 @@ class Database:
         album_id = App().albums.get_id_by_name_artists(album, artist_ids)
         if album_id is None:
             return None
-        elif track is None:
+        album_storage_type = App().albums.get_storage_type(album_id)
+        # If not track to check, albums exists only if storage is different
+        # Allow to populate albums with missing tracks
+        if track is None and not album_storage_type & storage_type:
             return album_id
         else:
             track_id = App().tracks.get_id_by(track,

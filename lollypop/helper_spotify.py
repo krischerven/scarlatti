@@ -18,7 +18,6 @@ from time import time, sleep
 
 from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep
-from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
@@ -384,17 +383,14 @@ class SpotifyHelper(GObject.Object):
                 cancellable_sleep(10, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
+            artists = [artist["name"]
+                       for artist in item["album"]["artists"]]
             track_id = App().db.exists_in_db(item["album"]["name"],
-                                             [artist["name"]
-                                             for artist in item["artists"]],
+                                             artists,
                                              item["name"])
             if track_id is not None:
-                track = Track(track_id)
-                if track.album.id not in self.__album_ids[cancellable] and\
-                        track.is_web:
-                    self.__album_ids[cancellable].append(track.album.id)
-                    if storage_type & StorageType.EPHEMERAL:
-                        GLib.idle_add(self.emit, "new-album", track.album)
+                Logger.debug("SpotifyHelper: track exists in DB: %s - %s",
+                             item["name"], artists)
                 continue
             (album_id,
              track_id,
@@ -425,19 +421,16 @@ class SpotifyHelper(GObject.Object):
                 cancellable_sleep(10, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
+            artists = [artist["name"]
+                       for artist in album_item["artists"]]
             album_id = App().db.exists_in_db(
                                     album_item["name"],
-                                    [artist["name"]
-                                     for artist in album_item["artists"]],
-                                    None)
+                                    artists,
+                                    None,
+                                    storage_type)
             if album_id is not None:
-                if album_id not in self.__album_ids[cancellable]:
-                    album = Album(album_id)
-                    if album.tracks:
-                        track = album.tracks[0]
-                        if track.is_web and\
-                                storage_type & StorageType.EPHEMERAL:
-                            GLib.idle_add(self.emit, "new-album", album)
+                Logger.debug("SpotifyHelper: album exists in DB: %s - %s",
+                             artists, album_item["name"])
                 continue
             uri = "https://api.spotify.com/v1/albums/%s" % album_item["id"]
             token = "Bearer %s" % self.__token
@@ -467,6 +460,8 @@ class SpotifyHelper(GObject.Object):
         _album_artists = []
         for artist in payload["album"]["artists"]:
             _album_artists.append(artist["name"])
+        Logger.debug("SpotifyHelper::__save_track(): %s - %s",
+                     _artists, title)
         # Translate to tag value
         artists = ";".join(_artists)
         album_artists = ";".join(_album_artists)
