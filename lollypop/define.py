@@ -165,15 +165,6 @@ class Size:
     BIG = 1300
 
 
-class Sizing:
-    MINI = 200
-    SMALL = 350
-    MEDIUM = 500
-    BIG = 700
-    MPRIS = 800
-    LARGE = 1000
-
-
 class OrderBy:
     ARTIST = 0
     NAME = 1

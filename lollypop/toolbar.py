@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Sizing
+from lollypop.define import App, Size, AdaptiveSize
 from lollypop.toolbar_playback import ToolbarPlayback
 from lollypop.toolbar_info import ToolbarInfo
 from lollypop.toolbar_title import ToolbarTitle
@@ -31,7 +31,7 @@ class Toolbar(Gtk.HeaderBar):
             @param window as Window
         """
         Gtk.HeaderBar.__init__(self)
-        self.__width = Sizing.SMALL
+        self.__width = Size.MINI
         self.set_title("Lollypop")
         self.__toolbar_playback = ToolbarPlayback(window)
         self.__toolbar_playback.show()
@@ -55,7 +55,7 @@ class Toolbar(Gtk.HeaderBar):
             Allow snapping for screen with width < 1400
             @return (int, int)
         """
-        return (Sizing.SMALL, self.__width)
+        return (Size.SMALL, self.__width)
 
     def set_content_width(self, window_width):
         """
@@ -66,15 +66,16 @@ class Toolbar(Gtk.HeaderBar):
         width += self.__toolbar_end.get_preferred_width()[1]
         window = self.get_window()
         if window is not None:
-            available = window.get_width() - width
+            self.__width = window.get_width()
+            available = self.__width - width
             if available > 0:
-                if window_width >= Sizing.MEDIUM:
+                if App().window.adaptive_size & (AdaptiveSize.BIG |
+                                                 AdaptiveSize.LARGE):
                     title = available / 2
                 else:
                     title = available
                 self.__toolbar_title.set_width(title)
                 self.__toolbar_info.set_width((available - title) / 2)
-            self.__width = window.get_width()
 
     def set_mini(self, mini):
         """
