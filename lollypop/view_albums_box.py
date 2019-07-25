@@ -276,6 +276,7 @@ class OthersAlbumsBoxView(AlbumsBoxView):
                                      weight="bold">%s %s</span>''' %
                                  (_("Others albums from"), artist))
                 label.set_property("halign", Gtk.Align.START)
+                label.set_ellipsize(Pango.EllipsizeMode.END)
                 label.set_margin_top(40)
                 label.show()
                 self.insert_row(0)
