@@ -20,7 +20,7 @@ from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import set_cursor_hand2
-from lollypop.define import App, ArtSize
+from lollypop.define import App, ArtSize, Size
 
 
 class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
@@ -215,7 +215,8 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
                 return
             self.__size = new_size
             self._previous_artwork_id = None
-            InformationController.on_current_changed(self, new_size, None)
+            InformationController.on_current_changed(
+                self, new_size + Size.MINI, None)
 
     def __on_artwork(self, surface):
         """
