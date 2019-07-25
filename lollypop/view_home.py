@@ -12,9 +12,11 @@
 
 from gi.repository import Gtk
 
+from gettext import gettext as _
+
 from lollypop.view import View
 from lollypop.utils import get_network_available
-from lollypop.define import ViewType
+from lollypop.define import ViewType, StorageType
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
@@ -57,8 +59,13 @@ class HomeView(View, FilteringHelper):
         if get_network_available("SPOTIFY") and\
                 get_network_available("YOUTUBE"):
             from lollypop.view_albums_box import AlbumsSpotifyBoxView
-            spotify_view = AlbumsSpotifyBoxView(self._view_type)
-            spotify_view.populate()
+            spotify_view = AlbumsSpotifyBoxView(_("You should like this:"),
+                                                self._view_type)
+            spotify_view.populate(StorageType.SPOTIFY_SIMILARS)
+            self.__grid.add(spotify_view)
+            spotify_view = AlbumsSpotifyBoxView(_("New albums from Spotify"),
+                                                self._view_type)
+            spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
             self.__grid.add(spotify_view)
 
     def activate_child(self):

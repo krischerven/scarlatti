@@ -236,7 +236,7 @@ class SimilarsPopover(Popover):
             @param providers as {}
         """
         if artists:
-            (artist, cover_uri) = artists.pop(0)
+            (spotify_id, artist, cover_uri) = artists.pop(0)
             if artist in self.__added:
                 return
             self.__added.append(artist)

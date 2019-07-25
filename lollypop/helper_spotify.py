@@ -15,6 +15,7 @@ from gi.repository import GLib, Soup, GObject, Gio
 import json
 from base64 import b64encode
 from time import time, sleep
+from random import choice, shuffle
 
 from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep
@@ -115,11 +116,56 @@ class SpotifyHelper(GObject.Object):
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]["items"]:
-                    artist_id = item["uri"].split(":")[-1]
+                    artist_id = item["id"]
                     return artist_id
         except Exception as e:
             Logger.error("SpotifyHelper::get_artist_id(): %s", e)
         return None
+
+    def search_similar_albums(self, cancellable):
+        """
+            Add similar albums to DB
+            @param cancellable as Gio.Cancellable
+        """
+        self.__album_ids[cancellable] = []
+        try:
+            while self.wait_for_token():
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
+                sleep(1)
+            token = "Bearer %s" % self.__token
+            helper = TaskHelper()
+            helper.add_header("Authorization", token)
+            artist_ids = App().artists.get_randoms(20)
+            similar_ids = []
+            # Get similars spotify ids
+            for (artist_id, name, sortname) in artist_ids:
+                cancellable_sleep(5, cancellable)
+                spotify_id = self.get_artist_id(name, cancellable)
+                if spotify_id is None:
+                    continue
+                similar_artists = self.get_similar_artists(spotify_id,
+                                                           cancellable)
+                for (similar_id, name, cover_uri) in similar_artists:
+                    similar_ids.append(similar_id)
+            # Add albums
+            shuffle(similar_ids)
+            for similar_id in similar_ids:
+                count = len(App().albums.get_for_storage_type(
+                                StorageType.SPOTIFY_SIMILARS, 20))
+                if count > 20:
+                    return
+                cancellable_sleep(5, cancellable)
+                albums_payload = self.__get_artist_albums_payload(similar_id,
+                                                                  cancellable)
+                if albums_payload:
+                    self.__create_albums_from_albums_payload(
+                                           [choice(albums_payload)],
+                                           StorageType.SPOTIFY_SIMILARS,
+                                           cancellable)
+        except Exception as e:
+            Logger.error("SpotifyHelper::search_similar_albums(): %s", e)
+        del self.__album_ids[cancellable]
 
     def search_new_releases(self, cancellable):
         """
@@ -142,7 +188,7 @@ class SpotifyHelper(GObject.Object):
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                self.__create_album_from_album_payload(
+                self.__create_albums_from_albums_payload(
                                              decode["albums"]["items"],
                                              StorageType.SPOTIFY_NEW_RELEASES,
                                              cancellable)
@@ -172,7 +218,13 @@ class SpotifyHelper(GObject.Object):
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]:
-                    artists.append((item["name"], item["images"][1]["url"]))
+                    try:
+                        image_uri = item["images"][1]["url"]
+                    except:
+                        image_uri = None
+                    artists.append((item["id"],
+                                    item["name"],
+                                    image_uri))
         except Exception as e:
             Logger.error("SpotifyHelper::get_similar_artists(): %s", e)
         return artists
@@ -198,7 +250,7 @@ class SpotifyHelper(GObject.Object):
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                self.__create_album_from_album_payload(
+                self.__create_albums_from_albums_payload(
                                                  decode["albums"]["items"],
                                                  StorageType.EPHEMERAL,
                                                  cancellable)
@@ -278,7 +330,7 @@ class SpotifyHelper(GObject.Object):
             Populate DB in a background task
         """
         try:
-            # self.search_similars(self.__cancellable)
+            self.search_similar_albums(self.__cancellable)
             self.search_new_releases(self.__cancellable)
             # Remove older albums
             App().tracks.del_old_for_storage_type(
@@ -294,7 +346,7 @@ class SpotifyHelper(GObject.Object):
             Get albums payload for artist
             @param spotify_id as str
             @param cancellable as Gio.Cancellable
-            @return str
+            @return {}
         """
         try:
             while self.wait_for_token():
@@ -304,13 +356,15 @@ class SpotifyHelper(GObject.Object):
             token = "Bearer %s" % self.__token
             helper = TaskHelper()
             helper.add_header("Authorization", token)
-            uri = "https://api.spotify.com/v1/artists/%s/albums"
+            uri = "https://api.spotify.com/v1/artists/%s/albums" % spotify_id
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                return decode["albums"]
+                return decode["items"]
         except Exception as e:
-            Logger.warning("SpotifyHelper::charts(): %s", e)
+            Logger.warning(
+                "SpotifyHelper::__get_artist_albums_payload(): %s", e)
+        return None
 
     def __get_track_payload(self, helper, spotify_id, cancellable):
         """
@@ -355,7 +409,7 @@ class SpotifyHelper(GObject.Object):
     def __create_album_from_tracks_payload(self, payload, storage_type,
                                            cancellable):
         """
-            Get albums from a track payload
+            Create albums from a track payload
             @param payload as {}
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
@@ -364,7 +418,7 @@ class SpotifyHelper(GObject.Object):
         # Populate tracks
         for item in payload:
             if not storage_type & StorageType.EPHEMERAL:
-                cancellable_sleep(10, cancellable)
+                cancellable_sleep(5, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             artists = [artist["name"]
@@ -391,10 +445,10 @@ class SpotifyHelper(GObject.Object):
                                   storage_type,
                                   cancellable)
 
-    def __create_album_from_album_payload(self, payload, storage_type,
-                                          cancellable):
+    def __create_albums_from_albums_payload(self, payload, storage_type,
+                                            cancellable):
         """
-            Get albums from an album payload
+            Create albums from albums payload
             @param payload as {}
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
@@ -402,7 +456,7 @@ class SpotifyHelper(GObject.Object):
         # Populate tracks
         for album_item in payload:
             if not storage_type & StorageType.EPHEMERAL:
-                cancellable_sleep(10, cancellable)
+                cancellable_sleep(5, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             artists = [artist["name"]
@@ -459,12 +513,11 @@ class SpotifyHelper(GObject.Object):
                                                 GLib.TimeZone.new_local())
             timestamp = dt.to_unix()
             year = dt.get_year()
-        except Exception as e:
-            Logger.warning("SpotifyHelper::__save_track(): %s", e)
+        except:
             timestamp = None
             year = None
         duration = payload["duration_ms"] // 1000
-        cover_uri = payload["album"]["images"][1]["url"]
+        cover_uri = payload["album"]["images"][0]["url"]
         uri = "web://%s" % payload["id"]
         mtime = int(time())
         (track_id, album_id) = App().scanner.save_track(

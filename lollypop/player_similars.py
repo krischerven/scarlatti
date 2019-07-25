@@ -72,7 +72,7 @@ class SimilarsPlayer:
             @return artist_id as int
         """
         similar_artist_ids = []
-        for (artist, cover_uri) in artists:
+        for (spotify_id,    artist, cover_uri) in artists:
             similar_artist_id = App().artists.get_id(artist)
             if similar_artist_id is not None:
                 if App().artists.get_albums([similar_artist_id]):

@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType, MARGIN, StorageType
+from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
@@ -479,13 +479,14 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
     """
 
     @signals
-    def __init__(self, view_type):
+    def __init__(self, text, view_type):
         """
             Init view
+            @param text as str
             @param view_type as ViewType
         """
         AlbumsLineView.__init__(self, view_type)
-        self._label.set_text(_("New albums from Spotify"))
+        self._label.set_text(text)
         self.__cancellable = Gio.Cancellable()
         return [
             (App().settings, "changed::network-access",
@@ -494,9 +495,10 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
              "_on_network_access_changed")
         ]
 
-    def populate(self):
+    def populate(self, storage_type):
         """
             Populate view
+            @param storage_type as StorageType
         """
         def on_load(items):
             AlbumsLineView.populate(self, items)
@@ -504,8 +506,7 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
                 self.__show_view()
 
         def load():
-            album_ids = App().albums.get_for_storage_type(
-                StorageType.SPOTIFY_NEW_RELEASES, 20)
+            album_ids = App().albums.get_for_storage_type(storage_type, 20)
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))

@@ -47,6 +47,7 @@ class StorageType:
     EPHEMERAL = 1 << 2
     SAVED = 1 << 3
     SPOTIFY_NEW_RELEASES = 1 << 4
+    SPOTIFY_SIMILARS = 1 << 5
 
 
 class ArtBehaviour:

@@ -224,7 +224,8 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
             for similar_item in artist_item.get_similar():
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
-                artists.append((similar_item.item.name,
+                artists.append((None,
+                                similar_item.item.name,
                                 similar_item.item.get_cover_image()))
         except Exception as e:
             Logger.error("LastFM::get_similar_artists(): %s", e)
