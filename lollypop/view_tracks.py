@@ -43,16 +43,17 @@ class TracksView(SignalsHelper):
     }
 
     @signals
-    def __init__(self, window, position=0):
+    def __init__(self, window, orientation, position=0):
         """
             Init view
             @param window as AdaptiveWindow/None
+            @param orientation as Gtk.Orientation
             @param initial position as int
         """
         self.__discs = []
         self.__position = position
         self._responsive_widget = None
-        self.__orientation = None
+        self.__orientation = orientation
         self.__populated = False
         self.__cancellable = Gio.Cancellable()
 
@@ -124,6 +125,8 @@ class TracksView(SignalsHelper):
             self.__discs_to_load = list(self.__discs)
             for disc in self.__discs:
                 self.__add_disc_container(disc.number)
+            if self.__orientation is not None:
+                self.__set_orientation(self.__orientation)
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
@@ -168,13 +171,6 @@ class TracksView(SignalsHelper):
             if child.id == App().player.current_track.id:
                 return child.translate_coordinates(parent, 0, 0)[1]
         return None
-
-    def set_orientation(self, orientation):
-        """
-            Set columns orientation
-            @param orientation as Gtk.Orientation
-        """
-        self.__set_orientation(orientation)
 
     def stop(self):
         """

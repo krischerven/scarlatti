@@ -48,12 +48,10 @@ class TracksPopover(Popover, TracksView,
         wanted_width = min(Size.NORMAL, window_width * 0.5)
         wanted_height = Size.MINI
         self._view_type = ViewType.TWO_COLUMNS
-        TracksView.__init__(self, None)
+        orientation = Gtk.Orientation.VERTICAL if wanted_width < Size.MEDIUM\
+            else Gtk.Orientation.HORIZONTAL
+        TracksView.__init__(self, None, orientation)
         self.populate()
-        if wanted_width < Size.MEDIUM:
-            self.set_orientation(Gtk.Orientation.VERTICAL)
-        else:
-            self.set_orientation(Gtk.Orientation.HORIZONTAL)
         self.__scrolled = Gtk.ScrolledWindow()
         self.__scrolled.add(self._responsive_widget)
         self.__scrolled.set_property("width-request", wanted_width)

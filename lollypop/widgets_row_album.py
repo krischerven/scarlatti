@@ -63,7 +63,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         """
         Gtk.ListBoxRow.__init__(self)
         self._view_type = view_type
-        TracksView.__init__(self, None, position)
+        TracksView.__init__(self, None, Gtk.Orientation.VERTICAL, position)
         self.__revealer = None
         self.__reveal = reveal
         self._artwork = None
@@ -179,7 +179,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         else:
             if self._responsive_widget is None:
                 TracksView.populate(self)
-                self.set_orientation(Gtk.Orientation.VERTICAL)
                 self._responsive_widget.show()
                 self.__revealer.add(self._responsive_widget)
             self.__revealer.set_reveal_child(True)
