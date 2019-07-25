@@ -338,8 +338,10 @@ class SpotifyHelper(GObject.Object):
             # Remove older albums
             for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
                                  StorageType.SPOTIFY_SIMILARS]:
-                if len(App().albums.get_for_storage_type(storage_type)) >\
-                        self.__MAX_ITEMS_PER_STORAGE_TYPE:
+                if len(App().albums.get_for_storage_type(
+                        storage_type,
+                        self.__MAX_ITEMS_PER_STORAGE_TYPE + 5)) >\
+                            self.__MAX_ITEMS_PER_STORAGE_TYPE:
                     App().tracks.del_old_for_storage_type(storage_type)
             App().tracks.clean()
             App().albums.clean()

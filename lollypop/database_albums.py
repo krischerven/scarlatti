@@ -270,18 +270,22 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def get_for_storage_type(self, storage_type, limit=100):
+    def get_for_storage_type(self, storage_type, limit, shuffle=False):
         """
             Get albums by storage type
             @param storage_type as StorageType
             @param limit as int
+            @param shuffle as bool
             @return [int]
         """
         with SqlCursor(App().db) as sql:
             filters = (storage_type, limit)
             request = "SELECT albums.rowid\
                        FROM albums\
-                       WHERE storage_type=? LIMIT ?"
+                       WHERE storage_type=?"
+            if shuffle:
+                request += " ORDER BY RANDOM()"
+            request += " LIMIT ?"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 

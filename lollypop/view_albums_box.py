@@ -506,7 +506,8 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
                 self.__show_view()
 
         def load():
-            album_ids = App().albums.get_for_storage_type(storage_type, 20)
+            album_ids = App().albums.get_for_storage_type(storage_type,
+                                                          20, True)
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
