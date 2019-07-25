@@ -19,12 +19,12 @@ from lollypop.widgets_tracks import TracksWidget
 from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import get_position_list, set_cursor_hand2
-from lollypop.define import App, Type, ViewType, Size
+from lollypop.define import App, Type, ViewType, AdaptiveSize
 
 
-class TracksView(SizeAllocationHelper):
+class TracksView(SignalsHelper):
     """
         Responsive view showing discs on one or two rows
         Need to be inherited by an Album widget (AlbumListView, AlbumWidget)
@@ -42,22 +42,38 @@ class TracksView(SizeAllocationHelper):
                                (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT))
     }
 
-    def __init__(self, view_type, position=0):
+    @signals
+    def __init__(self, window, position=0):
         """
-            Init widget
-            @param view_type as ViewType
+            Init view
+            @param window as AdaptiveWindow/None
             @param initial position as int
         """
-        if App().settings.get_value("force-single-column"):
-            view_type &= ~ViewType.TWO_COLUMNS
-        if not hasattr(self, "_view_type"):
-            self._view_type = view_type
         self.__discs = []
         self.__position = position
         self._responsive_widget = None
-        self._orientation = None
+        self.__orientation = None
         self.__populated = False
         self.__cancellable = Gio.Cancellable()
+
+        if window is None:
+            # Calling set_orientation() is needed
+            return []
+        if App().settings.get_value("force-single-column") or\
+                not self._view_type & ViewType.TWO_COLUMNS:
+            self.connect("realize",
+                         self.__on_realize,
+                         window,
+                         Gtk.Orientation.VERTICAL)
+            return []
+        else:
+            self.connect("realize",
+                         self.__on_realize,
+                         window,
+                         Gtk.Orientation.HORIZONTAL)
+            return [
+                (window, "adaptive-size-changed", "_on_adaptive_size_changed")
+            ]
 
     def set_playing_indicator(self):
         """
@@ -91,7 +107,6 @@ class TracksView(SizeAllocationHelper):
             @thread safe
         """
         if self._responsive_widget is None:
-            SizeAllocationHelper.__init__(self)
             if self._view_type & ViewType.DND:
                 self.connect("key-press-event", self.__on_key_press_event)
             self._responsive_widget = Gtk.Grid()
@@ -153,6 +168,13 @@ class TracksView(SizeAllocationHelper):
             if child.id == App().player.current_track.id:
                 return child.translate_coordinates(parent, 0, 0)[1]
         return None
+
+    def set_orientation(self, orientation):
+        """
+            Set columns orientation
+            @param orientation as Gtk.Orientation
+        """
+        self.__set_orientation(orientation)
 
     def stop(self):
         """
@@ -239,94 +261,18 @@ class TracksView(SizeAllocationHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _on_adaptive_size_changed(self, widget, adaptive_size):
         """
-            Change box max/min children
-            @param allocation as Gtk.Allocation
+            Change columns disposition
+            @param widget as Gtk.Widget
+            @param adaptive_size as AdaptiveSize
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            # We need an initial orientation
-            # but we only need to follow allocation in TWO_COLUMNS mode
-            if not self._view_type & ViewType.TWO_COLUMNS and\
-                    self._orientation is not None:
-                return
-            update = False
-            # We want vertical orientation
-            # when not enought place for cover or tracks
-            if allocation.width < Size.MEDIUM:
-                orientation = Gtk.Orientation.VERTICAL
-            else:
-                orientation = Gtk.Orientation.HORIZONTAL
-            if orientation != self._orientation:
-                self._orientation = orientation
-                update = True
-
-            if update:
-                for child in self._responsive_widget.get_children():
-                    self._responsive_widget.remove(child)
-                idx = 0
-                # Vertical
-                ##########################
-                #  --------Label-------- #
-                #  |     Column 1      | #
-                #  |     Column 2      | #
-                ##########################
-                # Horizontal
-                ###########################
-                # ---------Label--------- #
-                # | Column 1 | Column 2 | #
-                ###########################
-                for disc in self.__discs:
-                    if not disc.tracks:
-                        continue
-                    show_label = len(self.__discs) > 1
-                    disc_names = self._album.disc_names(disc.number)
-                    if show_label or disc_names:
-                        if disc_names:
-                            disc_text = ", ".join(disc_names)
-                        elif show_label:
-                            disc_text = _("Disc %s") % disc.number
-                        label = Gtk.Label.new()
-                        label.set_ellipsize(Pango.EllipsizeMode.END)
-                        label.set_text(disc_text)
-                        label.set_property("halign", Gtk.Align.START)
-                        label.get_style_context().add_class("dim-label")
-                        label.show()
-                        eventbox = Gtk.EventBox()
-                        eventbox.connect("realize", set_cursor_hand2)
-                        eventbox.set_tooltip_text(_("Play"))
-                        eventbox.connect("button-press-event",
-                                         self.__on_disc_button_press_event,
-                                         disc)
-                        eventbox.add(label)
-                        eventbox.show()
-                        if orientation == Gtk.Orientation.VERTICAL:
-                            self._responsive_widget.attach(
-                                eventbox, 0, idx, 1, 1)
-                        else:
-                            self._responsive_widget.attach(
-                                eventbox, 0, idx, 2, 1)
-                        idx += 1
-                    if orientation == Gtk.Orientation.VERTICAL:
-                        self._responsive_widget.attach(
-                                  self._tracks_widget_left[disc.number],
-                                  0, idx, 2, 1)
-                        idx += 1
-                    else:
-                        self._responsive_widget.attach(
-                                  self._tracks_widget_left[disc.number],
-                                  0, idx, 1, 1)
-                    if self._view_type & ViewType.TWO_COLUMNS:
-                        if orientation == Gtk.Orientation.VERTICAL:
-                            self._responsive_widget.attach(
-                                       self._tracks_widget_right[disc.number],
-                                       0, idx, 2, 1)
-                        else:
-                            self._responsive_widget.attach(
-                                       self._tracks_widget_right[disc.number],
-                                       1, idx, 1, 1)
-                    idx += 1
-            return True
+        if adaptive_size & (AdaptiveSize.LARGE | AdaptiveSize.BIG):
+            orientation = Gtk.Orientation.HORIZONTAL
+        else:
+            orientation = Gtk.Orientation.VERTICAL
+        if self.__orientation != orientation:
+            self.__set_orientation(orientation)
 
     def _on_album_updated(self, scanner, album_id):
         """
@@ -395,6 +341,76 @@ class TracksView(SizeAllocationHelper):
         self._tracks_widget_right[disc_number].connect("activated",
                                                        self._on_activated)
 
+    def __set_orientation(self, orientation):
+        """
+            Set columns orientation
+            @param orientation as Gtk.Orientation
+        """
+        for child in self._responsive_widget.get_children():
+            self._responsive_widget.remove(child)
+        idx = 0
+        # Vertical
+        ##########################
+        #  --------Label-------- #
+        #  |     Column 1      | #
+        #  |     Column 2      | #
+        ##########################
+        # Horizontal
+        ###########################
+        # ---------Label--------- #
+        # | Column 1 | Column 2 | #
+        ###########################
+        for disc in self.__discs:
+            if not disc.tracks:
+                continue
+            show_label = len(self.__discs) > 1
+            disc_names = self._album.disc_names(disc.number)
+            if show_label or disc_names:
+                if disc_names:
+                    disc_text = ", ".join(disc_names)
+                elif show_label:
+                    disc_text = _("Disc %s") % disc.number
+                label = Gtk.Label.new()
+                label.set_ellipsize(Pango.EllipsizeMode.END)
+                label.set_text(disc_text)
+                label.set_property("halign", Gtk.Align.START)
+                label.get_style_context().add_class("dim-label")
+                label.show()
+                eventbox = Gtk.EventBox()
+                eventbox.connect("realize", set_cursor_hand2)
+                eventbox.set_tooltip_text(_("Play"))
+                eventbox.connect("button-press-event",
+                                 self.__on_disc_button_press_event,
+                                 disc)
+                eventbox.add(label)
+                eventbox.show()
+                if orientation == Gtk.Orientation.VERTICAL:
+                    self._responsive_widget.attach(
+                        eventbox, 0, idx, 1, 1)
+                else:
+                    self._responsive_widget.attach(
+                        eventbox, 0, idx, 2, 1)
+                idx += 1
+            if orientation == Gtk.Orientation.VERTICAL:
+                self._responsive_widget.attach(
+                          self._tracks_widget_left[disc.number],
+                          0, idx, 2, 1)
+                idx += 1
+            else:
+                self._responsive_widget.attach(
+                          self._tracks_widget_left[disc.number],
+                          0, idx, 1, 1)
+            if self._view_type & ViewType.TWO_COLUMNS:
+                if orientation == Gtk.Orientation.VERTICAL:
+                    self._responsive_widget.attach(
+                               self._tracks_widget_right[disc.number],
+                               0, idx, 2, 1)
+                else:
+                    self._responsive_widget.attach(
+                               self._tracks_widget_right[disc.number],
+                               1, idx, 1, 1)
+            idx += 1
+
     def __add_tracks(self, widgets, disc_number):
         """
             Add tracks for to tracks widget
@@ -446,3 +462,16 @@ class TracksView(SizeAllocationHelper):
         album = Album(disc.album.id)
         album.set_tracks(disc.tracks)
         App().player.play_album(album)
+
+    def __on_realize(self, widget, window, orientation):
+        """
+            Set initial orientation
+            @param widget as Gtk.Widget
+            @param window as AdaptiveWindow
+            @param orientation as Gtk.Orientation
+        """
+        if orientation == Gtk.Orientation.VERTICAL:
+            self.__set_orientation(orientation)
+        elif window is not None:
+            self._on_adaptive_size_changed(window,
+                                           window.adaptive_size)

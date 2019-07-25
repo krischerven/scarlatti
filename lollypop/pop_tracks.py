@@ -20,9 +20,11 @@ from lollypop.define import MARGIN_SMALL, Size
 from lollypop.utils import set_cursor_hand2
 from lollypop.widgets_utils import Popover
 from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class TracksPopover(Popover, TracksView, SignalsHelper):
+class TracksPopover(Popover, TracksView,
+                    SizeAllocationHelper, SignalsHelper):
     """
         A popover with tracks
     """
@@ -39,13 +41,19 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
             @param width as int
         """
         Popover.__init__(self)
-        TracksView.__init__(self, ViewType.TWO_COLUMNS)
+        SizeAllocationHelper.__init__(self)
         self._album = album
         self.get_style_context().add_class("box-shadow")
-        self.populate()
         window_width = App().window.get_allocated_width()
         wanted_width = min(Size.NORMAL, window_width * 0.5)
         wanted_height = Size.MINI
+        self._view_type = ViewType.TWO_COLUMNS
+        TracksView.__init__(self, None)
+        self.populate()
+        if wanted_width < Size.MEDIUM:
+            self.set_orientation(Gtk.Orientation.VERTICAL)
+        else:
+            self.set_orientation(Gtk.Orientation.HORIZONTAL)
         self.__scrolled = Gtk.ScrolledWindow()
         self.__scrolled.add(self._responsive_widget)
         self.__scrolled.set_property("width-request", wanted_width)
@@ -132,7 +140,7 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if TracksView._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
             App().art_helper.set_album_artwork(
                     self._album,
                     ArtSize.SMALL,
