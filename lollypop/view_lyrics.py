@@ -16,13 +16,14 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.objects_radio import Radio
-from lollypop.define import App, Sizing, ArtBehaviour, ViewType
+from lollypop.define import App, ArtBehaviour, ViewType, AdaptiveSize, Size
 from lollypop.controller_information import InformationController
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_lyrics import SyncLyricsHelper
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
 class LyricsLabel(Gtk.Stack):
@@ -76,7 +77,8 @@ class LyricsLabel(Gtk.Stack):
                 break
 
 
-class LyricsView(View, InformationController, SignalsHelper):
+class LyricsView(View, InformationController,
+                 SignalsHelper, SizeAllocationHelper):
     """
         Show lyrics for track
     """
@@ -91,11 +93,10 @@ class LyricsView(View, InformationController, SignalsHelper):
                                        ArtBehaviour.BLUR_MAX |
                                        ArtBehaviour.CROP |
                                        ArtBehaviour.DARKER)
-        self.__size_allocate_timeout_id = None
+        SizeAllocationHelper.__init__(self)
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
         self.__lyrics_text = ""
-        self.__size = 0
         self.__cancellable = Gio.Cancellable()
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/LyricsView.ui")
@@ -108,10 +109,12 @@ class LyricsView(View, InformationController, SignalsHelper):
         # We do not use View scrolled window because it does not work with
         # an overlay
         self.add(builder.get_object("widget"))
-        self.connect("size-allocate", self.__on_size_allocate)
         self.__sync_lyrics_helper = SyncLyricsHelper()
+        self.__update_lyrics_style()
         return [
-            (App().player, "current-changed", "_on_current_changed")
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().window, "adaptive-size-changed",
+             "_on_adaptive_size_changed")
         ]
 
     def populate(self, track):
@@ -120,13 +123,13 @@ class LyricsView(View, InformationController, SignalsHelper):
             @param track as Track
         """
         self.__current_track = track
-        self.update_artwork(self.__size, self.__size)
+        size = max(self.get_allocated_width(), self.get_allocated_height())
+        self.update_artwork(size + Size.MINI, size + Size.MINI)
         self.__lyrics_text = ""
         self.__lyrics_label.set_text(_("Loading…"))
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
         self.__sync_lyrics_helper.load(track)
-        self.__update_lyrics_style()
         if self.__sync_lyrics_helper.available:
             self.__translate_button.hide()
             if self.__lyrics_timeout_id is None:
@@ -162,6 +165,16 @@ class LyricsView(View, InformationController, SignalsHelper):
 ##############
 # PROTECTED  #
 ##############
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            size = max(allocation.width, allocation.height)
+            self._previous_artwork_id = None
+            self.update_artwork(size + Size.MINI, size + Size.MINI)
+
     def _on_translate_toggled(self, button):
         """
             Translate lyrics
@@ -190,6 +203,14 @@ class LyricsView(View, InformationController, SignalsHelper):
         """
         self.populate(App().player.current_track)
         self.__translate_button.set_sensitive(True)
+
+    def _on_adaptive_size_changed(self, window, adaptive_size):
+        """
+            Update internal sizing
+            @param window as Window
+            @param adaptive_size as AdaptiveSize
+        """
+        self.__update_lyrics_style()
 
 ############
 # PRIVATE  #
@@ -312,48 +333,24 @@ class LyricsView(View, InformationController, SignalsHelper):
             context.remove_class(cls)
         context.add_class("lyrics")
         context.add_class("black")
-        width = self.get_allocated_width()
-        if width > Sizing.LARGE:
+        adaptive_size = App().window.adaptive_size
+        if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             if self.__sync_lyrics_helper.available:
                 context.add_class("text-xx-large")
             else:
                 context.add_class("text-x-large")
-        elif width > Sizing.MPRIS:
+        elif adaptive_size & AdaptiveSize.NORMAL:
             if self.__sync_lyrics_helper.available:
                 context.add_class("text-x-large")
             else:
                 context.add_class("text-large")
-        elif width > Sizing.BIG:
+        elif adaptive_size & AdaptiveSize.MEDIUM:
             if self.__sync_lyrics_helper.available:
                 context.add_class("text-large")
             else:
                 context.add_class("text-medium")
         elif self.__sync_lyrics_helper.available:
             context.add_class("text-medium")
-
-    def __handle_size_allocation(self):
-        """
-            Update style and resize cover
-        """
-        self.__size_allocate_timeout_id = None
-        self.__update_lyrics_style()
-        self._previous_artwork_id = None
-        self.update_artwork(self.__size, self.__size)
-
-    def __on_size_allocate(self, widget, allocation):
-        """
-            Update cover size
-            @param widget as Gtk.Widget
-            @param allocation as Gtk.Allocation
-        """
-        size = max(allocation.width, allocation.height)
-        if size == self.__size:
-            return
-        self.__size = size
-        if self.__size_allocate_timeout_id is not None:
-            GLib.source_remove(self.__size_allocate_timeout_id)
-        self.__size_allocate_timeout_id = GLib.idle_add(
-            self.__handle_size_allocation)
 
     def __on_lyrics_downloaded(self, uri, status, data, cls, separator):
         """
