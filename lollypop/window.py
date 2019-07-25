@@ -12,10 +12,10 @@
 
 from gi.repository import Gtk, Gdk, GLib
 
-from lollypop.define import App, Sizing, ScanType, AdaptiveSize
+from lollypop.define import App, ScanType, AdaptiveSize
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
-from lollypop.utils import is_unity, get_headerbar_buttons_width
+from lollypop.utils import is_unity
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.logger import Logger
 
@@ -37,8 +37,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         AdaptiveWindow.__init__(self)
         self.__timeout = None
         self.__miniplayer = None
-        self.__headerbar_buttons_width = get_headerbar_buttons_width()
-        App().player.connect("current-changed", self.__on_current_changed)
         self.__timeout_configure_id = None
         self.__setup_content()
         self.set_auto_startup_notification(False)
@@ -50,6 +48,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         return [
             (self, "window-state-event", "_on_window_state_event"),
             (self, "adaptive-size-changed", "_on_adaptive_size_changed"),
+            (App().player, "current-changed", "_on_current_changed")
         ]
 
     @property
@@ -78,6 +77,17 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
 ##############
 # PROTECTED  #
 ##############
+    def _on_current_changed(self, player):
+        """
+            Update toolbar
+            @param player as Player
+        """
+        if App().player.current_track.id is None:
+            self.set_title("Lollypop")
+        else:
+            artists = ", ".join(player.current_track.artists)
+            self.set_title("%s - %s" % (artists, "Lollypop"))
+
     def _on_configure_event_timeout(self, width, height, x, y):
         """
             Setup content based on current size
@@ -184,17 +194,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.drag_dest_add_uri_targets()
         self.connect("drag-data-received", self.__on_drag_data_received)
 
-    def __handle_miniplayer(self, width, height):
-        """
-            Handle mini player show/hide
-            @param width as int
-            @param height as int
-        """
-        if width - self.__headerbar_buttons_width < Sizing.MPRIS:
-            self.__show_miniplayer(True)
-        else:
-            self.__show_miniplayer(False)
-
     def __on_realize(self, window):
         """
             Init window content
@@ -212,17 +211,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             # No idea why, maybe scanner using Gstpbutils before Gstreamer
             # initialisation is finished...
             GLib.timeout_add(1000, App().scanner.update, ScanType.FULL)
-
-    def __on_current_changed(self, player):
-        """
-            Update toolbar
-            @param player as Player
-        """
-        if App().player.current_track.id is None:
-            self.set_title("Lollypop")
-        else:
-            artists = ", ".join(player.current_track.artists)
-            self.set_title("%s - %s" % (artists, "Lollypop"))
 
     def __on_back_button_clicked(self, gesture, n_press, x, y):
         """

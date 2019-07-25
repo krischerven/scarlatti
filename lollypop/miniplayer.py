@@ -18,7 +18,7 @@ from lollypop.controller_information import InformationController
 from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import set_cursor_hand2
 from lollypop.define import App, ArtSize
 
@@ -32,7 +32,7 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
         "revealed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
-    @signals_map
+    @signals
     def __init__(self):
         """
             Init mini player

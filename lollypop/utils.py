@@ -142,18 +142,6 @@ def on_query_tooltip(label, x, y, keyboard, tooltip):
         return True
 
 
-def get_headerbar_buttons_width():
-    """
-        Get headerbar buttons width
-        @return int
-    """
-    adwaita_width = 36
-    settings = Gio.Settings.new("org.gnome.desktop.wm.preferences")
-    button_layout = settings.get_value("button-layout").get_string()
-    split = button_layout.split(",")
-    return len(split) * adwaita_width
-
-
 def set_proxy_from_gnome():
     """
         Set proxy settings from GNOME
