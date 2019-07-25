@@ -200,7 +200,7 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
 
     def _handle_size_allocate(self, allocation):
         """
-            Change box max/min children
+            Handle artwork sizing
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
