@@ -157,6 +157,14 @@ class AdaptiveSize:
     LARGE = 1 << 5
 
 
+class Size:
+    MINI = 250
+    SMALL = 400
+    MEDIUM = 700
+    NORMAL = 1000
+    BIG = 1300
+
+
 class Sizing:
     MINI = 200
     SMALL = 350

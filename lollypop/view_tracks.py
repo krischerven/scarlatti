@@ -15,14 +15,13 @@ from gi.repository import GLib, Gtk, Gdk, Gio, GObject, Pango
 from gettext import gettext as _
 from collections import OrderedDict
 
-from lollypop.define import Sizing
 from lollypop.widgets_tracks import TracksWidget
 from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.utils import get_position_list, set_cursor_hand2
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, Size
 
 
 class TracksView(SizeAllocationHelper):
@@ -254,7 +253,7 @@ class TracksView(SizeAllocationHelper):
             update = False
             # We want vertical orientation
             # when not enought place for cover or tracks
-            if allocation.width < Sizing.BIG:
+            if allocation.width < Size.MEDIUM:
                 orientation = Gtk.Orientation.VERTICAL
             else:
                 orientation = Gtk.Orientation.HORIZONTAL

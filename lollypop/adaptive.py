@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize
+from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size
 
 
 class AdaptiveView:
@@ -405,6 +405,14 @@ class AdaptiveWindow:
             return self.__stack.history.count > 0
 
     @property
+    def adaptive_size(self):
+        """
+            Get adaptive size
+            @return AdaptiveSize
+        """
+        return self.__adaptive_size
+
+    @property
     def is_adaptive(self):
         """
             True if adaptive is on
@@ -424,17 +432,17 @@ class AdaptiveWindow:
             @param y as int
         """
         self.__configure_timeout_id = None
-        if width < 600:
+        if width < Size.MEDIUM:
             self.set_adaptive_stack(True)
         else:
             self.set_adaptive_stack(False)
-        if width < 400:
+        if width < Size.SMALL:
             adaptive_size = AdaptiveSize.SMALL
-        elif width < 600:
+        elif width < Size.MEDIUM:
             adaptive_size = AdaptiveSize.MEDIUM
-        elif width < 1000:
+        elif width < Size.NORMAL:
             adaptive_size = AdaptiveSize.NORMAL
-        elif width < 1200:
+        elif width < Size.BIG:
             adaptive_size = AdaptiveSize.BIG
         else:
             adaptive_size = AdaptiveSize.LARGE

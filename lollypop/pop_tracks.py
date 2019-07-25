@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view_tracks import TracksView
 from lollypop.define import App, ViewType, Shuffle, ArtSize, ArtBehaviour
-from lollypop.define import MARGIN_SMALL, Sizing
+from lollypop.define import MARGIN_SMALL, Size
 from lollypop.utils import set_cursor_hand2
 from lollypop.widgets_utils import Popover
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -44,8 +44,8 @@ class TracksPopover(Popover, TracksView, SignalsHelper):
         self.get_style_context().add_class("box-shadow")
         self.populate()
         window_width = App().window.get_allocated_width()
-        wanted_width = min(900, window_width * 0.5)
-        wanted_height = Sizing.MINI
+        wanted_width = min(Size.NORMAL, window_width * 0.5)
+        wanted_height = Size.MINI
         self.__scrolled = Gtk.ScrolledWindow()
         self.__scrolled.add(self._responsive_widget)
         self.__scrolled.set_property("width-request", wanted_width)
