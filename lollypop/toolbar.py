@@ -55,7 +55,8 @@ class Toolbar(Gtk.HeaderBar):
             Allow snapping for screen with width < 1400
             @return (int, int)
         """
-        return (Size.SMALL, self.__width)
+        width = max(Size.SMALL, self.__width)
+        return (Size.SMALL, width)
 
     def set_content_width(self, window_width):
         """
