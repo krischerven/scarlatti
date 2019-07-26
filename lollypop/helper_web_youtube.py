@@ -14,6 +14,7 @@ from gi.repository import GLib
 
 import json
 from re import sub
+from gettext import gettext as _
 
 from lollypop.define import App, GOOGLE_API_ID
 from lollypop.utils import escape
@@ -52,25 +53,29 @@ class YouTubeHelper:
             @param track as Track
             @return content uri as str/None
         """
-        python_path = GLib.get_user_data_dir() + "/lollypop/python"
-        path = "%s/bin/youtube-dl" % python_path
-        # Remove playlist args
-        uri = sub("list=.*", "", track.uri)
-        argv_list = [
-            [path, "-g", "-f", "bestaudio", uri, None],
-            [path, "-g", uri, None]]
-        for argv in argv_list:
-            (s, o, e, s) = GLib.spawn_sync(None,
-                                           argv,
-                                           ["PYTHONPATH=%s" % python_path],
-                                           GLib.SpawnFlags.SEARCH_PATH,
-                                           None)
-            if o:
-                return o.decode("utf-8")
-        error = e.decode("utf-8")
-        if App().notify is not None:
-            App().notify.send(error)
-        Logger.warning("YouTubeHelper::get_uri_content(): %s", error)
+        try:
+            python_path = GLib.get_user_data_dir() + "/lollypop/python"
+            path = "%s/bin/youtube-dl" % python_path
+            # Remove playlist args
+            uri = sub("list=.*", "", track.uri)
+            argv_list = [
+                [path, "-g", "-f", "bestaudio", uri, None],
+                [path, "-g", uri, None]]
+            for argv in argv_list:
+                (s, o, e, s) = GLib.spawn_sync(None,
+                                               argv,
+                                               ["PYTHONPATH=%s" % python_path],
+                                               GLib.SpawnFlags.SEARCH_PATH,
+                                               None)
+                if o:
+                    return o.decode("utf-8")
+            error = e.decode("utf-8")
+            if App().notify is not None:
+                GLib.idle_add(App().notify.send,
+                              _("Can't find this track on YouTube"))
+            Logger.warning("YouTubeHelper::get_uri_content(): %s", error)
+        except Exception as e:
+            Logger.warning("YouTubeHelper::get_uri_content(): %s", e)
         return None
 
 #######################

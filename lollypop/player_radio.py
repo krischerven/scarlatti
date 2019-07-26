@@ -71,8 +71,11 @@ class RadioPlayer(BasePlayer):
         from lollypop.helper_web_youtube import YouTubeHelper
         helper = YouTubeHelper()
         uri = helper.get_uri_content(track)
-        track.set_uri(uri)
-        GLib.idle_add(self.__start_playback, track, True)
+        if uri is not None:
+            track.set_uri(uri)
+            GLib.idle_add(self.__start_playback, track, True)
+        else:
+            self.stop()
 
     def __start_playback(self, track, play):
         """

@@ -50,4 +50,4 @@ class WebHelper:
             uri = helper.get_uri_content(track)
             if uri:
                 return uri
-        return ""
+        return None

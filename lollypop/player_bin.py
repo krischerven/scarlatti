@@ -292,7 +292,10 @@ class BinPlayer(BasePlayer):
         helper = WebHelper()
         helper.set_uri(track, self.__cancellable)
         uri = helper.get_track_content(track)
-        GLib.idle_add(play_uri, uri)
+        if uri is not None:
+            GLib.idle_add(play_uri, uri)
+        else:
+            self.next()
 
     def _scrobble(self, finished, finished_start_time):
         """
