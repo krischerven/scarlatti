@@ -19,7 +19,7 @@ from lollypop.objects_track import Track
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.define import App, ViewType, MARGIN_SMALL
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
@@ -28,7 +28,7 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
         Popover showing Albums View
     """
 
-    @signals_map
+    @signals
     def __init__(self, view_type):
         """
             Init view
