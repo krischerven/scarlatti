@@ -142,7 +142,6 @@ class HomeView(View, FilteringHelper):
         self._viewport.set_property("valign", Gtk.Align.FILL)
         label = Gtk.Label.new(_("Welcome on Lollypop"))
         label.get_style_context().add_class("text-xx-large")
-        label.get_style_context().add_class("dim-label")
         label.set_property("valign", Gtk.Align.END)
         label.set_vexpand(True)
         label.show()
