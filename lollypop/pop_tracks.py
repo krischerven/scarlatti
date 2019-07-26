@@ -18,7 +18,7 @@ from lollypop.view_tracks import TracksView
 from lollypop.define import App, ViewType, Shuffle, ArtSize, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Size
 from lollypop.widgets_utils import Popover
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -32,7 +32,7 @@ class TracksPopover(Popover, TracksView,
         "play-all-from": (GObject.SignalFlags.RUN_FIRST, None, ())
     }
 
-    @signals_map
+    @signals
     def __init__(self, album):
         """
             Init popover
@@ -122,9 +122,11 @@ class TracksPopover(Popover, TracksView,
         grid.add(overlay)
         grid.add(self.__scrolled)
         self.add(grid)
-        return [
-            (App().player, "current-changed", "_on_current_changed")
-        ]
+        return {
+            "map": [
+                (App().player, "current-changed", "_on_current_changed")
+            ]
+        }
 
 #######################
 # PROTECTED           #

@@ -31,19 +31,6 @@ def signals(f):
     return wrapper
 
 
-def signals_map(f):
-    """
-        Decorator to init signal helper
-    """
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        ret = f(*args, **kwargs)
-        SignalsHelper.__init__(args[0])
-        args[0].init_map(ret)
-
-    return wrapper
-
-
 class SignalsHelper():
     """
         Helper for autoconnect/disconnect signals on map
@@ -60,20 +47,16 @@ class SignalsHelper():
         """
             Init signals
         """
-        if signals:
-            self._connect_signals(signals)
+        if "init" in signals.keys():
+            self._connect_signals(signals["init"])
             self.connect("destroy",
-                         lambda x: self._disconnect_signals(signals))
+                         lambda x: self._disconnect_signals(signals["init"]))
 
-    def init_map(self, signals):
-        """
-            Init map signals
-        """
-        if signals:
+        if "map" in signals.keys():
             self.connect("map",
-                         lambda x: self._connect_signals(signals))
+                         lambda x: self._connect_signals(signals["map"]))
             self.connect("unmap",
-                         lambda x: self._disconnect_signals(signals))
+                         lambda x: self._disconnect_signals(signals["map"]))
 
 #######################
 # PROTECTE            #

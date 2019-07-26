@@ -84,9 +84,11 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
         self.attach(self.__grid, 0, 0, 1, 1)
         self.__grid.set_property("halign", Gtk.Align.CENTER)
         self._box.set_property("halign", Gtk.Align.CENTER)
-        return [
-            (App().player, "queue-changed", "_on_queue_changed")
-        ]
+        return {
+            "map": [
+                (App().player, "queue-changed", "_on_queue_changed")
+            ]
+        }
 
     def populate(self):
         """

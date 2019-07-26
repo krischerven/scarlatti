@@ -63,9 +63,11 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         if view_type & ViewType.SMALL and view_type & ViewType.SCROLLED:
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
                                       Gtk.PolicyType.NEVER)
-        return [
-            (App().scanner, "album-updated", "_on_album_updated")
-        ]
+        return {
+            "map": [
+                (App().scanner, "album-updated", "_on_album_updated")
+            ]
+        }
 
     def populate(self):
         """
@@ -504,12 +506,14 @@ class AlbumsSpotifyBoxView(AlbumsLineView):
         AlbumsLineView.__init__(self, view_type)
         self._label.set_text(text)
         self.__cancellable = Gio.Cancellable()
-        return [
-            (App().settings, "changed::network-access",
-             "_on_network_access_changed"),
-            (App().settings, "changed::network-access-acl",
-             "_on_network_access_changed")
-        ]
+        return {
+            "init": [
+                (App().settings, "changed::network-access",
+                 "_on_network_access_changed"),
+                (App().settings, "changed::network-access-acl",
+                 "_on_network_access_changed")
+            ]
+        }
 
     def populate(self, storage_type):
         """

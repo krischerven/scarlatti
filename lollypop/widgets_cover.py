@@ -40,9 +40,12 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         self.__artwork.get_style_context().add_class("white")
         self.add(self.__artwork)
         self.connect("realize", set_cursor_hand2)
-        return [
-            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
-        ]
+        return {
+            "init": [
+                (App().art, "album-artwork-changed",
+                 "_on_album_artwork_changed")
+            ]
+        }
 
     def set_artwork(self, art_size):
         """

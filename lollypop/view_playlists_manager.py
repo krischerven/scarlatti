@@ -47,9 +47,11 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self.insert_row(1)
         self.attach(self._new_button, 0, 1, 1, 1)
         self._widget_class = PlaylistRoundedWidget
-        return [
-            (App().playlists, "playlists-changed", "_on_playlist_changed")
-        ]
+        return {
+            "init": [
+                (App().playlists, "playlists-changed", "_on_playlist_changed")
+            ]
+        }
 
     def populate(self):
         """

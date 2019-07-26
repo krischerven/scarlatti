@@ -72,9 +72,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__title_label.get_style_context().add_class("text-x-large")
         self.add_overlay(widget)
         self.set_view_type(view_type)
-        return [
-           (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
-        ]
+        return {
+            "init": [
+               (App().art, "artist-artwork-changed",
+                "_on_artist_artwork_changed")
+            ]
+        }
 
     def set_view_type(self, view_type):
         """

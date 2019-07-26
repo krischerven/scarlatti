@@ -31,12 +31,14 @@ class ViewController(SignalsHelper):
             Init controller
             @param controller_type as ViewControllerType
         """
-        return [
-            (App().player, "current-changed", "_on_current_changed"),
-            (App().player, "duration-changed", "_on_duration_changed"),
-            (App().art, "%s-artwork-changed" % controller_type,
-             "_on_artwork_changed")
-        ]
+        return {
+            "init": [
+                (App().player, "current-changed", "_on_current_changed"),
+                (App().player, "duration-changed", "_on_duration_changed"),
+                (App().art, "%s-artwork-changed" % controller_type,
+                 "_on_artwork_changed")
+            ]
+        }
 
 #######################
 # PROTECTED           #

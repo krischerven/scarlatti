@@ -40,7 +40,11 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         self.get_style_context().add_class("trackswidget")
         self.set_property("hexpand", True)
         self.set_selection_mode(Gtk.SelectionMode.NONE)
-        return [(App().player, "queue-changed", "_on_queue_changed")]
+        return {
+            "init": [
+                (App().player, "queue-changed", "_on_queue_changed")
+            ]
+        }
 
     def update_playing(self, track_id):
         """

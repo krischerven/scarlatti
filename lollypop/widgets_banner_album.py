@@ -93,9 +93,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
         self.add_overlay(self.__widget)
-        return [
-            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
-        ]
+        return {
+            "init": [
+                (App().art, "album-artwork-changed",
+                 "_on_album_artwork_changed")
+            ]
+        }
 
     def set_view_type(self, view_type):
         """

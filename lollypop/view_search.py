@@ -75,14 +75,16 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         builder.connect_signals(self)
         self.__widget.set_property("halign", Gtk.Align.CENTER)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
-        return [
-            (App().spotify, "new-album", "_on_new_spotify_album"),
-            (App().spotify, "search-finished", "_on_search_finished"),
-            (App().settings, "changed::network-access",
-             "_update_bottom_buttons"),
-            (App().settings, "changed::network-access-acl",
-             "_update_bottom_buttons")
-         ]
+        return {
+            "init": [
+                (App().spotify, "new-album", "_on_new_spotify_album"),
+                (App().spotify, "search-finished", "_on_search_finished"),
+                (App().settings, "changed::network-access",
+                 "_update_bottom_buttons"),
+                (App().settings, "changed::network-access-acl",
+                 "_update_bottom_buttons")
+             ]
+        }
 
     def populate(self):
         pass

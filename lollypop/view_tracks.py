@@ -59,27 +59,36 @@ class TracksView(SignalsHelper):
 
         if window is None:
             # Calling set_orientation() is needed
-            return [
-                (App().player, "loading-changed", "_on_loading_changed")
-            ]
+            return {
+                "map": [
+                    (App().player, "loading-changed", "_on_loading_changed")
+                ]
+            }
         if App().settings.get_value("force-single-column") or\
                 not self._view_type & ViewType.TWO_COLUMNS:
             self.connect("realize",
                          self.__on_realize,
                          window,
                          Gtk.Orientation.VERTICAL)
-            return [
-                (App().player, "loading-changed", "_on_loading_changed")
-            ]
+            return {
+                "map": [
+                    (App().player, "loading-changed", "_on_loading_changed")
+                ]
+            }
         else:
             self.connect("realize",
                          self.__on_realize,
                          window,
                          Gtk.Orientation.HORIZONTAL)
-            return [
-                (window, "adaptive-size-changed", "_on_adaptive_size_changed"),
-                (App().player, "loading-changed", "_on_loading_changed")
-            ]
+            return {
+                "init": [
+                    (window, "adaptive-size-changed",
+                     "_on_adaptive_size_changed")
+                ],
+                "map": [
+                    (App().player, "loading-changed", "_on_loading_changed")
+                ]
+            }
 
     def set_playing_indicator(self):
         """

@@ -138,9 +138,11 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
         self.__stack.set_visible_child_name("main")
         self.add(widget)
         self.connect("unmap", self.__on_unmap)
-        return [
-            (App().art, "uri-artwork-found", "_on_uri_artwork_found")
-        ]
+        return {
+            "init": [
+                (App().art, "uri-artwork-found", "_on_uri_artwork_found")
+            ]
+        }
 
     def populate(self):
         """

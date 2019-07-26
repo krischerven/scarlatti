@@ -44,9 +44,11 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         self.__pop_tunein = None
         if not get_network_available("TUNEIN"):
             builder.get_object("search_btn").hide()
-        return [
-            (App().radios, "radio-changed", "_on_radio_changed")
-        ]
+        return {
+            "init": [
+                (App().radios, "radio-changed", "_on_radio_changed")
+            ]
+        }
 
     def populate(self):
         """

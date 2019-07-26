@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from lollypop.define import App
 from lollypop.widgets_utils import Popover
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class AppMenuPopover(Popover, SignalsHelper):
@@ -22,7 +22,7 @@ class AppMenuPopover(Popover, SignalsHelper):
         Configure defaults items
     """
 
-    @signals_map
+    @signals
     def __init__(self):
         """
             Init popover
@@ -34,9 +34,11 @@ class AppMenuPopover(Popover, SignalsHelper):
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
         builder.connect_signals(self)
-        return [
-            (App().player, "volume-changed", "_on_volume_changed")
-        ]
+        return {
+            "map": [
+                (App().player, "volume-changed", "_on_volume_changed")
+            ]
+        }
 
 #######################
 # PROTECTED           #

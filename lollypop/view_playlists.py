@@ -109,12 +109,14 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         else:
             self._view.connect("populated", self.__on_playlist_populated)
         self._view.set_property("halign", Gtk.Align.CENTER)
-        return [
-            (App().playlists, "playlist-track-added",
-             "_on_playlist_track_added"),
-            (App().playlists, "playlist-track-removed",
-             "_on_playlist_track_removed")
-         ]
+        return {
+            "init": [
+                (App().playlists, "playlist-track-added",
+                 "_on_playlist_track_added"),
+                (App().playlists, "playlist-track-removed",
+                 "_on_playlist_track_removed")
+             ]
+        }
 
     def set_view_type(self, view_type):
         """
