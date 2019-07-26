@@ -10,13 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Pango
 
 from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.utils import get_network_available
-from lollypop.define import ViewType, StorageType
+from lollypop.define import ViewType, StorageType, Size
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
@@ -139,16 +139,20 @@ class HomeView(View, FilteringHelper):
                 return
             else:
                 child.destroy()
-        self._viewport.set_property("valign", Gtk.Align.FILL)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                      Gtk.PolicyType.NEVER)
+            self._viewport.set_property("valign", Gtk.Align.FILL)
         label = Gtk.Label.new(_("Welcome on Lollypop"))
         label.get_style_context().add_class("text-xx-large")
         label.set_property("valign", Gtk.Align.END)
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         label.set_vexpand(True)
         label.show()
         label.get_style_context().add_class("opacity-transition")
         image = Gtk.Image.new_from_icon_name("org.gnome.Lollypop",
                                              Gtk.IconSize.INVALID)
-        image.set_pixel_size(512)
+        image.set_pixel_size(Size.SMALL)
         image.show()
         image.get_style_context().add_class("image-rotate-fast")
         image.get_style_context().add_class("opacity-transition")
