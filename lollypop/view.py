@@ -69,8 +69,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-        return [(App().window, "adaptive-changed", "_on_adaptive_changed"),
-                (App().scanner, "album-updated", "_on_album_updated")]
+        return [
+            (App().window, "adaptive-changed", "_on_adaptive_changed"),
+        ]
 
     def populate(self):
         """
@@ -146,9 +147,21 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _add_widget(self, widget):
+        """
+            Add main widget to view
+            @param widget as Gtk.Widget
+        """
+        if self._view_type & ViewType.SCROLLED:
+            if self._viewport.get_child() is None:
+                self._viewport.add(widget)
+        elif widget not in self.get_children():
+            self.add(widget)
+
     def _remove_placeholder(self):
         """
             Remove any placeholder
+            @return bool: True if removed
         """
         if self._view_type & ViewType.PLACEHOLDER:
             self._view_type & ~ViewType.PLACEHOLDER
@@ -158,6 +171,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 if child.get_name() == "lollypop_placeholder":
                     child.destroy()
                     break
+            return True
+        return False
 
     def _on_view_leave(self, event_controller):
         pass

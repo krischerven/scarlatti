@@ -25,11 +25,12 @@ from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals
 
 
-class AlbumsBoxView(FlowBoxView, ViewController):
+class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
     """
         Show albums in a box
     """
 
+    @signals
     def __init__(self, genre_ids, artist_ids, view_type=ViewType.SCROLLED):
         """
             Init album view
@@ -62,6 +63,9 @@ class AlbumsBoxView(FlowBoxView, ViewController):
         if view_type & ViewType.SMALL and view_type & ViewType.SCROLLED:
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
                                       Gtk.PolicyType.NEVER)
+        return [
+            (App().scanner, "album-updated", "_on_album_updated")
+        ]
 
     def populate(self):
         """
@@ -137,11 +141,15 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             @param album_id as int
             @param added as bool
         """
-        if added and (not self._genre_ids or self._genre_ids[0] >= 0):
+        if added and (not self._genre_ids or
+                      self._genre_ids[0] >= 0 or
+                      self._genre_ids[0] == Type.ALL):
             album_ids = App().window.container.get_view_album_ids(
                                             self._genre_ids,
                                             self._artist_ids)
             if album_id in album_ids:
+                if self._remove_placeholder():
+                    self._add_widget(self._box)
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
         else:
@@ -481,7 +489,7 @@ class AlbumsRandomGenreBoxView(AlbumsLineView):
         App().task_helper.run(load, callback=(on_load,))
 
 
-class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
+class AlbumsSpotifyBoxView(AlbumsLineView):
     """
         Spotify album box
     """
