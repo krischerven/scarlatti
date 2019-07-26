@@ -16,10 +16,9 @@ from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Type
 from lollypop.utils import on_query_tooltip, set_cursor_hand2
 from lollypop.view import View
-from lollypop.helper_signals import SignalsHelper, signals
 
 
-class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
+class AlbumSimpleWidget(Gtk.FlowBoxChild):
     """
         Album widget showing cover, artist and title
     """
@@ -27,7 +26,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
-    @signals
     def __init__(self, album, genre_ids, artist_ids, view_type, font_height):
         """
             Init simple album widget
@@ -50,9 +48,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
         self.get_style_context().add_class("no-padding")
         self.set_margin_start(MARGIN_SMALL)
         self.set_margin_end(MARGIN_SMALL)
-        return [
-            (App().scanner, "album-updated", "_on_album_updated")
-        ]
 
     def populate(self):
         """
@@ -192,19 +187,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild, SignalsHelper):
             True if album populated
         """
         return True
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_album_updated(self, scanner, album_id, added):
-        """
-            On album modified, disable it
-            @param scanner as CollectionScanner
-            @param album_id as int
-            @param added as bool
-        """
-        if self.__album.id == album_id and not added:
-            self.destroy()
 
 #######################
 # PRIVATE             #

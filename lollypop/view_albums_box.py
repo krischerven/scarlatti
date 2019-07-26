@@ -137,13 +137,18 @@ class AlbumsBoxView(FlowBoxView, ViewController):
             @param album_id as int
             @param added as bool
         """
-        album_ids = App().window.container.get_view_album_ids(
+        if added and (not self._genre_ids or self._genre_ids[0] >= 0):
+            album_ids = App().window.container.get_view_album_ids(
                                             self._genre_ids,
                                             self._artist_ids)
-        if album_id not in album_ids:
-            return
-        index = album_ids.index(album_id)
-        self.insert_album(Album(album_id), index)
+            if album_id in album_ids:
+                index = album_ids.index(album_id)
+                self.insert_album(Album(album_id), index)
+        else:
+            for child in self.children:
+                if child.album.id == album_id:
+                    child.destroy()
+                    break
 
     def _on_artwork_changed(self, artwork, album_id):
         """
@@ -342,7 +347,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             Init view
             @param view_type as ViewType
         """
-        AlbumsBoxView.__init__(self, [], [], view_type)
+        AlbumsBoxView.__init__(self, [Type.NONE], [], view_type)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
