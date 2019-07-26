@@ -381,6 +381,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         """
         self._box.set_min_children_per_line(len(albums))
         FlowBoxView.populate(self, albums)
+        if albums:
+            self.show()
 
     @property
     def args(self):
@@ -508,8 +510,6 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
         """
         def on_load(items):
             AlbumsLineView.populate(self, items)
-            if items:
-                self.__show_view()
 
         def load():
             album_ids = App().albums.get_for_storage_type(storage_type,
@@ -540,14 +540,3 @@ class AlbumsSpotifyBoxView(AlbumsLineView, SignalsHelper):
 #####################
 # PRIVATE           #
 #####################
-    def __show_view(self):
-        """
-            Show view
-        """
-        self._update_buttons()
-        if self.get_visible():
-            return
-        if self._view_type & ViewType.SCROLLED:
-            if self._viewport.get_child() is None:
-                self._viewport.add(self._box)
-            self.show()

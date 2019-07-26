@@ -195,6 +195,8 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         def on_load(items):
             self._box.set_min_children_per_line(len(items))
             FlowBoxView.populate(self, items)
+            if items:
+                self.show()
 
         def load():
             ids = App().artists.get_randoms(15)

@@ -617,3 +617,19 @@ flowboxchild:selected  {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
+
+.image-rotate-fast {
+  animation-name: spin;
+  animation-duration: 2s;
+  animation-timing-function: ease;
+  animation-iteration-count: 1;
+}
+
+.opacity-transition {
+    transition: opacity 1000ms linear;
+    opacity: 0;
+}
+
+.opacity-transition:visited {
+  opacity: 1;
+}

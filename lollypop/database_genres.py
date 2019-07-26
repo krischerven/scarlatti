@@ -160,7 +160,7 @@ class GenresDatabase:
                                             genres.rowid)\
                                   ORDER BY random() LIMIT 1")
             genres = list(result)
-            return genres[0] if genres else []
+            return genres[0] if genres else (None, "")
 
     def clean(self):
         """

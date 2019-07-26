@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 
@@ -39,11 +39,13 @@ class HomeView(View, FilteringHelper):
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
-        self._viewport.add(self.__grid)
         if view_type & ViewType.SCROLLED:
+            self._viewport.add(self.__grid)
             self._viewport.set_property("valign", Gtk.Align.START)
             self._scrolled.set_property("expand", True)
             self.add(self._scrolled)
+        else:
+            self.add(self.__grid)
 
     def populate(self):
         """
@@ -54,7 +56,6 @@ class HomeView(View, FilteringHelper):
                        AlbumsRandomGenreBoxView]:
             view = _class(self._view_type)
             view.populate()
-            view.show()
             self.__grid.add(view)
         if get_network_available("SPOTIFY") and\
                 get_network_available("YOUTUBE"):
@@ -67,6 +68,7 @@ class HomeView(View, FilteringHelper):
                                                 self._view_type)
             spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
             self.__grid.add(spotify_view)
+        GLib.timeout_add(250, self.__welcome_screen)
 
     def activate_child(self):
         """
@@ -126,3 +128,35 @@ class HomeView(View, FilteringHelper):
 #######################
     def _on_map(self, widget):
         pass
+
+    def __welcome_screen(self):
+        """
+            Show welcome screen if view empty
+        """
+        # If any child visible, quit
+        for child in self.__grid.get_children():
+            if child.get_visible():
+                return
+            else:
+                child.destroy()
+        self._viewport.set_property("valign", Gtk.Align.FILL)
+        label = Gtk.Label.new(_("Welcome on Lollypop"))
+        label.get_style_context().add_class("text-xx-large")
+        label.get_style_context().add_class("dim-label")
+        label.set_property("valign", Gtk.Align.END)
+        label.set_vexpand(True)
+        label.show()
+        label.get_style_context().add_class("opacity-transition")
+        image = Gtk.Image.new_from_icon_name("org.gnome.Lollypop",
+                                             Gtk.IconSize.INVALID)
+        image.set_pixel_size(512)
+        image.show()
+        image.get_style_context().add_class("image-rotate-fast")
+        image.get_style_context().add_class("opacity-transition")
+        image.set_hexpand(True)
+        image.set_vexpand(True)
+        image.set_property("valign", Gtk.Align.START)
+        self.__grid.add(label)
+        self.__grid.add(image)
+        GLib.idle_add(label.set_state_flags, Gtk.StateFlags.VISITED, True)
+        GLib.idle_add(image.set_state_flags, Gtk.StateFlags.VISITED, True)
