@@ -12,7 +12,7 @@
 
 from gi.repository import GObject, Gtk, Gdk
 
-from lollypop.define import App, ViewType, IndicatorType
+from lollypop.define import App, ViewType
 from lollypop.utils import do_shift_selection
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
@@ -106,8 +106,6 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         else:
             self.set_selection_mode(Gtk.SelectionMode.NONE)
             self.emit("activated", row.track)
-            if row.track.is_web:
-                row.set_indicator(IndicatorType.LOADING)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """

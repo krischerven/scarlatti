@@ -259,13 +259,13 @@ class BinPlayer(BasePlayer):
             self.__cancellable.cancel()
             self.__cancellable = Gio.Cancellable()
             if self._current_track.is_web:
-                self.emit("loading-changed", False, self._current_track.album)
+                self.emit("loading-changed", False, self._current_track)
             self._current_track = track
             # We check track is URI track, if yes, do a load from Web
             # Will not work if we add another music provider one day
             track_uri = App().tracks.get_uri(track.id)
             if track.is_web and track.uri == track_uri:
-                self.emit("loading-changed", True, track.album)
+                self.emit("loading-changed", True, track)
                 App().task_helper.run(self._load_from_web, track)
                 return False
             else:

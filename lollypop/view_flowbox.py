@@ -15,18 +15,15 @@ from gi.repository import Gtk, GLib
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, App, MARGIN, MARGIN_SMALL
+from lollypop.define import ViewType, MARGIN, MARGIN_SMALL
 from lollypop.utils import get_font_height
-from lollypop.helper_signals import SignalsHelper, signals
 
 
-class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
-                  SignalsHelper):
+class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
     """
         Lazy loading FlowBox
     """
 
-    @signals
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init flowbox view
@@ -54,9 +51,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             self._scrolled.set_property("expand", True)
             self._viewport.set_property("valign", Gtk.Align.START)
             self.add(self._scrolled)
-        return [
-            (App().player, "loading-changed", "_on_loading_changed")
-        ]
 
     def populate(self, items):
         """
@@ -163,23 +157,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper,
             child.disable_artwork()
             self._lazy_queue.append(child)
         self.lazy_loading()
-
-    def _on_loading_changed(self, player, status, album):
-        """
-            Show a spinner while loading
-            @param player as Player
-            @param status as bool
-            @param album as Album
-        """
-        for child in self._box.get_children():
-            if hasattr(child, "album"):
-                if album.id != child.album.id:
-                    continue
-            elif hasattr(child, "track"):
-                if child.track.album.id != album.id:
-                    continue
-            if hasattr(child, "show_spinner"):
-                child.show_spinner(status)
 
     def _on_view_leave(self, event_controller):
         """

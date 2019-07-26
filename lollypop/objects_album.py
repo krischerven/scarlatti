@@ -238,6 +238,14 @@ class Album(Base):
         App().scanner.emit("album-updated", self.id, save)
 
     @property
+    def is_web(self):
+        """
+            True if track is a web track
+            @return bool
+        """
+        return not self.storage_type & StorageType.COLLECTION
+
+    @property
     def synced(self):
         """
             Get synced state

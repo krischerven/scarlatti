@@ -153,7 +153,7 @@ class Track(Base):
             True if track is a web track
             @return bool
         """
-        return self.is_http or self.uri.startswith("web:")
+        return not self.storage_type & StorageType.COLLECTION
 
     @property
     def is_http(self):

@@ -21,7 +21,7 @@ from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import get_position_list, set_cursor_hand2
-from lollypop.define import App, Type, ViewType, AdaptiveSize
+from lollypop.define import App, Type, ViewType, AdaptiveSize, IndicatorType
 
 
 class TracksView(SignalsHelper):
@@ -59,21 +59,26 @@ class TracksView(SignalsHelper):
 
         if window is None:
             # Calling set_orientation() is needed
-            return []
+            return [
+                (App().player, "loading-changed", "_on_loading_changed")
+            ]
         if App().settings.get_value("force-single-column") or\
                 not self._view_type & ViewType.TWO_COLUMNS:
             self.connect("realize",
                          self.__on_realize,
                          window,
                          Gtk.Orientation.VERTICAL)
-            return []
+            return [
+                (App().player, "loading-changed", "_on_loading_changed")
+            ]
         else:
             self.connect("realize",
                          self.__on_realize,
                          window,
                          Gtk.Orientation.HORIZONTAL)
             return [
-                (window, "adaptive-size-changed", "_on_adaptive_size_changed")
+                (window, "adaptive-size-changed", "_on_adaptive_size_changed"),
+                (App().player, "loading-changed", "_on_loading_changed")
             ]
 
     def set_playing_indicator(self):
@@ -257,6 +262,21 @@ class TracksView(SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _on_loading_changed(self, player, status, track):
+        """
+            Update row loading status
+            @param player as Player
+            @param status as bool
+            @param track as Track
+        """
+        if not self._album.is_web:
+            return
+        for row in self.children:
+            if row.track.id == track.id:
+                row.set_indicator(IndicatorType.LOADING)
+            else:
+                row.set_indicator()
+
     def _on_adaptive_size_changed(self, widget, adaptive_size):
         """
             Change columns disposition
