@@ -40,17 +40,12 @@ class DNDHelper(GObject.Object):
         listbox.drag_dest_set(Gtk.DestDefaults.DROP | Gtk.DestDefaults.MOTION,
                               [], Gdk.DragAction.MOVE)
         listbox.drag_dest_add_text_targets()
-        listbox.connect("drag-begin", self.__on_drag_begin)
+        self.__gesture = Gtk.GestureDrag.new(listbox)
+        self.__gesture.connect("drag-begin", self.__on_drag_begin)
         listbox.connect("drag-leave", self.__on_drag_leave)
         listbox.connect("drag-motion", self.__on_drag_motion)
         listbox.connect("drag-data-get", self.__on_drag_data_get)
         listbox.connect("drag-data-received", self.__on_drag_data_received)
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_dnd_finished(self):
-        pass
 
 #######################
 # PRIVATE             #
@@ -119,8 +114,7 @@ class DNDHelper(GObject.Object):
         height = AlbumRow.get_best_height(src_row)
         new_album = Album(src_row.track.album.id)
         new_album.set_tracks([src_row.track])
-        new_album_row = AlbumRow(new_album, height, self.__view_type,
-                                 True, None, 0)
+        new_album_row = AlbumRow(new_album, height, self.__view_type, True, 0)
         new_album_row.show()
         new_album_row.populate()
         self.__insert_album_row_at_album_row(new_album_row,
@@ -227,23 +221,29 @@ class DNDHelper(GObject.Object):
                     context.remove_class("drag-up")
                     context.remove_class("drag-down")
 
-    def __on_drag_begin(self, listbox, context):
+    def __get_row_at_y(self, y):
         """
-            @param listbox as Gtk.ListBox
-            @param context as Gdk.DragContext
+            Get row at position
+            @param y as int
         """
-        self.__drag_begin_row = None
-        for row in self.__listbox.get_children():
-            if row.revealed:
-                for subrow in row.children:
-                    if subrow.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-                        self.__drag_begin_row = subrow
-                        break
-            if self.__drag_begin_row:
-                break
-            if row.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-                self.__drag_begin_row = row
-                break
+        row = self.__listbox.get_row_at_y(y)
+        if row is None:
+            return None
+        if row.revealed:
+            sub_listbox = row.boxes[0]
+            (row_x, row_y) = sub_listbox.translate_coordinates(self.__listbox,
+                                                               0, 0)
+            subrow = sub_listbox.get_row_at_y(y - row_y)
+            return subrow
+        return row
+
+    def __on_drag_begin(self, gesture, x, y):
+        """
+            @param gesture as Gtk.GestureDrag
+            @param x as int
+            @param y as int
+        """
+        self.__drag_begin_row = self.__get_row_at_y(y)
 
     def __on_drag_leave(self, listbox, context, time):
         """
@@ -263,7 +263,7 @@ class DNDHelper(GObject.Object):
             @param time as int
         """
         self.__unmark_all_rows()
-        row = listbox.get_row_at_y(y)
+        row = self.__get_row_at_y(y)
         if row is None:
             return
         row_height = row.get_allocated_height()
@@ -272,16 +272,6 @@ class DNDHelper(GObject.Object):
             row.get_style_context().add_class("drag-up")
         elif y > row_y + row_height - 20:
             row.get_style_context().add_class("drag-down")
-        if row.revealed:
-            for subrow in row.children:
-                (subrow_x, subrow_y) = subrow.translate_coordinates(listbox,
-                                                                    0, 0)
-                subrow_height = subrow.get_allocated_height()
-                if y > subrow_y and y < subrow_y + subrow_height / 2:
-                    subrow.get_style_context().add_class("drag-up")
-                elif y > subrow_y + subrow_height / 2 and\
-                        y < subrow_y + subrow_height:
-                    subrow.get_style_context().add_class("drag-down")
 
     def __on_drag_data_get(self, listbox, context, data, info, time):
         """
