@@ -26,14 +26,14 @@ class RadioPopover(Popover):
         Popover with radio logos from the web
     """
 
-    def __init__(self, radio):
+    def __init__(self, radio=None):
         """
             Init Popover
             @param radio as Radio
         """
         Popover.__init__(self)
         self.__uri_artwork_id = None
-        self.__radio = radio
+        self.__radio = radio if radio is not None else Radio()
 
         self.__stack = Gtk.Stack()
         self.__stack.set_transition_duration(1000)
@@ -52,7 +52,7 @@ class RadioPopover(Popover):
         self.__stack.set_visible_child_name("widget")
         self.add(self.__stack)
 
-        if radio.id is not None:
+        if radio is not None:
             rating = RatingWidget(radio)
             rating.show()
             builder.get_object("widget").attach(rating, 0, 2, 2, 1)
