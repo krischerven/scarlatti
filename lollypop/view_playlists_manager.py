@@ -136,8 +136,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        if child.is_selected():
-            App().window.container.show_view([Type.PLAYLISTS], [child.data])
+        App().window.container.show_view([Type.PLAYLISTS], [child.data])
 
     def _on_secondary_press_gesture(self, x, y, event):
         """

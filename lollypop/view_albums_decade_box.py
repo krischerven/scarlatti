@@ -92,5 +92,4 @@ class AlbumsDecadeBoxView(FlowBoxView):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        if child.is_selected():
-            App().window.container.show_view([Type.YEARS], child.data)
+        App().window.container.show_view([Type.YEARS], child.data)
