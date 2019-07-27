@@ -95,9 +95,21 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             @param widget as Gtk.Widget
         """
         from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover()
+        popover = RadioPopover(None, App().radios)
         popover.set_relative_to(widget)
         popover.popup()
+
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Play radio
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None:
+            return
+        App().player.load(child.track)
 
     def _on_search_clicked(self, widget):
         """
