@@ -96,10 +96,10 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             return
 
         if event.state & Gdk.ModifierType.CONTROL_MASK and\
-                self.__view_type & ViewType.POPOVER:
+                self.__view_type & ViewType.DND:
             self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         elif event.state & Gdk.ModifierType.SHIFT_MASK and\
-                self.__view_type & ViewType.POPOVER:
+                self.__view_type & ViewType.DND:
             self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
             do_shift_selection(self, row)
         elif event.state & Gdk.ModifierType.MOD1_MASK:
