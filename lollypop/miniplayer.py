@@ -120,14 +120,6 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
             self.__grid.get_style_context().remove_class("black")
             self._artwork.get_style_context().remove_class("black")
 
-    def _on_lyrics_button_clicked(self, button):
-        """
-            Show lyrics view
-            @param button as Gtk.Button
-        """
-        self._on_button_release_event()
-        App().window.container.show_lyrics()
-
     def _on_button_release_event(self, *ignore):
         """
             Set revealer on/off

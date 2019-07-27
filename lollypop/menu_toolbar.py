@@ -14,7 +14,7 @@ from gi.repository import Gio
 
 from gettext import gettext as _
 
-from lollypop.define import App, ViewType
+from lollypop.define import ViewType
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_artist import ArtistMenu
 
@@ -30,25 +30,8 @@ class ToolbarMenu(Gio.Menu):
             @param track as Track
         """
         Gio.Menu.__init__(self)
-        lyrics_menu = Gio.Menu()
-        action = Gio.SimpleAction(name="lyrics_action")
-        App().add_action(action)
-        action.connect("activate", self.__show_lyrics)
-        lyrics_menu.append(_("Show lyrics"), "app.lyrics_action")
-        self.insert_section(0, _("Lyrics"), lyrics_menu)
         if track.id >= 0:
             playlist_menu = PlaylistsMenu(track)
             self.insert_section(1, _("Playlists"), playlist_menu)
         self.insert_section(2, _("Artist"),
                             ArtistMenu(track, ViewType.ALBUM))
-
-#######################
-# PRIVATE             #
-#######################
-    def __show_lyrics(self, action, variant):
-        """
-            Show lyrics on main window
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        App().window.container.show_lyrics()

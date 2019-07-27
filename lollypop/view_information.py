@@ -74,11 +74,6 @@ class InformationView(View):
         self.__information_label = builder.get_object("bio_label")
         if artist_id is None and App().player.current_track.id is not None:
             builder.get_object("header").show()
-            builder.get_object("lyrics_button").show()
-            builder.get_object("lyrics_button").connect(
-                "clicked",
-                self.__on_lyrics_button_clicked,
-                App().player.current_track)
             artist_id = App().player.current_track.album.artist_ids[0]
             title_label.set_text(App().player.current_track.title)
         self.__artist_name = App().artists.get_name(artist_id)
@@ -194,17 +189,6 @@ class InformationView(View):
         if path is not None:
             return path
         return None
-
-    def __on_lyrics_button_clicked(self, button, track):
-        """
-            Show lyrics
-            @param button as Gtk.Button
-            @param track as Track
-        """
-        popover = self.get_ancestor(Gtk.Popover)
-        if popover is not None:
-            popover.popdown()
-        App().window.container.show_lyrics(track)
 
     def __on_artist_artwork(self, surface):
         """

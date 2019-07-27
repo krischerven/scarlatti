@@ -275,8 +275,6 @@ class ApplicationActions:
             App().player.prev()
         elif string == "go_back":
             App().window.go_back()
-        elif string == "lyrics":
-            App().window.container.show_lyrics()
         elif string == "reload":
             App().window.container.reload_view()
         elif string == "volume_up":
