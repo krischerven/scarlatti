@@ -337,7 +337,7 @@ class ArtistsDatabase:
                                   WHERE album_artists.album_id=albums.rowid\
                                   AND artists.rowid=album_artists.artist_id\
                                   AND albums.storage_type & ?",
-                                 StorageType.COLLECTION | StorageType.SAVED)
+                                 (StorageType.COLLECTION | StorageType.SAVED,))
             v = result.fetchone()
             if v is not None:
                 return v[0]

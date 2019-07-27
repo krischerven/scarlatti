@@ -1171,7 +1171,8 @@ class AlbumsDatabase:
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT COUNT(1) FROM albums\
                                   WHERE storage_type & ?",
-                                 (StorageType.COLLECTION | StorageType.SAVED))
+                                 ((StorageType.COLLECTION |
+                                   StorageType.SAVED,)))
             v = result.fetchone()
             if v is not None:
                 return v[0]
