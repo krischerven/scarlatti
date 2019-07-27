@@ -24,22 +24,6 @@ class ViewsContainer:
         """
         pass
 
-    def show_lyrics(self, track=None):
-        """
-            Show lyrics for track
-            @pram track as Track
-        """
-        if track is None and App().player.current_track.id is None:
-            return
-        self._list_view.hide()
-        self._sidebar.select_ids([], False)
-        from lollypop.view_lyrics import LyricsView
-        view = LyricsView()
-        view.populate(track or App().player.current_track)
-        view.show()
-        self._stack.add(view)
-        self._stack.set_visible_child(view)
-
     def show_view(self, item_ids, data=None, switch=True):
         """
             Show view for item id
@@ -67,6 +51,8 @@ class ViewsContainer:
                 view = self._get_view_device_albums(data)
             elif item_ids[0] == Type.DEVICE_PLAYLISTS:
                 view = self._get_view_device_playlists(data)
+            elif item_ids[0] == Type.LYRICS:
+                view = self._get_view_lyrics()
             elif item_ids[0] == Type.GENRES:
                 if data is None:
                     view = self._get_view_genres()
@@ -204,6 +190,17 @@ class ViewsContainer:
         from lollypop.view_playlists_manager import PlaylistsManagerDeviceView
         view = PlaylistsManagerDeviceView(index, view_type)
         view.populate()
+        return view
+
+    def _get_view_lyrics(self):
+        """
+            Show lyrics for track
+            @pram track as Track
+        """
+        from lollypop.view_lyrics import LyricsView
+        view = LyricsView()
+        view.populate(App().player.current_track)
+        view.show()
         return view
 
     def _get_view_artists_rounded(self):

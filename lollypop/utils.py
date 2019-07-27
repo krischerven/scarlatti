@@ -461,6 +461,8 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
         icon = "x-office-calendar-symbolic"
     elif object_id == Type.CURRENT:
         icon = "view-list-symbolic"
+    elif object_id == Type.LYRICS:
+        icon = "view-dual-symbolic"
     elif object_id == Type.SEARCH:
         icon = "edit-find-symbolic"
     elif object_id == Type.GENRES:

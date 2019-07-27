@@ -128,6 +128,8 @@ class ListsContainer:
 
         if selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()
+        elif selected_ids[0] == Type.LYRICS:
+            view = self._get_view_lyrics()
         elif selected_ids[0] == Type.CURRENT:
             view = self.get_view_current()
         elif selected_ids[0] == Type.SEARCH:

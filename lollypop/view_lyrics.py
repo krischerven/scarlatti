@@ -88,7 +88,7 @@ class LyricsView(View, InformationController,
         """
             Init view
         """
-        View.__init__(self, ViewType.SCROLLED)
+        View.__init__(self, ViewType.DEFAULT)
         InformationController.__init__(self, False,
                                        ArtBehaviour.BLUR_MAX |
                                        ArtBehaviour.CROP |
@@ -97,6 +97,8 @@ class LyricsView(View, InformationController,
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
         self.__lyrics_text = ""
+        self._empty_message = _("No track playing")
+        self._empty_icon_name = "view-dual-symbolic"
         self.__cancellable = Gio.Cancellable()
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/LyricsView.ui")
@@ -106,9 +108,7 @@ class LyricsView(View, InformationController,
         self.__lyrics_label.show()
         builder.get_object("viewport").add(self.__lyrics_label)
         self.__translate_button = builder.get_object("translate_button")
-        # We do not use View scrolled window because it does not work with
-        # an overlay
-        self.add(builder.get_object("widget"))
+        self.__widget = builder.get_object("widget")
         self.__sync_lyrics_helper = SyncLyricsHelper()
         self.__update_lyrics_style()
         return {
@@ -126,6 +126,13 @@ class LyricsView(View, InformationController,
             Set lyrics
             @param track as Track
         """
+        if track.id is None:
+            if self.__widget not in self.get_children():
+                self.remove(self.__widget)
+            View.populate(self)
+            return
+        self._remove_placeholder()
+        self._add_widget(self.__widget)
         self.__current_track = track
         size = max(self.get_allocated_width(), self.get_allocated_height())
         self.update_artwork(size + Size.MINI, size + Size.MINI)

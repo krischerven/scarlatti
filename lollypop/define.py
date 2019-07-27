@@ -200,6 +200,7 @@ class Type:
     ALBUM = -23
     SMART = -24
     EQUALIZER = -25
+    LYRICS = -26
     ALL = -100
     DEVICE_ALBUMS = -1000
     DEVICE_PLAYLISTS = -1001
