@@ -29,8 +29,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
                                  (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "track-activated": (GObject.SignalFlags.RUN_FIRST, None,
-                            (GObject.TYPE_PYOBJECT,))
     }
 
     __MARGIN = 4
@@ -279,18 +277,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             TracksView.populate(self)
         else:
             self.emit("populated")
-
-    def _on_activated(self, widget, track):
-        """
-            A row has been activated, play track
-            if in playlist, pass signal
-            @param widget as TracksWidget
-            @param track as Track
-        """
-        if self._view_type & ViewType.PLAYLISTS:
-            self.emit("track-activated", track)
-        else:
-            TracksView._on_activated(self, widget, track)
 
     def _on_action_button_press(self, x, y, event):
         """

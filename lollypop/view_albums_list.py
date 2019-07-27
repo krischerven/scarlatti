@@ -252,14 +252,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             do_shift_selection(self._box, row)
         else:
             self._box.set_selection_mode(Gtk.SelectionMode.NONE)
-            if self._view_type & ViewType.PLAYLISTS and row.album.tracks:
-                track = row.album.tracks[0]
-                albums = []
-                for child in self._box.get_children():
-                    albums.append(child.album)
-                App().player.play_track_for_albums(track, albums)
-            else:
-                row.reveal()
+            row.reveal()
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
