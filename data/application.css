@@ -406,6 +406,7 @@ flowboxchild:selected  {
 	padding-left: 4px;
 	padding-right: 4px;
 	padding-top: 0px;
+	min-height: 52px;
 	padding-bottom: 0px;
 	background-image: none;
 	border-style: solid;
