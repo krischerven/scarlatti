@@ -12,6 +12,7 @@
 
 from gi.repository import GLib
 
+from gettext import gettext as _
 import json
 from locale import getdefaultlocale
 
@@ -26,13 +27,17 @@ class Wikipedia:
         Helper for wikipedia search
     """
 
+    __API_SEARCH = "https://%s.wikipedia.org/w/api.php?action=query" +\
+        "&list=search&srsearch=%s&format=json"
+    __API_INFO = "https://%s.wikipedia.org/w/api.php?action=query" +\
+        "&pageids=%s&format=json" +\
+        "&prop=extracts&exlimit=max&explaintext&redirects=1"
+
     def __init__(self):
         """
             Init wikipedia
-            @raise exception  is wikipedia module not installed
         """
-        import wikipedia
-        wikipedia
+        self.__locale = getdefaultlocale()[0][0:2]
 
     def get_content(self, string):
         """
@@ -40,47 +45,46 @@ class Wikipedia:
             @param string as str
             @return str/None
         """
-        content = None
         try:
-            name = self.__get_duckduck_name(string)
-            if name is None:
+            (locale, page_id) = self.__search_term(string)
+            if page_id is None:
                 return None
-            import wikipedia
-            language = getdefaultlocale()[0][0:2]
-            wikipedia.set_lang(language)
-            page = wikipedia.page(name)
-            if page is None:
-                wikipedia.set_lang("en")
-                page = wikipedia.page(name)
-            if page is not None:
-                content = page.content.encode(encoding="UTF-8")
+            uri = self.__API_INFO % (locale, page_id)
+            (status, data) = App().task_helper.load_uri_content_sync(uri)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                extract = decode["query"]["pages"][str(page_id)]["extract"]
+                return extract.encode("utf-8")
         except Exception as e:
             Logger.error("Wikipedia::get_content(): %s", e)
-        return content
+        return None
 
 #######################
 # PRIVATE             #
 #######################
-    def __get_duckduck_name(self, string):
+    def __search_term(self, term):
         """
-            Get wikipedia duck duck name for string
-            @param string as str
-            @return str
+            Search term on Wikipdia
+            @param term as str
+            @return pageid as str
         """
-        name = None
         try:
-            uri = "https://api.duckduckgo.com/?q=%s&format=json&pretty=1"\
-                % string
-            (status, data) = App().task_helper.load_uri_content_sync(uri)
-            if status:
-                import json
-                decode = json.loads(data.decode("utf-8"))
-                uri = decode["AbstractURL"]
-                if uri:
-                    name = uri.split("/")[-1]
+            for locale in [self.__locale, "en"]:
+                uri = self.__API_SEARCH % (locale, term)
+                (status, data) = App().task_helper.load_uri_content_sync(uri)
+                if status:
+                    decode = json.loads(data.decode("utf-8"))
+                    for item in decode["query"]["search"]:
+                        if item["title"].lower() == term.lower():
+                            return (locale, item["pageid"])
+                        else:
+                            for word in [_("band"), _("singer"),
+                                         "band", "singer"]:
+                                if item["snippet"].lower().find(word) != -1:
+                                    return (locale, item["pageid"])
         except Exception as e:
-            Logger.error("Wikipedia::__get_duckduck_name(): %s", e)
-        return name
+            print("Wikipedia::__search_term(): %s", e)
+        return ("", None)
 
 
 class InfoDownloader(Downloader):
@@ -161,7 +165,7 @@ class InfoDownloader(Downloader):
             if get_network_available("WIKIPEDIA"):
                 wikipedia = Wikipedia()
                 content = wikipedia.get_content(artist)
-            else:
+            if content is None:
                 for (api, a_helper, ar_helper, helper) in self._WEBSERVICES:
                     if helper is None:
                         continue
