@@ -80,6 +80,7 @@ class TrackMenuExt(Gtk.Grid):
         """
         Gtk.Grid.__init__(self)
         self.set_margin_top(MARGIN_SMALL)
+        self.set_row_spacing(MARGIN_SMALL)
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
         if track.year is not None:
@@ -97,10 +98,14 @@ class TrackMenuExt(Gtk.Grid):
         rating = RatingWidget(track)
         rating.set_property("halign", Gtk.Align.START)
         rating.set_margin_end(10)
+        if App().window.is_adaptive:
+            rating.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         rating.show()
 
         loved = LovedWidget(track)
         loved.set_property("halign", Gtk.Align.START)
+        if App().window.is_adaptive:
+            loved.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         loved.show()
 
         if track.year is not None:
