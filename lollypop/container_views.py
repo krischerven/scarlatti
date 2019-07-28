@@ -82,7 +82,7 @@ class ViewsContainer:
             elif item_ids[0] == Type.ALL:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.COMPILATIONS:
-                view = self._get_view_albums([], item_ids)
+                view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.ARTISTS:
                 view = self._get_view_artists([], data)
         if view is not None:
@@ -131,7 +131,6 @@ class ViewsContainer:
             @return [int]
         """
         items = []
-        is_compilation = artist_ids and artist_ids[0] == Type.COMPILATIONS
         if genre_ids and genre_ids[0] == Type.POPULARS:
             items = App().albums.get_rated()
             count = 100 - len(items)
@@ -146,13 +145,12 @@ class ViewsContainer:
             items = App().albums.get_never_listened_to()
         elif genre_ids and genre_ids[0] == Type.RANDOMS:
             items = App().albums.get_randoms()
+        elif genre_ids and genre_ids[0] == Type.COMPILATIONS:
+            items = App().albums.get_compilation_ids([])
         elif genre_ids and not artist_ids:
-            if is_compilation or\
-                    App().settings.get_value(
-                        "show-compilations-in-album-view"):
+            if App().settings.get_value("show-compilations-in-album-view"):
                 items = App().albums.get_compilation_ids(genre_ids)
-            if not is_compilation:
-                items += App().albums.get_ids([], genre_ids)
+            items += App().albums.get_ids([], genre_ids)
         else:
             items = App().albums.get_ids(artist_ids, genre_ids)
         return items

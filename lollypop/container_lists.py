@@ -152,7 +152,7 @@ class ListsContainer:
         elif selected_ids[0] == Type.ALL:
             view = self._get_view_albums(selected_ids, [])
         elif selected_ids[0] == Type.COMPILATIONS:
-            view = self._get_view_albums([], selected_ids)
+            view = self._get_view_albums(selected_ids, [])
         if view is not None and view not in self._stack.get_children():
             view.show()
             self._stack.add(view)
