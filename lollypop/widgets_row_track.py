@@ -15,9 +15,10 @@ from gi.repository import Gtk, Pango, GLib, GObject
 from gettext import gettext as _
 
 from lollypop.define import App, ViewType, MARGIN_SMALL, IndicatorType
+from lollypop.define import StorageType
 from lollypop.widgets_indicator import IndicatorWidget
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.utils import seconds_to_string, on_query_tooltip
+from lollypop.utils import seconds_to_string, on_query_tooltip, popup_widget
 
 
 class TrackRow(Gtk.ListBoxRow):
@@ -65,9 +66,11 @@ class TrackRow(Gtk.ListBoxRow):
         self._artists_label = None
         self._track = track
         self._indicator = IndicatorWidget(self, view_type)
+        self._indicator.show()
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
         self._grid.set_column_spacing(5)
+        self._grid.show()
         self._title_label = Gtk.Label.new(
             GLib.markup_escape_text(self._track.name))
         self._title_label.set_use_markup(True)
@@ -77,6 +80,7 @@ class TrackRow(Gtk.ListBoxRow):
         self._title_label.set_property("halign", Gtk.Align.START)
         self._title_label.set_property("xalign", 0)
         self._title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self._title_label.show()
         featuring_artist_ids = track.get_featuring_artist_ids(album_artist_ids)
         if featuring_artist_ids:
             artists = []
@@ -100,6 +104,7 @@ class TrackRow(Gtk.ListBoxRow):
         self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._num_label.set_width_chars(4)
         self._num_label.get_style_context().add_class("dim-label")
+        self._num_label.show()
         self.update_number_label()
         self._grid.add(self._indicator)
         self._grid.add(self._num_label)
@@ -120,6 +125,7 @@ class TrackRow(Gtk.ListBoxRow):
         else:
             self.__action_button = None
         if self.__action_button is not None:
+            self.__action_button.show()
             self.__gesture_helper = GesturesHelper(
                 self.__action_button,
                 primary_press_callback=self._on_action_button_press)
@@ -127,14 +133,12 @@ class TrackRow(Gtk.ListBoxRow):
             self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
             context = self.__action_button.get_style_context()
             context.add_class("menu-button")
-            context.add_class("track-menu-button")
             self._grid.add(self.__action_button)
         else:
             self._duration_label.set_margin_end(MARGIN_SMALL)
         self.add(self._grid)
         self.set_indicator(self._get_indicator_type())
         self.update_duration()
-        self.show_all()
         self.get_style_context().add_class("trackrow")
 
     def update_duration(self):
@@ -200,6 +204,31 @@ class TrackRow(Gtk.ListBoxRow):
         self._track.set_number(position)
         self.update_number_label()
 
+    def popup_menu(self, parent, x=None, y=None):
+        """
+            Popup menu for track
+            @param parent as Gtk.Widget
+            @param x as int
+            @param y as int
+        """
+        def on_closed(popover):
+            self.unset_state_flags(Gtk.StateFlags.FOCUSED)
+            self.set_indicator()
+
+        from lollypop.menu_objects import TrackMenu, TrackMenuExt
+        from lollypop.widgets_menu import MenuBuilder
+        menu = TrackMenu(self._track)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        if not self._track.storage_type & StorageType.EPHEMERAL:
+            menu_ext = TrackMenuExt(self._track)
+            menu_ext.show()
+            menu_widget.get_child_by_name("main").add(menu_ext)
+        self.set_state_flags(Gtk.StateFlags.FOCUSED, True)
+        popover = popup_widget(menu_widget, parent, x, y)
+        if popover is not None:
+            popover.connect("closed", on_closed)
+
     @property
     def name(self):
         """
@@ -248,25 +277,8 @@ class TrackRow(Gtk.ListBoxRow):
             App().player.set_next()
             App().player.set_prev()
         else:
-            self.__popup_menu(self.__action_button)
+            self.popup_menu(self.__action_button)
 
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget):
-        """
-            Popup menu for track
-            @param widget as Gtk.Widget
-        """
-        def on_closed(popover):
-            self.get_style_context().remove_class("menu-selected")
-            self.set_indicator()
-
-        from lollypop.pop_menu import TrackMenuPopover
-        from lollypop.menu_objects import TrackMenu
-        menu = TrackMenu(self._track)
-        popover = TrackMenuPopover(self._track, menu)
-        popover.set_relative_to(widget)
-        popover.connect("closed", on_closed)
-        self.get_style_context().add_class("menu-selected")
-        popover.popup()
