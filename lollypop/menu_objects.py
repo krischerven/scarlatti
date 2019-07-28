@@ -34,12 +34,14 @@ class AlbumMenu(Gio.Menu):
             @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
-        self.insert_section(0, _("Artist"),
+        self.append_section(_("Artist"),
                             ArtistMenu(album, view_type))
+        section = Gio.Menu()
         if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
-            self.insert_section(2, _("Playlists"), PlaylistsMenu(album))
-        self.insert_section(3, _("Synchronization"), SyncAlbumMenu(album))
-        self.insert_section(4, _("Edit"), EditMenu(album))
+            section.append_submenu(_("Playlists"), PlaylistsMenu(album))
+        section.append_submenu(_("Devices"), SyncAlbumMenu(album))
+        self.append_section(_("Add to"), section)
+        self.append_section(_("Edit"), EditMenu(album))
 
 
 class TrackMenu(Gio.Menu):

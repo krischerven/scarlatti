@@ -212,10 +212,11 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         from lollypop.widgets_utils import Popover
         from lollypop.menu_objects import AlbumMenu
-        popover = Popover.new_from_model(self,
-                                         AlbumMenu(
-                                            child.album,
-                                            ViewType.ALBUM))
+        from lollypop.widgets_menu import MenuBuilder
+        menu_widget = MenuBuilder(AlbumMenu(child.album, ViewType.ALBUM))
+        menu_widget.show()
+        popover = Popover.new()
+        popover.add(menu_widget)
         popover.set_relative_to(child.artwork)
         popover.set_position(Gtk.PositionType.BOTTOM)
         popover.popup()
