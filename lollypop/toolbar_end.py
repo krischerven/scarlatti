@@ -138,16 +138,10 @@ class ToolbarEnd(Gtk.Bin):
         if button.get_active():
             self.__party_submenu.remove_all()
             self.__init_party_submenu()
-            from lollypop.widgets_utils import Popover
             from lollypop.widgets_menu import MenuBuilder
-            menu_widget = MenuBuilder(self.__shuffle_menu)
-            menu_widget.show()
-            popover = Popover.new()
-            popover.add(menu_widget)
-            popover.set_relative_to(button)
-            popover.set_position(Gtk.PositionType.BOTTOM)
-            popover.connect("closed", self.__on_popover_closed, button)
-            popover.popup()
+            widget = MenuBuilder(self.__shuffle_menu)
+            widget.show()
+            self.__popup_widget(widget, button)
 
     def _on_devices_button_toggled(self, button):
         """
@@ -167,27 +161,35 @@ class ToolbarEnd(Gtk.Bin):
             from lollypop.menu_application import ApplicationMenu
             widget = ApplicationMenu()
             widget.show()
-            if App().window.is_adaptive:
-                from lollypop.view import View
-                view = View()
-                view.show()
-                view.add(widget)
-                widget.get_style_context().add_class("adaptive-menu")
-                widget.set_vexpand(True)
-                App().window.container.stack.add(view)
-                App().window.container.stack.set_visible_child(view)
-                button.set_active(False)
-            else:
-                from lollypop.widgets_utils import Popover
-                popover = Popover.new()
-                popover.add(widget)
-                popover.set_relative_to(button)
-                popover.connect("closed", self.__on_popover_closed, button)
-                popover.popup()
+            self.__popup_widget(widget, button)
 
 #######################
 # PRIVATE             #
 #######################
+    def __popup_widget(self, widget, button):
+        """
+            Popup widget
+            @param widget as Gtk.Widget
+            @param button as Gtk.Button
+        """
+        if App().window.is_adaptive:
+            from lollypop.view import View
+            view = View()
+            view.show()
+            view.add(widget)
+            widget.get_style_context().add_class("adaptive-menu")
+            widget.set_vexpand(True)
+            App().window.container.stack.add(view)
+            App().window.container.stack.set_visible_child(view)
+            button.set_active(False)
+        else:
+            from lollypop.widgets_utils import Popover
+            popover = Popover.new()
+            popover.add(widget)
+            popover.set_relative_to(button)
+            popover.connect("closed", self.__on_popover_closed, button)
+            popover.popup()
+
     def __init_party_submenu(self):
         """
             Init party submenu with current ids
