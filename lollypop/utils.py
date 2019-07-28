@@ -488,6 +488,7 @@ def popup_widget(widget, parent, x=None, y=None):
         view = View()
         view.show()
         view.add(widget)
+        widget.get_style_context().add_class("adaptive-menu")
         widget.set_vexpand(True)
         App().window.container.stack.add(view)
         App().window.container.stack.set_visible_child(view)

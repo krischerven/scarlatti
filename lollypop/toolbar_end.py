@@ -14,7 +14,6 @@ from gi.repository import Gtk, Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.pop_appmenu import AppMenuPopover
 from lollypop.pop_devices import DevicesPopover
 from lollypop.define import App, Shuffle, Repeat
 from lollypop.progressbar import ButtonProgressBar
@@ -109,7 +108,7 @@ class ToolbarEnd(Gtk.Bin):
     def devices_popover(self):
         """
             Get Devices Popover
-            @return AppMenuPopover
+            @return DevicesPopover
         """
         return self.__devices_popover
 
@@ -165,11 +164,26 @@ class ToolbarEnd(Gtk.Bin):
            @param button as Gtk.ToggleButton
         """
         if button.get_active():
-            appmenu_popover = AppMenuPopover()
-            appmenu_popover.connect(
-                "closed", self.__on_popover_closed, button)
-            appmenu_popover.set_relative_to(button)
-            appmenu_popover.popup()
+            from lollypop.menu_application import ApplicationMenu
+            widget = ApplicationMenu()
+            widget.show()
+            if App().window.is_adaptive:
+                from lollypop.view import View
+                view = View()
+                view.show()
+                view.add(widget)
+                widget.get_style_context().add_class("adaptive-menu")
+                widget.set_vexpand(True)
+                App().window.container.stack.add(view)
+                App().window.container.stack.set_visible_child(view)
+                button.set_active(False)
+            else:
+                from lollypop.widgets_utils import Popover
+                popover = Popover.new()
+                popover.add(widget)
+                popover.set_relative_to(button)
+                popover.connect("closed", self.__on_popover_closed, button)
+                popover.popup()
 
 #######################
 # PRIVATE             #

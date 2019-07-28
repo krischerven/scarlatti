@@ -13,11 +13,10 @@
 from gi.repository import Gtk
 
 from lollypop.define import App
-from lollypop.widgets_utils import Popover
 from lollypop.helper_signals import SignalsHelper, signals
 
 
-class AppMenuPopover(Popover, SignalsHelper):
+class ApplicationMenu(Gtk.Bin, SignalsHelper):
     """
         Configure defaults items
     """
@@ -27,10 +26,11 @@ class AppMenuPopover(Popover, SignalsHelper):
         """
             Init popover
         """
-        Popover.__init__(self)
+        Gtk.Bin.__init__(self)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/Appmenu.ui")
-        self.add(builder.get_object("widget"))
+        widget = builder.get_object("widget")
+        self.add(widget)
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
         builder.connect_signals(self)

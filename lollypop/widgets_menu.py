@@ -55,10 +55,7 @@ class MenuBuilder(Gtk.Stack):
                 scrolled.add(box)
                 self.add_named(scrolled, menu_name)
                 button = Gtk.ModelButton.new()
-                if App().window.is_adaptive:
-                    button.get_style_context().add_class("menu-item")
-                else:
-                    button.get_style_context().add_class("padding")
+                button.get_style_context().add_class("padding")
                 button.set_property("menu-name", "main")
                 button.set_property("inverted", True)
                 button.set_label(menu_name)
@@ -95,9 +92,6 @@ class MenuBuilder(Gtk.Stack):
         button.set_alignment(0, 0.5)
         if target is not None:
             button.set_action_target_value(target)
-        # We are in view, can't use white as hover effect
-        if App().window.is_adaptive:
-            button.get_style_context().add_class("menu-item")
         button.show()
         self.__boxes[menu_name].add(button)
 
@@ -139,9 +133,6 @@ class MenuBuilder(Gtk.Stack):
         button.set_property("menu-name", submenu_name)
         button.set_label(text.get_string())
         button.set_alignment(0, 0.5)
-        # We are in view, can't use white as hover effect
-        if App().window.is_adaptive:
-            button.get_style_context().add_class("menu-item")
         button.show()
         self.__boxes[menu_name].add(button)
 
