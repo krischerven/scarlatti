@@ -100,6 +100,7 @@ class TrackRow(Gtk.ListBoxRow):
         duration = seconds_to_string(self._track.duration)
         self._duration_label = Gtk.Label.new(duration)
         self._duration_label.get_style_context().add_class("dim-label")
+        self._duration_label.show()
         self._num_label = Gtk.Label.new()
         self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._num_label.set_width_chars(4)
