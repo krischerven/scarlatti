@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.view_tracks import TracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
 from lollypop.define import ArtBehaviour, StorageType
+from lollypop.utils import popup_widget
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -326,15 +327,19 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             Popup menu for album
             @param widget as Gtk.Widget
         """
-        def on_closed(widget):
-            self.get_style_context().remove_class("menu-selected")
+        def on_closed(popover):
+            self.unset_state_flags(Gtk.StateFlags.FOCUSED)
+            self.set_indicator()
 
         from lollypop.menu_objects import AlbumMenu
+        from lollypop.widgets_menu import MenuBuilder
         menu = AlbumMenu(self._album, ViewType.ALBUM)
-        popover = Gtk.Popover.new_from_model(widget, menu)
-        popover.connect("closed", on_closed)
-        self.get_style_context().add_class("menu-selected")
-        popover.popup()
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        self.set_state_flags(Gtk.StateFlags.FOCUSED, True)
+        popover = popup_widget(menu_widget, widget)
+        if popover is not None:
+            popover.connect("closed", on_closed)
 
     def __on_album_artwork(self, surface):
         """
