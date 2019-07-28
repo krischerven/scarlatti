@@ -57,12 +57,10 @@ class TrackMenu(Gio.Menu):
         """
         Gio.Menu.__init__(self)
         if show_artist and not track.storage_type & StorageType.EPHEMERAL:
-            self.insert_section(0, _("Artist"),
-                                ArtistMenu(track, ViewType.ALBUM))
-        self.insert_section(1, _("Playback"),
-                            PlaybackMenu(track))
+            self.append_section(_("Artist"), ArtistMenu(track, ViewType.ALBUM))
+        self.append_section(_("Playback"), PlaybackMenu(track))
         if not track.storage_type & StorageType.EPHEMERAL:
-            self.insert_section(2, _("Playlists"),
-                                PlaylistsMenu(track))
-        self.insert_section(3, _("Edit"),
-                            EditMenu(track))
+            section = Gio.Menu()
+            section.append_submenu(_("Playlists"), PlaylistsMenu(track))
+        self.append_section(_("Add to"), section)
+        self.append_section(_("Edit"), EditMenu(track))

@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, MARGIN_SMALL
 from lollypop.widgets_utils import Popover
 
 
@@ -65,8 +65,10 @@ class TrackMenuPopover(Popover):
             @param menu as Gio.Menu
         """
         Popover.__init__(self)
-        if menu is not None:
-            self.bind_model(menu, None)
+        from lollypop.widgets_menu import MenuBuilder
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        self.add(menu_widget)
 
         if track.storage_type & StorageType.EPHEMERAL:
             return
@@ -82,19 +84,10 @@ class TrackMenuPopover(Popover):
             year_label.set_property("hexpand", True)
             year_label.show()
 
-        # Hack to add two widgets in popover
         grid = Gtk.Grid()
+        grid.set_margin_top(MARGIN_SMALL)
         grid.set_orientation(Gtk.Orientation.VERTICAL)
-
-        stack = Gtk.Stack()
-        stack.add_named(grid, "main")
-        stack.show_all()
-
-        menu_widget = self.get_child()
-        if menu_widget is not None:
-            self.remove(menu_widget)
-            grid.add(menu_widget)
-
+        grid.show()
         hgrid = Gtk.Grid()
         hgrid.get_style_context().add_class("popover-rating-loved-grid")
         rating = RatingWidget(track)
@@ -116,18 +109,21 @@ class TrackMenuPopover(Popover):
 
         if not track.storage_type & StorageType.COLLECTION:
             edit = Gtk.Entry()
-            edit.set_margin_top(5)
-            edit.set_margin_start(5)
-            edit.set_margin_end(5)
-            edit.set_margin_bottom(5)
+            edit.set_margin_top(MARGIN_SMALL)
+            edit.set_margin_start(MARGIN_SMALL)
+            edit.set_margin_end(MARGIN_SMALL)
+            edit.set_margin_bottom(MARGIN_SMALL)
             edit.set_property("hexpand", True)
             edit.set_text(track.uri)
             edit.connect("changed", self.__on_edit_changed, track)
             edit.show()
             grid.add(edit)
 
+        separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+        separator.show()
+        grid.add(separator)
         grid.add(hgrid)
-        self.add(stack)
+        menu_widget.get_child_by_name("main").add(grid)
 
 #######################
 # PRIVATE             #
