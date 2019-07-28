@@ -17,7 +17,7 @@ import json
 from locale import getdefaultlocale
 
 from lollypop.define import App, AUDIODB_CLIENT_ID
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, escape
 from lollypop.logger import Logger
 from lollypop.downloader import Downloader
 
@@ -75,7 +75,8 @@ class Wikipedia:
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     for item in decode["query"]["search"]:
-                        if item["title"].lower() == term.lower():
+                        if escape(item["title"].lower()) ==\
+                                escape(term.lower()):
                             return (locale, item["pageid"])
                         else:
                             for word in [_("band"), _("singer"),
