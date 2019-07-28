@@ -225,7 +225,7 @@ class TrackRow(Gtk.ListBoxRow):
             menu_ext = TrackMenuExt(self._track)
             menu_ext.show()
             menu_widget.get_child_by_name("main").add(menu_ext)
-        self.set_state_flags(Gtk.StateFlags.FOCUSED, True)
+        self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
         popover = popup_widget(menu_widget, parent, x, y)
         if popover is not None:
             popover.connect("closed", on_closed)
