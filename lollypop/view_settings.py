@@ -104,6 +104,15 @@ class SettingsView(View):
             self.add(self.__listbox)
 
     @property
+    def args(self):
+        """
+            Get default args for __class__, populate() plus sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int) or None
+        """
+        return ({"view_type": self._view_type}, 0, 0)
+
+    @property
     def type(self):
         """
             Get view type
@@ -185,6 +194,16 @@ class SettingsChildView(View):
             self.add(self._scrolled)
         else:
             self.add(widget)
+
+    @property
+    def args(self):
+        """
+            Get default args for __class__, populate() plus sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int) or None
+        """
+        return ({"view_id": self.__view_id, "view_type": self._view_type},
+                0, 0)
 
     @property
     def type(self):
