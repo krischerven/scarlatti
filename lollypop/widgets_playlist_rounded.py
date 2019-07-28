@@ -14,7 +14,6 @@ from random import sample
 
 from lollypop.define import App, Type
 from lollypop.objects_track import Track
-from lollypop.objects_album import Album, Disc
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
 
 
@@ -23,11 +22,10 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
         Playlist widget showing cover for 4 albums
     """
 
-    def __init__(self, playlist_id, obj, view_type, font_height):
+    def __init__(self, playlist_id, view_type, font_height):
         """
             Init widget
             @param playlist_id as playlist_id
-            @param obj as Track/Album
             @param view_type as ViewType
             @param font_height as int
         """
@@ -36,18 +34,7 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
         RoundedAlbumsWidget.__init__(self, playlist_id, name,
                                      sortname, view_type)
         self._track_ids = []
-        self._obj = obj
         self._genre = Type.PLAYLISTS
-        if obj is not None:
-            if isinstance(obj, Album) or\
-                    isinstance(obj, Disc):
-                self._add = not App().playlists.exists_album(
-                    playlist_id,
-                    obj)
-            else:
-                self._add = not App().playlists.exists_track(
-                    playlist_id,
-                    obj.uri)
 
     def populate(self):
         """

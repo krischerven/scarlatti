@@ -28,16 +28,14 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
     """
 
     @signals
-    def __init__(self, obj, view_type=ViewType.SCROLLED):
+    def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init decade view
-            @param obj as Track/Album
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
-        self.__obj = obj
         self._new_button = Gtk.Button(_("New playlist"))
         self._new_button.connect("clicked", self.__on_new_button_clicked)
         self._new_button.set_property("halign", Gtk.Align.CENTER)
@@ -61,15 +59,8 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             FlowBoxView.populate(self, items)
 
         def load():
-            items = []
-            if self.__obj is not None:
-                items = []
-                for item in App().playlists.get_ids():
-                    if not App().playlists.get_smart(item):
-                        items.append(item)
-            else:
-                items = [i[0] for i in ShownPlaylists.get()]
-                items += App().playlists.get_ids()
+            items = [i[0] for i in ShownPlaylists.get()]
+            items += App().playlists.get_ids()
             return items
 
         App().task_helper.run(load, callback=(on_load,))
@@ -111,8 +102,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         else:
             position = 0
         view_type = self._view_type & ~self.view_sizing_mask
-        return ({"obj": self.__obj, "view_type": view_type},
-                self._sidebar_id, position)
+        return ({"view_type": view_type}, self._sidebar_id, position)
 
 #######################
 # PROTECTED           #
@@ -124,7 +114,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param playlist_ids as [int]
         """
         self._remove_placeholder()
-        FlowBoxView._add_items(self, playlist_ids, self.__obj, self._view_type)
+        FlowBoxView._add_items(self, playlist_ids, self._view_type)
 
     def _on_primary_press_gesture(self, x, y, event):
         """
@@ -226,7 +216,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param button as Gtk.Button
         """
         existing_playlists = []
-        for (playlist_id, name, sortname) in App().playlists.get():
+        for (playlist_id, name) in App().playlists.get():
             existing_playlists.append(name)
 
         # Search for an available name

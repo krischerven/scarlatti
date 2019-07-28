@@ -10,9 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, GLib
 
-from gettext import gettext as _
+from hashlib import sha256
 
 from lollypop.define import App
 from lollypop.objects_track import Track
@@ -40,48 +40,29 @@ class PlaylistsMenu(Gio.Menu):
         """
             Set playlist actions
         """
-        playlist_action = Gio.SimpleAction(name="playlist_action")
-        App().add_action(playlist_action)
-        playlist_action.connect("activate",
-                                self.__add_to_playlists)
-        self.append(_("Add to others"), "app.playlist_action")
         i = 0
-        for playlist in App().playlists.get_last():
-            action = Gio.SimpleAction(name="playlist%s" % i)
-            App().add_action(action)
+        for (playlist_id, name) in App().playlists.get():
             if isinstance(self.__object, Album):
-                exists = App().playlists.exists_album(playlist[0],
+                exists = App().playlists.exists_album(playlist_id,
                                                       self.__object)
             else:
-                exists = App().playlists.exists_track(playlist[0],
+                exists = App().playlists.exists_track(playlist_id,
                                                       self.__object.uri)
-            if exists:
-                action.connect("activate",
-                               self.__remove_from_playlist,
-                               playlist[0])
-                self.append(_("Remove from \"%s\"") % playlist[1],
-                            "app.playlist%s" % i)
-            else:
-                action.connect("activate",
-                               self.__add_to_playlist,
-                               playlist[0])
-                self.append(_("Add to \"%s\"") % playlist[1],
-                            "app.playlist%s" % i)
+            encoded = sha256(name.encode("utf-8")).hexdigest()
+            playlist_action = Gio.SimpleAction.new_stateful(
+                                          encoded,
+                                          None,
+                                          GLib.Variant.new_boolean(exists))
+            playlist_action.connect("change-state",
+                                    self.__on_playlist_action_change_state,
+                                    playlist_id)
+            App().add_action(playlist_action)
+            self.append(name, "app.%s" % encoded)
             i += 1
 
-    def __add_to_playlists(self, action, variant):
-        """
-            Add to playlists
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        App().window.container.show_playlist_manager(self.__object)
-
-    def __add_to_playlist(self, action, variant, playlist_id):
+    def __add_to_playlist(self, playlist_id):
         """
             Add to playlist
-            @param Gio.SimpleAction
-            @param GLib.Variant
             @param playlist_id as int
         """
         def add(playlist_id):
@@ -94,13 +75,9 @@ class PlaylistsMenu(Gio.Menu):
             App().playlists.add_tracks(playlist_id, tracks, True)
         App().task_helper.run(add, playlist_id)
 
-    def __remove_from_playlist(self, action, variant, playlist_id):
+    def __remove_from_playlist(self, playlist_id):
         """
             Del from playlist
-            @param Gio.SimpleAction
-            @param GLib.Variant
-            @param object id as int
-            @param is album as bool
             @param playlist_id as int
         """
         def remove(playlist_id):
@@ -130,3 +107,16 @@ class PlaylistsMenu(Gio.Menu):
             @param playlist name as str
         """
         self.__object.set_loved(False)
+
+    def __on_playlist_action_change_state(self, action, variant, playlist_id):
+        """
+            Add/Remove object from playlist
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param playlist_id as int
+        """
+        action.set_state(variant)
+        if variant:
+            self.__add_to_playlist(playlist_id)
+        else:
+            self.__remove_from_playlist(playlist_id)

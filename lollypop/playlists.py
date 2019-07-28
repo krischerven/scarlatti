@@ -255,7 +255,7 @@ class Playlists(GObject.GObject):
             @return [int, str, str]
         """
         with SqlCursor(self) as sql:
-            result = sql.execute("SELECT rowid, name, name\
+            result = sql.execute("SELECT rowid, name\
                                   FROM playlists\
                                   ORDER BY name\
                                   COLLATE NOCASE COLLATE LOCALIZED")
@@ -272,19 +272,6 @@ class Playlists(GObject.GObject):
                                   ORDER BY name\
                                   COLLATE NOCASE COLLATE LOCALIZED")
             return list(itertools.chain(*result))
-
-    def get_last(self):
-        """
-            Return 6 last modified playlist
-            @return [string]
-        """
-        with SqlCursor(self) as sql:
-            result = sql.execute("SELECT rowid, name\
-                                  FROM playlists\
-                                  WHERE smart_enabled=0\
-                                  ORDER BY mtime DESC\
-                                  LIMIT 4")
-            return list(result)
 
     def get_track_uris(self, playlist_id):
         """

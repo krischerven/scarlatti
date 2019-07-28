@@ -177,7 +177,7 @@ class ViewsContainer:
             view = PlaylistsView(playlist_ids, view_type)
         else:
             from lollypop.view_playlists_manager import PlaylistsManagerView
-            view = PlaylistsManagerView(None, view_type)
+            view = PlaylistsManagerView(view_type)
         view.populate()
         return view
 

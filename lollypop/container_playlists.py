@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App, ViewType
-
 
 class PlaylistsContainer:
     """
@@ -24,34 +22,17 @@ class PlaylistsContainer:
         """
         pass
 
-    def show_playlist_manager(self, obj):
-        """
-            Show playlist manager for object_id
-            Current view stay present in ViewContainer
-            @param obj as Track/Album
-        """
-        from lollypop.view_playlists_manager import PlaylistsManagerView
-        current = self._stack.get_visible_child()
-        view = PlaylistsManagerView(obj, ViewType.SCROLLED)
-        view.populate(App().playlists.get_ids())
-        view.show()
-        self._stack.add(view)
-        self._stack.set_visible_child(view)
-        current.disable_overlay()
-
     def show_smart_playlist_editor(self, playlist_id):
         """
             Show a view allowing user to edit smart view
             @param playlist_id as int
         """
         from lollypop.view_playlist_smart import SmartPlaylistView
-        current = self._stack.get_visible_child()
         view = SmartPlaylistView(playlist_id)
         view.populate()
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)
-        current.disable_overlay()
 
 ##############
 # PROTECTED  #
