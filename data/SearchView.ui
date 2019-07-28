@@ -51,10 +51,6 @@
             <property name="image">image2</property>
             <property name="relief">none</property>
             <signal name="clicked" handler="_on_new_button_clicked" swapped="no"/>
-            <style>
-              <class name="light-button"/>
-              <class name="light-button-no-right-border"/>
-            </style>
           </object>
           <packing>
             <property name="name">page0</property>
@@ -117,9 +113,6 @@
         <property name="image">image1</property>
         <property name="relief">none</property>
         <signal name="clicked" handler="_on_play_button_clicked" swapped="no"/>
-        <style>
-          <class name="light-button"/>
-        </style>
       </object>
       <packing>
         <property name="left_attach">1</property>
