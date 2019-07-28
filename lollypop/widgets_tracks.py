@@ -12,7 +12,7 @@
 
 from gi.repository import GObject, Gtk, Gdk
 
-from lollypop.define import App, ViewType
+from lollypop.define import App, ViewType, StorageType
 from lollypop.utils import do_shift_selection, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
@@ -139,11 +139,15 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             # popover = RemoveMenuPopover(self.get_selected_rows())
             pass
         else:
-            from lollypop.menu_objects import TrackMenu
+            from lollypop.menu_objects import TrackMenu, TrackMenuExt
             from lollypop.widgets_menu import MenuBuilder
             menu = TrackMenu(row.track)
             menu_widget = MenuBuilder(menu)
             menu_widget.show()
+            if not row.track.storage_type & StorageType.EPHEMERAL:
+                menu_ext = TrackMenuExt(row.track)
+                menu_ext.show()
+                menu_widget.get_child_by_name("main").add(menu_ext)
             row.set_state_flags(Gtk.StateFlags.FOCUSED, True)
             popover = popup_widget(menu_widget, self, x, y)
             if popover is not None:

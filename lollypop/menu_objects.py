@@ -10,16 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, Gtk, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import ViewType, StorageType
+from lollypop.define import ViewType, StorageType, MARGIN_SMALL, App
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_artist import ArtistMenu
 from lollypop.menu_edit import EditMenu
 from lollypop.menu_playback import PlaybackMenu
 from lollypop.menu_sync import SyncAlbumMenu
+from lollypop.widgets_rating import RatingWidget
+from lollypop.widgets_loved import LovedWidget
 
 
 class AlbumMenu(Gio.Menu):
@@ -64,3 +66,82 @@ class TrackMenu(Gio.Menu):
             section.append_submenu(_("Playlists"), PlaylistsMenu(track))
         self.append_section(_("Add to"), section)
         self.append_section(_("Edit"), EditMenu(track))
+
+
+class TrackMenuExt(Gtk.Grid):
+    """
+        Additional widgets for track menu
+    """
+
+    def __init__(self, track):
+        """
+            Init widget
+            @param track as Track
+        """
+        Gtk.Grid.__init__(self)
+        self.set_margin_top(MARGIN_SMALL)
+        self.set_orientation(Gtk.Orientation.VERTICAL)
+
+        if track.year is not None:
+            year_label = Gtk.Label.new()
+            year_label.set_text(str(track.year))
+            dt = GLib.DateTime.new_from_unix_local(track.timestamp)
+            year_label.set_tooltip_text(dt.format(_("%Y-%m-%d")))
+            year_label.set_margin_end(5)
+            year_label.get_style_context().add_class("dim-label")
+            year_label.set_property("halign", Gtk.Align.END)
+            year_label.set_property("hexpand", True)
+            year_label.show()
+
+        hgrid = Gtk.Grid()
+        hgrid.get_style_context().add_class("popover-rating-loved-grid")
+        rating = RatingWidget(track)
+        rating.set_property("halign", Gtk.Align.START)
+        rating.set_margin_end(10)
+        rating.show()
+
+        loved = LovedWidget(track)
+        loved.set_property("halign", Gtk.Align.START)
+        loved.set_property("hexpand", True)
+        loved.show()
+
+        hgrid.add(rating)
+        hgrid.add(loved)
+
+        if track.year is not None:
+            hgrid.add(year_label)
+        hgrid.show()
+
+        if not track.storage_type & StorageType.COLLECTION:
+            edit = Gtk.Entry()
+            edit.set_margin_top(MARGIN_SMALL)
+            edit.set_margin_start(MARGIN_SMALL)
+            edit.set_margin_end(MARGIN_SMALL)
+            edit.set_margin_bottom(MARGIN_SMALL)
+            edit.set_property("hexpand", True)
+            edit.set_text(track.uri)
+            edit.connect("changed", self.__on_edit_changed, track)
+            edit.show()
+            self.add(edit)
+
+        separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+        separator.show()
+        self.add(separator)
+        self.add(hgrid)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_edit_changed(self, edit, track):
+        """
+            Update track uri
+            @param edit as Gtk.Edit
+            @param track as Track
+        """
+        from urllib.parse import urlparse
+        text = edit.get_text()
+        parsed = urlparse(text)
+        if parsed.scheme not in ["http", "https", "web"]:
+            text = "web://null"
+        App().tracks.set_uri(track.id, text)
+        track.reset("uri")
