@@ -89,12 +89,11 @@ class TrackMenuExt(Gtk.Grid):
             year_label.set_tooltip_text(dt.format(_("%Y-%m-%d")))
             year_label.set_margin_end(5)
             year_label.get_style_context().add_class("dim-label")
-            year_label.set_property("halign", Gtk.Align.END)
+            year_label.set_property("halign", Gtk.Align.START)
             year_label.set_property("hexpand", True)
             year_label.show()
 
         hgrid = Gtk.Grid()
-        hgrid.get_style_context().add_class("popover-rating-loved-grid")
         rating = RatingWidget(track)
         rating.set_property("halign", Gtk.Align.START)
         rating.set_margin_end(10)
@@ -102,14 +101,12 @@ class TrackMenuExt(Gtk.Grid):
 
         loved = LovedWidget(track)
         loved.set_property("halign", Gtk.Align.START)
-        loved.set_property("hexpand", True)
         loved.show()
-
-        hgrid.add(rating)
-        hgrid.add(loved)
 
         if track.year is not None:
             hgrid.add(year_label)
+        hgrid.add(rating)
+        hgrid.add(loved)
         hgrid.show()
 
         if not track.storage_type & StorageType.COLLECTION:
