@@ -231,7 +231,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param x as int
             @param y as int
         """
-        self.__popup_menu(self, x, y)
+        self.__popup_menu(x, y)
 
     def _on_primary_press_gesture(self, x, y, event):
         """
@@ -266,27 +266,28 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, widget, xcoordinate=None, ycoordinate=None):
+    def __popup_menu(self, x, y):
         """
             Popup menu for album
-            @param eventbox as Gtk.EventBox
-            @param xcoordinate as int (or None)
-            @param ycoordinate as int (or None)
+            @param x as int
+            @param y as int
         """
-        def on_closed(widget):
-            self.get_style_context().remove_class("menu-selected")
+        def on_closed(popover, row):
+            row.get_style_context().remove_class("menu-selected")
 
+        row = self._box.get_row_at_y(y)
+        if row is None:
+            return
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self._album, ViewType.ALBUM)
-        popover = Gtk.Popover.new_from_model(widget, menu)
-        popover.connect("closed", on_closed)
-        self.get_style_context().add_class("menu-selected")
-        if xcoordinate is not None and ycoordinate is not None:
-            rect = Gdk.Rectangle()
-            rect.x = xcoordinate
-            rect.y = ycoordinate
-            rect.width = rect.height = 1
-            popover.set_pointing_to(rect)
+        menu = AlbumMenu(row.album, ViewType.ALBUM)
+        rect = Gdk.Rectangle()
+        rect.x = x
+        rect.y = y
+        rect.width = rect.height = 1
+        popover = Gtk.Popover.new_from_model(row, menu)
+        popover.set_pointing_to(rect)
+        popover.connect("closed", on_closed, row)
+        row.get_style_context().add_class("menu-selected")
         popover.popup()
 
     def __reveal_row(self, row):
