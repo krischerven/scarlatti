@@ -89,7 +89,7 @@ class MenuBuilder(Gtk.Stack):
         button.set_label(text.get_string())
         button.set_alignment(0, 0.5)
         if target is not None:
-            button.set_action_target_value(target.get_string())
+            button.set_action_target_value(target)
         button.show()
         self.__boxes[menu_name].add(button)
 

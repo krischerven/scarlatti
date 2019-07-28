@@ -36,6 +36,7 @@ class ToolbarEnd(Gtk.Bin):
         self.__timeout_id = None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/ToolbarEnd.ui")
+        self.__shuffle_menu = builder.get_object("shuffle-menu")
         self.__party_submenu = builder.get_object("party_submenu")
         self.add(builder.get_object("end"))
 
@@ -136,9 +137,18 @@ class ToolbarEnd(Gtk.Bin):
            @param button as Gtk.ToggleButton
         """
         if button.get_active():
-            # Create submenu "Configure party mode"
             self.__party_submenu.remove_all()
             self.__init_party_submenu()
+            from lollypop.widgets_utils import Popover
+            from lollypop.widgets_menu import MenuBuilder
+            menu_widget = MenuBuilder(self.__shuffle_menu)
+            menu_widget.show()
+            popover = Popover.new()
+            popover.add(menu_widget)
+            popover.set_relative_to(button)
+            popover.set_position(Gtk.PositionType.BOTTOM)
+            popover.connect("closed", self.__on_popover_closed, button)
+            popover.popup()
 
     def _on_devices_button_toggled(self, button):
         """
@@ -205,10 +215,6 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(action)
         item = Gio.MenuItem.new(_("All genres"), "app.all_party_ids")
         self.__party_submenu.append_item(item)
-        i = 0
-        # Hack, hack, hack
-        submenu_name = _("Next")
-        menu = self.__party_submenu
         for (genre_id, name, sortname) in App().genres.get():
             in_party_ids = not party_ids or genre_id in party_ids
             action_name = "genre_%s" % genre_id
@@ -220,16 +226,7 @@ class ToolbarEnd(Gtk.Bin):
             App().add_action(action)
             menu_str = name if len(name) < 20 else name[0:20] + "…"
             item = Gio.MenuItem.new(menu_str, "app.%s" % action_name)
-            menu.append_item(item)
-            if i > 10:
-                submenu = Gio.Menu()
-                item = Gio.MenuItem.new(submenu_name, None)
-                submenu_name += " "
-                item.set_submenu(submenu)
-                menu.append_item(item)
-                menu = submenu
-                i = 0
-            i += 1
+            self.__party_submenu.append_item(item)
 
     def __set_shuffle_icon(self):
         """

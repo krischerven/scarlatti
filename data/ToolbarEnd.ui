@@ -94,13 +94,12 @@
       </packing>
     </child>
     <child>
-      <object class="GtkMenuButton" id="shuffle_button">
+      <object class="GtkToggleButton" id="shuffle_button">
         <property name="visible">True</property>
         <property name="valign">center</property>
         <property name="can_focus">False</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Playback options</property>
-        <property name="menu_model">shuffle-menu</property>
         <signal name="toggled" handler="_on_shuffle_button_toggled" swapped="no"/>
         <child>
           <object class="GtkImage" id="shuffle_button_image">
