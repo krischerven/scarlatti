@@ -19,7 +19,7 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
-from lollypop.utils import set_cursor_hand2
+from lollypop.utils import set_cursor_hand2, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
 
@@ -187,10 +187,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Show album menu
             @param button as Gtk.Button
         """
+        from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
         menu = AlbumMenu(self.__album, self._view_type)
-        popover = Gtk.Popover.new_from_model(button, menu)
-        popover.popup()
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
     def _on_play_button_clicked(self, button):
         """

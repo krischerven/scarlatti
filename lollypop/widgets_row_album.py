@@ -329,7 +329,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         """
         def on_closed(popover):
             self.unset_state_flags(Gtk.StateFlags.FOCUSED)
-            self.set_indicator()
 
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
