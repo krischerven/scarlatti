@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gdk, Gtk, GLib
+from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 from random import shuffle, choice
@@ -138,20 +138,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_size_allocate(self, allocation):
-            if App().settings.get_value("artist-artwork"):
-                artist = App().artists.get_name(choice(self.__artist_ids))
-                App().art_helper.set_artist_artwork(
-                                            artist,
-                                            # +100 to prevent resize lag
-                                            allocation.width + 100,
-                                            ArtSize.BANNER + MARGIN * 2,
-                                            self.get_scale_factor(),
-                                            ArtBehaviour.BLUR_HARD |
-                                            ArtBehaviour.DARKER,
-                                            self.__on_artist_artwork)
-            else:
-                self.__use_album_artwork(allocation.width,
-                                         ArtSize.BANNER + MARGIN * 2)
+            self.__set_artwork(allocation.width, ArtSize.BANNER + MARGIN * 2)
 
     def _on_label_button_release(self, eventbox, event):
         """
@@ -258,15 +245,33 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         if len(self.__artist_ids) == 1:
             artist = App().artists.get_name(self.__artist_ids[0])
             if prefix == artist:
-                rect = Gdk.Rectangle()
-                rect.width = self.get_allocated_width()
-                rect.height = self.get_allocated_height()
-                self.__width = 0
-                self.__handle_size_allocate(rect)
+                width = self.get_allocated_width()
+                self.__set_artwork(width, ArtSize.BANNER + MARGIN * 2)
+                self.set_view_type(self._view_type)
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_artwork(self, width, height):
+        """
+            Set artwork
+            @param width as int
+            @param height as int
+        """
+        if App().settings.get_value("artist-artwork"):
+            artist = App().artists.get_name(choice(self.__artist_ids))
+            App().art_helper.set_artist_artwork(
+                                        artist,
+                                        # +100 to prevent resize lag
+                                        width + 100,
+                                        height,
+                                        self.get_scale_factor(),
+                                        ArtBehaviour.BLUR_HARD |
+                                        ArtBehaviour.DARKER,
+                                        self.__on_artist_artwork)
+        else:
+            self.__use_album_artwork(width + 100, height)
+
     def __set_badge_artwork(self, art_size):
         """
             Set artist artwork on badge
@@ -349,8 +354,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             album = Album(self.__album_id)
             App().art_helper.set_album_artwork(
                 album,
-                # +100 to prevent resize lag
-                width + 100,
+                width,
                 height,
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR_HARD |
