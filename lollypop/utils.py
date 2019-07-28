@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib, Gdk, GdkPixbuf, Pango
+from gi.repository import Gio, GLib, Gdk, GdkPixbuf, Pango, Gtk
 
 from math import pi
 from gettext import gettext as _
@@ -472,6 +472,40 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
     elif object_id == Type.WEB:
         icon = "goa-panel-symbolic"
     return icon
+
+
+def popup_widget(widget, parent, x=None, y=None):
+    """
+        Popup menu on widget as x, y
+        @param widget as Gtk.Widget
+        @param parent as Gtk.Widget
+        @param x as int
+        @param y as int
+        @return Gtk.Popover/None
+    """
+    if App().window.is_adaptive:
+        from lollypop.view import View
+        view = View()
+        view.show()
+        view.add(widget)
+        widget.set_vexpand(True)
+        App().window.container.stack.add(view)
+        App().window.container.stack.set_visible_child(view)
+        return None
+    else:
+        from lollypop.widgets_utils import Popover
+        popover = Popover.new()
+        popover.add(widget)
+        popover.set_relative_to(parent)
+        if x is not None and y is not None:
+            rect = parent.get_allocation()
+            rect.x = x
+            rect.y = y
+            rect.width = rect.height = 1
+            popover.set_pointing_to(rect)
+        popover.set_position(Gtk.PositionType.BOTTOM)
+        popover.popup()
+        return popover
 
 
 def is_device(mount):

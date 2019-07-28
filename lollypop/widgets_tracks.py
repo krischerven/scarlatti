@@ -13,7 +13,7 @@
 from gi.repository import GObject, Gtk, Gdk
 
 from lollypop.define import App, ViewType
-from lollypop.utils import do_shift_selection
+from lollypop.utils import do_shift_selection, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
 
@@ -131,22 +131,20 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             @param y as int
         """
         def on_closed(popover, row):
-            row.get_style_context().remove_class("menu-selected")
+            row.unset_state_flags(Gtk.StateFlags.FOCUSED)
             row.set_indicator()
 
-        from lollypop.pop_menu import TrackMenuPopover, RemoveMenuPopover
         if self.get_selected_rows():
-            popover = RemoveMenuPopover(self.get_selected_rows())
+            # from lollypop.pop_menu import RemoveMenuPopover
+            # popover = RemoveMenuPopover(self.get_selected_rows())
+            pass
         else:
             from lollypop.menu_objects import TrackMenu
+            from lollypop.widgets_menu import MenuBuilder
             menu = TrackMenu(row.track)
-            popover = TrackMenuPopover(row.track, menu)
-        rect = row.get_allocation()
-        rect.x = x
-        rect.y = y
-        rect.width = rect.height = 1
-        popover.set_pointing_to(rect)
-        popover.set_relative_to(self)
-        popover.connect("closed", on_closed, row)
-        row.get_style_context().add_class("menu-selected")
-        popover.popup()
+            menu_widget = MenuBuilder(menu)
+            menu_widget.show()
+            row.set_state_flags(Gtk.StateFlags.FOCUSED, True)
+            popover = popup_widget(menu_widget, self, x, y)
+            if popover is not None:
+                popover.connect("closed", on_closed, row)

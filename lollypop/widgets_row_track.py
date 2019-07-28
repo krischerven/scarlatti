@@ -135,6 +135,7 @@ class TrackRow(Gtk.ListBoxRow):
         self.set_indicator(self._get_indicator_type())
         self.update_duration()
         self.show_all()
+        self.get_style_context().add_class("trackrow")
 
     def update_duration(self):
         """
@@ -157,15 +158,13 @@ class TrackRow(Gtk.ListBoxRow):
             self._indicator.load()
         elif indicator_type & IndicatorType.PLAY:
             self._indicator.set_opacity(1)
-            self.get_style_context().remove_class("trackrow")
-            self.get_style_context().add_class("trackrowplaying")
+            self.set_state_flags(Gtk.StateFlags.VISITED, True)
             if indicator_type & IndicatorType.LOVED:
                 self._indicator.play_loved()
             else:
                 self._indicator.play()
         else:
-            self.get_style_context().remove_class("trackrowplaying")
-            self.get_style_context().add_class("trackrow")
+            self.unset_state_flags(Gtk.StateFlags.VISITED)
             if indicator_type & IndicatorType.LOVED:
                 self._indicator.set_opacity(1)
                 self._indicator.loved()

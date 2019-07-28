@@ -443,48 +443,6 @@ flowboxchild:selected  {
   	color: inherit;
 }
 
-.trackrow:selected {
-    border-radius: 0px;
-    background-color: @theme_selected_bg_color;
-    color: @theme_selected_fg_color;
-}
-
-.trackrow:visited {
-    border-radius: 0px;
-	background-color: alpha(#e73435, 0.1);
-    color: @theme_fg_color;
-}
-
-.trackrowplaying {
-    border-radius: 5px;
-    padding: 0px;
-    min-height: 32px;
-	background-color: alpha(@theme_fg_color, 0.07);
-  	color: inherit;
-}
-
-.trackrowplaying:selected {
-    border-radius: 0px;
-    box-shadow: none;
-    background-color: @theme_selected_bg_color;
-    color: @theme_selected_fg_color;
-}
-
-.trackrowplaying .menu-button {
-	background-color: transparent;
-    border-color: transparent;
-  	color: transparent;
-}
-
-.trackrowplaying:hover .menu-button {
-	border-color: transparent;
-  	color: inherit;
-}
-
-.trackrowplaying:hover .menu-button:hover {
-	border-color: alpha(#000000, 0.1);
-}
-
 .trackrow .menu-button {
 	border-color: transparent;
 	background-color: transparent;
@@ -499,13 +457,29 @@ flowboxchild:selected  {
 	border-color: alpha(@theme_fg_color, 0.1);
 }
 
-.menu-selected {
-	background-color: alpha(@theme_fg_color, 0.03);
+.trackrow:selected {
+    border-radius: 0px;
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+.trackrow:visited {
+    border-radius: 5px;
+	background-color: alpha(@theme_fg_color, 0.07);
+    color: @theme_fg_color;
+}
+
+.trackrow:visited .menu-button {
   	color: inherit;
 }
 
-.menu-selected .menu-button {
-	border-color: alpha(@theme_fg_color, 0.1);
+.trackrow:focus {
+    border-radius: 5px;
+	background-color: alpha(@theme_fg_color, 0.05);
+    color: @theme_fg_color;
+}
+
+.trackrow:focus .menu-button {
   	color: inherit;
 }
 

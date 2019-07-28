@@ -19,7 +19,7 @@ from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
-from lollypop.utils import get_font_height
+from lollypop.utils import get_font_height, popup_widget
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals
@@ -210,16 +210,12 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             Popup album menu at position
             @param child ad AlbumSimpleWidget
         """
-        from lollypop.widgets_utils import Popover
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu_widget = MenuBuilder(AlbumMenu(child.album, ViewType.ALBUM))
+        menu = AlbumMenu(child.album, ViewType.ALBUM)
+        menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popover = Popover.new()
-        popover.add(menu_widget)
-        popover.set_relative_to(child.artwork)
-        popover.set_position(Gtk.PositionType.BOTTOM)
-        popover.popup()
+        popup_widget(menu_widget, child.artwork)
 
     def __on_album_popover_closed(self, popover, album_widget):
         """
