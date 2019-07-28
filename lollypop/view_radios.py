@@ -46,7 +46,8 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             builder.get_object("search_btn").hide()
         return {
             "init": [
-                (App().radios, "radio-changed", "_on_radio_changed")
+                (App().radios, "radio-changed", "_on_radio_changed"),
+                (App().player, "loading-changed", "_on_loading_changed")
             ]
         }
 
@@ -110,6 +111,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         if child is None:
             return
         App().player.load(child.track)
+        child.set_loading(True)
 
     def _on_search_clicked(self, widget):
         """
@@ -147,6 +149,15 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         if self.__pop_tunein is not None:
             self.__pop_tunein.destroy()
             self.__pop_tunein = None
+
+    def _on_loading_changed(self, player, status, track):
+        """
+            Stop loading for track child
+        """
+        for child in self.children:
+            if child.track.id == track.id:
+                child.set_loading(False)
+                break
 
     def _on_radio_changed(self, radios, radio_id):
         """

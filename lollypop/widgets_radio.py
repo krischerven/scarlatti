@@ -38,7 +38,6 @@ class RadioWidget(Gtk.FlowBoxChild):
         self._track = Radio(radio_id)
         self.__view_type = view_type
         self.set_view_type(view_type)
-        self.connect("activate", self.__on_activate)
 
     def populate(self):
         """
@@ -48,8 +47,10 @@ class RadioWidget(Gtk.FlowBoxChild):
             grid = Gtk.Grid()
             grid.set_row_spacing(2)
             grid.set_orientation(Gtk.Orientation.VERTICAL)
+            grid.show()
             self.__artwork = Gtk.Image.new()
             self.__artwork.connect("realize", set_cursor_hand2)
+            self.__artwork.show()
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)
             self.__label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -57,18 +58,23 @@ class RadioWidget(Gtk.FlowBoxChild):
             self.__label.get_style_context().add_class("big-padding")
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
-            toggle_button = Gtk.ToggleButton.new()
-            toggle_button.set_image(self.__label)
-            toggle_button.set_relief(Gtk.ReliefStyle.NONE)
-            toggle_button.get_style_context().add_class("light-button")
-            toggle_button.connect("toggled", self.__on_label_toggled)
-            toggle_button.show()
+            self.__label.show()
+            self.__toggle_button = Gtk.ToggleButton.new()
+            self.__toggle_button.set_image(self.__label)
+            self.__toggle_button.set_relief(Gtk.ReliefStyle.NONE)
+            self.__toggle_button.get_style_context().add_class("light-button")
+            self.__toggle_button.connect("toggled", self.__on_label_toggled)
+            self.__toggle_button.set_hexpand(True)
+            self.__toggle_button.show()
+            self.__spinner = Gtk.Spinner.new()
+            self.__spinner.get_style_context().add_class("big-padding")
+            self.__spinner.show()
             grid.add(self.__artwork)
-            grid.add(toggle_button)
+            grid.add(self.__toggle_button)
             self.add(grid)
             self.set_artwork()
             self.set_selection()
-            self.show_all()
+            self.show()
         else:
             self.set_artwork()
 
@@ -117,6 +123,18 @@ class RadioWidget(Gtk.FlowBoxChild):
         self.set_size_request(self.__art_size,
                               self.__art_size + self.__font_height)
 
+    def set_loading(self, loading):
+        """
+            Show spinner
+            @param loading as bool
+        """
+        if loading:
+            self.__spinner.start()
+            self.__toggle_button.set_image(self.__spinner)
+        else:
+            self.__spinner.stop()
+            self.__toggle_button.set_image(self.__label)
+
     def do_get_preferred_width(self):
         """
             Return preferred width
@@ -146,6 +164,13 @@ class RadioWidget(Gtk.FlowBoxChild):
             self.__artwork.set_state_flags(Gtk.StateFlags.SELECTED, True)
         else:
             self.__artwork.set_state_flags(Gtk.StateFlags.NORMAL, True)
+
+    @property
+    def spinner(self):
+        """
+            Get radio spinner
+        """
+        return self.__spinner
 
     @property
     def is_populated(self):
@@ -195,13 +220,6 @@ class RadioWidget(Gtk.FlowBoxChild):
 #######################
 # PRIVATE             #
 #######################
-    def __on_activate(self, child):
-        """
-            Play radio
-            @param child as Gtk.FlowBoxChild
-        """
-        App().player.load(self.__track)
-
     def __on_radio_artwork(self, surface):
         """
             Set radio artwork
@@ -213,7 +231,6 @@ class RadioWidget(Gtk.FlowBoxChild):
                                              Gtk.IconSize.DIALOG)
         else:
             self.__artwork.set_from_surface(surface)
-        self.show_all()
         self.emit("populated")
 
     def __on_label_toggled(self, button):
