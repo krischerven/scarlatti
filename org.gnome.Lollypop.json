@@ -218,18 +218,6 @@
       }]
     },
     {
-      "name": "python-wikipedia",
-      "buildsystem": "simple",
-      "build-commands": [
-        "python3 setup.py install --prefix=/app --root=/"
-      ],
-      "sources": [{
-        "type": "archive",
-        "url": "https://pypi.python.org/packages/source/w/wikipedia/wikipedia-1.4.0.tar.gz",
-        "sha256": "db0fad1829fdd441b1852306e9856398204dc0786d2996dd2e0c8bb8e26133b2"
-      }]
-    },
-    {
       "name": "python-socks",
       "buildsystem": "simple",
       "build-commands": [
