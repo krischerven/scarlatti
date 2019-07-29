@@ -44,7 +44,14 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
 # PROTECTED           #
 #######################
     def _on_button_clicked(self, button):
-        self.hide()
+        """
+            Popdown popover if exists or destroy self
+        """
+        popover = self.get_ancestor(Gtk.Popover)
+        if popover is None:
+            self.destroy()
+        else:
+            popover.popdown()
 
     def _on_volume_value_changed(self, scale):
         """
