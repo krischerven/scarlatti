@@ -172,7 +172,7 @@ class YouTubeHelper:
                             unescaped.replace(" ", "+"),
                             None,
                             True)
-            uri = "https://www.youtube.com/results?search_query=%s" % search
+            uri = "https://www.startpage.com/do/search?query=%s" % search
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             if not status:
@@ -183,12 +183,12 @@ class YouTubeHelper:
             ytems = []
             for link in soup.findAll("a"):
                 href = link.get("href")
-                title = link.get("title")
-                if href is None or title is None:
+                title = link.get_text()
+                if href is None or title is None or\
+                        href.find("youtube.com/watch?v") == -1:
                     continue
-                if href.startswith("/watch?v="):
-                    href = href.replace("/watch?v=", "")
-                    ytems.append((href, title))
+                youtube_id = href.split("watch?v=")[1]
+                ytems.append((youtube_id, title))
             dic = {}
             best = self.__BAD_SCORE
             for (yid, title) in ytems:
