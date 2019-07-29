@@ -17,7 +17,7 @@ from re import sub
 from gettext import gettext as _
 
 from lollypop.define import App, GOOGLE_API_ID
-from lollypop.utils import escape
+from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 
 
@@ -41,11 +41,18 @@ class YouTubeHelper:
             @return uri as str
             @param cancellable as Gio.Cancellable
         """
-        yid = self.__get_youtube_id(track, cancellable)
-        if yid is None:
+        youtube_id = None
+        if self.__fallback:
+            if get_network_available("STARTPAGE"):
+                youtube_id = self.__get_youtube_id_start(track, cancellable)
+            elif get_network_available("DUCKDUCKGO"):
+                youtube_id = self.__get_youtube_id_duckduck(track, cancellable)
+        else:
+            youtube_id = self.__get_youtube_id(track, cancellable)
+        if youtube_id is None:
             return ""
         else:
-            return "https://www.youtube.com/watch?v=%s" % yid
+            return "https://www.youtube.com/watch?v=%s" % youtube_id
 
     def get_uri_content(self, track):
         """
@@ -88,8 +95,6 @@ class YouTubeHelper:
             @param cancellable as Gio.Cancellable
             @return youtube id as str
         """
-        if self.__fallback:
-            return self.__get_youtube_id_fallback(track, cancellable)
         unescaped = "%s %s" % (track.artists[0],
                                track.name)
         search = GLib.uri_escape_string(
@@ -125,7 +130,7 @@ class YouTubeHelper:
         except Exception as e:
             Logger.warning("YouTubeHelper::__get_youtube_id(): %s", e)
             self.__fallback = True
-            return self.__get_youtube_id_fallback(track, cancellable)
+            return self.get_uri(track, cancellable)
         return None
 
     def __get_youtube_score(self, page_title, title, artist, album):
@@ -153,9 +158,9 @@ class YouTubeHelper:
         page_title = page_title.replace(title, "")
         return len(page_title)
 
-    def __get_youtube_id_fallback(self, track, cancellable):
+    def __get_youtube_id_start(self, track, cancellable):
         """
-            Get youtube id (fallback)
+            Get youtube id via startpage
             @param track as Track
             @param cancellable as Gio.Cancellable
             @return youtube id as str
@@ -207,6 +212,62 @@ class YouTubeHelper:
             else:
                 return dic[best]
         except Exception as e:
-            Logger.warning("YouTubeHelper::__get_youtube_id_fallback(): %s", e)
-            self.__fallback = True
+            Logger.warning("YouTubeHelper::__get_youtube_id_start(): %s", e)
+        return None
+
+    def __get_youtube_id_duckduck(self, track, cancellable):
+        """
+            Get youtube id via duckduckgo
+            @param track as Track
+            @param cancellable as Gio.Cancellable
+            @return youtube id as str
+        """
+        try:
+            from bs4 import BeautifulSoup
+        except:
+            print("$ sudo pip3 install beautifulsoup4")
+            return None
+        try:
+            unescaped = "%s %s" % (track.artists[0],
+                                   track.name)
+            search = GLib.uri_escape_string(
+                            unescaped.replace(" ", "+"),
+                            None,
+                            True)
+            uri = "https://duckduckgo.com/lite/?q=%s" % search
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri, cancellable)
+            if not status:
+                return None
+
+            html = data.decode("utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+            ytems = []
+            for link in soup.findAll("a"):
+                href = GLib.uri_unescape_string(link.get("href"), None)
+                title = link.get_text()
+                if href is None or title is None or\
+                        href.find("youtube.com/watch?v") == -1:
+                    continue
+                youtube_id = href.split("watch?v=")[1]
+                ytems.append((youtube_id, title))
+            dic = {}
+            best = self.__BAD_SCORE
+            for (yid, title) in ytems:
+                score = self.__get_youtube_score(title,
+                                                 track.name,
+                                                 track.artists[0],
+                                                 track.album.name)
+                if score < best:
+                    best = score
+                elif score == best:
+                    continue  # Keep first result
+                dic[score] = yid
+            # Return url from first dic item
+            if best == self.__BAD_SCORE:
+                return None
+            else:
+                return dic[best]
+        except Exception as e:
+            Logger.warning("YouTubeHelper::__get_youtube_id_duckduck(): %s", e)
         return None
