@@ -298,7 +298,7 @@ class ViewsContainer:
             Show albums for device at index
             @param index as int
         """
-        from lollypop.view_albums_box_load import AlbumsDeviceBoxView
+        from lollypop.view_albums_box import AlbumsDeviceBoxView
         view_type = ViewType.SCROLLED
         view = AlbumsDeviceBoxView(index, view_type)
         view.populate()

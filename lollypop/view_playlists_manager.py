@@ -239,7 +239,7 @@ class PlaylistsManagerDeviceView(PlaylistsManagerView):
             @param index as int
             @param view_type as ViewType
         """
-        PlaylistsManagerView.__init__(self, None, view_type)
+        PlaylistsManagerView.__init__(self, view_type)
         self.__index = index
         self._new_button.hide()
 
