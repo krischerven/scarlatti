@@ -121,7 +121,7 @@ class PlaybackMenu(Gio.Menu):
         albums = App().player.albums
         # If album last in list, merge
         if albums and albums[-1].id == self.__track.album.id:
-            albums[-1].insert_track(self.__track)
+            albums[-1].append_tracks([self.__track])
             App().player.set_next()
         # Add album with only one track
         else:
