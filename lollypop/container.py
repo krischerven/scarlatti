@@ -134,6 +134,8 @@ class Container(Gtk.Overlay, NotificationContainer,
             App().window.go_home()
         else:
             self.show_view([Type.HOME])
+            self._stack.history.reset()
+            App().window.emit("can-go-back-changed", False)
 
     @property
     def view(self):
