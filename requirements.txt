@@ -4,4 +4,3 @@ PyGObject
 pycairo
 pylast
 textblob
-wikipedia
