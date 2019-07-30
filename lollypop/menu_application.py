@@ -34,6 +34,8 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
         builder.connect_signals(self)
+        if App().settings.get_value("background-mode"):
+            builder.get_object("quit_button").show()
         return {
             "map": [
                 (App().player, "volume-changed", "_on_volume_changed")
