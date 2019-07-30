@@ -46,24 +46,24 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         """
             Populate widget content
         """
-        grid = Gtk.Grid()
-        grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__label = Gtk.Label.new()
-        self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__label.set_property("halign", Gtk.Align.CENTER)
-        self.__label.set_property("has-tooltip", True)
-        self.__label.connect("query-tooltip", on_query_tooltip)
-        self.__label.set_markup(
+        self._grid = Gtk.Grid()
+        self._grid.set_row_spacing(2)
+        self._grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self._label = Gtk.Label.new()
+        self._label.set_ellipsize(Pango.EllipsizeMode.END)
+        self._label.set_property("halign", Gtk.Align.CENTER)
+        self._label.set_property("has-tooltip", True)
+        self._label.connect("query-tooltip", on_query_tooltip)
+        self._label.set_markup(
             "<b>" + GLib.markup_escape_text(self.__name) + "</b>")
         self._artwork = Gtk.Image.new()
         self._artwork.connect("realize", set_cursor_hand2)
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
         self.set_artwork()
-        grid.add(self._artwork)
-        grid.add(self.__label)
+        self._grid.add(self._artwork)
         self._artwork.connect("realize", set_cursor_hand2)
-        self.add(grid)
+        self.add(self._grid)
         self.show_all()
 
     def set_view_type(self, view_type):
@@ -92,7 +92,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             Rename widget
             @param name as str
         """
-        self.__label.set_markup("<b>" + GLib.markup_escape_text(name) + "</b>")
+        self._label.set_markup("<b>" + GLib.markup_escape_text(name) + "</b>")
 
     def disable_artwork(self):
         """

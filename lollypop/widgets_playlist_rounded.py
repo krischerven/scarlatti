@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import Gtk
+
 from random import sample
 
 from lollypop.define import App, Type
@@ -42,6 +44,13 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
         """
         if self._artwork is None:
             RoundedAlbumsWidget.populate(self)
+            toggle_button = Gtk.ToggleButton.new()
+            toggle_button.set_image(self._label)
+            toggle_button.set_relief(Gtk.ReliefStyle.NONE)
+            toggle_button.get_style_context().add_class("light-button")
+            toggle_button.connect("toggled", self.__on_label_toggled)
+            toggle_button.show()
+            self._grid.add(toggle_button)
         else:
             self.set_artwork()
 
@@ -89,23 +98,21 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
 #######################
 # PRIVATE             #
 #######################
-    def __on_gesture_pressed(self, gesture, x, y):
+    def __on_label_toggled(self, button):
         """
-            Show current track menu
-            @param gesture as Gtk.GestureLongPress
-            @param x as float
-            @param y as float
+            Show tracks popover
+            @param button as Gtk.ToggleButton
         """
-        self.__popup_menu(self)
+        def on_closed(popover):
+            button.set_state_flags(Gtk.StateFlags.NORMAL, True)
+            button.set_active(False)
 
-    def __on_button_release_event(self, widget, event):
-        """
-            Handle button release event
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        if event.button == 1:
-            self.activate()
-        elif event.button == 3:
-            self.__popup_menu(self)
-        return True
+        if not button.get_active():
+            return
+
+        from lollypop.pop_playlist_edit import PlaylistEditPopover
+        popover = PlaylistEditPopover(self._data)
+        popover.set_relative_to(button)
+        popover.connect("closed", on_closed)
+        popover.popup()
+        button.set_state_flags(Gtk.StateFlags.VISITED, True)
