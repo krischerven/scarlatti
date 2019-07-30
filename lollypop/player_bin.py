@@ -336,27 +336,15 @@ class BinPlayer(BasePlayer):
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        # Some radio streams send message tag every seconds!
-        changed = False
-        if self._current_track.id >= 0 or self._current_track.duration > 0.0:
+        if isinstance(self._current_track, Track):
             return
         Logger.debug("Player::__on_bus_message_tag(): %s" %
                      self._current_track.uri)
         reader = TagReader()
         tags = message.parse_tag()
         title = reader.get_title(tags, "")
-        if len(title) > 1 and self._current_track.name != title:
-            self._current_track.name = title
-            changed = True
-            if self._current_track.name == "":
-                self._current_track.name = self._current_track.uri
-        artists = reader.get_artists(tags)
-        if len(artists) > 1 and self._current_track.artists != artists:
-            self._current_track.artists = artists.split(",")
-            changed = True
-            if not self._current_track.artists:
-                self._current_track.artists = self._current_track.album_artists
-        if changed:
+        if len(title) > 1 and self._current_track.artists != [title]:
+            self._current_track.artists = [title]
             self.emit("current-changed")
 
     def _on_bus_element(self, bus, message):

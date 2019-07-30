@@ -55,10 +55,7 @@ class InformationController:
             Update labels
             @param font_size as int
         """
-        if isinstance(App().player.current_track, Radio):
-            artist_text = App().player.current_track.name
-        else:
-            artist_text = ", ".join(App().player.current_track.artists)
+        artist_text = ", ".join(App().player.current_track.artists)
         if font_size is None:
             self._artist_label.set_text(artist_text)
         else:
