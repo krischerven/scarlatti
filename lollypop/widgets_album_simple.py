@@ -55,7 +55,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         """
         if self.__artwork is None:
             grid = Gtk.Grid()
-            grid.set_row_spacing(2)
+            grid.set_row_spacing(MARGIN_SMALL)
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)

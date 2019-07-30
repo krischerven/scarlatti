@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Pango, GObject
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN_SMALL
 from lollypop.utils import on_query_tooltip, set_cursor_hand2
 from lollypop.objects_radio import Radio
 
@@ -45,7 +45,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         """
         if self.__artwork is None:
             grid = Gtk.Grid()
-            grid.set_row_spacing(2)
+            grid.set_row_spacing(MARGIN_SMALL)
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             grid.show()
             self.__artwork = Gtk.Image.new()
