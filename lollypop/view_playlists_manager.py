@@ -42,8 +42,8 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self._new_button.set_hexpand(True)
         self._new_button.set_margin_top(5)
         self._new_button.show()
-        self.insert_row(1)
-        self.attach(self._new_button, 0, 1, 1, 1)
+        self.insert_row(0)
+        self.attach(self._new_button, 0, 0, 1, 1)
         self._widget_class = PlaylistRoundedWidget
         return {
             "init": [
