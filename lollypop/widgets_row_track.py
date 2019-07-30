@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango, GLib, GObject
+from gi.repository import Gtk, Pango, GLib
 
 from gettext import gettext as _
 
@@ -25,16 +25,6 @@ class TrackRow(Gtk.ListBoxRow):
     """
         A track row
     """
-
-    __gsignals__ = {
-        "insert-track": (
-            GObject.SignalFlags.RUN_FIRST, None, (int, bool)),
-        "remove-track": (
-            GObject.SignalFlags.RUN_FIRST, None, ()),
-        "insert-album": (
-            GObject.SignalFlags.RUN_FIRST, None, (
-                int, GObject.TYPE_PYOBJECT, bool)),
-    }
 
     def get_best_height(widget):
         """
@@ -272,11 +262,12 @@ class TrackRow(Gtk.ListBoxRow):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self._view_type & ViewType.POPOVER:
-            self._track.album.remove_track(self._track)
+        if self._view_type & ViewType.PLAYLISTS:
+            from lollypop.view_playlists import PlaylistsView
+            view = self.get_ancestor(PlaylistsView)
+            if view is not None:
+                view.remove_from_playlist(self._track)
             self.destroy()
-            App().player.set_next()
-            App().player.set_prev()
         else:
             self.popup_menu(self.__action_button)
 

@@ -28,8 +28,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
 
     __gsignals__ = {
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
-                                 (GObject.TYPE_PYOBJECT,))
     }
 
     def __init__(self, genre_ids, artist_ids, view_type):
@@ -341,7 +339,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             self.__position += len(album.tracks)
         else:
             self.__position = 0
-        row.connect("remove-from-playlist", self.__on_remove_from_playlist)
         return row
 
     def __get_current_ordinate(self):
@@ -356,9 +353,3 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 child.reveal(True)
                 y = child.translate_coordinates(self._box, 0, 0)[1]
         return y
-
-    def __on_remove_from_playlist(self, row, object):
-        """
-            Pass signal to parent
-        """
-        self.emit("remove-from-playlist", object)

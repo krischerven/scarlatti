@@ -27,8 +27,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
     """
 
     __gsignals__ = {
-        "remove-from-playlist": (GObject.SignalFlags.RUN_FIRST, None,
-                                 (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -311,10 +309,10 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
                     App().player.remove_album(self._album)
             else:
                 App().player.remove_album(self._album)
-            # Remove album from playlists
-            # A playlists can't have duplicate so just remove tracks
-            if self._view_type & ViewType.PLAYLISTS:
-                self.emit("remove-from-playlist", self._album)
+            from lollypop.view_playlists import PlaylistsView
+            view = self.get_ancestor(PlaylistsView)
+            if view is not None:
+                view.remove_from_playlist(self._album)
             self.destroy()
         else:
             self.__popup_menu(self.__action_button)

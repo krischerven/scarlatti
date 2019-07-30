@@ -61,8 +61,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         if view_type & ViewType.DND:
             self._view.dnd_helper.connect("dnd-finished",
                                           self.__on_dnd_finished)
-        self._view.connect("remove-from-playlist",
-                           self.__on_remove_from_playlist)
         self._view.show()
         self.__title_label.set_margin_start(MARGIN)
         self.__buttons.set_margin_end(MARGIN)
@@ -202,6 +200,17 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                 style_context.remove_class("typeahead")
         except Exception as e:
             Logger.error("PlaylistsView::activate_child: %s" % e)
+
+    def remove_from_playlist(self, object):
+        """
+            Remove object from playlist
+            @param object as Album/Track
+        """
+        if isinstance(object, Album):
+            tracks = object.tracks
+        else:
+            tracks = [object]
+        App().playlists.remove_tracks(self._playlist_ids[0], tracks)
 
     @property
     def args(self):
@@ -410,18 +419,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param playlists_widget as PlaylistsWidget
         """
         self.__update_jump_button()
-
-    def __on_remove_from_playlist(self, view, object):
-        """
-            Remove object from playlist
-            @param view as AlbumListView
-            @param object as Album/Track
-        """
-        if isinstance(object, Album):
-            tracks = object.tracks
-        else:
-            tracks = [object]
-        App().playlists.remove_tracks(self._playlist_ids[0], tracks)
 
     def __on_playlist_populated(self, widget):
         """
