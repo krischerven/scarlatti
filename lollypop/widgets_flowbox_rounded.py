@@ -49,6 +49,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._grid = Gtk.Grid()
         self._grid.set_row_spacing(2)
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self._grid.show()
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
         self._label.set_property("halign", Gtk.Align.CENTER)
@@ -56,6 +57,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._label.connect("query-tooltip", on_query_tooltip)
         self._label.set_markup(
             "<b>" + GLib.markup_escape_text(self.__name) + "</b>")
+        self._label.show()
         self._artwork = Gtk.Image.new()
         self._artwork.connect("realize", set_cursor_hand2)
         self._artwork.set_size_request(self._art_size, self._art_size)
@@ -64,7 +66,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._grid.add(self._artwork)
         self._artwork.connect("realize", set_cursor_hand2)
         self.add(self._grid)
-        self.show_all()
 
     def set_view_type(self, view_type):
         """

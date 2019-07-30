@@ -42,6 +42,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         """
         if self._artwork is None:
             RoundedFlowBoxWidget.populate(self)
+            self._grid.add(self._label)
             self.connect("destroy", self.__on_destroy)
         else:
             self.set_artwork()
