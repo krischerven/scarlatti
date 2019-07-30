@@ -468,7 +468,7 @@ flowboxchild:selected  {
 
 
 .menu-button-48 {
-    opacity: 0.7;
+    opacity: 0.6;
 	box-shadow: none;
 	min-height: 32px;
 	min-width: 48px;
@@ -499,7 +499,7 @@ flowboxchild:selected  {
 }
 
 .menu-button {
-    opacity: 0.7;
+    opacity: 0.6;
 	box-shadow: none;
 	min-height: 32px;
 	min-width: 32px;
