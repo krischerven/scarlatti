@@ -154,10 +154,6 @@ flowboxchild:selected  {
     background-color: @theme_bg_color;
 }
 
-.box-shadow {
-    box-shadow: 1px 1px 5px 5px alpha(black, 0.4);
-}
-
 .background-opacity {
     background-color: @theme_bg_color;
     opacity: 0.99;

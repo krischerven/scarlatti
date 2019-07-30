@@ -42,7 +42,6 @@ class TracksPopover(Popover, TracksView,
         Popover.__init__(self)
         SizeAllocationHelper.__init__(self)
         self._album = album
-        self.get_style_context().add_class("box-shadow")
         window_width = App().window.get_allocated_width()
         wanted_width = min(Size.NORMAL, window_width * 0.5)
         wanted_height = Size.MINI
