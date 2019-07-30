@@ -96,7 +96,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             @param widget as Gtk.Widget
         """
         from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover(None, App().radios)
+        popover = RadioPopover()
         popover.set_relative_to(widget)
         popover.popup()
 
