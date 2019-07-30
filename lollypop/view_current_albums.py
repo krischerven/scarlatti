@@ -34,7 +34,7 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
             Init view
             @param view_type as ViewType
         """
-        AlbumsListView.__init__(self, [], [], view_type)
+        AlbumsListView.__init__(self, [], [], view_type | ViewType.PLAYBACK)
         SizeAllocationHelper.__init__(self)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)

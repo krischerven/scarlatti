@@ -103,7 +103,7 @@ class TrackRow(Gtk.ListBoxRow):
         if self._artists_label is not None:
             self._grid.add(self._artists_label)
         self._grid.add(self._duration_label)
-        if self._view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
+        if self._view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                "list-remove-symbolic",
                Gtk.IconSize.MENU)
@@ -262,7 +262,12 @@ class TrackRow(Gtk.ListBoxRow):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self._view_type & ViewType.PLAYLISTS:
+        if self._view_type & ViewType.PLAYBACK:
+            self._track.album.remove_track(self._track)
+            App().player.set_next()
+            App().player.set_prev()
+            self.destroy()
+        elif self._view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:

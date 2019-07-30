@@ -105,7 +105,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
         self.__action_button = None
-        if self._view_type & (ViewType.POPOVER | ViewType.PLAYLISTS):
+        if self._view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "list-remove-symbolic",
                 Gtk.IconSize.MENU)
@@ -286,7 +286,10 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self._album.storage_type & StorageType.EPHEMERAL:
+        if self._view_type & ViewType.PLAYBACK:
+            App().player.remove_album(self._album)
+            self.destroy()
+        elif self._album.storage_type & StorageType.EPHEMERAL:
             App().art.copy_from_web_to_store(self._album.id)
             App().art.cache_artists_artwork()
             self._album.save(True)

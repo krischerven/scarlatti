@@ -80,6 +80,7 @@ class ViewType:
     FULLSCREEN = 1 << 10
     PLACEHOLDER = 1 << 11
     NO_PADDING = 1 << 12
+    PLAYBACK = 1 << 13
 
 
 NetworkAccessACL = {
