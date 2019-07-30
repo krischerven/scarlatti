@@ -144,12 +144,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__set_text_height(collapsed)
         if collapsed:
             self.__cover_widget.hide()
-            self.__duration_label.hide()
             self.__rating_grid.hide()
             self.__info_label.set_vexpand(True)
         else:
             self.__cover_widget.show()
-            self.__duration_label.show()
             self.__rating_grid.show()
             self.__info_label.set_vexpand(False)
 
