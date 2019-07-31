@@ -991,13 +991,15 @@ class AlbumsDatabase:
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             result = sql.execute("SELECT DISTINCT albums.rowid\
                                   FROM albums, tracks\
                                   WHERE albums.loved != -1 AND\
                                   albums.storage_type & ? AND\
                                   albums.rowid=tracks.album_id\
                                   AND albums.popularity = 0\
-                                  ORDER BY random() LIMIT 100")
+                                  ORDER BY random() LIMIT 100",
+                                 (storage_type,))
             return list(itertools.chain(*result))
 
     def get_years(self):
