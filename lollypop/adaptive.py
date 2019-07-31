@@ -380,7 +380,12 @@ class AdaptiveWindow:
             Go back to first page
         """
         view = self.__children[0][1]
-        self.__stack.set_visible_child(view)
+        if view in self.__stack.get_children():
+            self.__stack.set_visible_child(view)
+        else:
+            (view, sidebar_id) = self.__stack.history.pop(0)
+            if view is not None:
+                self.__stack.set_visible_child(view)
         self.__stack.history.reset()
         self.emit("can-go-back-changed", False)
 

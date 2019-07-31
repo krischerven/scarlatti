@@ -134,6 +134,8 @@ class ListsContainer:
             view = self.get_view_current()
         elif selected_ids[0] == Type.SEARCH:
             view = self.get_view_search()
+        elif selected_ids[0] == Type.SUGGESTIONS:
+            view = self._get_view_suggestions()
         elif selected_ids[0] in [Type.POPULARS,
                                  Type.LOVED,
                                  Type.RECENTS,
@@ -175,7 +177,7 @@ class ListsContainer:
         else:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:
-                self.show_view([Type.HOME])
+                selection_list.select_ids([Type.SUGGESTIONS], True)
             else:
                 selection_list.select_ids([startup_id], True)
 

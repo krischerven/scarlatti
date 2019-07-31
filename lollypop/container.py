@@ -126,17 +126,6 @@ class Container(Gtk.Overlay, NotificationContainer,
                 self._stack.add(view)
                 Gtk.Stack.set_visible_child(self._stack, view)
 
-    def go_home(self):
-        """
-            Go to home page
-        """
-        if App().window.is_adaptive:
-            App().window.go_home()
-        else:
-            self.show_view([Type.HOME])
-            self._stack.history.reset()
-            App().window.emit("can-go-back-changed", False)
-
     @property
     def view(self):
         """

@@ -40,9 +40,9 @@ class ViewsContainer:
                                Type.RANDOMS,
                                Type.WEB]:
                 view = self._get_view_albums(item_ids, [])
-            elif item_ids[0] == Type.HOME:
+            elif item_ids[0] == Type.SUGGESTIONS:
                 self.sidebar.select_ids([])
-                view = self._get_view_home()
+                view = self._get_view_suggestions()
             elif item_ids[0] == Type.SEARCH:
                 view = self.get_view_search(data)
             elif item_ids[0] == Type.INFO:
@@ -226,13 +226,13 @@ class ViewsContainer:
         view.show()
         return view
 
-    def _get_view_home(self):
+    def _get_view_suggestions(self):
         """
             Get home view
         """
-        from lollypop.view_home import HomeView
+        from lollypop.view_suggestions import SuggestionsView
         view_type = ViewType.SCROLLED
-        view = HomeView(view_type)
+        view = SuggestionsView(view_type)
         view.populate()
         view.show()
         return view

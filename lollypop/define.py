@@ -176,14 +176,14 @@ class OrderBy:
 # Order is important
 class Type:
     NONE = -1
-    POPULARS = -2
-    RANDOMS = -3
-    RECENTS = -4
-    LOVED = -5
-    NEVER = -6
-    PLAYLISTS = -7
-    RADIOS = -8
-    HOME = -9
+    SUGGESTIONS = -2
+    POPULARS = -3
+    RANDOMS = -4
+    RECENTS = -5
+    LOVED = -6
+    NEVER = -7
+    PLAYLISTS = -8
+    RADIOS = -9
     INFO = -10
     YEARS = -11
     ARTISTS = -12

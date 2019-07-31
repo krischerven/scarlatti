@@ -21,6 +21,8 @@ class ShownLists:
     """
 
     IDS = {
+        Type.SUGGESTIONS: (_("Suggestions"),
+                           SelectionListMask.SIDEBAR),
         Type.POPULARS: (_("Popular albums"),
                         SelectionListMask.SIDEBAR),
         Type.RANDOMS: (_("Random albums"),
