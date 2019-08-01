@@ -462,7 +462,7 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
     elif object_id == Type.YEARS:
         icon = "x-office-calendar-symbolic"
     elif object_id == Type.CURRENT:
-        icon = "view-list-symbolic"
+        icon = "org.gnome.Lollypop-play-queue"
     elif object_id == Type.LYRICS:
         icon = "view-dual-symbolic"
     elif object_id == Type.SEARCH:
