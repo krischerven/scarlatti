@@ -273,7 +273,7 @@ class LyricsView(View, InformationController,
         self.__downloads_running += 1
         # Update lyrics
         if isinstance(self.__current_track, Radio):
-            split = self.__current_track.name.split(" - ")
+            split = " ".join(self.__current_track.artists).split(" - ")
             if len(split) < 2:
                 return
             artist = GLib.uri_escape_string(
