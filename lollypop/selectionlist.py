@@ -120,7 +120,8 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork.show()
         elif self.__rowid < 0:
             icon_name = get_icon_name(self.__rowid, self.__mask)
-            self.__artwork.set_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
+            self.__artwork.set_from_icon_name(icon_name, Gtk.IconSize.INVALID)
+            self.__artwork.set_pixel_size(20)
             self.__artwork.show()
             self.emit("populated")
         else:
