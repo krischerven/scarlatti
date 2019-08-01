@@ -44,14 +44,11 @@ class ArtistView(View):
                                          (view_type |
                                           ViewType.ALBUM) &
                                          ~ViewType.SCROLLED)
-        self.__album_box.set_margin_top(self.__banner.height)
         self.__album_box.get_style_context().add_class("padding")
         self.__album_box.show()
         if self._view_type & ViewType.SCROLLED:
             self.__overlay.add(self._scrolled)
             self._viewport.add(self.__album_box)
-            self._scrolled.get_vscrollbar().set_margin_top(
-                self.__banner.height)
         else:
             self.__overlay.add(self.__album_box)
         self.add(self.__overlay)
@@ -113,6 +110,17 @@ class ArtistView(View):
 #######################
 # PROTECTED           #
 #######################
+    def _on_map(self, widget):
+        """
+            Set initial state
+            @param widget as Gtk.Widget
+        """
+        View._on_map(self, widget)
+        self.__album_box.set_margin_top(self.__banner.height)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
+
     def _on_value_changed(self, adj):
         """
             Update scroll value and check for lazy queue
@@ -120,14 +128,8 @@ class ArtistView(View):
         """
         if adj.get_value() == adj.get_lower():
             self.__banner.collapse(False)
-            self.__album_box.set_margin_top(
-                self.__banner.height)
         else:
-            self.__album_box.set_margin_top(self.__banner.height)
             self.__banner.collapse(True)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(
-                self.__banner.height)
 
     def _on_adaptive_changed(self, window, status):
         """
@@ -138,6 +140,9 @@ class ArtistView(View):
         View._on_adaptive_changed(self, window, status)
         self.__banner.set_view_type(self._view_type)
         self.__album_box.set_margin_top(self.__banner.height)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
 
 #######################
 # PRIVATE             #

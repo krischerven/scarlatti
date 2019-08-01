@@ -174,7 +174,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
 
     def _on_map(self, widget):
         """
-            Set initial state and connect signals
+            Set initial state
             @param widget as Gtk.Widget
         """
         LazyLoadingView._on_map(self, widget)
