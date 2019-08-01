@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import ViewType, MARGIN
 from lollypop.utils import get_font_height
 
 
@@ -42,7 +42,8 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         self._box.set_vexpand(True)
         self._box.set_max_children_per_line(1000)
         self._box.set_row_spacing(MARGIN)
-        self._box.set_column_spacing(MARGIN_SMALL)
+        self._box.set_column_spacing(MARGIN)
+        self._box.set_property("valign", Gtk.Align.START)
         self._box.show()
         if not view_type & ViewType.SMALL:
             self.__event_controller = Gtk.EventControllerMotion.new(self._box)
@@ -50,7 +51,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.SCROLLED:
             self._scrolled.set_property("expand", True)
-            self._viewport.set_property("valign", Gtk.Align.START)
             self.add(self._scrolled)
 
     def populate(self, items):
