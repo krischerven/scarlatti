@@ -652,6 +652,8 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             from lollypop.widgets_utils import Popover
             if relative is None:
                 row = self._box.get_row_at_y(y)
+                if row is None:
+                    return
                 row_id = row.id
                 relative = self._box
             else:
