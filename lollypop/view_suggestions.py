@@ -127,9 +127,6 @@ class SuggestionsView(View, FilteringHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_map(self, widget):
-        pass
-
     def __welcome_screen(self):
         """
             Show welcome screen if view empty
