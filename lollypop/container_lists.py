@@ -44,7 +44,7 @@ class ListsContainer:
                                         self.__on_list_view_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
         self._list_view.connect("map", self.__on_list_view_mapped)
-
+        self._sidebar_one.insert_column(0)
         App().window.add_adaptive_child(self._sidebar_one, self._sidebar)
         App().window.add_adaptive_child(self._sidebar_two, self._list_view)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
