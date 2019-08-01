@@ -249,12 +249,12 @@ class AdaptiveStack(Gtk.Stack):
             return
         if visible_child is not None:
             visible_child.stop()
-            added = self.__history.add_view(visible_child)
-            if added:
-                self.emit("history-changed")
-            else:
+            if not self.__history.add_view(visible_child):
                 visible_child.destroy_later()
-        Gtk.Stack.set_visible_child(self, view)
+            Gtk.Stack.set_visible_child(self, view)
+            self.emit("history-changed")
+        else:
+            Gtk.Stack.set_visible_child(self, view)
 
     def go_back(self):
         """
