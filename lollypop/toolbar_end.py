@@ -24,9 +24,10 @@ class ToolbarEnd(Gtk.Bin):
         Toolbar end
     """
 
-    def __init__(self):
+    def __init__(self, window):
         """
             Init toolbar
+            @param window as Window
         """
         Gtk.Bin.__init__(self)
         self.set_hexpand(True)
@@ -103,6 +104,7 @@ class ToolbarEnd(Gtk.Bin):
                                        devices_button)
         self.__devices_popover.populate()
         builder.connect_signals(self)
+        window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     @property
     def devices_popover(self):
@@ -348,7 +350,7 @@ class ToolbarEnd(Gtk.Bin):
 
     def __on_devices_content_changed(self, popover, count, devices_button):
         """
-            Hide/Show button
+            Show/Hide device button
             @param popover as DevicesPopover
             @param count as int
             @param devices_button as Gtk.ToggleButton
@@ -357,3 +359,14 @@ class ToolbarEnd(Gtk.Bin):
             devices_button.show()
         else:
             devices_button.hide()
+
+    def __on_adaptive_changed(self, window, status):
+        """
+            Show/Hide home button
+            @param window as Window
+            @param status as bool
+        """
+        if status:
+            self.__home_button.show()
+        else:
+            self.__home_button.hide()

@@ -38,7 +38,7 @@ class Toolbar(Gtk.HeaderBar):
         self.__toolbar_info = ToolbarInfo()
         self.__toolbar_info.show()
         self.__toolbar_title = ToolbarTitle()
-        self.__toolbar_end = ToolbarEnd()
+        self.__toolbar_end = ToolbarEnd(window)
         self.__toolbar_end.show()
         self.pack_start(self.__toolbar_playback)
         self.pack_start(self.__toolbar_info)
