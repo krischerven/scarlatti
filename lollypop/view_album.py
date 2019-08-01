@@ -58,8 +58,6 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         if self._view_type & ViewType.SCROLLED:
             self._overlay.add(self._scrolled)
             self._viewport.add(self.__grid)
-            self._scrolled.get_vscrollbar().set_margin_top(
-                self.__banner.height)
         else:
             self._overlay.add(self.__grid)
         self._overlay.show()
@@ -123,7 +121,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             Add scroll shift on y axes
             @return int
         """
-        return self.__banner.height + MARGIN
+        return self.__banner.height
 
     @property
     def scroll_relative_to(self):
@@ -144,14 +142,8 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         LazyLoadingView._on_value_changed(self, adj)
         if adj.get_value() == adj.get_lower():
             self.__banner.collapse(False)
-            self._responsive_widget.set_margin_top(
-                self.__banner.height + MARGIN)
         else:
-            self._responsive_widget.set_margin_top(self.__banner.height)
             self.__banner.collapse(True)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(
-                self.__banner.height)
 
     def _on_current_changed(self, player):
         """
@@ -187,7 +179,10 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         """
         LazyLoadingView._on_map(self, widget)
         self._responsive_widget.set_margin_top(
-            self.__banner.height + 15)
+            self.__banner.height)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
 
     def _on_tracks_populated(self, disc_number):
         """
@@ -214,8 +209,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         """
         LazyLoadingView._on_adaptive_changed(self, window, status)
         self.__banner.set_view_type(self._view_type)
-        if status:
-            self._responsive_widget.set_margin_top(self.__banner.height)
-        else:
-            self._responsive_widget.set_margin_top(
-                self.__banner.height + MARGIN)
+        self._responsive_widget.set_margin_top(self.__banner.height)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
