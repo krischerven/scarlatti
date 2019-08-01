@@ -61,10 +61,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._viewport = Gtk.Viewport()
             self._scrolled.add(self._viewport)
             self._viewport.show()
-            if not view_type & ViewType.NO_PADDING:
-                self._viewport.get_style_context().add_class("padding")
-        elif not view_type & ViewType.NO_PADDING:
-            self.get_style_context().add_class("padding")
 
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)

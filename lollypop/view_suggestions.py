@@ -36,6 +36,7 @@ class SuggestionsView(View, FilteringHelper):
         View.__init__(self, view_type)
         FilteringHelper.__init__(self)
         self.__grid = Gtk.Grid()
+        self.__grid.get_style_context().add_class("padding")
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()

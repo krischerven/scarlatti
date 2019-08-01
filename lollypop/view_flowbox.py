@@ -36,6 +36,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         self.__hovered_child = None
         self.__font_height = get_font_height()
         self._box = Gtk.FlowBox()
+        self._box.get_style_context().add_class("padding")
         # Allow lazy loading to not jump up and down
         self._box.set_homogeneous(True)
         self._box.set_vexpand(True)
