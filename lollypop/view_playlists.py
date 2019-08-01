@@ -85,7 +85,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
         self.__banner.add_overlay(self.__widget)
-        self._view.set_margin_top(self.__banner.height)
         self.add(self._overlay)
         self.__title_label.set_label(
             ", ".join(App().playlists.get_names(playlist_ids)))
@@ -94,7 +93,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         if len(playlist_ids) > 1:
             self.__menu_button.hide()
 
-        self.set_view_type(view_type)
+        self.set_view_type(self._view_type)
 
         # In DB duration calculation
         if playlist_ids[0] > 0 and\
@@ -130,6 +129,9 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
 
         self.__banner.set_view_type(view_type)
         self._view.set_margin_top(self.__banner.height)
+        if self._view_type & ViewType.SCROLLED:
+            self._scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
         self._view_type = view_type
         if view_type & ViewType.SMALL:
             style = "menu-button"
