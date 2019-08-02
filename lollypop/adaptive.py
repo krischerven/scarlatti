@@ -468,6 +468,8 @@ class AdaptiveWindow:
                 self.__stack.remove(child)
             for (p, c) in self.__children:
                 p.remove(c)
+                if isinstance(p, Gtk.Overlay):
+                    c.set_property("halign", Gtk.Align.FILL)
                 self.__stack.add(c)
                 if c.get_visible():
                     self.__stack.set_visible_child(c)
@@ -483,6 +485,7 @@ class AdaptiveWindow:
                     p.pack1(c, False, False)
                 else:
                     p.add_overlay(c)
+                    c.set_property("halign", Gtk.Align.START)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.emit("can-go-back-changed", self.can_go_back)
 

@@ -38,7 +38,6 @@ class ListsContainer:
             Setup container lists
         """
         self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
-        self._sidebar.set_property("halign", Gtk.Align.START)
         self._sidebar.show()
         self._list_view = SelectionList(SelectionListMask.LIST_VIEW)
         self._sidebar.listbox.connect("row-activated",

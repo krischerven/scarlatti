@@ -83,7 +83,6 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
             self.__label.set_ellipsize(Pango.EllipsizeMode.END)
-            self.__label.set_property("halign", Gtk.Align.START)
             self.__label.set_xalign(0)
             self.__grid.add(self.__label)
             if self.__mask & SelectionListMask.ARTISTS:
@@ -522,10 +521,11 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param window as Window
             @param status as bool
         """
-        mask = self.__base_mask
         if status:
-            mask |= SelectionListMask.LABEL | SelectionListMask.ELLIPSIZE
-        self.__set_rows_mask(mask)
+            self.__base_mask |= SelectionListMask.LABEL
+        else:
+            self.__base_mask &= ~SelectionListMask.LABEL
+        self.__set_rows_mask(self.__base_mask)
 
     def _on_map(self, widget):
         """
@@ -717,7 +717,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 return False
 
         self.__last_motion_coord = (x, y)
-        if self.__expanded:
+        if self.__expanded or App().window.is_adaptive:
             return
         self.__set_rows_mask(self.__base_mask | SelectionListMask.LABEL)
         width = 0
@@ -737,6 +737,8 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param x as int
             @param y as int
         """
+        if App().window.is_adaptive:
+            return
         if self.__last_motion_coord[0] > self.get_allocated_width() / 2:
             self.__set_rows_mask(self.__base_mask)
             if self.__animation_timeout_id is not None:
