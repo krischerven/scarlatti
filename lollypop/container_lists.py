@@ -55,6 +55,7 @@ class ListsContainer:
                      _("Current playlist")))
         self._sidebar.populate(items)
         self._stack.get_style_context().add_class("opacity-transition2")
+        App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     @property
     def sidebar(self):
@@ -220,3 +221,14 @@ class ListsContainer:
         position = App().settings.get_value(
             "paned-listview-width").get_int32()
         GLib.timeout_add(100, self._sidebar_two.set_position, position)
+
+    def __on_adaptive_changed(self, window, status):
+        """
+            Update sidebar halign
+            @param window as Window
+            @param status as bool
+        """
+        if status:
+            self._sidebar.set_property("halign", Gtk.Align.FILL)
+        else:
+            self._sidebar.set_property("halign", Gtk.Align.START)
