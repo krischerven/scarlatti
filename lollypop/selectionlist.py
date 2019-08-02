@@ -79,16 +79,18 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork = Gtk.Image.new()
             self.__grid.add(self.__artwork)
             self.__label = Gtk.Label.new()
-            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
             self.__label.set_markup(GLib.markup_escape_text(self.__name))
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+            self.__label.set_property("halign", Gtk.Align.START)
+            self.__label.set_xalign(0)
             self.__grid.add(self.__label)
             if self.__mask & SelectionListMask.ARTISTS:
                 self.__grid.set_margin_end(20)
             self.add(self.__grid)
             self.set_artwork()
-            self.show_label()
+            self.set_mask()
 
     def set_label(self, string):
         """
@@ -128,9 +130,9 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork.hide()
             self.emit("populated")
 
-    def show_label(self, mask=None):
+    def set_mask(self, mask=None):
         """
-            Show label
+            Set row mask
             @param mask as SelectionListMask
         """
         # Do nothing if widget not populated
@@ -244,6 +246,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
     """
     __gsignals__ = {
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "expanded": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
     def __init__(self, base_mask):
@@ -256,11 +259,13 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE
         self.__sort = False
+        self.__animation_timeout_id = None
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
         self._box.set_sort_func(self.__sort_func)
         self._box.show()
         GesturesHelper.__init__(self, self._box)
+        self._scrolled.set_vexpand(True)
         self._viewport.add(self._box)
         if self.__base_mask & SelectionListMask.LIST_VIEW:
             overlay = Gtk.Overlay.new()
@@ -273,6 +278,10 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             overlay.add_overlay(self.__fastscroll)
             self.add(overlay)
             self.__base_mask |= SelectionListMask.LABEL
+            App().settings.connect("changed::artist-artwork",
+                                   self.__on_artist_artwork_changed)
+            App().art.connect("artist-artwork-changed",
+                              self.__on_artist_artwork_changed)
         else:
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
                                       Gtk.PolicyType.AUTOMATIC)
@@ -285,11 +294,12 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                                        lambda x: self.__popup_menu(0, 0, x))
             self.__menu_button.show()
             self.add(self.__menu_button)
-        if self.__base_mask & SelectionListMask.LIST_VIEW:
-            App().settings.connect("changed::artist-artwork",
-                                   self.__on_artist_artwork_changed)
-            App().art.connect("artist-artwork-changed",
-                              self.__on_artist_artwork_changed)
+            self.__motion_ec = Gtk.EventControllerMotion.new(self._box)
+            self.__last_motion_coord = (0, 0)
+            self.__motion_ec.set_propagation_phase(Gtk.PropagationPhase.TARGET)
+            self.__motion_ec.connect("leave", self.__on_motion_ec_leave)
+            self.__motion_ec.connect("motion", self.__on_motion_ec_motion)
+            self.__expanded = False
 
     def set_mask(self, mask):
         """
@@ -512,19 +522,10 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param window as Window
             @param status as bool
         """
+        mask = self.__base_mask
         if status:
-            self.__base_mask |= SelectionListMask.LABEL
-        else:
-            self.__base_mask &= ~SelectionListMask.LABEL
-        for row in self._box.get_children():
-            row.show_label(self.mask)
-        self._scrolled.set_vexpand(True)
-        self._scrolled.set_hexpand(status)
-        if self.mask & SelectionListMask.SIDEBAR:
-            if status:
-                self.__menu_button.hide()
-            else:
-                self.__menu_button.show()
+            mask |= SelectionListMask.LABEL | SelectionListMask.ELLIPSIZE
+        self.__set_rows_mask(mask)
 
     def _on_map(self, widget):
         """
@@ -571,6 +572,18 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __set_rows_mask(self, mask):
+        """
+            Show labels on child
+            @param status as bool
+        """
+        for row in self._box.get_children():
+            row.set_mask(mask)
+        if mask & SelectionListMask.LABEL:
+            self._scrolled.set_hexpand(True)
+        else:
+            self._scrolled.set_hexpand(False)
+
     def __add_values(self, values):
         """
             Add values to the list
@@ -686,3 +699,49 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 elif row.name == artist:
                     row.set_artwork()
                     break
+
+    def __on_motion_ec_motion(self, motion_ec, x, y):
+        """
+            Record motion event
+            @param motion_ec as Gtk.EventControllerMotion
+            @param x as int
+            @param y as int
+        """
+        def do_animation(width):
+            allocated_width = self.get_allocated_width()
+            if allocated_width < width:
+                self.set_size_request(allocated_width + 20, -1)
+                return True
+            else:
+                self.__animation_timeout_id = None
+                return False
+
+        self.__last_motion_coord = (x, y)
+        if self.__expanded:
+            return
+        self.__set_rows_mask(self.__base_mask | SelectionListMask.LABEL)
+        width = 0
+        for row in self._box.get_children():
+            (minimal, natural) = row.get_preferred_width()
+            if natural > width:
+                width = natural
+        if self.__animation_timeout_id is None:
+            self.__expanded = True
+            self.emit("expanded", True)
+            self.__animation_timeout_id = GLib.idle_add(do_animation, width)
+
+    def __on_motion_ec_leave(self, motion_ec):
+        """
+            Collapse sidebar
+            @param motion_ec as Gtk.EventControllerMotion
+            @param x as int
+            @param y as int
+        """
+        if self.__last_motion_coord[0] > self.get_allocated_width() / 2:
+            self.__set_rows_mask(self.__base_mask)
+            if self.__animation_timeout_id is not None:
+                GLib.source_remove(self.__animation_timeout_id)
+                self.__animation_timeout_id = None
+            self.set_size_request(-1, -1)
+            self.__expanded = False
+            self.emit("expanded", False)

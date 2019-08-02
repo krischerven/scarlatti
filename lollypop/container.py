@@ -73,7 +73,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         ScannerContainer.__init__(self)
         PlaylistsContainer.__init__(self)
         ViewsContainer.__init__(self)
-        self._sidebar_one = None
+        self._main_widget = None
         self._sidebar_two = None
         self.__paned_position_id = None
         self._stack = ContainerStack()
@@ -87,15 +87,15 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.add_overlay(self.__progress)
         search_action = App().lookup_action("search")
         search_action.connect("activate", self.__on_search_activate)
-        self._sidebar_one = Gtk.Grid()
+        self._main_widget = Gtk.Grid()
         self._sidebar_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
         self._sidebar_two.connect("notify::position", self.__on_paned_position)
         self._sidebar_two.add2(self._stack)
-        self._sidebar_one.attach(self._sidebar_two, 0, 0, 1, 1)
+        self._main_widget.attach(self._sidebar_two, 0, 0, 1, 1)
         position = App().settings.get_value(
             "paned-listview-width").get_int32()
         self._sidebar_two.set_position(position)
-        self._sidebar_one.show()
+        self._main_widget.show()
         self._sidebar_two.show()
         self._grid = Gtk.Grid()
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
@@ -125,6 +125,14 @@ class Container(Gtk.Overlay, NotificationContainer,
                 view.show()
                 self._stack.add(view)
                 Gtk.Stack.set_visible_child(self._stack, view)
+
+    @property
+    def main_widget(self):
+        """
+            Get main widget
+            @return Gtk.Grid
+        """
+        return self._main_widget
 
     @property
     def view(self):

@@ -134,6 +134,7 @@ class SelectionListMask:
     PLAYLISTS = 1 << 5
     COMPILATIONS = 1 << 6
     LABEL = 1 << 7
+    ELLIPSIZE = 1 << 8
 
 
 class Shuffle:

@@ -482,7 +482,7 @@ class AdaptiveWindow:
                 if isinstance(p, Gtk.Paned):
                     p.pack1(c, False, False)
                 else:
-                    p.attach(c, 0, 0, 1, 1)
+                    p.add_overlay(c)
             self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.emit("can-go-back-changed", self.can_go_back)
 

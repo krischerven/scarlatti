@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
 from gettext import gettext as _
 
@@ -29,13 +29,16 @@ class ListsContainer:
         """
             Init container
         """
-        pass
+        self._black_transparent = Gtk.Label.new(" ")
+        self._black_transparent
+        self.add_overlay(self._black_transparent)
 
     def setup_lists(self):
         """
             Setup container lists
         """
         self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
+        self._sidebar.set_property("halign", Gtk.Align.START)
         self._sidebar.show()
         self._list_view = SelectionList(SelectionListMask.LIST_VIEW)
         self._sidebar.listbox.connect("row-activated",
@@ -43,15 +46,16 @@ class ListsContainer:
         self._list_view.listbox.connect("row-activated",
                                         self.__on_list_view_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
+        self.sidebar.connect("expanded", self.__on_sidebar_expanded)
         self._list_view.connect("map", self.__on_list_view_mapped)
-        self._sidebar_one.insert_column(0)
-        App().window.add_adaptive_child(self._sidebar_one, self._sidebar)
+        App().window.add_adaptive_child(self, self._sidebar)
         App().window.add_adaptive_child(self._sidebar_two, self._list_view)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         items.append((Type.CURRENT, _("Current playlist"),
                      _("Current playlist")))
         self._sidebar.populate(items)
+        self._stack.get_style_context().add_class("opacity-transition2")
 
     @property
     def sidebar(self):
@@ -180,6 +184,19 @@ class ListsContainer:
                 selection_list.select_ids([Type.SUGGESTIONS], True)
             else:
                 selection_list.select_ids([startup_id], True)
+
+    def __on_sidebar_expanded(self, selection_list, expanded):
+        """
+            Redraw self to update shadow
+            @param selection_list as SelectionList
+            @param expanded as bool
+        """
+        if self.view is None:
+            return
+        if expanded:
+            self._stack.set_state_flags(Gtk.StateFlags.VISITED, False)
+        else:
+            self._stack.unset_state_flags(Gtk.StateFlags.VISITED)
 
     def __on_list_view_activated(self, listbox, row):
         """
