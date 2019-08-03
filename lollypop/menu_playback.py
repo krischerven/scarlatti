@@ -30,14 +30,33 @@ class AlbumPlaybackMenu(Gio.Menu):
         """
         Gio.Menu.__init__(self)
         self.__album = album
-        play_action = Gio.SimpleAction(name="album_playback_action")
+        play_action = Gio.SimpleAction(name="album_play_action")
         App().add_action(play_action)
         play_action.connect("activate", self.__play)
-        self.append(_("Play this album"), "app.album_playback_action")
+        self.append(_("Play this album"), "app.album_play_action")
+        self.__set_playback_actions()
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_playback_actions(self):
+        """
+            Set playback actions
+        """
+        if self.__album.id not in App().player.album_ids:
+            append_playback_action = Gio.SimpleAction(
+                name="append_playback_action")
+            App().add_action(append_playback_action)
+            append_playback_action.connect("activate",
+                                           self.__append_to_playback)
+            self.append(_("Add to playback"), "app.append_playback_action")
+        else:
+            del_playback_action = Gio.SimpleAction(name="del_playback_action")
+            App().add_action(del_playback_action)
+            del_playback_action.connect("activate",
+                                        self.__remove_from_playback)
+            self.append(_("Remove from playback"), "app.del_playback_action")
+
     def __play(self, action, variant):
         """
             Play album
@@ -45,6 +64,22 @@ class AlbumPlaybackMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().player.play_album(self.__album)
+
+    def __append_to_playback(self, action, variant):
+        """
+            Append track to playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().player.add_album(self.__album)
+
+    def __remove_from_playback(self, action, variant):
+        """
+            Delete track id from playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().player.remove_album_by_id(self.__album.id)
 
 
 class TrackPlaybackMenu(Gio.Menu):
