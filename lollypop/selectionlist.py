@@ -293,7 +293,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             self.__menu_button.set_property("halign", Gtk.Align.CENTER)
             self.__menu_button.get_style_context().add_class("no-border")
             self.__menu_button.connect("clicked",
-                                       lambda x: self.__popup_menu(0, 0, x))
+                                       lambda x: self.__popup_menu(None, x))
             self.__menu_button.show()
             self.add(self.__menu_button)
 
@@ -575,7 +575,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param x as int
             @param y as int
         """
-        self.__popup_menu(x, y)
+        self.__popup_menu(y)
 
     def _on_primary_press_gesture(self, x, y, event):
         """
@@ -601,7 +601,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        self.__popup_menu(x, y)
+        self.__popup_menu(y)
 
 #######################
 # PRIVATE             #
@@ -686,10 +686,9 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 b = row_b.name
             return strcoll(a, b)
 
-    def __popup_menu(self, x, y, relative=None):
+    def __popup_menu(self, y=None, row=None):
         """
-            Show menu at (x, y)
-            @param x as int
+            Show menu at y or row
             @param y as int
             @param relative as Gtk.Widget
         """
@@ -700,26 +699,19 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                                SelectionListMask.LIST_VIEW):
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
-            if relative is None:
+            if row is None:
                 row = self._box.get_row_at_y(y)
                 if row is None:
                     return
                 row_id = row.id
-                relative = self._box
             else:
                 row_id = None
             menu = SelectionListMenu(self, row_id, self.mask)
             popover = Popover()
             popover.bind_model(menu, None)
             popover.connect("closed", on_closed)
-            popover.set_relative_to(relative)
+            popover.set_relative_to(row)
             popover.set_position(Gtk.PositionType.RIGHT)
-            if x != y != 0:
-                rect = Gdk.Rectangle()
-                rect.x = x
-                rect.y = y
-                rect.width = rect.height = 1
-                popover.set_pointing_to(rect)
             popover.popup()
             self.__lock_expanded = True
 
