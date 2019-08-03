@@ -49,7 +49,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             "init": [
                 (self, "window-state-event", "_on_window_state_event"),
                 (self, "adaptive-size-changed", "_on_adaptive_size_changed"),
-                (self, "adaptive-changed", "_on_adaptive_changed"),
                 (App().player, "current-changed", "_on_current_changed")
             ]
         }
@@ -116,17 +115,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         App().settings.set_boolean("window-maximized",
                                    "GDK_WINDOW_STATE_MAXIMIZED" in
                                    event.new_window_state.value_names)
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update internal widgets
-            @param window as Gtk.Window
-            @param status as int
-        """
-        if status:
-            self.__container.main_widget.set_margin_start(0)
-        else:
-            self.__container.main_widget.set_margin_start(50)
 
     def _on_adaptive_size_changed(self, window, adaptive_size):
         """

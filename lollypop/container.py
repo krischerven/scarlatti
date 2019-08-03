@@ -21,7 +21,6 @@ from lollypop.container_playlists import PlaylistsContainer
 from lollypop.container_lists import ListsContainer
 from lollypop.container_views import ViewsContainer
 from lollypop.container_filter import FilterContainer
-from lollypop.container_motion import MotionContainer
 from lollypop.progressbar import ProgressBar
 
 
@@ -58,7 +57,7 @@ class ContainerStack(AdaptiveStack):
 
 
 class Container(Gtk.Overlay, NotificationContainer,
-                ScannerContainer, PlaylistsContainer, MotionContainer,
+                ScannerContainer, PlaylistsContainer,
                 ListsContainer, ViewsContainer, FilterContainer):
     """
         Main view management
@@ -105,7 +104,6 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.add(self._grid)
         ListsContainer.__init__(self)
         FilterContainer.__init__(self)
-        MotionContainer.__init__(self)
 
     def stop_all(self):
         """

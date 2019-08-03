@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk
+from gi.repository import GLib
 
 from gettext import gettext as _
 
@@ -29,9 +29,7 @@ class ListsContainer:
         """
             Init container
         """
-        self._black_transparent = Gtk.Label.new(" ")
-        self._black_transparent
-        self.add_overlay(self._black_transparent)
+        pass
 
     def setup_lists(self):
         """
@@ -45,17 +43,15 @@ class ListsContainer:
         self._list_view.listbox.connect("row-activated",
                                         self.__on_list_view_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
-        self._sidebar.connect("expanded", self.__on_sidebar_expanded)
         self._list_view.connect("map", self.__on_list_view_mapped)
-        App().window.add_adaptive_child(self, self._sidebar)
+        self._main_widget.insert_column(0)
+        App().window.add_adaptive_child(self._main_widget, self._sidebar)
         App().window.add_adaptive_child(self._sidebar_two, self._list_view)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         items.append((Type.CURRENT, _("Current playlist"),
                      _("Current playlist")))
         self._sidebar.populate(items)
-        self._stack.get_style_context().add_class("opacity-transition2")
-        App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     @property
     def sidebar(self):
@@ -185,21 +181,6 @@ class ListsContainer:
             else:
                 selection_list.select_ids([startup_id], True)
 
-    def __on_sidebar_expanded(self, selection_list, expanded):
-        """
-            Redraw self to update shadow
-            @param selection_list as SelectionList
-            @param expanded as bool
-        """
-        if self.view is None:
-            return
-        if expanded:
-            self._stack.set_state_flags(Gtk.StateFlags.VISITED, False)
-            self._stack.set_sensitive(False)
-        else:
-            self._stack.set_sensitive(True)
-            self._stack.unset_state_flags(Gtk.StateFlags.VISITED)
-
     def __on_list_view_activated(self, listbox, row):
         """
             Update view based on selected object
@@ -223,14 +204,3 @@ class ListsContainer:
         position = App().settings.get_value(
             "paned-listview-width").get_int32()
         GLib.timeout_add(100, self._sidebar_two.set_position, position)
-
-    def __on_adaptive_changed(self, window, status):
-        """
-            Update sidebar halign
-            @param window as Window
-            @param status as bool
-        """
-        if status:
-            self._sidebar.set_property("halign", Gtk.Align.FILL)
-        else:
-            self._sidebar.set_property("halign", Gtk.Align.START)

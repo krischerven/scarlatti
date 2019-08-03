@@ -584,12 +584,3 @@ flowboxchild:selected  {
 .opacity-transition:visited {
   opacity: 1;
 }
-
-.opacity-transition2 {
-    transition: opacity 100ms linear;
-    opacity: 1;
-}
-
-.opacity-transition2:visited {
-  opacity: 0.4;
-}
