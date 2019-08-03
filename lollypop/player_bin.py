@@ -370,7 +370,7 @@ class BinPlayer(BasePlayer):
                 self.__codecs.install()
                 App().scanner.stop()
                 self.stop()
-            elif App().notify is not None:
+            else:
                 (error, parsed) = message.parse_error()
                 App().notify.send(parsed)
                 self.stop()

@@ -110,7 +110,7 @@ class DeviceWidget(Gtk.ListBoxRow):
         index = self.__get_device_index()
         if index is not None:
             App().window.container.show_view([Type.DEVICE_ALBUMS], index)
-        elif App().notify is not None:
+        else:
             App().notify.send(_("No synchronized albums"))
 
     def _on_content_playlists_clicked(self, button):
@@ -121,7 +121,7 @@ class DeviceWidget(Gtk.ListBoxRow):
         index = self.__get_device_index()
         if index is not None:
             App().window.container.show_view([Type.DEVICE_PLAYLISTS], index)
-        elif App().notify is not None:
+        else:
             App().notify.send(_("No synchronized playlists"))
 
     def _on_sync_button_clicked(self, button):

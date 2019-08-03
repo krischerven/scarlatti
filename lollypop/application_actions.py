@@ -298,14 +298,13 @@ class ApplicationActions:
                 else:
                     loved = Type.NONE
                 track.set_loved(loved)
-                if App().notify is not None:
-                    if track.loved == 1:
-                        heart = "❤"
-                    elif track.loved == -1:
-                        heart = "⏭"
-                    else:
-                        heart = "♡"
-                    App().notify.send("%s - %s: %s" %
-                                      (", ".join(track.artists),
-                                       track.name,
-                                       heart))
+                if track.loved == 1:
+                    heart = "❤"
+                elif track.loved == -1:
+                    heart = "⏭"
+                else:
+                    heart = "♡"
+                App().notify.send("%s - %s: %s" %
+                                  (", ".join(track.artists),
+                                   track.name,
+                                   heart))

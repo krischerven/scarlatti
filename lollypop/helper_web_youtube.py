@@ -77,9 +77,8 @@ class YouTubeHelper:
                 if o:
                     return o.decode("utf-8")
             error = e.decode("utf-8")
-            if App().notify is not None:
-                GLib.idle_add(App().notify.send,
-                              _("Can't find this track on YouTube"))
+            GLib.idle_add(App().notify.send,
+                          _("Can't find this track on YouTube"))
             Logger.warning("YouTubeHelper::get_uri_content(): %s", error)
         except Exception as e:
             Logger.warning("YouTubeHelper::get_uri_content(): %s", e)

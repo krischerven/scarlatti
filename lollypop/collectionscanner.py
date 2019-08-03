@@ -451,8 +451,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         (files, dirs) = self.__get_objects_for_uris(scan_type, uris)
 
         if files is None:
-            if App().notify is not None:
-                App().notify.send(_("Scan disabled, missing collection"))
+            App().notify.send(_("Scan disabled, missing collection"))
             return
 
         if scan_type == ScanType.NEW_FILES:
