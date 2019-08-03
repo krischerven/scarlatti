@@ -22,17 +22,19 @@ class MotionContainer:
         """
             Init container
         """
-        self.__motion_ec = Gtk.EventControllerMotion.new(self)
-        self.__motion_ec.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
-        self.__motion_ec.connect("motion", self.__on_motion_ec_motion)
+        self.__event_controller = Gtk.EventControllerMotion.new(self)
+        self.__event_controller.set_propagation_phase(
+            Gtk.PropagationPhase.CAPTURE)
+        self.__event_controller.connect(
+            "motion", self.__on_event_controller_motion)
 
 ############
 # PRIVATE  #
 ############
-    def __on_motion_ec_motion(self, motion_ec, x, y):
+    def __on_event_controller_motion(self, event_controller, x, y):
         """
             Update sidebar state based on current motion event
-            @param motion_ec as Gtk.EventControllerMotion
+            @param event_controller as Gtk.EventControllerMotion
             @param x as int
             @param y as int
         """
