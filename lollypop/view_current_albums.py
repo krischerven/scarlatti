@@ -113,7 +113,7 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
         else:
             position = 0
         view_type = self._view_type & ~self.view_sizing_mask
-        return ({"view_type": view_type}, self._sidebar_id, position)
+        return ({"view_type": view_type}, self.sidebar_id, position)
 
 #######################
 # PROTECTED           #

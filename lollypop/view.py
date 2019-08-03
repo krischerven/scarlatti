@@ -38,7 +38,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._view_type = view_type
         self.__destroyed = False
         self.__placeholder = None
-        self._sidebar_id = Type.NONE
+        self.__sidebar_id = Type.NONE
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
         self.__new_ids = []
@@ -109,13 +109,20 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     def stop(self):
         pass
 
+    def set_sidebar_id(self, sidebar_id):
+        """
+            Set sidebar id
+            @param sidebar_id as int
+        """
+        self.__sidebar_id = sidebar_id
+
     @property
     def sidebar_id(self):
         """
             Get sidebar id
             @return int
         """
-        return self._sidebar_id
+        return self.__sidebar_id
 
     @property
     def args(self):
@@ -193,35 +200,15 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._view_type &= ~self.view_sizing_mask
 
     def _on_value_changed(self, adj):
-        """
-            Handle change on scroll
-            @param adj as Gtk.Adjustment
-        """
         pass
 
     def _on_album_updated(self, scanner, album_id, added):
-        """
-            Handles changes in collection
-            @param scanner as CollectionScanner
-            @param album_id as int
-            @param added as bool
-        """
         pass
 
     def _on_map(self, widget):
-        """
-            Handles special shortcuts
-            @param widget as Gtk.Widget
-        """
-        selected_ids = App().window.container.sidebar.selected_ids
-        if selected_ids:
-            self._sidebar_id = selected_ids[0]
+        pass
 
     def _on_unmap(self, widget):
-        """
-            Handles special shortcuts
-            @param widget as Gtk.Widget
-        """
         pass
 
 #######################

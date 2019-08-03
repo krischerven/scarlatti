@@ -109,7 +109,7 @@ class SmartPlaylistView(View):
         else:
             position = 0
         return ({"playlist_id": self.__playlist_id},
-                self._sidebar_id, position)
+                self.sidebar_id, position)
 
 #######################
 # PROTECTED           #

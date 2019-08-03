@@ -121,7 +121,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         return ({"genre_ids": self._genre_ids,
                  "artist_ids": self._artist_ids,
                  "view_type": view_type},
-                self._sidebar_id, position)
+                self.sidebar_id, position)
 
 #######################
 # PROTECTED           #

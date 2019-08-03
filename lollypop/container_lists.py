@@ -164,8 +164,10 @@ class ListsContainer:
                 and selected_ids[0] in [Type.ARTISTS_LIST,
                                         Type.GENRES_LIST]:
             self._stack.set_visible_child(self._list_view)
+            self._list_view.set_sidebar_id(selected_ids[0])
         elif view is not None:
             self._stack.set_visible_child(view)
+            view.set_sidebar_id(selected_ids[0])
 
     def __on_sidebar_populated(self, selection_list):
         """

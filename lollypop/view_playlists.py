@@ -227,7 +227,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             position = 0
         view_type = self._view_type & ~self.view_sizing_mask
         return ({"playlist_ids": self._playlist_ids,
-                 "view_type": view_type}, self._sidebar_id, position)
+                 "view_type": view_type}, self.sidebar_id, position)
 
     @property
     def filtered(self):

@@ -153,7 +153,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         return ({"genre_ids": self.__genre_ids,
                  "artist_ids": self.__artist_ids,
                  "view_type": view_type},
-                self._sidebar_id, position)
+                self.sidebar_id, position)
 
     @property
     def dnd_helper(self):
