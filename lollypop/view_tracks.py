@@ -330,7 +330,7 @@ class TracksView(SignalsHelper):
         # Do not update album list if in party or album already available
         if not App().player.is_party and\
                 not App().player.track_in_playback(track):
-            album = self._album.clone(True)
+            album = Album(track.album.id)
             album.set_tracks(tracks)
             if not App().settings.get_value("append-albums"):
                 App().player.clear_albums()

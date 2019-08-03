@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App
 from lollypop.objects_track import Track
+from lollypop.objects_album import Album
 
 
 class AlbumPlaybackMenu(Gio.Menu):
@@ -189,9 +190,7 @@ class TrackPlaybackMenu(Gio.Menu):
             App().player.set_next()
         # Add album with only one track
         else:
-            # We do not want to share same album with multiple user add
-            # If needed, previous merge will do the job
-            album = self.__track.album.clone(True)
+            album = Album(self.__track.album.id)
             album.set_tracks([self.__track])
             if App().player.is_playing:
                 App().player.add_album(album)

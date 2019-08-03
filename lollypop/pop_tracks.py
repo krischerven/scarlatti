@@ -187,7 +187,7 @@ class TracksPopover(Popover, TracksView,
             Play album
            @param button as Gtk.Button
         """
-        App().player.play_album(self._album.clone(True))
+        App().player.play_album(self._album)
         self.__show_append(False)
         GLib.idle_add(self.popdown)
 
@@ -212,9 +212,9 @@ class TracksPopover(Popover, TracksView,
             self.__show_append(True)
         else:
             if App().player.is_playing and not App().player.albums:
-                App().player.play_album(self._album.clone(True))
+                App().player.play_album(self._album)
             else:
-                App().player.add_album(self._album.clone(True))
+                App().player.add_album(self._album)
             self.__show_append(False)
 
     def __on_play_all_clicked(self, button):
