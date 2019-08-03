@@ -258,6 +258,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE
         self.__sort = False
+        self.__expanded = False
         self.__animation_timeout_id = None
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
@@ -293,12 +294,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                                        lambda x: self.__popup_menu(0, 0, x))
             self.__menu_button.show()
             self.add(self.__menu_button)
-            self.__motion_ec = Gtk.EventControllerMotion.new(self._box)
-            self.__last_motion_coord = (0, 0)
-            self.__motion_ec.set_propagation_phase(Gtk.PropagationPhase.TARGET)
-            self.__motion_ec.connect("leave", self.__on_motion_ec_leave)
-            self.__motion_ec.connect("motion", self.__on_motion_ec_motion)
-            self.__expanded = False
 
     def set_mask(self, mask):
         """
@@ -450,6 +445,41 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             if style_context.has_class("typeahead"):
                 row.activate()
             style_context.remove_class("typeahead")
+
+    def set_expanded(self, expanded):
+        """
+            Set list expanded
+            @param expanded as bool
+        """
+        def do_animation(width):
+            allocated_width = self.get_allocated_width()
+            if allocated_width < width:
+                self.set_size_request(allocated_width + 20, -1)
+                return True
+            else:
+                self.__animation_timeout_id = None
+                return False
+
+        if expanded and not self.__expanded:
+            self.__set_rows_mask(self.__base_mask | SelectionListMask.LABEL)
+            width = 0
+            for row in self._box.get_children():
+                (minimal, natural) = row.get_preferred_width()
+                if natural > width:
+                    width = natural
+            if self.__animation_timeout_id is None:
+                self.__expanded = True
+                self.emit("expanded", True)
+                self.__animation_timeout_id = GLib.idle_add(
+                    do_animation, width)
+        elif not expanded and self.__expanded:
+            self.__set_rows_mask(self.__base_mask)
+            if self.__animation_timeout_id is not None:
+                GLib.source_remove(self.__animation_timeout_id)
+                self.__animation_timeout_id = None
+            self.set_size_request(-1, -1)
+            self.__expanded = False
+            self.emit("expanded", False)
 
     @property
     def filtered(self):
@@ -699,51 +729,3 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 elif row.name == artist:
                     row.set_artwork()
                     break
-
-    def __on_motion_ec_motion(self, motion_ec, x, y):
-        """
-            Record motion event
-            @param motion_ec as Gtk.EventControllerMotion
-            @param x as int
-            @param y as int
-        """
-        def do_animation(width):
-            allocated_width = self.get_allocated_width()
-            if allocated_width < width:
-                self.set_size_request(allocated_width + 20, -1)
-                return True
-            else:
-                self.__animation_timeout_id = None
-                return False
-
-        self.__last_motion_coord = (x, y)
-        if self.__expanded or App().window.is_adaptive:
-            return
-        self.__set_rows_mask(self.__base_mask | SelectionListMask.LABEL)
-        width = 0
-        for row in self._box.get_children():
-            (minimal, natural) = row.get_preferred_width()
-            if natural > width:
-                width = natural
-        if self.__animation_timeout_id is None:
-            self.__expanded = True
-            self.emit("expanded", True)
-            self.__animation_timeout_id = GLib.idle_add(do_animation, width)
-
-    def __on_motion_ec_leave(self, motion_ec):
-        """
-            Collapse sidebar
-            @param motion_ec as Gtk.EventControllerMotion
-            @param x as int
-            @param y as int
-        """
-        if App().window.is_adaptive:
-            return
-        if self.__last_motion_coord[0] > self.get_allocated_width() / 2:
-            self.__set_rows_mask(self.__base_mask)
-            if self.__animation_timeout_id is not None:
-                GLib.source_remove(self.__animation_timeout_id)
-                self.__animation_timeout_id = None
-            self.set_size_request(-1, -1)
-            self.__expanded = False
-            self.emit("expanded", False)
