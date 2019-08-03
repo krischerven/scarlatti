@@ -88,6 +88,8 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         """
         if event.keyval == Gdk.KEY_Up or event.keyval == Gdk.KEY_Down:
             return True
+        elif event.keyval == Gdk.KEY_Escape:
+            App().window.container.show_filter()
 
     def _on_entry_key_release_event(self, entry, event):
         """
