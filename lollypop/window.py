@@ -45,9 +45,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("released", self.__on_back_button_clicked)
         self.__multi_press.set_button(8)
-        self.__motion_ec = Gtk.EventControllerMotion.new(self)
-        self.__motion_ec.set_propagation_phase(Gtk.PropagationPhase.BUBBLE)
-        self.__motion_ec.connect("motion", self.__on_motion_ec_motion)
         return {
             "init": [
                 (self, "window-state-event", "_on_window_state_event"),
@@ -266,15 +263,3 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                       callback=(App().scanner.update,))
         except:
             pass
-
-    def __on_motion_ec_motion(self, motion_ec, x, y):
-        """
-            Update sidebar state based on current motion event
-            @param motion_ec as Gtk.EventControllerMotion
-            @param x as int
-            @param y as int
-        """
-        if x < self.__container.sidebar.get_allocated_width():
-            self.__container.sidebar.set_expanded(True)
-        else:
-            self.__container.sidebar.set_expanded(False)
