@@ -215,17 +215,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             Add a new playlist
             @param button as Gtk.Button
         """
-        existing_playlists = []
-        for (playlist_id, name) in App().playlists.get():
-            existing_playlists.append(name)
-
-        # Search for an available name
-        count = 1
-        name = _("New playlist ") + str(count)
-        while name in existing_playlists:
-            count += 1
-            name = _("New playlist ") + str(count)
-        App().playlists.add(name)
+        App().playlists.add(App().playlists.get_new_name())
 
 
 class PlaylistsManagerDeviceView(PlaylistsManagerView):

@@ -12,6 +12,7 @@
 
 from gi.repository import Gio, GLib
 
+from gettext import gettext as _
 from hashlib import sha256
 
 from lollypop.define import App
@@ -40,7 +41,11 @@ class PlaylistsMenu(Gio.Menu):
         """
             Set playlist actions
         """
-        i = 0
+        add_action = Gio.SimpleAction(name="add_to_new")
+        App().add_action(add_action)
+        add_action.connect("activate", self.__on_add_action_activate)
+        self.append(_("Add to a new playlist"), "app.add_to_new")
+        i = 1
         for (playlist_id, name) in App().playlists.get():
             if isinstance(self.__object, Album):
                 exists = App().playlists.exists_album(playlist_id,
@@ -120,3 +125,12 @@ class PlaylistsMenu(Gio.Menu):
             self.__add_to_playlist(playlist_id)
         else:
             self.__remove_from_playlist(playlist_id)
+
+    def __on_add_action_activate(self, action, variant):
+        """
+            Add a new playlist and add object to playlist
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        playlist_id = App().playlists.add(App().playlists.get_new_name())
+        self.__add_to_playlist(playlist_id)

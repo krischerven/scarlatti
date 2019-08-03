@@ -76,6 +76,23 @@ class Playlists(GObject.GObject):
         else:
             upgrade.upgrade(self)
 
+    def get_new_name(self):
+        """
+            Get a name for a new playlist
+            @return str
+        """
+        existing_playlists = []
+        for (playlist_id, name) in App().playlists.get():
+            existing_playlists.append(name)
+
+        # Search for an available name
+        count = 1
+        name = _("New playlist ") + str(count)
+        while name in existing_playlists:
+            count += 1
+            name = _("New playlist ") + str(count)
+        return name
+
     def add(self, name):
         """
             Add a playlist
