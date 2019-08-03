@@ -45,7 +45,7 @@ class ListsContainer:
         self._list_view.listbox.connect("row-activated",
                                         self.__on_list_view_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
-        self.sidebar.connect("expanded", self.__on_sidebar_expanded)
+        self._sidebar.connect("expanded", self.__on_sidebar_expanded)
         self._list_view.connect("map", self.__on_list_view_mapped)
         App().window.add_adaptive_child(self, self._sidebar)
         App().window.add_adaptive_child(self._sidebar_two, self._list_view)
@@ -195,7 +195,9 @@ class ListsContainer:
             return
         if expanded:
             self._stack.set_state_flags(Gtk.StateFlags.VISITED, False)
+            self._stack.set_sensitive(False)
         else:
+            self._stack.set_sensitive(True)
             self._stack.unset_state_flags(Gtk.StateFlags.VISITED)
 
     def __on_list_view_activated(self, listbox, row):

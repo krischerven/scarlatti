@@ -23,7 +23,7 @@ class MotionContainer:
             Init container
         """
         self.__motion_ec = Gtk.EventControllerMotion.new(self)
-        self.__motion_ec.set_propagation_phase(Gtk.PropagationPhase.BUBBLE)
+        self.__motion_ec.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.__motion_ec.connect("motion", self.__on_motion_ec_motion)
 
 ############
