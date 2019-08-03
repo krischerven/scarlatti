@@ -560,6 +560,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         else:
             self.__base_mask &= ~SelectionListMask.LABEL
         self.__set_rows_mask(self.__base_mask)
+        self.set_expanded(False)
 
     def _on_map(self, widget):
         """
