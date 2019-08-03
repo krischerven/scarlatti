@@ -25,8 +25,6 @@ class BasePlayer(GObject.GObject):
         "duration-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "loading-changed": (GObject.SignalFlags.RUN_FIRST, None,
                             (bool, GObject.TYPE_PYOBJECT)),
-        "album-added": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        "album-removed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "next-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "prev-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "seeked": (GObject.SignalFlags.RUN_FIRST, None, (int,)),

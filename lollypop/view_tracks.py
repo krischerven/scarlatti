@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk, Gdk, Gio, GObject, Pango
+from gi.repository import GLib, Gtk, Gdk, Gio, Pango
 
 from gettext import gettext as _
 from collections import OrderedDict
@@ -29,18 +29,6 @@ class TracksView(SignalsHelper):
         Responsive view showing discs on one or two rows
         Need to be inherited by an Album widget (AlbumListView, AlbumWidget)
     """
-    __gsignals__ = {
-        "album-added": (GObject.SignalFlags.RUN_FIRST, None,
-                        (int, GObject.TYPE_PYOBJECT)),
-        "album-moved": (GObject.SignalFlags.RUN_FIRST, None,
-                        (int, GObject.TYPE_PYOBJECT)),
-        "track-append": (GObject.SignalFlags.RUN_FIRST, None,
-                         (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT)),
-        "track-removed": (GObject.SignalFlags.RUN_FIRST, None,
-                          (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT)),
-        "insert-album-after": (GObject.SignalFlags.RUN_FIRST, None,
-                               (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT))
-    }
 
     @signals
     def __init__(self, window, orientation, position=0):

@@ -108,7 +108,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if not self.is_party:
                 self.set_next()
             self.set_prev()
-        self.emit("album-added", album.id)
 
     def remove_album(self, album):
         """
@@ -124,7 +123,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if not self.is_party or self._next_track.album_id == album.id:
                 self.set_next()
             self.set_prev()
-            self.emit("album-removed", album.id)
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
