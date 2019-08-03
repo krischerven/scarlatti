@@ -14,11 +14,11 @@ from gi.repository import Gio, Gtk, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import ViewType, StorageType, MARGIN_SMALL, App
+from lollypop.define import StorageType, MARGIN_SMALL, App
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_artist import ArtistMenu
 from lollypop.menu_edit import EditMenu
-from lollypop.menu_playback import PlaybackMenu
+from lollypop.menu_playback import TrackPlaybackMenu, AlbumPlaybackMenu
 from lollypop.menu_sync import SyncAlbumMenu
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
@@ -36,6 +36,7 @@ class AlbumMenu(Gio.Menu):
             @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
+        self.append_section(_("Playback"), AlbumPlaybackMenu(album))
         self.append_section(_("Artist"),
                             ArtistMenu(album, view_type))
         section = Gio.Menu()
@@ -51,16 +52,13 @@ class TrackMenu(Gio.Menu):
         Contextual menu for a track
     """
 
-    def __init__(self, track, show_artist=False):
+    def __init__(self, track):
         """
             Init menu model
             @param track as Track
-            @param show artist menu as bool
         """
         Gio.Menu.__init__(self)
-        if show_artist and not track.storage_type & StorageType.EPHEMERAL:
-            self.append_section(_("Artist"), ArtistMenu(track, ViewType.ALBUM))
-        self.append_section(_("Playback"), PlaybackMenu(track))
+        self.append_section(_("Playback"), TrackPlaybackMenu(track))
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu(track))

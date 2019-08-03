@@ -18,14 +18,43 @@ from lollypop.define import App
 from lollypop.objects_track import Track
 
 
-class PlaybackMenu(Gio.Menu):
+class AlbumPlaybackMenu(Gio.Menu):
     """
-        Contextual menu for queue
+        Contextual menu for albums
+    """
+
+    def __init__(self, album):
+        """
+            Init album menu
+            @param album as Album
+        """
+        Gio.Menu.__init__(self)
+        self.__album = album
+        play_action = Gio.SimpleAction(name="album_playback_action")
+        App().add_action(play_action)
+        play_action.connect("activate", self.__play)
+        self.append(_("Play this album"), "app.album_playback_action")
+
+#######################
+# PRIVATE             #
+#######################
+    def __play(self, action, variant):
+        """
+            Play album
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().player.play_album(self.__album)
+
+
+class TrackPlaybackMenu(Gio.Menu):
+    """
+        Contextual menu for tracks
     """
 
     def __init__(self, track):
         """
-            Init playlists menu
+            Init track menu
             @param track as Track
         """
         Gio.Menu.__init__(self)
