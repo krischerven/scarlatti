@@ -283,6 +283,11 @@
             <summary>Smooth track transitions</summary>
             <description></description>
         </key>
+        <key type="b" name="show-sidebar-labels">
+            <default>true</default>
+            <summary>Show labels in sidebar</summary>
+            <description></description>
+        </key>
         <key type="b" name="party-mix">
             <default>false</default>
             <summary>Only mix songs in party mode</summary>

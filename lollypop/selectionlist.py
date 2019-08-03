@@ -82,7 +82,6 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__label.set_markup(GLib.markup_escape_text(self.__name))
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
-            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
             self.__label.set_xalign(0)
             self.__grid.add(self.__label)
             if self.__mask & SelectionListMask.ARTISTS:
@@ -162,6 +161,10 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__label.hide()
             self.set_tooltip_text(self.__label.get_text())
             self.set_has_tooltip(True)
+        if mask & SelectionListMask.ELLIPSIZE:
+            self.__label.set_ellipsize(Pango.EllipsizeMode.END)
+        else:
+            self.__label.set_ellipsize(Pango.EllipsizeMode.NONE)
 
     def set_style(self, height):
         """
@@ -282,6 +285,8 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             App().art.connect("artist-artwork-changed",
                               self.__on_artist_artwork_changed)
         else:
+            App().settings.connect("changed::show-sidebar-labels",
+                                   self.__on_show_sidebar_labels_changed)
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
                                       Gtk.PolicyType.AUTOMATIC)
             self.add(self._scrolled)
@@ -517,9 +522,13 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param status as bool
         """
         if status:
+            self.__base_mask |= (SelectionListMask.LABEL |
+                                 SelectionListMask.ELLIPSIZE)
+        elif App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
         else:
-            self.__base_mask &= ~SelectionListMask.LABEL
+            self.__base_mask &= ~(SelectionListMask.LABEL |
+                                  SelectionListMask.ELLIPSIZE)
         self.__set_rows_mask(self.__base_mask)
 
     def _on_map(self, widget):
@@ -574,7 +583,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         for row in self._box.get_children():
             row.set_mask(mask)
-        if mask & SelectionListMask.LABEL:
+        if mask & SelectionListMask.ELLIPSIZE:
             self._scrolled.set_hexpand(True)
         else:
             self._scrolled.set_hexpand(False)
@@ -686,3 +695,11 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 elif row.name == artist:
                     row.set_artwork()
                     break
+
+    def __on_show_sidebar_labels_changed(self, settings, value):
+        """
+            Show/hide labels
+            @param settings as Gio.Settings
+            @param value as str
+        """
+        self._on_adaptive_changed(App().window, App().window.is_adaptive)
