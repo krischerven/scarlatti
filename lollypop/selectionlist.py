@@ -258,8 +258,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE
         self.__sort = False
-        self.__expanded = False
-        self.__lock_expanded = False
         self.__animation_timeout_id = None
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
@@ -447,43 +445,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             if style_context.has_class("typeahead"):
                 row.activate()
             style_context.remove_class("typeahead")
-
-    def set_expanded(self, expanded):
-        """
-            Set list expanded
-            @param expanded as bool
-        """
-        def do_animation(width):
-            allocated_width = self.get_allocated_width()
-            if allocated_width < width:
-                self.set_size_request(allocated_width + 20, -1)
-                return True
-            else:
-                self.__animation_timeout_id = None
-                return False
-
-        if self.__lock_expanded:
-            return
-        if expanded and not self.__expanded:
-            self.__set_rows_mask(self.__base_mask | SelectionListMask.LABEL)
-            width = 0
-            for row in self._box.get_children():
-                (minimal, natural) = row.get_preferred_width()
-                if natural > width:
-                    width = natural
-            if self.__animation_timeout_id is None:
-                self.__expanded = True
-                self.emit("expanded", True)
-                self.__animation_timeout_id = GLib.idle_add(
-                    do_animation, width)
-        elif not expanded and self.__expanded:
-            self.__set_rows_mask(self.__base_mask)
-            if self.__animation_timeout_id is not None:
-                GLib.source_remove(self.__animation_timeout_id)
-                self.__animation_timeout_id = None
-            self.set_size_request(-1, -1)
-            self.__expanded = False
-            self.emit("expanded", False)
 
     @property
     def filtered(self):
@@ -693,9 +654,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param y as int
             @param relative as Gtk.Widget
         """
-        def on_closed(popover):
-            self.__lock_expanded = False
-
         if self.__base_mask & (SelectionListMask.SIDEBAR |
                                SelectionListMask.LIST_VIEW):
             from lollypop.menu_selectionlist import SelectionListMenu
@@ -710,11 +668,9 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             menu = SelectionListMenu(self, row_id, self.mask)
             popover = Popover()
             popover.bind_model(menu, None)
-            popover.connect("closed", on_closed)
             popover.set_relative_to(row)
             popover.set_position(Gtk.PositionType.RIGHT)
             popover.popup()
-            self.__lock_expanded = True
 
     def __on_artist_artwork_changed(self, object, value):
         """
