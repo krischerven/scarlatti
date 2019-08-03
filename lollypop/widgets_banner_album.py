@@ -47,6 +47,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__info_label = builder.get_object("info_label")
         self.__play_button = builder.get_object("play_button")
+        self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
         self.__cover_widget = CoverWidget(album, view_type | ViewType.MEDIUM)
         self.__cover_widget.set_vexpand(True)
@@ -127,7 +128,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__cover_widget.set_artwork(art_size)
         for (button, icon_name) in [
                        (self.__menu_button, "view-more-symbolic"),
-                       (self.__play_button, "media-playback-start-symbolic")]:
+                       (self.__play_button, "media-playback-start-symbolic"),
+                       (self.__add_button, self.__get_add_button_icon_name())]:
             button_style_context = button.get_style_context()
             button_style_context.remove_class("menu-button-48")
             button_style_context.remove_class("menu-button")
@@ -197,7 +199,22 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Play album
            @param button as Gtk.Button
         """
-        App().player.play_album(self.__album.clone(True))
+        App().player.play_album(self.__album)
+
+    def _on_add_button_clicked(self, button):
+        """
+            Add/Remove album
+           @param button as Gtk.Button
+        """
+        (icon_name, icon_size) = button.get_image().get_icon_name()
+        if icon_name == "list-add-symbolic":
+            App().player.add_album(self.__album)
+            button.get_image().set_from_icon_name("list-remove-symbolic",
+                                                  icon_size)
+        else:
+            App().player.remove_album_by_id(self.__album.id)
+            button.get_image().set_from_icon_name("list-add-symbolic",
+                                                  icon_size)
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -228,6 +245,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __get_add_button_icon_name(self):
+        """
+            Get add button icon name
+            @return str
+        """
+        if self.__album.id in App().player.album_ids:
+            return "list-remove-symbolic"
+        else:
+            return "list-add-symbolic"
+
     def __set_text_height(self, collapsed):
         """
             Set text height
