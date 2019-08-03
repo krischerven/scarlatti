@@ -117,7 +117,7 @@ class ArtistView(View):
             @param widget as Gtk.Widget
         """
         View._on_map(self, widget)
-        self.__album_box.set_margin_top(self.__banner.height)
+        self.__album_box.set_margin_top(self.__banner.height + MARGIN)
         if self._view_type & ViewType.SCROLLED:
             self._scrolled.get_vscrollbar().set_margin_top(
                     self.__banner.height)
@@ -140,7 +140,7 @@ class ArtistView(View):
         """
         View._on_adaptive_changed(self, window, status)
         self.__banner.set_view_type(self._view_type)
-        self.__album_box.set_margin_top(self.__banner.height)
+        self.__album_box.set_margin_top(self.__banner.height + MARGIN)
         if self._view_type & ViewType.SCROLLED:
             self._scrolled.get_vscrollbar().set_margin_top(
                     self.__banner.height)

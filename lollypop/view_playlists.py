@@ -128,7 +128,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             button.get_image().set_from_icon_name(icon_name, icon_size)
 
         self.__banner.set_view_type(view_type)
-        self._view.set_margin_top(self.__banner.height)
+        self._view.set_margin_top(self.__banner.height + MARGIN)
         if self._view_type & ViewType.SCROLLED:
             self._scrolled.get_vscrollbar().set_margin_top(
                     self.__banner.height)
