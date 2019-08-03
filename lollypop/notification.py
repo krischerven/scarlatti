@@ -13,7 +13,7 @@
 from gi.repository import Gdk, GLib, Gio
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize
+from lollypop.define import App, ArtSize, Notifications
 from lollypop.utils import is_gnome
 from lollypop.objects_radio import Radio
 
@@ -28,9 +28,8 @@ class NotificationManager:
             Init notification object with lollypop infos
         """
         self.__notification_timeout_id = None
-        self.__notification_handler_id = None
-        self.__disable_all_notifications = True
         self.__is_gnome = is_gnome()
+        App().player.connect("current-changed", self.__on_current_changed)
         self.__notification = Gio.Notification.new("")
         self.__action = Gio.Notification.new("")
         self.__action.add_button_with_target(
@@ -41,17 +40,54 @@ class NotificationManager:
             _("Next"),
             "app.shortcut",
             GLib.Variant("s", "next"))
-        self.__on_notifications_settings_changed()
 
-        App().settings.connect(
-            "changed::disable-song-notifications",
-            self.__on_notifications_settings_changed,
-        )
+    def send_track(self, track):
+        """
+            Send a message about track
+            @param track as Track
+        """
+        if App().settings.get_enum("notifications") == Notifications.NONE:
+            return
+        state = App().window.get_window().get_state()
+        if track.id is None or\
+                state & Gdk.WindowState.FOCUSED or\
+                App().is_fullscreen:
+            return
 
-        App().settings.connect(
-            "changed::disable-notifications",
-            self.__on_notifications_settings_changed,
-        )
+        if self.__is_gnome:
+            cover_path = None
+        elif isinstance(track, Radio):
+            cover_path = App().art.get_radio_cache_path(track.name,
+                                                        ArtSize.BIG,
+                                                        ArtSize.BIG)
+        else:
+            cover_path = App().art.get_album_cache_path(track.album,
+                                                        ArtSize.BIG,
+                                                        ArtSize.BIG)
+        if cover_path is None:
+            icon = Gio.Icon.new_for_string("org.gnome.Lollypop-symbolic")
+        else:
+            f = Gio.File.new_for_path(cover_path)
+            icon = Gio.FileIcon.new(f)
+        self.__action.set_icon(icon)
+        self.__action.set_title(track.title)
+        if track.album.name == "":
+            self.__action.set_body(
+                # TRANSLATORS: by refers to the artist,
+                _("by %s") %
+                ", ".join(track.artists))
+        else:
+            self.__action.set_body(
+                # TRANSLATORS: by refers to the artist,
+                # from to the album
+                _("by %s, from %s") %
+                (", ".join(track.artists),
+                 track.album.name))
+        App().send_notification("current-changed", self.__action)
+        if self.__notification_timeout_id is not None:
+            GLib.source_remove(self.__notification_timeout_id)
+        self.__notification_timeout_id = GLib.timeout_add(
+            5000, self.__withdraw_notification)
 
     def send(self, title, body=""):
         """
@@ -59,9 +95,6 @@ class NotificationManager:
             @param title as str
             @param body as str
         """
-
-        if self.__disable_all_notifications:
-            return
         self.__notification.set_title(title)
         if body:
             self.__notification.set_body(body)
@@ -82,64 +115,6 @@ class NotificationManager:
             Send notification with track_id infos
             @param player Player
         """
-        if self.__disable_all_notifications:
+        if App().settings.get_enum("notifications") != Notifications.ALL:
             return
-        state = App().window.get_window().get_state()
-        if player.current_track.id is None or\
-                state & Gdk.WindowState.FOCUSED or\
-                App().is_fullscreen:
-            return
-
-        if self.__is_gnome:
-            cover_path = None
-        elif isinstance(player.current_track, Radio):
-            cover_path = App().art.get_radio_cache_path(
-                player.current_track.name,
-                ArtSize.BIG, ArtSize.BIG)
-        else:
-            cover_path = App().art.get_album_cache_path(
-                player.current_track.album, ArtSize.BIG, ArtSize.BIG)
-        if cover_path is None:
-            icon = Gio.Icon.new_for_string("org.gnome.Lollypop-symbolic")
-        else:
-            f = Gio.File.new_for_path(cover_path)
-            icon = Gio.FileIcon.new(f)
-        self.__action.set_icon(icon)
-        self.__action.set_title(player.current_track.title)
-        if player.current_track.album.name == "":
-            self.__action.set_body(
-                # TRANSLATORS: by refers to the artist,
-                _("by %s") %
-                ", ".join(player.current_track.artists))
-        else:
-            self.__action.set_body(
-                # TRANSLATORS: by refers to the artist,
-                # from to the album
-                _("by %s, from %s") %
-                (", ".join(player.current_track.artists),
-                 player.current_track.album.name))
-        App().send_notification("current-changed", self.__action)
-        if self.__notification_timeout_id is not None:
-            GLib.source_remove(self.__notification_timeout_id)
-        self.__notification_timeout_id = GLib.timeout_add(
-            5000, self.__withdraw_notification)
-
-    def __on_notifications_settings_changed(self, *ignore):
-        self.__disable_all_notifications = App().settings.get_value(
-            "disable-notifications",
-        )
-
-        disable_song_notifications = App().settings.get_value(
-            "disable-song-notifications",
-        )
-
-        if self.__notification_handler_id:
-            App().player.disconnect(self.__notification_handler_id)
-            self.__notification_handler_id = None
-
-        if (not self.__disable_all_notifications and not
-                disable_song_notifications):
-            self.__notification_handler_id = App().player.connect(
-                "current-changed",
-                self.__on_current_changed,
-            )
+        self.send_track(player.current_track)

@@ -11,6 +11,11 @@
        <value nick="suspend" value="2"/>
        <value nick="both" value="3"/>
     </enum>
+    <enum id="org.gnome.Lollypop.Notifications">
+       <value nick="none" value="0"/>
+       <value nick="all" value="1"/>
+       <value nick="mpris" value="2"/>
+    </enum>
     <enum id="org.gnome.Lollypop.Repeat">
        <value nick="none" value="0"/>
        <value nick="auto" value="1"/>
@@ -214,13 +219,10 @@
             <summary>Disable MPRIS</summary>
             <description>Restart needed</description>
         </key>
-        <key type="b" name="disable-notifications">
-            <default>false</default>
-            <summary>Disable all notifications</summary>
-        </key>
-        <key type="b" name="disable-song-notifications">
-            <default>false</default>
-            <summary>Disable notifications upon change of song</summary>
+        <key enum="org.gnome.Lollypop.Notifications" name="notifications">
+            <default>'all'</default>
+            <summary>Notifications behaviour</summary>
+            <description></description>
         </key>
         <key type="i" name="fullscreen-type">
             <default>1</default>

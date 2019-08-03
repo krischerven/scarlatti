@@ -143,6 +143,12 @@ class Shuffle:
     ALBUMS = 2           # Shuffle by albums on genre
 
 
+class Notifications:
+    NONE = 0
+    ALL = 1
+    MPRIS = 2
+
+
 class PowerManagement:
     NONE = 0             # Use OS defaults
     IDLE = 1             # Inhibit screensaver

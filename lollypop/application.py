@@ -104,7 +104,6 @@ class Application(Gtk.Application, ApplicationActions):
                     GLib.setenv("SSL_CERT_FILE", path, True)
                     break
         self.cursors = {}
-        self.notify = None
         self.scrobblers = []
         self.debug = False
         self.shown_sidebar_tooltip = False

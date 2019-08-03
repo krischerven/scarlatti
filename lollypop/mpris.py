@@ -19,7 +19,7 @@ from gi.repository import Gio, Gst, GLib, Gtk
 from random import randint
 
 from lollypop.logger import Logger
-from lollypop.define import App, ArtSize, Shuffle, Repeat
+from lollypop.define import App, ArtSize, Shuffle, Repeat, Notifications
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
 
@@ -210,9 +210,13 @@ class MPRIS(Server):
 
     def Next(self):
         App().player.next()
+        if App().settings.get_enum("notifications") == Notifications.MPRIS:
+            App().notify.send_track(App().player.current_track)
 
     def Previous(self):
         App().player.prev()
+        if App().settings.get_enum("notifications") == Notifications.MPRIS:
+            App().notify.send_track(App().player.current_track)
 
     def Pause(self):
         App().player.pause()
