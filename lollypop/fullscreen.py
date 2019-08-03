@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gdk, GLib, Gio, Gst
 from datetime import datetime
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.define import App, ArtSize, ArtBehaviour, AdaptiveSize
 from lollypop.controller_information import InformationController
 from lollypop.controller_playback import PlaybackController
 from lollypop.controller_progress import ProgressController
@@ -224,6 +224,10 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
     @property
     def is_adaptive(self):
         return True
+
+    @property
+    def adaptive_size(self):
+        return AdaptiveSize.SMALL
 
     @property
     def container(self):
