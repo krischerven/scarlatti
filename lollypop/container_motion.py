@@ -12,6 +12,8 @@
 
 from gi.repository import Gtk
 
+from lollypop.define import App
+
 
 class MotionContainer:
     """
@@ -38,6 +40,8 @@ class MotionContainer:
             @param x as int
             @param y as int
         """
+        if App().window.is_adaptive:
+            return
         if x < self._sidebar.get_allocated_width():
             self._sidebar.set_expanded(True)
         else:
