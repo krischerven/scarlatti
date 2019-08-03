@@ -254,7 +254,9 @@ class ViewsContainer:
             @param album as Album
         """
         from lollypop.view_album import AlbumView
-        view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED
+        view_type = ViewType.SCROLLED
+        if not App().window.is_adaptive:
+            view_type |= ViewType.TWO_COLUMNS
         view = AlbumView(album, view_type)
         view.populate()
         return view
