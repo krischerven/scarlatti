@@ -521,7 +521,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param window as Window
             @param status as bool
         """
-        if status:
+        if status or self.mask & SelectionListMask.LIST_VIEW:
             self.__base_mask |= (SelectionListMask.LABEL |
                                  SelectionListMask.ELLIPSIZE)
         elif App().settings.get_value("show-sidebar-labels"):
