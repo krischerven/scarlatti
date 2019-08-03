@@ -293,6 +293,7 @@ class DNDHelper(GObject.Object):
         """
         from lollypop.widgets_row_track import TrackRow
         album_row = listbox.get_row_at_y(y)
+        row = None
         # Search for any track row at y
         if album_row is not None:
             track_listbox = album_row.boxes[0]
