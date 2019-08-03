@@ -259,6 +259,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         self.__mask = SelectionListMask.NONE
         self.__sort = False
         self.__expanded = False
+        self.__lock_expanded = False
         self.__animation_timeout_id = None
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
@@ -289,6 +290,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             self.get_style_context().add_class("sidebar")
             self.__menu_button = Gtk.Button.new_from_icon_name(
                 "view-more-horizontal-symbolic", Gtk.IconSize.BUTTON)
+            self.__menu_button.set_property("halign", Gtk.Align.CENTER)
             self.__menu_button.get_style_context().add_class("no-border")
             self.__menu_button.connect("clicked",
                                        lambda x: self.__popup_menu(0, 0, x))
@@ -460,6 +462,8 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 self.__animation_timeout_id = None
                 return False
 
+        if self.__lock_expanded:
+            return
         if expanded and not self.__expanded:
             self.__set_rows_mask(self.__base_mask | SelectionListMask.LABEL)
             width = 0
@@ -689,6 +693,9 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param y as int
             @param relative as Gtk.Widget
         """
+        def on_closed(popover):
+            self.__lock_expanded = False
+
         if self.__base_mask & (SelectionListMask.SIDEBAR |
                                SelectionListMask.LIST_VIEW):
             from lollypop.menu_selectionlist import SelectionListMenu
@@ -704,6 +711,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             menu = SelectionListMenu(self, row_id, self.mask)
             popover = Popover()
             popover.bind_model(menu, None)
+            popover.connect("closed", on_closed)
             popover.set_relative_to(relative)
             popover.set_position(Gtk.PositionType.RIGHT)
             if x != y != 0:
@@ -713,6 +721,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 rect.width = rect.height = 1
                 popover.set_pointing_to(rect)
             popover.popup()
+            self.__lock_expanded = True
 
     def __on_artist_artwork_changed(self, object, value):
         """
