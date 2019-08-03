@@ -44,6 +44,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         self._box.set_row_spacing(MARGIN)
         self._box.set_column_spacing(MARGIN)
         self._box.set_property("valign", Gtk.Align.START)
+        self._box.connect("child-activated", self._on_child_activated)
         self._box.show()
         if not view_type & ViewType.SMALL:
             self.__event_controller = Gtk.EventControllerMotion.new(self._box)
@@ -137,6 +138,9 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         for child in self._box.get_children():
             child.set_selection()
+
+    def _on_child_activated(self, flowbox, child):
+        pass
 
     def _on_adaptive_changed(self, window, status):
         """

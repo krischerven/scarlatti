@@ -170,16 +170,12 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             if child.album.id == album_id:
                 child.set_artwork()
 
-    def _on_primary_press_gesture(self, x, y, event):
+    def _on_child_activated(self, flowbox, child):
         """
-            Show album view
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
+            Enter child
+            @param flowbox as Gtk.FlowBox
+            @param child as Gtk.FlowBoxChild
         """
-        child = self._box.get_child_at_pos(x, y)
-        if child is None or child.artwork is None:
-            return
         App().window.container.show_view([Type.ALBUM], child.album)
 
     def _on_secondary_press_gesture(self, x, y, event):
