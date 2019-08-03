@@ -189,7 +189,6 @@ class TracksPopover(Popover, TracksView,
         """
         App().player.play_album(self._album)
         self.__show_append(False)
-        GLib.idle_add(self.popdown)
 
     def __on_action_clicked(self, button):
         """
@@ -226,7 +225,6 @@ class TracksPopover(Popover, TracksView,
         if App().player.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self.emit("play-all-from")
-        GLib.idle_add(self.popdown)
 
     def __on_album_artwork(self, surface):
         """
