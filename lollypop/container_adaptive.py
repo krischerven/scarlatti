@@ -41,7 +41,11 @@ class AdaptiveContainer(SignalsHelper):
             self._stack.go_back()
         elif App().window.is_adaptive:
             visible_child = self._stack.get_visible_child()
-            Gtk.Stack.set_visible_child(self._stack, self._sidebar)
+            if visible_child == self._list_view or\
+                    not self._list_view.get_visible():
+                Gtk.Stack.set_visible_child(self._stack, self._sidebar)
+            else:
+                Gtk.Stack.set_visible_child(self._stack, self._list_view)
             if visible_child is not None:
                 visible_child.destroy_later()
         self.emit("can-go-back-changed", self.can_go_back)
