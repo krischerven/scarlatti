@@ -54,7 +54,11 @@ class AdaptiveContainer(SignalsHelper):
         """
             Go back to first page
         """
-        self._stack.set_visible_child(self._sidebar)
+        self._stack.history.reset()
+        visible_child = self._stack.get_visible_child()
+        Gtk.Stack.set_visible_child(self._stack, self._sidebar)
+        if visible_child is not None:
+            visible_child.destroy_later()
         self.emit("can-go-back-changed", False)
 
     @property
