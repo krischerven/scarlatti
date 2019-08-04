@@ -46,8 +46,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         SimilarsPlayer.__init__(self)
         self.__stop_after_track_id = None
         self.update_crossfading()
-        App().settings.connect("changed::repeat", self.__on_repeat_changed)
-        self._albums_backup = []
+        App().settings.connect("changed::repeat", self.__update_next_prev)
 
     def prev(self):
         """
@@ -88,26 +87,20 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                 BinPlayer._load_track(self, track)
                 self.emit("current-changed")
 
-    def add_album(self, album, index=-1):
+    def add_album(self, album):
         """
-            Add album to player. We may merge album!
+            Add album to player
             @param album as Album
-            @param index as int
         """
-        # We do not shuffle when user add an album
-        self._albums_backup = []
-        if index == -1:
-            if self._albums and self._albums[-1].id == album.id:
-                self._albums[-1].set_tracks(self._albums[-1].tracks +
-                                            album.tracks)
-            else:
-                self._albums.append(album)
+        # Merge album if previous is same
+        if self._albums and self._albums[-1].id == album.id:
+            tracks = list(set(self._albums[-1].tracks) | set(album.tracks))
+            self._albums[-1].set_tracks(tracks)
         else:
-            self._albums.insert(index, album)
-        if self._current_track.id is not None and self._current_track.id > 0:
-            if not self.is_party:
-                self.set_next()
-            self.set_prev()
+            self._albums.append(album)
+        if not self.is_party:
+            self.set_next()
+        self.set_prev()
 
     def remove_album(self, album):
         """
@@ -118,11 +111,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if album not in self._albums:
                 return
             self._albums.remove(album)
-            if album in self._albums_backup:
-                self._albums_backup.remove(album)
-            if not self.is_party or self._next_track.album_id == album.id:
-                self.set_next()
-            self.set_prev()
+            self.__update_next_prev()
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
@@ -135,28 +124,9 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             for album in self._albums:
                 if album.id == album_id:
                     self.remove_album(album)
+            self.__update_next_prev()
         except Exception as e:
             Logger.error("Player::remove_album_by_id(): %s" % e)
-
-    def remove_disc(self, disc, album_id):
-        """
-            Remove disc for album_id
-            @param disc as Disc
-            @param album_id as int
-        """
-        try:
-            removed = []
-            for album in self._albums:
-                if album.id == album_id:
-                    for track in list(album.tracks):
-                        if track.id in disc.track_ids:
-                            empty = album.remove_track(track)
-                            if empty:
-                                removed.append(album)
-            for album in removed:
-                self._albums.remove(album)
-        except Exception as e:
-            Logger.error("Player::remove_disc(): %s" % e)
 
     def play_album(self, album):
         """
@@ -176,6 +146,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         self.reset_history()
         self.load(track)
         self._albums = albums
+        self.__update_next_prev()
 
     def play_album_for_albums(self, album, albums):
         """
@@ -243,16 +214,12 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             Set player albums
         """
         self._albums = albums
-        self.set_next()
-        self.set_prev()
 
     def clear_albums(self):
         """
             Clear all albums
         """
         self._albums = []
-        self.set_next()
-        self.set_prev()
 
     def stop_after(self, track_id):
         """
@@ -537,10 +504,11 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         if track is not None:
             self.load(track)
 
-    def __on_repeat_changed(self, settings, value):
+    def __update_next_prev(self, *ignore):
         """
-            reset next/prev
-            @param settings as Gio.Settings, value as str
+            Update next/prev
+            @param player as Player
         """
-        self.set_next()
+        if not self.is_party:
+            self.set_next()
         self.set_prev()

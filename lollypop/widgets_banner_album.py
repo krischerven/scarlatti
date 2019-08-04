@@ -97,7 +97,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         return {
             "init": [
                 (App().art, "album-artwork-changed",
-                 "_on_album_artwork_changed")
+                 "_on_album_artwork_changed"),
+                (App().player, "playback-changed", "_on_playback_changed")
             ]
         }
 
@@ -200,6 +201,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
            @param button as Gtk.Button
         """
         App().player.play_album(self.__album)
+        App().player.emit("playback-changed")
 
     def _on_add_button_clicked(self, button):
         """
@@ -232,6 +234,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
                             self.__on_album_artwork)
+
+    def _on_playback_changed(self, player):
+        """
+            Update add button
+            @param player as Player
+        """
+        (icon_name, icon_size) = self.__add_button.get_image().get_icon_name()
+        icon_name = self.__get_add_button_icon_name()
+        self.__add_button.get_image().set_from_icon_name(icon_name, icon_size)
 
     def _on_year_press(self, x, y, event):
         """

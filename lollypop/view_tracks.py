@@ -336,6 +336,7 @@ class TracksView(SignalsHelper):
                 App().player.clear_albums()
             App().player.add_album(album)
             App().player.load(album.get_track(track.id))
+            App().player.emit("playback-changed")
         else:
             App().player.load(track)
 
