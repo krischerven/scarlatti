@@ -44,7 +44,7 @@ class PlaylistsMenu(Gio.Menu):
         add_action = Gio.SimpleAction(name="add_to_new")
         App().add_action(add_action)
         add_action.connect("activate", self.__on_add_action_activate)
-        self.append(_("Add to a new playlist"), "app.add_to_new")
+        self.append(_("New playlist"), "app.add_to_new")
         i = 1
         for (playlist_id, name) in App().playlists.get():
             if isinstance(self.__object, Album):
