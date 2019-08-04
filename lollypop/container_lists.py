@@ -118,9 +118,11 @@ class ListsContainer:
         if selected_ids[0] == Type.ARTISTS_LIST:
             self.__show_artists_list(self._list_view)
             self._list_view.show()
+            self._list_view.set_sidebar_id(Type.ARTISTS_LIST)
         elif selected_ids[0] == Type.GENRES_LIST:
             self.__show_genres_list(self._list_view)
             self._list_view.show()
+            self._list_view.set_sidebar_id(Type.GENRES_LIST)
         else:
             self._list_view.hide()
 
@@ -194,6 +196,7 @@ class ListsContainer:
         else:
             view = self._get_view_artists([], selected_ids)
         view.show()
+        view.set_sidebar_id(self._list_view.sidebar_id)
         self._stack.add(view)
         self._stack.set_visible_child(view)
 

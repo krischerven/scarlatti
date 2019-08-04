@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App
+from lollypop.define import App, Type
 from lollypop.helper_signals import SignalsHelper, signals
 
 
@@ -29,7 +29,9 @@ class AdaptiveContainer(SignalsHelper):
         self._stack.connect("history-changed", self.__on_history_changed)
         return {
             "init": [
-                (App().window, "adaptive-changed", "_on_adaptive_changed")
+                (App().window, "adaptive-changed", "_on_adaptive_changed"),
+                (self._stack, "visible-child-changed",
+                 "_on_visible_child_changed")
             ]
         }
 
@@ -92,6 +94,16 @@ class AdaptiveContainer(SignalsHelper):
             self._main_widget.attach(self._sidebar, 0, 0, 1, 1)
             self._sidebar_two.pack1(self._list_view, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
+
+    def _on_visible_child_changed(self, stack, sidebar_id):
+        """
+            Active sidebar selected id
+            @param stack as ContainerStack
+            @param sidebar_id as int
+        """
+        if sidebar_id not in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
+            self._list_view.hide()
+        self._sidebar.select_ids([sidebar_id], False)
 
 ############
 # PRIVATE  #
