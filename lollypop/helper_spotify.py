@@ -16,6 +16,7 @@ import json
 from base64 import b64encode
 from time import time, sleep
 from random import choice, shuffle
+from locale import getdefaultlocale
 
 from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep
@@ -28,7 +29,6 @@ class SpotifyHelper(GObject.Object):
     """
         Helper for Spotify
     """
-    __CHARTS = "https://spotifycharts.com/regional/%s/weekly/latest/download"
     __MAX_ITEMS_PER_STORAGE_TYPE = 20
     __gsignals__ = {
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
@@ -176,7 +176,7 @@ class SpotifyHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         self.__album_ids[cancellable] = []
-        locale = App().settings.get_value("spotify-charts-locale").get_string()
+        locale = getdefaultlocale()[0][0:2]
         try:
             while self.wait_for_token():
                 if cancellable.is_cancelled():
@@ -186,8 +186,7 @@ class SpotifyHelper(GObject.Object):
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/browse/new-releases"
-            if locale != "global":
-                uri += "?country=%s" % locale
+            uri += "?country=%s" % locale
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
