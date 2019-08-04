@@ -117,6 +117,7 @@ class ShufflePlayer(BasePlayer):
             self.set_next()
             self.set_prev()
         self.emit("party-changed", party)
+        self.emit("playback-changed")
 
     def set_party_ids(self):
         """
