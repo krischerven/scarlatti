@@ -126,7 +126,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__back_button.show()
         self.__background_artwork = builder.get_object("background_artwork")
         self.__container = Container()
-        self.set_stack(self.__container.stack)
         self.__container.show()
         self.__sidebar = Gtk.Grid()
         self.__sidebar.set_size_request(400, -1)
@@ -136,7 +135,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__sidebar.add(self.__back_button)
         self.__sidebar.add(self.__container)
         self.__sidebar.set_size_request(450, -1)
-        self.connect("can-go-back-changed", self.__on_can_go_back_changed)
+        self.__container.connect("can-go-back-changed",
+                                 self.__on_can_go_back_changed)
         self.connect("size-allocate", self.__on_size_allocate)
         self.__sidebar.get_style_context().add_class("background-opacity")
         self.__revealer.add(self.__sidebar)
@@ -274,8 +274,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             button.get_image().set_from_icon_name("pan-start-symbolic",
                                                   Gtk.IconSize.BUTTON)
         else:
-            self.set_adaptive(True)
             self.__revealer.set_reveal_child(True)
+            self.emit("adaptive-changed", True)
             button.get_image().set_from_icon_name("pan-end-symbolic",
                                                   Gtk.IconSize.BUTTON)
 
@@ -427,7 +427,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             Go back in container stack
             @param button as Gtk.Button
         """
-        self.go_back()
+        self.__container.go_back()
 
     def __on_can_go_back_changed(self, window, back):
         """
