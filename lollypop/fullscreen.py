@@ -274,7 +274,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             button.get_image().set_from_icon_name("pan-start-symbolic",
                                                   Gtk.IconSize.BUTTON)
         else:
-            self.set_adaptive_stack(True)
+            self.set_adaptive(True)
             self.__revealer.set_reveal_child(True)
             button.get_image().set_from_icon_name("pan-end-symbolic",
                                                   Gtk.IconSize.BUTTON)

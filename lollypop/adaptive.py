@@ -322,7 +322,6 @@ class AdaptiveWindow:
     gsignals = {
         "adaptive-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
         "adaptive-size-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        "can-go-back-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
     for signal in gsignals:
         args = gsignals[signal]
@@ -333,76 +332,10 @@ class AdaptiveWindow:
         """
             Init adaptive mode, Gtk.Window should be initialised
         """
-        self._adaptive_stack = None
-        self.__stack = None
-        self.__children = []
+        self.__is_adaptive = False
         self.__configure_timeout_id = None
         self.__adaptive_size = AdaptiveSize.NONE
         self.connect("configure-event", self.__on_configure_event)
-
-    def set_stack(self, stack):
-        """
-            Add stack to adaptive mode
-            @param stack as AdaptiveStack
-        """
-        self.__stack = stack
-        self.__stack.connect("history-changed",
-                             self.__on_history_changed)
-
-    def add_adaptive_child(self, parent, child):
-        """
-            Add an adaptive child
-            @param parent as Gtk.Container
-            @param child as Gtk.Widget
-        """
-        self.__children.append((parent, child))
-
-    def go_back(self):
-        """
-            Go back in container stack
-        """
-        if self.__stack.history.count > 0:
-            self.__stack.go_back()
-        elif self.is_adaptive:
-            visible_child = self.__stack.get_visible_child()
-            for child in reversed(self.__children):
-                if child[1] == visible_child:
-                    visible_child = None
-                elif child[1].get_visible():
-                    Gtk.Stack.set_visible_child(self.__stack, child[1])
-                    break
-            if visible_child is not None:
-                visible_child.destroy_later()
-        self.emit("can-go-back-changed", self.can_go_back)
-
-    def go_home(self):
-        """
-            Go back to first page
-        """
-        view = self.__children[0][1]
-        if view in self.__stack.get_children():
-            self.__stack.set_visible_child(view)
-            self.emit("can-go-back-changed", False)
-
-    def set_adaptive_stack(self, b):
-        """
-            Move paned child to stack
-            @param b as bool
-        """
-        if b == self._adaptive_stack:
-            return
-        self.__set_adaptive_stack(b)
-
-    @property
-    def can_go_back(self):
-        """
-            True if can go back
-            @return bool
-        """
-        if self.is_adaptive:
-            return self.__stack.get_visible_child() != self.__children[0][1]
-        else:
-            return self.__stack.history.count > 0
 
     @property
     def adaptive_size(self):
@@ -418,7 +351,7 @@ class AdaptiveWindow:
             True if adaptive is on
             @return bool
         """
-        return self._adaptive_stack is True
+        return self.__is_adaptive
 
 #############
 # PROTECTED #
@@ -433,9 +366,9 @@ class AdaptiveWindow:
         """
         self.__configure_timeout_id = None
         if width < Size.MEDIUM:
-            self.set_adaptive_stack(True)
+            self.__set_adaptive(True)
         else:
-            self.set_adaptive_stack(False)
+            self.__set_adaptive(False)
         if width < Size.SMALL:
             adaptive_size = AdaptiveSize.SMALL
         elif width < Size.MEDIUM:
@@ -453,56 +386,14 @@ class AdaptiveWindow:
 ############
 # PRIVATE  #
 ############
-    def __update_layout(self, adaptive_stack):
-        """
-            Update internal layout
-            @param adaptive_mode as bool
-        """
-        self._adaptive_stack = adaptive_stack
-        if not self.__children:
-            return
-        if adaptive_stack:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            children = self.__stack.get_children()
-            for child in children:
-                self.__stack.remove(child)
-            for (p, c) in self.__children:
-                if c in p.get_children():
-                    p.remove(c)
-                self.__stack.add(c)
-                if c.get_visible():
-                    self.__stack.set_visible_child(c)
-            for child in children:
-                self.__stack.add(child)
-                self.__stack.set_visible_child(child)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        else:
-            self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
-            for (p, c) in self.__children:
-                self.__stack.remove(c)
-                if isinstance(p, Gtk.Paned):
-                    p.pack1(c, False, False)
-                else:
-                    p.attach(c, 0, 0, 1, 1)
-            self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.emit("can-go-back-changed", self.can_go_back)
-
-    def __set_adaptive_stack(self, b):
+    def __set_adaptive(self, is_adaptive):
         """
             Handle adaptive switch
-            @param b as bool
+            @param is_adaptive as bool
         """
-        self.__adaptive_timeout_id = None
-        self.__update_layout(b)
-        self.emit("adaptive-changed", b)
-
-    def __on_history_changed(self, stack):
-        """
-            Emit can-go-back-changed if can go back
-            @param stack as Gtk.Stack
-        """
-        if self.can_go_back:
-            self.emit("can-go-back-changed", True)
+        if is_adaptive != self.__is_adaptive:
+            self.__is_adaptive = is_adaptive
+            self.emit("adaptive-changed", is_adaptive)
 
     def __on_configure_event(self, window, event):
         """

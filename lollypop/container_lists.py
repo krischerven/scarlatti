@@ -45,8 +45,6 @@ class ListsContainer:
         self._sidebar.connect("populated", self.__on_sidebar_populated)
         self._list_view.connect("map", self.__on_list_view_mapped)
         self._main_widget.insert_column(0)
-        App().window.add_adaptive_child(self._main_widget, self._sidebar)
-        App().window.add_adaptive_child(self._sidebar_two, self._list_view)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         items.append((Type.CURRENT, _("Current playlist"),
@@ -175,7 +173,7 @@ class ListsContainer:
         """
         if App().settings.get_value("save-state"):
             self._stack.load_history()
-            App().window.emit("can-go-back-changed", App().window.can_go_back)
+            self.emit("can-go-back-changed", self.can_go_back)
         else:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:

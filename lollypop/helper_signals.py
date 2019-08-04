@@ -68,7 +68,8 @@ class SignalsHelper():
         """
         for (obj, signal, callback_str) in signals:
             if obj is None:
-                Logger.warning("Can't connect signal: %s", signal)
+                Logger.warning("Can't connect signal: %s -> %s",
+                               signal, callback_str)
                 continue
             name = "%s_%s" % (obj, signal)
             if name in self._connected:
@@ -86,7 +87,8 @@ class SignalsHelper():
         """
         for (obj, signal, callback_str) in signals:
             if obj is None:
-                Logger.warning("Can't disconnect signal: %s", signal)
+                Logger.warning("Can't disconnect signal: %s -> %s",
+                               signal, callback_str)
                 continue
             name = "%s_%s" % (obj, signal)
             if name not in self._connected:

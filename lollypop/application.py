@@ -217,6 +217,7 @@ class Application(Gtk.Application, ApplicationActions):
             self.init()
             self.__window = Window()
             self.__window.connect("delete-event", self.__hide_on_delete)
+            self.__window.setup()
             self.__window.show()
             self.player.restore_state()
 

@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, GObject
 
 from lollypop.define import App, Type
 from lollypop.view import View
@@ -21,6 +21,7 @@ from lollypop.container_playlists import PlaylistsContainer
 from lollypop.container_lists import ListsContainer
 from lollypop.container_views import ViewsContainer
 from lollypop.container_filter import FilterContainer
+from lollypop.container_adaptive import AdaptiveContainer
 from lollypop.progressbar import ProgressBar
 
 
@@ -57,11 +58,15 @@ class ContainerStack(AdaptiveStack):
 
 
 class Container(Gtk.Overlay, NotificationContainer,
-                ScannerContainer, PlaylistsContainer,
+                ScannerContainer, PlaylistsContainer, AdaptiveContainer,
                 ListsContainer, ViewsContainer, FilterContainer):
     """
         Main view management
     """
+
+    __gsignals__ = {
+        "can-go-back-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
+    }
 
     def __init__(self):
         """
@@ -103,6 +108,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._grid.show()
         self.add(self._grid)
         ListsContainer.__init__(self)
+        AdaptiveContainer.__init__(self)
         FilterContainer.__init__(self)
 
     def stop_all(self):

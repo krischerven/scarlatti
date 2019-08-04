@@ -130,7 +130,7 @@ class ToolbarEnd(Gtk.Bin):
             Go home in adaptive mode
             @param button as Gtk.Button
         """
-        App().window.go_home()
+        App().window.container.go_home()
 
     def _on_shuffle_button_toggled(self, button):
         """

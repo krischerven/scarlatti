@@ -42,7 +42,8 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
         self._pause_image = builder.get_object("pause_image")
         self.__buttons = builder.get_object("buttons")
 
-        window.connect("can-go-back-changed", self.__on_can_go_back_changed)
+        window.container.connect("can-go-back-changed",
+                                 self.__on_can_go_back_changed)
 
     def set_mini(self, mini):
         """
@@ -71,7 +72,7 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
             Go back in container stack
             @param button as Gtk.Button
         """
-        App().window.go_back()
+        App().window.container.go_back()
 
 #######################
 # Private             #
@@ -87,10 +88,10 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
         else:
             self.__back_button.hide()
 
-    def __on_can_go_back_changed(self, window, back):
+    def __on_can_go_back_changed(self, container, back):
         """
             Make button sensitive
-            @param window as Gtk.Window
+            @param container as Container
             @param back as bool
         """
         if back:

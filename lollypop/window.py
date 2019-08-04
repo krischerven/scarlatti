@@ -13,6 +13,7 @@
 from gi.repository import Gtk, Gdk, GLib
 
 from lollypop.define import App, ScanType, AdaptiveSize
+from lollypop.container import Container
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity
@@ -38,7 +39,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__timeout = None
         self.__miniplayer = None
         self.__timeout_configure_id = None
-        self.__setup_content()
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         self.__multi_press = Gtk.GestureMultiPress.new(self)
@@ -52,6 +52,31 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                 (App().player, "current-changed", "_on_current_changed")
             ]
         }
+
+    def setup(self):
+        """
+            Setup window content
+        """
+        self.__vgrid = Gtk.Grid()
+        self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__vgrid.show()
+        self.__container = Container()
+        self.__container.show()
+        self.__vgrid.add(self.__container)
+        self.__container.setup_lists()
+        self.__toolbar = Toolbar(self)
+        self.__toolbar.show()
+        if App().settings.get_value("disable-csd") or is_unity():
+            self.__vgrid.add(self.__toolbar)
+        else:
+            self.set_titlebar(self.__toolbar)
+            self.__toolbar.set_show_close_button(
+                not App().settings.get_value("disable-csd"))
+        self.add(self.__vgrid)
+        self.drag_dest_set(Gtk.DestDefaults.DROP | Gtk.DestDefaults.MOTION,
+                           [], Gdk.DragAction.MOVE)
+        self.drag_dest_add_uri_targets()
+        self.connect("drag-data-received", self.__on_drag_data_received)
 
     @property
     def miniplayer(self):
@@ -142,7 +167,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             if App().settings.get_value("window-maximized"):
                 # Lets resize happen
                 GLib.idle_add(self.maximize)
-                self.set_adaptive_stack(False)
+                self.emit("adaptive-changed", False)
             else:
                 AdaptiveWindow._on_configure_event_timeout(
                     self, size[0], size[1], pos[0], pos[1])
@@ -158,11 +183,11 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             miniplayer.set_vexpand(revealed)
             if revealed:
                 self.__container.hide()
-                self.emit("can-go-back-changed", False)
+                self.__container.emit("can-go-back-changed", False)
                 self.toolbar.end.home_button.set_sensitive(False)
             else:
                 self.__container.show()
-                self.emit("can-go-back-changed", self.can_go_back)
+                self.__container.emit("can-go-back-changed", self.can_go_back)
                 self.toolbar.end.home_button.set_sensitive(True)
         if show and self.__miniplayer is None:
             from lollypop.miniplayer import MiniPlayer
@@ -177,38 +202,11 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__miniplayer = None
             self.__container.show()
 
-    def __setup_content(self):
-        """
-            Setup window content
-        """
-        self.__vgrid = Gtk.Grid()
-        self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__vgrid.show()
-        self.__toolbar = Toolbar(self)
-        self.__toolbar.show()
-        if App().settings.get_value("disable-csd") or is_unity():
-            self.__vgrid.add(self.__toolbar)
-        else:
-            self.set_titlebar(self.__toolbar)
-            self.__toolbar.set_show_close_button(
-                not App().settings.get_value("disable-csd"))
-        self.add(self.__vgrid)
-        self.drag_dest_set(Gtk.DestDefaults.DROP | Gtk.DestDefaults.MOTION,
-                           [], Gdk.DragAction.MOVE)
-        self.drag_dest_add_uri_targets()
-        self.connect("drag-data-received", self.__on_drag_data_received)
-
     def __on_realize(self, window):
         """
             Init window content
             @param window as Gtk.Window
         """
-        from lollypop.container import Container
-        self.__container = Container()
-        self.set_stack(self.container.stack)
-        self.__container.show()
-        self.__vgrid.add(self.__container)
-        self.__container.setup_lists()
         self.__setup_size_and_position()
         if App().settings.get_value("auto-update") or App().tracks.is_empty():
             # Delayed, make python segfault on sys.exit() otherwise
