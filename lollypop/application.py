@@ -270,7 +270,8 @@ class Application(Gtk.Application, ApplicationActions):
         if self.__fs_window is None:
             self.__window.hide()
             from lollypop.fullscreen import FullScreen
-            self.__fs_window = FullScreen(self)
+            self.__fs_window = FullScreen()
+            self.__fs_window.delayed_init()
             self.__fs_window.show()
             self.__fs_window.connect("destroy", on_destroy)
 

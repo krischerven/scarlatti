@@ -33,19 +33,29 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
     """
 
     @signals
-    def __init__(self, app):
+    def __init__(self):
         """
-            Init window for app
-            @param app as Gio.Application
+            Init window
         """
         Gtk.Window.__init__(self)
         AdaptiveWindow.__init__(self)
+        return {
+            "map": [
+                (App().player, "current-changed", "on_current_changed"),
+                (App().player, "status-changed", "on_status_changed")
+            ]
+        }
+
+    def delayed_init(self):
+        """
+            Delay real init to get App().window == self
+        """
         self.get_style_context().add_class("black")
         self.set_title("Lollypop")
         self.__allocation = Gdk.Rectangle()
         PlaybackController.__init__(self)
         ProgressController.__init__(self)
-        self.set_application(app)
+        self.set_application(App())
         self.__timeout_id = None
         self.__signal1_id = self.__signal2_id = None
         self.set_decorated(False)
@@ -141,12 +151,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.__sidebar.get_style_context().add_class("background-opacity")
         self.__revealer.add(self.__sidebar)
         self.add(widget)
-        return {
-            "map": [
-                (App().player, "current-changed", "on_current_changed"),
-                (App().player, "status-changed", "on_status_changed")
-            ]
-        }
 
     def do_show(self):
         """
