@@ -59,10 +59,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__bottom_buttons = builder.get_object("bottom_buttons")
         self.__entry = builder.get_object("entry")
         self.__spinner = builder.get_object("spinner")
-        self.__header_stack = builder.get_object("header_stack")
-        self.__combo_locale = builder.get_object("combo_locale")
-        self.__combo_locale.set_active_id(
-            App().settings.get_value("spotify-charts-locale").get_string())
         self.__button_stack = builder.get_object("button_stack")
         self.__stack = builder.get_object("stack")
         self.__placeholder = builder.get_object("placeholder")
@@ -183,17 +179,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__timeout_id = GLib.timeout_add(
                 timeout,
                 self.__on_search_changed_timeout)
-
-    def _on_combo_locale_changed(self, combobox):
-        """
-            Save setting
-            @param combobox as Gtk.ComboBoxText
-        """
-        App().settings.set_value("spotify-charts-locale",
-                                 GLib.Variant("s",
-                                              combobox.get_active_id()))
-        self.__on_search_action_change_state(self.__search_type_action,
-                                             GLib.Variant("s", "charts"))
 
     def _on_map(self, widget):
         """
@@ -374,16 +359,5 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             self.__button_stack.set_visible_child(self.__new_button)
         else:
             self.__new_button.hide()
-        if state == "charts":
-            self.__header_stack.set_visible_child_name("locale")
-            self.__play_button.set_sensitive(True)
-            self.__button_stack.set_visible_child(self.__spinner)
-            self.__spinner.start()
-            self.__stack.set_visible_child_name("view")
-            App().task_helper.run(App().spotify.charts,
-                                  self.__cancellable,
-                                  self.__combo_locale.get_active_id())
-        else:
-            self.__header_stack.set_visible_child_name("entry")
-            self.__populate()
-            GLib.idle_add(self.__entry.grab_focus)
+        self.__populate()
+        GLib.idle_add(self.__entry.grab_focus)

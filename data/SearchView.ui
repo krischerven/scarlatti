@@ -161,23 +161,6 @@
             <property name="position">1</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkToggleButton">
-            <property name="width_request">80</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Spotify charts</property>
-            <property name="action_name">app.search_type</property>
-            <property name="action_target">"charts"</property>
-            <property name="image">image5</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
         <style>
           <class name="linked"/>
         </style>
@@ -189,104 +172,17 @@
       </packing>
     </child>
     <child>
-      <object class="GtkStack" id="header_stack">
+      <object class="GtkSearchEntry" id="entry">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkSearchEntry" id="entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="has_focus">True</property>
-            <property name="is_focus">True</property>
-            <property name="margin_start">2</property>
-            <property name="hexpand">True</property>
-            <property name="primary_icon_name">edit-find-symbolic</property>
-            <property name="primary_icon_activatable">False</property>
-            <property name="primary_icon_sensitive">False</property>
-            <signal name="search-changed" handler="_on_search_changed" swapped="no"/>
-          </object>
-          <packing>
-            <property name="name">entry</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkComboBoxText" id="combo_locale">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <items>
-              <item id="global" translatable="yes">Global</item>
-              <item id="us" translatable="yes">United States</item>
-              <item id="gb" translatable="yes">United Kingdom</item>
-              <item id="ad" translatable="yes">Andorra</item>
-              <item id="ar" translatable="yes">Argentina</item>
-              <item id="at" translatable="yes">Austria</item>
-              <item id="au" translatable="yes">Australia</item>
-              <item id="be" translatable="yes">Belgium</item>
-              <item id="bg" translatable="yes">Bulgaria</item>
-              <item id="bo" translatable="yes">Bolivia</item>
-              <item id="br" translatable="yes">Brazil</item>
-              <item id="ca" translatable="yes">Canada</item>
-              <item id="ch" translatable="yes">Switzerland</item>
-              <item id="cl" translatable="yes">Chile</item>
-              <item id="co" translatable="yes">Colombia</item>
-              <item id="cr" translatable="yes">Costa Rica</item>
-              <item id="cy" translatable="yes">Cyprus</item>
-              <item id="cz" translatable="yes">Czechia</item>
-              <item id="de" translatable="yes">Germany</item>
-              <item id="dk" translatable="yes">Denmark</item>
-              <item id="do" translatable="yes">Dominican Republic</item>
-              <item id="ec" translatable="yes">Ecuador</item>
-              <item id="ee" translatable="yes">Estonia</item>
-              <item id="es" translatable="yes">Spain</item>
-              <item id="fi" translatable="yes">Finland</item>
-              <item id="fr" translatable="yes">France</item>
-              <item id="gr" translatable="yes">Greece</item>
-              <item id="gt" translatable="yes">Guatemala</item>
-              <item id="hk" translatable="yes">Hong Kong</item>
-              <item id="hn" translatable="yes">Honduras</item>
-              <item id="hu" translatable="yes">Hungary</item>
-              <item id="id" translatable="yes">Indonesia</item>
-              <item id="ie" translatable="yes">Ireland</item>
-              <item id="il" translatable="yes">Israel</item>
-              <item id="is" translatable="yes">Iceland</item>
-              <item id="it" translatable="yes">Italy</item>
-              <item id="jp" translatable="yes">Japan</item>
-              <item id="lt" translatable="yes">Lithuania</item>
-              <item id="lu" translatable="yes">Luxembourg</item>
-              <item id="lv" translatable="yes">Latvia</item>
-              <item id="mc" translatable="yes">Monaco</item>
-              <item id="mt" translatable="yes">Malta</item>
-              <item id="mx" translatable="yes">Mexico</item>
-              <item id="my" translatable="yes">Malaysia</item>
-              <item id="ni" translatable="yes">Nicaragua</item>
-              <item id="nl" translatable="yes">Netherlands</item>
-              <item id="no" translatable="yes">Norway</item>
-              <item id="nz" translatable="yes">New Zealand</item>
-              <item id="pa" translatable="yes">Panama</item>
-              <item id="pe" translatable="yes">Peru</item>
-              <item id="ph" translatable="yes">Philippines</item>
-              <item id="pl" translatable="yes">Poland</item>
-              <item id="pt" translatable="yes">Portugal</item>
-              <item id="py" translatable="yes">Paraguay</item>
-              <item id="ro" translatable="yes">Romania</item>
-              <item id="se" translatable="yes">Sweden</item>
-              <item id="sg" translatable="yes">Singapore</item>
-              <item id="sk" translatable="yes">Slovakia</item>
-              <item id="sv" translatable="yes">El Salvador</item>
-              <item id="th" translatable="yes">Thailand</item>
-              <item id="tr" translatable="yes">Turkey</item>
-              <item id="tw" translatable="yes">Taiwan</item>
-              <item id="uy" translatable="yes">Uruguay</item>
-              <item id="vn" translatable="yes">Viet Nam</item>
-              <item id="sa" translatable="yes">South Africa</item>
-            </items>
-            <signal name="changed" handler="_on_combo_locale_changed" swapped="no"/>
-          </object>
-          <packing>
-            <property name="name">locale</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="can_focus">True</property>
+        <property name="has_focus">True</property>
+        <property name="is_focus">True</property>
+        <property name="margin_start">2</property>
+        <property name="hexpand">True</property>
+        <property name="primary_icon_name">edit-find-symbolic</property>
+        <property name="primary_icon_activatable">False</property>
+        <property name="primary_icon_sensitive">False</property>
+        <signal name="search-changed" handler="_on_search_changed" swapped="no"/>
       </object>
       <packing>
         <property name="left_attach">0</property>

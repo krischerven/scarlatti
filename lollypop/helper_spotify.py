@@ -267,57 +267,6 @@ class SpotifyHelper(GObject.Object):
             GLib.idle_add(self.emit, "search-finished")
         del self.__album_ids[cancellable]
 
-    def charts(self, cancellable, language="global"):
-        """
-            Get albums related to search
-            We need a thread because we are going to populate DB
-            @param cancellable as Gio.Cancellable
-            @param language as str
-        """
-        self.__album_ids[cancellable] = []
-        from csv import reader
-        try:
-            while self.wait_for_token():
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % self.__token
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            uri = self.__CHARTS % language
-            spotify_ids = []
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
-            if status:
-                decode = data.decode("utf-8")
-                for line in decode.split("\n"):
-                    try:
-                        for row in reader([line]):
-                            if not row:
-                                continue
-                            url = row[4]
-                            if url == "URL":
-                                continue
-                            spotify_id = url.split("/")[-1]
-                            if spotify_id:
-                                spotify_ids.append(spotify_id)
-                    except Exception as e:
-                        Logger.warning("SpotifyHelper::charts(): %s", e)
-            for spotify_id in spotify_ids:
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                payload = self.__get_track_payload(helper,
-                                                   spotify_id,
-                                                   cancellable)
-                self.__create_album_from_tracks_payload(
-                                                 [payload],
-                                                 StorageType.EPHEMERAL,
-                                                 cancellable)
-        except Exception as e:
-            Logger.warning("SpotifyHelper::charts(): %s", e)
-        if not cancellable.is_cancelled():
-            GLib.idle_add(self.emit, "search-finished")
-        del self.__album_ids[cancellable]
-
     def cancel(self):
         """
             Cancel db populate

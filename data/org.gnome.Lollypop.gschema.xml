@@ -298,11 +298,6 @@
             <summary>Smoothing duration</summary>
             <description></description>
         </key>
-        <key type="s" name="spotify-charts-locale">
-            <default>"global"</default>
-            <summary>Spotify charts locale</summary>
-            <description></description>
-        </key>
         <key enum="org.gnome.Lollypop.Shuffle" name="shuffle">
             <default>'none'</default>
             <summary>Shuffle mode</summary>
