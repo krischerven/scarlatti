@@ -622,8 +622,8 @@ class AlbumsDatabase:
             @param limit as int
             @return [int]
         """
-        # Last week
-        timestamp = time() - 604800
+        # Last month
+        timestamp = time() - 2419200
         with SqlCursor(App().db) as sql:
             storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid FROM albums, tracks\
