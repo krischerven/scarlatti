@@ -63,7 +63,11 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             self.__label.set_property("halign", Gtk.Align.CENTER)
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
-            self.__label.get_style_context().add_class("padding")
+            style_context = self.__label.get_style_context()
+            if self.__view_type & ViewType.SMALL:
+                style_context.add_class("text-small")
+            else:
+                style_context.add_class("padding")
             album_name = GLib.markup_escape_text(self.__album.name)
             if self.__view_type & ViewType.ALBUM:
                 self.__label.set_markup("<span alpha='40000'>%s</span>" %
@@ -76,14 +80,17 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
                                                                   artist_name))
             self.__artwork = Gtk.Image.new()
             self.__artwork.connect("realize", set_cursor_hand2)
-            toggle_button = Gtk.ToggleButton.new()
-            toggle_button.set_image(self.__label)
-            toggle_button.set_relief(Gtk.ReliefStyle.NONE)
-            toggle_button.get_style_context().add_class("light-button")
-            toggle_button.connect("toggled", self.__on_label_toggled)
-            toggle_button.show()
             grid.add(self.__artwork)
-            grid.add(toggle_button)
+            if self.__view_type & ViewType.SMALL:
+                grid.add(self.__label)
+            else:
+                toggle_button = Gtk.ToggleButton.new()
+                toggle_button.set_image(self.__label)
+                toggle_button.set_relief(Gtk.ReliefStyle.NONE)
+                toggle_button.get_style_context().add_class("light-button")
+                toggle_button.connect("toggled", self.__on_label_toggled)
+                toggle_button.show()
+                grid.add(toggle_button)
             self.set_artwork()
             self.set_selection()
             self.connect("destroy", self.__on_destroy)
