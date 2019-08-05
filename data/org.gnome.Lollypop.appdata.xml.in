@@ -16,7 +16,7 @@
       <li>Artist bio, lyrics: Get artist and track information from the web</li>
       <li>Party mode: No awkward silences, let Lollypop choose music for you</li>
       <li>ReplayGain (RG): Automatically select the best audio level</li>
-      <li>Cover art downloader: Automatic artwork downloader from Last.fm, Itunes and Spotify</li>
+      <li>Cover art downloader: Automatic artwork downloader from Last.fm, iTunes and Spotify</li>
       <li>MTP devices: Sync your music with Android phones and any MTP devices</li>
       <li>Fullscreen view: Visual access from your couch</li>
       <li>Radios support</li>
@@ -30,7 +30,7 @@
     <release version="1.1.4" date="2019-07-05">
       <description>
 	<ul>Do not reload views on adaptive</ul>
-	<ul>Bug fixes</ul>
+	<ul>Bugfixes</ul>
       </description>
     </release>
   </releases>
