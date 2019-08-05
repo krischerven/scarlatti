@@ -59,7 +59,6 @@ class SyncMenu(Gio.Menu):
         """
         def on_get_synced(synced, sync_action):
             sync_action.set_state(GLib.Variant.new_boolean(synced))
-            sync_action.set_enabled(True)
 
         synced = False
         devices = list(App().settings.get_value("devices"))
@@ -70,7 +69,6 @@ class SyncMenu(Gio.Menu):
                                           None,
                                           GLib.Variant.new_boolean(synced))
         App().add_action(sync_action)
-        sync_action.set_enabled(False)
         try:
             if name == self.__all_devices:
                 index = 0
