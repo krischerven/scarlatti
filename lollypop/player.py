@@ -46,7 +46,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         SimilarsPlayer.__init__(self)
         self.__stop_after_track_id = None
         self.update_crossfading()
-        App().settings.connect("changed::repeat", self.__update_next_prev)
+        App().settings.connect("changed::repeat", self.update_next_prev)
 
     def prev(self):
         """
@@ -98,9 +98,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self._albums[-1].set_tracks(tracks)
         else:
             self._albums.append(album)
-        if not self.is_party:
-            self.set_next()
-        self.set_prev()
 
     def remove_album(self, album):
         """
@@ -111,7 +108,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if album not in self._albums:
                 return
             self._albums.remove(album)
-            self.__update_next_prev()
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
@@ -124,7 +120,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             for album in self._albums:
                 if album.id == album_id:
                     self.remove_album(album)
-            self.__update_next_prev()
         except Exception as e:
             Logger.error("Player::remove_album_by_id(): %s" % e)
 
@@ -144,9 +139,8 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self.reset_history()
-        self.load(track)
         self._albums = albums
-        self.__update_next_prev()
+        self.load(track)
 
     def play_album_for_albums(self, album, albums):
         """
@@ -366,6 +360,16 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         except Exception as e:
             Logger.error("Player::skip_album(): %s" % e)
 
+    def update_next_prev(self, *ignore):
+        """
+            Update next/prev
+            @param player as Player
+        """
+        if self._current_track.id is not None:
+            if not self.is_party:
+                self.set_next()
+            self.set_prev()
+
     def update_crossfading(self):
         """
             Calculate if crossfading is needed
@@ -503,12 +507,3 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         self._albums = albums
         if track is not None:
             self.load(track)
-
-    def __update_next_prev(self, *ignore):
-        """
-            Update next/prev
-            @param player as Player
-        """
-        if not self.is_party:
-            self.set_next()
-        self.set_prev()

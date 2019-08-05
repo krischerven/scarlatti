@@ -73,6 +73,7 @@ class AlbumPlaybackMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().player.add_album(self.__album)
+        App().player.update_next_prev()
 
     def __remove_from_playback(self, action, variant):
         """
@@ -81,6 +82,7 @@ class AlbumPlaybackMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().player.remove_album_by_id(self.__album.id)
+        App().player.update_next_prev()
 
 
 class TrackPlaybackMenu(Gio.Menu):

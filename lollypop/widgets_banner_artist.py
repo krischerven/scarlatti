@@ -197,6 +197,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__update_add_icon(not add)
         except Exception as e:
             Logger.error("ArtistView::_on_add_clicked: %s" % e)
+        App().player.update_next_prev()
 
     def _on_similars_button_toggled(self, button):
         """

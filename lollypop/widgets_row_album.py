@@ -289,6 +289,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         if self._view_type & ViewType.PLAYBACK:
             App().player.remove_album(self._album)
             self.destroy()
+            App().player.update_next_prev()
         elif self._album.storage_type & StorageType.EPHEMERAL:
             App().art.copy_from_web_to_store(self._album.id)
             App().art.cache_artists_artwork()
@@ -312,6 +313,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
                     App().player.remove_album(self._album)
             else:
                 App().player.remove_album(self._album)
+            App().player.update_next_prev()
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:

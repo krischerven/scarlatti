@@ -215,6 +215,7 @@ class TracksPopover(Popover, TracksView,
             else:
                 App().player.add_album(self._album)
             self.__show_append(False)
+        App().player.update_next_prev()
 
     def __on_play_all_clicked(self, button):
         """
