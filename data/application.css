@@ -287,6 +287,7 @@ flowboxchild:selected  {
     border-radius: 1px;
     border: 1px solid shade(@theme_bg_color, 0.90);
     background-color: shade(@theme_bg_color, 1.5);
+    color: @theme_fg_color;
 }
 
 .artwork-icon {
