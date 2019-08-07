@@ -132,7 +132,7 @@
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="action_name">app.about</property>
-        <property name="text" translatable="yes">_About</property>
+        <property name="text" translatable="yes">_About Lollypop</property>
       </object>
       <packing>
         <property name="left_attach">0</property>
