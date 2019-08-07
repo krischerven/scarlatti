@@ -436,7 +436,7 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
     """
     icon = ""
     if object_id == Type.SUGGESTIONS:
-        icon = "org.gnome.Lollypop-symbolic"
+        icon = "org.gnome.Lollypop-suggestions-symbolic"
     elif object_id == Type.POPULARS:
         icon = "starred-symbolic"
     elif object_id == Type.PLAYLISTS:
