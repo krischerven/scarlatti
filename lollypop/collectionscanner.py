@@ -183,8 +183,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             album_artist_ids = artist_ids
 
         missing_artist_ids = list(set(album_artist_ids) - set(artist_ids))
-        # https://github.com/gnumdk/lollypop/issues/507#issuecomment-200526942
         # Special case for broken tags
+        # If all artist album tags are missing
         # Can't do more because don't want to break split album behaviour
         if len(missing_artist_ids) == len(album_artist_ids):
             artist_ids += missing_artist_ids
