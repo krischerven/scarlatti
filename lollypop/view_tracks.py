@@ -375,8 +375,6 @@ class TracksView(SignalsHelper):
         # | Column 1 | Column 2 | #
         ###########################
         for disc in self.__discs:
-            if not disc.tracks:
-                continue
             show_label = len(self.__discs) > 1
             disc_names = self._album.disc_names(disc.number)
             if show_label or disc_names:
@@ -444,6 +442,14 @@ class TracksView(SignalsHelper):
             self._on_tracks_populated(disc_number)
             self._tracks_widget_left[disc_number].show()
             self._tracks_widget_right[disc_number].show()
+            if not self.children:
+                text = (_("""This album has no track."""
+                          """ Check tags, all 'album artist'"""
+                          """ tags should be in 'artist' tags"""))
+                label = Gtk.Label.new(text)
+                label.get_style_context().add_class("text-large")
+                label.show()
+                widget.add(label)
             return
 
         (track, position) = tracks.pop(0)
