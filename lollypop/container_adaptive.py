@@ -83,6 +83,7 @@ class AdaptiveContainer(SignalsHelper):
             @param window as Window
             @param status as bool
         """
+        print("on_adaptive_changed()", window, status)
         if status:
             self._main_widget.remove(self._sidebar)
             self._sidebar_two.remove(self._list_view)
