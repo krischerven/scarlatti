@@ -137,6 +137,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             GLib.idle_add(child.destroy)
         if clear_albums:
             App().player.clear_albums()
+            App().player.update_next_prev()
 
     @property
     def args(self):
