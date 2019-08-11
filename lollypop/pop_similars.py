@@ -222,7 +222,7 @@ class SimilarsPopover(Popover):
         """
         self.popdown()
         artist_name = row.artist_name
-        artist_id = App().artists.get_id(artist_name)
+        (artist_id, name) = App().artists.get_id(artist_name)
         if artist_id is None:
             target = "web://%s" % artist_name
         else:
@@ -240,7 +240,7 @@ class SimilarsPopover(Popover):
             if artist in self.__added:
                 return
             self.__added.append(artist)
-            artist_id = App().artists.get_id(artist)
+            (artist_id, name) = App().artists.get_id(artist)
             row = None
             if artist_id is not None:
                 # We want real artist name (with case)

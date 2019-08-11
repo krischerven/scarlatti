@@ -609,7 +609,7 @@ class TagReader(Discoverer):
                 else:
                     mbid = mbidsplit[i].strip()
                 # Get artist id, add it if missing
-                artist_id = App().artists.get_id(artist, mbid)
+                (artist_id, db_name) = App().artists.get_id(artist, mbid)
                 if i >= sortlen or sortsplit[i] == "":
                     sortname = None
                 else:
@@ -619,6 +619,10 @@ class TagReader(Discoverer):
                         sortname = format_artist_name(artist)
                     artist_id = App().artists.add(artist, sortname, mbid)
                 else:
+                    # artists.get_id() is NOCASE, check if we need to update
+                    # artist name
+                    if db_name != artist:
+                        App().artists.set_name(artist_id, artist)
                     if sortname is not None:
                         App().artists.set_sortname(artist_id, sortname)
                     if mbid is not None:

@@ -204,7 +204,7 @@ class Database:
         """
         artist_ids = []
         for artist in artists:
-            artist_id = App().artists.get_id(artist)
+            (artist_id, name) = App().artists.get_id(artist)
             artist_ids.append(artist_id)
         album_id = App().albums.get_id_by_name_artists(album, artist_ids)
         if album_id is None:

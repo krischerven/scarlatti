@@ -80,24 +80,21 @@ class ArtistsDatabase:
             Get artist id
             @param name as string
             @param mb_artist_id as str
-            @return Artist id as int
+            @return (artist_id as int, name as str)
         """
-        # Special case, id name is fully uppercase, do not use NOCASE
-        # We want to have a different artist
         with SqlCursor(App().db) as sql:
-            query = "SELECT rowid from artists\
+            query = "SELECT rowid, name from artists\
                      WHERE name=?"
             params = [name]
             if mb_artist_id:
                 query += " AND (mb_artist_id=? OR mb_artist_id IS NULL)"
                 params.append(mb_artist_id)
-            if not name.isupper():
-                query += " COLLATE NOCASE"
+            query += " COLLATE NOCASE"
             result = sql.execute(query, params)
             v = result.fetchone()
             if v is not None:
-                return v[0]
-            return None
+                return (v[0], v[1])
+            return (None, None)
 
     def get_name(self, artist_id):
         """
@@ -116,12 +113,23 @@ class ArtistsDatabase:
                 return v[0]
             return ""
 
+    def set_name(self, artist_id, name):
+        """
+            Set artist name
+            @param artist_id as int
+            @param name as str
+        """
+        with SqlCursor(App().db, True) as sql:
+            sql.execute("UPDATE artists\
+                         SET name=?\
+                         WHERE rowid=?",
+                        (name, artist_id))
+
     def set_mb_artist_id(self, artist_id, mb_artist_id):
         """
             Set MusicBrainz artist id
             @param artist_id as int
             @param mb_artist_id as str
-            @warning: commit needed
         """
         with SqlCursor(App().db, True) as sql:
             sql.execute("UPDATE artists\
