@@ -42,8 +42,10 @@ class AlbumMenu(Gio.Menu):
         section = Gio.Menu()
         if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
             section.append_submenu(_("Playlists"), PlaylistsMenu(album))
-        section.append_submenu(_("Devices"), SyncAlbumMenu(album))
-        self.append_section(_("Add to"), section)
+        if album.storage_type & StorageType.COLLECTION:
+            section.append_submenu(_("Devices"), SyncAlbumMenu(album))
+        if section.get_n_items() != 0:
+            self.append_section(_("Add to"), section)
         self.append_section(_("Edit"), EditMenu(album))
 
 
