@@ -167,7 +167,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             if App().settings.get_value("window-maximized"):
                 # Lets resize happen
                 GLib.idle_add(self.maximize)
-                self.emit("adaptive-changed", False)
+                self.set_adaptive(False)
             else:
                 AdaptiveWindow._on_configure_event_timeout(
                     self, size[0], size[1], pos[0], pos[1])

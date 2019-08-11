@@ -337,6 +337,15 @@ class AdaptiveWindow:
         self.__adaptive_size = AdaptiveSize.NONE
         self.connect("configure-event", self.__on_configure_event)
 
+    def set_adaptive(self, is_adaptive):
+        """
+            Handle adaptive switch
+            @param is_adaptive as bool
+        """
+        if is_adaptive != self.__is_adaptive:
+            self.__is_adaptive = is_adaptive
+            self.emit("adaptive-changed", is_adaptive)
+
     @property
     def adaptive_size(self):
         """
@@ -366,9 +375,9 @@ class AdaptiveWindow:
         """
         self.__configure_timeout_id = None
         if width < Size.MEDIUM:
-            self.__set_adaptive(True)
+            self.set_adaptive(True)
         else:
-            self.__set_adaptive(False)
+            self.set_adaptive(False)
         if width < Size.SMALL:
             adaptive_size = AdaptiveSize.SMALL
         elif width < Size.MEDIUM:
@@ -386,15 +395,6 @@ class AdaptiveWindow:
 ############
 # PRIVATE  #
 ############
-    def __set_adaptive(self, is_adaptive):
-        """
-            Handle adaptive switch
-            @param is_adaptive as bool
-        """
-        if is_adaptive != self.__is_adaptive:
-            self.__is_adaptive = is_adaptive
-            self.emit("adaptive-changed", is_adaptive)
-
     def __on_configure_event(self, window, event):
         """
             Delay event
