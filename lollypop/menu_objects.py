@@ -49,9 +49,27 @@ class AlbumMenu(Gio.Menu):
         self.append_section(_("Edit"), EditMenu(album))
 
 
-class TrackMenu(Gio.Menu):
+class MinTrackMenu(Gio.Menu):
     """
         Contextual menu for a track
+    """
+
+    def __init__(self, track):
+        """
+            Init menu model
+            @param track as Track
+        """
+        Gio.Menu.__init__(self)
+        if not track.storage_type & StorageType.EPHEMERAL:
+            section = Gio.Menu()
+            section.append_submenu(_("Playlists"), PlaylistsMenu(track))
+            self.append_section(_("Add to"), section)
+        self.append_section(_("Edit"), EditMenu(track))
+
+
+class TrackMenu(Gio.Menu):
+    """
+        Full Contextual menu for a track
     """
 
     def __init__(self, track):
@@ -64,7 +82,7 @@ class TrackMenu(Gio.Menu):
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu(track))
-        self.append_section(_("Add to"), section)
+            self.append_section(_("Add to"), section)
         self.append_section(_("Edit"), EditMenu(track))
 
 

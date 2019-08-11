@@ -13,11 +13,10 @@
 from gi.repository import Gtk, GLib
 
 
-from lollypop.utils import set_cursor_hand2
+from lollypop.utils import set_cursor_hand2, popup_widget
 from lollypop.objects_radio import Radio
-from lollypop.widgets_utils import Popover
 from lollypop.controller_information import InformationController
-from lollypop.define import App, ArtBehaviour
+from lollypop.define import App, ArtBehaviour, StorageType
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -185,15 +184,19 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
         """
         if App().window.is_adaptive or not self._artwork.get_visible():
             return
-        from lollypop.menu_toolbar import ToolbarMenu
-        menu = ToolbarMenu(App().player.current_track)
-        if App().player.current_track.id >= 0:
-            from lollypop.pop_menu import TrackMenuPopover
-            popover = TrackMenuPopover(App().player.current_track, menu)
-            popover.set_relative_to(self._infobox)
-        elif isinstance(App().player.current_track, Radio):
-            popover = Popover.new_from_model(self._infobox, menu)
-        popover.popup()
+        track = App().player.current_track
+        if track.id >= 0:
+            from lollypop.menu_objects import MinTrackMenu, TrackMenuExt
+            from lollypop.widgets_menu import MenuBuilder
+            menu = MinTrackMenu(track)
+            menu_widget = MenuBuilder(menu)
+            menu_widget.show()
+            if not track.storage_type & StorageType.EPHEMERAL:
+                menu_ext = TrackMenuExt(track)
+                menu_ext.show()
+                menu_widget.get_child_by_name("main").add(menu_ext)
+            self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
+            popup_widget(menu_widget, self._infobox)
 
     def __on_realize(self, toolbar):
         """
