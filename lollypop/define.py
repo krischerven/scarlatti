@@ -168,7 +168,7 @@ class AdaptiveSize:
 class Size:
     MINI = 250
     SMALL = 400
-    MEDIUM = 700
+    MEDIUM = 720  # Librem Phone
     NORMAL = 1000
     BIG = 1300
 
