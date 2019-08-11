@@ -42,7 +42,7 @@ class Track(Base):
                 "timestamp": 0,
                 "mtime": 1,
                 "loved": False,
-                "storage_type": 0,
+                "storage_type": StorageType.COLLECTION,
                 "mb_track_id": None,
                 "mb_artist_ids": []}
 

@@ -161,7 +161,7 @@ class BinPlayer(BasePlayer):
         if self._current_track.id is None:
             return
         # Seems gstreamer doesn't like seeking to end, sometimes
-        # doesn"t go to next track
+        # doesn't go to next track
         if position >= self._current_track.duration:
             self.next()
         else:
