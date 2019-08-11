@@ -332,7 +332,7 @@ class AdaptiveWindow:
         """
             Init adaptive mode, Gtk.Window should be initialised
         """
-        self.__is_adaptive = False
+        self.__is_adaptive = None
         self.__configure_timeout_id = None
         self.__adaptive_size = AdaptiveSize.NONE
         self.connect("configure-event", self.__on_configure_event)
@@ -351,7 +351,7 @@ class AdaptiveWindow:
             True if adaptive is on
             @return bool
         """
-        return self.__is_adaptive
+        return False if self.__is_adaptive is None else self.__is_adaptive
 
 #############
 # PROTECTED #
