@@ -26,10 +26,11 @@ class ViewsContainer:
         """
         pass
 
-    def show_menu(self, widget):
+    def show_menu(self, widget, in_toolbar=False):
         """
             Show menu widget
             @param widget as Gtk.Widget
+            @param in_toolbar as bool: menu related to toolbar
         """
         def on_closed(widget, view):
             App().window.toolbar.end.detach_menus()
@@ -51,7 +52,8 @@ class ViewsContainer:
         # Do not populate history
         self._stack.set_visible_child(view)
         self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.emit("can-go-back-changed", False)
+        if in_toolbar:
+            self.emit("can-go-back-changed", False)
 
     def show_view(self, item_ids, data=None, switch=True):
         """

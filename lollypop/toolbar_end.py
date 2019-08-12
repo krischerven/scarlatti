@@ -190,7 +190,7 @@ class ToolbarEnd(Gtk.Bin):
             @param button as Gtk.Button
         """
         if App().window.is_adaptive:
-            App().window.container.show_menu(widget)
+            App().window.container.show_menu(widget, True)
             widget.connect("closed", self.__on_popover_closed, button)
         else:
             from lollypop.widgets_utils import Popover
