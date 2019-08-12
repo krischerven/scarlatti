@@ -77,17 +77,6 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
 #######################
 # Private             #
 #######################
-    def __on_show_can_go_back(self, window, back):
-        """
-            Show back button
-            @param window as Gtk.Window
-            @param back as bool
-        """
-        if back:
-            self.__back_button.show()
-        else:
-            self.__back_button.hide()
-
     def __on_can_go_back_changed(self, container, back):
         """
             Make button sensitive

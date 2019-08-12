@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 from lollypop.define import App
 from lollypop.helper_signals import SignalsHelper, signals
@@ -20,6 +20,10 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
     """
         Configure defaults items
     """
+
+    __gsignals__ = {
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     @signals
     def __init__(self):
@@ -47,11 +51,18 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
 #######################
     def _on_button_clicked(self, button):
         """
-            Popdown popover if exists or destroy self
+            Popdown popover if exists
+            @param button as Gtk.Button
         """
         popover = self.get_ancestor(Gtk.Popover)
         if popover is not None:
             popover.popdown()
+
+    def _emit_closed(self, button):
+        """
+            Emit closed signal
+        """
+        self.emit("closed")
 
     def _on_volume_value_changed(self, scale):
         """

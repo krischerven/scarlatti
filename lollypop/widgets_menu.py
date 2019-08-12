@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 from lollypop.define import App
 
@@ -20,6 +20,10 @@ class MenuBuilder(Gtk.Stack):
         Advanced menu model constructor
         Does not support submenus
     """
+
+    __gsignals__ = {
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     def __init__(self, menu):
         """

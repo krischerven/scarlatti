@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import Gtk
+
 from lollypop.define import App, Type, ViewType, MARGIN_SMALL
 
 
@@ -23,6 +25,33 @@ class ViewsContainer:
             Init container
         """
         pass
+
+    def show_menu(self, widget):
+        """
+            Show menu widget
+            @param widget as Gtk.Widget
+        """
+        def on_closed(widget, view):
+            App().window.toolbar.end.detach_menus()
+            self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP)
+            self.go_back()
+            self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+            if self.can_go_back:
+                self.emit("can-go-back-changed", True)
+
+        from lollypop.view import View
+        view = View()
+        view.show()
+        view.add(widget)
+        widget.get_style_context().add_class("adaptive-menu")
+        widget.set_vexpand(True)
+        widget.connect("closed", on_closed, view)
+        self._stack.add(view)
+        self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_DOWN)
+        # Do not populate history
+        self._stack.set_visible_child(view)
+        self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.emit("can-go-back-changed", False)
 
     def show_view(self, item_ids, data=None, switch=True):
         """
