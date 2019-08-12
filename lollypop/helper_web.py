@@ -38,18 +38,24 @@ class WebHelper:
         escaped = GLib.uri_escape_string(track.uri, None, True)
         # Read URI from cache
         try:
-            return load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
+            uri = load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
+            track.set_uri(uri)
+            return
         except:
             pass
+
         # Get URI from helpers
         for helper in self.__helpers:
             uri = helper.get_uri(track, cancellable)
             if uri:
-                # CACHE URI
-                with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
-                    dump(uri, f)
+                try:
+                    # CACHE URI
+                    with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
+                        dump(uri, f)
+                except:
+                    pass
                 track.set_uri(uri)
-                return
+                break
 
     def get_track_content(self, track):
         """

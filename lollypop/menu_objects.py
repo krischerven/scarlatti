@@ -12,9 +12,10 @@
 
 from gi.repository import Gio, Gtk, GLib
 
+from pickle import load, dump
 from gettext import gettext as _
 
-from lollypop.define import StorageType, MARGIN_SMALL, App
+from lollypop.define import StorageType, MARGIN_SMALL, App, CACHE_PATH
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_artist import ArtistMenu
 from lollypop.menu_edit import EditMenu
@@ -132,14 +133,20 @@ class TrackMenuExt(Gtk.Grid):
         hgrid.add(loved)
         hgrid.show()
 
-        if not track.storage_type & StorageType.COLLECTION:
+        try:
+            escaped = GLib.uri_escape_string(track.uri, None, True)
+            uri = load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
+        except:
+            uri = ""
+        if uri is not None:
             edit = Gtk.Entry()
+            edit.set_placeholder_text(_("YouTube page address"))
             edit.set_margin_top(MARGIN_SMALL)
             edit.set_margin_start(MARGIN_SMALL)
             edit.set_margin_end(MARGIN_SMALL)
             edit.set_margin_bottom(MARGIN_SMALL)
             edit.set_property("hexpand", True)
-            edit.set_text(track.uri)
+            edit.set_text(uri)
             edit.connect("changed", self.__on_edit_changed, track)
             edit.show()
             self.add(edit)
@@ -159,9 +166,14 @@ class TrackMenuExt(Gtk.Grid):
             @param track as Track
         """
         from urllib.parse import urlparse
-        text = edit.get_text()
-        parsed = urlparse(text)
-        if parsed.scheme not in ["http", "https", "web"]:
-            text = "web://null"
-        App().tracks.set_uri(track.id, text)
-        track.reset("uri")
+        uri = edit.get_text()
+        parsed = urlparse(uri)
+        escaped = GLib.uri_escape_string(track.uri, None, True)
+        if parsed.scheme not in ["http", "https"]:
+            return
+        try:
+            # CACHE URI
+            with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
+                dump(uri, f)
+        except:
+            pass
