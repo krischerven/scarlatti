@@ -16,6 +16,7 @@ from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
+from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH
 from lollypop.utils import create_dir, escape
 
 import cairo
@@ -36,9 +37,9 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         ArtistArt.__init__(self)
         RadioArt.__init__(self)
         ArtDownloader.__init__(self)
-        create_dir(self._CACHE_PATH)
-        create_dir(self._STORE_PATH)
-        create_dir(self._WEB_PATH)
+        create_dir(CACHE_PATH)
+        create_dir(STORE_PATH)
+        create_dir(WEB_PATH)
 
     def add_artwork_to_cache(self, name, surface):
         """
@@ -50,7 +51,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         try:
             width = surface.get_width()
             height = surface.get_height()
-            cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH,
+            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
                                                   escape(name),
                                                   width, height)
             surface.write_to_png(cache_path_png)
@@ -67,7 +68,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @thread safe
         """
         try:
-            cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH,
+            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
                                                   escape(name),
                                                   width, height)
             surface = cairo.ImageSurface.create_from_png(cache_path_png)
@@ -81,7 +82,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             Remove all covers from cache
         """
         try:
-            rmtree(self._WEB_PATH)
+            rmtree(WEB_PATH)
         except Exception as e:
             Logger.error("Art::clean_web(): %s", e)
 
@@ -91,7 +92,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         """
         try:
             from pathlib import Path
-            for p in Path(self._CACHE_PATH).glob("*.jpg"):
+            for p in Path(CACHE_PATH).glob("*.jpg"):
                 p.unlink()
         except Exception as e:
             Logger.error("Art::clean_all_cache(): %s", e)

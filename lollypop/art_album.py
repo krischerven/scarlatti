@@ -16,6 +16,7 @@ from random import choice
 
 from lollypop.tagreader import TagReader
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
+from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import escape, is_readonly
@@ -51,7 +52,7 @@ class AlbumArt:
         filename = ""
         try:
             filename = self.get_album_cache_name(album)
-            cache_path_jpg = "%s/%s_%s_%s.jpg" % (self._CACHE_PATH,
+            cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
                                                   filename,
                                                   width,
                                                   height)
@@ -81,9 +82,9 @@ class AlbumArt:
             filename = self.get_album_cache_name(album) + ".jpg"
             self.__update_album_uri(album)
             if album.storage_type & StorageType.EPHEMERAL:
-                store_path = self._WEB_PATH + "/" + filename
+                store_path = WEB_PATH + "/" + filename
             else:
-                store_path = self._STORE_PATH + "/" + filename
+                store_path = STORE_PATH + "/" + filename
             uris = [
                 # Used when album.uri is readonly or for Web
                 GLib.filename_to_uri(store_path),
@@ -174,7 +175,7 @@ class AlbumArt:
         else:
             w = width
             h = height
-        cache_path_jpg = "%s/%s_%s_%s.jpg" % (self._CACHE_PATH, filename, w, h)
+        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH, filename, w, h)
         pixbuf = None
         try:
             # Look in cache
@@ -240,8 +241,8 @@ class AlbumArt:
         try:
             album = Album(album_id)
             filename = self.get_album_cache_name(album) + ".jpg"
-            web_path = self._WEB_PATH + "/" + filename
-            store_path = self._STORE_PATH + "/" + filename
+            web_path = WEB_PATH + "/" + filename
+            store_path = STORE_PATH + "/" + filename
             web_file = Gio.File.new_for_path(web_path)
             store_file = Gio.File.new_for_path(store_path)
             web_file.copy(store_file, Gio.FileCopyFlags.OVERWRITE,
@@ -300,10 +301,10 @@ class AlbumArt:
             from pathlib import Path
             name = self.get_album_cache_name(album)
             if width == -1 or height == -1:
-                for p in Path(self._CACHE_PATH).glob("%s*.jpg" % name):
+                for p in Path(CACHE_PATH).glob("%s*.jpg" % name):
                     p.unlink()
             else:
-                filename = "%s/%s_%s_%s.jpg" % (self._CACHE_PATH,
+                filename = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
                                                 name,
                                                 width,
                                                 height)
@@ -377,7 +378,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = self._WEB_PATH + "/" + filename
+        store_path = WEB_PATH + "/" + filename
         self._save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
         GLib.idle_add(self.album_artwork_update, album.id)
@@ -389,7 +390,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = self._STORE_PATH + "/" + filename
+        store_path = STORE_PATH + "/" + filename
         self._save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
         GLib.idle_add(self.album_artwork_update, album.id)
@@ -401,7 +402,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = self._STORE_PATH + "/" + filename
+        store_path = STORE_PATH + "/" + filename
         save_to_tags = App().settings.get_value("save-to-tags")
         uri_count = App().albums.get_uri_count(album.uri)
         art_uri = album.uri + "/" + self.__favorite
@@ -443,11 +444,11 @@ class AlbumArt:
                                                            True,
                                                            None)
         stream.close()
-        pixbuf.savev("%s/lollypop_cover_tags.jpg" % self._CACHE_PATH,
+        pixbuf.savev("%s/lollypop_cover_tags.jpg" % CACHE_PATH,
                      "jpeg", ["quality"], [str(App().settings.get_value(
                                            "cover-quality").get_int32())])
         self.__write_image_to_tags("%s/lollypop_cover_tags.jpg" %
-                                   self._CACHE_PATH, album.id)
+                                   CACHE_PATH, album.id)
 
     def __write_image_to_tags(self, path, album_id):
         """
@@ -462,7 +463,7 @@ class AlbumArt:
                     files.append(GLib.filename_from_uri(uri)[0])
                 except:
                     pass
-            cover = "%s/lollypop_cover_tags.jpg" % self._CACHE_PATH
+            cover = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
             if GLib.find_program_in_path("flatpak-spawn") is not None:
                 argv = ["flatpak-spawn", "--host", "kid3-cli",
                         "-c", "set picture:'%s' ''" % cover]

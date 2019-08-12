@@ -16,7 +16,7 @@ import re
 
 from lollypop.helper_task import TaskHelper
 from lollypop.logger import Logger
-from lollypop.define import ArtBehaviour
+from lollypop.define import ArtBehaviour, CACHE_PATH
 from lollypop.utils import escape
 
 
@@ -49,7 +49,7 @@ class RadioArt:
         filename = ""
         try:
             filename = self.__get_radio_cache_name(name)
-            cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH,
+            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
                                                   filename,
                                                   width,
                                                   height)
@@ -80,7 +80,7 @@ class RadioArt:
         width *= scale_factor
         height *= scale_factor
         filename = self.__get_radio_cache_name(name)
-        cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH, filename,
+        cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH, filename,
                                               width, height)
         pixbuf = None
         try:
@@ -165,7 +165,7 @@ class RadioArt:
         """
         cache_name = self.__get_radio_cache_name(name)
         try:
-            f = Gio.File.new_for_path(self._CACHE_PATH)
+            f = Gio.File.new_for_path(CACHE_PATH)
             infos = f.enumerate_children(
                 "standard::name",
                 Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
@@ -210,7 +210,7 @@ class RadioArt:
         """
         if status:
             filename = self.__get_radio_cache_name(name)
-            cache_path_png = "%s/%s_%s_%s.png" % (self._CACHE_PATH,
+            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
                                                   filename,
                                                   width,
                                                   height)

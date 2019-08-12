@@ -13,6 +13,7 @@
 from gi.repository import GLib, GdkPixbuf, Gio
 
 from lollypop.define import ArtBehaviour, ArtSize
+from lollypop.define import CACHE_PATH
 from lollypop.logger import Logger
 from lollypop.utils import escape
 
@@ -111,7 +112,7 @@ class ArtistArt:
             w = width
             h = height
         filename = self.get_artist_cache_name(artist)
-        cache_path_jpg = "%s/%s_%s_%s.jpg" % (self._CACHE_PATH, filename, w, h)
+        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH, filename, w, h)
         pixbuf = None
         try:
             # Look in cache
@@ -154,7 +155,7 @@ class ArtistArt:
         try:
             from pathlib import Path
             search = "%s*.jpg" % self.get_artist_cache_name(artist)
-            for p in Path(self._CACHE_PATH).glob(search):
+            for p in Path(CACHE_PATH).glob(search):
                 p.unlink()
         except Exception as e:
             Logger.error("ArtistArt::uncache_artist_artwork(): %s" % e)

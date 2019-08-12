@@ -27,6 +27,13 @@ TAG_EDITORS = ["kid3-qt", "exfalso", "easytag", "picard", "puddletag"]
 MARGIN = 15
 MARGIN_SMALL = 5
 
+# All cache goes here
+CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
+# Fallback when album dir is readonly
+STORE_PATH = GLib.get_user_data_dir() + "/lollypop/store"
+# Store for Web
+WEB_PATH = GLib.get_user_data_dir() + "/lollypop/web_store"
+
 
 class Repeat:
     NONE = 0

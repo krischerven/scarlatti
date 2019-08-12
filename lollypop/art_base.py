@@ -15,6 +15,7 @@ from gi.repository import GObject, Gio, GLib, GdkPixbuf
 from PIL import Image, ImageFilter
 
 from lollypop.define import ArtSize, App, TAG_EDITORS, ArtBehaviour
+from lollypop.define import STORE_PATH
 from lollypop.logger import Logger
 
 
@@ -22,11 +23,6 @@ class BaseArt(GObject.GObject):
     """
         Base art manager
     """
-    _CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
-    # Fallback when album dir is readonly
-    _STORE_PATH = GLib.get_user_data_dir() + "/lollypop/store"
-    # Store for Web
-    _WEB_PATH = GLib.get_user_data_dir() + "/lollypop/web_store"
     __gsignals__ = {
         "album-artwork-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "artist-artwork-changed": (GObject.SignalFlags.RUN_FIRST,
@@ -115,7 +111,7 @@ class BaseArt(GObject.GObject):
             @param filename as str
         """
         try:
-            filepath = self._STORE_PATH + "/" + filename + ".jpg"
+            filepath = STORE_PATH + "/" + filename + ".jpg"
             f = Gio.File.new_for_path(filepath)
             if f.query_exists():
                 f.delete()
