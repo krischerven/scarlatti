@@ -50,9 +50,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
             Popdown popover if exists or destroy self
         """
         popover = self.get_ancestor(Gtk.Popover)
-        if popover is None:
-            self.destroy()
-        else:
+        if popover is not None:
             popover.popdown()
 
     def _on_volume_value_changed(self, scale):

@@ -283,8 +283,6 @@ class ApplicationActions:
             App().player.set_volume(App().player.volume - 0.1)
         elif string == "filter":
             App().window.container.show_filter()
-        elif string == "volume":
-            App().window.container.show_view([Type.EQUALIZER])
         elif string == "current_artist":
             if App().player.current_track.id is not None and\
                     App().player.current_track.id > 0:
