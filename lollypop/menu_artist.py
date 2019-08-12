@@ -69,4 +69,4 @@ class ArtistMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().window.container.show_view([Type.ARTISTS],
-                                         self._album.artist_ids)
+                                         self.__album.artist_ids)
