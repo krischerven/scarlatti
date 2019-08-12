@@ -94,7 +94,9 @@ class MenuBuilder(Gtk.Stack):
         button.set_action_name(action.get_string())
         button.set_label(text.get_string())
         button.set_alignment(0, 0.5)
-        if target is not None:
+        if target is None:
+            button.connect("clicked", lambda x: self.emit("closed"))
+        else:
             button.set_action_target_value(target)
         button.show()
         self.__boxes[menu_name].add(button)
