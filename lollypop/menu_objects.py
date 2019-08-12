@@ -133,12 +133,12 @@ class TrackMenuExt(Gtk.Grid):
         hgrid.add(loved)
         hgrid.show()
 
-        try:
-            escaped = GLib.uri_escape_string(track.uri, None, True)
-            uri = load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
-        except:
-            uri = ""
-        if uri is not None:
+        if not track.storage_type & StorageType.COLLECTION:
+            try:
+                escaped = GLib.uri_escape_string(track.uri, None, True)
+                uri = load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
+            except:
+                uri = ""
             edit = Gtk.Entry()
             edit.set_placeholder_text(_("YouTube page address"))
             edit.set_margin_top(MARGIN_SMALL)
