@@ -10,8 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import GLib
+
+from pickle import load, dump
+
 from lollypop.helper_web_youtube import YouTubeHelper
-from lollypop.define import App
+from lollypop.define import CACHE_PATH
 
 
 class WebHelper:
@@ -31,12 +35,19 @@ class WebHelper:
             @param track as Track
             @param cancellable as Gio.Cancellable
         """
-        if track.is_http:
-            return
+        escaped = GLib.uri_escape_string(track.uri, None, True)
+        # Read URI from cache
+        try:
+            return load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
+        except:
+            pass
+        # Get URI from helpers
         for helper in self.__helpers:
             uri = helper.get_uri(track, cancellable)
             if uri:
-                App().tracks.set_uri(track.id, uri)
+                # CACHE URI
+                with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
+                    dump(uri, f)
                 track.set_uri(uri)
                 return
 
