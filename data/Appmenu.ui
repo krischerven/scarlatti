@@ -118,7 +118,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkModelButton">
+      <object class="GtkModelButton" id="shortcuts_button">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
