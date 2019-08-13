@@ -66,7 +66,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
         return {
-            "init": [
+            "map": [
                 (App().window, "adaptive-changed", "_on_adaptive_changed"),
             ]
         }
@@ -206,7 +206,10 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         pass
 
     def _on_map(self, widget):
-        pass
+        """
+            Delayed adaptive mode
+        """
+        self._on_adaptive_changed(App().window, App().window.is_adaptive)
 
     def _on_unmap(self, widget):
         pass

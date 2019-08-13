@@ -535,6 +535,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             Unselect all if adaptive
             @param widget as Gtk.Widget
         """
+        LazyLoadingView._on_map(self, widget)
         if App().window.is_adaptive:
             self._box.unselect_all()
 
