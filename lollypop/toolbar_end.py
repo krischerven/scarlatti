@@ -149,6 +149,8 @@ class ToolbarEnd(Gtk.Bin):
            @param button as Gtk.ToggleButton
         """
         if button.get_active():
+            if self.__appmenu is not None:
+                self.__appmenu.emit("closed")
             self.__party_submenu.remove_all()
             self.__init_party_submenu()
             from lollypop.widgets_menu import MenuBuilder
@@ -174,6 +176,8 @@ class ToolbarEnd(Gtk.Bin):
         """
         from lollypop.menu_application import ApplicationMenu
         if button.get_active():
+            if self.__playback_menu is not None:
+                self.__playback_menu.emit("closed")
             self.__appmenu = ApplicationMenu()
             self.__appmenu.show()
             self.__popup_widget(self.__appmenu, button)
