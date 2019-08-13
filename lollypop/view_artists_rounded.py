@@ -35,7 +35,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
-        self.__view_type = view_type
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
@@ -72,7 +71,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
                 return
         # Setup sort on insert
         self._box.set_sort_func(self.__sort_func)
-        widget = RoundedArtistWidget(item, self.__view_type, self.font_height)
+        widget = RoundedArtistWidget(item, self._view_type, self.font_height)
         widget.populate()
         widget.show()
         self._box.insert(widget, -1)
@@ -109,7 +108,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             Add artists to the view
             @param items as [(int, str, str)]
         """
-        FlowBoxView._add_items(self, items, self.__view_type)
+        FlowBoxView._add_items(self, items, self._view_type)
 
     def _on_child_activated(self, flowbox, child):
         """
