@@ -105,7 +105,8 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
                 (App().playlists, "playlist-track-removed",
-                 "_on_playlist_track_removed")
+                 "_on_playlist_track_removed"),
+                (App().playlists, "playlists-changed", "_on_playlist_changed")
              ]
         }
 
@@ -376,6 +377,16 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                             if len(children) == 1:
                                 album_row.destroy()
                                 break
+
+    def _on_playlist_changed(self, playlists, playlist_id):
+        """
+            Destroy self if removed
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        if playlist_id == self._playlist_id and\
+                not playlists.exists(playlist_id):
+            App().window.container.go_back()
 
 #######################
 # PRIVATE             #
