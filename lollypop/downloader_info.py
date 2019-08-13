@@ -12,80 +12,14 @@
 
 from gi.repository import GLib
 
-from gettext import gettext as _
 import json
 from locale import getdefaultlocale
 
 from lollypop.define import App, AUDIODB_CLIENT_ID
-from lollypop.utils import get_network_available, escape
+from lollypop.utils import get_network_available
 from lollypop.logger import Logger
 from lollypop.downloader import Downloader
-
-
-class Wikipedia:
-    """
-        Helper for wikipedia search
-    """
-
-    __API_SEARCH = "https://%s.wikipedia.org/w/api.php?action=query" +\
-        "&list=search&srsearch=%s&format=json"
-    __API_INFO = "https://%s.wikipedia.org/w/api.php?action=query" +\
-        "&pageids=%s&format=json" +\
-        "&prop=extracts&exlimit=max&explaintext&redirects=1"
-
-    def __init__(self):
-        """
-            Init wikipedia
-        """
-        self.__locale = getdefaultlocale()[0][0:2]
-
-    def get_content(self, string):
-        """
-            Get content for string
-            @param string as str
-            @return str/None
-        """
-        try:
-            (locale, page_id) = self.__search_term(string)
-            if page_id is None:
-                return None
-            uri = self.__API_INFO % (locale, page_id)
-            (status, data) = App().task_helper.load_uri_content_sync(uri)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                extract = decode["query"]["pages"][str(page_id)]["extract"]
-                return extract.encode("utf-8")
-        except Exception as e:
-            Logger.error("Wikipedia::get_content(): %s", e)
-        return None
-
-#######################
-# PRIVATE             #
-#######################
-    def __search_term(self, term):
-        """
-            Search term on Wikipdia
-            @param term as str
-            @return pageid as str
-        """
-        try:
-            for locale in [self.__locale, "en"]:
-                uri = self.__API_SEARCH % (locale, term)
-                (status, data) = App().task_helper.load_uri_content_sync(uri)
-                if status:
-                    decode = json.loads(data.decode("utf-8"))
-                    for item in decode["query"]["search"]:
-                        if escape(item["title"].lower()) ==\
-                                escape(term.lower()):
-                            return (locale, item["pageid"])
-                        else:
-                            for word in [_("band"), _("singer"),
-                                         "band", "singer"]:
-                                if item["snippet"].lower().find(word) != -1:
-                                    return (locale, item["pageid"])
-        except Exception as e:
-            print("Wikipedia::__search_term(): %s", e)
-        return ("", None)
+from lollypop.wikipedia import Wikipedia
 
 
 class InfoDownloader(Downloader):
@@ -165,7 +99,7 @@ class InfoDownloader(Downloader):
         try:
             if get_network_available("WIKIPEDIA"):
                 wikipedia = Wikipedia()
-                content = wikipedia.get_content(artist)
+                content = wikipedia.get_content_for_term(artist)
             if content is None:
                 for (api, a_helper, ar_helper, helper) in self._WEBSERVICES:
                     if helper is None:
