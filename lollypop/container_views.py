@@ -107,7 +107,7 @@ class ViewsContainer:
                 else:
                     view = self._get_view_albums_years(data)
             elif item_ids[0] == Type.PLAYLISTS:
-                view = self._get_view_playlists([] if data is None else data)
+                view = self._get_view_playlists(data)
             elif item_ids[0] == Type.RADIOS:
                 view = self._get_view_radios()
             elif item_ids[0] == Type.EQUALIZER:
@@ -199,24 +199,23 @@ class ViewsContainer:
 ##############
 # PROTECTED  #
 ##############
-    def _get_view_playlists(self, playlist_ids=[]):
+    def _get_view_playlists(self, playlist_id=None):
         """
             Get playlists view for playlists
-            @param playlist_ids as [int]
+            @param playlist_id as int
             @return View
         """
         view_type = ViewType.PLAYLISTS | ViewType.SCROLLED
-        if len(playlist_ids) == 1 and\
-                App().playlists.get_smart(playlist_ids[0]):
-            from lollypop.view_playlists import SmartPlaylistsView
-            view = SmartPlaylistsView(playlist_ids, view_type)
-        elif playlist_ids:
-            from lollypop.view_playlists import PlaylistsView
-            view_type |= ViewType.DND
-            view = PlaylistsView(playlist_ids, view_type)
-        else:
+        if playlist_id is None:
             from lollypop.view_playlists_manager import PlaylistsManagerView
             view = PlaylistsManagerView(view_type)
+        elif App().playlists.get_smart(playlist_id):
+            from lollypop.view_playlists import SmartPlaylistsView
+            view = SmartPlaylistsView(playlist_id, view_type)
+        else:
+            from lollypop.view_playlists import PlaylistsView
+            view_type |= ViewType.DND
+            view = PlaylistsView(playlist_id, view_type)
         view.populate()
         return view
 

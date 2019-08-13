@@ -35,17 +35,17 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
     """
 
     @signals
-    def __init__(self, playlist_ids, view_type):
+    def __init__(self, playlist_id, view_type):
         """
             Init PlaylistView
-            @parma playlist ids as [int]
+            @parma playlist_id as int
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         SizeAllocationHelper.__init__(self)
-        self._playlist_ids = playlist_ids
+        self._playlist_id = playlist_id
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/PlaylistView.ui")
         self.__title_label = builder.get_object("title")
@@ -80,27 +80,21 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self.__duration_label.set_vexpand(True)
         self.__title_label.set_property("valign", Gtk.Align.END)
         self.__duration_label.set_property("valign", Gtk.Align.START)
-        self.__banner = PlaylistBannerWidget(playlist_ids[0], view_type)
+        self.__banner = PlaylistBannerWidget(playlist_id, view_type)
         self.__banner.init_background()
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
         self.__banner.add_overlay(self.__widget)
         self.add(self._overlay)
-        self.__title_label.set_label(
-            ", ".join(App().playlists.get_names(playlist_ids)))
+        self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
-
-        if len(playlist_ids) > 1:
-            self.__menu_button.hide()
 
         self.set_view_type(self._view_type)
 
         # In DB duration calculation
-        if playlist_ids[0] > 0 and\
-                not App().playlists.get_smart(playlist_ids[0]):
-            duration = 0
-            for playlist_id in self._playlist_ids:
-                duration += App().playlists.get_duration(playlist_id)
+        if playlist_id > 0 and\
+                not App().playlists.get_smart(playlist_id):
+            duration = App().playlists.get_duration(playlist_id)
             self.__set_duration(duration)
         # Ask widget after populated
         else:
@@ -162,15 +156,15 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         """
         def load():
             track_ids = []
-            for playlist_id in self._playlist_ids:
-                if playlist_id == Type.LOVED:
-                    for track_id in App().tracks.get_loved_track_ids():
-                        if track_id not in track_ids:
-                            track_ids.append(track_id)
-                else:
-                    for track_id in App().playlists.get_track_ids(playlist_id):
-                        if track_id not in track_ids:
-                            track_ids.append(track_id)
+            if self._playlist_id == Type.LOVED:
+                for track_id in App().tracks.get_loved_track_ids():
+                    if track_id not in track_ids:
+                        track_ids.append(track_id)
+            else:
+                for track_id in App().playlists.get_track_ids(
+                        self._playlist_id):
+                    if track_id not in track_ids:
+                        track_ids.append(track_id)
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
@@ -212,7 +206,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             tracks = object.tracks
         else:
             tracks = [object]
-        App().playlists.remove_tracks(self._playlist_ids[0], tracks)
+        App().playlists.remove_tracks(self._playlist_id, tracks)
 
     @property
     def args(self):
@@ -226,7 +220,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         else:
             position = 0
         view_type = self._view_type & ~self.view_sizing_mask
-        return ({"playlist_ids": self._playlist_ids,
+        return ({"playlist_id": self._playlist_id,
                  "view_type": view_type}, self.sidebar_id, position)
 
     @property
@@ -257,14 +251,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @return Gtk.Widget
         """
         return self._view
-
-    @property
-    def playlist_ids(self):
-        """
-            Return playlist ids
-            @return id as [int]
-        """
-        return self._playlist_ids
 
 #######################
 # PROTECTED           #
@@ -346,7 +332,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param button as Gtk.Button
         """
         from lollypop.menu_playlist import PlaylistMenu
-        menu = PlaylistMenu(self._playlist_ids[0])
+        menu = PlaylistMenu(self._playlist_id)
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
 
@@ -366,8 +352,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param playlist_id as int
             @param uri as str
         """
-        if len(self._playlist_ids) == 1 and\
-                playlist_id in self._playlist_ids:
+        if playlist_id == self._playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
@@ -380,8 +365,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param playlist_id as int
             @param uri as str
         """
-        if len(self._playlist_ids) == 1 and\
-                playlist_id in self._playlist_ids:
+        if playlist_id in self._playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
             children = self._view.children
             for album_row in children:
@@ -434,13 +418,13 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             Save playlist if needed
             @param dnd_helper as DNDHelper
         """
-        if len(self._playlist_ids) == 1 and self._playlist_ids[0] >= 0:
+        if self._playlist_id >= 0:
             uris = []
             for child in self._view.children:
                 for track in child.album.tracks:
                     uris.append(track.uri)
-            App().playlists.clear(self._playlist_ids[0])
-            App().playlists.add_uris(self._playlist_ids[0], uris)
+            App().playlists.clear(self._playlist_id)
+            App().playlists.add_uris(self._playlist_id, uris)
 
 
 class SmartPlaylistsView(PlaylistsView):
@@ -448,20 +432,20 @@ class SmartPlaylistsView(PlaylistsView):
         View showing smart playlists
     """
 
-    def __init__(self, playlist_ids, view_type):
+    def __init__(self, playlist_id, view_type):
         """
             Init PlaylistView
-            @parma playlist ids as [int]
+            @parma playlist_id as int
             @param view_type as ViewType
         """
-        PlaylistsView.__init__(self, playlist_ids, view_type)
+        PlaylistsView.__init__(self, playlist_id, view_type)
 
     def populate(self):
         """
             Populate view
         """
         def load():
-            request = App().playlists.get_smart_sql(self._playlist_ids[0])
+            request = App().playlists.get_smart_sql(self._playlist_id)
             track_ids = App().db.execute(request)
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])

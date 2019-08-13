@@ -122,7 +122,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param flowbox as Gtk.FlowBox
             @param child as Gtk.FlowBoxChild
         """
-        App().window.container.show_view([Type.PLAYLISTS], [child.data])
+        App().window.container.show_view([Type.PLAYLISTS], child.data)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """

@@ -413,28 +413,6 @@ class Playlists(GObject.GObject):
                 return v[0]
             return ""
 
-    def get_names(self, playlist_ids):
-        """
-            Return playlist names
-            @param playlist_ids as [int]
-            @return names as [str]
-        """
-        names = []
-        for playlist_id in playlist_ids:
-            if playlist_id == Type.POPULARS:
-                names.append(_("Popular tracks"))
-            elif playlist_id == Type.RECENTS:
-                names.append(_("Recently played"))
-            elif playlist_id == Type.NEVER:
-                names.append(_("Never played"))
-            elif playlist_id == Type.RANDOMS:
-                names.append(_("Random tracks"))
-            elif playlist_id == Type.SEARCH:
-                names.append(_("Search"))
-            else:
-                names.append(self.get_name(playlist_id))
-        return names
-
     def get_synced(self, playlist_id, index):
         """
             True if playlist synced
