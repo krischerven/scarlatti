@@ -26,6 +26,19 @@ class ViewsContainer:
         """
         pass
 
+    def show_widget(self, widget):
+        """
+            Show widget
+            @param widget as Gtk.Widget
+        """
+        from lollypop.view import View
+        view = View()
+        view.show()
+        view.add(widget)
+        widget.set_vexpand(True)
+        self._stack.add(view)
+        self._stack.set_visible_child(view)
+
     def show_menu(self, widget):
         """
             Show menu widget
@@ -48,7 +61,6 @@ class ViewsContainer:
         widget.connect("closed", on_closed, view)
         self._stack.add(view)
         self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_DOWN)
-        # Do not populate history
         self._stack.set_visible_child(view)
         self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.emit("can-go-back-changed", False)

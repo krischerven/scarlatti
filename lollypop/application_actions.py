@@ -12,7 +12,7 @@
 
 from gi.repository import Gio, GLib, Gtk, Gst
 
-from lollypop.define import App, ScanType, Type
+from lollypop.define import App, ScanType, Type, MARGIN
 
 
 class ApplicationActions:
@@ -213,12 +213,31 @@ class ApplicationActions:
             @param action as Gio.SimpleAction
             @param param as GLib.Variant
         """
+        def get_instance(children, instance):
+            for child in children:
+                if isinstance(child, instance):
+                    return child
+            return None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/AboutDialog.ui")
         about = builder.get_object("about_dialog")
-        about.set_transient_for(App().window)
-        about.connect("response", self.__on_about_activate_response)
-        about.show()
+        if App().window.is_adaptive:
+            box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
+            box.show()
+            about_children = about.get_children()
+            about_box = get_instance(about_children, Gtk.Box)
+            about_headerbar = get_instance(about_children, Gtk.HeaderBar)
+            about_headerbar.set_show_close_button(False)
+            about_headerbar.get_style_context().add_class("light-button")
+            about.remove(about_headerbar)
+            about.remove(about_box)
+            box.add(about_headerbar)
+            box.add(about_box)
+            App().window.container.show_widget(box)
+        else:
+            about.set_transient_for(App().window)
+            about.connect("response", self.__on_about_activate_response)
+            about.show()
 
     def __on_shortcuts_activate(self, action, param):
         """
