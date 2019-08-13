@@ -25,7 +25,7 @@ class FilteringHelper():
         """
             Init helper
         """
-        pass
+        self.__last_scrolled = None
 
     def search_for_child(self, text):
         """
@@ -117,6 +117,9 @@ class FilteringHelper():
             Scroll to child
             @param child as Gtk.Widget
         """
+        if child == self.__last_scrolled:
+            return
+        self.__last_scrolled = child
         if self._view_type & ViewType.SCROLLED:
             coordinates = child.translate_coordinates(
                 self.scroll_relative_to, 0, -self.scroll_shift)
