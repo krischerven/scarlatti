@@ -56,6 +56,14 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
             self.__buttons.show()
 
     @property
+    def back_button(self):
+        """
+            Get back button
+            @return Gtk.Button
+        """
+        return self.__back_button
+
+    @property
     def seek_wanted(self):
         """
             True if previous is about seeking at beginning
