@@ -139,6 +139,15 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             App().player.clear_albums()
             App().player.update_next_prev()
 
+    def do_get_preferred_width(self):
+        """
+            Sync preferred width and size request
+        """
+        (width, height) = self.get_size_request()
+        if width == -1:
+            return LazyLoadingView.do_get_preferred_width(self)
+        return (width, width)
+
     @property
     def args(self):
         """

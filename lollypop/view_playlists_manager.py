@@ -75,7 +75,10 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
                 return
         # Setup sort on insert
         self._box.set_sort_func(self.__sort_func)
-        widget = PlaylistRoundedWidget(item[0], None, self._view_type)
+        from lollypop.utils import get_font_height
+        widget = PlaylistRoundedWidget(item[0],
+                                       self._view_type,
+                                       get_font_height())
         widget.populate()
         widget.show()
         self._box.insert(widget, -1)
