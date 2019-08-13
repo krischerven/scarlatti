@@ -17,7 +17,7 @@ from random import shuffle, choice
 
 from lollypop.objects_album import Album
 from lollypop.utils import set_cursor_hand2, on_query_tooltip
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals
@@ -126,7 +126,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__set_text_height(collapsed)
         if collapsed:
             self.__badge_artwork.hide()
-        else:
+        elif self.get_allocated_width() >= Size.SMALL + 100:
             self.__badge_artwork.show()
 
 #######################
@@ -139,6 +139,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_size_allocate(self, allocation):
             self.__set_artwork(allocation.width, ArtSize.BANNER + MARGIN * 2)
+            if allocation.width < Size.SMALL + 100:
+                self.__badge_artwork.hide()
+            else:
+                self.__badge_artwork.show()
 
     def _on_label_button_release(self, eventbox, event):
         """
@@ -401,4 +405,5 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__badge_artwork.get_style_context().remove_class(
                 "artwork-icon")
             self.__badge_artwork.set_from_surface(surface)
-        self.__badge_artwork.show()
+        if self.get_allocated_width() >= Size.SMALL + 100:
+            self.__badge_artwork.show()
