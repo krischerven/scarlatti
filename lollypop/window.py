@@ -183,7 +183,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                 self.toolbar.end.home_button.set_sensitive(False)
             else:
                 self.__container.show()
-                self.__container.emit("can-go-back-changed", self.can_go_back)
+                self.__container.emit("can-go-back-changed",
+                                      self.__container.can_go_back)
                 self.toolbar.end.home_button.set_sensitive(True)
         if show and self.__miniplayer is None:
             from lollypop.miniplayer import MiniPlayer
