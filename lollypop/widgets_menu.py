@@ -12,7 +12,8 @@
 
 from gi.repository import Gtk, GObject
 
-from lollypop.define import App
+from lollypop.objects_album import Album
+from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
 
 
 class MenuBuilder(Gtk.Stack):
@@ -71,7 +72,11 @@ class MenuBuilder(Gtk.Stack):
         for i in range(0, n_items):
             label = menu.get_item_attribute_value(i, "label")
             action = menu.get_item_attribute_value(i, "action")
-            if action is None:
+            header = menu.get_item_attribute_value(i, "header")
+            if header is not None:
+                album_id = menu.get_item_attribute_value(i, "album-id")
+                self.__add_header(label, album_id, menu_name)
+            elif action is None:
                 link = menu.get_item_link(i, "section")
                 submenu = menu.get_item_link(i, "submenu")
                 if link is not None:
@@ -141,6 +146,49 @@ class MenuBuilder(Gtk.Stack):
         button.set_alignment(0, 0.5)
         button.show()
         self.__boxes[menu_name].add(button)
+
+    def __add_header(self, text, album_id, menu_name):
+        """
+            Add an header to close menu
+            @param text as GLib.Variant
+            @param album_id as GLib.Variant
+            @param menu_name as str
+        """
+        button = Gtk.ModelButton.new()
+        button.set_alignment(0, 0.5)
+        button.connect("clicked", lambda x: self.emit("closed"))
+        button.show()
+        label = Gtk.Label.new()
+        label.set_markup(text.get_string())
+        label.show()
+        artwork = Gtk.Image.new()
+        grid = Gtk.Grid()
+        grid.set_column_spacing(MARGIN)
+        grid.add(artwork)
+        grid.add(label)
+        button.set_image(grid)
+        App().art_helper.set_album_artwork(
+                Album(album_id.get_int32()),
+                ArtSize.MEDIUM,
+                ArtSize.MEDIUM,
+                artwork.get_scale_factor(),
+                ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
+                self.__on_album_artwork,
+                artwork)
+        self.__boxes[menu_name].add(button)
+
+    def __on_album_artwork(self, surface, artwork):
+        """
+            Set album artwork
+            @param surface as str
+            @param artwork as Gtk.Image
+        """
+        if surface is None:
+            artwork.set_from_icon_name("folder-music-symbolic",
+                                       Gtk.IconSize.BUTTON)
+        else:
+            artwork.set_from_surface(surface)
+        artwork.show()
 
     def __on_box_map(self, widget, menu_name):
         """

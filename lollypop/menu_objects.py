@@ -30,13 +30,17 @@ class AlbumMenu(Gio.Menu):
         Contextual menu for album
     """
 
-    def __init__(self, album, view_type):
+    def __init__(self, album, view_type, header):
         """
             Init menu model
             @param album as Album
             @param view_type as ViewType
+            @param header as bool
         """
         Gio.Menu.__init__(self)
+        if header:
+            from lollypop.menu_header import MenuHeader
+            self.append_item(MenuHeader(album))
         self.append_section(_("Playback"), AlbumPlaybackMenu(album))
         self.append_section(_("Artist"),
                             ArtistMenu(album, view_type))
@@ -73,12 +77,16 @@ class TrackMenu(Gio.Menu):
         Full Contextual menu for a track
     """
 
-    def __init__(self, track):
+    def __init__(self, track, header):
         """
             Init menu model
             @param track as Track
+            @param header as bool
         """
         Gio.Menu.__init__(self)
+        if header:
+            from lollypop.menu_header import MenuHeader
+            self.append_item(MenuHeader(track))
         self.append_section(_("Playback"), TrackPlaybackMenu(track))
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()

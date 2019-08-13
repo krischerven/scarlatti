@@ -335,7 +335,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
 
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(self._album, ViewType.ALBUM)
+        menu = AlbumMenu(self._album, ViewType.ALBUM, App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         self.set_state_flags(Gtk.StateFlags.FOCUSED, True)

@@ -208,13 +208,14 @@ class TrackRow(Gtk.ListBoxRow):
 
         from lollypop.menu_objects import TrackMenu, TrackMenuExt
         from lollypop.widgets_menu import MenuBuilder
-        menu = TrackMenu(self._track)
+        menu = TrackMenu(self._track, App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
+        main = menu_widget.get_child_by_name("main")
         menu_widget.show()
         if not self._track.storage_type & StorageType.EPHEMERAL:
             menu_ext = TrackMenuExt(self._track)
             menu_ext.show()
-            menu_widget.get_child_by_name("main").add(menu_ext)
+            main.add(menu_ext)
         self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
         popover = popup_widget(menu_widget, parent, x, y)
         if popover is not None:

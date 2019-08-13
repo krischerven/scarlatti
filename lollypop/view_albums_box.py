@@ -208,7 +208,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(child.album, ViewType.ALBUM)
+        menu = AlbumMenu(child.album, ViewType.ALBUM, App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, child.artwork)
