@@ -202,7 +202,7 @@ class TrackRow(Gtk.ListBoxRow):
             @param x as int
             @param y as int
         """
-        def on_closed(popover):
+        def on_closed(widget):
             self.unset_state_flags(Gtk.StateFlags.FOCUSED)
             self.set_indicator()
 
@@ -218,7 +218,9 @@ class TrackRow(Gtk.ListBoxRow):
             main.add(menu_ext)
         self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
         popover = popup_widget(menu_widget, parent, x, y)
-        if popover is not None:
+        if popover is None:
+            menu_widget.connect("closed", on_closed)
+        else:
             popover.connect("closed", on_closed)
 
     @property

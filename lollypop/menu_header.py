@@ -12,7 +12,6 @@
 
 from gi.repository import Gio, GLib
 
-from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 
 
