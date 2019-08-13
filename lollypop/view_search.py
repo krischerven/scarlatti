@@ -293,9 +293,8 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             tracks += child.album.tracks
         if tracks:
             playlist_id = App().playlists.get_id(self.__current_search)
-            if playlist_id == Type.NONE:
-                App().playlists.add(self.__current_search)
-                playlist_id = App().playlists.get_id(self.__current_search)
+            if playlist_id is None:
+                playlist_id = App().playlists.add(self.__current_search)
             App().playlists.add_tracks(playlist_id, tracks)
         GLib.idle_add(self.__show_playlist, playlist_id)
 

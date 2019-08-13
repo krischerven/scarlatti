@@ -151,8 +151,7 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
             import datetime
             now = datetime.datetime.now()
             date_string = now.strftime("%Y-%m-%d-%H:%M:%S")
-            App().playlists.add(date_string)
-            playlist_id = App().playlists.get_id(date_string)
+            playlist_id = App().playlists.add(date_string)
             App().playlists.add_tracks(playlist_id, tracks)
 
     def _handle_size_allocate(self, allocation):

@@ -22,10 +22,10 @@ import json
 from lollypop.database import Database
 from lollypop.define import App, Type
 from lollypop.objects_track import Track
-from lollypop.logger import Logger
 from lollypop.sqlcursor import SqlCursor
 from lollypop.localized import LocalizedCollation
 from lollypop.shown import ShownPlaylists
+from lollypop.utils import get_mtime
 from lollypop.database_upgrade import DatabasePlaylistsUpgrade
 
 
@@ -103,9 +103,9 @@ class Playlists(GObject.GObject):
         if name == _("Loved tracks"):
             return Type.LOVED
         with SqlCursor(self, True) as sql:
-            result = sql.execute("INSERT INTO playlists (name, mtime)"
-                                 " VALUES (?, ?)",
-                                 (name, datetime.now().strftime("%s")))
+            result = sql.execute("INSERT INTO playlists (name, mtime)\
+                                  VALUES (?, ?)",
+                                 (name, 0))
             GLib.idle_add(self.emit, "playlists-changed", result.lastrowid)
             return result.lastrowid
 
@@ -174,9 +174,6 @@ class Playlists(GObject.GObject):
             self.emit("playlist-track-added", playlist_id, uri)
         with SqlCursor(self, True) as sql:
             sql.execute("INSERT INTO tracks VALUES (?, ?)", (playlist_id, uri))
-            sql.execute("UPDATE playlists SET mtime=?\
-                         WHERE rowid=?", (datetime.now().strftime("%s"),
-                                          playlist_id))
 
     def add_uris(self, playlist_id, uris, signal=False):
         """
@@ -232,9 +229,6 @@ class Playlists(GObject.GObject):
         with SqlCursor(self, True) as sql:
             sql.execute("DELETE FROM tracks WHERE uri=? AND playlist_id=?",
                         (uri, playlist_id))
-            sql.execute("UPDATE playlists SET mtime=?\
-                         WHERE rowid=?", (datetime.now().strftime("%s"),
-                                          playlist_id))
 
     def remove_uris(self, playlist_id, uris, signal=False):
         """
@@ -397,7 +391,7 @@ class Playlists(GObject.GObject):
             v = result.fetchone()
             if v is not None:
                 return v[0]
-            return Type.NONE
+            return None
 
     def get_name(self, playlist_id):
         """
@@ -572,69 +566,6 @@ class Playlists(GObject.GObject):
                         WHERE rowid=?",
                         (request, playlist_id))
 
-    def import_uri(self, playlist_id, uri, start=None, down=True):
-        """
-            Import uri in playlist
-            @param playlist_id as int
-            @param uri as str
-            @param start track id as int
-            @param down as bool
-        """
-        try:
-            uri = uri.strip("\n\r")
-            f = Gio.File.new_for_uri(uri)
-            if f.query_exists():
-                if f.query_file_type(Gio.FileQueryInfoFlags.NONE,
-                                     None) == Gio.FileType.DIRECTORY:
-                    walk_uris = [uri]
-                    track_ids = []
-                    while walk_uris:
-                        uri = walk_uris.pop(0)
-                        try:
-                            d = Gio.File.new_for_uri(uri)
-                            infos = d.enumerate_children(
-                                "standard::name,standard::type",
-                                Gio.FileQueryInfoFlags.NONE,
-                                None)
-                        except Exception as e:
-                            Logger.info("Playlists::import_uri(): %s" % e)
-                            continue
-                        for info in infos:
-                            f = infos.get_child(info)
-                            if info.get_file_type() == Gio.FileType.DIRECTORY:
-                                walk_uris.append(f.get_uri())
-                            else:
-                                track_id = App().tracks.get_id_by_uri(
-                                    f.get_uri())
-                                if track_id is not None:
-                                    track_ids.append(track_id)
-                else:
-                    track_id = App().tracks.get_id_by_uri(uri)
-                    track_ids = [track_id]
-                tracks = []
-                if start is None:
-                    for track_id in track_ids:
-                        tracks.append(Track(track_id))
-                    self.add_tracks(playlist_id, tracks)
-                else:
-                    # Insert at wanted position
-                    playlist_track_ids = self.get_track_ids(playlist_id)
-                    start_idx = playlist_track_ids.index(start)
-                    if down:
-                        start_idx += 1
-                    for track_id in track_ids:
-                        playlist_track_ids.insert(start_idx, track_id)
-                        GLib.idle_add(self.emit, "playlist-add",
-                                      playlist_id, track_id, start_idx)
-                        start_idx += 1
-                    self.clear(playlist_id)
-                    tracks = []
-                    for track_id in playlist_track_ids:
-                        tracks.append(Track(track_id))
-                    self.add_tracks(playlist_id, tracks)
-        except:
-            pass
-
     def get_position(self, playlist_id, track_id):
         """
             Get track position in playlist
@@ -693,18 +624,36 @@ class Playlists(GObject.GObject):
             Import file as playlist
             @param f as Gio.File
         """
+        # Create playlist and get id
         basename = ".".join(f.get_basename().split(".")[:-1])
-        parser = TotemPlParser.Parser.new()
         playlist_id = self.get_id(basename)
-        if playlist_id in [Type.NONE, Type.LOVED]:
+        if playlist_id is None:
             playlist_id = self.add(basename)
-            uris = self.get_tracks(playlist_id)
-            if not uris:
-                parser.connect("entry-parsed", self.__on_entry_parsed,
-                               playlist_id, uris)
-                parser.parse_async(f.get_uri(), True,
-                                   None, self.__on_parse_finished,
-                                   playlist_id, uris)
+
+        # Check mtime has been updated
+        with SqlCursor(self) as sql:
+            result = sql.execute("SELECT mtime\
+                                 FROM playlists\
+                                 WHERE rowid=?", (playlist_id,))
+            v = result.fetchone()
+            if v is not None:
+                db_mtime = v[0]
+            else:
+                db_mtime = 0
+            info = f.query_info(Gio.FILE_ATTRIBUTE_TIME_MODIFIED,
+                                Gio.FileQueryInfoFlags.NONE, None)
+            mtime = get_mtime(info)
+            if db_mtime >= mtime:
+                return
+
+        # Load playlist
+        parser = TotemPlParser.Parser.new()
+        uris = []
+        parser.connect("entry-parsed", self.__on_entry_parsed,
+                       playlist_id, uris)
+        parser.parse_async(f.get_uri(), True,
+                           None, self.__on_parse_finished,
+                           playlist_id, uris)
 
     def get_cursor(self):
         """
@@ -729,7 +678,12 @@ class Playlists(GObject.GObject):
             @param playlist_id as int
             @param uris as [str]
         """
+        self.clear(playlist_id)
         self.add_uris(playlist_id, uris)
+        with SqlCursor(self, True) as sql:
+            sql.execute("UPDATE playlists SET mtime=?\
+                         WHERE rowid=?", (datetime.now().strftime("%s"),
+                                          playlist_id))
 
     def __on_entry_parsed(self, parser, uri, metadata, playlist_id, uris):
         """
