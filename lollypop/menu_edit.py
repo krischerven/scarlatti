@@ -56,20 +56,29 @@ class EditMenu(Gio.Menu):
             save_action.connect("activate",
                                 self.__on_save_action_activate,
                                 True)
-            self.append(_("Save in collection"), "app.save_album_action")
+            menu_item = Gio.MenuItem.new(_("Save in collection"),
+                                         "app.save_album_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            self.append_item(menu_item)
         elif self.__object.storage_type & StorageType.SAVED:
             save_action = Gio.SimpleAction(name="remove_album_action")
             App().add_action(save_action)
             save_action.connect("activate",
                                 self.__on_save_action_activate,
                                 False)
-            self.append(_("Remove from collection"), "app.remove_album_action")
+            menu_item = Gio.MenuItem.new(_("Remove from collection"),
+                                         "app.remove_album_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            self.append_item(menu_item)
         if not self.__object.storage_type & StorageType.COLLECTION:
             buy_action = Gio.SimpleAction(name="buy_album_action")
             App().add_action(buy_action)
             buy_action.connect("activate",
                                self.__on_buy_action_activate)
-            self.append(_("Buy this album"), "app.buy_album_action")
+            menu_item = Gio.MenuItem.new(_("Buy this album"),
+                                         "app.buy_album_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            self.append_item(menu_item)
 
     def __set_edit_action(self):
         """
@@ -78,7 +87,10 @@ class EditMenu(Gio.Menu):
         edit_tag_action = Gio.SimpleAction(name="edit_tag_action")
         App().add_action(edit_tag_action)
         edit_tag_action.connect("activate", self.__on_edit_tag_action_activate)
-        self.append(_("Modify information"), "app.edit_tag_action")
+        menu_item = Gio.MenuItem.new(_("Modify information"),
+                                     "app.edit_tag_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
 
     def __on_buy_action_activate(self, action, variant):
         """

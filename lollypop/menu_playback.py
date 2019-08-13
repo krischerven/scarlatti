@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
@@ -34,7 +34,10 @@ class AlbumPlaybackMenu(Gio.Menu):
         play_action = Gio.SimpleAction(name="album_play_action")
         App().add_action(play_action)
         play_action.connect("activate", self.__play)
-        self.append(_("Play this album"), "app.album_play_action")
+        menu_item = Gio.MenuItem.new(_("Play this album"),
+                                     "app.album_play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
         self.__set_playback_actions()
 
 #######################
@@ -50,13 +53,17 @@ class AlbumPlaybackMenu(Gio.Menu):
             App().add_action(append_playback_action)
             append_playback_action.connect("activate",
                                            self.__append_to_playback)
-            self.append(_("Add to playback"), "app.append_playback_action")
+            menu_item = Gio.MenuItem.new(_("Add to playback"),
+                                         "app.append_playback_action")
         else:
             del_playback_action = Gio.SimpleAction(name="del_playback_action")
             App().add_action(del_playback_action)
             del_playback_action.connect("activate",
                                         self.__remove_from_playback)
-            self.append(_("Remove from playback"), "app.del_playback_action")
+            menu_item = Gio.MenuItem.new(_("Remove from playback"),
+                                         "app.del_playback_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
 
     def __play(self, action, variant):
         """
