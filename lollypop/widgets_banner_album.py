@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ArtSize, MARGIN, Type, ViewType
+from lollypop.define import App, ArtSize, MARGIN, Type, ViewType, Size
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
@@ -149,7 +149,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__cover_widget.hide()
             self.__rating_grid.hide()
             self.__info_label.set_vexpand(True)
-        else:
+        elif self.get_allocated_width() >= Size.SMALL + 100:
             self.__cover_widget.show()
             self.__rating_grid.show()
             self.__info_label.set_vexpand(False)
@@ -182,6 +182,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
                     self.__on_album_artwork)
+            if allocation.width < Size.SMALL + 100:
+                self.__cover_widget.hide()
+            else:
+                self.__cover_widget.show()
 
     def _on_menu_button_clicked(self, button):
         """
