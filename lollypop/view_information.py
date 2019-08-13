@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gio
+from gi.repository import Gtk, GLib, Gio, Pango
 
 from gettext import gettext as _
 
@@ -39,6 +39,7 @@ class ArtistRow(Gtk.ListBoxRow):
         self.__page_id = item[2]
         label = Gtk.Label.new("%s: %s" % (item[0], item[1]))
         label.set_property("halign", Gtk.Align.START)
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         label.get_style_context().add_class("padding")
         label.show()
         self.add(label)
