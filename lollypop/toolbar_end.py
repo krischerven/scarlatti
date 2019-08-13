@@ -33,7 +33,7 @@ class ToolbarEnd(Gtk.Bin):
         self.set_hexpand(True)
         self.__search_popover = None
         self.__devices_popover = None
-        self.__appmenu = None
+        self.__app_menu = None
         self.__playback_menu = None
         self.__timeout_id = None
         builder = Gtk.Builder()
@@ -100,7 +100,7 @@ class ToolbarEnd(Gtk.Bin):
         devices_button = builder.get_object("devices_button")
         self.__devices_popover = DevicesPopover(button_progress_bar)
         self.__devices_popover.connect(
-                "closed", self.__on_popover_closed, devices_button)
+                "closed", self.__on_menu_closed, devices_button)
         self.__devices_popover.connect("content-changed",
                                        self.__on_devices_content_changed,
                                        devices_button)
@@ -114,7 +114,7 @@ class ToolbarEnd(Gtk.Bin):
         """
             Mark menus as None
         """
-        self.__appmenu = None
+        self.__app_menu = None
         self.__playback_menu = None
 
     @property
@@ -149,8 +149,8 @@ class ToolbarEnd(Gtk.Bin):
            @param button as Gtk.ToggleButton
         """
         if button.get_active():
-            if self.__appmenu is not None:
-                self.__appmenu.emit("closed")
+            if self.__app_menu is not None:
+                self.__app_menu.emit("closed")
             self.__party_submenu.remove_all()
             self.__init_party_submenu()
             from lollypop.widgets_menu import MenuBuilder
@@ -178,11 +178,11 @@ class ToolbarEnd(Gtk.Bin):
         if button.get_active():
             if self.__playback_menu is not None:
                 self.__playback_menu.emit("closed")
-            self.__appmenu = ApplicationMenu()
-            self.__appmenu.show()
-            self.__popup_widget(self.__appmenu, button)
-        elif self.__appmenu is not None and App().window.is_adaptive:
-            self.__appmenu.emit("closed")
+            self.__app_menu = ApplicationMenu()
+            self.__app_menu.show()
+            self.__popup_widget(self.__app_menu, button)
+        elif self.__app_menu is not None and App().window.is_adaptive:
+            self.__app_menu.emit("closed")
 
 #######################
 # PRIVATE             #
@@ -195,13 +195,13 @@ class ToolbarEnd(Gtk.Bin):
         """
         if App().window.is_adaptive:
             App().window.container.show_menu(widget)
-            widget.connect("closed", self.__on_popover_closed, button)
+            widget.connect("closed", self.__on_menu_closed, button)
         else:
             from lollypop.widgets_utils import Popover
             popover = Popover.new()
             popover.add(widget)
             popover.set_relative_to(button)
-            popover.connect("closed", self.__on_popover_closed, button)
+            popover.connect("closed", self.__on_menu_closed, button)
             popover.popup()
 
     def __init_party_submenu(self):
@@ -352,12 +352,14 @@ class ToolbarEnd(Gtk.Bin):
         """
         self.__set_shuffle_icon()
 
-    def __on_popover_closed(self, popover, button):
+    def __on_menu_closed(self, popover, button):
         """
             Restore button state
             @param popover as Popover
             @param button as Gtk.Button
         """
+        self.__app_menu = None
+        self.__playback_menu = None
         button.set_active(False)
 
     def __on_devices_content_changed(self, popover, count, devices_button):
