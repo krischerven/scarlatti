@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ScanType, AdaptiveSize
 from lollypop.container import Container
@@ -73,10 +73,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__toolbar.set_show_close_button(
                 not App().settings.get_value("disable-csd"))
         self.add(self.__vgrid)
-        self.drag_dest_set(Gtk.DestDefaults.DROP | Gtk.DestDefaults.MOTION,
-                           [], Gdk.DragAction.MOVE)
-        self.drag_dest_add_uri_targets()
-        self.connect("drag-data-received", self.__on_drag_data_received)
 
     @property
     def miniplayer(self):
@@ -223,29 +219,3 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param y as int
         """
         App().window.go_back()
-
-    def __on_drag_data_received(self, widget, context, x, y, data, info, time):
-        """
-            Import values
-            @param widget as Gtk.Widget
-            @param context as Gdk.DragContext
-            @param x as int
-            @param y as int
-            @param data as Gtk.SelectionData
-            @param info as int
-            @param time as int
-        """
-        try:
-            from lollypop.collectionimporter import CollectionImporter
-            from urllib.parse import urlparse
-            importer = CollectionImporter()
-            uris = []
-            for uri in data.get_text().strip("\n").split("\r"):
-                parsed = urlparse(uri)
-                if parsed.scheme in ["file", "sftp", "smb", "webdav"]:
-                    uris.append(uri)
-            if uris:
-                App().task_helper.run(importer.add, uris,
-                                      callback=(App().scanner.update,))
-        except:
-            pass
