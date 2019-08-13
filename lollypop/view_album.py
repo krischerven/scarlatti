@@ -207,9 +207,10 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @param window as Window
             @param status as bool
         """
-        LazyLoadingView._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self._responsive_widget.set_margin_top(self.__banner.height + MARGIN)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(
-                    self.__banner.height)
+        if LazyLoadingView._on_adaptive_changed(self, window, status):
+            self.__banner.set_view_type(self._view_type)
+            self._responsive_widget.set_margin_top(
+                self.__banner.height + MARGIN)
+            if self._view_type & ViewType.SCROLLED:
+                self._scrolled.get_vscrollbar().set_margin_top(
+                        self.__banner.height)

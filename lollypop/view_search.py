@@ -70,7 +70,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.add(self.__widget)
         builder.connect_signals(self)
         self.__widget.set_property("halign", Gtk.Align.CENTER)
-        self._on_adaptive_changed(App().window, App().window.is_adaptive)
         return {
             "init": [
                 (App().spotify, "new-album", "_on_new_spotify_album"),

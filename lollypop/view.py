@@ -185,6 +185,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     def _on_adaptive_changed(self, window, status):
         """
             Handle adaptive mode for views
+            @param window as Window
+            @param status as bool
+            @return bool
         """
         if self.__placeholder is not None:
             style_context = self.__placeholder.get_style_context()
@@ -194,10 +197,12 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             else:
                 style_context.remove_class("text-x-large")
                 style_context.add_class("text-xx-large")
+        view_type = self._view_type
         if status:
             self._view_type |= self.view_sizing_mask
         else:
             self._view_type &= ~self.view_sizing_mask
+        return view_type != self._view_type
 
     def _on_value_changed(self, adj):
         pass

@@ -343,8 +343,8 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param window as Window
             @param status as bool
         """
-        LazyLoadingView._on_adaptive_changed(self, window, status)
-        self.set_view_type(self._view_type)
+        if LazyLoadingView._on_adaptive_changed(self, window, status):
+            self.set_view_type(self._view_type)
 
     def _on_playlist_track_added(self, playlists, playlist_id, uri):
         """

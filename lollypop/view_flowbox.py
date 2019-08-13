@@ -147,21 +147,18 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             Update artwork
             @param window as Window
             @param status as bool
+            @return bool
         """
-        def update_artwork(children):
-            if children:
-                child = children.pop(0)
-                child.set_artwork()
-                GLib.idle_add(update_artwork, children)
-
-        self.stop(True)
-        LazyLoadingView._on_adaptive_changed(self, window, status)
-        children = self._box.get_children()
-        for child in children:
-            child.set_view_type(self._view_type)
-            child.disable_artwork()
-            self._lazy_queue.append(child)
-        self.lazy_loading()
+        if LazyLoadingView._on_adaptive_changed(self, window, status):
+            self.stop(True)
+            children = self._box.get_children()
+            for child in children:
+                child.set_view_type(self._view_type)
+                child.disable_artwork()
+                self._lazy_queue.append(child)
+            self.lazy_loading()
+            return True
+        return False
 
     def _on_view_leave(self, event_controller):
         """
