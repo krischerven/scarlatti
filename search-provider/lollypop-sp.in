@@ -19,6 +19,7 @@ sys.path.insert(1, '@PYTHON_DIR@')
 import gi
 gi.require_version('Secret', '1')
 gi.require_version('TotemPlParser', '1.0')
+gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('GstPbutils', '1.0')
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
@@ -29,11 +30,12 @@ from lollypop.art import Art
 from lollypop.settings import Settings
 from lollypop.database import Database
 from lollypop.sqlcursor import SqlCursor
-from lollypop.objects import Album, Track
+from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.database_albums import AlbumsDatabase
 from lollypop.database_artists import ArtistsDatabase
 from lollypop.database_tracks import TracksDatabase
-from lollypop.define import ArtSize
+from lollypop.define import ArtSize, StorageType
 
 
 class Server:
@@ -214,15 +216,10 @@ class SearchLollypopService(Server, Gio.Application):
         search = " ".join(terms)
         try:
             # Search for albums
-            for id in self.albums.search(search):
+            for id in self.albums.search(search, StorageType.COLLECTION|StorageType.SAVED):
                 ids.append("a:"+str(id))
-            # Search for artists
-            for artist_id in self.artists.search(search):
-                for album_id in self.albums.get_ids([artist_id], []):
-                    if str(album_id) not in ids:
-                        ids.append("a:"+str(album_id))
             # Search for tracks
-            for track_id in self.tracks.search(search):
+            for track_id in self.tracks.search(search, StorageType.COLLECTION|StorageType.SAVED):
                 ids.append("t:"+str(track_id))
         except Exception as e:
             print("SearchLollypopService::__search():", e)
