@@ -19,7 +19,7 @@ from random import choice, shuffle
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
-from lollypop.utils import cancellable_sleep
+from lollypop.utils import cancellable_sleep, get_network_available
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
@@ -48,6 +48,7 @@ class SpotifyHelper(GObject.Object):
         self.__token = None
         self.__loading_token = False
         self.__album_ids = {}
+        self.__is_running = False
         self.__cancellable = Gio.Cancellable()
 
     def get_token(self):
@@ -93,7 +94,8 @@ class SpotifyHelper(GObject.Object):
         """
             Populate DB in a background task
         """
-        App().task_helper.run(self.__populate_db)
+        if get_network_available("SPOTIFY"):
+            App().task_helper.run(self.__populate_db)
         return True
 
     def get_artist_id(self, artist_name, cancellable):
@@ -163,7 +165,7 @@ class SpotifyHelper(GObject.Object):
                                            StorageType.SPOTIFY_SIMILARS,
                                            cancellable)
         except Exception as e:
-            Logger.error("SpotifyHelper::search_similar_albums(): %s", e)
+            Logger.warning("SpotifyHelper::search_similar_albums(): %s", e)
         del self.__album_ids[cancellable]
 
     def search_new_releases(self, cancellable):
@@ -191,7 +193,7 @@ class SpotifyHelper(GObject.Object):
                                              StorageType.SPOTIFY_NEW_RELEASES,
                                              cancellable)
         except Exception as e:
-            Logger.error("SpotifyHelper::search_new_releases(): %s", e)
+            Logger.warning("SpotifyHelper::search_new_releases(): %s", e)
         del self.__album_ids[cancellable]
 
     def get_similar_artists(self, artist_id, cancellable):
@@ -262,12 +264,18 @@ class SpotifyHelper(GObject.Object):
             GLib.idle_add(self.emit, "search-finished")
         del self.__album_ids[cancellable]
 
-    def cancel(self):
+    def is_running(self):
         """
-            Cancel db populate
+            Return populate status
         """
-        self.__cancellable.cancel()
-        self.__cancellable = Gio.Cancellable()
+        return self.__is_running
+
+    def stop(self):
+        """
+            Stop db populate
+        """
+        if not self.__cancellable.is_cancelled():
+            self.__cancellable.cancel()
 
 #######################
 # PRIVATE             #
@@ -277,6 +285,9 @@ class SpotifyHelper(GObject.Object):
             Populate DB in a background task
         """
         try:
+            Logger.info("Spotify download started")
+            self.__is_running = True
+            self.__cancellable = Gio.Cancellable()
             self.search_similar_albums(self.__cancellable)
             self.search_new_releases(self.__cancellable)
             SqlCursor.add(App().db)
@@ -289,11 +300,15 @@ class SpotifyHelper(GObject.Object):
                     storage_type, diff)
                 for album_id in album_ids:
                     App().tracks.remove_album(album_id, False)
-            App().tracks.clean(False)
-            App().albums.clean(False)
-            App().artists.clean(False)
+            # On cancel, clean not needed, done in Application::quit()
+            if not self.__cancellable.is_cancelled():
+                App().tracks.clean(False)
+                App().albums.clean(False)
+                App().artists.clean(False)
             SqlCursor.commit(App().db)
             SqlCursor.remove(App().db)
+            self.__is_running = False
+            Logger.info("Spotify download finished")
         except Exception as e:
             Logger.error("SpotifyHelper::__populate_db(): %s", e)
 

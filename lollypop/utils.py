@@ -28,10 +28,10 @@ from lollypop.define import StorageType
 def cancellable_sleep(seconds, cancellable):
     if not App().debug:
         while seconds:
-            time.sleep(1)
-            seconds -= 1
+            time.sleep(0.1)
+            seconds -= 0.1
             if cancellable.is_cancelled():
-                return
+                raise Exception("cancelled")
 
 
 def seconds_to_string(duration):

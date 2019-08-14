@@ -211,7 +211,6 @@ class Application(Gtk.Application, ApplicationActions):
             Init application
         """
         Gtk.Application.do_startup(self)
-
         if self.__window is None:
             from lollypop.window import Window
             self.init()
@@ -226,14 +225,17 @@ class Application(Gtk.Application, ApplicationActions):
             Quit Lollypop
             @param vacuum as bool
         """
-        self.spotify.cancel()
+        self.__window.hide()
+        if self.spotify.is_running():
+            self.spotify.stop()
+            GLib.timeout_add(100, self.quit, vacuum)
+            return
         if self.settings.get_value("save-state"):
             self.__window.container.stack.save_history()
         # Then vacuum db
         if vacuum:
             self.__vacuum()
             self.art.clean_web()
-        self.__window.hide()
         for scrobbler in self.scrobblers:
             scrobbler.save()
         Gio.Application.quit(self)
