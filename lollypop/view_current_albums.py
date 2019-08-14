@@ -17,13 +17,11 @@ from gettext import gettext as _
 from lollypop.utils import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.define import App, ViewType, MARGIN_SMALL
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.define import App, ViewType, MARGIN_SMALL, Size
 from lollypop.helper_signals import SignalsHelper, signals
 
 
-class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
-                        SignalsHelper):
+class CurrentAlbumsView(AlbumsListView, SignalsHelper):
     """
         Popover showing Albums View
     """
@@ -35,7 +33,6 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
             @param view_type as ViewType
         """
         AlbumsListView.__init__(self, [], [], view_type | ViewType.PLAYBACK)
-        SizeAllocationHelper.__init__(self)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
         self.__clear_button = Gtk.Button.new_from_icon_name(
@@ -66,20 +63,18 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
         label.set_margin_start(2)
         label.get_style_context().add_class("dim-label")
         label.set_property("halign", Gtk.Align.START)
-        self.__grid = Gtk.Grid()
-        self.__grid.set_column_spacing(MARGIN_SMALL)
-        self.__grid.set_margin_top(MARGIN_SMALL)
-        self.__grid.add(label)
-        self.__grid.set_property("valign", Gtk.Align.CENTER)
-        self.__grid.add(self.__jump_button)
-        self.__grid.add(self.__save_button)
-        self.__grid.add(self.__clear_button)
-        self.__grid.show_all()
+        self.__header = Gtk.Grid()
+        self.__header.set_column_spacing(MARGIN_SMALL)
+        self.__header.set_margin_top(MARGIN_SMALL)
+        self.__header.add(label)
+        self.__header.set_property("valign", Gtk.Align.CENTER)
+        self.__header.add(self.__jump_button)
+        self.__header.add(self.__save_button)
+        self.__header.add(self.__clear_button)
+        self.__header.show_all()
         self.set_row_spacing(2)
         self.insert_row(0)
-        self.attach(self.__grid, 0, 0, 1, 1)
-        self.__grid.set_property("halign", Gtk.Align.CENTER)
-        self._box.set_property("halign", Gtk.Align.CENTER)
+        self.attach(self.__header, 0, 0, 1, 1)
         return {
             "map": [
                 (App().player, "queue-changed", "_on_queue_changed")
@@ -114,6 +109,22 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
 #######################
 # PROTECTED           #
 #######################
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+        """
+        AlbumsListView._on_adaptive_changed(self, window, status)
+        if status:
+            self._box.set_property("halign", Gtk.Align.FILL)
+            self.__header.set_property("halign", Gtk.Align.FILL)
+            self._box.set_size_request(-1, -1)
+            self.__header.set_size_request(-1, -1)
+        else:
+            self._box.set_size_request(Size.MEDIUM * 0.8, -1)
+            self.__header.set_size_request(Size.MEDIUM * 0.8, -1)
+            self._box.set_property("halign", Gtk.Align.CENTER)
+            self.__header.set_property("halign", Gtk.Align.CENTER)
+
     def _on_queue_changed(self, *ignore):
         """
             Clean view and reload if empty
@@ -153,16 +164,6 @@ class CurrentAlbumsView(AlbumsListView, SizeAllocationHelper,
             date_string = now.strftime("%Y-%m-%d-%H:%M:%S")
             playlist_id = App().playlists.add(date_string)
             App().playlists.add_tracks(playlist_id, tracks)
-
-    def _handle_size_allocate(self, allocation):
-        """
-            Change view width
-            @param allocation as Gtk.Allocation
-        """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            width = allocation.width / 2
-            self.__grid.set_size_request(width, -1)
-            self._box.set_size_request(width, -1)
 
     def __on_jump_clicked(self, button):
         """
