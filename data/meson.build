@@ -57,7 +57,7 @@ if appstreamcli.found()
   test (
     'Validate appdata file',
     appstreamcli,
-    args: ['validate-relax', join_paths(meson.current_build_dir (), project_id + '.appdata.xml')]
+    args: ['validate', '--nonet', join_paths(meson.current_build_dir (), project_id + '.appdata.xml')]
   )
 endif
 
