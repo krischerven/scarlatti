@@ -77,7 +77,8 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         self.attach(self.__header, 0, 0, 1, 1)
         return {
             "map": [
-                (App().player, "queue-changed", "_on_queue_changed")
+                (App().player, "queue-changed", "_on_queue_changed"),
+                (App().player, "playback-changed", "_on_playback_changed")
             ]
         }
 
@@ -85,6 +86,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
             Populate view
         """
+        self._remove_placeholder()
         if App().player.queue:
             tracks = [Track(track_id) for track_id in App().player.queue]
             albums = tracks_to_albums(tracks)
@@ -147,6 +149,13 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         else:
             self.clear()
             self.populate()
+
+    def _on_playback_changed(self, *ignore):
+        """
+            Clear and populate view again
+        """
+        self.clear()
+        self.populate()
 
 #######################
 # PRIVATE             #
