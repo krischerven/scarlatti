@@ -598,12 +598,14 @@ class TracksDatabase:
             sql.execute("DELETE FROM tracks WHERE storage_type=?",
                         (StorageType.EPHEMERAL,))
 
-    def del_old_for_storage_type(self, storage_type):
+    def del_old_for_storage_type(self, storage_type, offset=604800):
         """
             Delete album id tracks
+            @param storage_type as StorageType
+            @param offset as int
         """
         # Last week
-        timestamp = time() - 604800
+        timestamp = time() - offset
         with SqlCursor(App().db, True) as sql:
             sql.execute("DELETE FROM tracks\
                          WHERE storage_type=? AND\

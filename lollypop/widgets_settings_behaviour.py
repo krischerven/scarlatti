@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, NetworkAccessACL
+from lollypop.define import App, NetworkAccessACL, StorageType
 
 
 class BehaviourSettingsWidget(Gtk.Bin):
@@ -112,6 +112,13 @@ class BehaviourSettingsWidget(Gtk.Bin):
                                        GLib.Variant("i", acl))
         App().art.reset_history()
         App().art.cache_artists_artwork()
+        if key == "SPOTIFY" and not state:
+            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
+                                 StorageType.SPOTIFY_SIMILARS]:
+                App().tracks.del_old_for_storage_type(storage_type, 0)
+            App().tracks.clean()
+            App().albums.clean()
+            App().artists.clean()
 
     def _on_switch_scan_state_set(self, widget, state):
         """
