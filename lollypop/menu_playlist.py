@@ -15,7 +15,6 @@ from gi.repository import Gio, Gtk
 from gettext import gettext as _
 
 from lollypop.define import App
-from lollypop.logger import Logger
 from lollypop.menu_sync import SyncPlaylistsMenu
 
 
@@ -100,18 +99,7 @@ class PlaylistMenu(Gio.Menu):
             @param dialog as Gtk.NativeDialog
             @param response_id as int
         """
-        try:
-            if response_id == Gtk.ResponseType.ACCEPT:
-                uris = App().playlists.get_track_uris(self.__playlist_id)
-                stream = dialog.get_file().replace(
-                    None,
-                    False,
-                    Gio.FileCreateFlags.REPLACE_DESTINATION,
-                    None)
-                stream.write("#EXTM3U\n".encode("utf-8"))
-                for uri in uris:
-                    string = "%s\n" % uri
-                    stream.write(string.encode("utf-8"))
-                stream.close()
-        except Exception as e:
-            Logger.error("PlaylistMenu::__on_save_response(): %s", e)
+        if response_id == Gtk.ResponseType.ACCEPT:
+            uri = dialog.get_file().get_uri()
+            App().playlists.set_sync_uri(self.__playlist_id, uri)
+            App().playlists.sync_to_disk(self.__playlist_id, True)

@@ -366,7 +366,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param playlist_id as int
             @param uri as str
         """
-        if playlist_id in self._playlist_id:
+        if playlist_id == self._playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
             children = self._view.children
             for album_row in children:

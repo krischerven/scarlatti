@@ -90,6 +90,7 @@ class DatabasePlaylistsUpgrade(DatabaseUpgrade):
            2: "ALTER TABLE playlists ADD smart_enabled INT NOT NULL DEFAULT 0",
            3: "ALTER TABLE playlists ADD smart_sql TEXT",
            4: self.__upgrade_4,
+           5: "ALTER TABLE playlists ADD uri TEXT"
         }
 
 #######################
