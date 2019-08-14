@@ -251,7 +251,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             track_id = App().tracks.get_id_by_uri(uri)
             duration = App().tracks.get_duration(track_id)
             album_id = App().tracks.get_album_id(track_id)
-            genre_ids = App().tracks.get_genre_ids(track_id)
             album_artist_ids = App().albums.get_artist_ids(album_id)
             artist_ids = App().tracks.get_artist_ids(track_id)
             track_pop = App().tracks.get_popularity(track_id)
@@ -263,8 +262,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             album_rate = App().albums.get_rate(album_id)
             album_loved = App().albums.get_loved(album_id)
             album_synced = App().albums.get_synced(album_id)
-            # Force genre for album
-            App().albums.set_genre_ids(album_id, genre_ids)
             if backup:
                 f = Gio.File.new_for_uri(uri)
                 name = f.get_basename()
@@ -273,6 +270,9 @@ class CollectionScanner(GObject.GObject, TagReader):
                                    album_loved, album_pop, album_rate,
                                    album_synced)
             App().tracks.remove(track_id)
+            # Force genre for album
+            genre_ids = App().tracks.get_genre_ids(track_id)
+            App().albums.set_genre_ids(album_id, genre_ids)
             App().albums.clean()
             App().genres.clean()
             App().artists.clean()
