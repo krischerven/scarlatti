@@ -174,6 +174,14 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         return self.__dnd_helper
 
     @property
+    def box(self):
+        """
+            Get album list box
+            @return Gtk.ListBox
+        """
+        return self._box
+
+    @property
     def children(self):
         """
             Get view children

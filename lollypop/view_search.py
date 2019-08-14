@@ -17,16 +17,16 @@ from random import shuffle
 from urllib.parse import urlparse
 
 from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, StorageType
+from lollypop.define import Size
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
 from lollypop.view import View
 from lollypop.logger import Logger
-from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
 
 
-class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
+class SearchView(View, Gtk.Bin, SignalsHelper):
     """
         View for searching albums/tracks
     """
@@ -39,7 +39,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         """
         View.__init__(self)
         Gtk.Bin.__init__(self)
-        SizeAllocationHelper.__init__(self)
         self.__timeout_id = None
         self.__search_count = 0
         self.__current_search = ""
@@ -57,6 +56,7 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__new_button = builder.get_object("new_button")
         self.__play_button = builder.get_object("play_button")
         self.__bottom_buttons = builder.get_object("bottom_buttons")
+        self.__header = builder.get_object("header")
         self.__entry = builder.get_object("entry")
         self.__spinner = builder.get_object("spinner")
         self.__button_stack = builder.get_object("button_stack")
@@ -69,7 +69,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         self.__set_default_placeholder()
         self.add(self.__widget)
         builder.connect_signals(self)
-        self.__widget.set_property("halign", Gtk.Align.CENTER)
         return {
             "init": [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
@@ -126,14 +125,6 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
             self.__search_type_action.change_state(GLib.Variant("s", "local"))
         else:
             self.__bottom_buttons.show()
-
-    def _handle_size_allocate(self, allocation):
-        """
-            Change view width
-            @param allocation as Gtk.Allocation
-        """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            self.__widget.set_size_request(allocation.width / 2, -1)
 
     def _on_play_button_clicked(self, button):
         """
@@ -228,9 +219,17 @@ class SearchView(View, Gtk.Bin, SizeAllocationHelper, SignalsHelper):
         """
         style_context = self.__placeholder.get_style_context()
         if status:
+            self.__view.box.set_property("halign", Gtk.Align.FILL)
+            self.__header.set_property("halign", Gtk.Align.FILL)
+            self.__view.box.set_size_request(-1, -1)
+            self.__header.set_size_request(-1, -1)
             style_context.remove_class("text-xx-large")
             style_context.add_class("text-x-large")
         else:
+            self.__view.box.set_size_request(Size.MEDIUM * 0.8, -1)
+            self.__header.set_size_request(Size.MEDIUM * 0.8, -1)
+            self.__view.box.set_property("halign", Gtk.Align.CENTER)
+            self.__header.set_property("halign", Gtk.Align.CENTER)
             style_context.remove_class("text-x-large")
             style_context.add_class("text-xx-large")
 

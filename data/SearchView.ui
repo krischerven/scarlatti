@@ -22,11 +22,6 @@
     <property name="can_focus">False</property>
     <property name="icon_name">goa-panel-symbolic</property>
   </object>
-  <object class="GtkImage" id="image5">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">application-rss+xml-symbolic</property>
-  </object>
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -35,46 +30,6 @@
     <property name="orientation">vertical</property>
     <property name="row_spacing">2</property>
     <property name="column_spacing">5</property>
-    <child>
-      <object class="GtkStack" id="button_stack">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkButton" id="new_button">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Create a new playlist</property>
-            <property name="valign">center</property>
-            <property name="margin_end">2</property>
-            <property name="image">image2</property>
-            <property name="relief">none</property>
-            <signal name="clicked" handler="_on_new_button_clicked" swapped="no"/>
-          </object>
-          <packing>
-            <property name="name">page0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSpinner" id="spinner">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="opacity">0.5</property>
-          </object>
-          <packing>
-            <property name="name">page1</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="left_attach">2</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
     <child>
       <object class="GtkStack" id="stack">
         <property name="visible">True</property>
@@ -85,8 +40,8 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">center</property>
-            <property name="wrap">True</property>
             <property name="justify">center</property>
+            <property name="wrap">True</property>
             <property name="max_width_chars">40</property>
             <style>
               <class name="dim-label"/>
@@ -100,23 +55,6 @@
       <packing>
         <property name="left_attach">0</property>
         <property name="top_attach">1</property>
-        <property name="width">3</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkButton" id="play_button">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Play</property>
-        <property name="valign">center</property>
-        <property name="image">image1</property>
-        <property name="relief">none</property>
-        <signal name="clicked" handler="_on_play_button_clicked" swapped="no"/>
-      </object>
-      <packing>
-        <property name="left_attach">1</property>
-        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
@@ -168,21 +106,91 @@
       <packing>
         <property name="left_attach">0</property>
         <property name="top_attach">2</property>
-        <property name="width">3</property>
       </packing>
     </child>
     <child>
-      <object class="GtkSearchEntry" id="entry">
+      <object class="GtkBox" id="header">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="has_focus">True</property>
-        <property name="is_focus">True</property>
-        <property name="margin_start">2</property>
-        <property name="hexpand">True</property>
-        <property name="primary_icon_name">edit-find-symbolic</property>
-        <property name="primary_icon_activatable">False</property>
-        <property name="primary_icon_sensitive">False</property>
-        <signal name="search-changed" handler="_on_search_changed" swapped="no"/>
+        <property name="can_focus">False</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkSearchEntry" id="entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
+            <property name="is_focus">True</property>
+            <property name="margin_start">2</property>
+            <property name="hexpand">True</property>
+            <property name="primary_icon_name">edit-find-symbolic</property>
+            <property name="primary_icon_activatable">False</property>
+            <property name="primary_icon_sensitive">False</property>
+            <signal name="search-changed" handler="_on_search_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="play_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Play</property>
+            <property name="valign">center</property>
+            <property name="image">image1</property>
+            <property name="relief">none</property>
+            <signal name="clicked" handler="_on_play_button_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStack" id="button_stack">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton" id="new_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Create a new playlist</property>
+                <property name="valign">center</property>
+                <property name="margin_right">2</property>
+                <property name="margin_end">2</property>
+                <property name="image">image2</property>
+                <property name="relief">none</property>
+                <signal name="clicked" handler="_on_new_button_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="name">page0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinner" id="spinner">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="opacity">0.50196078431372548</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="name">page1</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
       </object>
       <packing>
         <property name="left_attach">0</property>
