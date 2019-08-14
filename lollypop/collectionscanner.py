@@ -476,9 +476,10 @@ class CollectionScanner(GObject.GObject, TagReader):
         try:
             f = Gio.File.new_for_uri(uri)
             # Scan file
-            if App().settings.get_value("import-playlists") and is_pls(f):
+            if is_pls(f):
                 # Import playlist
-                App().playlists.import_tracks(f)
+                if App().settings.get_value("import-playlists"):
+                    App().playlists.import_tracks(f)
             elif is_audio(f):
                 return True
             else:
@@ -527,8 +528,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                         SqlCursor.allow_thread_execution(App().db)
                         new_tracks.append(uri)
                 except Exception as e:
-                    Logger.error(
-                               "CollectionScanner:: __scan_add_files: % s" % e)
+                    Logger.error("Adding file: %s, %s" % (uri, e))
                 i += 1
                 self.__update_progress(i, count)
             if scan_type != ScanType.EPHEMERAL and self.__thread is not None:
@@ -553,7 +553,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                         self.del_from_db(uri, True)
                         SqlCursor.allow_thread_execution(App().db)
         except Exception as e:
-            Logger.warning("CollectionScanner:: __scan_files: % s" % e)
+            Logger.warning("CollectionScanner::__scan_files(): % s" % e)
         SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
         return new_tracks
