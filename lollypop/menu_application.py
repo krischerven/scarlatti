@@ -23,6 +23,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
 
     __gsignals__ = {
         "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     @signals
@@ -65,6 +66,12 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
             Emit closed signal
         """
         self.emit("closed")
+
+    def _emit_hide(self, button):
+        """
+            Emit closed signal
+        """
+        self.emit("hidden")
 
     def _on_volume_value_changed(self, scale):
         """

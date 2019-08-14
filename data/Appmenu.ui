@@ -48,6 +48,7 @@
             <property name="image">image1</property>
             <signal name="clicked" handler="_on_button_clicked" swapped="no"/>
             <signal name="clicked" handler="_emit_closed" swapped="no"/>
+            <signal name="clicked" handler="_emit_hide" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -66,6 +67,7 @@
             <property name="action_name">app.equalizer</property>
             <property name="image">image2</property>
             <signal name="clicked" handler="_on_button_clicked" swapped="no"/>
+            <signal name="clicked" handler="_emit_hide" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -85,6 +87,7 @@
             <property name="image">image40</property>
             <signal name="clicked" handler="_on_button_clicked" swapped="no"/>
             <signal name="clicked" handler="_emit_closed" swapped="no"/>
+            <signal name="clicked" handler="_emit_hide" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -109,6 +112,7 @@
         <property name="action_name">app.settings</property>
 	    <property name="action_target">1</property>
         <property name="text" translatable="yes">_Preferences</property>
+        <signal name="clicked" handler="_emit_hide" swapped="no"/>
       </object>
       <packing>
         <property name="left_attach">0</property>
@@ -123,6 +127,7 @@
         <property name="action_name">app.shortcuts</property>
         <property name="text" translatable="yes">_Keyboard Shortcuts</property>
         <signal name="clicked" handler="_emit_closed" swapped="no"/>
+        <signal name="clicked" handler="_emit_hide" swapped="no"/>
       </object>
       <packing>
         <property name="left_attach">0</property>
@@ -136,6 +141,7 @@
         <property name="receives_default">True</property>
         <property name="action_name">app.about</property>
         <property name="text" translatable="yes">_About Lollypop</property>
+        <signal name="clicked" handler="_emit_hide" swapped="no"/>
       </object>
       <packing>
         <property name="left_attach">0</property>
