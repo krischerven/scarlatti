@@ -24,6 +24,7 @@ class MenuBuilder(Gtk.Stack):
 
     __gsignals__ = {
         "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self, menu):
