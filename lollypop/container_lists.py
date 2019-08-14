@@ -47,6 +47,8 @@ class ListsContainer:
         self._main_widget.insert_column(0)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
+        items.append((Type.SEPARATOR, "", ""))
+        items.append((Type.SEARCH, _("Search"), _("Search")))
         items.append((Type.CURRENT, _("Current playlist"),
                      _("Current playlist")))
         self._sidebar.populate(items)

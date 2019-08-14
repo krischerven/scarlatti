@@ -47,8 +47,6 @@ class ShownLists:
                    SelectionListMask.SIDEBAR),
         Type.LYRICS: (_("Lyrics"),
                       SelectionListMask.SIDEBAR),
-        Type.SEARCH: (_("Search"),
-                      SelectionListMask.SIDEBAR),
         Type.ALL: (_("Albums"),
                    SelectionListMask.SIDEBAR),
         Type.ARTISTS: (_("Artists"), SelectionListMask.SIDEBAR),
