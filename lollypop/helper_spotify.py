@@ -155,7 +155,7 @@ class SpotifyHelper(GObject.Object):
                     similar_ids.append(similar_id)
             # Add albums
             shuffle(similar_ids)
-            for similar_id in similar_ids:
+            for similar_id in similar_ids[:self.__MAX_ITEMS_PER_STORAGE_TYPE]:
                 cancellable_sleep(5, cancellable)
                 albums_payload = self.__get_artist_albums_payload(similar_id,
                                                                   cancellable)
