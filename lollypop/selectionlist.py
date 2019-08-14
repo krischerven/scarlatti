@@ -22,7 +22,6 @@ from lollypop.define import Type, App, ArtSize, SelectionListMask
 from lollypop.define import ArtBehaviour, ViewType
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, on_query_tooltip
-from lollypop.shown import ShownPlaylists
 
 
 class SelectionListRow(Gtk.ListBoxRow):
@@ -418,16 +417,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         if self.__base_mask & SelectionListMask.ARTISTS:
             self.__fastscroll.clear()
             self.__fastscroll.clear_chars()
-
-    def get_playlist_headers(self):
-        """
-            Return playlist headers
-            @return items as [(int, str)]
-        """
-        lists = ShownPlaylists.get()
-        if lists:
-            lists.append((Type.SEPARATOR, "", ""))
-        return lists
 
     def select_first(self):
         """
