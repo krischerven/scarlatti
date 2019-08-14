@@ -585,7 +585,12 @@ class Playlists(GObject.GObject):
             @param create as bool => create file
         """
         try:
+            name = self.get_name(playlist_id)
+            # Clear cache
+            App().art.remove_artwork_from_cache("ROUNDED_%s" % name)
             uri = self.get_sync_uri(playlist_id)
+            if uri is None:
+                return
             f = Gio.File.new_for_uri(uri)
             if not f.query_exists() and not create:
                 return

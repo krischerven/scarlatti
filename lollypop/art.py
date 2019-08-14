@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import Gio
+
 from lollypop.art_base import BaseArt
 from lollypop.art_album import AlbumArt
 from lollypop.art_artist import ArtistArt
@@ -57,6 +59,21 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             surface.write_to_png(cache_path_png)
         except Exception as e:
             Logger.error("Art::add_artwork_to_cache(): %s" % e)
+
+    def remove_artwork_from_cache(self, name):
+        """
+            Remove artwork from cache
+            @param name as str
+        """
+        try:
+            from glob import glob
+            search = "%s/%s_*.png" % (CACHE_PATH, name)
+            pathes = glob(search)
+            for path in pathes:
+                f = Gio.File.new_for_path(path)
+                f.delete(None)
+        except Exception as e:
+            Logger.error("Art::remove_artwork_from_cache(): %s" % e)
 
     def get_artwork_from_cache(self, name, width, height):
         """
