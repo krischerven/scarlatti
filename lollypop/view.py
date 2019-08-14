@@ -83,7 +83,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         grid.set_margin_end(20)
         grid.set_column_spacing(20)
         self.__placeholder = Gtk.Label.new()
-        self.__placeholder.set_markup("<b>%s</b>" % GLib.markup_escape_text(
+        self.__placeholder.set_markup("%s" % GLib.markup_escape_text(
             self._empty_message))
         label_style = self.__placeholder.get_style_context()
         if App().window.is_adaptive:
