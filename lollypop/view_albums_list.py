@@ -21,6 +21,17 @@ from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
 
 
+class ListBox(Gtk.ListBox):
+    def do_get_preferred_width(self):
+        """
+            Sync preferred width and size request
+        """
+        (width, height) = self.get_size_request()
+        if width == -1:
+            return LazyLoadingView.do_get_preferred_width(self)
+        return (width, width)
+
+
 class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
     """
         View showing albums
@@ -50,7 +61,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         # Calculate default album height based on current pango context
         # We may need to listen to screen changes
         self.__height = AlbumRow.get_best_height(self)
-        self._box = Gtk.ListBox()
+        self._box = ListBox()
         if view_type & ViewType.PLAYLISTS:
             self._box.set_margin_bottom(MARGIN)
         self._box.set_margin_end(MARGIN)
@@ -138,15 +149,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         if clear_albums:
             App().player.clear_albums()
             App().player.update_next_prev()
-
-    def do_get_preferred_width(self):
-        """
-            Sync preferred width and size request
-        """
-        (width, height) = self.get_size_request()
-        if width == -1:
-            return LazyLoadingView.do_get_preferred_width(self)
-        return (width, width)
 
     @property
     def args(self):
