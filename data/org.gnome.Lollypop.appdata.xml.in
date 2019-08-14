@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
+<!-- Copyright 2014 Cédric Bellegarde --> 
+<component type="desktop-application">
   <id>org.gnome.Lollypop</id>
   <launchable type="desktop-id">org.gnome.Lollypop.desktop</launchable>
   <metadata_license>CC0-1.0</metadata_license>
@@ -34,10 +35,6 @@
       </description>
     </release>
   </releases>
-  <categories>
-    <category>AudioVideo</category>
-    <category>Audio</category>
-  </categories>
   <screenshots>
     <screenshot type="default">
       <image type="source" width="1680" height="1023">https://adishatz.org/lollypop1.png</image>
@@ -45,6 +42,7 @@
       <image type="source" width="400" height="617">https://adishatz.org/lollypop3.png</image>
     </screenshot>
   </screenshots>
+  <translation type="gettext">lollypop</translation>
   <url type="homepage">https://wiki.gnome.org/Apps/Lollypop</url>
   <url type="bugtracker">https://gitlab.gnome.org/gnumdk/lollypop/issues</url>
   <url type="donation">https://www.paypal.me/lollypopgnome</url>
