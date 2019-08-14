@@ -96,17 +96,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
 
     @property
     def args(self):
-        """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
-        """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        view_type = self._view_type & ~self.view_sizing_mask
-        return ({"view_type": view_type}, self.sidebar_id, position)
+        return None
 
 #######################
 # PROTECTED           #
