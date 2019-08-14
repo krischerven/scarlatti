@@ -192,8 +192,8 @@ class SearchLollypopService(Server, Gio.Application):
                 if surface is not None:
                     del surface
                 d = { 'id': GLib.Variant('s', search_id),
-                      'description': GLib.Variant('s', description),
-                      'name': GLib.Variant('s', name),
+                      'description': GLib.Variant('s', GLib.markup_escape_text(description)),
+                      'name': GLib.Variant('s', GLib.markup_escape_text(name)),
                       'gicon': GLib.Variant('s', gicon) }
                 results.append(d)
         except Exception as e:
