@@ -286,6 +286,7 @@ class OthersAlbumsBoxView(AlbumsBoxView):
                 label.set_property("halign", Gtk.Align.START)
                 label.set_ellipsize(Pango.EllipsizeMode.END)
                 label.set_margin_top(40)
+                label.set_margin_bottom(MARGIN)
                 label.show()
                 self.insert_row(0)
                 self.attach(label, 0, 0, 1, 1)
