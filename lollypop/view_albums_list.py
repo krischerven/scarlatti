@@ -28,7 +28,7 @@ class ListBox(Gtk.ListBox):
         """
         (width, height) = self.get_size_request()
         if width == -1:
-            return LazyLoadingView.do_get_preferred_width(self)
+            return Gtk.ListBox.do_get_preferred_width(self)
         return (width, width)
 
 
