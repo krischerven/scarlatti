@@ -38,8 +38,7 @@ class EditMenu(Gio.Menu):
             self.__object = Track(object.id)
         if isinstance(self.__object, Album):
             self.__set_save_action()
-        if self.__object.storage_type & StorageType.COLLECTION and\
-                App().art.tag_editor:
+        if self.__object.storage_type & StorageType.COLLECTION:
             self.__set_edit_action()
 
 #######################
@@ -90,6 +89,11 @@ class EditMenu(Gio.Menu):
         menu_item = Gio.MenuItem.new(_("Modify information"),
                                      "app.edit_tag_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        if not App().art.tag_editor:
+            edit_tag_action.set_enabled(False)
+            menu_item.set_attribute_value(
+                "tooltip",
+                GLib.Variant("s", _("Please install easytag or kid3-qt")))
         self.append_item(menu_item)
 
     def __on_buy_action_activate(self, action, variant):

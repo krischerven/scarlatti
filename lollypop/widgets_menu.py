@@ -73,6 +73,7 @@ class MenuBuilder(Gtk.Stack):
             label = menu.get_item_attribute_value(i, "label")
             action = menu.get_item_attribute_value(i, "action")
             header = menu.get_item_attribute_value(i, "header")
+            tooltip = menu.get_item_attribute_value(i, "tooltip")
             close = menu.get_item_attribute_value(i, "close") is not None
             if header is not None:
                 album_id = menu.get_item_attribute_value(i, "album-id")
@@ -86,14 +87,16 @@ class MenuBuilder(Gtk.Stack):
                     self.__add_submenu(label, submenu, menu_name)
             else:
                 target = menu.get_item_attribute_value(i, "target")
-                self.__add_item(label, action, target, close, menu_name)
+                self.__add_item(label, action, target,
+                                tooltip, close, menu_name)
 
-    def __add_item(self, text, action, target, close, menu_name):
+    def __add_item(self, text, action, target, tooltip, close, menu_name):
         """
             Add a Menu item
             @param text as GLib.Variant
             @param action as Gio.Action
             @param target as GLib.Variant
+            @parmam tooltip as GLib.Variant
             @param close as bool
             @param menu_name as str
         """
@@ -103,6 +106,9 @@ class MenuBuilder(Gtk.Stack):
         button.set_alignment(0, 0.5)
         if close:
             button.connect("clicked", lambda x: self.emit("closed"))
+        if tooltip is not None:
+            button.set_tooltip_text(tooltip.get_string())
+            button.set_has_tooltip(True)
         if target is not None:
             button.set_action_target_value(target)
         button.show()
