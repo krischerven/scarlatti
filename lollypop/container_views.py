@@ -127,7 +127,9 @@ class ViewsContainer:
             elif item_ids[0] == Type.ARTISTS:
                 view = self._get_view_artists([], data)
         if view is not None:
-            view.set_sidebar_id(self._sidebar.selected_ids[0])
+            ids = self._sidebar.selected_ids
+            if ids:
+                view.set_sidebar_id(ids[0])
             view.show()
             self._stack.add(view)
             if switch:
