@@ -590,11 +590,20 @@ class TracksDatabase:
                 mtimes.update((row,))
             return mtimes
 
-    def del_non_persistent(self):
+    def remove_album(self, album_id, commit=True):
+        """
+            Remove album
+            @param album_id as int
+        """
+        with SqlCursor(App().db, commit) as sql:
+            sql.execute("DELETE FROM tracks WHERE album_id=?", (album_id,))
+
+    def del_non_persistent(self, commit=True):
         """
             Delete non persistent tracks
+            @param commit as bool
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(App().db, commit) as sql:
             sql.execute("DELETE FROM tracks WHERE storage_type=?",
                         (StorageType.EPHEMERAL,))
 
@@ -975,12 +984,12 @@ class TracksDatabase:
                 return v[0]
             return 0
 
-    def clean(self):
+    def clean(self, commit=True):
         """
             Clean database for track id
-            @warning commit needed
+            @param commit as bool
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(App().db, commit) as sql:
             sql.execute("DELETE FROM track_artists\
                          WHERE track_artists.track_id NOT IN (\
                             SELECT tracks.rowid FROM tracks)")

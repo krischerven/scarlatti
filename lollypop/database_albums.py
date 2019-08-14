@@ -270,24 +270,48 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def get_for_storage_type(self, storage_type, limit, shuffle=False):
+    def get_for_storage_type(self, storage_type, limit):
         """
             Get albums by storage type
             @param storage_type as StorageType
             @param limit as int
-            @param shuffle as bool
             @return [int]
         """
         with SqlCursor(App().db) as sql:
             filters = (storage_type, limit)
-            request = "SELECT albums.rowid\
+            request = "SELECT rowid\
                        FROM albums\
-                       WHERE storage_type=?"
-            if shuffle:
-                request += " ORDER BY RANDOM()"
-            request += " LIMIT ?"
+                       WHERE storage_type=? ORDER BY RANDOM() LIMIT ?"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
+
+    def get_oldest_for_storage_type(self, storage_type, limit):
+        """
+            Get albums by storage type
+            @param storage_type as StorageType
+            @param limit as int
+            @param offset as int
+        """
+        with SqlCursor(App().db) as sql:
+            filters = (storage_type, limit)
+            request = "SELECT rowid FROM albums\
+                       WHERE storage_type=? ORDER BY mtime ASC LIMIT ?"
+            result = sql.execute(request, filters)
+            return list(itertools.chain(*result))
+
+    def get_count_for_storage_type(self, storage_type):
+        """
+            Get albums count for storage type
+            @param storage_type as StorageType
+        """
+        with SqlCursor(App().db) as sql:
+            filters = (storage_type,)
+            request = "SELECT COUNT(*) FROM albums WHERE storage_type=?"
+            result = sql.execute(request, filters)
+            v = result.fetchone()
+            if v is not None:
+                return v[0]
+            return 0
 
     def get_rate(self, album_id):
         """
@@ -1180,11 +1204,12 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def clean(self):
+    def clean(self, commit=True):
         """
             Clean albums
+            @param commit as bool
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(App().db, commit) as sql:
             sql.execute("DELETE FROM albums WHERE albums.rowid NOT IN (\
                             SELECT tracks.album_id FROM tracks)")
             sql.execute("DELETE FROM album_genres\

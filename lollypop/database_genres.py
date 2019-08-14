@@ -162,11 +162,12 @@ class GenresDatabase:
             genres = list(result)
             return genres[0] if genres else (None, "")
 
-    def clean(self):
+    def clean(self, commit=True):
         """
             Clean genres
+            @param commit as bool
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(App().db, commit) as sql:
             sql.execute("DELETE FROM genres WHERE genres.rowid NOT IN (\
                             SELECT album_genres.genre_id FROM album_genres)")
             sql.execute("DELETE FROM genres WHERE genres.rowid NOT IN (\

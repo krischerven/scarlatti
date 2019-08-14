@@ -518,8 +518,7 @@ class AlbumsSpotifyBoxView(AlbumsLineView):
             AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = App().albums.get_for_storage_type(storage_type,
-                                                          20, True)
+            album_ids = App().albums.get_for_storage_type(storage_type, 20)
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))

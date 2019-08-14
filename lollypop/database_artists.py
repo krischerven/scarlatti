@@ -351,11 +351,12 @@ class ArtistsDatabase:
                 return v[0]
             return 0
 
-    def clean(self):
+    def clean(self, commit=True):
         """
             Clean artists
+            @param commit as bool
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(App().db, commit) as sql:
             sql.execute("DELETE FROM artists WHERE artists.rowid NOT IN (\
                             SELECT album_artists.artist_id\
                             FROM album_artists) AND artists.rowid NOT IN (\

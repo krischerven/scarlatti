@@ -21,6 +21,7 @@ from locale import getdefaultlocale
 from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep
 from lollypop.objects_album import Album
+from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
 
@@ -29,7 +30,7 @@ class SpotifyHelper(GObject.Object):
     """
         Helper for Spotify
     """
-    __MAX_ITEMS_PER_STORAGE_TYPE = 20
+    __MAX_ITEMS_PER_STORAGE_TYPE = 50
     __gsignals__ = {
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
                       (GObject.TYPE_PYOBJECT,)),
@@ -153,11 +154,6 @@ class SpotifyHelper(GObject.Object):
             # Add albums
             shuffle(similar_ids)
             for similar_id in similar_ids:
-                count = len(App().albums.get_for_storage_type(
-                                StorageType.SPOTIFY_SIMILARS,
-                                self.__MAX_ITEMS_PER_STORAGE_TYPE + 5))
-                if count == self.__MAX_ITEMS_PER_STORAGE_TYPE + 5:
-                    return
                 cancellable_sleep(5, cancellable)
                 albums_payload = self.__get_artist_albums_payload(similar_id,
                                                                   cancellable)
@@ -283,17 +279,21 @@ class SpotifyHelper(GObject.Object):
         try:
             self.search_similar_albums(self.__cancellable)
             self.search_new_releases(self.__cancellable)
+            SqlCursor.add(App().db)
             # Remove older albums
             for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
                                  StorageType.SPOTIFY_SIMILARS]:
-                if len(App().albums.get_for_storage_type(
-                        storage_type,
-                        self.__MAX_ITEMS_PER_STORAGE_TYPE + 5)) >\
-                            self.__MAX_ITEMS_PER_STORAGE_TYPE:
-                    App().tracks.del_old_for_storage_type(storage_type)
-            App().tracks.clean()
-            App().albums.clean()
-            App().artists.clean()
+                count = App().albums.get_count_for_storage_type(storage_type)
+                diff = count - self.__MAX_ITEMS_PER_STORAGE_TYPE
+                album_ids = App().albums.get_oldest_for_storage_type(
+                    storage_type, diff)
+                for album_id in album_ids:
+                    App().tracks.remove_album(album_id, False)
+            App().tracks.clean(False)
+            App().albums.clean(False)
+            App().artists.clean(False)
+            SqlCursor.commit(App().db)
+            SqlCursor.remove(App().db)
         except Exception as e:
             Logger.error("SpotifyHelper::__populate_db(): %s", e)
 
