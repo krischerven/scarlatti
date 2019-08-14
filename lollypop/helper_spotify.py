@@ -294,12 +294,14 @@ class SpotifyHelper(GObject.Object):
             # Remove older albums
             for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
                                  StorageType.SPOTIFY_SIMILARS]:
+                # If too many albums, do some cleanup
                 count = App().albums.get_count_for_storage_type(storage_type)
                 diff = count - self.__MAX_ITEMS_PER_STORAGE_TYPE
-                album_ids = App().albums.get_oldest_for_storage_type(
-                    storage_type, diff)
-                for album_id in album_ids:
-                    App().tracks.remove_album(album_id, False)
+                if diff > 0:
+                    album_ids = App().albums.get_oldest_for_storage_type(
+                        storage_type, diff)
+                    for album_id in album_ids:
+                        App().tracks.remove_album(album_id, False)
             # On cancel, clean not needed, done in Application::quit()
             if not self.__cancellable.is_cancelled():
                 App().tracks.clean(False)
