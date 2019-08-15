@@ -221,7 +221,7 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
         artists = []
         try:
             artist_item = self.get_artist(artist)
-            for similar_item in artist_item.get_similar():
+            for similar_item in artist_item.get_similar(10):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 artists.append((None,
