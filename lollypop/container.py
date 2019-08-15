@@ -123,12 +123,13 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         view = self._stack.get_visible_child()
         if view is not None:
-            self._stack.history.add_view(view, True)
-            (view, sidebar_id) = self._stack.history.pop(-1)
-            if view is not None:
-                view.show()
-                self._stack.add(view)
-                Gtk.Stack.set_visible_child(self._stack, view)
+            new_view = view.__class__(**view.args[0])
+            new_view.populate()
+            new_view.set_sidebar_id(view.args[1])
+            new_view.show()
+            self._stack.add(new_view)
+            Gtk.Stack.set_visible_child(self._stack, new_view)
+            view.destroy_later()
 
     @property
     def main_widget(self):
