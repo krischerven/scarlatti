@@ -72,10 +72,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__title_label.get_style_context().add_class("text-x-large")
         self.add_overlay(widget)
         self.set_view_type(view_type)
+        self.__update_add_button()
         return {
             "init": [
                (App().art, "artist-artwork-changed",
-                "_on_artist_artwork_changed")
+                "_on_artist_artwork_changed"),
+               (App().player, "playback-changed", "_on_playback_changed")
             ]
         }
 
@@ -169,7 +171,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                              self.__genre_ids)
             albums = [Album(album_id) for album_id in album_ids]
             App().player.play_albums(albums)
-            self.__update_add_icon(False)
+            self.__update_add_button()
         except Exception as e:
             Logger.error("ArtistView::_on_play_clicked: %s" % e)
 
@@ -198,7 +200,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             elif App().player.current_track.album.id\
                     not in App().player.album_ids:
                 App().player.skip_album()
-            self.__update_add_icon(not add)
+            self.__update_add_button()
         except Exception as e:
             Logger.error("ArtistView::_on_add_clicked: %s" % e)
         App().player.update_next_prev()
@@ -253,6 +255,13 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 width = self.get_allocated_width()
                 self.__set_artwork(width, ArtSize.BANNER + MARGIN * 2)
                 self.set_view_type(self._view_type)
+
+    def _on_playback_changed(self, player):
+        """
+            Update add button
+            @param player as Player
+        """
+        self.__update_add_button()
 
 #######################
 # PRIVATE             #
@@ -316,11 +325,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__title_label.get_style_context().add_class(
                 "text-xx-large")
 
-    def __update_add_icon(self, add):
+    def __update_add_button(self):
         """
-            Set icon for Artist +/-
-            @param add as bool
+            Set image as +/-
         """
+        album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids)
+        add = set(App().player.album_ids) & set(album_ids) != set(album_ids)
         (name, pixel_size) = self.__add_button.get_image().get_icon_name()
         if add:
             # Translators: artist context

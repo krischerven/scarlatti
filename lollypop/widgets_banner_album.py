@@ -206,7 +206,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
            @param button as Gtk.Button
         """
         App().player.play_album(self.__album)
-        App().player.emit("playback-changed")
 
     def _on_add_button_clicked(self, button):
         """
