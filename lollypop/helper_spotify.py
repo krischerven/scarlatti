@@ -309,10 +309,10 @@ class SpotifyHelper(GObject.Object):
                 App().artists.clean(False)
             SqlCursor.commit(App().db)
             SqlCursor.remove(App().db)
-            self.__is_running = False
             Logger.info("Spotify download finished")
         except Exception as e:
             Logger.error("SpotifyHelper::__populate_db(): %s", e)
+        self.__is_running = False
 
     def __get_artist_albums_payload(self, spotify_id, cancellable):
         """
