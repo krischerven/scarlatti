@@ -27,7 +27,7 @@ from lollypop.define import StorageType
 
 def cancellable_sleep(seconds, cancellable):
     if not App().debug:
-        while seconds:
+        while seconds > 0:
             time.sleep(0.1)
             seconds -= 0.1
             if cancellable.is_cancelled():
