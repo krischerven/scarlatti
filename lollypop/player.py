@@ -179,7 +179,6 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         else:
             album = albums[0]
         self.play_album_for_albums(album, albums)
-        self.emit("playback-changed")
 
     def play_uris(self, uris):
         """
