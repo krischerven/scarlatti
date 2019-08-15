@@ -122,7 +122,6 @@ class SimilarsPlayer:
             @param artists as [str]
             @param providers as {}
         """
-        print(artists)
         similar_artist_ids = self.__get_artist_ids(artists)
         added = False
         if similar_artist_ids:
