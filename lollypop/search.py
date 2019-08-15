@@ -74,14 +74,14 @@ class Search:
             @param search_items as [str]
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
-            @return (result [int], score as int)
+            @return [int]
         """
         track_ids = []
         for search_str in search_items:
             track_ids += App().tracks.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
-        return track_ids
+        return list(set(track_ids))
 
     def __search_albums(self, search_items, storage_type, cancellable):
         """
@@ -89,7 +89,7 @@ class Search:
             @param search_items as [str]
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
-            @return (result [int], score as int)
+            @return [int]
         """
         album_ids = []
         for search_str in search_items:
