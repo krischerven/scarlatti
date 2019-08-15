@@ -146,7 +146,7 @@ class SimilarsPlayer:
         """
         if artist_id is None:
             if providers.keys():
-                self.__populate(providers)
+                self.__populate(providers, cancellable)
         else:
             App().task_helper.run(provider.get_similar_artists,
                                   artist_id, cancellable,
@@ -169,4 +169,4 @@ class SimilarsPlayer:
             if self.albums:
                 added = self.__add_a_new_album(similar_artist_ids)
         if not added:
-            self.__populate(providers)
+            self.__populate(providers, cancellable)
