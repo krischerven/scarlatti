@@ -21,7 +21,7 @@ from lollypop.database_upgrade import DatabaseAlbumsUpgrade
 from lollypop.sqlcursor import SqlCursor
 from lollypop.logger import Logger
 from lollypop.localized import LocalizedCollation
-from lollypop.utils import noaccents
+from lollypop.utils import noaccents, sql_escape
 
 
 class MyLock:
@@ -178,6 +178,7 @@ class Database:
             c = sqlite3.connect(self.DB_PATH, 600.0)
             c.create_collation("LOCALIZED", LocalizedCollation())
             c.create_function("noaccents", 1, noaccents)
+            c.create_function("sql_escape", 1, sql_escape)
             return c
         except:
             exit(-1)

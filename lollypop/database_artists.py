@@ -83,18 +83,32 @@ class ArtistsDatabase:
             @return (artist_id as int, name as str)
         """
         with SqlCursor(App().db) as sql:
-            query = "SELECT rowid, name from artists\
+            request = "SELECT rowid, name from artists\
                      WHERE name=?"
             params = [name]
             if mb_artist_id:
-                query += " AND (mb_artist_id=? OR mb_artist_id IS NULL)"
+                request += " AND (mb_artist_id=? OR mb_artist_id IS NULL)"
                 params.append(mb_artist_id)
-            query += " COLLATE NOCASE"
-            result = sql.execute(query, params)
+            request += " COLLATE NOCASE"
+            result = sql.execute(request, params)
             v = result.fetchone()
             if v is not None:
                 return (v[0], v[1])
             return (None, None)
+
+    def get_id_for_escaped_string(self, name):
+        """
+            Get artist id
+            @param name as string
+            @return int
+        """
+        with SqlCursor(App().db) as sql:
+            request = "SELECT rowid from artists WHERE sql_escape(name)=?"
+            result = sql.execute(request, (name,))
+            v = result.fetchone()
+            if v is not None:
+                return v[0]
+            return None
 
     def get_name(self, artist_id):
         """

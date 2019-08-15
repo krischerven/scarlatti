@@ -224,13 +224,24 @@ def do_shift_selection(listbox, row):
 
 def noaccents(string):
     """
-        Return string without accents
+        Return string without accents lowered
         @param string as str
         @return str
     """
     nfkd_form = unicodedata.normalize("NFKD", string)
     v = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
     return v.lower()
+
+
+def sql_escape(str):
+    """
+        Escape string for SQL request
+        @param str as str
+        @param ignore as [str]
+    """
+    return "".join([c for c in str if
+                    c.isalpha() or
+                    c.isdigit()]).rstrip().lower()
 
 
 def escape(str, ignore=["_", "-", " ", "."]):

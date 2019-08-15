@@ -73,7 +73,8 @@ class SimilarsPlayer:
         """
         similar_artist_ids = []
         for (spotify_id, artist, cover_uri) in artists:
-            (similar_artist_id, name) = App().artists.get_id(artist)
+            similar_artist_id = App().artists.get_id_for_escaped_string(
+                artist.lower())
             if similar_artist_id is not None:
                 if App().artists.get_albums([similar_artist_id]):
                     similar_artist_ids.append(similar_artist_id)
@@ -121,6 +122,7 @@ class SimilarsPlayer:
             @param artists as [str]
             @param providers as {}
         """
+        print(artists)
         similar_artist_ids = self.__get_artist_ids(artists)
         added = False
         if similar_artist_ids:
