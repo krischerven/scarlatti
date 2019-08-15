@@ -40,6 +40,12 @@ class GesturesHelper():
         self.__multi_press.connect("released", self.__on_multi_released)
         self.__multi_press.set_button(0)
 
+    def special_headerbar_hack(self):
+        """
+            Enable a special header bar hack to block mutter
+        """
+        self.__multi_press.connect("pressed", self.__on_multi_pressed)
+
 #######################
 # PROTECTED           #
 #######################
@@ -73,6 +79,19 @@ class GesturesHelper():
             self._on_primary_long_press_gesture(x, y)
         else:
             self._on_secondary_long_press_gesture(x, y)
+
+    def __on_multi_pressed(self, gesture, n_press, x, y):
+        """
+            @param gesture as Gtk.Gesture
+            @param n_press as int
+            @param x as int
+            @param y as int
+        """
+        if gesture.get_current_button() == 3:
+            sequence = gesture.get_current_sequence()
+            event = gesture.get_last_event(sequence)
+            gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+            self._on_secondary_press_gesture(x, y, event)
 
     def __on_multi_released(self, gesture, n_press, x, y):
         """

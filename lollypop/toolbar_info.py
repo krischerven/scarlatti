@@ -43,6 +43,7 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
         self._infobox.connect("realize", set_cursor_hand2)
         self.add(self._infobox)
         GesturesHelper.__init__(self, self._infobox)
+        self.special_headerbar_hack()
 
         self.__labels = builder.get_object("nowplaying_labels")
         self.__labels.connect("query-tooltip", self.__on_query_tooltip)
@@ -134,12 +135,22 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
     def _on_primary_long_press_gesture(self, x, y):
         """
             Show menu
+            @param x as int
+            @param y as int
         """
-        self.__popup_menu()
+        if App().window.is_adaptive or not self._artwork.get_visible():
+            return
+        if isinstance(App().player.current_track, Radio):
+            return
+        if App().player.current_track.id is not None:
+            self.__popup_menu()
 
     def _on_primary_press_gesture(self, x, y, event):
         """
             Show information popover
+            @param x as int
+            @param y as int
+            @param evnet as Gdk.Event
         """
         if App().window.is_adaptive or not self._artwork.get_visible():
             return
@@ -153,6 +164,14 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
             popover.populate()
         popover.set_relative_to(self._infobox)
         popover.popup()
+
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Show menu
+            @param x as int
+            @param y as int
+        """
+        self._on_primary_long_press_gesture(x, y)
 
 #######################
 # PRIVATE             #
