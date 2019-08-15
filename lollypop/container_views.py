@@ -126,6 +126,7 @@ class ViewsContainer:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.ARTISTS:
                 view = self._get_view_artists([], data)
+        self._sidebar.select_ids(item_ids, False)
         if view is not None:
             ids = self._sidebar.selected_ids
             if ids:
