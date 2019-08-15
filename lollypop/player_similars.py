@@ -35,17 +35,18 @@ class SimilarsPlayer:
 #######################
 # PRIVATE             #
 #######################
-    def __populate(self, providers):
+    def __populate(self, providers, cancellable):
         """
             Populate view with providers
             @param providers as {}
+            @param cancellable as Gio.Cancellable
         """
         for provider in providers.keys():
             artist = providers[provider]
             App().task_helper.run(provider.get_artist_id,
-                                  artist, self.__cancellable,
+                                  artist, cancellable,
                                   callback=(self.__on_get_artist_id,
-                                            providers, provider))
+                                            providers, provider, cancellable))
             del providers[provider]
             break
 
@@ -84,6 +85,8 @@ class SimilarsPlayer:
         """
             Add a new album if playback finished and wanted by user
         """
+        self.__cancellable.cancel()
+        self.__cancellable = Gio.Cancellable()
         # Check if we need to add a new album
         if App().settings.get_enum("repeat") == Repeat.AUTO and\
                 player.next_track.id is None and\
@@ -98,30 +101,34 @@ class SimilarsPlayer:
                 providers[App().spotify] = artist_name
             if App().lastfm is not None and get_network_available("LASTFM"):
                 providers[App().lastfm] = artist_name
-            self.__populate(providers)
+            self.__populate(providers, self.__cancellable)
 
-    def __on_get_artist_id(self, artist_id, providers, provider):
+    def __on_get_artist_id(self, artist_id, providers, provider, cancellable):
         """
             Get similars
             @param artist_id as str
             @param providers as {}
             @param provider as SpotifyHelper/LastFM
+            @param cancellable as Gio.Cancellable
         """
         if artist_id is None:
             if providers.keys():
                 self.__populate(providers)
         else:
             App().task_helper.run(provider.get_similar_artists,
-                                  artist_id, self.__cancellable,
+                                  artist_id, cancellable,
                                   callback=(self.__on_similar_artists,
-                                            providers))
+                                            providers, cancellable))
 
-    def __on_similar_artists(self, artists, providers):
+    def __on_similar_artists(self, artists, providers, cancellable):
         """
             Add one album from artist to player
             @param artists as [str]
             @param providers as {}
+            @param cancellable as Gio.Cancellable
         """
+        if cancellable.is_cancelled():
+            return
         similar_artist_ids = self.__get_artist_ids(artists)
         added = False
         if similar_artist_ids:
