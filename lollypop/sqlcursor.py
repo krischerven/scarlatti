@@ -54,9 +54,8 @@ class SqlCursor:
         """
         name = current_thread().getName() + obj.__class__.__name__
         if name in App().cursors.keys() and obj.thread_lock.count > 1:
-            App().cursors[name].commit()
             obj.thread_lock.release()
-            sleep(0.01)
+            sleep(0.0001)
             obj.thread_lock.acquire()
 
     def __init__(self, obj, commit=False):

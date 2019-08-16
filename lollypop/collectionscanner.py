@@ -110,11 +110,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @commit needed
         """
         if album_artist_ids:
-            # Update UI based on previous artist calculation
-            storage_type = App().albums.get_storage_type(album_id)
-            if storage_type & StorageType.COLLECTION:
-                for artist_id in album_artist_ids:
-                    GLib.idle_add(self.emit, "artist-updated", artist_id, True)
             App().albums.set_artist_ids(album_id, album_artist_ids)
         # Set artist ids based on content
         else:
@@ -212,16 +207,16 @@ class CollectionScanner(GObject.GObject, TagReader):
         Logger.debug("CollectionScanner::save_track(): Update track")
         self.update_track(track_id, artist_ids, genre_ids)
         Logger.debug("CollectionScanner::save_track(): Update album")
-        SqlCursor.commit(App().db)
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
-        SqlCursor.commit(App().db)
         # This make Lollypop slow, should give a look
-        if storage_type & StorageType.COLLECTION:
+        if storage_type & StorageType.COLLECTION and album_added:
+            SqlCursor.commit(App().db)
+            for artist_id in album_artist_ids:
+                GLib.idle_add(self.emit, "artist-updated", artist_id, True)
             for genre_id in genre_ids:
                 GLib.idle_add(self.emit, "genre-updated", genre_id, True)
-            if album_added:
-                GLib.idle_add(self.emit, "album-updated", album_id, True)
+            GLib.idle_add(self.emit, "album-updated", album_id, True)
         return (track_id, album_id)
 
     def update_track(self, track_id, artist_ids, genre_ids):
@@ -276,10 +271,10 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().albums.clean()
             App().genres.clean()
             App().artists.clean()
-            if notify:
-                if App().albums.get_name(album_id) is None:
-                    GLib.idle_add(self.emit, "album-updated",
-                                  album_id, False)
+            if notify and App().albums.get_name(album_id) is None:
+                SqlCursor.commit(App().db)
+                GLib.idle_add(self.emit, "album-updated",
+                              album_id, False)
                 for artist_id in album_artist_ids + artist_ids:
                     GLib.idle_add(self.emit, "artist-updated",
                                   artist_id, False)
