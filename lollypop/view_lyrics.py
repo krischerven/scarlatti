@@ -153,15 +153,16 @@ class LyricsView(View, InformationController,
                 GLib.source_remove(self.__lyrics_timeout_id)
                 self.__lyrics_timeout_id = None
         # First try to get lyrics from tags
-        from lollypop.tagreader import TagReader
-        reader = TagReader()
+        from lollypop.tagreader import TagReader, Discoverer
+        tagreader = TagReader()
+        discoverer = Discoverer()
         try:
-            info = reader.get_info(self.__current_track.uri)
+            info = discoverer.get_info(self.__current_track.uri)
         except:
             info = None
         if info is not None:
             tags = info.get_tags()
-            self.__lyrics_text = reader.get_lyrics(tags)
+            self.__lyrics_text = tagreader.get_lyrics(tags)
         if self.__lyrics_text:
             self.__lyrics_label.set_text(self.__lyrics_text)
         else:

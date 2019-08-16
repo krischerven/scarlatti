@@ -38,15 +38,16 @@ class SyncLyricsHelper:
         if self.__lrc_file.query_exists():
             self.__get_timestamps()
         else:
-            from lollypop.tagreader import TagReader
-            reader = TagReader()
+            from lollypop.tagreader import Discoverer, TagReader
+            discoverer = Discoverer()
+            tagreader = TagReader()
             try:
-                info = reader.get_info(track.uri)
+                info = discoverer.get_info(track.uri)
             except:
                 info = None
             if info is not None:
                 tags = info.get_tags()
-                for (lyrics, timestamp) in reader.get_synced_lyrics(tags):
+                for (lyrics, timestamp) in tagreader.get_synced_lyrics(tags):
                     self.__timestamps[timestamp] = lyrics
 
     def get_lyrics_for_timestamp(self, timestamp):

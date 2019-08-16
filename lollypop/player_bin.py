@@ -15,7 +15,7 @@ from gi.repository import Gst, GstAudio, GstPbutils, GLib, Gio
 from time import time
 
 from lollypop.player_base import BasePlayer
-from lollypop.tagreader import TagReader
+from lollypop.tagreader import TagReader, Discoverer
 from lollypop.player_plugins import PluginsPlayer
 from lollypop.define import GstPlayFlags, App
 from lollypop.codecs import Codecs
@@ -554,8 +554,8 @@ class BinPlayer(BasePlayer):
             @param uri as str
         """
         try:
-            reader = TagReader()
-            duration = reader.get_info(uri).get_duration() / 1000000000
+            discoverer = Discoverer()
+            duration = discoverer.get_info(uri).get_duration() / 1000000000
             if duration != track.duration and duration > 0:
                 App().tracks.set_duration(track.id, int(duration))
                 track.reset("duration")

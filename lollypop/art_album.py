@@ -14,7 +14,7 @@ from gi.repository import GLib, GdkPixbuf, Gio, Gst
 
 from random import choice
 
-from lollypop.tagreader import TagReader
+from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH
 from lollypop.objects_album import Album
@@ -323,8 +323,8 @@ class AlbumArt:
         if uri.startswith("web:"):
             return
         try:
-            tag_reader = TagReader()
-            info = tag_reader.get_info(uri)
+            discoverer = Discoverer()
+            info = discoverer.get_info(uri)
             exist = False
             if info is not None:
                 (exist, sample) = info.get_tags().get_sample_index("image", 0)
