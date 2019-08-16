@@ -379,7 +379,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                        data["duration"], data["tracknumber"],
                        data["discnumber"], data["discname"], data["year"],
                        data["timestamp"], -1, data["track_popularity"],
-                       data["track_rate"], data["track_loved"], 0, "", 0)
+                       data["track_rate"], data["track_loved"], 0, "", 0,
+                       StorageType.SAVED)
             infos.close(None)
         except Exception as e:
             Logger.error("CollectionScanner::__import_web_tracks(): %s", e)
