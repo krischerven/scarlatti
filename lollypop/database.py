@@ -26,23 +26,23 @@ from lollypop.utils import noaccents, sql_escape
 
 class MyLock:
     """
-        Lock with count
+        Lock with status
     """
     def __init__(self):
         self.__lock = Lock()
-        self.__count = 0
+        self.__locked = False
 
     def acquire(self):
-        self.__count += 1
+        self.__locked = True
         self.__lock.acquire()
 
     def release(self):
-        self.__count -= 1
+        self.__locked = False
         self.__lock.release()
 
     @property
-    def count(self):
-        return self.__count
+    def locked(self):
+        return self.__locked
 
 
 class Database:

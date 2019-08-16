@@ -12,7 +12,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from threading import current_thread
-from time import sleep
 
 from lollypop.define import App
 
@@ -25,7 +24,6 @@ class SqlCursor:
         """
             Add cursor to thread list
         """
-        obj.thread_lock.acquire()
         name = current_thread().getName() + obj.__class__.__name__
         App().cursors[name] = obj.get_cursor()
 
@@ -35,10 +33,11 @@ class SqlCursor:
         """
         name = current_thread().getName() + obj.__class__.__name__
         if name in App().cursors.keys():
+            obj.thread_lock.acquire()
             App().cursors[name].commit()
+            obj.thread_lock.release()
             App().cursors[name].close()
             del App().cursors[name]
-        obj.thread_lock.release()
 
     def commit(obj):
         """
@@ -46,50 +45,39 @@ class SqlCursor:
         """
         name = current_thread().getName() + obj.__class__.__name__
         if name in App().cursors.keys():
-            App().cursors[name].commit()
-
-    def allow_thread_execution(obj):
-        """
-            Release thread lock allowing others threads execution
-        """
-        name = current_thread().getName() + obj.__class__.__name__
-        if name in App().cursors.keys() and obj.thread_lock.count > 1:
+            obj.thread_lock.acquire()
             App().cursors[name].commit()
             obj.thread_lock.release()
-            sleep(0.000001)
-            obj.thread_lock.acquire()
 
     def __init__(self, obj, commit=False):
         """
-            Init object, if using multiple SqlCursor, parent commit param will
-            be used
+            Init object
             @param obj as Database/Playlists/Radios
             @param commit as bool
         """
         self.__obj = obj
-        self.__creator = False
         self.__commit = commit
 
     def __enter__(self):
         """
-            Return cursor for thread, create a new one if needed
+            Get thread cursor or a new one
         """
         name = current_thread().getName() + self.__obj.__class__.__name__
-        if name not in App().cursors.keys():
-            App().cursors[name] = self.__obj.get_cursor()
-            self.__creator = True
-            if self.__commit:
-                self.__obj.thread_lock.acquire()
-        return App().cursors[name]
+        if name in App().cursors.keys():
+            cursor = App().cursors[name]
+        else:
+            cursor = self.__obj.get_cursor()
+        return cursor
 
     def __exit__(self, type, value, traceback):
         """
-            If creator, close cursor and remove it
+            Close cursor if not thread cursor
         """
         name = current_thread().getName() + self.__obj.__class__.__name__
-        if name in App().cursors.keys() and self.__creator:
+        if name not in App().cursors.keys():
+            cursor = self.__obj.get_cursor()
             if self.__commit:
-                App().cursors[name].commit()
+                self.__obj.thread_lock.acquire()
+                cursor.commit()
                 self.__obj.thread_lock.release()
-            App().cursors[name].close()
-            del App().cursors[name]
+            cursor.close()

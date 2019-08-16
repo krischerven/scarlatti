@@ -91,6 +91,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             if scan_type != ScanType.EPHEMERAL:
                 App().window.container.progress.add(self)
                 App().window.container.progress.set_fraction(0, self)
+            Logger.info("Scan started")
             # Launch scan in a separate thread
             self.__thread = Thread(target=self.__scan, args=(scan_type, uris))
             self.__thread.daemon = True
@@ -209,7 +210,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         Logger.debug("CollectionScanner::save_track(): Update album")
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
-        # This make Lollypop slow, should give a look
         if storage_type & StorageType.COLLECTION and album_added:
             SqlCursor.commit(App().db)
             for artist_id in album_artist_ids:
@@ -323,6 +323,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             Notify from main thread when scan finished
             @param modifications as bool
         """
+        Logger.info("Scan finished")
         App().lookup_action("update_db").set_enabled(True)
         App().window.container.progress.set_fraction(1.0, self)
         self.stop()
@@ -524,7 +525,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                             mtime = int(time())
                         Logger.debug("Adding file: %s" % uri)
                         self.__add2db(uri, mtime, storage_type)
-                        SqlCursor.allow_thread_execution(App().db)
                         new_tracks.append(uri)
                 except Exception as e:
                     Logger.error("Adding file: %s, %s" % (uri, e))
@@ -550,10 +550,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                     f = Gio.File.new_for_uri(uri)
                     if not in_collection or not f.query_exists():
                         self.del_from_db(uri, True)
-                        SqlCursor.allow_thread_execution(App().db)
         except Exception as e:
             Logger.warning("CollectionScanner::__scan_files(): % s" % e)
-        SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
         return new_tracks
 
