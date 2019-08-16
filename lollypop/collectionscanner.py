@@ -561,8 +561,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uri as string
             @param track_mtime as int
             @param storage_type as StorageType
-            @return track id as int
-            @warning, be sure SqlCursor is available for App().db
         """
         f = Gio.File.new_for_uri(uri)
         Logger.debug("CollectionScanner::add2db(): Read tags")
@@ -637,12 +635,10 @@ class CollectionScanner(GObject.GObject, TagReader):
         if album_mtime == 0:
             album_mtime = track_mtime
 
-        (track_id, album_id) = self.save_track(
-                   genres, artists, a_sortnames, mb_artist_id,
-                   album_artists, aa_sortnames, mb_album_artist_id,
-                   album_name, mb_album_id, uri, album_loved, album_pop,
-                   album_rate, album_synced, album_mtime, title, duration,
-                   tracknumber, discnumber, discname, year, timestamp,
-                   track_mtime, track_pop, track_rate, track_loved,
-                   track_ltime, mb_track_id, bpm, storage_type)
-        return track_id
+        self.save_track(genres, artists, a_sortnames, mb_artist_id,
+                        album_artists, aa_sortnames, mb_album_artist_id,
+                        album_name, mb_album_id, uri, album_loved, album_pop,
+                        album_rate, album_synced, album_mtime, title, duration,
+                        tracknumber, discnumber, discname, year, timestamp,
+                        track_mtime, track_pop, track_rate, track_loved,
+                        track_ltime, mb_track_id, bpm, storage_type)
