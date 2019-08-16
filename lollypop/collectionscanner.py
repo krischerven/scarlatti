@@ -210,8 +210,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         Logger.debug("CollectionScanner::save_track(): Update album")
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
+        SqlCursor.commit(App().db)
         if storage_type & StorageType.COLLECTION and album_added:
-            SqlCursor.commit(App().db)
             for artist_id in album_artist_ids:
                 GLib.idle_add(self.emit, "artist-updated", artist_id, True)
             for genre_id in genre_ids:
@@ -271,8 +271,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().albums.clean()
             App().genres.clean()
             App().artists.clean()
+            SqlCursor.commit(App().db)
             if notify and App().albums.get_name(album_id) is None:
-                SqlCursor.commit(App().db)
                 GLib.idle_add(self.emit, "album-updated",
                               album_id, False)
                 for artist_id in album_artist_ids + artist_ids:
