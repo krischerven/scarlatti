@@ -225,6 +225,7 @@ class CollectionsSettingsWidget(Gtk.Bin):
             @param history as History
         """
         if uris:
+            App().stop_spotify()
             uri = uris.pop(0)
             App().scanner.del_from_db(uri, True, False)
             self.__progress.set_fraction((count - len(uris)) / count)

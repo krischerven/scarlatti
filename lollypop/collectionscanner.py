@@ -334,6 +334,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.emit("scan-finished", modifications)
         # Update max count value
         App().albums.update_max_count()
+        App().start_spotify()
 
     def __add_monitor(self, dirs):
         """
@@ -445,6 +446,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
+        App().stop_spotify()
+
         if not App().tracks.get_mtimes():
             self.__import_web_tracks()
 

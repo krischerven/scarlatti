@@ -110,6 +110,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.__window = None
         self.__fs_window = None
         self.__scanner_timeout_id = None
+        self.__spotify_timeout_id = None
         self.__scanner_uris = []
         GLib.set_application_name("Lollypop")
         GLib.set_prgname("lollypop")
@@ -191,8 +192,6 @@ class Application(Gtk.Application, ApplicationActions):
         self.task_helper = TaskHelper()
         self.art_helper = ArtHelper()
         self.spotify = SpotifyHelper()
-        GLib.timeout_add_seconds(3600, self.spotify.populate_db)
-        self.spotify.populate_db()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
             MPRIS(self)
@@ -205,6 +204,25 @@ class Application(Gtk.Application, ApplicationActions):
             settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
         install_youtube_dl()
+        self.start_spotify()
+
+    def start_spotify(self):
+        """
+            Start spotify timeout and start a new populate
+        """
+        if self.__spotify_timeout_id is None:
+            self.spotify.populate_db()
+            self.__spotify_timeout_id = GLib.timeout_add_seconds(
+                3600, self.spotify.populate_db)
+
+    def stop_spotify(self):
+        """
+            Stop spotify timeout and stop current populate
+        """
+        if self.__spotify_timeout_id is not None:
+            self.spotify.stop()
+            GLib.source_remove(self.__spotify_timeout_id)
+            self.__spotify_timeout_id = None
 
     def do_startup(self):
         """
