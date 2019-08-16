@@ -49,7 +49,7 @@ class Discoverer:
         return info
 
 
-class TagReader(Discoverer):
+class TagReader:
     """
         Scanner tag reader
     """
@@ -58,7 +58,7 @@ class TagReader(Discoverer):
         """
             Init tag reader
         """
-        Discoverer.__init__(self)
+        pass
 
     def get_title(self, tags, filepath):
         """

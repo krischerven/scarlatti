@@ -21,14 +21,16 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
 from gettext import gettext as _
 from time import time
 import json
+from multiprocessing import cpu_count
 
 from lollypop.inotify import Inotify
 from lollypop.define import App, ScanType, Type, StorageType
 from lollypop.sqlcursor import SqlCursor
-from lollypop.tagreader import TagReader
+from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
 from lollypop.utils import is_audio, is_pls, get_mtime, profile, create_dir
+from lollypop.utils import split_list
 
 
 SCAN_QUERY_INFO = "{},{},{},{}".format(FILE_ATTRIBUTE_STANDARD_NAME,
@@ -55,11 +57,12 @@ class CollectionScanner(GObject.GObject, TagReader):
             Init collection scanner
         """
         GObject.GObject.__init__(self)
-        TagReader.__init__(self)
-
         self.__thread = None
         self.__history = History()
         self.__is_locked = False
+        self.__progress_total = 1
+        self.__progress_count = 0
+        self.__new_tracks = []
         self.__disable_compilations = True
         if App().settings.get_value("auto-update"):
             self.__inotify = Inotify()
@@ -458,14 +461,31 @@ class CollectionScanner(GObject.GObject, TagReader):
             db_uris = App().tracks.get_uris(uris)
         else:
             db_uris = App().tracks.get_uris()
-        new_tracks = self.__scan_files(files, db_uris, scan_type)
+
+        # Get mtime of all tracks to detect which has to be updated
+        db_mtimes = App().tracks.get_mtimes()
+        self.__progress_total = len(files)
+        self.__progress_count = 0
+        split_files = split_list(files, max(1, cpu_count() // 2))
+        self.__new_tracks = []
+        threads = []
+        for files in split_files:
+            thread = App().task_helper.run(self.__scan_files, files, db_mtimes,
+                                           scan_type)
+            threads.append(thread)
+
+        # Wait for scan to finish
+        for thread in threads:
+            thread.join()
+
+        self.__remove_old_tracks(db_uris, scan_type)
 
         if scan_type != ScanType.EPHEMERAL:
             self.__add_monitor(dirs)
-            GLib.idle_add(self.__finish, new_tracks)
+            GLib.idle_add(self.__finish, self.__new_tracks)
 
         if scan_type == ScanType.EPHEMERAL:
-            App().player.play_uris(new_tracks)
+            App().player.play_uris(self.__new_tracks)
 
     def __scan_to_handle(self, uri):
         """
@@ -488,23 +508,17 @@ class CollectionScanner(GObject.GObject, TagReader):
             Logger.error("CollectionScanner::__scan_to_handle(): %s" % e)
         return False
 
-    @profile
-    def __scan_files(self, files, db_uris, scan_type):
+    def __scan_files(self, files, db_mtimes, scan_type):
         """
             Scan music collection for new audio files
             @param files as [str]
-            @param db_uris as [str]
+            @param db_mtimes as {}
             @param scan_type as ScanType
             @return new track uris as [str]
             @thread safe
         """
         SqlCursor.add(App().db)
-        i = 0
-        # New tracks present in collection
-        new_tracks = []
-        # Get mtime of all tracks to detect which has to be updated
-        db_mtimes = App().tracks.get_mtimes()
-        count = len(files) + 1
+        discoverer = Discoverer()
         try:
             # Scan new files
             for (mtime, uri) in files:
@@ -514,7 +528,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                 try:
                     if not self.__scan_to_handle(uri):
                         continue
-                    if mtime > db_mtimes.get(uri, 0):
+                    db_mtime = db_mtimes.get(uri, 0)
+                    if mtime > db_mtime:
                         # If not saved, use 0 as mtime, easy delete on quit
                         if scan_type == ScanType.EPHEMERAL:
                             storage_type = StorageType.EPHEMERAL
@@ -524,47 +539,59 @@ class CollectionScanner(GObject.GObject, TagReader):
                         if db_mtimes:
                             mtime = int(time())
                         Logger.debug("Adding file: %s" % uri)
-                        self.__add2db(uri, mtime, storage_type)
-                        new_tracks.append(uri)
+                        self.__add2db(discoverer, uri, mtime, storage_type)
+                        self.__new_tracks.append(uri)
+                    if db_mtime != 0:
+                        del db_mtimes[uri]
                 except Exception as e:
                     Logger.error("Adding file: %s, %s" % (uri, e))
-                i += 1
-                self.__update_progress(i, count)
-            if scan_type != ScanType.EPHEMERAL and not self.__is_locked:
-                # We need to check files are always in collections
-                if scan_type == ScanType.FULL:
-                    collections = App().settings.get_music_uris()
-                else:
-                    collections = None
-                for uri in db_uris:
-                    # Handle a stop request
-                    if not self.__is_locked:
-                        raise Exception("cancelled")
-                    in_collection = True
-                    if collections is not None:
-                        in_collection = False
-                        for collection in collections:
-                            if collection in uri:
-                                in_collection = True
-                                break
-                    f = Gio.File.new_for_uri(uri)
-                    if not in_collection or not f.query_exists():
-                        self.del_from_db(uri, True)
+                self.__progress_count += 1
+                self.__update_progress(self.__progress_count,
+                                       self.__progress_total)
         except Exception as e:
             Logger.warning("CollectionScanner::__scan_files(): % s" % e)
         SqlCursor.remove(App().db)
-        return new_tracks
 
-    def __add2db(self, uri, track_mtime, storage_type=StorageType.COLLECTION):
+    def __remove_old_tracks(self, uris, scan_type):
+        """
+            Remove non existent tracks from DB
+            @param scan_type as ScanType
+        """
+        SqlCursor.add(App().db)
+        if scan_type != ScanType.EPHEMERAL and not self.__is_locked:
+            # We need to check files are always in collections
+            if scan_type == ScanType.FULL:
+                collections = App().settings.get_music_uris()
+            else:
+                collections = None
+            for uri in uris:
+                # Handle a stop request
+                if not self.__is_locked:
+                    raise Exception("cancelled")
+                in_collection = True
+                if collections is not None:
+                    in_collection = False
+                    for collection in collections:
+                        if collection in uri:
+                            in_collection = True
+                            break
+                f = Gio.File.new_for_uri(uri)
+                if not in_collection or not f.query_exists():
+                    self.del_from_db(uri, True)
+        SqlCursor.remove(App().db)
+
+    def __add2db(self, discoverer, uri,
+                 track_mtime, storage_type=StorageType.COLLECTION):
         """
             Add new file(or update one) to db with information
+            @param discoverer as Discoverer
             @param uri as string
             @param track_mtime as int
             @param storage_type as StorageType
         """
         f = Gio.File.new_for_uri(uri)
         Logger.debug("CollectionScanner::add2db(): Read tags")
-        info = self.get_info(uri)
+        info = discoverer.get_info(uri)
         tags = info.get_tags()
         name = f.get_basename()
         title = self.get_title(tags, name)

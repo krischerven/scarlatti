@@ -44,11 +44,13 @@ class TaskHelper:
             @param command as function
             @param *args as command arguments
             @param **kwargs
+            @return thread as Thread
         """
         thread = Thread(target=self.__run,
                         args=(command, kwargs, *args))
         thread.daemon = True
         thread.start()
+        return thread
 
     def load_uri_content(self, uri, cancellable, callback, *args):
         """
