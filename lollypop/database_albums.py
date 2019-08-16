@@ -425,17 +425,17 @@ class AlbumsDatabase:
                 return v[0]
             return None
 
-    def get_id_by_name_artists(self, album_name, artist_ids):
+    def get_id_by(self, album_name, artist_ids):
         """
-            Get non compilation album id
-            @param album_name as str
+            Get album for name and artists
+            @param album_name as escaped str
             @param artist_ids as [int]
             @return int
         """
         with SqlCursor(App().db) as sql:
             filters = (album_name,)
             request = "SELECT albums.rowid FROM albums, album_artists\
-                       WHERE name=? COLLATE NOCASE AND\
+                       WHERE sql_escape(name)=? COLLATE NOCASE AND\
                        album_artists.album_id=albums.rowid AND (1=0 "
             filters += tuple(artist_ids)
             for artist_id in artist_ids:

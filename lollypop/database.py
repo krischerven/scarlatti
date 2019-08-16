@@ -197,17 +197,19 @@ class Database:
                      storage_type=StorageType.NONE):
         """
             Search if item exists in db
-            @param track as str
             @param album as str
             @param artists as [str]
+            @param track as str/None
             @param storage_type as int
             @return int
         """
         artist_ids = []
         for artist in artists:
-            (artist_id, name) = App().artists.get_id(artist)
+            artist_id = App().artists.get_id_for_escaped_string(
+                sql_escape(artist.lower()))
             artist_ids.append(artist_id)
-        album_id = App().albums.get_id_by_name_artists(album, artist_ids)
+        album_id = App().albums.get_id_by(
+            sql_escape(album.lower()), artist_ids)
         if album_id is None:
             return None
         album_storage_type = App().albums.get_storage_type(album_id)
@@ -216,7 +218,7 @@ class Database:
         if track is None and not album_storage_type & storage_type:
             return album_id
         else:
-            track_id = App().tracks.get_id_by(track,
+            track_id = App().tracks.get_id_by(sql_escape(track.lower()),
                                               album_id,
                                               artist_ids)
             return track_id

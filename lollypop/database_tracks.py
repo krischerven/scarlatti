@@ -165,8 +165,8 @@ class TracksDatabase:
 
     def get_id_by(self, name, album_id, artist_ids=[]):
         """
-            Return track id for name/album/artists
-            @param name as str
+            Get track for name, album and artists
+            @param name as escaped str
             @param album_id as int
             @param artist_ids as [int]
             @return track id as int
@@ -175,7 +175,7 @@ class TracksDatabase:
             if artist_ids:
                 filters = (name, album_id) + tuple(artist_ids)
                 request = "SELECT tracks.rowid FROM tracks\
-                           WHERE name = ? COLLATE NOCASE\
+                           WHERE sql_escape(name) = ? COLLATE NOCASE\
                            AND album_id = ?\
                            AND EXISTS (\
                                 SELECT rowid\
@@ -188,7 +188,7 @@ class TracksDatabase:
             else:
                 filters = (name, album_id)
                 request = "SELECT tracks.rowid FROM tracks\
-                           WHERE name = ? COLLATE NOCASE\
+                           WHERE sql_escape(name) = ? COLLATE NOCASE\
                            AND album_id = ?"
             result = sql.execute(request, filters)
             v = result.fetchone()

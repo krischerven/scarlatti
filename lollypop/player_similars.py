@@ -17,7 +17,7 @@ from random import shuffle
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.define import App, Repeat
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, sql_escape
 
 
 class InternalProvider:
@@ -108,7 +108,7 @@ class SimilarsPlayer:
         similar_artist_ids = []
         for (spotify_id, artist, cover_uri) in artists:
             similar_artist_id = App().artists.get_id_for_escaped_string(
-                artist.lower())
+                sql_escape(artist.lower()))
             if similar_artist_id is not None:
                 if App().artists.get_albums([similar_artist_id]):
                     similar_artist_ids.append(similar_artist_id)

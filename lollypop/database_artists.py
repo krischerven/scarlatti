@@ -99,7 +99,7 @@ class ArtistsDatabase:
     def get_id_for_escaped_string(self, name):
         """
             Get artist id
-            @param name as string
+            @param name as escaped string
             @return int
         """
         with SqlCursor(App().db) as sql:
