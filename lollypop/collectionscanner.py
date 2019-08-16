@@ -19,7 +19,6 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
                               FILE_ATTRIBUTE_TIME_MODIFIED
 
 from gettext import gettext as _
-from threading import Thread
 from time import time
 import json
 
@@ -60,6 +59,7 @@ class CollectionScanner(GObject.GObject, TagReader):
 
         self.__thread = None
         self.__history = History()
+        self.__is_locked = False
         self.__disable_compilations = True
         if App().settings.get_value("auto-update"):
             self.__inotify = Inotify()
@@ -93,9 +93,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 App().window.container.progress.set_fraction(0, self)
             Logger.info("Scan started")
             # Launch scan in a separate thread
-            self.__thread = Thread(target=self.__scan, args=(scan_type, uris))
-            self.__thread.daemon = True
-            self.__thread.start()
+            App().task_helper.run(self.__scan, scan_type, uris)
 
     def update_album(self, album_id, album_artist_ids,
                      genre_ids, year, timestamp):
@@ -290,13 +288,13 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
             Return True if db locked
         """
-        return self.__thread is not None and self.__thread.isAlive()
+        return self.__is_locked
 
     def stop(self):
         """
             Stop scan
         """
-        self.__thread = None
+        self.__is_locked = True
 
     @property
     def inotify(self):
@@ -323,6 +321,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             Notify from main thread when scan finished
             @param modifications as bool
         """
+        self.__is_locked = False
         Logger.info("Scan finished")
         App().lookup_action("update_db").set_enabled(True)
         App().window.container.progress.set_fraction(1.0, self)
@@ -342,7 +341,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         # Add monitors on dirs
         for d in dirs:
             # Handle a stop request
-            if self.__thread is None:
+            if not self.__is_locked:
                 break
             if d.startswith("file://"):
                 self.__inotify.add_monitor(d)
@@ -443,6 +442,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
+        self.__is_locked = True
         App().stop_spotify()
 
         if not App().tracks.get_mtimes():
@@ -509,8 +509,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Scan new files
             for (mtime, uri) in files:
                 # Handle a stop request
-                if self.__thread is None and scan_type != ScanType.EPHEMERAL:
-                    raise Exception("Scan add cancelled")
+                if not self.__is_locked and scan_type != ScanType.EPHEMERAL:
+                    raise Exception("cancelled")
                 try:
                     if not self.__scan_to_handle(uri):
                         continue
@@ -530,7 +530,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                     Logger.error("Adding file: %s, %s" % (uri, e))
                 i += 1
                 self.__update_progress(i, count)
-            if scan_type != ScanType.EPHEMERAL and self.__thread is not None:
+            if scan_type != ScanType.EPHEMERAL and not self.__is_locked:
                 # We need to check files are always in collections
                 if scan_type == ScanType.FULL:
                     collections = App().settings.get_music_uris()
@@ -538,8 +538,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                     collections = None
                 for uri in db_uris:
                     # Handle a stop request
-                    if self.__thread is None:
-                        raise Exception("Scan del cancelled")
+                    if not self.__is_locked:
+                        raise Exception("cancelled")
                     in_collection = True
                     if collections is not None:
                         in_collection = False
