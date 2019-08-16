@@ -59,7 +59,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         GObject.GObject.__init__(self)
         self.__thread = None
         self.__history = History()
-        self.__is_locked = False
         self.__progress_total = 1
         self.__progress_count = 0
         self.__new_tracks = []
@@ -96,7 +95,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 App().window.container.progress.set_fraction(0, self)
             Logger.info("Scan started")
             # Launch scan in a separate thread
-            App().task_helper.run(self.__scan, scan_type, uris)
+            self.__thread = App().task_helper.run(self.__scan, scan_type, uris)
 
     def update_album(self, album_id, album_artist_ids,
                      genre_ids, year, timestamp):
@@ -289,15 +288,16 @@ class CollectionScanner(GObject.GObject, TagReader):
 
     def is_locked(self):
         """
-            Return True if db locked
+            True if db locked
+            @return bool
         """
-        return self.__is_locked
+        return self.__thread is not None and self.__thread.isAlive()
 
     def stop(self):
         """
             Stop scan
         """
-        self.__is_locked = True
+        self.__thread = None
 
     @property
     def inotify(self):
@@ -324,7 +324,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             Notify from main thread when scan finished
             @param modifications as bool
         """
-        self.__is_locked = False
+        self.__thread = None
         Logger.info("Scan finished")
         App().lookup_action("update_db").set_enabled(True)
         App().window.container.progress.set_fraction(1.0, self)
@@ -344,7 +344,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         # Add monitors on dirs
         for d in dirs:
             # Handle a stop request
-            if not self.__is_locked:
+            if self.__thread is None:
                 break
             if d.startswith("file://"):
                 self.__inotify.add_monitor(d)
@@ -445,7 +445,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
-        self.__is_locked = True
         App().stop_spotify()
 
         if not App().tracks.get_mtimes():
@@ -523,7 +522,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Scan new files
             for (mtime, uri) in files:
                 # Handle a stop request
-                if not self.__is_locked and scan_type != ScanType.EPHEMERAL:
+                if self.__thread is None and scan_type != ScanType.EPHEMERAL:
                     raise Exception("cancelled")
                 try:
                     if not self.__scan_to_handle(uri):
@@ -558,7 +557,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param scan_type as ScanType
         """
         SqlCursor.add(App().db)
-        if scan_type != ScanType.EPHEMERAL and not self.__is_locked:
+        if scan_type != ScanType.EPHEMERAL and self.__thread is not None:
             # We need to check files are always in collections
             if scan_type == ScanType.FULL:
                 collections = App().settings.get_music_uris()
@@ -566,7 +565,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 collections = None
             for uri in uris:
                 # Handle a stop request
-                if not self.__is_locked:
+                if self.__thread is None:
                     raise Exception("cancelled")
                 in_collection = True
                 if collections is not None:
