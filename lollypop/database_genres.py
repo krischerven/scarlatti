@@ -14,7 +14,7 @@ import itertools
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, sql_escape
 
 
 class GenresDatabase:
@@ -47,8 +47,11 @@ class GenresDatabase:
             @return genre id as int
         """
         with SqlCursor(App().db) as sql:
+            # Escape string to fix mixed tags:
+            # Alternative Rock, Aternative-Rock, alternative rock
             result = sql.execute("SELECT rowid FROM genres\
-                                  WHERE name=?", (name,))
+                                  WHERE sql_escape(name)=?",
+                                 (sql_escape(name),))
             v = result.fetchone()
             if v is not None:
                 return v[0]
