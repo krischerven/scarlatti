@@ -474,7 +474,7 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
     elif object_id == Type.RECENTS:
         icon = "document-open-recent-symbolic"
     elif object_id == Type.RADIOS:
-        icon = "audio-input-microphone-symbolic"
+        icon = "de.haeckerfelix.gradio-symbolic"
     elif object_id == Type.RANDOMS:
         icon = "media-playlist-shuffle-symbolic"
     elif object_id == Type.LOVED:
@@ -486,7 +486,7 @@ def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
     elif object_id == Type.CURRENT:
         icon = "org.gnome.Lollypop-play-queue-symbolic"
     elif object_id == Type.LYRICS:
-        icon = "view-dual-symbolic"
+        icon = "audio-input-microphone-symbolic"
     elif object_id == Type.SEARCH:
         icon = "edit-find-symbolic"
     elif object_id == Type.GENRES:
