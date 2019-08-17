@@ -592,6 +592,7 @@ class TagReader:
             @commit needed
         """
         artist_ids = []
+        added_artist_ids = []
         artistsplit = artists.split(";")
         sortsplit = sortnames.split(";")
         sortlen = len(sortsplit)
@@ -618,6 +619,7 @@ class TagReader:
                     if sortname is None:
                         sortname = format_artist_name(artist)
                     artist_id = App().artists.add(artist, sortname, mbid)
+                    added_artist_ids.append(artist_id)
                 else:
                     # artists.get_id() is NOCASE, check if we need to update
                     # artist name
@@ -629,7 +631,7 @@ class TagReader:
                         App().artists.set_mb_artist_id(artist_id, mbid)
                 i += 1
                 artist_ids.append(artist_id)
-        return artist_ids
+        return (added_artist_ids, artist_ids)
 
     def add_genres(self, genres):
         """

@@ -165,14 +165,16 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param bpm as int
             @param storage_type as int
         """
-        Logger.debug(
-            "CollectionScanner::save_track(): Add artists %s" % artists)
-        artist_ids = self.add_artists(artists, a_sortnames, mb_artist_id)
-
         Logger.debug("CollectionScanner::save_track(): "
                      "Add album artists %s" % album_artists)
-        album_artist_ids = self.add_artists(album_artists, aa_sortnames,
-                                            mb_album_artist_id)
+        (added_album_artist_ids,
+         album_artist_ids) = self.add_artists(album_artists, aa_sortnames,
+                                              mb_album_artist_id)
+
+        Logger.debug(
+            "CollectionScanner::save_track(): Add artists %s" % artists)
+        (added_artist_ids,
+         artist_ids) = self.add_artists(artists, a_sortnames, mb_artist_id)
 
         # User does not want compilations
         if self.__disable_compilations and not album_artist_ids:
@@ -211,12 +213,13 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
         SqlCursor.commit(App().db)
-        if storage_type & StorageType.COLLECTION and album_added:
-            for artist_id in album_artist_ids:
+        if storage_type & StorageType.COLLECTION:
+            for artist_id in added_album_artist_ids:
                 GLib.idle_add(self.emit, "artist-updated", artist_id, True)
             for genre_id in genre_ids:
                 GLib.idle_add(self.emit, "genre-updated", genre_id, True)
-            GLib.idle_add(self.emit, "album-updated", album_id, True)
+            if album_added:
+                GLib.idle_add(self.emit, "album-updated", album_id, True)
         return (track_id, album_id)
 
     def update_track(self, track_id, artist_ids, genre_ids):

@@ -19,7 +19,7 @@ from lollypop.define import App, Type, ViewType, MARGIN
 from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
-from lollypop.utils import get_icon_name
+from lollypop.utils import get_icon_name, get_font_height
 from lollypop.helper_signals import SignalsHelper, signals
 
 
@@ -39,9 +39,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return {
-            "init": [
+            "map": [
                 (App().art, "artist-artwork-changed",
-                 "_on_artist_artwork_changed")
+                 "_on_artist_artwork_changed"),
+                (App().scanner, "artist-updated", "_on_artist_updated")
             ]
         }
 
@@ -127,6 +128,30 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         for child in self._box.get_children():
             if child.name == prefix:
                 child.set_artwork()
+
+    def _on_artist_updated(self, scanner, artist_id, add):
+        """
+            Add/remove artist to/from list
+            @param scanner as CollectionScanner
+            @param artist_id as int
+            @param add as bool
+        """
+        if add:
+            artist_ids = App().artists.get_ids()
+            position = artist_ids.index(artist_id)
+            artist_name = App().artists.get_name(artist_id)
+            sortname = App().artists.get_sortname(artist_id)
+            widget = RoundedArtistWidget((artist_id, artist_name, sortname),
+                                         self._view_type,
+                                         get_font_height())
+            self._box.insert(widget, position)
+            widget.show()
+            widget.populate()
+        else:
+            for child in self._box.get_children():
+                if child.data == artist_id:
+                    child.destroy()
+                    break
 
 #######################
 # PRIVATE             #
@@ -228,6 +253,9 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         RoundedArtistsView._on_populated(self, widget, lazy_loading_id)
         if self.is_populated:
             self._update_buttons()
+
+    def _on_artist_updated(self, scanner, artist_id, add):
+        pass
 
 #######################
 # PRIVATE             #
