@@ -393,14 +393,20 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param ids as [int]
             @param activate as bool
         """
-        self._box.unselect_all()
-        for row in self._box.get_children():
-            if row.id in ids:
-                self._box.select_row(row)
-        if activate:
-            for row in self._box.get_selected_rows():
-                row.activate()
-                break
+        if ids:
+            rows = []
+            for row in self._box.get_children():
+                if row.id in ids:
+                    rows.append(row)
+
+            if rows:
+                self._box.unselect_all()
+                for row in rows:
+                    self._box.select_row(row)
+                if activate:
+                    rows[0].activate()
+        else:
+            self._box.unselect_all()
 
     def grab_focus(self):
         """
