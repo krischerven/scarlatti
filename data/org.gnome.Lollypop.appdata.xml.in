@@ -8,23 +8,12 @@
   <name>Lollypop</name>
   <summary>Play and organize your music collection</summary>
   <description>
-    <p>Lollypop is a modern music player for GNOME.</p>
-    <p>Features:</p>
+    <p>Lollypop is a lightweight modern and material design-inspired music player designed to work excellently on the GNOME desktop environment. Lollypop also features a party mode which will automatically select party-related playlists to play; a full-screen view which lets you visually access the player from your couch thanks to its HiDPI support; and native support for replay gain.</p>
     <ul>
-      <li>Play many audio formats: MP3, MP4, OGG, and FLAC</li>
-      <li>Intuitive browsing: Walk through your collection by genre/artist and album artwork</li>
-      <li>Search in your collection by artist, album and title</li>
-      <li>Artist bio, lyrics: Get artist and track information from the web</li>
-      <li>Party mode: No awkward silences, let Lollypop choose music for you</li>
-      <li>ReplayGain (RG): Automatically select the best audio level</li>
-      <li>Cover art downloader: Automatic artwork downloader from Last.fm, iTunes and Spotify</li>
-      <li>MTP devices: Sync your music with Android phones and any MTP devices</li>
-      <li>Fullscreen view: Visual access from your couch</li>
-      <li>Radios support</li>
-      <li>Last.fm, Libre.fm and ListenBrainz support</li>
-      <li>Auto install codecs</li>
-      <li>HiDPI support</li>
-      <li>TuneIn support</li>
+      <li><b>Multiple Audio Formats –</b> Play mp3/4, ogg and flac files</li>
+      <li><b>Metadata –</b> Fetch lyrics, artist bio, and automatically download cover arts</li>
+      <li><b>Synchronization –</b> Sync Lollypop with your Android device via MTP</li>
+      <li><b>Audio Scrobbling –</b> You can scrob songs to Last.fm, Libre.fm and ListenBrainz</li>
     </ul>
   </description>
   <releases>
