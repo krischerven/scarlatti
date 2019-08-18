@@ -13,7 +13,7 @@
 from gi.repository import Gtk
 
 
-from lollypop.define import ArtSize, ViewType, MARGIN
+from lollypop.define import ArtSize, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -78,7 +78,7 @@ class BannerWidget(Gtk.Overlay, SizeAllocationHelper):
             Get wanted height
         """
         if self._collapsed:
-            return ArtSize.SMALL
+            return ArtSize.SMALL + MARGIN_SMALL * 2
         elif self._view_type & ViewType.SMALL:
             return ArtSize.MEDIUM + MARGIN * 2
         elif self._view_type & ViewType.MEDIUM:
