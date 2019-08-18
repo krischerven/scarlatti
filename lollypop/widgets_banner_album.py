@@ -90,6 +90,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__loved_widget.show()
         self.__rating_grid.attach(self.__loved_widget, 2, 0, 1, 1)
         self.__cover_widget.set_margin_start(MARGIN)
+        self.__title_label.set_margin_start(MARGIN)
         self.__info_label.set_margin_end(MARGIN)
         self.__rating_grid.set_margin_end(MARGIN)
         self.set_view_type(view_type)
