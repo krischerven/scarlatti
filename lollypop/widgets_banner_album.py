@@ -184,7 +184,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                     self.__on_album_artwork)
             if allocation.width < Size.SMALL + 100:
                 self.__cover_widget.hide()
-            else:
+            elif not self._collapsed:
                 self.__cover_widget.show()
 
     def _on_menu_button_clicked(self, button):
