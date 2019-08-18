@@ -359,7 +359,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 found = True
                 break
         if not found:
-            if self.__base_mask & SelectionListMask.ARTISTS:
+            if self.__base_mask & SelectionListMask.LIST_VIEW:
                 self.__fastscroll.clear()
             row = self.__add_value(object_id, name, name)
             row.populate()
@@ -371,7 +371,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             Update view with values
             @param [(int, str, optional str)]
         """
-        if self.mask & SelectionListMask.ARTISTS:
+        if self.mask & SelectionListMask.LIST_VIEW:
             self.__fastscroll.clear()
         # Remove not found items
         value_ids = set([v[0] for v in values])
@@ -420,7 +420,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         for child in self._box.get_children():
             child.destroy()
-        if self.__base_mask & SelectionListMask.ARTISTS:
+        if self.__base_mask & SelectionListMask.LIST_VIEW:
             self.__fastscroll.clear()
             self.__fastscroll.clear_chars()
 

@@ -84,9 +84,8 @@ class ListsContainer:
         def load():
             genres = App().genres.get()
             return genres
-
-        App().task_helper.run(load, callback=(selection_list.populate,))
         selection_list.set_mask(SelectionListMask.GENRES)
+        App().task_helper.run(load, callback=(selection_list.populate,))
 
     def __show_artists_list(self, selection_list):
         """
@@ -99,8 +98,8 @@ class ListsContainer:
             else:
                 artists = App().artists.get([])
             return artists
-        App().task_helper.run(load, callback=(selection_list.populate,))
         selection_list.set_mask(SelectionListMask.ARTISTS)
+        App().task_helper.run(load, callback=(selection_list.populate,))
 
     def __on_sidebar_activated(self, listbox, row):
         """
