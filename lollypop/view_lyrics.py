@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.view import View
 from lollypop.objects_radio import Radio
 from lollypop.define import App, ArtBehaviour, ViewType, AdaptiveSize, Size
+from lollypop.define import StorageType
 from lollypop.controller_information import InformationController
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
@@ -136,7 +137,6 @@ class LyricsView(View, InformationController,
         self.__current_track = track
         size = max(self.get_allocated_width(), self.get_allocated_height())
         self.update_artwork(size + Size.MINI, size + Size.MINI)
-        self.__lyrics_text = ""
         self.__lyrics_label.set_text(_("Loading…"))
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
@@ -153,16 +153,18 @@ class LyricsView(View, InformationController,
                 GLib.source_remove(self.__lyrics_timeout_id)
                 self.__lyrics_timeout_id = None
         # First try to get lyrics from tags
-        from lollypop.tagreader import TagReader, Discoverer
-        tagreader = TagReader()
-        discoverer = Discoverer()
-        try:
-            info = discoverer.get_info(self.__current_track.uri)
-        except:
-            info = None
-        if info is not None:
-            tags = info.get_tags()
-            self.__lyrics_text = tagreader.get_lyrics(tags)
+        self.__lyrics_text = ""
+        if self.__current_track.storage_type & StorageType.COLLECTION:
+            from lollypop.tagreader import TagReader, Discoverer
+            tagreader = TagReader()
+            discoverer = Discoverer()
+            try:
+                info = discoverer.get_info(self.__current_track.uri)
+            except:
+                info = None
+            if info is not None:
+                tags = info.get_tags()
+                self.__lyrics_text = tagreader.get_lyrics(tags)
         if self.__lyrics_text:
             self.__lyrics_label.set_text(self.__lyrics_text)
         else:
