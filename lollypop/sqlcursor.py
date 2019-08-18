@@ -57,6 +57,7 @@ class SqlCursor:
         """
         self.__obj = obj
         self.__commit = commit
+        self.__cursor = None
 
     def __enter__(self):
         """
@@ -65,19 +66,19 @@ class SqlCursor:
         name = current_thread().getName() + self.__obj.__class__.__name__
         if name in App().cursors.keys():
             cursor = App().cursors[name]
+            return cursor
         else:
-            cursor = self.__obj.get_cursor()
-        return cursor
+            self.__cursor = self.__obj.get_cursor()
+            return self.__cursor
 
     def __exit__(self, type, value, traceback):
         """
             Close cursor if not thread cursor
         """
-        name = current_thread().getName() + self.__obj.__class__.__name__
-        if name not in App().cursors.keys():
-            cursor = self.__obj.get_cursor()
+        if self.__cursor is not None:
             if self.__commit:
                 self.__obj.thread_lock.acquire()
-                cursor.commit()
+                self.__cursor.commit()
                 self.__obj.thread_lock.release()
-            cursor.close()
+            self.__cursor.close()
+        self.__cursor = None
