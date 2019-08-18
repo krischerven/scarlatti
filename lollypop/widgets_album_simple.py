@@ -70,13 +70,12 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
                 style_context.add_class("padding")
             album_name = GLib.markup_escape_text(self.__album.name)
             if self.__view_type & ViewType.ALBUM:
-                self.__label.set_markup("<span alpha='40000'>%s</span>" %
-                                        album_name)
+                self.__label.set_markup(album_name)
             else:
                 artist_name = GLib.markup_escape_text(", ".join(
                                                       self.__album.artists))
                 self.__label.set_markup(
-                    "<b>%s</b>\n<span alpha='40000'>%s</span>" % (album_name,
+                    "<b>%s</b>\n<span alpha='50000'>%s</span>" % (album_name,
                                                                   artist_name))
             self.__artwork = Gtk.Image.new()
             self.__artwork.connect("realize", set_cursor_hand2)
