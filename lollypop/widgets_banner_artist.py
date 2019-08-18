@@ -143,7 +143,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__set_artwork(allocation.width, ArtSize.BANNER + MARGIN * 2)
             if allocation.width < Size.SMALL + 100:
                 self.__badge_artwork.hide()
-            else:
+            elif not self._collapsed:
                 self.__badge_artwork.show()
 
     def _on_label_button_release(self, eventbox, event):
