@@ -448,10 +448,12 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
+        SqlCursor.add(App().db)
         App().stop_spotify()
 
         if not App().tracks.get_mtimes():
             self.__import_web_tracks()
+            SqlCursor.commit(App().db)
 
         (files, dirs) = self.__get_objects_for_uris(scan_type, uris)
 
@@ -481,6 +483,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             thread.join()
 
         self.__remove_old_tracks(db_uris, scan_type)
+
+        SqlCursor.remove(App().db)
 
         if scan_type != ScanType.EPHEMERAL:
             self.__add_monitor(dirs)
@@ -559,7 +563,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             Remove non existent tracks from DB
             @param scan_type as ScanType
         """
-        SqlCursor.add(App().db)
         if scan_type != ScanType.EPHEMERAL and self.__thread is not None:
             # We need to check files are always in collections
             if scan_type == ScanType.FULL:
@@ -580,7 +583,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                 f = Gio.File.new_for_uri(uri)
                 if not in_collection or not f.query_exists():
                     self.del_from_db(uri, True)
-        SqlCursor.remove(App().db)
 
     def __add2db(self, discoverer, uri,
                  track_mtime, storage_type=StorageType.COLLECTION):
