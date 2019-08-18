@@ -42,13 +42,6 @@ class DatabaseUpgrade:
             Upgrade db
             @param db as Database
         """
-        # Migration from gsettings
-        gsettings_version = App().settings.get_value("db-version").get_int32()
-        if gsettings_version != -1:
-            with SqlCursor(db, True) as sql:
-                sql.execute("PRAGMA user_version=%s" % gsettings_version)
-                App().settings.set_value("db-version",
-                                         GLib.Variant("i", -1))
         version = 0
         with SqlCursor(db, True) as sql:
             result = sql.execute("PRAGMA user_version")
