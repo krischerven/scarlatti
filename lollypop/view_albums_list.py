@@ -68,7 +68,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         self._box.get_style_context().add_class("trackswidget")
         self._box.set_vexpand(True)
         self._box.set_selection_mode(Gtk.SelectionMode.NONE)
-        self._box.show()
         GesturesHelper.__init__(self, self._box)
         if view_type & ViewType.DND:
             from lollypop.helper_dnd import DNDHelper
@@ -126,8 +125,10 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 GLib.idle_add(child.destroy)
             self.__add_albums(list(albums))
             self._albums = albums
+            self._box.show()
         else:
             LazyLoadingView.populate(self)
+            self._box.hide()
 
     def jump_to_current(self, scrolled=None):
         """
