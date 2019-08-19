@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 
@@ -96,7 +96,7 @@ class ListsContainer:
             self.__right_list_grid = Gtk.Grid()
             style_context = self.__right_list_grid.get_style_context()
             style_context.add_class("left-gradient")
-            style_context.add_class("opacity-transition")
+            style_context.add_class("opacity-transition-fast")
             self.__right_list = SelectionList(SelectionListMask.VIEW)
             self.__right_list.show()
             self.__gesture = GesturesHelper(
@@ -121,7 +121,7 @@ class ListsContainer:
         """
         if self.__right_list is not None:
             self.__right_list_grid.unset_state_flags(Gtk.StateFlags.VISITED)
-            self.__right_list_grid.hide()
+            GLib.timeout_add(200, self.__right_list_grid.hide)
             self.__right_list.clear()
 
     def __show_genres_list(self, selection_list):

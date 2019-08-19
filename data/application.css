@@ -597,10 +597,19 @@ flowboxchild:selected  {
 }
 
 .opacity-transition {
-    transition: opacity 300ms linear;
+    transition: opacity 1000ms linear;
     opacity: 0;
 }
 
 .opacity-transition:visited {
+  opacity: 1;
+}
+
+.opacity-transition-fast {
+    transition: opacity 200ms linear;
+    opacity: 0;
+}
+
+.opacity-transition-fast:visited {
   opacity: 1;
 }
