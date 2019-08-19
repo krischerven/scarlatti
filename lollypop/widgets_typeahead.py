@@ -43,7 +43,7 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         self.add(widget)
         return {
             "map": [
-                ("App().window.container.list_overlay", "button-press-event",
+                ("App().window.container.left_list", "button-press-event",
                  "_on_list_key_press_event")
             ]
         }

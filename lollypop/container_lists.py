@@ -30,8 +30,7 @@ class ListsContainer:
         """
             Init container
         """
-        self._list_overlay = Gtk.Overlay.new()
-        self._list_overlay.show()
+        pass
 
     def setup_lists(self):
         """
@@ -62,14 +61,6 @@ class ListsContainer:
         return self._sidebar
 
     @property
-    def list_overlay(self):
-        """
-            Get list overlay
-            @return Gtk.Overlay
-        """
-        return self._list_overlay
-
-    @property
     def left_list(self):
         """
             Get left selection list
@@ -77,10 +68,8 @@ class ListsContainer:
         """
         if self.__left_list is None:
             self.__left_list = SelectionList(SelectionListMask.VIEW)
-            self.__left_list.show()
             self.__left_list.listbox.connect("row-activated",
                                              self.__on_left_list_activated)
-            self._list_overlay.add(self.__left_list)
         return self.__left_list
 
     @property
@@ -105,7 +94,7 @@ class ListsContainer:
                                               self.__on_right_list_activated)
             self.__right_list_grid.add(eventbox)
             self.__right_list_grid.add(self.__right_list)
-            self._list_overlay.add_overlay(self.__right_list_grid)
+            self.__left_list.overlay.add_overlay(self.__right_list_grid)
         return self.__right_list
 
 ##############
@@ -165,15 +154,15 @@ class ListsContainer:
         if selected_ids[0] == Type.ARTISTS_LIST:
             self.__show_artists_list(self.left_list)
             self.__hide_right_list()
-            self._list_overlay.show()
+            self.left_list.show()
             self.left_list.set_sidebar_id(Type.ARTISTS_LIST)
         elif selected_ids[0] == Type.GENRES_LIST:
             self.__show_genres_list(self.left_list)
             self.__hide_right_list()
-            self._list_overlay.show()
+            self.left_list.show()
             self.left_list.set_sidebar_id(Type.GENRES_LIST)
         else:
-            self._list_overlay.hide()
+            self.left_list.hide()
 
         if selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()

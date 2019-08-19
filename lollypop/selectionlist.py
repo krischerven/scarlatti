@@ -269,21 +269,22 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         self._scrolled.set_vexpand(True)
         self._viewport.add(self._box)
         if self.__base_mask & SelectionListMask.VIEW:
-            overlay = Gtk.Overlay.new()
-            overlay.set_hexpand(True)
-            overlay.set_vexpand(True)
-            overlay.show()
-            overlay.add(self._scrolled)
+            self.__overlay = Gtk.Overlay.new()
+            self.__overlay.set_hexpand(True)
+            self.__overlay.set_vexpand(True)
+            self.__overlay.show()
+            self.__overlay.add(self._scrolled)
             self.__fastscroll = FastScroll(self._box,
                                            self._scrolled)
-            overlay.add_overlay(self.__fastscroll)
-            self.add(overlay)
+            self.__overlay.add_overlay(self.__fastscroll)
+            self.add(self.__overlay)
             self.__base_mask |= SelectionListMask.LABEL
             App().settings.connect("changed::artist-artwork",
                                    self.__on_artist_artwork_changed)
             App().art.connect("artist-artwork-changed",
                               self.__on_artist_artwork_changed)
         else:
+            self.__overlay = None
             App().settings.connect("changed::show-sidebar-labels",
                                    self.__on_show_sidebar_labels_changed)
             self._scrolled.set_policy(Gtk.PolicyType.NEVER,
@@ -457,6 +458,14 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             if isinstance(child, SelectionListRow):
                 filtered.append(child)
         return filtered
+
+    @property
+    def overlay(self):
+        """
+            Get list overlay
+            @return overlay as Gtk.Overlay
+        """
+        return self.__overlay
 
     @property
     def listbox(self):

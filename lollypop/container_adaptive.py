@@ -43,11 +43,11 @@ class AdaptiveContainer(SignalsHelper):
             self._stack.go_back()
         elif App().window.is_adaptive:
             visible_child = self._stack.get_visible_child()
-            if visible_child == self._list_overlay or\
-                    not self._list_overlay.get_visible():
+            if visible_child == self.left_list or\
+                    not self.left_list.get_visible():
                 Gtk.Stack.set_visible_child(self._stack, self._sidebar)
             else:
-                Gtk.Stack.set_visible_child(self._stack, self._list_overlay)
+                Gtk.Stack.set_visible_child(self._stack, self.left_list)
             if visible_child is not None:
                 visible_child.destroy_later()
         self.emit("can-go-back-changed", self.can_go_back)
@@ -85,14 +85,14 @@ class AdaptiveContainer(SignalsHelper):
         """
         if status:
             self._main_widget.remove(self._sidebar)
-            self._sidebar_two.remove(self._list_overlay)
+            self._sidebar_two.remove(self.left_list)
             self._stack.add(self._sidebar)
-            self._stack.add(self._list_overlay)
+            self._stack.add(self.left_list)
         else:
             self._stack.remove(self._sidebar)
-            self._stack.remove(self._list_overlay)
+            self._stack.remove(self.left_list)
             self._main_widget.attach(self._sidebar, 0, 0, 1, 1)
-            self._sidebar_two.pack1(self._list_overlay, False, False)
+            self._sidebar_two.pack1(self.left_list, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
 
     def _on_visible_child_changed(self, stack, sidebar_id):
@@ -102,7 +102,7 @@ class AdaptiveContainer(SignalsHelper):
             @param sidebar_id as int
         """
         if sidebar_id not in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
-            self._list_overlay.hide()
+            self.left_list.hide()
         self._sidebar.select_ids([sidebar_id], False)
 
 ############
