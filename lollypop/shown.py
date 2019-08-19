@@ -64,12 +64,8 @@ class ShownLists:
         """
         wanted = list(App().settings.get_value("shown-album-lists"))
         lists = []
-        show_list_ids = ShownLists.IDS.copy()
-        if App().settings.get_value("show-sidebar-labels"):
-            del show_list_ids[Type.GENRES_LIST]
-            del show_list_ids[Type.ARTISTS_LIST]
-        for key in show_list_ids.keys():
-            (string, id_mask) = show_list_ids[key]
+        for key in ShownLists.IDS.keys():
+            (string, id_mask) = ShownLists.IDS[key]
             if mask & id_mask and (get_all or key in wanted):
                 lists.append((key, string, ""))
         lists.sort(key=lambda tup: tup[0], reverse=True)

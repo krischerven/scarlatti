@@ -93,6 +93,9 @@ class SelectionListMenu(Gio.Menu):
                     encoded,
                     None,
                     GLib.Variant.new_boolean(exists))
+                if item[0] in [Type.GENRES_LIST, Type.ARTISTS_LIST] and\
+                        App().settings.get_value("show-sidebar-labels"):
+                    action.set_enabled(False)
                 action.connect("change-state",
                                self.__on_shown_change_state,
                                item[0])
