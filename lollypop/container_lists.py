@@ -229,18 +229,21 @@ class ListsContainer:
         """
         Logger.debug("Container::__on_left_list_activated()")
         selected_ids = self.left_list.selected_ids
+        view = None
         if self.left_list.mask & SelectionListMask.GENRES:
-            view = self._get_view_albums(selected_ids, [])
+            if not App().window.is_adaptive:
+                view = self._get_view_albums(selected_ids, [])
             self.__show_artists_list(self.right_list, selected_ids)
             self.__right_list_grid.show()
             self.__right_list_grid.set_state_flags(Gtk.StateFlags.VISITED,
                                                    False)
         else:
             view = self._get_view_artists([], selected_ids)
-        view.show()
-        view.set_sidebar_id(self.left_list.sidebar_id)
-        self._stack.add(view)
-        self._stack.set_visible_child(view)
+        if view is not None:
+            view.show()
+            view.set_sidebar_id(self.left_list.sidebar_id)
+            self._stack.add(view)
+            self._stack.set_visible_child(view)
 
     def __on_right_list_activated(self, listbox, row):
         """
