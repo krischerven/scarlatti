@@ -43,7 +43,7 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         self.add(widget)
         return {
             "map": [
-                ("App().window.container.list_view", "button-press-event",
+                ("App().window.container.list_overlay", "button-press-event",
                  "_on_list_key_press_event")
             ]
         }
@@ -147,5 +147,5 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
             Connect signals
             @param widget as Gtk.Widget
         """
-        if App().window.container.list_view.get_visible():
-            self.__current_focused_view = App().window.container.list_view
+        if App().window.container.left_list.get_visible():
+            self.__current_focused_view = App().window.container.left_list

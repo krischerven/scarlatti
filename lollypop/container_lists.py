@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -18,6 +18,7 @@ from lollypop.logger import Logger
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
 from lollypop.shown import ShownLists
+from lollypop.helper_gestures import GesturesHelper
 
 
 class ListsContainer:
@@ -29,21 +30,20 @@ class ListsContainer:
         """
             Init container
         """
-        pass
+        self._list_overlay = Gtk.Overlay.new()
+        self._list_overlay.show()
 
     def setup_lists(self):
         """
             Setup container lists
         """
+        self.__left_list = None
+        self.__right_list = None
         self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
         self._sidebar.show()
-        self._list_view = SelectionList(SelectionListMask.VIEW)
         self._sidebar.listbox.connect("row-activated",
                                       self.__on_sidebar_activated)
-        self._list_view.listbox.connect("row-activated",
-                                        self.__on_list_view_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
-        self._list_view.connect("map", self.__on_list_view_mapped)
         self._main_widget.insert_column(0)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
@@ -62,12 +62,51 @@ class ListsContainer:
         return self._sidebar
 
     @property
-    def list_view(self):
+    def list_overlay(self):
         """
-            Get second SelectionList
+            Get list overlay
+            @return Gtk.Overlay
+        """
+        return self._list_overlay
+
+    @property
+    def left_list(self):
+        """
+            Get left selection list
             @return SelectionList
         """
-        return self._list_view
+        if self.__left_list is None:
+            self.__left_list = SelectionList(SelectionListMask.VIEW)
+            self.__left_list.show()
+            self.__left_list.listbox.connect("row-activated",
+                                             self.__on_left_list_activated)
+            self._list_overlay.add(self.__left_list)
+        return self.__left_list
+
+    @property
+    def right_list(self):
+        """
+            Get right selection list
+            @return SelectionList
+        """
+        if self.__right_list is None:
+            eventbox = Gtk.EventBox.new()
+            eventbox.set_size_request(50, -1)
+            eventbox.show()
+            self.__right_list_grid = Gtk.Grid()
+            style_context = self.__right_list_grid.get_style_context()
+            style_context.add_class("left-gradient")
+            style_context.add_class("opacity-transition")
+            self.__right_list = SelectionList(SelectionListMask.VIEW)
+            self.__right_list.show()
+            self.__gesture = GesturesHelper(
+                eventbox, primary_press_callback=self.__hide_right_list)
+            self.__right_list.listbox.connect("row-activated",
+                                              self.__on_right_list_activated)
+            self.__right_list_grid.add(eventbox)
+            self.__right_list_grid.add(self.__right_list)
+            self._list_overlay.add_overlay(self.__right_list_grid)
+        return self.__right_list
 
 ##############
 # PROTECTED  #
@@ -76,6 +115,15 @@ class ListsContainer:
 ############
 # PRIVATE  #
 ############
+    def __hide_right_list(self, *ignore):
+        """
+            Hide right list
+        """
+        if self.__right_list is not None:
+            self.__right_list_grid.unset_state_flags(Gtk.StateFlags.VISITED)
+            self.__right_list_grid.hide()
+            self.__right_list.clear()
+
     def __show_genres_list(self, selection_list):
         """
             Setup list for genres
@@ -87,16 +135,17 @@ class ListsContainer:
         selection_list.set_mask(SelectionListMask.GENRES)
         App().task_helper.run(load, callback=(selection_list.populate,))
 
-    def __show_artists_list(self, selection_list):
+    def __show_artists_list(self, selection_list, genre_ids=[]):
         """
             Setup list for artists
             @param list as SelectionList
+            @param genre_ids as [int]
         """
         def load():
             if App().settings.get_value("show-performers"):
-                artists = App().artists.get_all([])
+                artists = App().artists.get_all(genre_ids)
             else:
-                artists = App().artists.get([])
+                artists = App().artists.get(genre_ids)
             return artists
         selection_list.set_mask(SelectionListMask.ARTISTS)
         App().task_helper.run(load, callback=(selection_list.populate,))
@@ -114,15 +163,17 @@ class ListsContainer:
             return
         # Update lists
         if selected_ids[0] == Type.ARTISTS_LIST:
-            self.__show_artists_list(self._list_view)
-            self._list_view.show()
-            self._list_view.set_sidebar_id(Type.ARTISTS_LIST)
+            self.__show_artists_list(self.left_list)
+            self.__hide_right_list()
+            self._list_overlay.show()
+            self.left_list.set_sidebar_id(Type.ARTISTS_LIST)
         elif selected_ids[0] == Type.GENRES_LIST:
-            self.__show_genres_list(self._list_view)
-            self._list_view.show()
-            self._list_view.set_sidebar_id(Type.GENRES_LIST)
+            self.__show_genres_list(self.left_list)
+            self.__hide_right_list()
+            self._list_overlay.show()
+            self.left_list.set_sidebar_id(Type.GENRES_LIST)
         else:
-            self._list_view.hide()
+            self._list_overlay.hide()
 
         if selected_ids[0] == Type.PLAYLISTS:
             view = self._get_view_playlists()
@@ -158,11 +209,10 @@ class ListsContainer:
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted
         if App().window.is_adaptive\
-                and self._list_view.get_visible()\
                 and selected_ids[0] in [Type.ARTISTS_LIST,
                                         Type.GENRES_LIST]:
-            self._stack.set_visible_child(self._list_view)
-            self._list_view.set_sidebar_id(selected_ids[0])
+            self._stack.set_visible_child(self.left_list)
+            self.left_list.set_sidebar_id(selected_ids[0])
         elif view is not None:
             self._stack.set_visible_child(view)
             view.set_sidebar_id(selected_ids[0])
@@ -182,27 +232,37 @@ class ListsContainer:
             else:
                 selection_list.select_ids([startup_id], True)
 
-    def __on_list_view_activated(self, listbox, row):
+    def __on_left_list_activated(self, listbox, row):
         """
             Update view based on selected object
             @param listbox as Gtk.ListBox
             @param row as Gtk.ListBoxRow
         """
-        Logger.debug("Container::__on_list_view_activated()")
-        selected_ids = self._list_view.selected_ids
-        if self._list_view.mask & SelectionListMask.GENRES:
+        Logger.debug("Container::__on_left_list_activated()")
+        selected_ids = self.left_list.selected_ids
+        if self.left_list.mask & SelectionListMask.GENRES:
             view = self._get_view_albums(selected_ids, [])
+            self.__show_artists_list(self.right_list, selected_ids)
+            self.__right_list_grid.show()
+            self.__right_list_grid.set_state_flags(Gtk.StateFlags.VISITED,
+                                                   False)
         else:
             view = self._get_view_artists([], selected_ids)
         view.show()
-        view.set_sidebar_id(self._list_view.sidebar_id)
+        view.set_sidebar_id(self.left_list.sidebar_id)
         self._stack.add(view)
         self._stack.set_visible_child(view)
 
-    def __on_list_view_mapped(self, widget):
+    def __on_right_list_activated(self, listbox, row):
         """
-            Force paned width, see ignore in container.py
+            Update view based on selected object
+            @param listbox as Gtk.ListBox
+            @param row as Gtk.ListBoxRow
         """
-        position = App().settings.get_value(
-            "paned-listview-width").get_int32()
-        GLib.timeout_add(100, self._sidebar_two.set_position, position)
+        genre_ids = self.left_list.selected_ids
+        artist_ids = self.right_list.selected_ids
+        view = self._get_view_artists(genre_ids, artist_ids)
+        view.show()
+        view.set_sidebar_id(self.left_list.sidebar_id)
+        self._stack.add(view)
+        self._stack.set_visible_child(view)
