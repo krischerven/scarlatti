@@ -76,6 +76,18 @@ class SelectionListMenu(Gio.Menu):
                 startup_menu.append_item(item)
                 self.append_section(_("Startup"), startup_menu)
 
+        # Options
+        if rowid is None:
+            options_menu = Gio.Menu()
+            action = Gio.SimpleAction.new_stateful(
+                    "show_label",
+                    None,
+                    App().settings.get_value("show-sidebar-labels"))
+            action.connect("change-state",
+                           self.__on_show_label_change_state)
+            App().add_action(action)
+            options_menu.append(_("Show text"), "app.show_label")
+            self.append_section(_("Options"), options_menu)
         # Shown menu
         if mask & SelectionListMask.PLAYLISTS or rowid is None:
             shown_menu = Gio.Menu()
@@ -156,3 +168,20 @@ class SelectionListMenu(Gio.Menu):
         else:
             App().settings.set_value("startup-id",
                                      GLib.Variant("i", -1))
+
+    def __on_show_label_change_state(self, action, variant):
+        """
+            Update option
+            @param action as Gio.SimpleAction
+            @param variant as GVariant
+        """
+        action.set_state(variant)
+        App().settings.set_value("show-sidebar-labels",
+                                 GLib.Variant("b", variant))
+        for (item_id, name, ignore) in ShownLists.get(self.__mask, True):
+            if item_id in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
+                encoded = sha256(name.encode("utf-8")).hexdigest()
+                action = App().lookup_action(encoded)
+                action.set_enabled(not variant)
+                if action.get_state():
+                    action.change_state(GLib.Variant("b", not variant))

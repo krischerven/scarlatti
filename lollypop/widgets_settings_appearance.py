@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, Type
+from lollypop.define import App
 
 
 class AppearanceSettingsWidget(Gtk.Bin):
@@ -48,10 +48,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
 
         self.__popover_compilations = builder.get_object(
             "popover-compilations")
-
-        switch_sidebar_labels = builder.get_object("switch_sidebar_labels")
-        switch_sidebar_labels.set_state(
-            App().settings.get_value("show-sidebar-labels"))
 
         switch_artwork = builder.get_object("switch_artwork")
         switch_artwork.set_state(App().settings.get_value("artist-artwork"))
@@ -105,24 +101,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
                                  GLib.Variant("b", state))
         if state:
             App().art.cache_artists_artwork()
-
-    def _on_switch_sidebar_labels_state_set(self, widget, state):
-        """
-            Update sidebar labels setting
-            @param widget as Gtk.Switch
-            @param state as bool
-        """
-        App().settings.set_value("show-sidebar-labels",
-                                 GLib.Variant("b", state))
-        shown = list(App().settings.get_value("shown-album-lists"))
-        if Type.ARTISTS_LIST in shown:
-            shown.remove(Type.ARTISTS_LIST)
-            App().window.container.sidebar.remove_value(Type.ARTISTS_LIST)
-        if Type.GENRES_LIST in shown:
-            shown.remove(Type.GENRES_LIST)
-            App().window.container.sidebar.remove_value(Type.GENRES_LIST)
-        App().settings.set_value("shown-album-lists",
-                                 GLib.Variant("ai", shown))
 
     def _on_combo_order_by_changed(self, widget):
         """
