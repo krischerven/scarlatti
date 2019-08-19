@@ -132,9 +132,9 @@ class SelectionListMenu(Gio.Menu):
         else:
             option = "shown-album-lists"
         wanted = list(App().settings.get_value(option))
-        if variant:
+        if variant and rowid not in wanted:
             wanted.append(rowid)
-        else:
+        elif rowid in wanted:
             wanted.remove(rowid)
         App().settings.set_value(option, GLib.Variant("ai", wanted))
         if self.__mask & SelectionListMask.PLAYLISTS:
