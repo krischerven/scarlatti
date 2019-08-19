@@ -233,13 +233,8 @@
             <summary>Show track number from tags</summary>
             <description></description>
         </key>
-        <key type="i" name="paned-mainlist-width">
-            <default>200</default>
-            <summary>INTERNAL</summary>
-            <description></description>
-        </key>
         <key type="i" name="paned-listview-width">
-            <default>200</default>
+            <default>280</default>
             <summary>INTERNAL</summary>
             <description></description>
         </key>
