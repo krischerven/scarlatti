@@ -13,7 +13,7 @@
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type
+from lollypop.define import App, Type, StorageType
 from lollypop.objects import Base
 
 
@@ -56,6 +56,7 @@ class Radio(Base):
         """
         Base.__init__(self, App().radios)
         self.id = self.album_id = radio_id
+        self.storage_type = StorageType.COLLECTION
         self.album = RadioAlbum(self)
         self.artists = self.genres = self.album_artists = [_("Radio")]
         self.path = self.discname = ""
