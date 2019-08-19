@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App
+from lollypop.define import App, Type
 
 
 class AppearanceSettingsWidget(Gtk.Bin):
@@ -114,6 +114,15 @@ class AppearanceSettingsWidget(Gtk.Bin):
         """
         App().settings.set_value("show-sidebar-labels",
                                  GLib.Variant("b", state))
+        shown = list(App().settings.get_value("shown-album-lists"))
+        if Type.ARTISTS_LIST in shown:
+            shown.remove(Type.ARTISTS_LIST)
+            App().window.container.sidebar.remove_value(Type.ARTISTS_LIST)
+        if Type.GENRES_LIST in shown:
+            shown.remove(Type.GENRES_LIST)
+            App().window.container.sidebar.remove_value(Type.GENRES_LIST)
+        App().settings.set_value("shown-album-lists",
+                                 GLib.Variant("ai", shown))
 
     def _on_combo_order_by_changed(self, widget):
         """
