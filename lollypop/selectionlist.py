@@ -268,7 +268,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         GesturesHelper.__init__(self, self._box)
         self._scrolled.set_vexpand(True)
         self._viewport.add(self._box)
-        if self.__base_mask & SelectionListMask.LIST_VIEW:
+        if self.__base_mask & SelectionListMask.VIEW:
             overlay = Gtk.Overlay.new()
             overlay.set_hexpand(True)
             overlay.set_vexpand(True)
@@ -359,7 +359,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 found = True
                 break
         if not found:
-            if self.__base_mask & SelectionListMask.LIST_VIEW:
+            if self.__base_mask & SelectionListMask.VIEW:
                 self.__fastscroll.clear()
             row = self.__add_value(object_id, name, name)
             row.populate()
@@ -371,7 +371,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             Update view with values
             @param [(int, str, optional str)]
         """
-        if self.mask & SelectionListMask.LIST_VIEW:
+        if self.mask & SelectionListMask.VIEW:
             self.__fastscroll.clear()
         # Remove not found items
         value_ids = set([v[0] for v in values])
@@ -420,7 +420,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         for child in self._box.get_children():
             child.destroy()
-        if self.__base_mask & SelectionListMask.LIST_VIEW:
+        if self.__base_mask & SelectionListMask.VIEW:
             self.__fastscroll.clear()
             self.__fastscroll.clear_chars()
 
@@ -518,7 +518,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         self.__base_mask &= ~(SelectionListMask.LABEL |
                               SelectionListMask.ELLIPSIZE)
-        if status or self.mask & SelectionListMask.LIST_VIEW:
+        if status or self.mask & SelectionListMask.VIEW:
             self.__base_mask |= (SelectionListMask.LABEL |
                                  SelectionListMask.ELLIPSIZE)
         elif App().settings.get_value("show-sidebar-labels"):
@@ -549,7 +549,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        if self.__base_mask & SelectionListMask.LIST_VIEW:
+        if self.__base_mask & SelectionListMask.VIEW:
             row = self._box.get_row_at_y(y)
             if row is not None:
                 (exists, state) = event.get_state()
@@ -658,7 +658,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
             @param relative as Gtk.Widget
         """
         if self.__base_mask & (SelectionListMask.SIDEBAR |
-                               SelectionListMask.LIST_VIEW):
+                               SelectionListMask.VIEW):
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_utils import Popover
             if row is None:

@@ -135,7 +135,7 @@ class ScanType:
 class SelectionListMask:
     NONE = 1 << 0
     SIDEBAR = 1 << 1
-    LIST_VIEW = 1 << 2
+    VIEW = 1 << 2
     ARTISTS = 1 << 3
     GENRES = 1 << 4
     PLAYLISTS = 1 << 5

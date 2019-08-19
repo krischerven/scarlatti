@@ -39,7 +39,7 @@ class SelectionListMenu(Gio.Menu):
 
         if rowid is not None:
             if not App().devices and mask & (SelectionListMask.SIDEBAR |
-                                             SelectionListMask.LIST_VIEW):
+                                             SelectionListMask.VIEW):
                 section = Gio.Menu()
                 section.append(_("No connected devices"), "app.none")
             elif mask & SelectionListMask.PLAYLISTS:

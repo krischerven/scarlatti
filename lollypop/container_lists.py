@@ -37,7 +37,7 @@ class ListsContainer:
         """
         self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
         self._sidebar.show()
-        self._list_view = SelectionList(SelectionListMask.LIST_VIEW)
+        self._list_view = SelectionList(SelectionListMask.VIEW)
         self._sidebar.listbox.connect("row-activated",
                                       self.__on_sidebar_activated)
         self._list_view.listbox.connect("row-activated",
