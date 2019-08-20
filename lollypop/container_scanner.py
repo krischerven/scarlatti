@@ -57,7 +57,7 @@ class ScannerContainer:
             @param genre_id as int
             @param add as bool
         """
-        if self.left_list.mask & SelectionListMask.GENRES:
+        if Type.GENRES_LIST in self.sidebar.selected_ids:
             if add:
                 genre_name = App().genres.get_name(genre_id)
                 self.left_list.add_value((genre_id, genre_name, genre_name))
