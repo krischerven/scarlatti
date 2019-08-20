@@ -31,6 +31,7 @@ class DNDHelper(GObject.Object):
             @params view_type as ViewType
         """
         GObject.Object.__init__(self)
+        return
         self.__listbox = listbox
         self.__view_type = view_type
         self.__drag_begin_rows = []
