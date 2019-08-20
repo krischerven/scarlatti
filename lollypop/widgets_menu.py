@@ -108,7 +108,7 @@ class MenuBuilder(Gtk.Stack):
         if close:
             button.connect("clicked", lambda x: self.emit("closed"))
         if tooltip is not None:
-            button.set_tooltip_text(tooltip.get_string())
+            button.set_tooltip_markup(tooltip.get_string())
             button.set_has_tooltip(True)
         if target is not None:
             button.set_action_target_value(target)

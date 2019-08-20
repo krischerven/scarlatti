@@ -89,11 +89,13 @@ class EditMenu(Gio.Menu):
         menu_item = Gio.MenuItem.new(_("Modify information"),
                                      "app.edit_tag_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        if not App().art.tag_editor:
+        if App().art.tag_editor:
             edit_tag_action.set_enabled(False)
             menu_item.set_attribute_value(
                 "tooltip",
-                GLib.Variant("s", _("Please install easytag or kid3-qt")))
+                GLib.Variant(
+                    "s",
+                    _("Please install <i>easytag</i> or <i>kid3-qt</i>")))
         self.append_item(menu_item)
 
     def __on_buy_action_activate(self, action, variant):
