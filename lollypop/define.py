@@ -218,11 +218,12 @@ class Type:
     ALL = -100
     DEVICE_ALBUMS = -1000
     DEVICE_PLAYLISTS = -1001
-    SEPARATOR = -2000
+    # Stored in DB, can't be changed
     COMPILATIONS = -2001
-    CURRENT = -2002
-    SEARCH = -2003
-    LYRICS = -2004
+    SEPARATOR = -2002
+    CURRENT = -2003
+    SEARCH = -2004
+    LYRICS = -2005
 
 
 LATIN1_ENCODING = b"\x00"

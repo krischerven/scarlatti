@@ -99,6 +99,8 @@ class SelectionListMenu(Gio.Menu):
                 lists = ShownLists.get(mask, True)
                 wanted = App().settings.get_value("shown-album-lists")
             for item in lists:
+                if item[0] == Type.SEPARATOR:
+                    continue
                 exists = item[0] in wanted
                 encoded = sha256(item[1].encode("utf-8")).hexdigest()
                 action = Gio.SimpleAction.new_stateful(

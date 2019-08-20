@@ -12,7 +12,7 @@
 
 from gettext import gettext as _
 
-from lollypop.define import Type, App, SelectionListMask
+from lollypop.define import Type, App
 
 
 class ShownLists:
@@ -21,38 +21,25 @@ class ShownLists:
     """
 
     IDS = {
-        Type.SUGGESTIONS: (_("Suggestions"),
-                           SelectionListMask.SIDEBAR),
-        Type.POPULARS: (_("Popular albums"),
-                        SelectionListMask.SIDEBAR),
-        Type.RANDOMS: (_("Random albums"),
-                       SelectionListMask.SIDEBAR),
-        Type.LOVED: (_("Loved albums"),
-                     SelectionListMask.SIDEBAR),
-        Type.RECENTS: (_("Recently added albums"),
-                       SelectionListMask.SIDEBAR),
-        Type.NEVER: (_("Unplayed albums"),
-                     SelectionListMask.SIDEBAR),
-        Type.PLAYLISTS: (_("Playlists"),
-                         SelectionListMask.SIDEBAR),
-        Type.RADIOS: (_("Radios"),
-                      SelectionListMask.SIDEBAR),
-        Type.YEARS: (_("Years"),
-                     SelectionListMask.SIDEBAR),
-        Type.GENRES: (_("Genres"),
-                      SelectionListMask.SIDEBAR),
-        Type.GENRES_LIST: (_("Genres (list)"),
-                           SelectionListMask.SIDEBAR),
-        Type.WEB: (_("Web"),
-                   SelectionListMask.SIDEBAR),
-        Type.LYRICS: (_("Lyrics"),
-                      SelectionListMask.SIDEBAR),
-        Type.ALL: (_("Albums"),
-                   SelectionListMask.SIDEBAR),
-        Type.ARTISTS: (_("Artists"), SelectionListMask.SIDEBAR),
-        Type.ARTISTS_LIST: (_("Artists (list)"),
-                            SelectionListMask.SIDEBAR),
-        Type.COMPILATIONS: (_("Compilations"), SelectionListMask.SIDEBAR),
+        Type.SUGGESTIONS: _("Suggestions"),
+        Type.POPULARS: _("Popular albums"),
+        Type.RANDOMS: _("Random albums"),
+        Type.LOVED: _("Loved albums"),
+        Type.RECENTS: _("Recently added albums"),
+        Type.NEVER: _("Unplayed albums"),
+        Type.PLAYLISTS: _("Playlists"),
+        Type.RADIOS: _("Radios"),
+        Type.YEARS: _("Years"),
+        Type.GENRES: _("Genres"),
+        Type.GENRES_LIST: _("Genres (list)"),
+        Type.WEB: _("Web"),
+        Type.LYRICS: _("Lyrics"),
+        Type.ALL: _("Albums"),
+        Type.ARTISTS: _("Artists"),
+        Type.ARTISTS_LIST: _("Artists (list)"),
+        Type.SEARCH: _("Search"),
+        Type.CURRENT: _("Current playlist"),
+        Type.COMPILATIONS: _("Compilations"),
     }
 
     def get(mask, get_all=False):
@@ -65,9 +52,10 @@ class ShownLists:
         wanted = list(App().settings.get_value("shown-album-lists"))
         lists = []
         for key in ShownLists.IDS.keys():
-            (string, id_mask) = ShownLists.IDS[key]
-            if mask & id_mask and (get_all or key in wanted):
+            string = ShownLists.IDS[key]
+            if get_all or key in wanted:
                 lists.append((key, string, ""))
+        lists.append((Type.SEPARATOR, "", ""))
         lists.sort(key=lambda tup: tup[0], reverse=True)
         return lists
 

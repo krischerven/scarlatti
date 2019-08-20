@@ -12,8 +12,6 @@
 
 from gi.repository import Gtk, GLib
 
-from gettext import gettext as _
-
 from lollypop.logger import Logger
 from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
@@ -46,10 +44,6 @@ class ListsContainer:
         self._main_widget.insert_column(0)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
-        items.append((Type.SEPARATOR, "", ""))
-        items.append((Type.SEARCH, _("Search"), _("Search")))
-        items.append((Type.CURRENT, _("Current playlist"),
-                     _("Current playlist")))
         self._sidebar.populate(items)
 
     @property
