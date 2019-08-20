@@ -89,7 +89,7 @@ class EditMenu(Gio.Menu):
         menu_item = Gio.MenuItem.new(_("Modify information"),
                                      "app.edit_tag_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        if App().art.tag_editor:
+        if not App().art.tag_editor:
             edit_tag_action.set_enabled(False)
             menu_item.set_attribute_value(
                 "tooltip",
