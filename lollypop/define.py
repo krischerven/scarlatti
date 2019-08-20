@@ -215,7 +215,6 @@ class Type:
     ALBUM = -23
     SMART = -24
     EQUALIZER = -25
-    LYRICS = -26
     ALL = -100
     DEVICE_ALBUMS = -1000
     DEVICE_PLAYLISTS = -1001
@@ -223,6 +222,7 @@ class Type:
     COMPILATIONS = -2001
     CURRENT = -2002
     SEARCH = -2003
+    LYRICS = -2004
 
 
 LATIN1_ENCODING = b"\x00"

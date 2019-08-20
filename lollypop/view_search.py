@@ -107,6 +107,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__cancellable = Gio.Cancellable()
 
     @property
+    def args(self):
+        return None
+
+    @property
     def should_destroy(self):
         return False
 

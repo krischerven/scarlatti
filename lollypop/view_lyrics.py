@@ -176,6 +176,10 @@ class LyricsView(View, InformationController,
                 self.__lyrics_label.set_text(
                     _("You have disabled lyrics search in network settings !"))
 
+    @property
+    def args(self):
+        return None
+
 ##############
 # PROTECTED  #
 ##############
