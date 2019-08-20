@@ -190,11 +190,12 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @param disc_number as int
         """
         if TracksView.get_populated(self):
-            from lollypop.view_albums_box import OthersAlbumsBoxView
+            from lollypop.view_albums_box import AlbumsArtistBoxView
             for artist_id in self._album.artist_ids:
-                others_box = OthersAlbumsBoxView(self._album, artist_id,
+                others_box = AlbumsArtistBoxView(self._album, artist_id,
                                                  ViewType.SMALL |
-                                                 ViewType.ALBUM)
+                                                 ViewType.ALBUM |
+                                                 ViewType.SCROLLED)
                 others_box.populate()
                 self.__grid.add(others_box)
                 self.__others_boxes.append(others_box)

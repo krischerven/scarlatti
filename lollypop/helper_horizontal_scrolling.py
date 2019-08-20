@@ -41,10 +41,10 @@ class HorizontalScrollingHelper:
         """
             Update buttons state
         """
-        value = self._box.get_allocated_width()
+        value = self._scrolled.get_allocated_width()
         self._backward_button.set_sensitive(self.__adjustment.get_value() !=
                                             self.__adjustment.get_lower())
-        self._forward_button.set_sensitive(self.__adjustment.get_value() <=
+        self._forward_button.set_sensitive(self.__adjustment.get_value() !=
                                            self.__adjustment.get_upper() -
                                            value)
 
