@@ -62,6 +62,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__progress_total = 1
         self.__progress_count = 0
         self.__new_tracks = []
+        self.__new_non_album_artists = []
         self.__disable_compilations = True
         if App().settings.get_value("auto-update"):
             self.__inotify = Inotify()
@@ -213,8 +214,14 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.update_album(album_id, album_artist_ids,
                           genre_ids, year, timestamp)
         SqlCursor.commit(App().db)
+        # We need to keep new artist because we don't know yet if we
+        # are playing with a compilation or an album
+        self.__new_non_album_artists += list(
+            set(added_artist_ids) - set(added_album_artist_ids))
         if storage_type & StorageType.COLLECTION:
             for artist_id in added_album_artist_ids:
+                if artist_id in self.__new_non_album_artists:
+                    self.__new_non_album_artists.remove(artist_id)
                 GLib.idle_add(self.emit, "artist-updated", artist_id, True)
             for genre_id in genre_ids:
                 GLib.idle_add(self.emit, "genre-updated", genre_id, True)
@@ -448,6 +455,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
+        self.__new_non_album_artists = []
         SqlCursor.add(App().db)
         App().stop_spotify()
 
@@ -556,6 +564,10 @@ class CollectionScanner(GObject.GObject, TagReader):
                                        self.__progress_total)
         except Exception as e:
             Logger.warning("CollectionScanner::__scan_files(): % s" % e)
+        for artist_id in self.__new_non_album_artists:
+            album_ids = App().albums.get_ids([artist_id], [])
+            if album_ids:
+                self.emit("artist-updated", artist_id, True)
         SqlCursor.remove(App().db)
 
     def __remove_old_tracks(self, uris, scan_type):
