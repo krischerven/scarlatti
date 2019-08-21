@@ -204,7 +204,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Stop view loading
         """
         self.__artwork = None
-        if self.__tracks_view.get_populated():
+        if self.__tracks_view.is_populated:
             self.__tracks_view.stop()
 
     def set_artwork(self):
@@ -247,7 +247,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Return True if populated
             @return bool
         """
-        return not self.revealed or self.__tracks_view.get_populated()
+        return not self.revealed or self.__tracks_view.is_populated
 
     @property
     def name(self):
