@@ -143,7 +143,9 @@ class DNDHelper(GObject.Object):
                                    True)
         split_album_row.populate()
         for row in rows:
-            album_row.album.remove_track(row.track)
+            empty = album_row.album.remove_track(row.track)
+            if empty:
+                album_row.destroy()
             row.destroy()
         return split_album_row
 
