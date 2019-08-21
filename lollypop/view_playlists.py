@@ -259,7 +259,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            self._view.set_size_request(allocation.width / 2, -1)
+            self._view.box.set_size_request(allocation.width / 2, -1)
 
     def _on_value_changed(self, adj):
         """
