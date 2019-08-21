@@ -60,13 +60,21 @@ class AlbumRow(Gtk.ListBoxRow):
         Gtk.ListBoxRow.__init__(self)
         self.__view_type = view_type
         self.__revealer = None
-        self.__reveal = reveal
         self.__artwork = None
         self.__album = album
         self.__cancellable = Gio.Cancellable()
         self.set_sensitive(False)
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
+        self.__tracks_view = TracksView(self.__album, None,
+                                        Gtk.Orientation.VERTICAL,
+                                        self.__view_type)
+        self.__tracks_view.connect("populated", self.__on_tracks_populated)
+        self.__tracks_view.show()
+        if reveal or self.__view_type & ViewType.PLAYLISTS:
+            self.populate()
+            self.reveal(True)
+            self.__tracks_view.populate()
 
     def populate(self):
         """
@@ -74,11 +82,6 @@ class AlbumRow(Gtk.ListBoxRow):
         """
         if self.__artwork is not None:
             return
-        self.__tracks_view = TracksView(self.__album, None,
-                                        Gtk.Orientation.VERTICAL,
-                                        self.__view_type)
-        self.__tracks_view.connect("populated", self.__on_tracks_populated)
-        self.__tracks_view.show()
         self.__artwork = Gtk.Image.new()
         App().art_helper.set_frame(self.__artwork, "small-cover-frame",
                                    ArtSize.SMALL, ArtSize.SMALL)
@@ -147,8 +150,6 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__revealer.add(self.__tracks_view)
         self.add(grid)
         self.set_playing_indicator()
-        if self.__reveal or self.__view_type & ViewType.PLAYLISTS:
-            self.reveal(True)
         self.set_artwork()
 
     def append_rows(self, tracks):
