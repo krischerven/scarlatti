@@ -193,7 +193,7 @@ class TrackRow(Gtk.ListBoxRow):
             @param y as int
         """
         def on_closed(widget):
-            self.unset_state_flags(Gtk.StateFlags.FOCUSED)
+            self.unset_state_flags(Gtk.StateFlags.CHECKED)
             self.set_indicator()
 
         from lollypop.menu_objects import TrackMenu, TrackMenuExt
@@ -206,7 +206,7 @@ class TrackRow(Gtk.ListBoxRow):
             menu_ext = TrackMenuExt(self._track)
             menu_ext.show()
             main.add(menu_ext)
-        self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
+        self.set_state_flags(Gtk.StateFlags.CHECKED, False)
         popover = popup_widget(menu_widget, parent, x, y)
         if popover is None:
             menu_widget.connect("closed", on_closed)

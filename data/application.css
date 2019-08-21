@@ -21,7 +21,6 @@ flowboxchild:selected  {
     color: @theme_fg_color;
 }
 
-
 .usagebar {
     border: none;
     background-color: transparent;
@@ -480,7 +479,7 @@ flowboxchild:selected  {
     color: @theme_fg_color;
 }
 
-.trackrow:focus {
+.trackrow:checked {
     border-radius: 5px;
 	background-color: alpha(@theme_fg_color, 0.05);
     color: @theme_fg_color;

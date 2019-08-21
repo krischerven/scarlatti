@@ -13,14 +13,13 @@
 from gi.repository import GLib, Gtk, Gdk, Gio, Pango, GObject
 
 from gettext import gettext as _
-from collections import OrderedDict
 
 from lollypop.widgets_tracks import TracksWidget
 from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals
-from lollypop.utils import get_position_list, set_cursor_hand2
+from lollypop.utils import set_cursor_hand2
 from lollypop.define import App, Type, ViewType, AdaptiveSize, IndicatorType
 
 
@@ -95,26 +94,33 @@ class TracksView(Gtk.Bin, SignalsHelper):
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
-            tracks = get_position_list(disc.tracks, 0)
+            tracks = disc.tracks
             if self.__view_type & ViewType.TWO_COLUMNS:
+                position = 0
                 mid_tracks = int(0.5 + len(tracks) / 2)
-                widgets = {self._tracks_widget_left[disc_number]:
-                           tracks[:mid_tracks],
-                           self._tracks_widget_right[disc_number]:
-                           tracks[mid_tracks:]}
-                self.__add_tracks(OrderedDict(widgets), disc_number)
+                self.__add_tracks(self._tracks_widget_left[disc_number],
+                                  tracks[:mid_tracks], position)
+                position += mid_tracks
+                self.__add_tracks(self._tracks_widget_right[disc_number],
+                                  tracks[mid_tracks:], position)
+                self._tracks_widget_left[disc_number].show()
+                self._tracks_widget_right[disc_number].show()
             else:
-                widgets = {self._tracks_widget_left[disc_number]: tracks}
-                self.__add_tracks(OrderedDict(widgets), disc_number)
-
-    def populate_sync(self):
-        """
-            Populate tracks without lazy mode
-            ONE COLUMN ONLY
-        """
-        self.__init()
-        for disc in self.__discs_to_load:
-            self.add_tracks_sync(self._tracks_widget_left[0], disc.tracks)
+                self.__add_tracks(self._tracks_widget_left[disc_number],
+                                  tracks)
+                self._tracks_widget_left[disc_number].show()
+            GLib.idle_add(self.emit, "populated", disc_number)
+        else:
+            self.__populated = True
+            if not self.children:
+                text = (_("""This album has no track."""
+                          """ Check tags, all 'album artist'"""
+                          """ tags should be in 'artist' tags"""))
+                label = Gtk.Label.new(text)
+                label.get_style_context().add_class("text-large")
+                label.show()
+                self._tracks_widget_left[0].add(label)
+                self._tracks_widget_left[0].show()
 
     def append_row(self, track):
         """
@@ -124,7 +130,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             @param position as int
         """
         self.__init()
-        self.add_tracks_sync(self._tracks_widget_left[0], [track])
+        self.__add_tracks(self._tracks_widget_left[0], [track])
 
     def append_rows(self, tracks):
         """
@@ -133,7 +139,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             @param tracks as [Track]
         """
         self.__init()
-        self.add_tracks_sync(self._tracks_widget_left[0], tracks)
+        self.__add_tracks(self._tracks_widget_left[0], tracks)
 
     def get_current_ordinate(self, parent):
         """
@@ -403,51 +409,12 @@ class TracksView(Gtk.Bin, SignalsHelper):
                                1, idx, 1, 1)
             idx += 1
 
-    def __add_tracks(self, widgets, disc_number):
-        """
-            Add tracks to widgets
-            @param widgets as OrderedDict
-            @param disc number as int
-        """
-        if self.__cancellable.is_cancelled():
-            return
-
-        widget = next(iter(widgets))
-        widgets.move_to_end(widget)
-        tracks = widgets[widget]
-
-        if not tracks:
-            if len(self.__discs_to_load) == 0:
-                self.__populated = True
-            self.emit("populated", disc_number)
-            self._tracks_widget_left[disc_number].show()
-            self._tracks_widget_right[disc_number].show()
-            if not self.children:
-                text = (_("""This album has no track."""
-                          """ Check tags, all 'album artist'"""
-                          """ tags should be in 'artist' tags"""))
-                label = Gtk.Label.new(text)
-                label.get_style_context().add_class("text-large")
-                label.show()
-                widget.add(label)
-            return
-
-        (track, position) = tracks.pop(0)
-        if not App().settings.get_value("show-tag-tracknumber") and\
-                not self.__view_type & ViewType.PLAYLISTS:
-            track.set_number(position + 1)
-        row = TrackRow(track, self.__album.artist_ids, self.__view_type)
-        row.show()
-        widget.insert(row, position)
-        GLib.idle_add(self.__add_tracks, widgets, disc_number)
-
-    def add_tracks_sync(self, widget, tracks):
+    def __add_tracks(self, widget, tracks, position=0):
         """
             Add tracks to widget
             @param widget as Gtk.ListBox
             @param tracks as [Track]
         """
-        position = 0
         for track in tracks:
             if not App().settings.get_value("show-tag-tracknumber") and\
                     not self.__view_type & ViewType.PLAYLISTS:
@@ -456,8 +423,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
             row.show()
             widget.add(row)
             position += 1
-        self._tracks_widget_left[0].show()
-        self.__populated = True
 
     def __on_key_press_event(self, widget, event):
         """

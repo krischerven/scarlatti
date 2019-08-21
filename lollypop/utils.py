@@ -391,20 +391,6 @@ def tracks_to_albums(tracks):
     return albums
 
 
-def get_position_list(items, position):
-    """
-        Return a list with item and position
-        @param items as []
-        @param position as int
-        @return []
-    """
-    _items = []
-    for item in items:
-        _items.append((item, position))
-        position += 1
-    return _items
-
-
 def is_readonly(uri):
     """
         Check if uri is readonly

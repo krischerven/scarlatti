@@ -409,12 +409,6 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         else:
             self._box.unselect_all()
 
-    def grab_focus(self):
-        """
-            Grab focus on treeview
-        """
-        self._box.grab_focus()
-
     def clear(self):
         """
             Clear treeview
