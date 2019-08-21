@@ -52,64 +52,63 @@ class TrackRow(Gtk.ListBoxRow):
         """
         # We do not use Gtk.Builder for speed reasons
         Gtk.ListBoxRow.__init__(self)
-        self._view_type = view_type
-        self._artists_label = None
+        self.__view_type = view_type
         self._track = track
-        self._indicator = IndicatorWidget(self, view_type)
-        self._indicator.show()
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
         self._grid.set_column_spacing(5)
         self._grid.show()
-        self._title_label = Gtk.Label.new(
+        self._indicator = IndicatorWidget(self, view_type)
+        self._indicator.show()
+        self._grid.add(self._indicator)
+        if not view_type & ViewType.PLAYBACK:
+            self._num_label = Gtk.Label.new()
+            self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
+            self._num_label.set_width_chars(4)
+            self._num_label.get_style_context().add_class("dim-label")
+            self._num_label.show()
+            self.update_number_label()
+            self._grid.add(self._num_label)
+        self.__title_label = Gtk.Label.new(
             GLib.markup_escape_text(self._track.name))
-        self._title_label.set_use_markup(True)
-        self._title_label.set_property("has-tooltip", True)
-        self._title_label.connect("query-tooltip", on_query_tooltip)
-        self._title_label.set_property("hexpand", True)
-        self._title_label.set_property("halign", Gtk.Align.START)
-        self._title_label.set_property("xalign", 0)
-        self._title_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self._title_label.show()
+        self.__title_label.set_use_markup(True)
+        self.__title_label.set_property("has-tooltip", True)
+        self.__title_label.connect("query-tooltip", on_query_tooltip)
+        self.__title_label.set_property("hexpand", True)
+        self.__title_label.set_property("halign", Gtk.Align.START)
+        self.__title_label.set_property("xalign", 0)
+        self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.__title_label.show()
+        self._grid.add(self.__title_label)
         featuring_artist_ids = track.get_featuring_artist_ids(album_artist_ids)
         if featuring_artist_ids:
             artists = []
             for artist_id in featuring_artist_ids:
                 artists.append(App().artists.get_name(artist_id))
-            self._artists_label = Gtk.Label.new(GLib.markup_escape_text(
+            artists_label = Gtk.Label.new(GLib.markup_escape_text(
                 ", ".join(artists)))
-            self._artists_label.set_use_markup(True)
-            self._artists_label.set_property("has-tooltip", True)
-            self._artists_label.connect("query-tooltip", on_query_tooltip)
-            self._artists_label.set_property("hexpand", True)
-            self._artists_label.set_property("halign", Gtk.Align.END)
-            self._artists_label.set_ellipsize(Pango.EllipsizeMode.END)
-            self._artists_label.set_opacity(0.3)
-            self._artists_label.set_margin_end(5)
-            self._artists_label.show()
+            artists_label.set_use_markup(True)
+            artists_label.set_property("has-tooltip", True)
+            artists_label.connect("query-tooltip", on_query_tooltip)
+            artists_label.set_property("hexpand", True)
+            artists_label.set_property("halign", Gtk.Align.END)
+            artists_label.set_ellipsize(Pango.EllipsizeMode.END)
+            artists_label.set_opacity(0.3)
+            artists_label.set_margin_end(5)
+            artists_label.show()
+            self._grid.add(artists_label)
         duration = seconds_to_string(self._track.duration)
-        self._duration_label = Gtk.Label.new(duration)
-        self._duration_label.get_style_context().add_class("dim-label")
-        self._duration_label.show()
-        self._num_label = Gtk.Label.new()
-        self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self._num_label.set_width_chars(4)
-        self._num_label.get_style_context().add_class("dim-label")
-        self._num_label.show()
-        self.update_number_label()
-        self._grid.add(self._indicator)
-        self._grid.add(self._num_label)
-        self._grid.add(self._title_label)
-        if self._artists_label is not None:
-            self._grid.add(self._artists_label)
-        self._grid.add(self._duration_label)
-        if self._view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
+        self.__duration_label = Gtk.Label.new(duration)
+        self.__duration_label.get_style_context().add_class("dim-label")
+        self.__duration_label.show()
+        self._grid.add(self.__duration_label)
+        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                "list-remove-symbolic",
                Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
                _("Remove from playlist"))
-        elif not self._view_type & ViewType.SEARCH:
+        elif not self.__view_type & ViewType.SEARCH:
             self.__action_button = Gtk.Button.new_from_icon_name(
                "view-more-symbolic",
                Gtk.IconSize.MENU)
@@ -126,7 +125,7 @@ class TrackRow(Gtk.ListBoxRow):
             context.add_class("menu-button")
             self._grid.add(self.__action_button)
         else:
-            self._duration_label.set_margin_end(MARGIN_SMALL)
+            self.__duration_label.set_margin_end(MARGIN_SMALL)
         self.add(self._grid)
         self.set_indicator(self._get_indicator_type())
         self.update_duration()
@@ -138,7 +137,7 @@ class TrackRow(Gtk.ListBoxRow):
         """
         self._track.reset("duration")
         duration = seconds_to_string(self._track.duration)
-        self._duration_label.set_label(duration)
+        self.__duration_label.set_label(duration)
 
     def set_indicator(self, indicator_type=None):
         """
@@ -173,11 +172,13 @@ class TrackRow(Gtk.ListBoxRow):
         """
             Update position label for row
         """
+        if self.__view_type & ViewType.PLAYBACK:
+            return
         if App().player.track_in_queue(self._track):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
-        elif self._track.number > 0 and not self._view_type & ViewType.DND:
+        elif self._track.number > 0:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text(str(self._track.number))
         else:
@@ -218,7 +219,7 @@ class TrackRow(Gtk.ListBoxRow):
             Get row name
             @return str
         """
-        return self._title_label.get_text()
+        return self.__title_label.get_text()
 
     @property
     def track(self):
@@ -254,12 +255,12 @@ class TrackRow(Gtk.ListBoxRow):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self._view_type & ViewType.PLAYBACK:
+        if self.__view_type & ViewType.PLAYBACK:
             self._track.album.remove_track(self._track)
             App().player.set_next()
             App().player.set_prev()
             self.destroy()
-        elif self._view_type & ViewType.PLAYLISTS:
+        elif self.__view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:

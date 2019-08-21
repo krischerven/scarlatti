@@ -429,7 +429,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
             return
 
         (track, position) = tracks.pop(0)
-        if not App().settings.get_value("show-tag-tracknumber"):
+        if not App().settings.get_value("show-tag-tracknumber") and\
+                not self.__view_type & ViewType.PLAYLISTS:
             track.set_number(position + 1)
         row = TrackRow(track, self.__album.artist_ids, self.__view_type)
         row.show()

@@ -127,33 +127,39 @@ class Album(Base):
         """
         self._discs = discs
 
-    def set_tracks(self, tracks):
+    def set_tracks(self, tracks, clone=True):
         """
-            Set album tracks (cloned tracks)
+            Set album tracks
             @param tracks as [Track]
+            @param clone as bool
         """
-        self._tracks = []
-        for track in tracks:
-            new_track = Track(track.id, self)
-            self._tracks.append(new_track)
+        if clone:
+            self._tracks = []
+            for track in tracks:
+                new_track = Track(track.id, self)
+                self._tracks.append(new_track)
+        else:
+            self._tracks = tracks
 
-    def append_track(self, track):
+    def append_track(self, track, clone=True):
         """
             Append track to album
             @param track as Track
+            @param clone as bool
         """
-        clone = Track(track.id, self)
-        self._tracks.append(clone)
+        if clone:
+            self._tracks.append(Track(track.id, self))
+        else:
+            self._tracks.append(track)
 
-    def append_tracks(self, tracks):
+    def append_tracks(self, tracks, clone=True):
         """
             Append tracks to album
             @param tracks as [Track]
+            @param clone as bool
         """
-        cloned = []
         for track in tracks:
-            cloned.append(Track(track.id, self))
-        self._tracks += cloned
+            self.append_track(track, clone)
 
     def remove_track(self, track):
         """
