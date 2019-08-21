@@ -96,9 +96,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                 not App().playlists.get_smart(playlist_id):
             duration = App().playlists.get_duration(playlist_id)
             self.__set_duration(duration)
-        # Ask widget after populated
-        else:
-            self._view.connect("populated", self.__on_playlist_populated)
         self._view.set_property("halign", Gtk.Align.CENTER)
         return {
             "init": [
@@ -416,13 +413,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             @param playlists_widget as PlaylistsWidget
         """
         self.__update_jump_button()
-
-    def __on_playlist_populated(self, widget):
-        """
-            Set duration on populated
-            @param widget as PlaylistsWidget
-        """
-        self.__set_duration(widget.duration)
 
     def __on_dnd_finished(self, dnd_helper):
         """
