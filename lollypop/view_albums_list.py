@@ -351,8 +351,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         row = AlbumRow(album, self.__height, self._view_type,
                        reveal, self.__position)
-        # For Playlists, we want track position not track number
-        if self._view_type & ViewType.PLAYLISTS:
+        if self._view_type & ViewType.DND:
             self.__position += len(album.tracks)
         else:
             self.__position = 0
