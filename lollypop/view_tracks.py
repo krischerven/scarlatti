@@ -89,8 +89,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
 
     def populate(self):
         """
-            Populate tracks
-            @thread safe
+            Populate tracks lazy
         """
         self.__init()
         if self.__discs_to_load:
@@ -108,28 +107,33 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 widgets = {self._tracks_widget_left[disc_number]: tracks}
                 self.__add_tracks(OrderedDict(widgets), disc_number)
 
+    def populate_sync(self):
+        """
+            Populate tracks without lazy mode
+            ONE COLUMN ONLY
+        """
+        self.__init()
+        for disc in self.__discs_to_load:
+            self.add_tracks_sync(self._tracks_widget_left[0], disc.tracks)
+
     def append_row(self, track):
         """
             Append a track
+            ONE COLUMN ONLY
             @param track as Track
             @param position as int
-            @return TrackRow
         """
-        if self.__responsive_widget is None:
-            self.__init()
-        row = TrackRow(track, self.__album.artist_ids, self.__view_type)
-        row.show()
-        self._tracks_widget_left[0].insert(row, -1)
-        return row
+        self.__init()
+        self.add_tracks_sync(self._tracks_widget_left[0], [track])
 
     def append_rows(self, tracks):
         """
             Add track rows
+            ONE COLUMN ONLY
             @param tracks as [Track]
         """
-        widgets = {self._tracks_widget_left[0]:
-                   get_position_list(tracks, len(self.children))}
-        self.__add_tracks(OrderedDict(widgets), 0)
+        self.__init()
+        self.add_tracks_sync(self._tracks_widget_left[0], tracks)
 
     def get_current_ordinate(self, parent):
         """
@@ -401,7 +405,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
 
     def __add_tracks(self, widgets, disc_number):
         """
-            Add tracks for to tracks widget
+            Add tracks to widgets
             @param widgets as OrderedDict
             @param disc number as int
         """
@@ -436,6 +440,24 @@ class TracksView(Gtk.Bin, SignalsHelper):
         row.show()
         widget.insert(row, position)
         GLib.idle_add(self.__add_tracks, widgets, disc_number)
+
+    def add_tracks_sync(self, widget, tracks):
+        """
+            Add tracks to widget
+            @param widget as Gtk.ListBox
+            @param tracks as [Track]
+        """
+        position = 0
+        for track in tracks:
+            if not App().settings.get_value("show-tag-tracknumber") and\
+                    not self.__view_type & ViewType.PLAYLISTS:
+                track.set_number(position + 1)
+            row = TrackRow(track, self.__album.artist_ids, self.__view_type)
+            row.show()
+            widget.add(row)
+            position += 1
+        self._tracks_widget_left[0].show()
+        self.__populated = True
 
     def __on_key_press_event(self, widget, event):
         """

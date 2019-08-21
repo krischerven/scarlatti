@@ -73,8 +73,8 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__tracks_view.show()
         if reveal or self.__view_type & ViewType.PLAYLISTS:
             self.populate()
-            self.reveal(True)
-            self.__tracks_view.populate()
+            self.__revealer.set_reveal_child(True)
+            self.__tracks_view.populate_sync()
 
     def populate(self):
         """
