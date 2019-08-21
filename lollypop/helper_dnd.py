@@ -67,11 +67,6 @@ class DNDHelper(GObject.Object):
         """
             Merge album rows and update track position
         """
-        def update_position(rows):
-            position = 0
-            for row in rows:
-                position = row.update_track_position(position)
-
         def merge_if_possible(row1, row2):
             if row1 is None or row2 is None:
                 return False
@@ -92,9 +87,6 @@ class DNDHelper(GObject.Object):
             else:
                 children.pop(0)
                 row.show()
-        GLib.idle_add(update_position,
-                      self.__listbox.get_children(),
-                      priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
 
     def __do_drag_and_drop(self, src_rows, dest_row, direction):
@@ -148,7 +140,7 @@ class DNDHelper(GObject.Object):
         split_album = Album(album_row.album.id)
         split_album.set_tracks([row.track for row in rows])
         split_album_row = AlbumRow(split_album, height, self.__view_type,
-                                   True, 0)
+                                   True)
         split_album_row.populate()
         for row in rows:
             album_row.album.remove_track(row.track)
@@ -172,7 +164,7 @@ class DNDHelper(GObject.Object):
                     new_album = Album(row.track.album.id)
                     new_album.set_tracks([row.track])
                     new_album_row = AlbumRow(new_album, height,
-                                             self.__view_type, True, 0)
+                                             self.__view_type, True)
                     new_album_row.populate()
                     new_rows.append(new_album_row)
             else:
@@ -184,7 +176,7 @@ class DNDHelper(GObject.Object):
                     new_album = Album(row.album.id)
                     new_album.set_tracks(row.album.tracks)
                     new_album_row = AlbumRow(new_album, height,
-                                             self.__view_type, False, 0)
+                                             self.__view_type, False)
                     new_album_row.populate()
                     new_rows.append(new_album_row)
         return new_rows

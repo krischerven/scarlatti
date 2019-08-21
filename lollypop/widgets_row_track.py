@@ -177,23 +177,12 @@ class TrackRow(Gtk.ListBoxRow):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
-        elif self._track.number > 0:
+        elif self._track.number > 0 and not self._view_type & ViewType.DND:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text(str(self._track.number))
         else:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text("")
-
-    def set_position(self, position):
-        """
-            Update row position
-            @param position as int
-        """
-        if App().settings.get_value("show-tag-tracknumber") and\
-                not (self._view_type & ViewType.PLAYLISTS | ViewType.POPOVER):
-            return
-        self._track.set_number(position)
-        self.update_number_label()
 
     def popup_menu(self, parent, x=None, y=None):
         """

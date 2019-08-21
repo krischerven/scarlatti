@@ -48,7 +48,7 @@ class AlbumRow(Gtk.ListBoxRow):
         else:
             return cover_height + 2
 
-    def __init__(self, album, height, view_type, reveal, position):
+    def __init__(self, album, height, view_type, reveal):
         """
             Init row widgets
             @param album as Album
@@ -56,7 +56,6 @@ class AlbumRow(Gtk.ListBoxRow):
             @param view_type as ViewType
             @param reveal as bool
             @param parent as AlbumListView
-            @param position as int
         """
         Gtk.ListBoxRow.__init__(self)
         self.__view_type = view_type
@@ -65,7 +64,6 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__artwork = None
         self.__album = album
         self.__cancellable = Gio.Cancellable()
-        self.__position = position
         self.set_sensitive(False)
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
@@ -78,7 +76,7 @@ class AlbumRow(Gtk.ListBoxRow):
             return
         self.__tracks_view = TracksView(self.__album, None,
                                         Gtk.Orientation.VERTICAL,
-                                        self.__view_type, self.__position)
+                                        self.__view_type)
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.show()
         self.__artwork = Gtk.Image.new()
@@ -213,20 +211,6 @@ class AlbumRow(Gtk.ListBoxRow):
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
-
-    def update_track_position(self, position):
-        """
-            Update track position based on current tracks
-            @param position as int
-            @return position as int
-        """
-        if not self.__tracks_view.is_populated:
-            self.__tracks_view.set_position(position)
-            return position + len(self.__album.tracks)
-        for row in self.children:
-            row.set_position(position + 1)
-            position += 1
-        return position
 
     @property
     def revealed(self):

@@ -49,11 +49,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self._albums = []
-        self.__position = 0
-        self.__track_position_id = None
-        self.__autoscroll_timeout_id = None
         self.__reveals = []
-        self.__prev_animated_rows = []
         # Calculate default album height based on current pango context
         # We may need to listen to screen changes
         self.__height = AlbumRow.get_best_height(self)
@@ -349,12 +345,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param album as Album
             @param reveal as bool
         """
-        row = AlbumRow(album, self.__height, self._view_type, reveal,
-                       self.__position)
-        if self._view_type & ViewType.DND:
-            self.__position += album.tracks_count
-        else:
-            self.__position = 0
+        row = AlbumRow(album, self.__height, self._view_type, reveal)
         return row
 
     def __get_current_ordinate(self):

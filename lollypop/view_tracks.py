@@ -34,14 +34,13 @@ class TracksView(Gtk.Bin, SignalsHelper):
     }
 
     @signals
-    def __init__(self, album, window, orientation, view_type, position=0):
+    def __init__(self, album, window, orientation, view_type):
         """
             Init view
             @param album as Album
             @param window as AdaptiveWindow/None
             @param orientation as Gtk.Orientation/None
             @param view_type as ViewType
-            @param initial position as int
         """
         Gtk.Bin.__init__(self)
         self.__view_type = view_type
@@ -50,7 +49,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
         self._tracks_widget_right = {}
         self.__discs = []
         self.__discs_to_load = []
-        self.__position = position
         self.__responsive_widget = None
         self.__populated = False
         self.__orientation = orientation
@@ -98,7 +96,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
-            tracks = get_position_list(disc.tracks, self.__position)
+            tracks = get_position_list(disc.tracks, 0)
             if self.__view_type & ViewType.TWO_COLUMNS:
                 mid_tracks = int(0.5 + len(tracks) / 2)
                 widgets = {self._tracks_widget_left[disc_number]:
@@ -175,13 +173,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 self._tracks_widget_right[number].update_duration(track_id)
         except Exception as e:
             Logger.error("TrackView::update_duration(): %s" % e)
-
-    def set_position(self, position):
-        """
-            Set tracks position
-            @param position as int
-        """
-        self.__position = position
 
     @property
     def children(self):
