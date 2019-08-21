@@ -62,8 +62,8 @@ class AlbumRow(Gtk.ListBoxRow):
         self._view_type = view_type
         self.__revealer = None
         self.__reveal = reveal
-        self._artwork = None
-        self._album = album
+        self.__artwork = None
+        self.__album = album
         self.__cancellable = Gio.Cancellable()
         self.set_sensitive(False)
         self.__tracks_view = TracksView(album, None, Gtk.Orientation.VERTICAL,
@@ -77,25 +77,25 @@ class AlbumRow(Gtk.ListBoxRow):
         """
             Populate widget content
         """
-        if self.get_child() is not None:
+        if self.__artwork is not None:
             return
-        self._artwork = Gtk.Image.new()
-        App().art_helper.set_frame(self._artwork, "small-cover-frame",
+        self.__artwork = Gtk.Image.new()
+        App().art_helper.set_frame(self.__artwork, "small-cover-frame",
                                    ArtSize.SMALL, ArtSize.SMALL)
-        self._artwork.set_margin_start(self.__MARGIN)
+        self.__artwork.set_margin_start(self.__MARGIN)
         # Little hack: we do not set margin_bottom because already set by
         # get_best_height(): we are Align.FILL
         # This allow us to not Align.CENTER row_widget and not jump up
         # and down on reveal()
-        self._artwork.set_margin_top(self.__MARGIN)
+        self.__artwork.set_margin_top(self.__MARGIN)
         self.get_style_context().add_class("albumrow")
         self.set_sensitive(True)
         self.set_property("has-tooltip", True)
         self.connect("query-tooltip", self.__on_query_tooltip)
         grid = Gtk.Grid()
         grid.set_column_spacing(8)
-        if self._album.artists:
-            artists = GLib.markup_escape_text(", ".join(self._album.artists))
+        if self.__album.artists:
+            artists = GLib.markup_escape_text(", ".join(self.__album.artists))
         else:
             artists = _("Compilation")
         self.__artist_label = Gtk.Label.new("<b>%s</b>" % artists)
@@ -103,7 +103,7 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__artist_label.set_hexpand(True)
         self.__artist_label.set_property("halign", Gtk.Align.START)
         self.__artist_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__title_label = Gtk.Label.new(self._album.name)
+        self.__title_label = Gtk.Label.new(self.__album.name)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
@@ -114,7 +114,7 @@ class AlbumRow(Gtk.ListBoxRow):
                 Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
                 _("Remove from playlist"))
-        elif self._album.storage_type & StorageType.EPHEMERAL:
+        elif self.__album.storage_type & StorageType.EPHEMERAL:
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "document-save-symbolic",
                 Gtk.IconSize.MENU)
@@ -136,7 +136,7 @@ class AlbumRow(Gtk.ListBoxRow):
             self.__gesture_helper = GesturesHelper(
                 self.__action_button,
                 primary_press_callback=self._on_action_button_press)
-        grid.attach(self._artwork, 0, 0, 1, 2)
+        grid.attach(self.__artwork, 0, 0, 1, 2)
         grid.attach(self.__artist_label, 1, 0, 1, 1)
         grid.attach(self.__title_label, 1, 1, 1, 1)
         if self.__action_button is not None:
@@ -187,7 +187,7 @@ class AlbumRow(Gtk.ListBoxRow):
         """
             Show play indicator
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             return
         selected = self.album.id == App().player.current_track.album.id and\
             App().player.current_track.id in self.album.track_ids
@@ -203,7 +203,7 @@ class AlbumRow(Gtk.ListBoxRow):
         """
             Stop view loading
         """
-        self._artwork = None
+        self.__artwork = None
         if self.__tracks_view.get_populated():
             self.__tracks_view.stop()
 
@@ -211,12 +211,12 @@ class AlbumRow(Gtk.ListBoxRow):
         """
             Set album artwork
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             return
-        App().art_helper.set_album_artwork(self._album,
+        App().art_helper.set_album_artwork(self.__album,
                                            ArtSize.SMALL,
                                            ArtSize.SMALL,
-                                           self._artwork.get_scale_factor(),
+                                           self.__artwork.get_scale_factor(),
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
@@ -247,7 +247,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Return True if populated
             @return bool
         """
-        return self.__tracks_view.get_populated()
+        return not self.revealed or self.__tracks_view.get_populated()
 
     @property
     def name(self):
@@ -263,7 +263,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Get album
             @return row id as int
         """
-        return self._album
+        return self.__album
 
 #######################
 # PROTECTED           #
@@ -278,37 +278,37 @@ class AlbumRow(Gtk.ListBoxRow):
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
         if self._view_type & ViewType.PLAYBACK:
-            App().player.remove_album(self._album)
+            App().player.remove_album(self.__album)
             self.destroy()
             App().player.update_next_prev()
-        elif self._album.storage_type & StorageType.EPHEMERAL:
-            App().art.copy_from_web_to_store(self._album.id)
+        elif self.__album.storage_type & StorageType.EPHEMERAL:
+            App().art.copy_from_web_to_store(self.__album.id)
             App().art.cache_artists_artwork()
-            self._album.save(True)
+            self.__album.save(True)
             self.__action_button.hide()
         elif self._view_type & ViewType.SEARCH:
             popover = self.get_ancestor(Gtk.Popover)
             if popover is not None:
                 popover.popdown()
             App().window.container.show_view([Type.ARTISTS],
-                                             self._album.artist_ids)
+                                             self.__album.artist_ids)
         elif self._view_type & ViewType.PLAYLISTS:
-            if App().player.current_track.album.id == self._album.id:
+            if App().player.current_track.album.id == self.__album.id:
                 # Stop playback or loop for last album
                 # Else skip current
                 if len(App().player.albums) == 1:
-                    App().player.remove_album(self._album)
+                    App().player.remove_album(self.__album)
                     App().player.next()
                 else:
                     App().player.skip_album()
-                    App().player.remove_album(self._album)
+                    App().player.remove_album(self.__album)
             else:
-                App().player.remove_album(self._album)
+                App().player.remove_album(self.__album)
             App().player.update_next_prev()
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
-                view.remove_from_playlist(self._album)
+                view.remove_from_playlist(self.__album)
             self.destroy()
         else:
             self.__popup_menu(self.__action_button)
@@ -326,7 +326,8 @@ class AlbumRow(Gtk.ListBoxRow):
 
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(self._album, ViewType.ALBUM, App().window.is_adaptive)
+        menu = AlbumMenu(self.__album, ViewType.ALBUM,
+                         App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         self.set_state_flags(Gtk.StateFlags.FOCUSED, True)
@@ -339,13 +340,13 @@ class AlbumRow(Gtk.ListBoxRow):
             Set album artwork
             @param surface as str
         """
-        if self._artwork is None:
+        if self.__artwork is None:
             return
         if surface is None:
-            self._artwork.set_from_icon_name("folder-music-symbolic",
-                                             Gtk.IconSize.BUTTON)
+            self.__artwork.set_from_icon_name("folder-music-symbolic",
+                                              Gtk.IconSize.BUTTON)
         else:
-            self._artwork.set_from_surface(surface)
+            self.__artwork.set_from_surface(surface)
         self.emit("populated")
         self.show_all()
 
@@ -373,7 +374,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param widget as Gtk.Widget
         """
         self.__cancellable.cancel()
-        self._artwork = None
+        self.__artwork = None
 
     def __on_tracks_populated(self, view, disc_number):
         """
