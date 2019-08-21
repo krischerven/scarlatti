@@ -22,8 +22,7 @@ from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class TracksPopover(Popover, TracksView,
-                    SizeAllocationHelper, SignalsHelper):
+class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
     """
         A popover with tracks
     """
@@ -45,17 +44,18 @@ class TracksPopover(Popover, TracksView,
         window_width = App().window.get_allocated_width()
         wanted_width = min(Size.NORMAL, window_width * 0.5)
         wanted_height = Size.MINI
-        self._view_type = ViewType.TWO_COLUMNS
         orientation = Gtk.Orientation.VERTICAL if wanted_width < Size.MEDIUM\
             else Gtk.Orientation.HORIZONTAL
-        TracksView.__init__(self, None, orientation)
-        self.populate()
+        self.__tracks_view = TracksView(album, None, orientation,
+                                        ViewType.TWO_COLUMNS)
+        self.__tracks_view.show()
+        self.__tracks_view.connect("populated", self.__on_tracks_populated)
+        self.__tracks_view.populate()
         self.__scrolled = Gtk.ScrolledWindow()
-        self.__scrolled.add(self._responsive_widget)
+        self.__scrolled.add(self.__tracks_view)
         self.__scrolled.set_property("width-request", wanted_width)
         self.__scrolled.set_property("height-request", wanted_height)
         self.__scrolled.show()
-        self._responsive_widget.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN_SMALL)
         grid.show()
@@ -152,16 +152,8 @@ class TracksPopover(Popover, TracksView,
             Update view
             @param player as Player
         """
-        self.set_playing_indicator()
+        self.__tracks_view.set_playing_indicator()
         self.__show_append(self._album.id not in App().player.album_ids)
-
-    def _on_tracks_populated(self, disc_number):
-        """
-            Tracks populated
-            @param disc_number
-        """
-        if not self.is_populated:
-            self.populate()
 
 #######################
 # PRIVATE             #
@@ -234,3 +226,12 @@ class TracksPopover(Popover, TracksView,
         """
         if surface is not None:
             self.__artwork.set_from_surface(surface)
+
+    def __on_tracks_populated(self, view, disc_number):
+        """
+            Tracks populated
+            @param view as TracksView
+            @param disc_number
+        """
+        if not self.__tracks_view.is_populated:
+            self.__tracks_view.populate()

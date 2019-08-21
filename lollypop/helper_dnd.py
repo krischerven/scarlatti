@@ -13,6 +13,8 @@
 from gi.repository import Gdk, Gtk, GLib, GObject
 
 from lollypop.objects_album import Album
+from lollypop.widgets_row_album import AlbumRow
+from lollypop.widgets_row_track import TrackRow
 
 
 class DNDHelper(GObject.Object):
@@ -31,7 +33,6 @@ class DNDHelper(GObject.Object):
             @params view_type as ViewType
         """
         GObject.Object.__init__(self)
-        return
         self.__listbox = listbox
         self.__view_type = view_type
         self.__drag_begin_rows = []
@@ -62,151 +63,147 @@ class DNDHelper(GObject.Object):
                 return row
         return None
 
-    def update_album_rows(self):
+    def __update_album_rows(self):
         """
             Merge album rows and update track position
         """
-        def merge_if_possible(row1, row2, children):
+        def update_position(rows):
+            position = 0
+            for row in rows:
+                position = row.update_track_position(position)
+
+        def merge_if_possible(row1, row2):
             if row1 is None or row2 is None:
-                return
+                return False
             if row1.album.id == row2.album.id:
                 row1.album.append_tracks(row2.album.tracks)
                 row1.append_rows(row2.album.tracks)
-                if row2 in children:
-                    children.remove(row2)
-                row2.destroy()
+                return True
+            return False
 
         children = self.__listbox.get_children()
         while children:
-            row = children.pop(0)
+            row = children[0]
             index = row.get_index()
             next = self.__listbox.get_row_at_index(index + 1)
-            merge_if_possible(row, next, children)
-        position = 1
-        for row in self.__listbox.get_children():
-            position = row.update_track_position(position)
+            if merge_if_possible(row, next):
+                children.remove(next)
+                next.destroy()
+            else:
+                children.pop(0)
+                row.show()
+        GLib.idle_add(update_position,
+                      self.__listbox.get_children(),
+                      priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
 
-    def __insert_album_row_at_album_row(self, src_row, dst_row, direction):
+    def __do_drag_and_drop(self, src_rows, dest_row, direction):
         """
-            Insert src album row at dst album row
-            @param src_row as AlbumRow
-            @param dst_row as AlbumRow
+            Drag source rows at destination row with direction
+            @param src_rows as [Row]
+            @param dest_row as Row
             @param direction as Gtk.DirectionType
         """
-        src_index = src_row.get_index()
-        if src_index != -1:
-            self.__listbox.remove(src_row)
-        dst_index = dst_row.get_index()
-        if direction == Gtk.DirectionType.DOWN:
-            self.__listbox.insert(src_row, dst_index)
+        # Build new rows
+        new_rows = self.__get_rows_from_rows(
+            src_rows, AlbumRow.get_best_height(dest_row))
+        self.__destroy_rows(src_rows)
+        # Insert new rows
+        if isinstance(dest_row, TrackRow):
+            album_row = dest_row.get_ancestor(AlbumRow)
+            if album_row is None:
+                return
+            split_album_row = self.__split_album_row(album_row,
+                                                     dest_row,
+                                                     direction)
+            index = album_row.get_index()
+            self.__listbox.insert(split_album_row, index)
+            index += 1
+            for row in new_rows:
+                self.__listbox.insert(row, index)
+                index += 1
         else:
-            self.__listbox.insert(src_row, dst_index)
-        GLib.idle_add(self.update_album_rows, priority=GLib.PRIORITY_LOW)
+            index = dest_row.get_index()
+            if direction == Gtk.DirectionType.DOWN:
+                index += 1
+            for row in new_rows:
+                self.__listbox.insert(row, index)
+                index += 1
+        GLib.idle_add(self.__update_album_rows, priority=GLib.PRIORITY_LOW)
 
-    def __insert_track_row_at_album_row(self, src_row, dst_row, direction):
+    def __split_album_row(self, album_row, track_row, direction):
         """
-            Insert src track row at dst album row
-            @param src_row as TrackRow
-            @param dst_row as AlbumRow
+            Split album row at track row with direction
+            @param album_row as AlbumRow
+            @param track_row as TrackRow
             @param direction as Gtk.DirectionType
+            @return AlbumRow
         """
-        from lollypop.widgets_row_album import AlbumRow
-        height = AlbumRow.get_best_height(src_row)
-        new_album = Album(src_row.track.album.id)
-        new_album.set_tracks([src_row.track])
-        new_album_row = AlbumRow(new_album, height, self.__view_type, True, 0)
-        new_album_row.show()
-        new_album_row.populate()
-        self.__insert_album_row_at_album_row(new_album_row,
-                                             dst_row, direction)
-        # If last track row, delete album row
-        album_row = src_row.get_ancestor(AlbumRow)
-        if len(album_row.children) == 1:
-            album_row.destroy()
-        else:
-            src_row.track.album.remove_track(src_row.track)
-            src_row.destroy()
-
-    def __insert_album_row_at_track_row(self, src_row, dst_album_row,
-                                        dst_row, direction):
-        """
-            Insert album track row at dst track row
-            @param src_row as TrackRow
-            @param dst_album_row as AlbumRow
-            @param dst_row as TrackRow
-            @param direction as Gtk.DirectionType
-        """
-        from lollypop.widgets_row_album import AlbumRow
-        height = AlbumRow.get_best_height(src_row)
+        height = AlbumRow.get_best_height(album_row)
         # First split dst album
-        index = dst_album_row.children.index(dst_row)
+        index = album_row.children.index(track_row)
         if direction == Gtk.DirectionType.DOWN:
             index += 1
-        rows = dst_album_row.children[:index]
-        split_album = Album(dst_album_row.album.id)
+        rows = album_row.children[:index]
+        split_album = Album(album_row.album.id)
         split_album.set_tracks([row.track for row in rows])
         split_album_row = AlbumRow(split_album, height, self.__view_type,
                                    True, 0)
-        split_album_row.show()
         split_album_row.populate()
         for row in rows:
-            dst_album_row.album.remove_track(row.track)
+            album_row.album.remove_track(row.track)
             row.destroy()
-        self.__insert_album_row_at_album_row(src_row, dst_album_row,
-                                             Gtk.DirectionType.DOWN)
-        self.__insert_album_row_at_album_row(split_album_row, src_row,
-                                             Gtk.DirectionType.DOWN)
+        return split_album_row
 
-    def __insert_track_row_at_track_row(self, src_row, dst_album_row,
-                                        dst_row, direction):
+    def __get_rows_from_rows(self, rows, height):
         """
-            Insert src track row at dst track row
-            @param src_row as TrackRow
-            @param dst_album_row as AlbumRow
-            @param dst_row as TrackRow
-            @param direction as Gtk.DirectionType
+            Build news rows from rows
+            @return [TrackRow/AlbumRow]
+            @param height as int
         """
-        # Just move track
-        if src_row.track.album == dst_row.track.album:
-            index = dst_row.get_index()
-            if direction == Gtk.DirectionType.DOWN:
-                index += 1
-            dst_album_row.insert_rows([src_row.track], index)
-            dst_album_row.album.remove_track(src_row.track)
-            dst_album_row.album.insert_tracks([src_row.track], index)
-            src_row.destroy()
-            GLib.idle_add(self.update_album_rows, priority=GLib.PRIORITY_LOW)
-        else:
-            from lollypop.widgets_row_album import AlbumRow
-            height = AlbumRow.get_best_height(src_row)
-            # First split dst album
-            index = dst_album_row.children.index(dst_row)
-            if direction == Gtk.DirectionType.DOWN:
-                index += 1
-            rows = dst_album_row.children[:index]
-            split_album = Album(dst_album_row.album.id)
-            split_album.set_tracks([row.track for row in rows])
-            split_album_row = AlbumRow(split_album, height, self.__view_type,
-                                       True, 0)
-            split_album_row.show()
-            split_album_row.populate()
-            for row in rows:
-                dst_album_row.album.remove_track(row.track)
+        new_rows = []
+        for row in rows:
+            if isinstance(row, TrackRow):
+                # Merge with previous
+                if new_rows and new_rows[-1].album.id == row.track.album.id:
+                    new_rows[-1].append_row(row.track)
+                # Create a new album
+                else:
+                    new_album = Album(row.track.album.id)
+                    new_album.set_tracks([row.track])
+                    new_album_row = AlbumRow(new_album, height,
+                                             self.__view_type, True, 0)
+                    new_album_row.populate()
+                    new_rows.append(new_album_row)
+            else:
+                # Merge with previous
+                if new_rows and new_rows[-1].album.id == row.album.id:
+                    new_rows[-1].append_rows(row.album.tracks)
+                # Create a new album
+                else:
+                    new_album = Album(row.album.id)
+                    new_album.set_tracks(row.album.tracks)
+                    new_album_row = AlbumRow(new_album, height,
+                                             self.__view_type, False, 0)
+                    new_album_row.populate()
+                    new_rows.append(new_album_row)
+        return new_rows
+
+    def __destroy_rows(self, rows):
+        """
+            Destroy rows and parent if needed
+            @param rows as [Row]
+        """
+        for row in rows:
+            if isinstance(row, TrackRow):
+                album_row = row.get_ancestor(AlbumRow)
+                if album_row is not None:
+                    empty = album_row.album.remove_track(row.track)
+                    if empty:
+                        album_row.destroy()
+                    row.destroy()
+            else:
                 row.destroy()
-            # Create new album
-            new_album = Album(src_row.track.album.id)
-            new_album.set_tracks([src_row.track])
-            new_album_row = AlbumRow(new_album, height, self.__view_type,
-                                     True, 0)
-            new_album_row.show()
-            new_album_row.populate()
-            self.__insert_album_row_at_album_row(new_album_row,
-                                                 dst_album_row,
-                                                 Gtk.DirectionType.DOWN)
-            self.__insert_album_row_at_album_row(split_album_row,
-                                                 new_album_row,
-                                                 Gtk.DirectionType.DOWN)
 
     def __unmark_all_rows(self):
         """
@@ -226,17 +223,29 @@ class DNDHelper(GObject.Object):
         """
             Get row at position
             @param y as int
+            @return (Gtk.ListBox, Row)
         """
         row = self.__listbox.get_row_at_y(y)
-        if row is None:
-            return None
         if row.revealed:
-            sub_listbox = row.boxes[0]
-            (row_x, row_y) = sub_listbox.translate_coordinates(self.__listbox,
-                                                               0, 0)
-            subrow = sub_listbox.get_row_at_y(y - row_y)
-            return (sub_listbox, subrow)
+            (listbox, subrow) = self.__get_subrow_at_y(row, y)
+            if subrow is not None:
+                return (listbox, subrow)
         return (self.__listbox, row)
+
+    def __get_subrow_at_y(self, album_row, y):
+        """
+            Get subrow as position
+            @param album_row as AlbumRow
+            @param y as int
+            @return (Gtk.ListBox, Row)
+        """
+        if album_row is not None:
+            listbox = album_row.listbox
+            (tx, ty) = listbox.translate_coordinates(self.__listbox, 0, 0)
+            track_row = listbox.get_row_at_y(y - ty)
+            if track_row is not None:
+                return (listbox, track_row)
+        return (None, None)
 
     def __on_drag_begin(self, gesture, x, y):
         """
@@ -270,7 +279,7 @@ class DNDHelper(GObject.Object):
             @param time as int
         """
         self.__unmark_all_rows()
-        (listbox, row) = self.__get_row_at_y(y)
+        (ignore, row) = self.__get_row_at_y(y)
         if row is None:
             return
         row_height = row.get_allocated_height()
@@ -300,38 +309,14 @@ class DNDHelper(GObject.Object):
         """
         if not self.__drag_begin_rows:
             return
-        from lollypop.widgets_row_track import TrackRow
-        album_row = listbox.get_row_at_y(y)
-        row = None
-        for source_row in self.__drag_begin_rows:
-            # Search for any track row at y
-            if album_row is not None:
-                track_listbox = album_row.boxes[0]
-                (tx, ty) = track_listbox.translate_coordinates(listbox, 0, 0)
-                track_row = track_listbox.get_row_at_y(y - ty)
-                if track_row is not None:
-                    row = track_row
-                else:
-                    row = album_row
-            if row is None:
-                return
+        (_listbox, row) = self.__get_row_at_y(y)
+        if row is not None:
             row_height = row.get_allocated_height()
             (row_x, row_y) = row.translate_coordinates(listbox, 0, 0)
             if y < row_y + row_height / 2:
                 direction = Gtk.DirectionType.UP
             elif y > row_y - row_height / 2:
                 direction = Gtk.DirectionType.DOWN
-                if isinstance(row, TrackRow):
-                    if isinstance(source_row, TrackRow):
-                        self.__insert_track_row_at_track_row(
-                            source_row, album_row, row, direction)
-                    else:
-                        self.__insert_album_row_at_track_row(
-                            source_row, album_row, row, direction)
-                elif isinstance(source_row, TrackRow):
-                    self.__insert_track_row_at_album_row(
-                        source_row, row, direction)
-                else:
-                    self.__insert_album_row_at_album_row(
-                        source_row, row, direction)
+            self.__do_drag_and_drop(self.__drag_begin_rows,
+                                    row, direction)
         self.__unmark_all_rows()

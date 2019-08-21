@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, GObject, Gdk
+from gi.repository import Gtk, GLib, Gdk
 
 from lollypop.utils import do_shift_selection
 from lollypop.view import LazyLoadingView
@@ -36,10 +36,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
     """
         View showing albums
     """
-
-    __gsignals__ = {
-        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
 
     def __init__(self, genre_ids, artist_ids, view_type):
         """
@@ -355,8 +351,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         row = AlbumRow(album, self.__height, self._view_type,
                        reveal, self.__position)
-        # For Playlists, we want track position not track number
-        if self._view_type & ViewType.PLAYLISTS:
+        if self._view_type & ViewType.DND:
             self.__position += len(album.tracks)
         else:
             self.__position = 0

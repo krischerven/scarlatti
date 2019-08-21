@@ -202,3 +202,4 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         for child in self.children:
             albums.append(child.album)
         App().player.set_albums(albums)
+        App().player.update_next_prev()

@@ -138,9 +138,17 @@ class Album(Base):
             new_track = Track(track.id, self)
             self._tracks.append(new_track)
 
+    def append_track(self, track):
+        """
+            Append track to album
+            @param track as Track
+        """
+        clone = Track(track.id, self)
+        self._tracks.append(clone)
+
     def append_tracks(self, tracks):
         """
-            Append tracks to albums
+            Append tracks to album
             @param tracks as [Track]
         """
         cloned = []
@@ -148,23 +156,15 @@ class Album(Base):
             cloned.append(Track(track.id, self))
         self._tracks += cloned
 
-    def insert_tracks(self, tracks, position):
-        """
-            Insert tracks at position
-        """
-        for track in tracks:
-            clone = Track(track.id, self)
-            self._tracks.insert(position, clone)
-            position += 1
-
     def remove_track(self, track):
         """
             Remove track from album
             @param track as Track
             @return True if album empty
         """
-        if track in self.tracks:
-            self._tracks.remove(track)
+        for _track in self.tracks:
+            if track.id == _track.id:
+                self._tracks.remove(_track)
         return len(self._tracks) == 0
 
     def clear_tracks(self):

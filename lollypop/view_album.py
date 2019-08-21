@@ -21,7 +21,7 @@ from lollypop.helper_filtering import FilteringHelper
 from lollypop.logger import Logger
 
 
-class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
+class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
     """
         Show artist albums and tracks
     """
@@ -33,10 +33,12 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, view_type)
-        TracksView.__init__(self, App().window, None)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
+        self.__tracks_view = TracksView(album, App().window, None, view_type)
+        self.__tracks_view.show()
+        self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__others_boxes = []
         self.__grid = Gtk.Grid()
         self.__grid.set_property("vexpand", True)
@@ -45,13 +47,13 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         self.__grid.set_margin_end(MARGIN)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
+        self.__grid.add(self.__tracks_view)
 
     def populate(self):
         """
             Populate the view with album
         """
-        TracksView.populate(self)
-        self.__grid.add(self._responsive_widget)
+        self.__tracks_view.populate()
         self.__banner = AlbumBannerWidget(self._album,
                                           self._view_type | ViewType.ALBUM)
         self._overlay = Gtk.Overlay.new()
@@ -64,7 +66,6 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
         self.__banner.show()
         self._overlay.add_overlay(self.__banner)
         self.add(self._overlay)
-        self._responsive_widget.show()
 
     def activate_child(self):
         """
@@ -129,7 +130,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             Relative to scrolled widget
             @return Gtk.Widget
         """
-        return self._responsive_widget
+        return self.__tracks_view
 
 #######################
 # PROTECTED           #
@@ -150,7 +151,7 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             Update children state
             @param player as Player
         """
-        self.set_playing_indicator()
+        self.__tracks_view.set_playing_indicator()
 
     def _on_duration_changed(self, player, track_id):
         """
@@ -178,18 +179,36 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
             @param widget as Gtk.Widget
         """
         LazyLoadingView._on_map(self, widget)
-        self._responsive_widget.set_margin_top(
+        self.__tracks_view.set_margin_top(
             self.__banner.height + MARGIN)
         if self._view_type & ViewType.SCROLLED:
             self._scrolled.get_vscrollbar().set_margin_top(
                     self.__banner.height)
 
-    def _on_tracks_populated(self, disc_number):
+    def _on_adaptive_changed(self, window, status):
         """
-            Emit populated signal
+            Update banner style
+            @param window as Window
+            @param status as bool
+        """
+        if LazyLoadingView._on_adaptive_changed(self, window, status):
+            self.__banner.set_view_type(self._view_type)
+            self.__tracks_view.set_margin_top(
+                self.__banner.height + MARGIN)
+            if self._view_type & ViewType.SCROLLED:
+                self._scrolled.get_vscrollbar().set_margin_top(
+                        self.__banner.height)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_tracks_populated(self, view, disc_number):
+        """
+            Populate remaining discs
+            @param view as TracksView
             @param disc_number as int
         """
-        if TracksView.get_populated(self):
+        if self.__tracks_view.is_populated:
             from lollypop.view_albums_box import AlbumsArtistBoxView
             for artist_id in self._album.artist_ids:
                 others_box = AlbumsArtistBoxView(self._album, artist_id,
@@ -200,18 +219,4 @@ class AlbumView(LazyLoadingView, TracksView, ViewController, FilteringHelper):
                 self.__grid.add(others_box)
                 self.__others_boxes.append(others_box)
         else:
-            TracksView.populate(self)
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update banner style
-            @param window as Window
-            @param status as bool
-        """
-        if LazyLoadingView._on_adaptive_changed(self, window, status):
-            self.__banner.set_view_type(self._view_type)
-            self._responsive_widget.set_margin_top(
-                self.__banner.height + MARGIN)
-            if self._view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(
-                        self.__banner.height)
+            self.__tracks_view.populate()
