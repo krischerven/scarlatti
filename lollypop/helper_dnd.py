@@ -110,7 +110,8 @@ class DNDHelper(GObject.Object):
             index = album_row.get_index()
             if split_album_row is not None:
                 self.__listbox.insert(split_album_row, index)
-            index += 1
+            elif direction == Gtk.DirectionType.DOWN:
+                index += 1
             for row in new_rows:
                 self.__listbox.insert(row, index)
                 index += 1
@@ -138,7 +139,9 @@ class DNDHelper(GObject.Object):
         index = children.index(track_row)
         if direction == Gtk.DirectionType.DOWN:
             index += 1
-        if index + 1 > len(children):
+            if index + 1 > len(children):
+                return None
+        elif index - 1 < 0:
             return None
         rows = album_row.children[:index]
         split_album = Album(album_row.album.id)
