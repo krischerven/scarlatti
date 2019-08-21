@@ -344,7 +344,9 @@ class AlbumRow(Gtk.ListBoxRow):
         else:
             self.__artwork.set_from_surface(surface)
         self.show_all()
-        self.emit("populated")
+        # TracksView will not emit populated
+        if not self.revealed:
+            self.emit("populated")
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """
