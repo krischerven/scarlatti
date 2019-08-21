@@ -208,7 +208,7 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
             @param view as TracksView
             @param disc_number as int
         """
-        if self.__tracks_view.get_populated():
+        if self.__tracks_view.is_populated:
             from lollypop.view_albums_box import AlbumsArtistBoxView
             for artist_id in self._album.artist_ids:
                 others_box = AlbumsArtistBoxView(self._album, artist_id,

@@ -190,13 +190,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
         """
         self.__cancellable.cancel()
 
-    def get_populated(self):
-        """
-            Return True if populated
-            @return bool
-        """
-        return self.__populated
-
     @property
     def children(self):
         """
@@ -238,7 +231,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Return True if populated
             @return bool
         """
-        return self.get_populated()
+        return self.__populated
 
 #######################
 # PROTECTED           #

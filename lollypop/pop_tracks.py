@@ -49,6 +49,7 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
         self.__tracks_view = TracksView(album, None, orientation,
                                         ViewType.TWO_COLUMNS)
         self.__tracks_view.show()
+        self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.populate()
         self.__scrolled = Gtk.ScrolledWindow()
         self.__scrolled.add(self.__tracks_view)
@@ -151,16 +152,8 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
             Update view
             @param player as Player
         """
-        self.set_playing_indicator()
+        self.__tracks_view.set_playing_indicator()
         self.__show_append(self._album.id not in App().player.album_ids)
-
-    def _on_tracks_populated(self, disc_number):
-        """
-            Tracks populated
-            @param disc_number
-        """
-        if not self.is_populated:
-            self.populate()
 
 #######################
 # PRIVATE             #
@@ -233,3 +226,12 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
         """
         if surface is not None:
             self.__artwork.set_from_surface(surface)
+
+    def __on_tracks_populated(self, view, disc_number):
+        """
+            Tracks populated
+            @param view as TracksView
+            @param disc_number
+        """
+        if not self.__tracks_view.is_populated:
+            self.populate()

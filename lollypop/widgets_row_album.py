@@ -156,7 +156,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Add track rows (only works for albums with merged discs)
             @param tracks as [Track]
         """
-        if self.__tracks_view.get_populated():
+        if self.__tracks_view.is_populated:
             self.__tracks_view.append_rows(tracks)
 
     def insert_rows(self, tracks, position):
@@ -165,7 +165,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param tracks as [Track]
             @param position as int
         """
-        if self.__tracks_view.get_populated():
+        if self.__tracks_view.is_populated:
             self.__tracks_view.insert_rows(tracks, position)
 
     def reveal(self, reveal=None):
@@ -178,7 +178,7 @@ class AlbumRow(Gtk.ListBoxRow):
             if self.album.id == App().player.current_track.album.id:
                 self.set_state_flags(Gtk.StateFlags.VISITED, True)
         else:
-            if not self.__tracks_view.get_populated():
+            if not self.__tracks_view.is_populated:
                 self.__tracks_view.populate()
             self.__revealer.set_reveal_child(True)
             self.unset_state_flags(Gtk.StateFlags.VISITED)
@@ -382,7 +382,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param view as TracksView
             @param disc_number as int
         """
-        if not self.__tracks_view.get_populated():
+        if not self.__tracks_view.is_populated:
             self.__tracks_view.populate()
         else:
             self.emit("populated")
