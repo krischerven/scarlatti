@@ -22,8 +22,7 @@ from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class TracksPopover(Popover, TracksView,
-                    SizeAllocationHelper, SignalsHelper):
+class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
     """
         A popover with tracks
     """
@@ -45,17 +44,17 @@ class TracksPopover(Popover, TracksView,
         window_width = App().window.get_allocated_width()
         wanted_width = min(Size.NORMAL, window_width * 0.5)
         wanted_height = Size.MINI
-        self._view_type = ViewType.TWO_COLUMNS
         orientation = Gtk.Orientation.VERTICAL if wanted_width < Size.MEDIUM\
             else Gtk.Orientation.HORIZONTAL
-        TracksView.__init__(self, None, orientation)
-        self.populate()
+        self.__tracks_view = TracksView(album, None, orientation,
+                                        ViewType.TWO_COLUMNS)
+        self.__tracks_view.show()
+        self.__tracks_view.populate()
         self.__scrolled = Gtk.ScrolledWindow()
-        self.__scrolled.add(self._responsive_widget)
+        self.__scrolled.add(self.__tracks_view)
         self.__scrolled.set_property("width-request", wanted_width)
         self.__scrolled.set_property("height-request", wanted_height)
         self.__scrolled.show()
-        self._responsive_widget.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN_SMALL)
         grid.show()

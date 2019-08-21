@@ -21,7 +21,7 @@ from lollypop.utils import popup_widget
 from lollypop.helper_gestures import GesturesHelper
 
 
-class AlbumRow(Gtk.ListBoxRow, TracksView):
+class AlbumRow(Gtk.ListBoxRow):
     """
         Album row
     """
@@ -60,13 +60,16 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         """
         Gtk.ListBoxRow.__init__(self)
         self._view_type = view_type
-        TracksView.__init__(self, None, Gtk.Orientation.VERTICAL, position)
         self.__revealer = None
         self.__reveal = reveal
         self._artwork = None
         self._album = album
         self.__cancellable = Gio.Cancellable()
         self.set_sensitive(False)
+        self.__tracks_view = TracksView(album, None, Gtk.Orientation.VERTICAL,
+                                        view_type, position)
+        self.__tracks_view.connect("populated", self.__on_tracks_populated)
+        self.__tracks_view.show()
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
 
@@ -141,6 +144,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         self.__revealer = Gtk.Revealer.new()
         self.__revealer.show()
         grid.attach(self.__revealer, 0, 2, 3, 1)
+        self.__revealer.add(self.__tracks_view)
         self.add(grid)
         self.set_playing_indicator()
         if self.__reveal or self._view_type & ViewType.PLAYLISTS:
@@ -152,8 +156,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             Add track rows (only works for albums with merged discs)
             @param tracks as [Track]
         """
-        if self._responsive_widget is not None:
-            TracksView.append_rows(self, tracks)
+        if self.__tracks_view.get_populated():
+            self.__tracks_view.append_rows(tracks)
 
     def insert_rows(self, tracks, position):
         """
@@ -161,8 +165,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             @param tracks as [Track]
             @param position as int
         """
-        if self._responsive_widget is not None:
-            TracksView.insert_rows(self, tracks, position)
+        if self.__tracks_view.get_populated():
+            self.__tracks_view.insert_rows(tracks, position)
 
     def reveal(self, reveal=None):
         """
@@ -174,10 +178,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             if self.album.id == App().player.current_track.album.id:
                 self.set_state_flags(Gtk.StateFlags.VISITED, True)
         else:
-            if self._responsive_widget is None:
-                TracksView.populate(self)
-                self._responsive_widget.show()
-                self.__revealer.add(self._responsive_widget)
+            if not self.__tracks_view.get_populated():
+                self.__tracks_view.populate()
             self.__revealer.set_reveal_child(True)
             self.unset_state_flags(Gtk.StateFlags.VISITED)
 
@@ -190,7 +192,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         selected = self.album.id == App().player.current_track.album.id and\
             App().player.current_track.id in self.album.track_ids
         if self.__revealer.get_reveal_child():
-            TracksView.set_playing_indicator(self)
+            self.__tracks_view.set_playing_indicator()
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
         elif selected:
             self.set_state_flags(Gtk.StateFlags.VISITED, True)
@@ -202,8 +204,8 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             Stop view loading
         """
         self._artwork = None
-        if self._responsive_widget is not None:
-            TracksView.stop(self)
+        if self.__tracks_view.get_populated():
+            self.__tracks_view.stop()
 
     def set_artwork(self):
         """
@@ -245,8 +247,7 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
             Return True if populated
             @return bool
         """
-        return True if self._responsive_widget is None\
-            else TracksView.get_populated(self)
+        return self.__tracks_view.get_populated()
 
     @property
     def name(self):
@@ -267,16 +268,6 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
 #######################
 # PROTECTED           #
 #######################
-    def _on_tracks_populated(self, disc_number):
-        """
-            Populate remaining discs
-            @param disc_number as int
-        """
-        if not self.is_populated:
-            TracksView.populate(self)
-        else:
-            self.emit("populated")
-
     def _on_action_button_press(self, x, y, event):
         """
             Show row menu
@@ -383,3 +374,14 @@ class AlbumRow(Gtk.ListBoxRow, TracksView):
         """
         self.__cancellable.cancel()
         self._artwork = None
+
+    def __on_tracks_populated(self, view, disc_number):
+        """
+            Populate remaining discs
+            @param view as TracksView
+            @param disc_number as int
+        """
+        if not self.__tracks_view.get_populated():
+            self.__tracks_view.populate()
+        else:
+            self.emit("populated")
