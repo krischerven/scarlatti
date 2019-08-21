@@ -234,4 +234,4 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
             @param disc_number
         """
         if not self.__tracks_view.is_populated:
-            self.populate()
+            self.__tracks_view.populate()

@@ -46,11 +46,16 @@ class TracksView(Gtk.Bin, SignalsHelper):
         Gtk.Bin.__init__(self)
         self.__view_type = view_type
         self.__album = album
-        self.__discs = []
+        self._tracks_widget_left = {}
+        self._tracks_widget_right = {}
+        if view_type & ViewType.TWO_COLUMNS:
+            self.__discs = self.__album.discs
+        else:
+            self.__discs = [self.__album.one_disc]
+        self.__discs_to_load = list(self.__discs)
         self.__position = position
         self.__responsive_widget = None
         self.__orientation = orientation
-        self.__populated = False
         self.__cancellable = Gio.Cancellable()
 
         if window is None:
@@ -117,28 +122,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Populate tracks
             @thread safe
         """
-        if self.__responsive_widget is None:
-            if self.__view_type & ViewType.DND:
-                self.connect("key-press-event", self.__on_key_press_event)
-            self.__responsive_widget = Gtk.Grid()
-            self.__responsive_widget.set_column_spacing(20)
-            self.__responsive_widget.set_column_homogeneous(True)
-            self.__responsive_widget.set_property("valign", Gtk.Align.START)
-
-            self._tracks_widget_left = {}
-            self._tracks_widget_right = {}
-
-            if self.__view_type & ViewType.TWO_COLUMNS:
-                self.__discs = self.__album.discs
-            else:
-                self.__discs = [self.__album.one_disc]
-            self.__discs_to_load = list(self.__discs)
-            for disc in self.__discs:
-                self.__add_disc_container(disc.number)
-            if self.__orientation is not None:
-                self.__set_orientation(self.__orientation)
-            self.add(self.__responsive_widget)
-            self.__responsive_widget.show()
+        self.__init()
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
@@ -154,6 +138,20 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 widgets = {self._tracks_widget_left[disc_number]: tracks}
                 self.__add_tracks(OrderedDict(widgets), disc_number)
 
+    def append_row(self, track):
+        """
+            Append a track
+            @param track as Track
+            @param position as int
+            @return TrackRow
+        """
+        if self.__responsive_widget is None:
+            self.__init()
+        row = TrackRow(track, self.__album.artist_ids, self.__view_type)
+        row.show()
+        self._tracks_widget_left[0].insert(row, -1)
+        return row
+
     def append_rows(self, tracks):
         """
             Add track rows
@@ -161,16 +159,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
         """
         widgets = {self._tracks_widget_left[0]:
                    get_position_list(tracks, len(self.children))}
-        self.__add_tracks(OrderedDict(widgets), 0)
-
-    def insert_rows(self, tracks, position):
-        """
-            Insert track rows
-            @param tracks as [Track]
-            @param position as int
-        """
-        widgets = {self._tracks_widget_left[0]:
-                   get_position_list(tracks, position)}
         self.__add_tracks(OrderedDict(widgets), 0)
 
     def get_current_ordinate(self, parent):
@@ -189,6 +177,13 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Stop loading
         """
         self.__cancellable.cancel()
+
+    def set_position(self, position):
+        """
+            Set tracks position
+            @param position as int
+        """
+        self.__position = position
 
     @property
     def children(self):
@@ -231,7 +226,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Return True if populated
             @return bool
         """
-        return self.__populated
+        return len(self.__discs_to_load) == 0
 
 #######################
 # PROTECTED           #
@@ -312,6 +307,24 @@ class TracksView(Gtk.Bin, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __init(self):
+        """
+            Init main widget
+        """
+        if self.__responsive_widget is None:
+            if self.__view_type & ViewType.DND:
+                self.connect("key-press-event", self.__on_key_press_event)
+            self.__responsive_widget = Gtk.Grid()
+            self.__responsive_widget.set_column_spacing(20)
+            self.__responsive_widget.set_column_homogeneous(True)
+            self.__responsive_widget.set_property("valign", Gtk.Align.START)
+            for disc in self.__discs:
+                self.__add_disc_container(disc.number)
+            if self.__orientation is not None:
+                self.__set_orientation(self.__orientation)
+            self.add(self.__responsive_widget)
+            self.__responsive_widget.show()
+
     def __add_disc_container(self, disc_number):
         """
             Add disc container to box
@@ -406,8 +419,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
         tracks = widgets[widget]
 
         if not tracks:
-            if len(self.__discs_to_load) == 0:
-                self.__populated = True
             self.emit("populated", disc_number)
             self._tracks_widget_left[disc_number].show()
             self._tracks_widget_right[disc_number].show()

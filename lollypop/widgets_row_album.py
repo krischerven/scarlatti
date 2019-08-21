@@ -153,20 +153,11 @@ class AlbumRow(Gtk.ListBoxRow):
 
     def append_rows(self, tracks):
         """
-            Add track rows (only works for albums with merged discs)
+            Add track rows
             @param tracks as [Track]
         """
         if self.__tracks_view.is_populated:
             self.__tracks_view.append_rows(tracks)
-
-    def insert_rows(self, tracks, position):
-        """
-            Add track rows (only works for albums with merged discs)
-            @param tracks as [Track]
-            @param position as int
-        """
-        if self.__tracks_view.is_populated:
-            self.__tracks_view.insert_rows(tracks, position)
 
     def reveal(self, reveal=None):
         """
@@ -227,8 +218,11 @@ class AlbumRow(Gtk.ListBoxRow):
             @param position as int
             @return position as int
         """
+        if not self.__tracks_view.is_populated:
+            self.__tracks_view.set_position(position)
+            return position + len(self.__album.tracks)
         for row in self.children:
-            row.set_position(position)
+            row.set_position(position + 1)
             position += 1
         return position
 
@@ -240,6 +234,22 @@ class AlbumRow(Gtk.ListBoxRow):
         """
         return self.__revealer is not None and\
             self.__revealer.get_reveal_child()
+
+    @property
+    def listbox(self):
+        """
+            Get listbox
+            @return Gtk.ListBox
+        """
+        return self.__tracks_view.boxes[0]
+
+    @property
+    def children(self):
+        """
+            Get track rows
+            @return [TrackRow]
+        """
+        return self.__tracks_view.boxes[0].get_children()
 
     @property
     def is_populated(self):
@@ -347,8 +357,8 @@ class AlbumRow(Gtk.ListBoxRow):
                                               Gtk.IconSize.BUTTON)
         else:
             self.__artwork.set_from_surface(surface)
-        self.emit("populated")
         self.show_all()
+        self.emit("populated")
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """
@@ -382,7 +392,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param view as TracksView
             @param disc_number as int
         """
-        if not self.__tracks_view.is_populated:
+        if self.revealed and not self.__tracks_view.is_populated:
             self.__tracks_view.populate()
         else:
             self.emit("populated")

@@ -151,7 +151,7 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
             Update children state
             @param player as Player
         """
-        self.set_playing_indicator()
+        self.__tracks_view.set_playing_indicator()
 
     def _on_duration_changed(self, player, track_id):
         """
