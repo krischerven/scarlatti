@@ -93,11 +93,10 @@ class Album(Base):
                 "year": None,
                 "timestamp": 0,
                 "uri": "",
-                "tracks_count": 1,
                 "duration": 0,
                 "popularity": 0,
                 "mtime": 1,
-                "synced": False,
+                "synced": 0,
                 "loved": False,
                 "storage_type": 0,
                 "mb_album_id": None}
@@ -187,7 +186,7 @@ class Album(Base):
             @param loved as bool
         """
         if self.id >= 0:
-            App().albums.set_loved(self.id, loved)
+            self.db.set_loved(self.id, loved)
             self.loved = loved
 
     def set_uri(self, uri):
@@ -196,7 +195,7 @@ class Album(Base):
             @param uri as str
         """
         if self.id >= 0:
-            App().albums.set_uri(self.id, uri)
+            self.db.set_uri(self.id, uri)
         self.uri = uri
 
     def get_track(self, track_id):
@@ -216,9 +215,9 @@ class Album(Base):
             @param save as bool
         """
         if save:
-            App().albums.set_storage_type(self.id, StorageType.SAVED)
+            self.db.set_storage_type(self.id, StorageType.SAVED)
         else:
-            App().albums.set_storage_type(self.id, StorageType.EPHEMERAL)
+            self.db.set_storage_type(self.id, StorageType.EPHEMERAL)
         for track in self.tracks:
             track.save(save)
         self.reset("mtime")
@@ -235,21 +234,18 @@ class Album(Base):
         return not self.storage_type & StorageType.COLLECTION
 
     @property
-    def synced(self):
+    def tracks_count(self):
         """
-            Get synced state
-            Remove from cache
+            Get tracks count
             @return int
         """
-        return App().albums.get_synced(self.id)
-
-    @property
-    def title(self):
-        """
-            Get album name
-            @return str
-        """
-        return self.name
+        if self._tracks:
+            return len(self._tracks)
+        else:
+            return self.db.get_tracks_count(
+                self.id,
+                self.genre_ids,
+                self.artist_ids)
 
     @property
     def track_ids(self):

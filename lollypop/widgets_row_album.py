@@ -59,17 +59,14 @@ class AlbumRow(Gtk.ListBoxRow):
             @param position as int
         """
         Gtk.ListBoxRow.__init__(self)
-        self._view_type = view_type
+        self.__view_type = view_type
         self.__revealer = None
         self.__reveal = reveal
         self.__artwork = None
         self.__album = album
         self.__cancellable = Gio.Cancellable()
+        self.__position = position
         self.set_sensitive(False)
-        self.__tracks_view = TracksView(album, None, Gtk.Orientation.VERTICAL,
-                                        view_type, position)
-        self.__tracks_view.connect("populated", self.__on_tracks_populated)
-        self.__tracks_view.show()
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
 
@@ -79,6 +76,11 @@ class AlbumRow(Gtk.ListBoxRow):
         """
         if self.__artwork is not None:
             return
+        self.__tracks_view = TracksView(self.__album, None,
+                                        Gtk.Orientation.VERTICAL,
+                                        self.__view_type, self.__position)
+        self.__tracks_view.connect("populated", self.__on_tracks_populated)
+        self.__tracks_view.show()
         self.__artwork = Gtk.Image.new()
         App().art_helper.set_frame(self.__artwork, "small-cover-frame",
                                    ArtSize.SMALL, ArtSize.SMALL)
@@ -108,7 +110,7 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
         self.__action_button = None
-        if self._view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
+        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "list-remove-symbolic",
                 Gtk.IconSize.MENU)
@@ -119,7 +121,7 @@ class AlbumRow(Gtk.ListBoxRow):
                 "document-save-symbolic",
                 Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(_("Save in collection"))
-        elif self._view_type & ViewType.SEARCH:
+        elif self.__view_type & ViewType.SEARCH:
             self.__action_button = Gtk.Button.new_from_icon_name(
                     'avatar-default-symbolic',
                     Gtk.IconSize.MENU)
@@ -147,7 +149,7 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__revealer.add(self.__tracks_view)
         self.add(grid)
         self.set_playing_indicator()
-        if self.__reveal or self._view_type & ViewType.PLAYLISTS:
+        if self.__reveal or self.__view_type & ViewType.PLAYLISTS:
             self.reveal(True)
         self.set_artwork()
 
@@ -287,7 +289,7 @@ class AlbumRow(Gtk.ListBoxRow):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self._view_type & ViewType.PLAYBACK:
+        if self.__view_type & ViewType.PLAYBACK:
             App().player.remove_album(self.__album)
             self.destroy()
             App().player.update_next_prev()
@@ -296,13 +298,13 @@ class AlbumRow(Gtk.ListBoxRow):
             App().art.cache_artists_artwork()
             self.__album.save(True)
             self.__action_button.hide()
-        elif self._view_type & ViewType.SEARCH:
+        elif self.__view_type & ViewType.SEARCH:
             popover = self.get_ancestor(Gtk.Popover)
             if popover is not None:
                 popover.popdown()
             App().window.container.show_view([Type.ARTISTS],
                                              self.__album.artist_ids)
-        elif self._view_type & ViewType.PLAYLISTS:
+        elif self.__view_type & ViewType.PLAYLISTS:
             if App().player.current_track.album.id == self.__album.id:
                 # Stop playback or loop for last album
                 # Else skip current

@@ -594,21 +594,6 @@ class AlbumsDatabase:
             result = sql.execute("SELECT uri FROM albums")
             return list(itertools.chain(*result))
 
-    def get_tracks_count(self, album_id):
-        """
-            Return tracks count
-            @param album_id as int
-            @return count as int
-        """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT COUNT(*)\
-                                  FROM tracks WHERE album_id=?",
-                                 (album_id,))
-            v = result.fetchone()
-            if v is not None:
-                return v[0]
-            return 1
-
     def get_rated(self, limit=100):
         """
             Get albums with user rating >= 4
@@ -808,6 +793,42 @@ class AlbumsDatabase:
             request += " ORDER BY discnumber, tracknumber, tracks.name"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
+
+    def get_tracks_count(self, album_id, genre_ids, artist_ids):
+        """
+            Get tracks ids for album
+            @param album_id as int
+            @param genre_ids as [int]
+            @param artist_ids as [int]
+            @return [int]
+        """
+        genre_ids = remove_static(genre_ids)
+        artist_ids = remove_static(artist_ids)
+        with SqlCursor(App().db) as sql:
+            filters = (album_id,)
+            request = "SELECT COUNT(*) FROM tracks"
+            if genre_ids:
+                request += ", track_genres"
+                filters += tuple(genre_ids)
+            if artist_ids:
+                request += ", track_artists"
+                filters += tuple(artist_ids)
+            request += " WHERE album_id=?"
+            if genre_ids:
+                request += " AND track_genres.track_id = tracks.rowid AND ("
+                for genre_id in genre_ids:
+                    request += "track_genres.genre_id=? OR "
+                request += "1=0)"
+            if artist_ids:
+                request += " AND track_artists.track_id=tracks.rowid AND ("
+                for artist_id in artist_ids:
+                    request += "track_artists.artist_id=? OR "
+                request += "1=0)"
+            result = sql.execute(request, filters)
+            v = result.fetchone()
+            if v is not None and v[0] > 0:
+                return v[0]
+            return 1
 
     def get_id_by_uri(self, uri):
         """

@@ -415,15 +415,8 @@ class BinPlayer(BasePlayer):
                 pop_to_add = 1
             # In normal mode, based on tracks count
             else:
-                # Some users report an issue where get_tracks_count() return 0
-                # See issue #886
-                # Don"t understand how this can happen!
-                count = App().albums.get_tracks_count(
-                    self._current_track.album_id)
-                if count:
-                    pop_to_add = int(App().albums.max_count / count)
-                else:
-                    pop_to_add = 1
+                count = self._current_track.album.tracks_count
+                pop_to_add = int(App().albums.max_count / count)
             App().albums.set_more_popular(self._current_track.album_id,
                                           pop_to_add)
         if self._next_track.id is None:
@@ -517,15 +510,10 @@ class BinPlayer(BasePlayer):
                 pop_to_add = 1
             # In normal mode, based on tracks count
             else:
-                count = App().albums.get_tracks_count(
-                    self._current_track.album_id)
-                if count:
-                    pop_to_add = int(App().albums.max_count / count)
-                else:
-                    pop_to_add = 0
-            if pop_to_add > 0:
-                App().albums.set_more_popular(self._current_track.album_id,
-                                              pop_to_add)
+                count = self._current_track.album.tracks_count
+                pop_to_add = int(App().albums.max_count / count)
+            App().albums.set_more_popular(self._current_track.album_id,
+                                          pop_to_add)
 
         GLib.idle_add(self.__volume_down, self._playbin,
                       self._plugins, duration)

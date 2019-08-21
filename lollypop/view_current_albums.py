@@ -137,6 +137,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
                             row.destroy()
                         break
         else:
+            self.stop()
             self.clear()
             self.populate()
 
@@ -144,6 +145,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
             Clear and populate view again
         """
+        self.stop()
         self.clear()
         self.populate()
 

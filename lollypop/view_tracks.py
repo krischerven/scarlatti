@@ -48,13 +48,11 @@ class TracksView(Gtk.Bin, SignalsHelper):
         self.__album = album
         self._tracks_widget_left = {}
         self._tracks_widget_right = {}
-        if view_type & ViewType.TWO_COLUMNS:
-            self.__discs = self.__album.discs
-        else:
-            self.__discs = [self.__album.one_disc]
-        self.__discs_to_load = list(self.__discs)
+        self.__discs = []
+        self.__discs_to_load = []
         self.__position = position
         self.__responsive_widget = None
+        self.__populated = False
         self.__orientation = orientation
         self.__cancellable = Gio.Cancellable()
 
@@ -90,32 +88,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
                     (App().player, "loading-changed", "_on_loading_changed")
                 ]
             }
-
-    def set_playing_indicator(self):
-        """
-            Set playing indicator
-        """
-        try:
-            for disc in self.__discs:
-                self._tracks_widget_left[disc.number].update_playing(
-                    App().player.current_track.id)
-                self._tracks_widget_right[disc.number].update_playing(
-                    App().player.current_track.id)
-        except Exception as e:
-            Logger.error("TrackView::set_playing_indicator(): %s" % e)
-
-    def update_duration(self, track_id):
-        """
-            Update track duration
-            @param track_id as int
-        """
-        try:
-            for disc in self.__discs:
-                number = disc.number
-                self._tracks_widget_left[number].update_duration(track_id)
-                self._tracks_widget_right[number].update_duration(track_id)
-        except Exception as e:
-            Logger.error("TrackView::update_duration(): %s" % e)
 
     def populate(self):
         """
@@ -178,6 +150,32 @@ class TracksView(Gtk.Bin, SignalsHelper):
         """
         self.__cancellable.cancel()
 
+    def set_playing_indicator(self):
+        """
+            Set playing indicator
+        """
+        try:
+            for disc in self.__discs:
+                self._tracks_widget_left[disc.number].update_playing(
+                    App().player.current_track.id)
+                self._tracks_widget_right[disc.number].update_playing(
+                    App().player.current_track.id)
+        except Exception as e:
+            Logger.error("TrackView::set_playing_indicator(): %s" % e)
+
+    def update_duration(self, track_id):
+        """
+            Update track duration
+            @param track_id as int
+        """
+        try:
+            for disc in self.__discs:
+                number = disc.number
+                self._tracks_widget_left[number].update_duration(track_id)
+                self._tracks_widget_right[number].update_duration(track_id)
+        except Exception as e:
+            Logger.error("TrackView::update_duration(): %s" % e)
+
     def set_position(self, position):
         """
             Set tracks position
@@ -226,7 +224,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Return True if populated
             @return bool
         """
-        return len(self.__discs_to_load) == 0
+        return self.__populated
 
 #######################
 # PROTECTED           #
@@ -318,12 +316,17 @@ class TracksView(Gtk.Bin, SignalsHelper):
             self.__responsive_widget.set_column_spacing(20)
             self.__responsive_widget.set_column_homogeneous(True)
             self.__responsive_widget.set_property("valign", Gtk.Align.START)
+            if self.__view_type & ViewType.TWO_COLUMNS:
+                self.__discs = self.__album.discs
+            else:
+                self.__discs = [self.__album.one_disc]
             for disc in self.__discs:
                 self.__add_disc_container(disc.number)
             if self.__orientation is not None:
                 self.__set_orientation(self.__orientation)
             self.add(self.__responsive_widget)
             self.__responsive_widget.show()
+            self.__discs_to_load = list(self.__discs)
 
     def __add_disc_container(self, disc_number):
         """
@@ -419,6 +422,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
         tracks = widgets[widget]
 
         if not tracks:
+            if len(self.__discs_to_load) == 0:
+                self.__populated = True
             self.emit("populated", disc_number)
             self._tracks_widget_left[disc_number].show()
             self._tracks_widget_right[disc_number].show()

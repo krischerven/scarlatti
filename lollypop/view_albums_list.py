@@ -349,10 +349,10 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param album as Album
             @param reveal as bool
         """
-        row = AlbumRow(album, self.__height, self._view_type,
-                       reveal, self.__position)
+        row = AlbumRow(album, self.__height, self._view_type, reveal,
+                       self.__position)
         if self._view_type & ViewType.DND:
-            self.__position += len(album.tracks)
+            self.__position += album.tracks_count
         else:
             self.__position = 0
         return row

@@ -298,8 +298,6 @@ class LazyLoadingView(View):
         if self.__scrolled_position is not None:
             self._viewport.connect("size-allocate",
                                    self.__on_viewport_size_allocated)
-        if self._lazy_queue:
-            self.lazy_loading()
 
     def _on_value_changed(self, adj):
         """
