@@ -41,6 +41,7 @@ class DeviceWidget(Gtk.ListBoxRow):
         """
         Gtk.ListBoxRow.__init__(self)
         self.get_style_context().add_class("background")
+        self.connect("map", self.__on_map)
         self.__name = name
         self.__uri = uri
         self.__progress = 0
@@ -64,8 +65,6 @@ class DeviceWidget(Gtk.ListBoxRow):
         for encoder in self.__mtp_sync._GST_ENCODER.keys():
             if not self.__mtp_sync.check_encoder_status(encoder):
                 self.__builder.get_object(encoder).set_sensitive(False)
-        App().task_helper.run(self.__get_basename_for_sync,
-                              callback=(self.__set_combobox_content,))
 
     @property
     def uri(self):
@@ -331,3 +330,11 @@ class DeviceWidget(Gtk.ListBoxRow):
         self.__sync_button.set_label(_("Synchronize"))
         self.__sync_button.set_sensitive(True)
         self.__calculate_free_space()
+
+    def __on_map(self, widget):
+        """
+            Setup combobox
+            @param widget as Gtk.Widget
+        """
+        App().task_helper.run(self.__get_basename_for_sync,
+                              callback=(self.__set_combobox_content,))
