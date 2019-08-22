@@ -364,9 +364,9 @@ class LazyLoadingView(View):
         """
             Add visible widgets to lazy queue
         """
+        self.__scroll_timeout_id = None
         if self.__lazy_loading_id is None:
             return
-        self.__scroll_timeout_id = None
         self.__priority_queue = []
         for child in self._lazy_queue:
             if self.__is_visible(child):
