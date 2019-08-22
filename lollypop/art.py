@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, GdkPixbuf, Gdk
 
 from lollypop.art_base import BaseArt
 from lollypop.art_album import AlbumArt
@@ -18,10 +18,9 @@ from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
-from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH
+from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH, App
 from lollypop.utils import create_dir, escape
 
-import cairo
 from shutil import rmtree
 
 
@@ -53,10 +52,13 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         try:
             width = surface.get_width()
             height = surface.get_height()
-            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
+            cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
                                                   escape(name),
                                                   width, height)
-            surface.write_to_png(cache_path_png)
+            pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, width, height)
+            pixbuf.savev(cache_path_jpg, "jpeg", ["quality"],
+                         [str(App().settings.get_value(
+                             "cover-quality").get_int32())])
         except Exception as e:
             Logger.error("Art::add_artwork_to_cache(): %s" % e)
 
@@ -67,7 +69,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         """
         try:
             from glob import glob
-            search = "%s/%s_*.png" % (CACHE_PATH, name)
+            search = "%s/%s_*.jpg" % (CACHE_PATH, name)
             pathes = glob(search)
             for path in pathes:
                 f = Gio.File.new_for_path(path)
@@ -81,14 +83,14 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @param name as str
             @param width as int
             @param height as int
-            @return cairo surface
+            @return bytes
         """
         try:
-            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
+            cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
                                                   escape(name),
                                                   width, height)
-            surface = cairo.ImageSurface.create_from_png(cache_path_png)
-            return surface
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path_jpg)
+            return pixbuf
         except Exception as e:
             Logger.warning("Art::get_artwork_from_cache(): %s" % e)
             return None
@@ -101,10 +103,10 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @param height as int
             @return bool
         """
-        cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
+        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
                                               escape(name),
                                               width, height)
-        f = Gio.File.new_for_path(cache_path_png)
+        f = Gio.File.new_for_path(cache_path_jpg)
         return f.query_exists()
 
     def clean_web(self):

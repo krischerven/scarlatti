@@ -152,14 +152,16 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         else:
             GLib.idle_add(self.__set_surface, surface)
 
-    def __on_load_from_cache(self, surface):
+    def __on_load_from_cache(self, pixbuf):
         """
             Set artwork surface
+            @param pixbuf as GdkPixbuf.Pixbuf
         """
-        if self.__cancellable.is_cancelled():
-            return
-        self._artwork.set_from_surface(
-                get_round_surface(surface, self._scale_factor, 50))
+        if not self.__cancellable.is_cancelled() and pixbuf is not None:
+            surface = Gdk.cairo_surface_create_from_pixbuf(
+                pixbuf, self._artwork.get_scale_factor(), None)
+            self._artwork.set_from_surface(
+                    get_round_surface(surface, self._scale_factor, 50))
         self.emit("populated")
 
     def __on_unmap(self, widget):
