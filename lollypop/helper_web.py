@@ -16,7 +16,7 @@ from pickle import load, dump
 
 from lollypop.helper_web_youtube import YouTubeHelper
 from lollypop.helper_web_invidious import InvidiousHelper
-from lollypop.define import CACHE_PATH
+from lollypop.define import CACHE_PATH, App
 from lollypop.logger import Logger
 
 
@@ -29,7 +29,10 @@ class WebHelper:
         """
             Init helper
         """
-        self.__helpers = [InvidiousHelper(), YouTubeHelper()]
+        if App().settings.get_value("invidious-server").get_string():
+            self.__helpers = [InvidiousHelper()]
+        else:
+            self.__helpers = [YouTubeHelper()]
 
     def set_uri(self, track, cancellable):
         """

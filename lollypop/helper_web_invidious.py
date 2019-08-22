@@ -32,7 +32,8 @@ class InvidiousHelper:
         """
             Init heApper
         """
-        self.__server = "https://invidio.us"
+        self.__server = App().settings.get_value(
+            "invidious-server").get_string().strip("/")
 
     def get_uri(self, track, cancellable):
         """

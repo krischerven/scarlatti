@@ -79,7 +79,7 @@
             <summary>Window maximized</summary>
             <description>Window maximized state.</description>
         </key>
-  	<key type="ai" name="party-ids">
+  	    <key type="ai" name="party-ids">
             <default>[]</default>
             <summary>Enabled genres in party mode</summary>
             <description>ID for genres.</description>
@@ -92,6 +92,11 @@
         <key type="s" name="sync-internal-ids">
             <default>""</default>
             <summary>INTERNAL</summary>
+            <description></description>
+        </key>
+        <key type="s" name="invidious-server">
+            <default>""</default>
+            <summary>If set, Lollypop will use this server instead of YouTube. See https://github.com/omarroth/invidious </summary>
             <description></description>
         </key>
         <key type="b" name="import-playlists">
