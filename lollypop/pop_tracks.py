@@ -18,11 +18,11 @@ from lollypop.view_tracks import TracksView
 from lollypop.define import App, ViewType, Shuffle, ArtSize, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Size
 from lollypop.widgets_utils import Popover
-from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.controller_view import ViewController, ViewControllerType
 
 
-class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
+class TracksPopover(Popover, ViewController, SizeAllocationHelper):
     """
         A popover with tracks
     """
@@ -31,7 +31,6 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
         "play-all-from": (GObject.SignalFlags.RUN_FIRST, None, ())
     }
 
-    @signals
     def __init__(self, album):
         """
             Init popover
@@ -39,6 +38,7 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
             @param width as int
         """
         Popover.__init__(self)
+        ViewController.__init__(self, ViewControllerType.ALBUM)
         SizeAllocationHelper.__init__(self)
         self._album = album
         window_width = App().window.get_allocated_width()
@@ -121,11 +121,6 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
         grid.add(overlay)
         grid.add(self.__scrolled)
         self.add(grid)
-        return {
-            "map": [
-                (App().player, "current-changed", "_on_current_changed")
-            ]
-        }
 
 #######################
 # PROTECTED           #
@@ -154,6 +149,14 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
         """
         self.__tracks_view.set_playing_indicator()
         self.__show_append(self._album.id not in App().player.album_ids)
+
+    def _on_duration_changed(self, player, track_id):
+        """
+            Update track duration
+            @param player as Player
+            @param track_id as int
+        """
+        self.__tracks_view.update_duration(track_id)
 
 #######################
 # PRIVATE             #
@@ -227,11 +230,10 @@ class TracksPopover(Popover, SizeAllocationHelper, SignalsHelper):
         if surface is not None:
             self.__artwork.set_from_surface(surface)
 
-    def __on_tracks_populated(self, view, disc_number):
+    def __on_tracks_populated(self, view):
         """
             Tracks populated
             @param view as TracksView
-            @param disc_number
         """
         if not self.__tracks_view.is_populated:
             self.__tracks_view.populate()

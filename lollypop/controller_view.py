@@ -32,7 +32,7 @@ class ViewController(SignalsHelper):
             @param controller_type as ViewControllerType
         """
         return {
-            "init": [
+            "map": [
                 (App().player, "current-changed", "_on_current_changed"),
                 (App().player, "duration-changed", "_on_duration_changed"),
                 (App().art, "%s-artwork-changed" % controller_type,

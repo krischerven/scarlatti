@@ -29,7 +29,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
     """
 
     __gsignals__ = {
-        "populated": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     @signals
@@ -98,7 +98,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 widget.show()
                 GLib.idle_add(load_disc, items, disc_number, position)
             else:
-                GLib.idle_add(self.emit, "populated", disc_number)
+                GLib.idle_add(self.emit, "populated")
 
         self.__init()
         if self.__discs_to_load:
@@ -117,6 +117,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             load_disc(items, disc_number)
         else:
             self.__populated = True
+            self.emit("populated")
             if not self.children:
                 text = (_("""This album has no track."""
                           """ Check tags, all 'album artist'"""

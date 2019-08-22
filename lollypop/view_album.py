@@ -159,7 +159,7 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
             @param player as Player
             @param track_id as int
         """
-        self.update_duration(track_id)
+        self.__tracks_view.update_duration(track_id)
 
     def _on_album_updated(self, scanner, album_id, added):
         """
@@ -202,11 +202,10 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __on_tracks_populated(self, view, disc_number):
+    def __on_tracks_populated(self, view):
         """
             Populate remaining discs
             @param view as TracksView
-            @param disc_number as int
         """
         if self.__tracks_view.is_populated:
             from lollypop.view_albums_box import AlbumsArtistBoxView

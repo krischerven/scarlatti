@@ -375,7 +375,7 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__cancellable.cancel()
         self.__artwork = None
 
-    def __on_tracks_populated(self, view, disc_number):
+    def __on_tracks_populated(self, view):
         """
             Populate remaining discs
             @param view as TracksView
