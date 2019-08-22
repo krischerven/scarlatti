@@ -167,7 +167,6 @@ class DNDHelper(GObject.Object):
             @return AlbumRow
         """
         height = AlbumRow.get_best_height(album_row)
-        # First split dst album
         children = album_row.children
         index = children.index(track_row)
         if direction == Gtk.DirectionType.DOWN:
