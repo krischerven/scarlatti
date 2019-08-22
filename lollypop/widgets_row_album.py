@@ -229,6 +229,14 @@ class AlbumRow(Gtk.ListBoxRow):
             self.__revealer.get_reveal_child()
 
     @property
+    def tracks_view(self):
+        """
+            Get tracks view
+            @return TracksView
+        """
+        return self.__tracks_view
+
+    @property
     def listbox(self):
         """
             Get listbox

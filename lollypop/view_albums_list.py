@@ -212,7 +212,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param track_id as int
         """
         for child in self.children:
-            child.update_duration(track_id)
+            child.tracks_view.update_duration(track_id)
 
     def _on_album_updated(self, scanner, album_id, added):
         """
