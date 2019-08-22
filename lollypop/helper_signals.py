@@ -123,7 +123,7 @@ class SignalsHelper():
 
     def __on_signal(self, obj, *args):
         """
-            Keep signal in cache in self not mapped
+            Keep callback in cache in self not mapped
         """
         callback = args[-1]
         callback_args = args[:-1]
