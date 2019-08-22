@@ -458,6 +458,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__new_non_album_artists = []
         SqlCursor.add(App().db)
         App().stop_spotify()
+        App().art.clean_rounded()
 
         if not App().tracks.get_mtimes():
             self.__import_web_tracks()

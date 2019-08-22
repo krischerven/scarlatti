@@ -52,9 +52,9 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         try:
             width = surface.get_width()
             height = surface.get_height()
-            cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                                  escape(name),
-                                                  width, height)
+            cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
+                                                    escape(name),
+                                                    width, height)
             pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, width, height)
             pixbuf.savev(cache_path_jpg, "jpeg", ["quality"],
                          [str(App().settings.get_value(
@@ -69,7 +69,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         """
         try:
             from glob import glob
-            search = "%s/%s_*.jpg" % (CACHE_PATH, name)
+            search = "%s/@%s@_*.jpg" % (CACHE_PATH, escape(name))
             pathes = glob(search)
             for path in pathes:
                 f = Gio.File.new_for_path(path)
@@ -86,9 +86,9 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @return bytes
         """
         try:
-            cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                                  escape(name),
-                                                  width, height)
+            cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
+                                                    escape(name),
+                                                    width, height)
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path_jpg)
             return pixbuf
         except Exception as e:
@@ -103,9 +103,9 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @param height as int
             @return bool
         """
-        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                              escape(name),
-                                              width, height)
+        cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
+                                                escape(name),
+                                                width, height)
         f = Gio.File.new_for_path(cache_path_jpg)
         return f.query_exists()
 
@@ -117,6 +117,19 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             rmtree(WEB_PATH)
         except Exception as e:
             Logger.error("Art::clean_web(): %s", e)
+
+    def clean_rounded(self):
+        """
+            Clean rounded artwork
+        """
+        try:
+            from pathlib import Path
+            print("coucou")
+            for p in Path(CACHE_PATH).glob("@ROUNDED*@*.jpg"):
+                print(p)
+                p.unlink()
+        except Exception as e:
+            Logger.error("Art::clean_all_cache(): %s", e)
 
     def clean_all_cache(self):
         """
