@@ -93,7 +93,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
         def load_disc(items, disc_number, position=0):
             if items:
                 (widget, tracks) = items.pop(0)
-                self.__add_tracks(widget, tracks)
+                self.__add_tracks(widget, tracks, position)
                 position += len(tracks)
                 widget.show()
                 GLib.idle_add(load_disc, items, disc_number, position)
