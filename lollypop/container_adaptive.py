@@ -13,25 +13,20 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, Type
-from lollypop.helper_signals import SignalsHelper, signals
 
 
-class AdaptiveContainer(SignalsHelper):
+class AdaptiveContainer:
     """
         Manage adaptive mode
     """
-
-    @signals
     def __init__(self):
         """
             Init container
         """
         self._stack.connect("history-changed", self.__on_history_changed)
-        return [
-                (App().window, "adaptive-changed", "_on_adaptive_changed"),
-                (self._stack, "visible-child-changed",
-                 "_on_visible_child_changed")
-        ]
+        self._stack.connect("visible-child-changed",
+                            self.__on_visible_child_changed)
+        App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     def go_back(self):
         """
@@ -75,7 +70,19 @@ class AdaptiveContainer(SignalsHelper):
 ##############
 # PROTECTED  #
 ##############
-    def _on_adaptive_changed(self, window, status):
+
+############
+# PRIVATE  #
+############
+    def __on_history_changed(self, stack):
+        """
+            Emit can-go-back-changed if can go back
+            @param stack as Gtk.Stack
+        """
+        if self.can_go_back:
+            self.emit("can-go-back-changed", True)
+
+    def __on_adaptive_changed(self, window, status):
         """
             Update current layout
             @param window as Window
@@ -93,7 +100,7 @@ class AdaptiveContainer(SignalsHelper):
             self._sidebar_two.pack1(self.left_list, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
 
-    def _on_visible_child_changed(self, stack, sidebar_id):
+    def __on_visible_child_changed(self, stack, sidebar_id):
         """
             Active sidebar selected id
             @param stack as ContainerStack
@@ -102,14 +109,3 @@ class AdaptiveContainer(SignalsHelper):
         if sidebar_id not in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
             self.left_list.hide()
         self._sidebar.select_ids([sidebar_id], False)
-
-############
-# PRIVATE  #
-############
-    def __on_history_changed(self, stack):
-        """
-            Emit can-go-back-changed if can go back
-            @param stack as Gtk.Stack
-        """
-        if self.can_go_back:
-            self.emit("can-go-back-changed", True)

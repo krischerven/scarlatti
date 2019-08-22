@@ -45,9 +45,9 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("released", self.__on_back_button_clicked)
         self.__multi_press.set_button(8)
+        self.connect("window-state-event", self.__on_window_state_event)
+        self.connect("adaptive-size-changed", self.__on_adaptive_size_changed)
         return [
-            (self, "window-state-event", "_on_window_state_event"),
-            (self, "adaptive-size-changed", "_on_adaptive_size_changed"),
             (App().player, "current-changed", "_on_current_changed")
         ]
 
@@ -127,24 +127,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                      GLib.Variant("ai", [width, height]))
         App().settings.set_value("window-position", GLib.Variant("ai", [x, y]))
 
-    def _on_window_state_event(self, widget, event):
-        """
-            Save maximised state
-        """
-        App().settings.set_boolean("window-maximized",
-                                   "GDK_WINDOW_STATE_MAXIMIZED" in
-                                   event.new_window_state.value_names)
-
-    def _on_adaptive_size_changed(self, window, adaptive_size):
-        """
-            Update internal widgets
-            @param window as Gtk.Window
-            @param adaptive_size as AdaptiveSize
-        """
-        self.__show_miniplayer(adaptive_size & (AdaptiveSize.SMALL |
-                                                AdaptiveSize.MEDIUM |
-                                                AdaptiveSize.NORMAL))
-
 ############
 # PRIVATE  #
 ############
@@ -218,3 +200,21 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param y as int
         """
         App().window.go_back()
+
+    def __on_window_state_event(self, widget, event):
+        """
+            Save maximised state
+        """
+        App().settings.set_boolean("window-maximized",
+                                   "GDK_WINDOW_STATE_MAXIMIZED" in
+                                   event.new_window_state.value_names)
+
+    def __on_adaptive_size_changed(self, window, adaptive_size):
+        """
+            Update internal widgets
+            @param window as Gtk.Window
+            @param adaptive_size as AdaptiveSize
+        """
+        self.__show_miniplayer(adaptive_size & (AdaptiveSize.SMALL |
+                                                AdaptiveSize.MEDIUM |
+                                                AdaptiveSize.NORMAL))
