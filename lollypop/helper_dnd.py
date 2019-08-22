@@ -71,7 +71,7 @@ class DNDHelper(GObject.Object):
             if row1 is None or row2 is None:
                 return False
             if row1.album.id == row2.album.id:
-                row1.append_rows(row2.album.tracks)
+                row1.tracks_view.append_rows(row2.album.tracks)
                 return True
             return False
 
@@ -200,7 +200,7 @@ class DNDHelper(GObject.Object):
             if isinstance(row, TrackRow):
                 # Merge with previous
                 if new_rows and new_rows[-1].album.id == row.track.album.id:
-                    new_rows[-1].append_row(row.track)
+                    new_rows[-1].tracks_view.append_row(row.track)
                 # Create a new album
                 else:
                     new_album = Album(row.track.album.id)
@@ -212,7 +212,7 @@ class DNDHelper(GObject.Object):
             else:
                 # Merge with previous
                 if new_rows and new_rows[-1].album.id == row.album.id:
-                    new_rows[-1].append_rows(row.album.tracks)
+                    new_rows[-1].tracks_view.append_rows(row.album.tracks)
                 # Create a new album
                 else:
                     new_album = Album(row.album.id)

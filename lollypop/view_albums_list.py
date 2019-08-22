@@ -92,14 +92,10 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param reveal as bool
             @param position as int
         """
-        row = None
-        if row is None:
-            row = self.__row_for_album(album, reveal)
-            row.populate()
-            row.show()
-            self._box.insert(row, position)
-        else:
-            row.append_rows(album.tracks)
+        row = self.__row_for_album(album, reveal)
+        row.populate()
+        row.show()
+        self._box.insert(row, position)
         if self._view_type & ViewType.SCROLLED:
             if self._viewport.get_child() is None:
                 self._viewport.add(self._box)
