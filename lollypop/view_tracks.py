@@ -90,26 +90,31 @@ class TracksView(Gtk.Bin, SignalsHelper):
         """
             Populate tracks lazy
         """
+        def load_disc(items, disc_number, position=0):
+            if items:
+                (widget, tracks) = items.pop(0)
+                self.__add_tracks(widget, tracks)
+                position += len(tracks)
+                widget.show()
+                GLib.idle_add(load_disc, items, disc_number, position)
+            else:
+                GLib.idle_add(self.emit, "populated", disc_number)
+
         self.__init()
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
             disc_number = disc.number
             tracks = disc.tracks
+            items = []
             if self.__view_type & ViewType.TWO_COLUMNS:
-                position = 0
                 mid_tracks = int(0.5 + len(tracks) / 2)
-                self.__add_tracks(self._tracks_widget_left[disc_number],
-                                  tracks[:mid_tracks], position)
-                position += mid_tracks
-                self.__add_tracks(self._tracks_widget_right[disc_number],
-                                  tracks[mid_tracks:], position)
-                self._tracks_widget_left[disc_number].show()
-                self._tracks_widget_right[disc_number].show()
+                items.append((self._tracks_widget_left[disc_number],
+                              tracks[:mid_tracks]))
+                items.append((self._tracks_widget_right[disc_number],
+                              tracks[mid_tracks:]))
             else:
-                self.__add_tracks(self._tracks_widget_left[disc_number],
-                                  tracks)
-                self._tracks_widget_left[disc_number].show()
-            GLib.idle_add(self.emit, "populated", disc_number)
+                items.append((self._tracks_widget_left[0], tracks))
+            GLib.idle_add(load_disc, items, disc_number)
         else:
             self.__populated = True
             if not self.children:
