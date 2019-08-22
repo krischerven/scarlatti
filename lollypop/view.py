@@ -16,7 +16,7 @@ from time import time
 from gettext import gettext as _
 import gc
 
-from lollypop.define import ViewType, Type, App
+from lollypop.define import ViewType, Type, App, LoadingState
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 from lollypop.helper_signals import SignalsHelper, signals
@@ -240,7 +240,7 @@ class LazyLoadingView(View):
             @param view_type as ViewType
         """
         View.__init__(self, view_type)
-        self.__is_populated = False
+        self.__loading_state = LoadingState.NONE
         self._lazy_queue = []
         self.__priority_queue = []
         self.__scroll_timeout_id = None
@@ -253,6 +253,7 @@ class LazyLoadingView(View):
             Stop loading
             @param clear as bool
         """
+        self.__loading_state = LoadingState.ABORTED
         self.__lazy_loading_id = None
         if clear:
             self._lazy_queue = []
@@ -281,7 +282,7 @@ class LazyLoadingView(View):
             True if populated
             @return bool
         """
-        return self.__is_populated
+        return self.__loading_state == LoadingState.FINISHED
 
 #######################
 # PROTECTED           #
@@ -296,6 +297,8 @@ class LazyLoadingView(View):
         if self.__scrolled_position is not None:
             self._viewport.connect("size-allocate",
                                    self.__on_viewport_size_allocated)
+        if self.__loading_state == LoadingState.ABORTED and self._lazy_queue:
+            self.lazy_loading()
 
     def _on_value_changed(self, adj):
         """
@@ -342,7 +345,7 @@ class LazyLoadingView(View):
             GLib.idle_add(widget.populate)
         else:
             self.__lazy_loading_id = None
-            self.__is_populated = True
+            self.__loading_state = LoadingState.FINISHED
             Logger.debug("LazyLoadingView::lazy_loading(): %s",
                          time() - self.__start_time)
 

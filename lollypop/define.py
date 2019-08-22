@@ -108,6 +108,12 @@ NetworkAccessACL = {
 }
 
 
+class LoadingState:
+    NONE = 0
+    ABORTED = 1
+    FINISHED = 2
+
+
 class IndicatorType:
     NONE = 1 << 0
     PLAY = 1 << 1
