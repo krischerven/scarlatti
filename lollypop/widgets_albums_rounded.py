@@ -46,8 +46,6 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         """
             Populate widget content
         """
-        self.__album_ids = self._get_album_ids()
-        shuffle(self.__album_ids)
         RoundedFlowBoxWidget.populate(self)
         self._artwork.get_style_context().add_class("light-background")
 
@@ -73,6 +71,8 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                 self._art_size, self._art_size,
                 callback=(self.__on_load_from_cache,))
         else:
+            self.__album_ids = self._get_album_ids()
+            shuffle(self.__album_ids)
             App().task_helper.run(self._create_surface, True)
 
 #######################
