@@ -150,8 +150,6 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
             Update controllers
             @param player as Player
         """
-        if App().player.current_track.id is not None:
-            self.show()
         InformationController.on_current_changed(self, self.__size, None)
         ProgressController.on_current_changed(self, player)
         PlaybackController.on_current_changed(self, player)

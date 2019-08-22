@@ -108,6 +108,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         else:
             artists = ", ".join(player.current_track.artists)
             self.set_title("%s - %s" % (artists, player.current_track.name))
+            if self.__miniplayer is not None:
+                self.__miniplayer.show()
 
     def _on_configure_event_timeout(self, width, height, x, y):
         """
