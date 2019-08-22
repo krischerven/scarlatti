@@ -82,7 +82,6 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @param width as int
             @param height as int
             @return cairo surface
-            @thread safe
         """
         try:
             cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
@@ -93,6 +92,20 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         except Exception as e:
             Logger.warning("Art::get_artwork_from_cache(): %s" % e)
             return None
+
+    def artwork_exists_in_cache(self, name, width, height):
+        """
+            True if artwork exists in cache
+            @param name as str
+            @param width as int
+            @param height as int
+            @return bool
+        """
+        cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
+                                              escape(name),
+                                              width, height)
+        f = Gio.File.new_for_path(cache_path_png)
+        return f.query_exists()
 
     def clean_web(self):
         """
