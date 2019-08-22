@@ -63,30 +63,52 @@ class DNDHelper(GObject.Object):
                 return row
         return None
 
-    def __update_album_rows(self):
+    def __update_album_rows(self, start_index, end_index):
         """
-            Merge album rows and update track position
+            Merge album rows and update track position for indexes
         """
         def merge_if_possible(row1, row2):
             if row1 is None or row2 is None:
                 return False
             if row1.album.id == row2.album.id:
-                row1.album.append_tracks(row2.album.tracks)
                 row1.append_rows(row2.album.tracks)
                 return True
             return False
 
-        children = self.__listbox.get_children()
+        children = self.__listbox.get_children()[start_index:end_index]
         while children:
             row = children[0]
             index = row.get_index()
             next = self.__listbox.get_row_at_index(index + 1)
             if merge_if_possible(row, next):
-                children.remove(next)
+                if next in children:
+                    children.remove(next)
                 next.destroy()
             else:
                 children.pop(0)
+        self.__update_track_indexes(start_index, end_index)
         GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
+
+    def __update_track_indexes(self, start_index, end_index):
+        """
+            Update track number from start_index + 1 to end_index
+            start_index is a valid track number
+            @param start_index as int
+            @param end_index as int
+        """
+        if start_index == 0:
+            current_number = 0
+        else:
+            current_number = None
+        children = self.__listbox.get_children()
+        for album_row in children[start_index:end_index]:
+            for track_row in album_row.children:
+                if current_number is None:
+                    current_number = track_row.track.number
+                    continue
+                current_number += 1
+                track_row.track.set_number(current_number)
+                track_row.update_number_label()
 
     def __do_drag_and_drop(self, src_rows, dest_row, direction):
         """
@@ -95,15 +117,16 @@ class DNDHelper(GObject.Object):
             @param dest_row as Row
             @param direction as Gtk.DirectionType
         """
+        indexes = []
         # Build new rows
         new_rows = self.__get_rows_from_rows(
             src_rows, AlbumRow.get_best_height(dest_row))
-        self.__destroy_rows(src_rows)
         # Insert new rows
         if isinstance(dest_row, TrackRow):
             album_row = dest_row.get_ancestor(AlbumRow)
             if album_row is None:
                 return
+            indexes.append(album_row.get_index())
             split_album_row = self.__split_album_row(album_row,
                                                      dest_row,
                                                      direction)
@@ -118,12 +141,22 @@ class DNDHelper(GObject.Object):
                 index += 1
         else:
             index = dest_row.get_index()
+            indexes.append(index)
             if direction == Gtk.DirectionType.DOWN:
                 index += 1
             for row in new_rows:
                 self.__listbox.insert(row, index)
                 index += 1
-        GLib.idle_add(self.__update_album_rows, priority=GLib.PRIORITY_LOW)
+        # Calculate update range
+        for row in src_rows:
+            if isinstance(row, TrackRow):
+                album_row = row.get_ancestor(AlbumRow)
+                if album_row is not None:
+                    indexes.append(album_row.get_index())
+            else:
+                indexes.append(row.get_index())
+        self.__destroy_rows(src_rows)
+        self.__update_album_rows(max(0, min(indexes) - 1), max(indexes) + 1)
 
     def __split_album_row(self, album_row, track_row, direction):
         """
@@ -159,8 +192,9 @@ class DNDHelper(GObject.Object):
     def __get_rows_from_rows(self, rows, height):
         """
             Build news rows from rows
-            @return [TrackRow/AlbumRow]
+            @param rows as [TrackRow/AlbumRow]
             @param height as int
+            @return [AlbumRow]
         """
         new_rows = []
         for row in rows:

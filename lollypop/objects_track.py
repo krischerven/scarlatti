@@ -178,6 +178,14 @@ class Track(Base):
         return i
 
     @property
+    def number(self):
+        """
+            Get track number, may not be equal to position
+            @return int
+        """
+        return self._number
+
+    @property
     def first(self):
         """
             Is track first for album

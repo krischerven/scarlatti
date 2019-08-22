@@ -152,13 +152,19 @@ class AlbumRow(Gtk.ListBoxRow):
         self.set_playing_indicator()
         self.set_artwork()
 
+    def append_row(self, track):
+        """
+            Add track rows
+            @param track as Track
+        """
+        self.__tracks_view.append_row(track)
+
     def append_rows(self, tracks):
         """
             Add track rows
             @param tracks as [Track]
         """
-        if self.__tracks_view.is_populated:
-            self.__tracks_view.append_rows(tracks)
+        self.__tracks_view.append_rows(tracks)
 
     def reveal(self, reveal=None):
         """

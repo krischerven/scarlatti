@@ -114,7 +114,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
                               tracks[mid_tracks:]))
             else:
                 items.append((self._tracks_widget_left[0], tracks))
-            GLib.idle_add(load_disc, items, disc_number)
+            load_disc(items, disc_number)
         else:
             self.__populated = True
             if not self.children:
@@ -135,6 +135,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             @param position as int
         """
         self.__init()
+        self.__album.append_track(track)
         self.__add_tracks(self._tracks_widget_left[0], [track])
 
     def append_rows(self, tracks):
@@ -144,6 +145,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             @param tracks as [Track]
         """
         self.__init()
+        self.__album.append_tracks(tracks)
         self.__add_tracks(self._tracks_widget_left[0], tracks)
 
     def get_current_ordinate(self, parent):
