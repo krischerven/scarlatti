@@ -110,7 +110,7 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
             Get filtered children
             @return [Gtk.Widget]
         """
-        filtered = self.children
+        filtered = self.__tracks_view.children
         for box in self.__others_boxes:
             for child in box.children:
                 filtered.append(child)
