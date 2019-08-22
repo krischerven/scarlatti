@@ -244,6 +244,8 @@ class DeviceWidget(Gtk.ListBoxRow):
             Set combobox content based on names
             @param names as [str]
         """
+        if self.__combobox.get_active_text():
+            return
         self.__sync_button.set_sensitive(True)
         if names is None:
             self.__load_uri_settings(self.__get_music_uri())
