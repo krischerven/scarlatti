@@ -86,7 +86,6 @@ class DNDHelper(GObject.Object):
                 next.destroy()
             else:
                 children.pop(0)
-                row.show()
         GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
 
     def __do_drag_and_drop(self, src_rows, dest_row, direction):
@@ -99,6 +98,7 @@ class DNDHelper(GObject.Object):
         # Build new rows
         new_rows = self.__get_rows_from_rows(
             src_rows, AlbumRow.get_best_height(dest_row))
+        self.__destroy_rows(src_rows)
         # Insert new rows
         if isinstance(dest_row, TrackRow):
             album_row = dest_row.get_ancestor(AlbumRow)
@@ -110,6 +110,7 @@ class DNDHelper(GObject.Object):
             index = album_row.get_index()
             if split_album_row is not None:
                 self.__listbox.insert(split_album_row, index)
+                index += 1
             elif direction == Gtk.DirectionType.DOWN:
                 index += 1
             for row in new_rows:
@@ -122,7 +123,6 @@ class DNDHelper(GObject.Object):
             for row in new_rows:
                 self.__listbox.insert(row, index)
                 index += 1
-        self.__destroy_rows(src_rows)
         GLib.idle_add(self.__update_album_rows, priority=GLib.PRIORITY_LOW)
 
     def __split_album_row(self, album_row, track_row, direction):
@@ -148,6 +148,7 @@ class DNDHelper(GObject.Object):
         split_album.set_tracks([row.track for row in rows])
         split_album_row = AlbumRow(split_album, height, self.__view_type,
                                    True)
+        split_album_row.show()
         for row in rows:
             empty = album_row.album.remove_track(row.track)
             if empty:
@@ -173,6 +174,7 @@ class DNDHelper(GObject.Object):
                     new_album.set_tracks([row.track])
                     new_album_row = AlbumRow(new_album, height,
                                              self.__view_type, True)
+                    new_album_row.show()
                     new_rows.append(new_album_row)
             else:
                 # Merge with previous
@@ -184,6 +186,7 @@ class DNDHelper(GObject.Object):
                     new_album.set_tracks(row.album.tracks)
                     new_album_row = AlbumRow(new_album, height,
                                              self.__view_type, False)
+                    new_album_row.show()
                     new_rows.append(new_album_row)
         return new_rows
 
