@@ -18,13 +18,13 @@ from lollypop.controller_information import InformationController
 from lollypop.controller_progress import ProgressController
 from lollypop.controller_playback import PlaybackController
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import signals
 from lollypop.utils import set_cursor_hand2
 from lollypop.define import App, ArtSize, Size
 
 
-class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
-                 ProgressController, PlaybackController, SizeAllocationHelper):
+class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
+                 PlaybackController, SizeAllocationHelper):
     """
         Mini player shown in adaptive mode
     """
