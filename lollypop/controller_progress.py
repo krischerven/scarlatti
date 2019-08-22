@@ -15,13 +15,15 @@ from gi.repository import GLib, Gst
 from lollypop.objects_radio import Radio
 from lollypop.define import App, StorageType
 from lollypop.utils import seconds_to_string
+from lollypop.helper_signals import SignalsHelper, signals
 
 
-class ProgressController:
+class ProgressController(SignalsHelper):
     """
         Progress controller (for toolbars)
     """
 
+    @signals
     def __init__(self):
         """
             Init progress controller (for toolbars)
@@ -31,7 +33,7 @@ class ProgressController:
         # Update pogress position
         self.__timeout_id = None
         self.connect("unmap", self.__on_unmap)
-        self.signals_map = [
+        return [
             (App().player, "seeked", "_on_seeked")
         ]
 

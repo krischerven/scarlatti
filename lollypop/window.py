@@ -45,13 +45,11 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("released", self.__on_back_button_clicked)
         self.__multi_press.set_button(8)
-        return {
-            "init": [
-                (self, "window-state-event", "_on_window_state_event"),
-                (self, "adaptive-size-changed", "_on_adaptive_size_changed"),
-                (App().player, "current-changed", "_on_current_changed")
-            ]
-        }
+        return [
+            (self, "window-state-event", "_on_window_state_event"),
+            (self, "adaptive-size-changed", "_on_adaptive_size_changed"),
+            (App().player, "current-changed", "_on_current_changed")
+        ]
 
     def setup(self):
         """

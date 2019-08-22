@@ -34,6 +34,7 @@ def signals(f):
 class SignalsHelper():
     """
         Helper for autoconnect/disconnect signals on map
+        Keep signals cached when unmapped
     """
 
     def __init__(self):
@@ -42,24 +43,24 @@ class SignalsHelper():
         """
         if not hasattr(self, "_connected"):
             self._connected = []
+            self.__signal_ids = []
+            self.__cached = {}
 
     def init(self, signals):
         """
             Init signals
+            @param signals as []
         """
-        if "init" in signals.keys():
-            self._connect_signals(signals["init"])
-            self.connect("destroy",
-                         lambda x: self._disconnect_signals(signals["init"]))
-
-        if "map" in signals.keys():
-            self.connect("map",
-                         lambda x: self._connect_signals(signals["map"]))
-            self.connect("unmap",
-                         lambda x: self._disconnect_signals(signals["map"]))
+        self.__signal_ids.append(
+                     self.connect("map",
+                                  lambda x: self._connect_signals(signals)))
+        self.connect("map", self.__on_map)
+        self.connect("unmap", self.__on_unmap)
+        self.connect("destroy",
+                     lambda x: self._disconnect_signals(signals))
 
 #######################
-# PROTECTE            #
+# PROTECTED           #
 #######################
     def _connect_signals(self, signals):
         """
@@ -77,7 +78,7 @@ class SignalsHelper():
             if isinstance(obj, str):
                 obj = eval(obj)
             callback = getattr(self, callback_str)
-            obj.connect(signal, callback)
+            obj.connect(signal, self.__on_signal, callback)
             self._connected.append(name)
 
     def _disconnect_signals(self, signals):
@@ -95,6 +96,38 @@ class SignalsHelper():
                 continue
             if isinstance(obj, str):
                 obj = eval(obj)
-            callback = getattr(self, callback_str)
-            obj.disconnect_by_func(callback)
+            obj.disconnect_by_func(self.__on_signal)
             self._connected.remove(name)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_map(self, widget):
+        """
+            Run cached signals
+            @param widget as Gtk.Widget
+        """
+        for callback in self.__cached.keys():
+            (obj, callback_args) = self.__cached[callback]
+            callback(obj, *callback_args)
+        self.__cached = {}
+
+    def __on_unmap(self, widget):
+        """
+            Disconnect initial map signal
+            @param widget as Gtk.Widget
+        """
+        for signal_id in self.__signal_ids:
+            self.disconnect(signal_id)
+        self.__signal_ids = []
+
+    def __on_signal(self, obj, *args):
+        """
+            Keep signal in cache in self not mapped
+        """
+        callback = args[-1]
+        callback_args = args[:-1]
+        if self.get_mapped():
+            callback(obj, *callback_args)
+        else:
+            self.__cached[callback] = (obj, callback_args)

@@ -43,11 +43,9 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
             builder.get_object("quit_button").show()
         if App().window.is_adaptive:
             builder.get_object("shortcuts_button").hide()
-        return {
-            "map": [
+        return [
                 (App().player, "volume-changed", "_on_volume_changed")
-            ]
-        }
+        ]
 
 #######################
 # PROTECTED           #

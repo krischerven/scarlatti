@@ -97,15 +97,13 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             duration = App().playlists.get_duration(playlist_id)
             self.__set_duration(duration)
         self._view.set_property("halign", Gtk.Align.CENTER)
-        return {
-            "init": [
+        return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
                 (App().playlists, "playlist-track-removed",
                  "_on_playlist_track_removed"),
                 (App().playlists, "playlists-changed", "_on_playlist_changed")
-             ]
-        }
+        ]
 
     def set_view_type(self, view_type):
         """

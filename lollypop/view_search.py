@@ -69,16 +69,14 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__set_default_placeholder()
         self.add(self.__widget)
         builder.connect_signals(self)
-        return {
-            "init": [
+        return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
                 (App().settings, "changed::network-access",
                  "_update_bottom_buttons"),
                 (App().settings, "changed::network-access-acl",
                  "_update_bottom_buttons")
-             ]
-        }
+        ]
 
     def populate(self):
         pass

@@ -65,11 +65,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
-        return {
-            "map": [
-                (App().window, "adaptive-changed", "_on_adaptive_changed"),
-            ]
-        }
+        return [
+            (App().window, "adaptive-changed", "_on_adaptive_changed"),
+        ]
 
     def populate(self):
         """

@@ -41,12 +41,10 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         self.__prev_button.connect("clicked", lambda x: self.__search_prev())
         self.__entry.connect("map", self.__on_map)
         self.add(widget)
-        return {
-            "map": [
-                ("App().window.container.left_list", "button-press-event",
-                 "_on_list_key_press_event")
-            ]
-        }
+        return [
+            ("App().window.container.left_list", "button-press-event",
+             "_on_list_button_press_event")
+        ]
 
     @property
     def entry(self):
@@ -102,7 +100,7 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         elif event.keyval == Gdk.KEY_Down:
             self.__search_next()
 
-    def _on_list_key_press_event(self, selection_list, event):
+    def _on_list_button_press_event(self, selection_list, event):
         """
             Force focus on list
             @param selection_list as SelectionList

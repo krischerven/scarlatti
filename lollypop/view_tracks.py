@@ -55,36 +55,28 @@ class TracksView(Gtk.Bin, SignalsHelper):
 
         if window is None:
             # Calling set_orientation() is needed
-            return {
-                "map": [
+            return [
                     (App().player, "loading-changed", "_on_loading_changed")
-                ]
-            }
+            ]
         if App().settings.get_value("force-single-column") or\
                 not self.__view_type & ViewType.TWO_COLUMNS:
             self.connect("realize",
                          self.__on_realize,
                          window,
                          Gtk.Orientation.VERTICAL)
-            return {
-                "map": [
+            return [
                     (App().player, "loading-changed", "_on_loading_changed")
-                ]
-            }
+            ]
         else:
             self.connect("realize",
                          self.__on_realize,
                          window,
                          Gtk.Orientation.HORIZONTAL)
-            return {
-                "init": [
+            return [
                     (window, "adaptive-size-changed",
-                     "_on_adaptive_size_changed")
-                ],
-                "map": [
+                     "_on_adaptive_size_changed"),
                     (App().player, "loading-changed", "_on_loading_changed")
-                ]
-            }
+            ]
 
     def populate(self):
         """

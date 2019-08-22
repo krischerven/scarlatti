@@ -75,12 +75,10 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         self.set_row_spacing(2)
         self.insert_row(0)
         self.attach(self.__header, 0, 0, 1, 1)
-        return {
-            "map": [
-                (App().player, "queue-changed", "_on_queue_changed"),
-                (App().player, "playback-changed", "_on_playback_changed")
-            ]
-        }
+        return [
+            (App().player, "queue-changed", "_on_queue_changed"),
+            (App().player, "playback-changed", "_on_playback_changed")
+        ]
 
     def populate(self):
         """

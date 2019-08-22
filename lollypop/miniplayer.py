@@ -81,13 +81,11 @@ class MiniPlayer(Gtk.Bin, SignalsHelper, InformationController,
             self.update_position()
             ProgressController.on_status_changed(self, App().player)
         self.add(builder.get_object("widget"))
-        return {
-            "init": [
+        return [
                 (App().player, "current-changed", "_on_current_changed"),
                 (App().player, "status-changed", "_on_status_changed"),
                 (App().player, "duration-changed", "on_duration_changed")
-            ]
-        }
+        ]
 
     def do_get_preferred_width(self):
         """

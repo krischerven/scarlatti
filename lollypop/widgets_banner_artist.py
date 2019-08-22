@@ -73,13 +73,11 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.add_overlay(widget)
         self.set_view_type(view_type)
         self.__update_add_button()
-        return {
-            "init": [
+        return [
                (App().art, "artist-artwork-changed",
                 "_on_artist_artwork_changed"),
                (App().player, "playback-changed", "_on_playback_changed")
-            ]
-        }
+        ]
 
     def set_view_type(self, view_type):
         """

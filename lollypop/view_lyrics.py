@@ -112,15 +112,11 @@ class LyricsView(View, InformationController,
         self.__widget = builder.get_object("widget")
         self.__sync_lyrics_helper = SyncLyricsHelper()
         self.__update_lyrics_style()
-        return {
-            "init": [
+        return [
                 (App().window, "adaptive-size-changed",
                  "_on_adaptive_size_changed")
-            ],
-            "map": [
                 (App().player, "current-changed", "_on_current_changed")
-            ]
-        }
+        ]
 
     def populate(self, track):
         """

@@ -27,13 +27,11 @@ class AdaptiveContainer(SignalsHelper):
             Init container
         """
         self._stack.connect("history-changed", self.__on_history_changed)
-        return {
-            "init": [
+        return [
                 (App().window, "adaptive-changed", "_on_adaptive_changed"),
                 (self._stack, "visible-child-changed",
                  "_on_visible_child_changed")
-            ]
-        }
+        ]
 
     def go_back(self):
         """
