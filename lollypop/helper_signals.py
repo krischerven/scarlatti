@@ -104,7 +104,7 @@ class SignalsHelper():
 #######################
     def __on_map(self, widget):
         """
-            Run cached signals
+            Run cached callbacks
             @param widget as Gtk.Widget
         """
         for callback in self.__cached.keys():
