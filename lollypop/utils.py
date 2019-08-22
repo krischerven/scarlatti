@@ -391,6 +391,32 @@ def tracks_to_albums(tracks):
     return albums
 
 
+def get_page_score(page_title, title, artist, album):
+    """
+        Calculate web page score
+        if page_title looks like (title, artist, album), score is lower
+        @return int/None
+    """
+    page_title = escape(page_title.lower(), [])
+    artist = escape(artist.lower(), [])
+    album = escape(album.lower(), [])
+    title = escape(title.lower(), [])
+    # YouTube page title should be at least as long as wanted title
+    if len(page_title) < len(title):
+        return -1
+    # Remove common word for a valid track
+    page_title = page_title.replace("official", "")
+    page_title = page_title.replace("video", "")
+    page_title = page_title.replace("audio", "")
+    # Remove artist name
+    page_title = page_title.replace(artist, "")
+    # Remove album name
+    page_title = page_title.replace(album, "")
+    # Remove title
+    page_title = page_title.replace(title, "")
+    return len(page_title)
+
+
 def is_readonly(uri):
     """
         Check if uri is readonly

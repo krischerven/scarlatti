@@ -17,7 +17,7 @@ from re import sub
 from gettext import gettext as _
 
 from lollypop.define import App, GOOGLE_API_ID
-from lollypop.utils import escape, get_network_available
+from lollypop.utils import get_network_available, get_page_score
 from lollypop.logger import Logger
 
 
@@ -25,8 +25,6 @@ class YouTubeHelper:
     """
         YoutTube helper
     """
-
-    __BAD_SCORE = 1000000
 
     def __init__(self):
         """
@@ -117,19 +115,19 @@ class YouTubeHelper:
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 dic = {}
-                best = self.__BAD_SCORE
+                best = 10000000
                 for i in decode["items"]:
-                    score = self.__get_youtube_score(i["snippet"]["title"],
-                                                     track.name,
-                                                     track.artists[0],
-                                                     track.album.name)
-                    if score < best:
+                    score = get_page_score(i["snippet"]["title"],
+                                           track.name,
+                                           track.artists[0],
+                                           track.album.name)
+                    if score == -1 or score == best:
+                        continue
+                    elif score < best:
                         best = score
-                    elif score == best:
-                        continue  # Keep first result
                     dic[score] = i["id"]["videoId"]
                 # Return url from first dic item
-                if best == self.__BAD_SCORE:
+                if best == 10000000:
                     return None
                 else:
                     return dic[best]
@@ -138,31 +136,6 @@ class YouTubeHelper:
             self.__fallback = True
             return self.get_uri(track, cancellable)
         return None
-
-    def __get_youtube_score(self, page_title, title, artist, album):
-        """
-            Calculate youtube score
-            if page_title looks like (title, artist, album), score is lower
-            @return int
-        """
-        page_title = escape(page_title.lower(), [])
-        artist = escape(artist.lower(), [])
-        album = escape(album.lower(), [])
-        title = escape(title.lower(), [])
-        # YouTube page title should be at least as long as wanted title
-        if len(page_title) < len(title):
-            return self.__BAD_SCORE
-        # Remove common word for a valid track
-        page_title = page_title.replace("official", "")
-        page_title = page_title.replace("video", "")
-        page_title = page_title.replace("audio", "")
-        # Remove artist name
-        page_title = page_title.replace(artist, "")
-        # Remove album name
-        page_title = page_title.replace(album, "")
-        # Remove title
-        page_title = page_title.replace(title, "")
-        return len(page_title)
 
     def __get_youtube_id_start(self, track, cancellable):
         """

@@ -15,7 +15,9 @@ from gi.repository import GLib
 from pickle import load, dump
 
 from lollypop.helper_web_youtube import YouTubeHelper
+from lollypop.helper_web_invidious import InvidiousHelper
 from lollypop.define import CACHE_PATH
+from lollypop.logger import Logger
 
 
 class WebHelper:
@@ -27,7 +29,7 @@ class WebHelper:
         """
             Init helper
         """
-        self.__helpers = [YouTubeHelper()]
+        self.__helpers = [InvidiousHelper(), YouTubeHelper()]
 
     def set_uri(self, track, cancellable):
         """
@@ -48,6 +50,7 @@ class WebHelper:
         for helper in self.__helpers:
             uri = helper.get_uri(track, cancellable)
             if uri:
+                Logger.info("Track found by %s" % helper)
                 try:
                     # CACHE URI
                     with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
@@ -66,5 +69,6 @@ class WebHelper:
         for helper in self.__helpers:
             uri = helper.get_uri_content(track)
             if uri:
+                Logger.info("Track URI found by %s" % helper)
                 return uri
         return None
