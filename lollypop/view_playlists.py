@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN, Type
+from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -62,30 +62,18 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             self._view.dnd_helper.connect("dnd-finished",
                                           self.__on_dnd_finished)
         self._view.show()
-        self.__title_label.set_margin_start(MARGIN)
-        self.__buttons.set_margin_end(MARGIN)
-        self.__duration_label.set_margin_start(MARGIN)
-        self._overlay = Gtk.Overlay.new()
-        if view_type & ViewType.SCROLLED:
-            self._viewport.add(self._view)
-            self._overlay.add(self._scrolled)
-        else:
-            self._overlay.add(self._view)
-        self._overlay.show()
-        self.__widget.attach(self.__title_label, 0, 0, 1, 1)
-        self.__widget.attach(self.__duration_label, 0, 1, 1, 1)
-        self.__widget.attach(self.__buttons, 1, 0, 1, 2)
-        self.__widget.set_vexpand(True)
-        self.__title_label.set_vexpand(True)
-        self.__duration_label.set_vexpand(True)
-        self.__title_label.set_property("valign", Gtk.Align.END)
-        self.__duration_label.set_property("valign", Gtk.Align.START)
         self.__banner = PlaylistBannerWidget(playlist_id, view_type)
+        self.__banner.collapse(True)
         self.__banner.init_background()
         self.__banner.show()
-        self._overlay.add_overlay(self.__banner)
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self.__banner)
         self.__banner.add_overlay(self.__widget)
+        self._view.set_margin_top(MARGIN_SMALL)
+        self._viewport.add(self._view)
         self.add(self._overlay)
+        self.add(self._scrolled)
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
 
@@ -118,25 +106,22 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             button.get_image().set_from_icon_name(icon_name, icon_size)
 
         self.__banner.set_view_type(view_type)
-        self._view.set_margin_top(self.__banner.height + MARGIN)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(
-                    self.__banner.height)
         self._view_type = view_type
+        duration_context = self.__duration_label.get_style_context()
+        title_context = self.__title_label.get_style_context()
+        for c in title_context.list_classes():
+            title_context.remove_class(c)
+        for c in duration_context.list_classes():
+            duration_context.remove_class(c)
         if view_type & ViewType.SMALL:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
-            self.__duration_label.get_style_context().add_class(
-                "text-large")
+            title_context.add_class("text-large")
         else:
             style = "menu-button-48"
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            self.__title_label.get_style_context().add_class(
-                "text-xx-large")
-            self.__duration_label.get_style_context().add_class(
-                "text-x-large")
+            title_context.add_class("text-x-large")
+            duration_context.add_class("text-large")
         update_button(self.__play_button, style,
                       icon_size, "media-playback-start-symbolic")
         update_button(self.__shuffle_button, style,
@@ -258,28 +243,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
             self._view.box.set_size_request(allocation.width / 2, -1)
-
-    def _on_value_changed(self, adj):
-        """
-            Adapt widget to current scroll value
-            @param adj as Gtk.Adjustment
-        """
-        LazyLoadingView._on_value_changed(self, adj)
-        if not self._view_type & (ViewType.POPOVER | ViewType.FULLSCREEN):
-            title_style_context = self.__title_label.get_style_context()
-            if adj.get_value() == adj.get_lower():
-                self.__banner.collapse(False)
-                self.__duration_label.show()
-                self.__title_label.set_property("valign", Gtk.Align.END)
-                if not App().window.is_adaptive:
-                    title_style_context.remove_class("text-x-large")
-                    title_style_context.add_class("text-xx-large")
-            else:
-                self.__banner.collapse(True)
-                self.__duration_label.hide()
-                title_style_context.remove_class("text-xx-large")
-                title_style_context.add_class("text-x-large")
-                self.__title_label.set_property("valign", Gtk.Align.CENTER)
 
     def _on_current_changed(self, player):
         """
