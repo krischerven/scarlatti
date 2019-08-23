@@ -72,7 +72,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
                 f = Gio.File.new_for_path(dialog.get_filename())
                 (status, data, tag) = f.load_contents()
                 if status:
-                    App().art.save_album_artwork(self.__album, data)
+                    App().art.save_album_artwork(data, self.__album)
                 self._streams = {}
             except Exception as e:
                 Logger.error(
