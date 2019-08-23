@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.view import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type
+from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type, Size
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -236,13 +236,18 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _on_adaptive_changed(self, window, status):
         """
-            Change view width
-            @param allocation as Gtk.Allocation
+            Handle adaptive mode for views
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            self._view.box.set_size_request(allocation.width / 2, -1)
+        if LazyLoadingView._on_adaptive_changed(self, window, status):
+            self.set_view_type(self._view_type)
+        if status:
+            self._view.set_property("halign", Gtk.Align.FILL)
+            self._view.set_size_request(-1, -1)
+        else:
+            self._view.set_size_request(Size.MEDIUM * 0.8, -1)
+            self._view.set_property("halign", Gtk.Align.CENTER)
 
     def _on_current_changed(self, player):
         """
@@ -294,15 +299,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         menu = PlaylistMenu(self._playlist_id)
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update banner style
-            @param window as Window
-            @param status as bool
-        """
-        if LazyLoadingView._on_adaptive_changed(self, window, status):
-            self.set_view_type(self._view_type)
 
     def _on_playlist_track_added(self, playlists, playlist_id, uri):
         """
