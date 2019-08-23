@@ -39,12 +39,10 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         """
         Gtk.Window.__init__(self)
         AdaptiveWindow.__init__(self)
-        return {
-            "map": [
+        return [
                 (App().player, "current-changed", "on_current_changed"),
                 (App().player, "status-changed", "on_status_changed")
-            ]
-        }
+        ]
 
     def delayed_init(self):
         """
