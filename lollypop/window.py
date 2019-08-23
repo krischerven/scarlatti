@@ -171,6 +171,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         if show and self.__miniplayer is None:
             from lollypop.miniplayer import MiniPlayer
             self.__miniplayer = MiniPlayer()
+            if App().player.current_track.id is not None:
+                self.__miniplayer.show()
             self.__miniplayer.connect("revealed", on_revealed)
             self.__miniplayer.set_vexpand(False)
             self.__vgrid.add(self.__miniplayer)
