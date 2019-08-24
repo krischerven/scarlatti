@@ -33,6 +33,8 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             @param view_type as ViewType
         """
         AlbumsListView.__init__(self, [], [], view_type | ViewType.PLAYBACK)
+        self.__width = Size.MEDIUM
+        self.set_property("halign", Gtk.Align.CENTER)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
         self.__clear_button = Gtk.Button.new_from_icon_name(
@@ -92,6 +94,9 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             albums = App().player.albums
         AlbumsListView.populate(self, albums)
 
+    def do_get_preferred_width(self):
+        return (self.__width, self.__width)
+
     @property
     def args(self):
         return None
@@ -99,22 +104,6 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode for views
-        """
-        AlbumsListView._on_adaptive_changed(self, window, status)
-        if status:
-            self._box.set_property("halign", Gtk.Align.FILL)
-            self.__header.set_property("halign", Gtk.Align.FILL)
-            self._box.set_size_request(-1, -1)
-            self.__header.set_size_request(-1, -1)
-        else:
-            self._box.set_size_request(Size.MEDIUM * 0.8, -1)
-            self.__header.set_size_request(Size.MEDIUM * 0.8, -1)
-            self._box.set_property("halign", Gtk.Align.CENTER)
-            self.__header.set_property("halign", Gtk.Align.CENTER)
-
     def _on_queue_changed(self, *ignore):
         """
             Clean view and reload if empty

@@ -58,6 +58,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self.__widget = builder.get_object("widget")
         # We remove SCROLLED because we want to be the scrolled view
         self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
+        self._view.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
             self._view.dnd_helper.connect("dnd-finished",
                                           self.__on_dnd_finished)
@@ -242,12 +243,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         """
         if LazyLoadingView._on_adaptive_changed(self, window, status):
             self.set_view_type(self._view_type)
-        if status:
-            self._view.set_property("halign", Gtk.Align.FILL)
-            self._view.set_size_request(-1, -1)
-        else:
-            self._view.set_size_request(Size.MEDIUM * 0.8, -1)
-            self._view.set_property("halign", Gtk.Align.CENTER)
 
     def _on_current_changed(self, player):
         """

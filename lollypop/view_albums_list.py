@@ -21,17 +21,6 @@ from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
 
 
-class ListBox(Gtk.ListBox):
-    def do_get_preferred_width(self):
-        """
-            Sync preferred width and size request
-        """
-        (width, height) = self.get_size_request()
-        if width == -1:
-            return Gtk.ListBox.do_get_preferred_width(self)
-        return (width, width)
-
-
 class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
     """
         View showing albums
@@ -46,6 +35,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
+        self.__width = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self._albums = []
@@ -53,7 +43,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         # Calculate default album height based on current pango context
         # We may need to listen to screen changes
         self.__height = AlbumRow.get_best_height(self)
-        self._box = ListBox()
+        self._box = Gtk.ListBox()
         if view_type & ViewType.PLAYLISTS:
             self._box.set_margin_bottom(MARGIN)
         self._box.set_margin_end(MARGIN)
@@ -138,6 +128,20 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         if clear_albums:
             App().player.clear_albums()
             App().player.update_next_prev()
+
+    def set_width(self, width):
+        """
+            Set list width
+            @param width as int
+        """
+        self.set_property("halign", Gtk.Align.CENTER)
+        self.__width = width
+
+    def do_get_preferred_width(self):
+        if self.__width == 0:
+            return LazyLoadingView.do_get_preferred_width(self)
+        else:
+            return (self.__width, self.__width)
 
     @property
     def args(self):
