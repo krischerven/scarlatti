@@ -134,6 +134,9 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
         self.stop()
         self.clear()
+        self.__clear_button.set_sensitive(True)
+        self.__jump_button.set_sensitive(True)
+        self.__save_button.set_sensitive(True)
         self.populate()
 
 #######################
