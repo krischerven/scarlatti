@@ -10,14 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-
-from gettext import gettext as _
 from locale import strcoll
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, SelectionListMask
+from lollypop.define import MARGIN_SMALL
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
+from lollypop.widgets_banner_playlists import PlaylistsBannerWidget
 from lollypop.shown import ShownPlaylists
 from lollypop.helper_signals import SignalsHelper, signals
 
@@ -36,14 +35,13 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         FlowBoxView.__init__(self, view_type)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
-        self._new_button = Gtk.Button(_("New playlist"))
-        self._new_button.connect("clicked", self.__on_new_button_clicked)
-        self._new_button.set_property("halign", Gtk.Align.CENTER)
-        self._new_button.set_hexpand(True)
-        self._new_button.set_margin_top(5)
-        self._new_button.show()
+        self.__banner = PlaylistsBannerWidget(view_type)
+        self.__banner.show()
+        self.__banner.collapse(True)
+        self.__banner.init_background()
         self.insert_row(0)
-        self.attach(self._new_button, 0, 0, 1, 1)
+        self.set_row_spacing(MARGIN_SMALL)
+        self.attach(self.__banner, 0, 0, 1, 1)
         self._widget_class = PlaylistRoundedWidget
         return [
                 (App().playlists, "playlists-changed", "_on_playlist_changed")
@@ -206,13 +204,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         # String comparaison for non static
         else:
             return strcoll(widget1.name, widget2.name)
-
-    def __on_new_button_clicked(self, button):
-        """
-            Add a new playlist
-            @param button as Gtk.Button
-        """
-        App().playlists.add(App().playlists.get_new_name())
 
 
 class PlaylistsManagerDeviceView(PlaylistsManagerView):

@@ -423,7 +423,7 @@ flowboxchild:selected  {
     border-left-width: 1px;
     border-right-width: 1px;
     border-color: transparent;
-    background-color: shade(@theme_bg_color, 1.2);
+    background-color: transparent;
     color: inherit;
 }
 
@@ -487,12 +487,11 @@ flowboxchild:selected  {
 
 
 .menu-button-48 {
-    opacity: 0.6;
+    opacity: 0.8;
 	box-shadow: none;
 	min-height: 32px;
-	min-width: 48px;
-	padding-left: 4px;
-	padding-right: 4px;
+	padding-left: 15px;
+	padding-right: 15px;
 	padding-top: 0px;
 	padding-bottom: 0px;
 	background-image: none;
@@ -508,7 +507,7 @@ flowboxchild:selected  {
 
 
 .menu-button-48:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 .menu-button-48:hover {
@@ -518,12 +517,11 @@ flowboxchild:selected  {
 }
 
 .menu-button {
-    opacity: 0.6;
+    opacity: 0.8;
 	box-shadow: none;
 	min-height: 32px;
-	min-width: 32px;
-	padding-left: 4px;
-	padding-right: 4px;
+	padding-left: 10px;
+	padding-right: 10px;
 	padding-top: 0px;
 	padding-bottom: 0px;
 	background-image: none;
@@ -538,7 +536,7 @@ flowboxchild:selected  {
 }
 
 .menu-button:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 .menu-button:hover {

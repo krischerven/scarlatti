@@ -108,7 +108,7 @@ class PlaylistBannerWidget(BannerWidget):
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
-                self.__on_album_artwork)
+                self.__on_artwork)
 
     def _on_jump_button_clicked(self, button):
         """
@@ -157,7 +157,7 @@ class PlaylistBannerWidget(BannerWidget):
 #######################
 # PRIVATE             #
 #######################
-    def __on_album_artwork(self, surface):
+    def __on_artwork(self, surface):
         """
             Set album artwork
             @param surface as str
