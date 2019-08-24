@@ -12,10 +12,9 @@
 
 from gi.repository import Gtk, GObject
 
-from random import choice, shuffle
+from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums
-from lollypop.objects_track import Track
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, ViewType
 from lollypop.widgets_banner import BannerWidget
 
@@ -31,15 +30,13 @@ class PlaylistBannerWidget(BannerWidget):
 
     def __init__(self, playlist_id, view):
         """
-            Init artist banner
+            Init banner
             @param playlist_id as int
             @param view as AlbumsListView
         """
         BannerWidget.__init__(self, view.args[0]["view_type"])
         self.__playlist_id = playlist_id
         self.__view = view
-        self.__track = None
-        self.__track_ids = []
         builder = Gtk.Builder()
         builder.add_from_resource(
             "/org/gnome/Lollypop/PlaylistBannerWidget.ui")
@@ -52,12 +49,6 @@ class PlaylistBannerWidget(BannerWidget):
         self.add_overlay(builder.get_object("widget"))
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
-        if App().playlists.get_smart(playlist_id):
-            request = App().playlists.get_smart_sql(playlist_id)
-            if request is not None:
-                self.__track_ids = App().db.execute(request)
-        else:
-            self.__track_ids = App().playlists.get_track_ids(playlist_id)
         # In DB duration calculation
         if playlist_id > 0 and\
                 not App().playlists.get_smart(playlist_id):
@@ -110,20 +101,14 @@ class PlaylistBannerWidget(BannerWidget):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_size_allocate(self, allocation):
-            if self.__track_ids and self.__track is None:
-                track_id = choice(self.__track_ids)
-                self.__track_ids.remove(track_id)
-                self.__track = Track(track_id)
-            if self.__track is not None:
-                App().art_helper.set_album_artwork(
-                    self.__track.album,
-                    # +100 to prevent resize lag
-                    allocation.width + 100,
-                    ArtSize.BANNER + MARGIN * 2,
-                    self._artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR_HARD |
-                    ArtBehaviour.DARKER,
-                    self.__on_album_artwork)
+            App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                allocation.width + 100,
+                ArtSize.BANNER + MARGIN * 2,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR_HARD |
+                ArtBehaviour.DARKER,
+                self.__on_album_artwork)
 
     def _on_jump_button_clicked(self, button):
         """

@@ -42,6 +42,18 @@ class BaseArt(GObject.GObject):
         self.__kid3_cli_search()
         self.__tag_editor_search()
 
+    def get_banner_artwork(self, width, height, scale_factor, behaviour):
+        """
+            Get default banner artwork
+            @param width as int
+            @param height as int
+            @param scale_factor as int
+            @param behaviour as ArtBehaviour
+        """
+        filename = "%s/%s" % (App().data_dir, "banner.jpg")
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+        return self.load_behaviour(pixbuf, "", width, height, behaviour)
+
     def load_behaviour(self, pixbuf, cache_path, width, height, behaviour):
         """
             Load behaviour on pixbuf

@@ -65,16 +65,18 @@ class Application(Gtk.Application, ApplicationActions):
             - Create main window
     """
 
-    def __init__(self, version):
+    def __init__(self, version, data_dir):
         """
             Create application
             @param version as str
+            @param data_dir as str
         """
         Gtk.Application.__init__(
             self,
             application_id="org.gnome.Lollypop",
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
         self.__version = version
+        self.__data_dir = data_dir
         self.set_property("register-session", True)
         signal(SIGINT, lambda a, b: self.quit())
         signal(SIGTERM, lambda a, b: self.quit())
@@ -349,6 +351,14 @@ class Application(Gtk.Application, ApplicationActions):
             return self.__fs_window
         else:
             return self.__window
+
+    @property
+    def data_dir(self):
+        """
+            Get data dir
+            @return str
+        """
+        return self.__data_dir
 
     @property
     def gtk_application_prefer_dark_theme(self):
