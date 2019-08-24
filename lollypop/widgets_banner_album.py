@@ -303,3 +303,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         if surface is not None:
             self._artwork.set_from_surface(surface)
+        else:
+            App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                self.get_allocated_width() + 100,
+                ArtSize.BANNER + MARGIN * 2,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR_HARD |
+                ArtBehaviour.DARKER,
+                self.__on_album_artwork)
