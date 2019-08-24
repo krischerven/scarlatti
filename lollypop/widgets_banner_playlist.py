@@ -106,7 +106,7 @@ class PlaylistBannerWidget(BannerWidget):
                 allocation.width + 100,
                 ArtSize.BANNER + MARGIN * 2,
                 self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR_HARD |
+                ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
                 self.__on_album_artwork)
 

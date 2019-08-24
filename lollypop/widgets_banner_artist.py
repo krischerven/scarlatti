@@ -353,7 +353,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 self.get_allocated_width() + 100,
                 ArtSize.BANNER + MARGIN * 2,
                 self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR_HARD |
+                ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
                 self.__on_artist_artwork)
         else:
