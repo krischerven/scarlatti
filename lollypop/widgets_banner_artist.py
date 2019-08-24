@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
-from random import shuffle, choice
+from random import choice
 
 from lollypop.objects_album import Album
 from lollypop.utils import set_cursor_hand2, on_query_tooltip
@@ -37,8 +37,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param view_type as ViewType (Unused)
         """
         BannerWidget.__init__(self, view_type)
-        self.__album_ids = None
-        self.__album_id = None
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         builder = Gtk.Builder()
@@ -282,7 +280,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         ArtBehaviour.DARKER,
                                         self.__on_artist_artwork)
         else:
-            self.__use_album_artwork(width + 100, height)
+            self.__on_artist_artwork(None)
 
     def __set_badge_artwork(self, art_size):
         """
@@ -344,56 +342,20 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 "list-remove-symbolic",
                 pixel_size)
 
-    def __use_album_artwork(self, width, height):
-        """
-            Set artwork with album artwork
-            @param width as int
-            @param height as int
-        """
-        # Select an album
-        if self.__album_id is None:
-            if self.__album_ids is None:
-                if App().settings.get_value("show-performers"):
-                    self.__album_ids = App().tracks.get_album_ids(
-                        self.__artist_ids, [])
-                else:
-                    self.__album_ids = App().albums.get_ids(
-                        self.__artist_ids, [])
-                shuffle(self.__album_ids)
-            if self.__album_ids:
-                self.__album_id = self.__album_ids.pop(0)
-        # Get artwork
-        if self.__album_id is not None:
-            album = Album(self.__album_id)
-            App().art_helper.set_album_artwork(
-                album,
-                width,
-                height,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR_HARD |
-                ArtBehaviour.DARKER,
-                self.__on_album_artwork)
-
-    def __on_album_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is None:
-            self.__album_id = None
-            self.__use_album_artwork(self.get_allocated_width(),
-                                     self.get_allocated_height())
-        else:
-            self._artwork.set_from_surface(surface)
-
     def __on_artist_artwork(self, surface):
         """
             Set artist artwork
             @param surface as str
         """
         if surface is None:
-            self.__use_album_artwork(self.get_allocated_width(),
-                                     self.get_allocated_height())
+            App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                self.get_allocated_width() + 100,
+                ArtSize.BANNER + MARGIN * 2,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR_HARD |
+                ArtBehaviour.DARKER,
+                self.__on_artist_artwork)
         else:
             self._artwork.set_from_surface(surface)
 
