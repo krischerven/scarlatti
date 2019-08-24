@@ -60,7 +60,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self._viewport.add(self._view)
         self.add(self.__banner)
         self.add(self._scrolled)
-        self.set_view_type(self._view_type)
+        self.__banner.set_view_type(view_type)
         return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
@@ -68,13 +68,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                  "_on_playlist_track_removed"),
                 (App().playlists, "playlists-changed", "_on_playlist_changed")
         ]
-
-    def set_view_type(self, view_type):
-        """
-            Update view type
-            @param view_type as ViewType
-        """
-        self.__banner.set_view_type(view_type)
 
     def populate(self):
         """
@@ -186,7 +179,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             Handle adaptive mode for views
         """
         if LazyLoadingView._on_adaptive_changed(self, window, status):
-            self.set_view_type(self._view_type)
+            self.__banner.set_view_type(self._view_type)
 
     def _on_playlist_track_added(self, playlists, playlist_id, uri):
         """

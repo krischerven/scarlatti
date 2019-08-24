@@ -77,7 +77,7 @@ class SelectionListMenu(Gio.Menu):
                 self.append_section(_("Startup"), startup_menu)
 
         # Options
-        if rowid is None:
+        if rowid is None and mask & SelectionListMask.SIDEBAR:
             options_menu = Gio.Menu()
             action = Gio.SimpleAction.new_stateful(
                     "show_label",

@@ -13,7 +13,7 @@
 from locale import strcoll
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ViewType, SelectionListMask
+from lollypop.define import App, Type, ViewType
 from lollypop.define import MARGIN_SMALL
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.widgets_banner_playlists import PlaylistsBannerWidget
@@ -35,10 +35,11 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         FlowBoxView.__init__(self, view_type)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
-        self.__banner = PlaylistsBannerWidget(view_type)
+        self.__banner = PlaylistsBannerWidget(self)
         self.__banner.show()
         self.__banner.collapse(True)
         self.__banner.init_background()
+        self.__banner.set_view_type(view_type)
         self.insert_row(0)
         self.set_row_spacing(MARGIN_SMALL)
         self.attach(self.__banner, 0, 0, 1, 1)
@@ -168,23 +169,22 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
                 if child.data == playlist_id:
                     child.destroy()
 
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+        """
+        if FlowBoxView._on_adaptive_changed(self, window, status):
+            self.__banner.set_view_type(self._view_type)
+
 #######################
 # PRIVATE             #
 #######################
     def __popup_menu(self, child):
         """
-            Popup menu for track
+            Popup menu for playlist
             @param child as PlaylistRoundedWidget
         """
-        from lollypop.menu_selectionlist import SelectionListMenu
-        from lollypop.widgets_utils import Popover
-        menu = SelectionListMenu(self,
-                                 child.data,
-                                 SelectionListMask.PLAYLISTS)
-        popover = Popover()
-        popover.bind_model(menu, None)
-        popover.set_relative_to(child.artwork)
-        popover.popup()
+        pass
 
     def __sort_func(self, widget1, widget2):
         """
