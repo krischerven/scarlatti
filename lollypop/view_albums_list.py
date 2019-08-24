@@ -355,7 +355,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         y = None
         for child in self._box.get_children():
-            if child.album == App().player.current_track.album:
+            if child.album.id == App().player.current_track.album.id:
                 child.populate()
                 child.reveal(True)
                 y = child.translate_coordinates(self._box, 0, 0)[1]

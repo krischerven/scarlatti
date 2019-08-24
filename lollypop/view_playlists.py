@@ -10,11 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib
 
-from random import shuffle
-
-from lollypop.utils import get_human_duration, tracks_to_albums
+from lollypop.utils import tracks_to_albums
 from lollypop.view import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type, Size
 from lollypop.objects_album import Album
@@ -46,16 +44,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         FilteringHelper.__init__(self)
         SizeAllocationHelper.__init__(self)
         self._playlist_id = playlist_id
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/PlaylistView.ui")
-        self.__title_label = builder.get_object("title")
-        self.__duration_label = builder.get_object("duration")
-        self.__play_button = builder.get_object("play_button")
-        self.__shuffle_button = builder.get_object("shuffle_button")
-        self.__jump_button = builder.get_object("jump_button")
-        self.__menu_button = builder.get_object("menu_button")
-        self.__buttons = builder.get_object("box-buttons")
-        self.__widget = builder.get_object("widget")
         # We remove SCROLLED because we want to be the scrolled view
         self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
         self._view.set_width(Size.MEDIUM)
@@ -63,29 +51,16 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             self._view.dnd_helper.connect("dnd-finished",
                                           self.__on_dnd_finished)
         self._view.show()
-        self.__banner = PlaylistBannerWidget(playlist_id, view_type)
+        self.__banner = PlaylistBannerWidget(playlist_id, self._view)
         self.__banner.collapse(True)
         self.__banner.init_background()
+        self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self.__banner)
-        self.__banner.add_overlay(self.__widget)
         self._view.set_margin_top(MARGIN_SMALL)
         self._viewport.add(self._view)
-        self.add(self._overlay)
+        self.add(self.__banner)
         self.add(self._scrolled)
-        self.__title_label.set_label(App().playlists.get_name(playlist_id))
-        builder.connect_signals(self)
-
         self.set_view_type(self._view_type)
-
-        # In DB duration calculation
-        if playlist_id > 0 and\
-                not App().playlists.get_smart(playlist_id):
-            duration = App().playlists.get_duration(playlist_id)
-            self.__set_duration(duration)
-        self._view.set_property("halign", Gtk.Align.CENTER)
         return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
@@ -99,38 +74,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
             Update view type
             @param view_type as ViewType
         """
-        def update_button(button, style, icon_size, icon_name):
-            context = button.get_style_context()
-            context.remove_class("menu-button-48")
-            context.remove_class("menu-button")
-            context.add_class(style)
-            button.get_image().set_from_icon_name(icon_name, icon_size)
-
         self.__banner.set_view_type(view_type)
-        self._view_type = view_type
-        duration_context = self.__duration_label.get_style_context()
-        title_context = self.__title_label.get_style_context()
-        for c in title_context.list_classes():
-            title_context.remove_class(c)
-        for c in duration_context.list_classes():
-            duration_context.remove_class(c)
-        if view_type & ViewType.SMALL:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
-            title_context.add_class("text-large")
-        else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            title_context.add_class("text-x-large")
-            duration_context.add_class("text-large")
-        update_button(self.__play_button, style,
-                      icon_size, "media-playback-start-symbolic")
-        update_button(self.__shuffle_button, style,
-                      icon_size, "media-playlist-shuffle-symbolic")
-        update_button(self.__jump_button, style,
-                      icon_size, "go-jump-symbolic")
-        update_button(self.__menu_button, style,
-                      icon_size, "view-more-symbolic")
 
     def populate(self):
         """
@@ -244,57 +188,6 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         if LazyLoadingView._on_adaptive_changed(self, window, status):
             self.set_view_type(self._view_type)
 
-    def _on_current_changed(self, player):
-        """
-            Update children state
-            @param player as Player
-        """
-        self.__update_jump_button()
-
-    def _on_jump_button_clicked(self, button):
-        """
-            Scroll to current track
-            @param button as Gtk.Button
-        """
-        self._view.jump_to_current(self._scrolled)
-
-    def _on_play_button_clicked(self, button):
-        """
-            Play playlist
-            @param button as Gtk.Button
-        """
-        tracks = []
-        for album_row in self._view.children:
-            for track_row in album_row.children:
-                tracks.append(track_row.track)
-        if tracks:
-            albums = tracks_to_albums(tracks)
-            App().player.play_track_for_albums(tracks[0], albums)
-
-    def _on_shuffle_button_clicked(self, button):
-        """
-            Play playlist shuffled
-            @param button as Gtk.Button
-        """
-        tracks = []
-        for album_row in self._view.children:
-            for track_row in album_row.children:
-                tracks.append(track_row.track)
-        if tracks:
-            shuffle(tracks)
-            albums = tracks_to_albums(tracks)
-            App().player.play_track_for_albums(tracks[0], albums)
-
-    def _on_menu_button_clicked(self, button):
-        """
-            Show playlist menu
-            @param button as Gtk.Button
-        """
-        from lollypop.menu_playlist import PlaylistMenu
-        menu = PlaylistMenu(self._playlist_id)
-        popover = Gtk.Popover.new_from_model(button, menu)
-        popover.popup()
-
     def _on_playlist_track_added(self, playlists, playlist_id, uri):
         """
             Append track to album list
@@ -340,31 +233,12 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
 #######################
 # PRIVATE             #
 #######################
-    def __set_duration(self, duration):
+    def __on_jump_to_current(self, banner):
         """
-            Set playlist duration
-            @param duration as int (seconds)
+            Jump to current track
+            @param banner as PlaylistBannerWidget
         """
-        self.__duration_label.set_text(get_human_duration(duration))
-
-    def __update_jump_button(self):
-        """
-            Update jump button status
-        """
-        track_ids = []
-        for child in self._view.children:
-            track_ids += child.album.track_ids
-        if App().player.current_track.id in track_ids:
-            self.__jump_button.set_sensitive(True)
-        else:
-            self.__jump_button.set_sensitive(False)
-
-    def __on_populated(self, playlists_widget):
-        """
-            Update jump button on populated
-            @param playlists_widget as PlaylistsWidget
-        """
-        self.__update_jump_button()
+        self._view.jump_to_current(self._scrolled)
 
     def __on_dnd_finished(self, dnd_helper):
         """
