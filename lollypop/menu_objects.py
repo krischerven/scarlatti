@@ -30,7 +30,7 @@ class AlbumMenu(Gio.Menu):
         Contextual menu for album
     """
 
-    def __init__(self, album, view_type, header):
+    def __init__(self, album, view_type, header=False):
         """
             Init menu model
             @param album as Album
