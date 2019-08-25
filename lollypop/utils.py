@@ -488,7 +488,7 @@ def get_icon_name(object_id):
     elif object_id == Type.RECENTS:
         icon = "document-open-recent-symbolic"
     elif object_id == Type.RADIOS:
-        icon = "de.haeckerfelix.gradio-symbolic"
+        icon = "org.gnome.Lollypop-gradio-symbolic"
     elif object_id == Type.RANDOMS:
         icon = "media-playlist-shuffle-symbolic"
     elif object_id == Type.LOVED:
