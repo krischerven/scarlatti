@@ -78,7 +78,11 @@ class MenuBuilder(Gtk.Stack):
             close = menu.get_item_attribute_value(i, "close") is not None
             if header is not None:
                 album_id = menu.get_item_attribute_value(i, "album-id")
-                self.__add_header(label, album_id, menu_name)
+                icon_name = menu.get_item_attribute_value(i, "icon-name")
+                if album_id is not None:
+                    self.__add_album_header(label, album_id, menu_name)
+                elif icon_name is not None:
+                    self.__add_header(label, icon_name, menu_name)
             elif action is None:
                 link = menu.get_item_link(i, "section")
                 submenu = menu.get_item_link(i, "submenu")
@@ -156,9 +160,34 @@ class MenuBuilder(Gtk.Stack):
         button.show()
         self.__boxes[menu_name].add(button)
 
-    def __add_header(self, text, album_id, menu_name):
+    def __add_header(self, text, icon_name, menu_name):
         """
-            Add an header to close menu
+            Add an header for albums to close menu
+            @param text as GLib.Variant
+            @param icon_name as GLib.Variant
+            @param menu_name as str
+        """
+        button = Gtk.ModelButton.new()
+        button.set_alignment(0, 0.5)
+        button.connect("clicked", lambda x: self.emit("closed"))
+        button.show()
+        label = Gtk.Label.new()
+        label.set_markup(text.get_string())
+        label.show()
+        artwork = Gtk.Image.new_from_icon_name(icon_name.get_string(),
+                                               Gtk.IconSize.INVALID)
+        artwork.set_pixel_size(ArtSize.MEDIUM)
+        artwork.show()
+        grid = Gtk.Grid()
+        grid.set_column_spacing(MARGIN)
+        grid.add(artwork)
+        grid.add(label)
+        button.set_image(grid)
+        self.__boxes[menu_name].add(button)
+
+    def __add_album_header(self, text, album_id, menu_name):
+        """
+            Add an header for albums to close menu
             @param text as GLib.Variant
             @param album_id as GLib.Variant
             @param menu_name as str

@@ -13,11 +13,31 @@
 from gi.repository import Gio, GLib
 
 from lollypop.objects_album import Album
+from lollypop.utils import get_icon_name
+
+
+class MenuHeader(Gio.MenuItem):
+    """
+        A menu header item
+    """
+
+    def __init__(self, type_id):
+        """
+            Init menu
+            @param type_id as int
+        """
+        Gio.MenuItem.__init__(self)
+        from lollypop.shown import ShownLists
+        label = ShownLists.IDS[type_id]
+        icon_name = get_icon_name(type_id)
+        self.set_attribute_value("header", GLib.Variant("b", True))
+        self.set_attribute_value("label", GLib.Variant("s", label))
+        self.set_attribute_value("icon-name", GLib.Variant("s", icon_name))
 
 
 class AlbumMenuHeader(Gio.MenuItem):
     """
-        A menu header item
+        A menu header item for Albums/Tracks
     """
 
     def __init__(self, object):

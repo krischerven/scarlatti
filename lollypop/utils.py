@@ -21,7 +21,7 @@ import time
 from functools import wraps
 
 from lollypop.logger import Logger
-from lollypop.define import App, Type, SelectionListMask, NetworkAccessACL
+from lollypop.define import App, Type, NetworkAccessACL
 from lollypop.define import StorageType
 
 
@@ -465,11 +465,10 @@ def get_font_height():
     return int(layout.get_pixel_size()[1])
 
 
-def get_icon_name(object_id, type=SelectionListMask.ARTISTS):
+def get_icon_name(object_id):
     """
         Return icon name for id
         @param object_id as int
-        @param type as SelectionListMask
     """
     icon = ""
     if object_id == Type.SUGGESTIONS:

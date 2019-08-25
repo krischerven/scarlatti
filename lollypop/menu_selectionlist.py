@@ -24,18 +24,26 @@ class SelectionListMenu(Gio.Menu):
         A menu for configuring SelectionList
     """
 
-    def __init__(self, widget, rowid, mask):
+    def __init__(self, widget, rowid, mask, header=False):
         """
             Init menu
             @param widget as Gtk.Widget
             @param rowid as int
             @param mask as SelectionListMask
+            @param header as bool
         """
         Gio.Menu.__init__(self)
         self.__widget = widget
         self.__rowid = rowid
         self.__mask = mask
         section = None
+
+        if header:
+            from lollypop.menu_header import MenuHeader
+            if mask & SelectionListMask.SIDEBAR:
+                pass  # self.append_item(MenuHeader(rowid))
+            else:
+                self.append_item(MenuHeader(Type.PLAYLISTS))
 
         if rowid is not None:
             if not App().devices and mask & (SelectionListMask.SIDEBAR |
