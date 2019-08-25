@@ -21,7 +21,7 @@ from lollypop.fastscroll import FastScroll
 from lollypop.define import Type, App, ArtSize, SelectionListMask
 from lollypop.define import ArtBehaviour, ViewType
 from lollypop.logger import Logger
-from lollypop.utils import get_icon_name, on_query_tooltip
+from lollypop.utils import get_icon_name, on_query_tooltip, popup_widget
 
 
 class SelectionListRow(Gtk.ListBoxRow):
@@ -663,7 +663,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         if self.__base_mask & (SelectionListMask.SIDEBAR |
                                SelectionListMask.VIEW):
             from lollypop.menu_selectionlist import SelectionListMenu
-            from lollypop.widgets_utils import Popover
+            from lollypop.widgets_menu import MenuBuilder
             if row is None:
                 row = self._box.get_row_at_y(y)
                 if row is None:
@@ -671,12 +671,13 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
                 row_id = row.id
             else:
                 row_id = None
-            menu = SelectionListMenu(self, row_id, self.mask)
-            popover = Popover()
-            popover.bind_model(menu, None)
-            popover.set_relative_to(row)
-            popover.set_position(Gtk.PositionType.RIGHT)
-            popover.popup()
+            menu = SelectionListMenu(self,
+                                     row_id,
+                                     self.mask,
+                                     App().window.is_adaptive)
+            menu_widget = MenuBuilder(menu)
+            menu_widget.show()
+            popup_widget(menu_widget, row)
 
     def __on_artist_artwork_changed(self, object, value):
         """

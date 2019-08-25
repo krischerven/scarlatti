@@ -13,6 +13,7 @@
 from gi.repository import Gio, GLib
 
 from lollypop.objects_album import Album
+from lollypop.define import Type
 from lollypop.utils import get_icon_name
 
 
@@ -28,8 +29,12 @@ class MenuHeader(Gio.MenuItem):
         """
         Gio.MenuItem.__init__(self)
         from lollypop.shown import ShownLists
-        label = ShownLists.IDS[type_id]
-        icon_name = get_icon_name(type_id)
+        if type_id == Type.NONE:
+            label = "Lollypop"
+            icon_name = "org.gnome.Lollypop-symbolic"
+        else:
+            label = ShownLists.IDS[type_id]
+            icon_name = get_icon_name(type_id)
         self.set_attribute_value("header", GLib.Variant("b", True))
         self.set_attribute_value("label", GLib.Variant("s", label))
         self.set_attribute_value("icon-name", GLib.Variant("s", icon_name))

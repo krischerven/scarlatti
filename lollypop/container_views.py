@@ -53,9 +53,9 @@ class ViewsContainer:
                 self.emit("can-go-back-changed", True)
 
         from lollypop.view import View
-        view = View()
+        view = View(ViewType.SCROLLED)
         view.show()
-        view.add(widget)
+        view.add_widget(widget)
         widget.get_style_context().add_class("adaptive-menu")
         widget.set_vexpand(True)
         widget.connect("closed", on_closed, view)

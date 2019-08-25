@@ -101,6 +101,17 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         grid.show_all()
         self.add(grid)
 
+    def add_widget(self, widget):
+        """
+            Add widget to view
+            @param widget as Gtk.Widget
+        """
+        if self._view_type & ViewType.SCROLLED:
+            self._viewport.add(widget)
+            self.add(self._scrolled)
+        else:
+            self.add(widget)
+
     def stop(self):
         pass
 

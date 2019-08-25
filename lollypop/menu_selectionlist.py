@@ -41,7 +41,7 @@ class SelectionListMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import MenuHeader
             if mask & SelectionListMask.SIDEBAR:
-                pass  # self.append_item(MenuHeader(rowid))
+                self.append_item(MenuHeader(Type.NONE))
             else:
                 self.append_item(MenuHeader(Type.PLAYLISTS))
 
@@ -85,7 +85,9 @@ class SelectionListMenu(Gio.Menu):
                 self.append_section(_("Startup"), startup_menu)
 
         # Options
-        if rowid is None and mask & SelectionListMask.SIDEBAR:
+        if rowid is None and\
+                mask & SelectionListMask.SIDEBAR and\
+                not App().window.is_adaptive:
             options_menu = Gio.Menu()
             action = Gio.SimpleAction.new_stateful(
                     "show_label",
