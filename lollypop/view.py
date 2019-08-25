@@ -45,9 +45,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._empty_message = _("No items to show")
         self._empty_icon_name = "emblem-music-symbolic"
 
-        if App().window.is_adaptive:
-            self._view_type |= self.view_sizing_mask
-
         if view_type & ViewType.SCROLLED:
             self._scrolled = Gtk.ScrolledWindow()
             self.__event_controller = Gtk.EventControllerMotion.new(
@@ -123,6 +120,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         return self.__sidebar_id
 
     @property
+    def view_type(self):
+        """
+            View type less sizing
+            @return ViewType
+        """
+        return self._view_type & ~(ViewType.MEDIUM | ViewType.SMALL)
+
+    @property
     def args(self):
         """
             Get default args for __class__, populate() plus sidebar_id and
@@ -138,14 +143,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @return bool
         """
         return self.__destroyed
-
-    @property
-    def view_sizing_mask(self):
-        """
-            Get mask relative to adaptive mode
-            @return ViewType
-        """
-        return ViewType.SMALL
 
 #######################
 # PROTECTED           #
@@ -197,9 +194,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 style_context.add_class("text-xx-large")
         view_type = self._view_type
         if status:
-            self._view_type |= self.view_sizing_mask
+            self._view_type |= ViewType.MEDIUM
         else:
-            self._view_type &= ~self.view_sizing_mask
+            self._view_type &= ~ViewType.MEDIUM
         return view_type != self._view_type
 
     def _on_value_changed(self, adj):

@@ -103,14 +103,6 @@ class SuggestionsView(View, FilteringHelper):
         return self
 
     @property
-    def view_sizing_mask(self):
-        """
-            Get mask for adaptive mode
-            @return ViewType
-        """
-        return ViewType.MEDIUM
-
-    @property
     def args(self):
         """
             Get default args for __class__, populate() plus sidebar_id and
@@ -121,8 +113,7 @@ class SuggestionsView(View, FilteringHelper):
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
-        view_type = self._view_type & ~self.view_sizing_mask
-        return ({"view_type": view_type}, self.sidebar_id, position)
+        return ({"view_type": self.view_type}, self.sidebar_id, position)
 
 #######################
 # PROTECTED           #

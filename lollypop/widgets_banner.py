@@ -79,10 +79,8 @@ class BannerWidget(Gtk.Overlay, SizeAllocationHelper):
         """
         if self._collapsed:
             return ArtSize.SMALL + MARGIN_SMALL * 2
-        elif self._view_type & ViewType.SMALL:
+        elif self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
             return ArtSize.MEDIUM + MARGIN * 2
-        elif self._view_type & ViewType.MEDIUM:
-            return ArtSize.BANNER + MARGIN * 2
         else:
             return ArtSize.BANNER + MARGIN * 2
 

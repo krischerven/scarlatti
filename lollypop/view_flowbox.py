@@ -92,14 +92,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
         """
         return self._box.get_children()
 
-    @property
-    def view_sizing_mask(self):
-        """
-            Get mask for adaptive mode
-            @return ViewType
-        """
-        return ViewType.MEDIUM
-
 #######################
 # PROTECTED           #
 #######################

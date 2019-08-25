@@ -108,14 +108,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.set_view_type(self, view_type)
         art_size = 0
-        if view_type & ViewType.SMALL:
+        if view_type & ViewType.MEDIUM:
             art_size = ArtSize.MEDIUM
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
-        elif view_type & ViewType.MEDIUM:
-            art_size = ArtSize.BANNER
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
         else:
             art_size = ArtSize.BANNER
             style = "menu-button-48"
