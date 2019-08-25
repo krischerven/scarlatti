@@ -183,6 +183,7 @@ class MenuBuilder(Gtk.Stack):
         grid.add(artwork)
         grid.add(label)
         button.set_image(grid)
+        button.get_style_context().add_class("padding")
         self.__boxes[menu_name].add(button)
 
     def __add_album_header(self, text, album_id, menu_name):
@@ -205,6 +206,7 @@ class MenuBuilder(Gtk.Stack):
         grid.add(artwork)
         grid.add(label)
         button.set_image(grid)
+        button.get_style_context().add_class("padding")
         App().art_helper.set_album_artwork(
                 Album(album_id.get_int32()),
                 ArtSize.MEDIUM,

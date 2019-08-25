@@ -14,7 +14,7 @@ from gi.repository import Gio, Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App
+from lollypop.define import App, Type
 from lollypop.menu_sync import SyncPlaylistsMenu
 
 
@@ -23,13 +23,17 @@ class PlaylistMenu(Gio.Menu):
         A playlist menu
     """
 
-    def __init__(self, playlist_id):
+    def __init__(self, playlist_id, header=False):
         """
             Init variable
             @param playlist_id as int
+            @param header as bool
         """
         Gio.Menu.__init__(self)
         self.__playlist_id = playlist_id
+        if header:
+            from lollypop.menu_header import MenuHeader
+            self.append_item(MenuHeader(Type.PLAYLISTS))
         save_action = Gio.SimpleAction(name="save_pl_action")
         App().add_action(save_action)
         save_action.connect("activate", self.__on_save_action_activate)

@@ -15,6 +15,7 @@ from locale import strcoll
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
 from lollypop.define import MARGIN_SMALL
+from lollypop.utils import popup_widget
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.widgets_banner_playlists import PlaylistsBannerWidget
 from lollypop.shown import ShownPlaylists
@@ -130,9 +131,9 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        self._on_primary_long_gesture(x, y)
+        self._on_primary_long_press_gesture(x, y)
 
-    def _on_primary_long_gesture(self, x, y):
+    def _on_primary_long_press_gesture(self, x, y):
         """
             Show Context view for activated album
             @param x as int
@@ -183,7 +184,12 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             Popup menu for playlist
             @param child as PlaylistRoundedWidget
         """
-        pass
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_playlist import PlaylistMenu
+        menu = PlaylistMenu(child.data, App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, child)
 
     def __sort_func(self, widget1, widget2):
         """

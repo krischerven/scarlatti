@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from random import sample
 
@@ -44,13 +44,11 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
         """
         if self._artwork is None:
             RoundedAlbumsWidget.populate(self)
-            toggle_button = Gtk.ToggleButton.new()
-            toggle_button.set_image(self._label)
-            toggle_button.set_relief(Gtk.ReliefStyle.NONE)
-            toggle_button.get_style_context().add_class("light-button")
-            toggle_button.connect("toggled", self.__on_label_toggled)
-            toggle_button.show()
-            self._grid.add(toggle_button)
+            label = Gtk.Label.new()
+            markup = "<b>%s</b>" % GLib.markup_escape_text(self.name)
+            label.set_markup(markup)
+            label.show()
+            self._grid.add(label)
         else:
             self.set_artwork()
 
@@ -98,21 +96,3 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
 #######################
 # PRIVATE             #
 #######################
-    def __on_label_toggled(self, button):
-        """
-            Show tracks popover
-            @param button as Gtk.ToggleButton
-        """
-        def on_closed(popover):
-            button.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            button.set_active(False)
-
-        if not button.get_active():
-            return
-
-        from lollypop.pop_playlist_edit import PlaylistEditPopover
-        popover = PlaylistEditPopover(self._data)
-        popover.set_relative_to(button)
-        popover.connect("closed", on_closed)
-        popover.popup()
-        button.set_state_flags(Gtk.StateFlags.VISITED, True)
