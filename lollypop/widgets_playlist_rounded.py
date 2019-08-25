@@ -36,6 +36,15 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
         self._track_ids = []
         self._genre = Type.PLAYLISTS
 
+    def populate(self):
+        """
+            Populate widget content
+        """
+        if self._artwork is None:
+            RoundedAlbumsWidget.populate(self)
+        else:
+            self.set_artwork()
+
     def set_view_type(self, view_type):
         """
             Update view type
