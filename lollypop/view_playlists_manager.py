@@ -116,7 +116,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             Start lazy loading
             @param playlist_ids as [int]
         """
-        self._remove_placeholder()
+        self.remove_placeholder()
         FlowBoxView._add_items(self, playlist_ids, self._view_type)
 
     def _on_child_activated(self, flowbox, child):

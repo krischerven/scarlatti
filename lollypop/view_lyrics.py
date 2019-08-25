@@ -114,7 +114,7 @@ class LyricsView(View, InformationController,
         self.__update_lyrics_style()
         return [
                 (App().window, "adaptive-size-changed",
-                 "_on_adaptive_size_changed")
+                 "_on_adaptive_size_changed"),
                 (App().player, "current-changed", "_on_current_changed")
         ]
 
@@ -128,8 +128,8 @@ class LyricsView(View, InformationController,
                 self.remove(self.__widget)
             View.populate(self)
             return
-        self._remove_placeholder()
-        self._add_widget(self.__widget)
+        self.remove_placeholder()
+        self.add_widget(self.__widget)
         self.__current_track = track
         size = max(self.get_allocated_width(), self.get_allocated_height())
         self.update_artwork(size + Size.MINI, size + Size.MINI)

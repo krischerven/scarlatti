@@ -84,7 +84,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             Start lazy loading
             @param radio ids as [int]
         """
-        self._remove_placeholder()
+        self.remove_placeholder()
         FlowBoxView._add_items(self, radio_ids, self._view_type)
 
     def _on_new_clicked(self, widget):

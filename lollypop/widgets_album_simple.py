@@ -15,7 +15,6 @@ from gi.repository import GLib, Gtk, Pango, GObject
 from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Type
 from lollypop.utils import on_query_tooltip, set_cursor_hand2
-from lollypop.view import View
 
 
 class AlbumSimpleWidget(Gtk.FlowBoxChild):
@@ -225,11 +224,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             button.set_state_flags(Gtk.StateFlags.NORMAL, True)
             button.set_active(False)
 
-        def on_play_all_from(popover):
-            view = self.get_ancestor(View)
-            if view is not None:
-                view.play_all_from(self)
-
         if not button.get_active():
             return
         if App().window.is_adaptive:
@@ -240,7 +234,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             popover.set_relative_to(button)
             popover.set_position(Gtk.PositionType.BOTTOM)
             popover.connect("closed", on_closed)
-            popover.connect("play-all-from", on_play_all_from)
             popover.popup()
             button.set_state_flags(Gtk.StateFlags.VISITED, True)
 

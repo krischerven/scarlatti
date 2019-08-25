@@ -86,7 +86,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
             Populate view
         """
-        self._remove_placeholder()
+        self.remove_placeholder()
         if App().player.queue:
             tracks = [Track(track_id) for track_id in App().player.queue]
             albums = tracks_to_albums(tracks)

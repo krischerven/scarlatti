@@ -10,12 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject, GLib
+from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 
 from lollypop.view_tracks import TracksView
-from lollypop.define import App, ViewType, Shuffle, ArtSize, ArtBehaviour
+from lollypop.define import App, ViewType, ArtSize, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Size
 from lollypop.widgets_utils import Popover
 from lollypop.helper_size_allocation import SizeAllocationHelper
@@ -26,10 +26,6 @@ class TracksPopover(Popover, ViewController, SizeAllocationHelper):
     """
         A popover with tracks
     """
-
-    __gsignals__ = {
-        "play-all-from": (GObject.SignalFlags.RUN_FIRST, None, ())
-    }
 
     def __init__(self, album):
         """
@@ -100,24 +96,6 @@ class TracksPopover(Popover, ViewController, SizeAllocationHelper):
         self.__action_button.get_style_context().add_class(
             "vertical-menu-button")
         self.__action_button.get_style_context().add_class("black-transparent")
-        play_all_button = Gtk.Button.new()
-        play_all_button.set_property("has-tooltip", True)
-        play_all_button.set_tooltip_text(_("Play albums"))
-        play_all_button.get_style_context().add_class("vertical-menu-button")
-        play_all_button.get_style_context().add_class("black-transparent")
-        play_all_button.connect("clicked", self.__on_play_all_clicked)
-        play_all_button.set_image(Gtk.Image())
-        if App().settings.get_enum("shuffle") == Shuffle.NONE:
-            play_all_button.get_image().set_from_icon_name(
-                "media-playlist-consecutive-symbolic",
-                Gtk.IconSize.DND)
-        else:
-            play_all_button.get_image().set_from_icon_name(
-                "media-playlist-shuffle-symbolic",
-                Gtk.IconSize.DND)
-        play_all_button.show()
-        linked_grid.add(play_all_button)
-        play_all_button.get_style_context().add_class("overlay-button")
         grid.add(overlay)
         grid.add(self.__scrolled)
         self.add(grid)

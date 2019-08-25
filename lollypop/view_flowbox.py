@@ -50,9 +50,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             self.__event_controller = Gtk.EventControllerMotion.new(self._box)
             self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
-        if view_type & ViewType.SCROLLED:
-            self._scrolled.set_property("expand", True)
-            self.add(self._scrolled)
 
     def populate(self, items):
         """
@@ -121,7 +118,7 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             GLib.idle_add(self._add_items, items)
         else:
             self.lazy_loading()
-            self._add_widget(self._box)
+            self.add_widget(self._box)
 
     def _on_current_changed(self, player):
         """

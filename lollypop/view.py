@@ -107,10 +107,28 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param widget as Gtk.Widget
         """
         if self._view_type & ViewType.SCROLLED:
-            self._viewport.add(widget)
-            self.add(self._scrolled)
-        else:
+            if self._viewport.get_child() is None:
+                self._viewport.add(widget)
+                self.add(self._scrolled)
+                self._scrolled.set_property("expand", True)
+        elif widget not in self.get_children():
             self.add(widget)
+
+    def remove_placeholder(self):
+        """
+            Remove any placeholder
+            @return bool: True if removed
+        """
+        if self._view_type & ViewType.PLACEHOLDER:
+            self._view_type & ~ViewType.PLACEHOLDER
+            if self._view_type & ViewType.SCROLLED:
+                self._scrolled.show()
+            for child in self.get_children():
+                if child.get_name() == "lollypop_placeholder":
+                    child.destroy()
+                    break
+            return True
+        return False
 
     def stop(self):
         pass
@@ -158,33 +176,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _add_widget(self, widget):
-        """
-            Add main widget to view
-            @param widget as Gtk.Widget
-        """
-        if self._view_type & ViewType.SCROLLED:
-            if self._viewport.get_child() is None:
-                self._viewport.add(widget)
-        elif widget not in self.get_children():
-            self.add(widget)
-
-    def _remove_placeholder(self):
-        """
-            Remove any placeholder
-            @return bool: True if removed
-        """
-        if self._view_type & ViewType.PLACEHOLDER:
-            self._view_type & ~ViewType.PLACEHOLDER
-            if self._view_type & ViewType.SCROLLED:
-                self._scrolled.show()
-            for child in self.get_children():
-                if child.get_name() == "lollypop_placeholder":
-                    child.destroy()
-                    break
-            return True
-        return False
-
     def _on_view_leave(self, event_controller):
         pass
 

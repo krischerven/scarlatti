@@ -13,6 +13,7 @@
 from gi.repository import GLib, Gtk, Gio, Pango
 
 from gettext import gettext as _
+from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
@@ -23,6 +24,7 @@ from lollypop.utils import get_font_height, popup_widget
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.widgets_banner_albums import AlbumsBannerWidget
 
 
 class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
@@ -96,14 +98,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         widget.show()
         widget.populate()
 
-    def play_all_from(self, child):
-        """
-            Play all children from child
-            @param child as AlbumSimpleWidget
-        """
-        albums = [c.album for c in self._box.get_children()]
-        App().player.play_album_for_albums(child.album, albums)
-
     @property
     def args(self):
         """
@@ -129,7 +123,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             Start lazy loading
             @param albums as [Album]
         """
-        self._remove_placeholder()
+        self.remove_placeholder()
         FlowBoxView._add_items(self, albums, self._genre_ids, self._artist_ids,
                                self._view_type)
 
@@ -147,8 +141,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                                             self._genre_ids,
                                             self._artist_ids)
             if album_id in album_ids:
-                if self._remove_placeholder():
-                    self._add_widget(self._box)
+                if self.remove_placeholder():
+                    self.add_widget(self._box)
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
         else:
@@ -217,6 +211,56 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param album_widget as AlbumWidget
         """
         album_widget.artwork.set_opacity(1)
+
+
+class AlbumsGenresBoxView(AlbumsBoxView):
+    """
+        Show albums in a box for a genre (static or not)
+    """
+
+    def __init__(self, genre_ids, artist_ids, view_type=ViewType.SCROLLED):
+        """
+            Init album view
+            @param genre_ids as [int]
+            @param artist_ids as [int]
+            @param view_type as ViewType
+        """
+        AlbumsBoxView.__init__(self, genre_ids, artist_ids, view_type)
+        self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
+        self.__banner.collapse(True)
+        self.__banner.init_background()
+        self.__banner.show()
+        self.__banner.set_view_type(view_type)
+        self.__banner.connect("play-all", self.__on_banner_play_all)
+        self.add(self.__banner)
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+        """
+        if AlbumsBoxView._on_adaptive_changed(self, window, status):
+            self.__banner.set_view_type(self._view_type)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_banner_play_all(self, banner, random):
+        """
+            Play all albums
+            @param banner as AlbumsBannerWidget
+            @param random as bool
+        """
+        albums = [c.album for c in self._box.get_children()]
+        if not albums:
+            return
+        if random:
+            shuffle(albums)
+            App().player.play_album_for_albums(albums[0], albums)
+        else:
+            App().player.play_album_for_albums(albums[0], albums)
 
 
 class AlbumsYearsBoxView(AlbumsBoxView):

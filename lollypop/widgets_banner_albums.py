@@ -12,48 +12,47 @@
 
 from gi.repository import Gtk, GObject
 
-from random import shuffle
-
-from lollypop.utils import get_human_duration, tracks_to_albums
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, ViewType
 from lollypop.widgets_banner import BannerWidget
+from lollypop.shown import ShownLists
 
 
-class PlaylistBannerWidget(BannerWidget):
+class AlbumsBannerWidget(BannerWidget):
     """
-        Banner for playlist
+        Banner for albums
     """
 
     __gsignals__ = {
-        "jump-to-current": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "play-all": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
-    def __init__(self, playlist_id, view):
+    def __init__(self, genre_ids, artist_ids, view_type):
         """
             Init banner
-            @param playlist_id as int
-            @param view as AlbumsListView
+            @param genre_ids as [int]
+            @param artist_ids as [int]
+            @param view_type as ViewType
         """
-        BannerWidget.__init__(self, view.args[0]["view_type"])
-        self.__playlist_id = playlist_id
-        self.__view = view
+        BannerWidget.__init__(self, view_type)
+        self.__genre_ids = genre_ids
+        self.__artist_ids = artist_ids
         builder = Gtk.Builder()
         builder.add_from_resource(
-            "/org/gnome/Lollypop/PlaylistBannerWidget.ui")
+            "/org/gnome/Lollypop/AlbumsBannerWidget.ui")
         self.__title_label = builder.get_object("title")
         self.__duration_label = builder.get_object("duration")
         self.__play_button = builder.get_object("play_button")
         self.__shuffle_button = builder.get_object("shuffle_button")
-        self.__jump_button = builder.get_object("jump_button")
         self.__menu_button = builder.get_object("menu_button")
         self.add_overlay(builder.get_object("widget"))
-        self.__title_label.set_label(App().playlists.get_name(playlist_id))
+        genres = []
+        for genre_id in genre_ids:
+            if genre_id < 0:
+                genres.append(ShownLists.IDS[genre_id])
+            else:
+                genres.append(App().genres.get_name(genre_id))
+        self.__title_label.set_label(",".join(genres))
         builder.connect_signals(self)
-        # In DB duration calculation
-        if playlist_id > 0 and\
-                not App().playlists.get_smart(playlist_id):
-            duration = App().playlists.get_duration(playlist_id)
-            self.__duration_label.set_text(get_human_duration(duration))
 
     def set_view_type(self, view_type):
         """
@@ -87,10 +86,6 @@ class PlaylistBannerWidget(BannerWidget):
                       icon_size, "media-playback-start-symbolic")
         update_button(self.__shuffle_button, style,
                       icon_size, "media-playlist-shuffle-symbolic")
-        update_button(self.__jump_button, style,
-                      icon_size, "go-jump-symbolic")
-        update_button(self.__menu_button, style,
-                      icon_size, "view-more-symbolic")
 
 #######################
 # PROTECTED           #
@@ -110,49 +105,19 @@ class PlaylistBannerWidget(BannerWidget):
                 ArtBehaviour.DARKER,
                 self.__on_artwork)
 
-    def _on_jump_button_clicked(self, button):
-        """
-            Scroll to current track
-            @param button as Gtk.Button
-        """
-        self.emit("jump-to-current")
-
     def _on_play_button_clicked(self, button):
         """
             Play playlist
             @param button as Gtk.Button
         """
-        tracks = []
-        for album_row in self.__view.children:
-            for track_row in album_row.children:
-                tracks.append(track_row.track)
-        if tracks:
-            albums = tracks_to_albums(tracks)
-            App().player.play_track_for_albums(tracks[0], albums)
+        self.emit("play-all", False)
 
     def _on_shuffle_button_clicked(self, button):
         """
             Play playlist shuffled
             @param button as Gtk.Button
         """
-        tracks = []
-        for album_row in self.__view.children:
-            for track_row in album_row.children:
-                tracks.append(track_row.track)
-        if tracks:
-            shuffle(tracks)
-            albums = tracks_to_albums(tracks)
-            App().player.play_track_for_albums(tracks[0], albums)
-
-    def _on_menu_button_clicked(self, button):
-        """
-            Show playlist menu
-            @param button as Gtk.Button
-        """
-        from lollypop.menu_playlist import PlaylistMenu
-        menu = PlaylistMenu(self.__playlist_id)
-        popover = Gtk.Popover.new_from_model(button, menu)
-        popover.popup()
+        self.emit("play-all", True)
 
 #######################
 # PRIVATE             #

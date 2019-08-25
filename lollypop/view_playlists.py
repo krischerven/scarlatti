@@ -57,9 +57,8 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
         self._view.set_margin_top(MARGIN_SMALL)
-        self._viewport.add(self._view)
         self.add(self.__banner)
-        self.add(self._scrolled)
+        self.add_widget(self._view)
         self.__banner.set_view_type(view_type)
         return [
                 (App().playlists, "playlist-track-added",

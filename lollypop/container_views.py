@@ -331,9 +331,9 @@ class ViewsContainer:
             @param genre_ids as [int]
             @param is compilation as bool
         """
-        from lollypop.view_albums_box import AlbumsBoxView
+        from lollypop.view_albums_box import AlbumsGenresBoxView
         view_type = ViewType.SCROLLED
-        view = AlbumsBoxView(genre_ids, artist_ids, view_type)
+        view = AlbumsGenresBoxView(genre_ids, artist_ids, view_type)
         view.populate()
         return view
 

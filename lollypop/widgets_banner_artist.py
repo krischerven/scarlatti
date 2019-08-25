@@ -84,18 +84,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.set_view_type(self, view_type)
         art_size = 0
-        if view_type & ViewType.SMALL:
+        if view_type & ViewType.MEDIUM:
             art_size = ArtSize.MEDIUM
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
             self.__title_label.get_style_context().add_class(
                 "text-large")
-        elif view_type & ViewType.MEDIUM:
-            art_size = ArtSize.BANNER
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
         else:
             art_size = ArtSize.BANNER
             style = "menu-button-48"

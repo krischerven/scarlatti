@@ -85,8 +85,8 @@ class TrackMenu(Gio.Menu):
         """
         Gio.Menu.__init__(self)
         if header:
-            from lollypop.menu_header import MenuHeader
-            self.append_item(MenuHeader(track))
+            from lollypop.menu_header import AlbumMenuHeader
+            self.append_item(AlbumMenuHeader(track))
         self.append_section(_("Playback"), TrackPlaybackMenu(track))
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
