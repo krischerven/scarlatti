@@ -39,8 +39,8 @@ class AlbumMenu(Gio.Menu):
         """
         Gio.Menu.__init__(self)
         if header:
-            from lollypop.menu_header import MenuHeader
-            self.append_item(MenuHeader(album))
+            from lollypop.menu_header import AlbumMenuHeader
+            self.append_item(AlbumMenuHeader(album))
         self.append_section(_("Playback"), AlbumPlaybackMenu(album))
         self.append_section(_("Artist"),
                             ArtistMenu(album, view_type))

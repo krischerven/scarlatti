@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, ViewType
 from lollypop.define import SelectionListMask
+from lollypop.utils import popup_widget
 from lollypop.widgets_banner import BannerWidget
 
 
@@ -111,14 +112,13 @@ class PlaylistsBannerWidget(BannerWidget):
             @param button as Gtk.Button
         """
         from lollypop.menu_selectionlist import SelectionListMenu
-        from lollypop.widgets_utils import Popover
+        from lollypop.widgets_menu import MenuBuilder
         menu = SelectionListMenu(self.__view,
                                  None,
                                  SelectionListMask.PLAYLISTS)
-        popover = Popover()
-        popover.bind_model(menu, None)
-        popover.set_relative_to(button)
-        popover.popup()
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
     def __on_artwork(self, surface):
         """

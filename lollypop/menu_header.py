@@ -15,7 +15,7 @@ from gi.repository import Gio, GLib
 from lollypop.objects_album import Album
 
 
-class MenuHeader(Gio.MenuItem):
+class AlbumMenuHeader(Gio.MenuItem):
     """
         A menu header item
     """
