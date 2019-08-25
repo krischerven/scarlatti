@@ -10,7 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import Gio
+
 from locale import strcoll
+from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
@@ -185,9 +188,18 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             @param child as PlaylistRoundedWidget
         """
         from lollypop.widgets_menu import MenuBuilder
-        from lollypop.menu_playlist import PlaylistMenu
+        from lollypop.menu_playlist import PlaylistMenu, PlaylistMenuExt
         menu = PlaylistMenu(child.data, App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
+        if child.data >= 0:
+            menu.append_section(_("Rename"), Gio.Menu())
+            menu_widget = MenuBuilder(menu)
+            main = menu_widget.get_child_by_name("main")
+            menu_ext = PlaylistMenuExt(child.data)
+            menu_ext.show()
+            main.add(menu_ext)
+        else:
+            menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, child)
 

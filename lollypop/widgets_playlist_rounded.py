@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
-
 from random import sample
 
 from lollypop.define import App, Type
@@ -37,20 +35,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
                                      sortname, view_type)
         self._track_ids = []
         self._genre = Type.PLAYLISTS
-
-    def populate(self):
-        """
-            Populate widget content
-        """
-        if self._artwork is None:
-            RoundedAlbumsWidget.populate(self)
-            label = Gtk.Label.new()
-            markup = "<b>%s</b>" % GLib.markup_escape_text(self.name)
-            label.set_markup(markup)
-            label.show()
-            self._grid.add(label)
-        else:
-            self.set_artwork()
 
     def set_view_type(self, view_type):
         """

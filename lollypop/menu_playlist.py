@@ -14,7 +14,7 @@ from gi.repository import Gio, Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type
+from lollypop.define import App, Type, MARGIN_SMALL
 from lollypop.menu_sync import SyncPlaylistsMenu
 
 
@@ -107,3 +107,42 @@ class PlaylistMenu(Gio.Menu):
             uri = dialog.get_file().get_uri()
             App().playlists.set_sync_uri(self.__playlist_id, uri)
             App().playlists.sync_to_disk(self.__playlist_id, True)
+
+
+class PlaylistMenuExt(Gtk.Grid):
+    """
+        Additional widgets for playlist menu
+    """
+
+    def __init__(self, playlist_id):
+        """
+            Init widget
+            @param playlist_id as int
+        """
+        Gtk.Grid.__init__(self)
+        self.set_margin_top(MARGIN_SMALL)
+        self.set_row_spacing(MARGIN_SMALL)
+        self.set_orientation(Gtk.Orientation.VERTICAL)
+
+        entry = Gtk.Entry()
+        entry.set_margin_top(MARGIN_SMALL)
+        entry.set_margin_start(MARGIN_SMALL)
+        entry.set_margin_end(MARGIN_SMALL)
+        entry.set_margin_bottom(MARGIN_SMALL)
+        entry.set_property("hexpand", True)
+        entry.set_text(App().playlists.get_name(playlist_id))
+        entry.connect("changed", self.__on_entry_changed, playlist_id)
+        entry.show()
+        self.add(entry)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_entry_changed(self, entry, playlist_id):
+        """
+            Update playlist name
+            @param entry as Gtk.Entry
+            @param playlist_id as int
+        """
+        new_name = entry.get_text()
+        App().playlists.rename(playlist_id, new_name)

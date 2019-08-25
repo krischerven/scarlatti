@@ -138,7 +138,8 @@ class Playlists(GObject.GObject):
                         SET name=?\
                         WHERE rowid=?",
                         (name, playlist_id))
-            GLib.idle_add(self.emit, "playlists-changed", playlist_id)
+        GLib.idle_add(self.emit, "playlists-changed", playlist_id)
+        App().art.remove_artwork_from_cache("ROUNDED_%s" % name)
 
     def remove(self, playlist_id):
         """

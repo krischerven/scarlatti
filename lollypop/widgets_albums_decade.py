@@ -41,7 +41,6 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget):
         """
         if self._artwork is None:
             RoundedAlbumsWidget.populate(self)
-            self._grid.add(self._label)
         else:
             self.set_artwork()
 

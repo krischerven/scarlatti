@@ -64,6 +64,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._artwork.show()
         self.set_artwork()
         self._grid.add(self._artwork)
+        self._grid.add(self._label)
         self._artwork.connect("realize", set_cursor_hand2)
         self.add(self._grid)
 
