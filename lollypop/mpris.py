@@ -19,7 +19,7 @@ from gi.repository import Gio, Gst, GLib, Gtk
 from random import randint
 
 from lollypop.logger import Logger
-from lollypop.define import App, ArtSize, Shuffle, Repeat, Notifications
+from lollypop.define import App, ArtSize, Repeat, Notifications
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
 
@@ -178,14 +178,6 @@ class MPRIS(Server):
         self.__metadata = {"mpris:trackid": GLib.Variant(
             "o",
             "/org/mpris/MediaPlayer2/TrackList/NoTrack")}
-        # Get the shuffle state for our shuffle toggle setting so we can
-        # remember the last non-NONE suffle state if we start with Shuffle.NONE
-        # then our "on" setting starts with Shuffle.TRACKS.
-        shuffle_state = App().settings.get_enum("shuffle")
-        if shuffle_state != Shuffle.NONE:
-            self.__shuffle_state = shuffle_state
-        else:
-            self.__shuffle_state = Shuffle.TRACKS
         self.__track_id = self.__get_media_id(0)
         self.__bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(self.__bus,
@@ -266,9 +258,7 @@ class MPRIS(Server):
         elif property_name == "HasTrackList":
             return GLib.Variant("b", False)
         elif property_name == "Shuffle":
-            return GLib.Variant(
-                "b",
-                App().settings.get_enum("shuffle") != Shuffle.NONE)
+            return App().settings.get_value("shuffle")
         elif property_name in ["Rate", "MinimumRate", "MaximumRate"]:
             return GLib.Variant("d", 1.0)
         elif property_name == "Identity":
@@ -341,10 +331,7 @@ class MPRIS(Server):
         if property_name == "Volume":
             App().player.set_volume(new_value)
         elif property_name == "Shuffle":
-            if new_value is True:
-                App().settings.set_enum("shuffle", self.__shuffle_state)
-            else:
-                App().settings.set_enum("shuffle", Shuffle.NONE)
+            App().settings.set_value("shuffle", GLib.Variant("b", new_value))
         elif property_name == "LoopStatus":
             if new_value == "Playlist":
                 value = Repeat.ALL
@@ -452,14 +439,7 @@ class MPRIS(Server):
                                [])
 
     def __on_shuffle_changed(self, settings, value):
-        shuffle_state = App().settings.get_enum("shuffle")
-        # We only want to remember the last non-NONE shuffle state.
-        if shuffle_state != Shuffle.NONE:
-            self.__shuffle_state = shuffle_state
-        value = GLib.Variant(
-            "b",
-            shuffle_state != Shuffle.NONE)
-        properties = {"Shuffle": GLib.Variant("b", value)}
+        properties = {"Shuffle": App().settings.get_value("shuffle")}
         self.PropertiesChanged(self.__MPRIS_PLAYER_IFACE, properties, [])
 
     def __on_repeat_changed(self, settings, value):

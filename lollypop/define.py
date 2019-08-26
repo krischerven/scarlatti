@@ -150,12 +150,6 @@ class SelectionListMask:
     ELLIPSIZE = 1 << 8
 
 
-class Shuffle:
-    NONE = 0             # No shuffle
-    TRACKS = 1           # Shuffle by tracks on genre
-    ALBUMS = 2           # Shuffle by albums on genre
-
-
 class Notifications:
     NONE = 0
     ALL = 1

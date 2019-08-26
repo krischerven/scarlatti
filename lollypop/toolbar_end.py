@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gio, GLib
 from gettext import gettext as _
 
 from lollypop.pop_devices import DevicesPopover
-from lollypop.define import App, Shuffle, Repeat
+from lollypop.define import App, Repeat
 from lollypop.progressbar import ButtonProgressBar
 
 
@@ -42,13 +42,10 @@ class ToolbarEnd(Gtk.Bin):
         self.__party_submenu = builder.get_object("party_submenu")
         self.add(builder.get_object("end"))
 
-        # Map some settings to actions, can't use Gio.Settings.create_action()
-        # because API does not support set_enabled()
         self.__shuffle_action = Gio.SimpleAction.new_stateful(
             "shuffle",
-            GLib.VariantType.new("s"),
-            GLib.Variant("s", "none"))
-        self.__shuffle_action.set_state(App().settings.get_value("shuffle"))
+            None,
+            App().settings.get_value("shuffle"))
         self.__shuffle_action.connect("change-state",
                                       self.__on_shuffle_change_state)
         self.__repeat_action = Gio.SimpleAction.new_stateful(
@@ -263,35 +260,26 @@ class ToolbarEnd(Gtk.Bin):
         """
             Set shuffle icon
         """
-        shuffle = App().settings.get_enum("shuffle")
+        shuffle = App().settings.get_value("shuffle")
         repeat = App().settings.get_enum("repeat")
-        if repeat == Repeat.TRACK:
+        if shuffle:
+            self.__shuffle_button_image.set_from_icon_name(
+                "media-playlist-shuffle-symbolic",
+                Gtk.IconSize.BUTTON)
+        elif repeat == Repeat.TRACK:
             self.__shuffle_button_image.get_style_context().remove_class(
                 "selected")
             self.__shuffle_button_image.set_from_icon_name(
                 "media-playlist-repeat-song-symbolic",
-                Gtk.IconSize.SMALL_TOOLBAR)
-        elif shuffle == Shuffle.NONE:
-            self.__shuffle_button_image.get_style_context().remove_class(
-                "selected")
-            if repeat == Repeat.ALL:
-                self.__shuffle_button_image.set_from_icon_name(
-                    "media-playlist-repeat-symbolic",
-                    Gtk.IconSize.SMALL_TOOLBAR)
-            else:
-                self.__shuffle_button_image.set_from_icon_name(
-                    "media-playlist-consecutive-symbolic",
-                    Gtk.IconSize.SMALL_TOOLBAR)
+                Gtk.IconSize.BUTTON)
+        elif repeat == Repeat.ALL:
+            self.__shuffle_button_image.set_from_icon_name(
+                "media-playlist-repeat-symbolic",
+                Gtk.IconSize.BUTTON)
         else:
             self.__shuffle_button_image.set_from_icon_name(
-                "media-playlist-shuffle-symbolic",
-                Gtk.IconSize.SMALL_TOOLBAR)
-            if shuffle == Shuffle.TRACKS:
-                self.__shuffle_button_image.get_style_context().add_class(
-                    "selected")
-            else:
-                self.__shuffle_button_image.get_style_context().remove_class(
-                    "selected")
+                "media-playlist-consecutive-symbolic",
+                Gtk.IconSize.BUTTON)
 
     def __on_party_mode_change_state(self, action, value):
         """

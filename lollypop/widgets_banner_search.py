@@ -12,10 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from random import shuffle
-
 from lollypop.define import App, ArtSize, ArtBehaviour, Type, ViewType
-from lollypop.define import Shuffle
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
 from lollypop.utils import update_button
@@ -127,10 +124,7 @@ class SearchBannerWidget(BannerWidget):
         """
         try:
             App().player.clear_albums()
-            shuffle_setting = App().settings.get_enum("shuffle")
             children = self.__view.children
-            if shuffle_setting == Shuffle.ALBUMS:
-                shuffle(children)
             for child in children:
                 App().player.add_album(child.album)
             App().player.load(App().player.albums[0].tracks[0])

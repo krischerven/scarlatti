@@ -12,7 +12,7 @@
 
 import random
 
-from lollypop.define import Shuffle, Repeat, App
+from lollypop.define import Repeat, App
 from lollypop.player_base import BasePlayer
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
@@ -57,7 +57,7 @@ class ShufflePlayer(BasePlayer):
         if repeat == Repeat.TRACK:
             return self._current_playback_track
         track = Track()
-        if self._shuffle == Shuffle.TRACKS or self.__is_party:
+        if App().settings.get_value("shuffle") or self.__is_party:
             if self.shuffle_has_next:
                 track = self.__history.next.value
             elif self._albums:
@@ -73,7 +73,7 @@ class ShufflePlayer(BasePlayer):
         if repeat == Repeat.TRACK:
             return self._current_playback_track
         track = Track()
-        if self._shuffle == Shuffle.TRACKS or self.__is_party:
+        if App().settings.get_value("shuffle") or self.__is_party:
             if self.shuffle_has_prev:
                 track = self.__history.prev.value
             else:
@@ -167,7 +167,7 @@ class ShufflePlayer(BasePlayer):
                 self._current_playback_track.id < 0:
             return
         # Add track to shuffle history if needed
-        if self._shuffle == Shuffle.TRACKS or self.__is_party:
+        if App().settings.get_value("shuffle") or self.__is_party:
             if self.__history:
                 next = self.__history.next
                 prev = self.__history.prev
@@ -200,14 +200,13 @@ class ShufflePlayer(BasePlayer):
 #######################
     def __set_shuffle(self, settings, value):
         """
-            Set shuffle mode to gettings value
-            @param settings as Gio.Settings, value as str
+            Update playback based on shuffle status
+            @param settings as Gio.Settings
+            @param value as GLib.Variant
         """
-        self._shuffle = App().settings.get_enum("shuffle")
-
         if self._plugins1.rgvolume is not None and\
            self._plugins2.rgvolume is not None:
-            if self._shuffle == Shuffle.TRACKS:
+            if value:
                 self._plugins1.rgvolume.props.album_mode = 0
                 self._plugins2.rgvolume.props.album_mode = 0
             else:
@@ -222,7 +221,7 @@ class ShufflePlayer(BasePlayer):
             @return track as Track
         """
         try:
-            if self._shuffle == Shuffle.TRACKS or self.__is_party:
+            if App().settings.get_value("shuffle") or self.__is_party:
                 if self._albums:
                     track = self.__get_tracks_random()
                     # All track dones

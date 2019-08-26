@@ -16,19 +16,8 @@
         <section>
             <attribute name="label" translatable="yes">Shuffle</attribute>
             <item>
-              <attribute name="label" translatable="yes">No shuffle</attribute>
-              <attribute name="action">app.shuffle</attribute>
-              <attribute name="target">none</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Shuffle albums</attribute>
-              <attribute name="action">app.shuffle</attribute>
-              <attribute name="target">albums</attribute>
-            </item>
-            <item>
               <attribute name="label" translatable="yes">Shuffle tracks</attribute>
               <attribute name="action">app.shuffle</attribute>
-              <attribute name="target">tracks</attribute>
             </item>
         </section>
         <section>

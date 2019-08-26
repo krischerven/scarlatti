@@ -25,7 +25,7 @@ from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.objects_radio import Radio
-from lollypop.define import App, Type, LOLLYPOP_DATA_PATH, Shuffle
+from lollypop.define import App, Type, LOLLYPOP_DATA_PATH
 
 
 class Player(BinPlayer, QueuePlayer, RadioPlayer,
@@ -155,10 +155,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self.reset_history()
-        shuffle_setting = App().settings.get_enum("shuffle")
-        if shuffle_setting == Shuffle.ALBUMS:
-            self.__play_shuffle_albums(album, albums)
-        elif shuffle_setting == Shuffle.TRACKS:
+        if App().settings.get_value("shuffle"):
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
@@ -171,10 +168,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         if not albums:
             return
-        shuffle_setting = App().settings.get_enum("shuffle")
-        if shuffle_setting == Shuffle.ALBUMS:
-            album = choice(albums)
-        elif shuffle_setting == Shuffle.TRACKS:
+        if App().settings.get_value("shuffle"):
             album = choice(albums)
         else:
             album = albums[0]
@@ -350,8 +344,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         try:
             # In party or shuffle, just update next track
-            if self.is_party or\
-                    App().settings.get_enum("shuffle") == Shuffle.TRACKS:
+            if self.is_party or App().settings.get_value("shuffle"):
                 self.set_next()
                 # We send this signal to update next popover
                 self.emit("queue-changed")
