@@ -555,6 +555,31 @@ def popup_widget(widget, parent, x=None, y=None):
         return popover
 
 
+def update_track_indexes(listbox, start_index, end_index):
+    """
+        Update track number from start_index + 1 to end_index
+        start_index is a valid track number
+        @param listbox as Gtk.ListBox
+        @param start_index as int
+        @param end_index as int
+    """
+    if start_index == 0:
+        current_number = 0
+    else:
+        current_number = None
+    children = listbox.get_children()
+    if end_index == -1:
+        end_index = len(children)
+    for album_row in children[start_index:end_index]:
+        for track_row in album_row.children:
+            if current_number is None:
+                current_number = track_row.track.number
+                continue
+            current_number += 1
+            track_row.track.set_number(current_number)
+            track_row.update_number_label()
+
+
 def is_device(mount):
     """
         True if mount is a Lollypop device

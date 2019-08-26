@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango, GLib
+from gi.repository import Gtk, Pango, GLib, GObject
 
 from gettext import gettext as _
 
@@ -25,6 +25,10 @@ class TrackRow(Gtk.ListBoxRow):
     """
         A track row
     """
+
+    __gsignals__ = {
+        "removed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     def get_best_height(widget):
         """
@@ -257,26 +261,16 @@ class TrackRow(Gtk.ListBoxRow):
             self._track.album.remove_track(self._track)
             App().player.set_next()
             App().player.set_prev()
-            self.__destroy()
+            self.emit("removed")
         elif self.__view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
                 view.remove_from_playlist(self._track)
-            self.__destroy()
+            self.emit("removed")
         else:
             self.popup_menu(self.__action_button)
 
 #######################
 # PRIVATE             #
 #######################
-    def __destroy(self):
-        """
-            Remove album row if last child and destroy
-            @param widget as Gtk.Widget
-        """
-        from lollypop.widgets_row_album import AlbumRow
-        album_row = self.get_ancestor(AlbumRow)
-        self.destroy()
-        if album_row is not None and not album_row.children:
-            album_row.destroy()

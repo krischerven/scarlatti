@@ -13,6 +13,7 @@
 from gi.repository import Gdk, Gtk, GLib, GObject
 
 from lollypop.objects_album import Album
+from lollypop.utils import update_track_indexes
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.widgets_row_track import TrackRow
 
@@ -86,29 +87,8 @@ class DNDHelper(GObject.Object):
                 next.destroy()
             else:
                 children.pop(0)
-        self.__update_track_indexes(start_index, end_index)
+        update_track_indexes(self.__listbox, start_index, end_index)
         GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
-
-    def __update_track_indexes(self, start_index, end_index):
-        """
-            Update track number from start_index + 1 to end_index
-            start_index is a valid track number
-            @param start_index as int
-            @param end_index as int
-        """
-        if start_index == 0:
-            current_number = 0
-        else:
-            current_number = None
-        children = self.__listbox.get_children()
-        for album_row in children[start_index:end_index]:
-            for track_row in album_row.children:
-                if current_number is None:
-                    current_number = track_row.track.number
-                    continue
-                current_number += 1
-                track_row.track.set_number(current_number)
-                track_row.update_number_label()
 
     def __do_drag_and_drop(self, src_rows, dest_row, direction):
         """

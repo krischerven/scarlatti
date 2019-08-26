@@ -30,6 +30,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
 
     __gsignals__ = {
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "track-removed": (GObject.SignalFlags.RUN_FIRST, None,
+                          (GObject.TYPE_PYOBJECT,)),
     }
 
     @signals
@@ -421,8 +423,16 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 track.set_number(position + 1)
             row = TrackRow(track, self.__album.artist_ids, self.__view_type)
             row.show()
+            row.connect("removed", self.__on_track_row_removed)
             widget.add(row)
             position += 1
+
+    def __on_track_row_removed(self, row):
+        """
+            Pass signal
+            @param row as TrackRow
+        """
+        self.emit("track-removed", row)
 
     def __on_key_press_event(self, widget, event):
         """
