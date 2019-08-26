@@ -253,22 +253,30 @@ class TrackRow(Gtk.ListBoxRow):
             @param y as int
             @param event as Gdk.EventButton
         """
-        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-            return True
         if self.__view_type & ViewType.PLAYBACK:
             self._track.album.remove_track(self._track)
             App().player.set_next()
             App().player.set_prev()
-            self.destroy()
+            self.__destroy()
         elif self.__view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
                 view.remove_from_playlist(self._track)
-            self.destroy()
+            self.__destroy()
         else:
             self.popup_menu(self.__action_button)
 
 #######################
 # PRIVATE             #
 #######################
+    def __destroy(self):
+        """
+            Remove album row if last child and destroy
+            @param widget as Gtk.Widget
+        """
+        from lollypop.widgets_row_album import AlbumRow
+        album_row = self.get_ancestor(AlbumRow)
+        self.destroy()
+        if album_row is not None and not album_row.children:
+            album_row.destroy()
