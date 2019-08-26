@@ -19,7 +19,7 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
-from lollypop.utils import set_cursor_hand2, popup_widget
+from lollypop.utils import set_cursor_hand2, popup_widget, update_button
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.helper_gestures import GesturesHelper
 
@@ -125,11 +125,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                        (self.__menu_button, "view-more-symbolic"),
                        (self.__play_button, "media-playback-start-symbolic"),
                        (self.__add_button, self.__get_add_button_icon_name())]:
-            button_style_context = button.get_style_context()
-            button_style_context.remove_class("menu-button-48")
-            button_style_context.remove_class("menu-button")
-            button_style_context.add_class(style)
-            button.get_image().set_from_icon_name(icon_name, icon_size)
+            update_button(button, style, icon_size, icon_name)
         self.__set_text_height()
 
     def set_selected(self, selected):
