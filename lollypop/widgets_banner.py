@@ -68,6 +68,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.__overlay.add(self._artwork)
         self.add(self.__overlay)
         self.set_reveal_child(True)
+        self.set_transition_duration(250)
 
     def add_overlay(self, widget):
         """

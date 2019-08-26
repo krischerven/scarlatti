@@ -16,11 +16,12 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.utils import get_network_available
-from lollypop.define import ViewType, StorageType, Size
+from lollypop.define import ViewType, StorageType, Size, MARGIN_SMALL
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
 from lollypop.view_artists_rounded import RoundedArtistsRandomView
+from lollypop.widgets_banner_today import TodayBannerWidget
 
 
 class SuggestionsView(View, FilteringHelper):
@@ -40,13 +41,18 @@ class SuggestionsView(View, FilteringHelper):
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
-        if view_type & ViewType.SCROLLED:
-            self._viewport.add(self.__grid)
-            self._viewport.set_property("valign", Gtk.Align.START)
-            self._scrolled.set_property("expand", True)
-            self.add(self._scrolled)
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self._scrolled)
+        self._viewport.add(self.__grid)
+        album = TodayBannerWidget.get_today_album()
+        if album.id is not None:
+            self.__banner = TodayBannerWidget(album, self._view_type)
+            self.__banner.show()
+            self._overlay.add_overlay(self.__banner)
         else:
-            self.add(self.__grid)
+            self.__banner = None
+        self.add(self._overlay)
 
     def populate(self):
         """
@@ -118,6 +124,41 @@ class SuggestionsView(View, FilteringHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update banner style
+            @param window as Window
+            @param status as bool
+        """
+        View._on_adaptive_changed(self, window, status)
+        if self.__banner is not None:
+            self.__banner.set_view_type(self._view_type)
+            self.__set_margin()
+
+    def _on_value_changed(self, adj):
+        """
+            Update scroll value and check for lazy queue
+            @param adj as Gtk.Adjustment
+        """
+        View._on_value_changed(self, adj)
+        if self.__banner is not None:
+            reveal = self.should_reveal_header(adj)
+            self.__banner.set_reveal_child(reveal)
+            if reveal:
+                self.__set_margin()
+            else:
+                self._scrolled.get_vscrollbar().set_margin_top(0)
+
+#######################
+# PRIVATE             #
+#######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self.__grid.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __welcome_screen(self):
         """
             Show welcome screen if view empty
