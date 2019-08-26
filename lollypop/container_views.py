@@ -162,9 +162,8 @@ class ViewsContainer:
                 child.set_search(search)
                 return child
         view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
-        view.set_margin_top(MARGIN_SMALL)
-        view.set_margin_start(MARGIN_SMALL)
         view.set_search(search)
+        view.populate()
         view.show()
         return view
 

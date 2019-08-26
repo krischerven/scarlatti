@@ -86,11 +86,8 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         row.populate()
         row.show()
         self._box.insert(row, position)
-        if self._view_type & ViewType.SCROLLED:
-            if self._viewport.get_child() is None:
-                self._viewport.add(self._box)
-        elif self._box not in self.get_children():
-            self.add(self._box)
+        self.add_widget(self._box)
+        self._box.show()
 
     def populate(self, albums):
         """

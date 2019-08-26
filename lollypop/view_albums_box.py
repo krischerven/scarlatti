@@ -229,12 +229,12 @@ class AlbumsGenresBoxView(AlbumsBoxView):
         self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self._scrolled)
+        self.__overlay = Gtk.Overlay.new()
+        self.__overlay.show()
+        self.__overlay.add(self._scrolled)
         self._viewport.add(self._box)
-        self._overlay.add_overlay(self.__banner)
-        self.add(self._overlay)
+        self.__overlay.add_overlay(self.__banner)
+        self.add(self.__overlay)
         self.__set_margin()
 
 #######################

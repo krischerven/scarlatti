@@ -13,17 +13,16 @@
 from gi.repository import Gtk, GLib, Gio
 
 from gettext import gettext as _
-from random import shuffle
 from urllib.parse import urlparse
 
-from lollypop.define import App, Type, Shuffle, MARGIN_SMALL, StorageType
-from lollypop.define import Size
+from lollypop.define import App, MARGIN_SMALL, StorageType
+from lollypop.define import Size, ViewType
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
 from lollypop.view import View
-from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.widgets_banner_search import SearchBannerWidget
 
 
 class SearchView(View, Gtk.Bin, SignalsHelper):
@@ -37,7 +36,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Init Popover
             @param view_type as ViewType
         """
-        View.__init__(self)
+        View.__init__(self, view_type)
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
         self.__search_count = 0
@@ -50,25 +49,57 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__search_type_action.connect("change-state",
                                           self.__on_search_action_change_state)
         App().add_action(self.__search_type_action)
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/SearchView.ui")
-        self.__widget = builder.get_object("widget")
-        self.__new_button = builder.get_object("new_button")
-        self.__play_button = builder.get_object("play_button")
-        self.__bottom_buttons = builder.get_object("bottom_buttons")
-        self.__header = builder.get_object("header")
-        self.__entry = builder.get_object("entry")
-        self.__spinner = builder.get_object("spinner")
-        self.__button_stack = builder.get_object("button_stack")
-        self.__stack = builder.get_object("stack")
-        self.__placeholder = builder.get_object("placeholder")
-        self.__view = AlbumsListView([], [], view_type)
-        self.__view.set_margin_start(MARGIN_SMALL)
+        self.__stack = Gtk.Stack.new()
+        self.__stack.show()
+        self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.__stack.set_transition_duration(200)
+        self.__placeholder = Gtk.Label.new()
+        self.__placeholder.show()
+        self.__placeholder.set_justify(Gtk.Justification.CENTER)
+        self.__placeholder.set_line_wrap(True)
+        self.__placeholder.set_vexpand(True)
+        self.__placeholder.get_style_context().add_class("dim-label")
+        self.__stack.add_named(self.__placeholder, "placeholder")
+        self.__bottom_buttons = Gtk.Grid()
+        self.__bottom_buttons.show()
+        self.__bottom_buttons.get_style_context().add_class("linked")
+        self.__bottom_buttons.set_property("halign", Gtk.Align.CENTER)
+        local_button = Gtk.ToggleButton.new()
+        local_button.show()
+        image = Gtk.Image.new_from_icon_name("computer-symbolic",
+                                             Gtk.IconSize.BUTTON)
+        image.show()
+        local_button.set_image(image)
+        local_button.set_action_name("app.search_type")
+        local_button.set_action_target_value(GLib.Variant("s", "local"))
+        local_button.set_size_request(125, -1)
+        web_button = Gtk.ToggleButton.new()
+        web_button.show()
+        image = Gtk.Image.new_from_icon_name("goa-panel-symbolic",
+                                             Gtk.IconSize.BUTTON)
+        image.show()
+        web_button.set_image(image)
+        web_button.set_action_name("app.search_type")
+        web_button.set_action_target_value(GLib.Variant("s", "web"))
+        web_button.set_size_request(125, -1)
+        self.__bottom_buttons.add(local_button)
+        self.__bottom_buttons.add(web_button)
+        self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
         self.__view.show()
+        self.__view.set_width(Size.MEDIUM)
         self.__stack.add_named(self.__view, "view")
         self.__set_default_placeholder()
-        self.add(self.__widget)
-        builder.connect_signals(self)
+        self.__banner = SearchBannerWidget(self.__view)
+        self.__banner.show()
+        self.__overlay = Gtk.Overlay.new()
+        self.__overlay.show()
+        self.__overlay.add(self._scrolled)
+        self._viewport.add(self.__stack)
+        self.__overlay.add_overlay(self.__banner)
+        self.add(self.__overlay)
+        self.add(self.__bottom_buttons)
+        self.__set_margin()
+        self.__banner.entry.connect("changed", self._on_search_changed)
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
@@ -79,7 +110,36 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         ]
 
     def populate(self):
-        pass
+        """
+            Populate search
+            in db based on text entry current text
+        """
+        self.__cancellable = Gio.Cancellable()
+        if len(self.__current_search) > 1:
+            self.__banner.spinner.start()
+            state = self.__search_type_action.get_state().get_string()
+            current_search = self.__current_search.lower()
+            search = Search()
+            if state == "local":
+                self.__search_count = 1
+                search.get(current_search,
+                           StorageType.COLLECTION | StorageType.SAVED,
+                           self.__cancellable,
+                           callback=(self.__on_search_get, current_search))
+            elif state == "web":
+                self.__search_count = 2
+                search.get(current_search,
+                           StorageType.EPHEMERAL |
+                           StorageType.SPOTIFY_NEW_RELEASES,
+                           self.__cancellable,
+                           callback=(self.__on_search_get, current_search))
+                App().task_helper.run(App().spotify.search,
+                                      current_search,
+                                      self.__cancellable)
+        else:
+            self.__stack.set_visible_child_name("placeholder")
+            self.__set_default_placeholder()
+            GLib.idle_add(self.__banner.spinner.stop)
 
     def set_search(self, search):
         """
@@ -89,11 +149,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         parsed = urlparse(search)
         search = search.replace("%s://" % parsed.scheme, "")
         if parsed.scheme == "local":
-            self.__entry.set_text(search)
+            self.__banner.entry.set_text(search)
             GLib.idle_add(self.__search_type_action.set_state,
                           GLib.Variant("s", "local"))
         elif parsed.scheme == "web":
-            self.__entry.set_text(search)
+            self.__banner.entry.set_text(search)
             GLib.idle_add(self.__search_type_action.set_state,
                           GLib.Variant("s", "web"))
 
@@ -128,50 +188,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         else:
             self.__bottom_buttons.show()
 
-    def _on_play_button_clicked(self, button):
-        """
-            Play search
-            @param button as Gtk.Button
-        """
-        try:
-            App().player.clear_albums()
-            shuffle_setting = App().settings.get_enum("shuffle")
-            children = self.__view.children
-            if shuffle_setting == Shuffle.ALBUMS:
-                shuffle(children)
-            for child in children:
-                App().player.add_album(child.album)
-            App().player.load(App().player.albums[0].tracks[0])
-        except Exception as e:
-            Logger.error("SearchPopover::_on_play_button_clicked(): %s", e)
-
-    def _on_new_button_clicked(self, button):
-        """
-            Create a new playlist based on search
-            @param button as Gtk.Button
-        """
-        App().task_helper.run(self.__search_to_playlist)
-
-    def _on_search_changed(self, widget):
-        """
-            Timeout filtering
-            @param widget as Gtk.TextEntry
-        """
-        state = self.__search_type_action.get_state().get_string()
-        if state == "local":
-            timeout = 500
-        else:
-            timeout = 1000
-        if self.__timeout_id:
-            GLib.source_remove(self.__timeout_id)
-            self.__timeout_id = None
-        self.cancel()
-        self.__view.stop()
-        self.__current_search = widget.get_text().strip()
-        self.__timeout_id = GLib.timeout_add(
-                timeout,
-                self.__on_search_changed_timeout)
-
     def _on_map(self, widget):
         """
             Init signals and grab focus
@@ -180,7 +196,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         View._on_map(self, widget)
         App().enable_special_shortcuts(False)
         self._update_bottom_buttons()
-        GLib.idle_add(self.__entry.grab_focus)
 
     def __on_unmap(self, widget):
         """
@@ -191,8 +206,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         App().enable_special_shortcuts(True)
         self.cancel()
         self.__view.stop()
-        self.__button_stack.set_visible_child(self.__new_button)
-        self.__spinner.stop()
+        self.__banner.spinner.stop()
 
     def _on_new_spotify_album(self, spotify, album):
         """
@@ -209,8 +223,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__search_count -= 1
         if self.__search_count == 0:
-            self.__spinner.stop()
-            self.__button_stack.set_visible_child(self.__new_button)
+            self.__banner.spinner.stop()
             if not self.__view.children:
                 self.__stack.set_visible_child_name("placeholder")
                 self.__set_no_result_placeholder()
@@ -219,25 +232,27 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Handle adaptive mode for views
         """
+        View._on_adaptive_changed(self, window, status)
         style_context = self.__placeholder.get_style_context()
         if status:
-            self.__view.box.set_property("halign", Gtk.Align.FILL)
-            self.__header.set_property("halign", Gtk.Align.FILL)
-            self.__view.box.set_size_request(-1, -1)
-            self.__header.set_size_request(-1, -1)
             style_context.remove_class("text-xx-large")
             style_context.add_class("text-x-large")
         else:
-            self.__view.box.set_size_request(Size.MEDIUM * 0.8, -1)
-            self.__header.set_size_request(Size.MEDIUM * 0.8, -1)
-            self.__view.box.set_property("halign", Gtk.Align.CENTER)
-            self.__header.set_property("halign", Gtk.Align.CENTER)
             style_context.remove_class("text-x-large")
             style_context.add_class("text-xx-large")
+        self.__banner.set_view_type(self._view_type)
+        self.__set_margin()
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self.__stack.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __set_no_result_placeholder(self):
         """
             Set placeholder for no result
@@ -249,65 +264,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Set placeholder for no result
         """
         self.__placeholder.set_text(_("Search for artists, albums and tracks"))
-
-    def __populate(self):
-        """
-            Populate searching items
-            in db based on text entry current text
-        """
-        self.__cancellable = Gio.Cancellable()
-        self.__button_stack.set_visible_child(self.__spinner)
-        if len(self.__current_search) > 2:
-            self.__spinner.start()
-            state = self.__search_type_action.get_state().get_string()
-            current_search = self.__current_search.lower()
-            search = Search()
-            if state == "local":
-                self.__search_count = 1
-                search.get(current_search,
-                           StorageType.COLLECTION | StorageType.SAVED,
-                           self.__cancellable,
-                           callback=(self.__on_search_get, current_search))
-            elif state == "web":
-                self.__search_count = 2
-                search.get(current_search,
-                           StorageType.EPHEMERAL |
-                           StorageType.SPOTIFY_NEW_RELEASES,
-                           self.__cancellable,
-                           callback=(self.__on_search_get, current_search))
-                App().task_helper.run(App().spotify.search,
-                                      current_search,
-                                      self.__cancellable)
-        else:
-            self.__stack.set_visible_child_name("placeholder")
-            self.__set_default_placeholder()
-            self.__button_stack.set_visible_child(self.__new_button)
-            GLib.idle_add(self.__spinner.stop)
-
-    def __search_to_playlist(self):
-        """
-            Create a new playlist based on search
-        """
-        tracks = []
-        for child in self.__view.children:
-            tracks += child.album.tracks
-        if tracks:
-            playlist_id = App().playlists.get_id(self.__current_search)
-            if playlist_id is None:
-                playlist_id = App().playlists.add(self.__current_search)
-            App().playlists.add_tracks(playlist_id, tracks)
-        GLib.idle_add(self.__show_playlist, playlist_id)
-
-    def __show_playlist(self, playlist_id):
-        """
-            Hide if in a popover and show playlist
-        """
-        App().window.container.show_view(Type.PLAYLISTS, [playlist_id])
-        popover = self.get_ancestor(Gtk.Popover)
-        if popover is not None:
-            popover.hide()
-        else:
-            self.destroy()
 
     def __on_search_get(self, result, search):
         """
@@ -325,6 +281,30 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__view.set_reveal(reveal_albums)
             self.__view.populate(albums)
             self.__stack.set_visible_child_name("view")
+            self.__banner.play_button.set_sensitive(True)
+            self.__banner.new_button.set_sensitive(True)
+
+    def _on_search_changed(self, widget):
+        """
+            Timeout filtering
+            @param widget as Gtk.TextEntry
+        """
+        self.__banner.play_button.set_sensitive(False)
+        self.__banner.new_button.set_sensitive(False)
+        state = self.__search_type_action.get_state().get_string()
+        if state == "local":
+            timeout = 500
+        else:
+            timeout = 1000
+        if self.__timeout_id:
+            GLib.source_remove(self.__timeout_id)
+            self.__timeout_id = None
+        self.cancel()
+        self.__view.stop()
+        self.__current_search = widget.get_text().strip()
+        self.__timeout_id = GLib.timeout_add(
+                timeout,
+                self.__on_search_changed_timeout)
 
     def __on_search_changed_timeout(self):
         """
@@ -335,11 +315,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__view.clear()
             return True
         self.__timeout_id = None
-        self.__populate()
-        if self.__current_search != "":
-            self.__new_button.set_sensitive(True)
-        else:
-            self.__new_button.set_sensitive(False)
+        self.populate()
 
     def __on_search_action_change_state(self, action, value):
         """
@@ -350,13 +326,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.cancel()
         self.__view.stop()
         action.set_state(value)
-        state = value.get_string()
         # A new album signal may be in queue, so clear after
         GLib.idle_add(self.__view.clear)
-        if state == "local":
-            self.__new_button.show()
-            self.__button_stack.set_visible_child(self.__new_button)
-        else:
-            self.__new_button.hide()
-        self.__populate()
-        GLib.idle_add(self.__entry.grab_focus)
+        self.populate()
+        GLib.idle_add(self.__banner.entry.grab_focus)

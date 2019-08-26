@@ -20,7 +20,7 @@
      <file compressed="true" preprocess="xml-stripblanks">RadioPopover.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">RadiosView.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">RatingWidget.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">SearchView.ui</file>
+     <file compressed="true" preprocess="xml-stripblanks">SearchBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SettingsAppearance.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SettingsBehaviour.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SettingsCollections.ui</file>
