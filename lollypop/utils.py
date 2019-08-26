@@ -545,7 +545,7 @@ def popup_widget(widget, parent, x=None, y=None):
         popover.add(widget)
         popover.set_relative_to(parent)
         if x is not None and y is not None:
-            rect = parent.get_allocation()
+            rect = Gdk.Rectangle()
             rect.x = x
             rect.y = y
             rect.width = rect.height = 1

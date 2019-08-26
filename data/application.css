@@ -403,6 +403,11 @@ flowboxchild:selected  {
     color: @theme_fg_color;
 }
 
+.albumrow:checked {
+	background-color: alpha(@theme_fg_color, 0.05);
+    color: @theme_fg_color;
+}
+
 .bold {
     font-weight: bold;
 }

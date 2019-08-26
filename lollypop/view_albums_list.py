@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib, Gdk
 
-from lollypop.utils import do_shift_selection
+from lollypop.utils import do_shift_selection, popup_widget
 from lollypop.view import LazyLoadingView
 from lollypop.objects_album import Album
 from lollypop.define import App, ViewType, MARGIN
@@ -272,22 +272,20 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param y as int
         """
         def on_closed(popover, row):
-            row.get_style_context().remove_class("menu-selected")
+            row.unset_state_flags(Gtk.StateFlags.CHECKED)
 
         row = self._box.get_row_at_y(y)
         if row is None:
             return
         from lollypop.menu_objects import AlbumMenu
+        from lollypop.widgets_menu import MenuBuilder
         menu = AlbumMenu(row.album, ViewType.ALBUM)
-        rect = Gdk.Rectangle()
-        rect.x = x
-        rect.y = y
-        rect.width = rect.height = 1
-        popover = Gtk.Popover.new_from_model(row, menu)
-        popover.set_pointing_to(rect)
-        popover.connect("closed", on_closed, row)
-        row.get_style_context().add_class("menu-selected")
-        popover.popup()
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popover = popup_widget(menu_widget, self._box, x, y)
+        if popover is not None:
+            popover.connect("closed", on_closed, row)
+        row.set_state_flags(Gtk.StateFlags.CHECKED, True)
 
     def __reveal_row(self, row):
         """

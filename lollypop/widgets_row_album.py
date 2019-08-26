@@ -319,7 +319,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param widget as Gtk.Widget
         """
         def on_closed(popover):
-            self.unset_state_flags(Gtk.StateFlags.FOCUSED)
+            self.unset_state_flags(Gtk.StateFlags.CHECKED)
 
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
@@ -327,7 +327,7 @@ class AlbumRow(Gtk.ListBoxRow):
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        self.set_state_flags(Gtk.StateFlags.FOCUSED, True)
+        self.set_state_flags(Gtk.StateFlags.CHECKED, True)
         popover = popup_widget(menu_widget, widget)
         if popover is not None:
             popover.connect("closed", on_closed)
