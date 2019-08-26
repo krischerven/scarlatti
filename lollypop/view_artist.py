@@ -123,9 +123,9 @@ class ArtistView(View):
             @param window as Window
             @param status as bool
         """
-        if View._on_adaptive_changed(self, window, status):
-            self.__banner.set_view_type(self._view_type)
-            self.__set_margin()
+        View._on_adaptive_changed(self, window, status)
+        self.__banner.set_view_type(self._view_type)
+        self.__set_margin()
 
 #######################
 # PRIVATE             #

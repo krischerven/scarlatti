@@ -177,9 +177,9 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         """
             Handle adaptive mode for views
         """
-        if LazyLoadingView._on_adaptive_changed(self, window, status):
-            self.__banner.set_view_type(self._view_type)
-            self.__set_margin()
+        LazyLoadingView._on_adaptive_changed(self, window, status)
+        self.__banner.set_view_type(self._view_type)
+        self.__set_margin()
 
     def _on_value_changed(self, adj):
         """
