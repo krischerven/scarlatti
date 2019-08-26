@@ -44,8 +44,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         # We may need to listen to screen changes
         self.__height = AlbumRow.get_best_height(self)
         self._box = Gtk.ListBox()
-        if view_type & ViewType.PLAYLISTS:
-            self._box.set_margin_bottom(MARGIN)
+        self._box.set_margin_bottom(MARGIN)
         self._box.set_margin_end(MARGIN)
         self._box.get_style_context().add_class("trackswidget")
         self._box.set_vexpand(True)
@@ -67,13 +66,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param albums as [Album]
         """
         self.__reveals = albums
-
-    def set_margin_top(self, margin):
-        """
-            Set margin on box
-            @param margin as int
-        """
-        self._box.set_margin_top(margin + MARGIN)
 
     def insert_album(self, album, reveal, position):
         """
