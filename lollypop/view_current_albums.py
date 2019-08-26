@@ -10,18 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
-
-from gettext import gettext as _
+from gi.repository import Gtk
 
 from lollypop.utils import tracks_to_albums
 from lollypop.objects_track import Track
+from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.define import App, ViewType, MARGIN_SMALL, Size
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
 
 
-class CurrentAlbumsView(AlbumsListView, SignalsHelper):
+class CurrentAlbumsView(View, SignalsHelper):
     """
         Popover showing Albums View
     """
@@ -32,51 +32,24 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        AlbumsListView.__init__(self, [], [], view_type | ViewType.PLAYBACK)
-        self.__width = Size.MEDIUM
-        self.set_property("halign", Gtk.Align.CENTER)
+        View.__init__(self, view_type)
+        view_type |= ViewType.PLAYBACK
+        view_type &= ~ViewType.SCROLLED
+        self.__view = AlbumsListView([], [], view_type)
+        self.__view.show()
+        self.__view.set_external_scrolled(self._scrolled)
+        self.__view.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
-            self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
-        self.__clear_button = Gtk.Button.new_from_icon_name(
-            "edit-clear-all-symbolic",
-            Gtk.IconSize.MENU)
-        self.__clear_button.set_relief(Gtk.ReliefStyle.NONE)
-        self.__clear_button.set_tooltip_text(_("Clear albums"))
-        self.__clear_button.set_sensitive(App().player.albums)
-        self.__clear_button.connect("clicked", self.__on_clear_clicked)
-        self.__clear_button.set_margin_end(MARGIN_SMALL)
-        self.__save_button = Gtk.Button.new_from_icon_name(
-            "document-new-symbolic",
-            Gtk.IconSize.MENU)
-        self.__save_button.set_relief(Gtk.ReliefStyle.NONE)
-        self.__save_button.set_tooltip_text(_("Create a new playlist"))
-        self.__save_button.set_sensitive(App().player.albums)
-        self.__save_button.connect("clicked", self.__on_save_clicked)
-        self.__jump_button = Gtk.Button.new_from_icon_name(
-            "go-jump-symbolic",
-            Gtk.IconSize.MENU)
-        self.__jump_button.set_relief(Gtk.ReliefStyle.NONE)
-        self.__jump_button.connect("clicked", self.__on_jump_clicked)
-        self.__jump_button.set_tooltip_text(_("Go to current track"))
-        self.__jump_button.set_sensitive(App().player.albums)
-        label = Gtk.Label.new("<b>" + _("Playing albums") + "</b>")
-        label.set_use_markup(True)
-        label.set_hexpand(True)
-        label.set_margin_start(2)
-        label.get_style_context().add_class("dim-label")
-        label.set_property("halign", Gtk.Align.START)
-        self.__header = Gtk.Grid()
-        self.__header.set_column_spacing(MARGIN_SMALL)
-        self.__header.set_margin_top(MARGIN_SMALL)
-        self.__header.add(label)
-        self.__header.set_property("valign", Gtk.Align.CENTER)
-        self.__header.add(self.__jump_button)
-        self.__header.add(self.__save_button)
-        self.__header.add(self.__clear_button)
-        self.__header.show_all()
-        self.set_row_spacing(2)
-        self.insert_row(0)
-        self.attach(self.__header, 0, 0, 1, 1)
+            self.__view.dnd_helper.connect("dnd-finished",
+                                           self.__on_dnd_finished)
+        self.__banner = CurrentAlbumsBannerWidget(self.__view)
+        self.__banner.show()
+        self.__overlay = Gtk.Overlay.new()
+        self.__overlay.show()
+        self.__overlay.add(self._scrolled)
+        self._viewport.add(self.__view)
+        self.__overlay.add_overlay(self.__banner)
+        self.add(self.__overlay)
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
             (App().player, "playback-changed", "_on_playback_changed")
@@ -86,16 +59,13 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
             Populate view
         """
-        self.remove_placeholder()
+        self.__view.remove_placeholder()
         if App().player.queue:
             tracks = [Track(track_id) for track_id in App().player.queue]
             albums = tracks_to_albums(tracks)
         else:
             albums = App().player.albums
-        AlbumsListView.populate(self, albums)
-
-    def do_get_preferred_width(self):
-        return (self.__width, self.__width)
+        self.__view.populate(albums)
 
     @property
     def args(self):
@@ -124,66 +94,53 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
                             row.destroy()
                         break
         else:
-            self.stop()
-            self.clear()
+            self.__view.stop()
+            self.__view.clear()
             self.populate()
 
     def _on_playback_changed(self, *ignore):
         """
             Clear and populate view again
         """
-        self.stop()
-        self.clear()
-        self.__clear_button.set_sensitive(True)
-        self.__jump_button.set_sensitive(True)
-        self.__save_button.set_sensitive(True)
+        self.__view.stop()
+        self.__view.clear()
+        self.__banner.clear_button.set_sensitive(True)
+        self.__banner.jump_button.set_sensitive(True)
+        self.__banner.save_button.set_sensitive(True)
         self.populate()
+
+    def _on_value_changed(self, adj):
+        """
+            Update banner
+            @param adj as Gtk.Adjustment
+        """
+        View._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
+        else:
+            self._scrolled.get_vscrollbar().set_margin_top(0)
+
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode
+            @param window as Window
+            @param status as bool
+        """
+        View._on_adaptive_changed(self, window, status)
+        self.__banner.set_view_type(self._view_type)
+        self.__set_margin()
 
 #######################
 # PRIVATE             #
 #######################
-    def __albums_to_playlist(self):
+    def __set_margin(self):
         """
-            Create a new playlist based on search
+            Set margin from header
         """
-        tracks = []
-        for child in self.children:
-            tracks += child.album.tracks
-        if tracks:
-            import datetime
-            now = datetime.datetime.now()
-            date_string = now.strftime("%Y-%m-%d-%H:%M:%S")
-            playlist_id = App().playlists.add(date_string)
-            App().playlists.add_tracks(playlist_id, tracks)
-
-    def __on_jump_clicked(self, button):
-        """
-            Scroll to album
-            @param button as Gtk.Button
-        """
-        self.jump_to_current()
-
-    def __on_save_clicked(self, button):
-        """
-            Save to playlist
-            @param button as Gtk.Button
-        """
-        button.set_sensitive(False)
-        App().task_helper.run(self.__albums_to_playlist)
-
-    def __on_clear_clicked(self, button):
-        """
-            Clear albums
-            @param button as Gtk.Button
-        """
-        GLib.idle_add(self.clear, True)
-        self.__clear_button.set_sensitive(False)
-        self.__jump_button.set_sensitive(False)
-        self.__save_button.set_sensitive(False)
-        App().player.emit("status-changed")
-        popover = self.get_ancestor(Gtk.Popover)
-        if popover is not None:
-            popover.popdown()
+        self.__view.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
 
     def __on_dnd_finished(self, dnd_helper):
         """

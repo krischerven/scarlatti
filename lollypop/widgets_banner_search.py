@@ -29,7 +29,7 @@ class SearchBannerWidget(BannerWidget):
     def __init__(self, view):
         """
             Init banner
-            @param view as PlaylistView
+            @param view as AlbumsListView
         """
         BannerWidget.__init__(self, view.args[0]["view_type"])
         builder = Gtk.Builder()

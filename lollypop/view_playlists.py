@@ -183,7 +183,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
 
     def _on_value_changed(self, adj):
         """
-            Update scroll value and check for lazy queue
+            Update banner
             @param adj as Gtk.Adjustment
         """
         LazyLoadingView._on_value_changed(self, adj)

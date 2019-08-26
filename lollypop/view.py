@@ -288,6 +288,15 @@ class LazyLoadingView(View):
         if self._view_type & ViewType.SCROLLED:
             self.__scrolled_position = position
 
+    def set_external_scrolled(self, scrolled):
+        """
+            Set an external scrolled window for loading
+            @param scrolled as Gtk.ScrolledWindow
+        """
+        self._scrolled = scrolled
+        scrolled.get_vadjustment().connect("value-changed",
+                                           self._on_value_changed)
+
     @property
     def is_populated(self):
         """

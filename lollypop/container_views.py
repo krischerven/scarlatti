@@ -144,8 +144,6 @@ class ViewsContainer:
         from lollypop.view_current_albums import CurrentAlbumsView
         view = CurrentAlbumsView(view_type)
         view.populate()
-        view.set_margin_top(MARGIN_SMALL)
-        view.set_margin_start(MARGIN_SMALL)
         view.show()
         return view
 

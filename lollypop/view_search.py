@@ -86,6 +86,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__bottom_buttons.add(web_button)
         self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
         self.__view.show()
+        self.__view.set_external_scrolled(self._scrolled)
         self.__view.set_width(Size.MEDIUM)
         self.__stack.add_named(self.__view, "view")
         self.__set_default_placeholder()
@@ -228,9 +229,24 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 self.__stack.set_visible_child_name("placeholder")
                 self.__set_no_result_placeholder()
 
+    def _on_value_changed(self, adj):
+        """
+            Update banner
+            @param adj as Gtk.Adjustment
+        """
+        View._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
+        else:
+            self._scrolled.get_vscrollbar().set_margin_top(0)
+
     def _on_adaptive_changed(self, window, status):
         """
-            Handle adaptive mode for views
+            Handle adaptive mode
+            @param window as Window
+            @param status as bool
         """
         View._on_adaptive_changed(self, window, status)
         style_context = self.__placeholder.get_style_context()
