@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GObject
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Type
 from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
 from lollypop.utils import update_button
@@ -46,13 +46,17 @@ class AlbumsBannerWidget(BannerWidget):
         self.__shuffle_button = builder.get_object("shuffle_button")
         self.__menu_button = builder.get_object("menu_button")
         self.add_overlay(builder.get_object("widget"))
-        genres = []
-        for genre_id in genre_ids:
-            if genre_id < 0:
-                genres.append(ShownLists.IDS[genre_id])
-            else:
-                genres.append(App().genres.get_name(genre_id))
-        self.__title_label.set_label(",".join(genres))
+        if genre_ids and genre_ids[0] == Type.YEARS:
+            decade_str = "%s - %s" % (artist_ids[0], artist_ids[-1])
+            self.__title_label.set_label(decade_str)
+        else:
+            genres = []
+            for genre_id in genre_ids:
+                if genre_id < 0:
+                    genres.append(ShownLists.IDS[genre_id])
+                else:
+                    genres.append(App().genres.get_name(genre_id))
+            self.__title_label.set_label(",".join(genres))
         builder.connect_signals(self)
 
     def set_view_type(self, view_type):

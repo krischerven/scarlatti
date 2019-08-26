@@ -287,7 +287,7 @@ class AlbumsGenresBoxView(AlbumsBoxView):
             App().player.play_album_for_albums(albums[0], albums)
 
 
-class AlbumsYearsBoxView(AlbumsBoxView):
+class AlbumsYearsBoxView(AlbumsGenresBoxView):
     """
         Years album box
     """
@@ -299,7 +299,7 @@ class AlbumsYearsBoxView(AlbumsBoxView):
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        AlbumsBoxView.__init__(self, genre_ids, artist_ids, view_type)
+        AlbumsGenresBoxView.__init__(self, genre_ids, artist_ids, view_type)
 
     def populate(self):
         """
