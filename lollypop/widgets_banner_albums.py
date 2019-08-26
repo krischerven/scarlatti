@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GObject
 
-from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
 
@@ -87,6 +87,14 @@ class AlbumsBannerWidget(BannerWidget):
         update_button(self.__shuffle_button, style,
                       icon_size, "media-playlist-shuffle-symbolic")
 
+    @property
+    def height(self):
+        """
+            Get wanted height
+            @return int
+        """
+        return ArtSize.SMALL
+
 #######################
 # PROTECTED           #
 #######################
@@ -99,7 +107,7 @@ class AlbumsBannerWidget(BannerWidget):
             App().art_helper.set_banner_artwork(
                 # +100 to prevent resize lag
                 allocation.width + 100,
-                ArtSize.BANNER + MARGIN * 2,
+                ArtSize.SMALL,
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,

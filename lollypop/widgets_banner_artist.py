@@ -107,19 +107,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             button_style_context.remove_class("menu-button")
             button_style_context.add_class(style)
             button.get_image().set_from_icon_name(icon_name, icon_size)
-        self.__set_text_height(self._collapsed)
-
-    def collapse(self, collapsed):
-        """
-            Collapse banner
-            @param collapse as bool
-        """
-        BannerWidget.collapse(self, collapsed)
-        self.__set_text_height(collapsed)
-        if collapsed:
-            self.__badge_artwork.hide()
-        elif self.get_allocated_width() >= Size.SMALL + 100:
-            self.__badge_artwork.show()
+        self.__set_text_height()
 
 #######################
 # PROTECTED           #
@@ -133,7 +121,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__set_artwork(allocation.width, ArtSize.BANNER + MARGIN * 2)
             if allocation.width < Size.SMALL + 100:
                 self.__badge_artwork.hide()
-            elif not self._collapsed:
+            else:
                 self.__badge_artwork.show()
 
     def _on_label_button_release(self, eventbox, event):
@@ -295,20 +283,15 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         self.__on_badge_artist_artwork)
         else:
             self.__title_label.set_margin_start(MARGIN)
-            self.collapse(True)
 
-    def __set_text_height(self, collapsed):
+    def __set_text_height(self):
         """
             Set text height
-            @param collapsed as bool
         """
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if collapsed:
-            self.__title_label.get_style_context().add_class(
-                "text-large")
-        elif self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
+        if self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
         else:

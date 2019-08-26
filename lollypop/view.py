@@ -38,6 +38,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._view_type = view_type
         self.__destroyed = False
         self.__placeholder = None
+        self.__scrolled_value = 0
         self.__sidebar_id = Type.NONE
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
@@ -140,9 +141,21 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
         self.__sidebar_id = sidebar_id
 
+    def should_reveal_header(self, adj):
+        """
+            Check if we need to reveal header
+            @param adj as Gtk.Adjustment
+            @param delta as int
+            @return int
+        """
+        value = adj.get_value()
+        reveal = self.__scrolled_value > value
+        self.__scrolled_value = value
+        return reveal
+
     @property
     def sidebar_id(self):
-        """
+        """te
             Get sidebar id
             @return int
         """

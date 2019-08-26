@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, Gtk
 
 from locale import strcoll
 from gettext import gettext as _
@@ -41,12 +41,13 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__banner = PlaylistsBannerWidget(self)
         self.__banner.show()
-        self.__banner.collapse(True)
-        self.__banner.init_background()
         self.__banner.set_view_type(self._view_type)
-        self.insert_row(0)
-        self.set_row_spacing(MARGIN_SMALL)
-        self.attach(self.__banner, 0, 0, 1, 1)
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self._scrolled)
+        self._viewport.add(self._box)
+        self._overlay.add_overlay(self.__banner)
+        self.add(self._overlay)
         self._widget_class = PlaylistRoundedWidget
         return [
                 (App().playlists, "playlists-changed", "_on_playlist_changed")
@@ -178,10 +179,31 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         if FlowBoxView._on_adaptive_changed(self, window, status):
             self.__banner.set_view_type(self._view_type)
+            self.__set_margin()
+
+    def _on_value_changed(self, adj):
+        """
+            Update scroll value and check for lazy queue
+            @param adj as Gtk.Adjustment
+        """
+        FlowBoxView._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
+        else:
+            self._scrolled.get_vscrollbar().set_margin_top(0)
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self._box.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __popup_menu(self, child):
         """
             Popup menu for playlist

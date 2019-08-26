@@ -17,7 +17,7 @@ from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType, MARGIN
+from lollypop.define import App, Type, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height, popup_widget
@@ -227,16 +227,32 @@ class AlbumsGenresBoxView(AlbumsBoxView):
         """
         AlbumsBoxView.__init__(self, genre_ids, artist_ids, view_type)
         self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
-        self.__banner.collapse(True)
-        self.__banner.init_background()
         self.__banner.show()
-        self.__banner.set_view_type(view_type)
         self.__banner.connect("play-all", self.__on_banner_play_all)
-        self.add(self.__banner)
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self._scrolled)
+        self._viewport.add(self._box)
+        self._overlay.add_overlay(self.__banner)
+        self.add(self._overlay)
+        self.__set_margin()
 
 #######################
 # PROTECTED           #
 #######################
+    def _on_value_changed(self, adj):
+        """
+            Update scroll value and check for lazy queue
+            @param adj as Gtk.Adjustment
+        """
+        AlbumsBoxView._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
+        else:
+            self._scrolled.get_vscrollbar().set_margin_top(0)
+
     def _on_adaptive_changed(self, window, status):
         """
             Handle adaptive mode for views
@@ -247,6 +263,13 @@ class AlbumsGenresBoxView(AlbumsBoxView):
 #######################
 # PRIVATE             #
 #######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self._box.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __on_banner_play_all(self, banner, random):
         """
             Play all albums

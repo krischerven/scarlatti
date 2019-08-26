@@ -12,50 +12,21 @@
 
 from gi.repository import Gtk
 
-
-from lollypop.define import ArtSize, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import ArtSize, ViewType, MARGIN
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class BannerWidget(Gtk.Overlay, SizeAllocationHelper):
+class Overlay(Gtk.Overlay):
     """
-        Default banner widget
+        Overlay with constraint size
     """
-
-    def __init__(self, view_type):
+    def __init__(self, banner):
         """
-            Init bannner
-            @param view_type as ViewType
+            Init overlay
+            @param banner as BannerWidget
         """
         Gtk.Overlay.__init__(self)
-        self._view_type = view_type
-        self._collapsed = False
-        self.set_property("valign", Gtk.Align.START)
-
-    def init_background(self):
-        """
-            Init banner background
-        """
-        SizeAllocationHelper.__init__(self)
-        self.get_style_context().add_class("black")
-        self._artwork = Gtk.Image()
-        self._artwork.get_style_context().add_class("black")
-        self._artwork.show()
-        self.add(self._artwork)
-
-    def set_view_type(self, view_type):
-        """
-            Update widget internals for view_type
-            @param view_type as ViewType
-        """
-        self._view_type = view_type
-
-    def collapse(self, collapsed):
-        """
-            Collapse banner
-            @param collapse as bool
-        """
-        self._collapsed = collapsed
+        self.__banner = banner
 
     def do_get_preferred_width(self):
         """
@@ -67,28 +38,57 @@ class BannerWidget(Gtk.Overlay, SizeAllocationHelper):
 
     def do_get_preferred_height(self):
         """
-            Force preferred height
+           Force preferred height
         """
-        height = self.height
+        height = self.__banner.height
         return (height, height)
+
+
+class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
+    """
+        Default banner widget
+    """
+
+    def __init__(self, view_type):
+        """
+            Init bannner
+            @param view_type as ViewType
+        """
+        Gtk.Revealer.__init__(self)
+        SizeAllocationHelper.__init__(self)
+        self._view_type = view_type
+        self.set_property("valign", Gtk.Align.START)
+        self.get_style_context().add_class("black")
+        self.__overlay = Overlay(self)
+        self.__overlay.show()
+        self._artwork = Gtk.Image()
+        self._artwork.get_style_context().add_class("black")
+        self._artwork.show()
+        self.__overlay.add(self._artwork)
+        self.add(self.__overlay)
+        self.set_reveal_child(True)
+
+    def add_overlay(self, widget):
+        """
+            Add widget to overlay
+            @param widget as Gtk.Widget
+        """
+        self.__overlay.add_overlay(widget)
+
+    def set_view_type(self, view_type):
+        """
+            Update widget internals for view_type
+            @param view_type as ViewType
+        """
+        self._view_type = view_type
 
     @property
     def height(self):
         """
             Get wanted height
+            @return int
         """
-        if self._collapsed:
-            return ArtSize.SMALL + MARGIN_SMALL * 2
-        elif self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
+        if self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
             return ArtSize.MEDIUM + MARGIN * 2
         else:
             return ArtSize.BANNER + MARGIN * 2
-
-#######################
-# PROTECTED           #
-#######################
-
-
-#######################
-# PRIVATE             #
-#######################

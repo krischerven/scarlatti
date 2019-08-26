@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.view import View
 from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.widgets_banner_artist import ArtistBannerWidget
@@ -34,8 +34,6 @@ class ArtistView(View):
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
-        self.__banner.init_background()
-        self.__banner.set_view_type(self._view_type)
         self.__banner.show()
         self.__overlay = Gtk.Overlay()
         self.__overlay.show()
@@ -47,14 +45,10 @@ class ArtistView(View):
                                          ~ViewType.SCROLLED)
         self.__album_box.get_style_context().add_class("padding")
         self.__album_box.show()
-        if self._view_type & ViewType.SCROLLED:
-            self.__overlay.add(self._scrolled)
-            self._viewport.add(self.__album_box)
-        else:
-            self.__overlay.add(self.__album_box)
+        self.__overlay.add(self._scrolled)
+        self._viewport.add(self.__album_box)
         self.add(self.__overlay)
-        if len(self._artist_ids) > 1:
-            self.__banner.collapse(True)
+        self.__set_margin()
 
     def populate(self):
         """
@@ -110,26 +104,18 @@ class ArtistView(View):
 #######################
 # PROTECTED           #
 #######################
-    def _on_map(self, widget):
-        """
-            Set initial state
-            @param widget as Gtk.Widget
-        """
-        View._on_map(self, widget)
-        self.__album_box.set_margin_top(self.__banner.height + MARGIN)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(
-                    self.__banner.height)
-
     def _on_value_changed(self, adj):
         """
             Update scroll value and check for lazy queue
             @param adj as Gtk.Adjustment
         """
-        if adj.get_value() == adj.get_lower():
-            self.__banner.collapse(False)
+        View._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
         else:
-            self.__banner.collapse(True)
+            self._scrolled.get_vscrollbar().set_margin_top(0)
 
     def _on_adaptive_changed(self, window, status):
         """
@@ -139,14 +125,18 @@ class ArtistView(View):
         """
         if View._on_adaptive_changed(self, window, status):
             self.__banner.set_view_type(self._view_type)
-            self.__album_box.set_margin_top(self.__banner.height + MARGIN)
-            if self._view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(
-                        self.__banner.height)
+            self.__set_margin()
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self.__album_box.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __update_jump_button(self):
         """
             Update jump button status

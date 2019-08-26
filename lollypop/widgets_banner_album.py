@@ -75,7 +75,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__gesture = GesturesHelper(
             info_eventbox, primary_press_callback=self._on_year_press)
         self.__widget = builder.get_object("widget")
-        self.init_background()
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__rating_grid = builder.get_object("rating_grid")
         self.__rating_widget = RatingWidget(album, Gtk.IconSize.INVALID)
@@ -131,23 +130,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             button_style_context.remove_class("menu-button")
             button_style_context.add_class(style)
             button.get_image().set_from_icon_name(icon_name, icon_size)
-        self.__set_text_height(self._collapsed)
-
-    def collapse(self, collapsed):
-        """
-            Collapse banner
-            @param collapse as bool
-        """
-        BannerWidget.collapse(self, collapsed)
-        self.__set_text_height(collapsed)
-        if collapsed:
-            self.__cover_widget.hide()
-            self.__rating_grid.hide()
-            self.__info_label.set_vexpand(True)
-        elif self.get_allocated_width() >= Size.SMALL + 100:
-            self.__cover_widget.show()
-            self.__rating_grid.show()
-            self.__info_label.set_vexpand(False)
+        self.__set_text_height()
 
     def set_selected(self, selected):
         """
@@ -179,7 +162,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                     self.__on_album_artwork)
             if allocation.width < Size.SMALL + 100:
                 self.__cover_widget.hide()
-            elif not self._collapsed:
+            else:
                 self.__cover_widget.show()
 
     def _on_menu_button_clicked(self, button):
@@ -267,10 +250,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             return "list-add-symbolic"
 
-    def __set_text_height(self, collapsed):
+    def __set_text_height(self):
         """
             Set text height
-            @param collapsed as bool
         """
         title_context = self.__title_label.get_style_context()
         info_context = self.__info_label.get_style_context()
@@ -278,10 +260,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             title_context.remove_class(c)
         for c in info_context.list_classes():
             info_context.remove_class(c)
-        if collapsed:
-            self.__title_label.get_style_context().add_class(
-                "text-large")
-        elif self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
+        if self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
             self.__info_label.get_style_context().add_class(

@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
 from lollypop.utils import tracks_to_albums
 from lollypop.view import LazyLoadingView
@@ -52,13 +52,14 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                                           self.__on_dnd_finished)
         self._view.show()
         self.__banner = PlaylistBannerWidget(playlist_id, self._view)
-        self.__banner.collapse(True)
-        self.__banner.init_background()
         self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
-        self._view.set_margin_top(MARGIN_SMALL)
-        self.add(self.__banner)
-        self.add_widget(self._view)
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self._scrolled)
+        self._viewport.add(self._view)
+        self._overlay.add_overlay(self.__banner)
+        self.add(self._overlay)
         self.__banner.set_view_type(view_type)
         return [
                 (App().playlists, "playlist-track-added",
@@ -178,6 +179,20 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         """
         if LazyLoadingView._on_adaptive_changed(self, window, status):
             self.__banner.set_view_type(self._view_type)
+            self.__set_margin()
+
+    def _on_value_changed(self, adj):
+        """
+            Update scroll value and check for lazy queue
+            @param adj as Gtk.Adjustment
+        """
+        LazyLoadingView._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
+        else:
+            self._scrolled.get_vscrollbar().set_margin_top(0)
 
     def _on_playlist_track_added(self, playlists, playlist_id, uri):
         """
@@ -224,6 +239,13 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
 #######################
 # PRIVATE             #
 #######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self._view.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __on_jump_to_current(self, banner):
         """
             Jump to current track

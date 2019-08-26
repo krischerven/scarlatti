@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -39,33 +39,29 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
         self.__tracks_view = TracksView(album, App().window, None, view_type)
         self.__tracks_view.show()
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
+        self.__tracks_view.set_margin_start(MARGIN)
+        self.__tracks_view.set_margin_end(MARGIN)
         self.__others_boxes = []
         self.__grid = Gtk.Grid()
-        self.__grid.set_property("vexpand", True)
-        self.__grid.set_row_spacing(10)
-        self.__grid.set_margin_start(MARGIN)
-        self.__grid.set_margin_end(MARGIN)
-        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
+        self.__grid.set_row_spacing(10)
+        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.add(self.__tracks_view)
+        self.__banner = AlbumBannerWidget(self._album,
+                                          self._view_type | ViewType.ALBUM)
+        self.__banner.show()
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self._scrolled)
+        self._viewport.add(self.__grid)
+        self._overlay.add_overlay(self.__banner)
+        self.add(self._overlay)
 
     def populate(self):
         """
             Populate the view with album
         """
         self.__tracks_view.populate()
-        self.__banner = AlbumBannerWidget(self._album,
-                                          self._view_type | ViewType.ALBUM)
-        self._overlay = Gtk.Overlay.new()
-        if self._view_type & ViewType.SCROLLED:
-            self._overlay.add(self._scrolled)
-            self._viewport.add(self.__grid)
-        else:
-            self._overlay.add(self.__grid)
-        self._overlay.show()
-        self.__banner.show()
-        self._overlay.add_overlay(self.__banner)
-        self.add(self._overlay)
 
     def activate_child(self):
         """
@@ -134,17 +130,6 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        LazyLoadingView._on_value_changed(self, adj)
-        if adj.get_value() == adj.get_lower():
-            self.__banner.collapse(False)
-        else:
-            self.__banner.collapse(True)
-
     def _on_current_changed(self, player):
         """
             Update children state
@@ -172,18 +157,6 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
             App().window.go_back()
             return
 
-    def _on_map(self, widget):
-        """
-            Set initial state
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_map(self, widget)
-        self.__tracks_view.set_margin_top(
-            self.__banner.height + MARGIN)
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.get_vscrollbar().set_margin_top(
-                    self.__banner.height)
-
     def _on_adaptive_changed(self, window, status):
         """
             Update banner style
@@ -192,15 +165,31 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
         """
         if LazyLoadingView._on_adaptive_changed(self, window, status):
             self.__banner.set_view_type(self._view_type)
-            self.__tracks_view.set_margin_top(
-                self.__banner.height + MARGIN)
-            if self._view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(
-                        self.__banner.height)
+            self.__set_margin()
+
+    def _on_value_changed(self, adj):
+        """
+            Update scroll value and check for lazy queue
+            @param adj as Gtk.Adjustment
+        """
+        LazyLoadingView._on_value_changed(self, adj)
+        reveal = self.should_reveal_header(adj)
+        self.__banner.set_reveal_child(reveal)
+        if reveal:
+            self.__set_margin()
+        else:
+            self._scrolled.get_vscrollbar().set_margin_top(0)
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self.__tracks_view.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __on_tracks_populated(self, view):
         """
             Populate remaining discs
@@ -213,6 +202,8 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
                                                  ViewType.SMALL |
                                                  ViewType.ALBUM |
                                                  ViewType.SCROLLED)
+                others_box.set_margin_start(MARGIN)
+                others_box.set_margin_end(MARGIN)
                 others_box.populate()
                 self.__grid.add(others_box)
                 self.__others_boxes.append(others_box)
