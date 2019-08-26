@@ -15,6 +15,7 @@ from gi.repository import Gtk, GObject
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
+from lollypop.utils import update_button
 
 
 class AlbumsBannerWidget(BannerWidget):
@@ -59,13 +60,6 @@ class AlbumsBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        def update_button(button, style, icon_size, icon_name):
-            context = button.get_style_context()
-            context.remove_class("menu-button-48")
-            context.remove_class("menu-button")
-            context.add_class(style)
-            button.get_image().set_from_icon_name(icon_name, icon_size)
-
         BannerWidget.set_view_type(self, view_type)
         duration_context = self.__duration_label.get_style_context()
         title_context = self.__title_label.get_style_context()

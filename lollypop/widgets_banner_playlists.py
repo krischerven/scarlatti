@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, ViewType
 from lollypop.define import SelectionListMask
-from lollypop.utils import popup_widget
+from lollypop.utils import popup_widget, update_button
 from lollypop.widgets_banner import BannerWidget
 
 
@@ -61,13 +61,6 @@ class PlaylistsBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        def update_button(button, style, icon_size, icon_name):
-            context = button.get_style_context()
-            context.remove_class("menu-button-48")
-            context.remove_class("menu-button")
-            context.add_class(style)
-            button.get_image().set_from_icon_name(icon_name, icon_size)
-
         BannerWidget.set_view_type(self, view_type)
         if view_type & ViewType.MEDIUM:
             style = "menu-button"
