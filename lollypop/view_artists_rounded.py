@@ -238,8 +238,8 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
             @param window as Window
             @param status as bool
         """
-        if RoundedArtistsView._on_adaptive_changed(self, window, status):
-            self.__update_label(status)
+        RoundedArtistsView._on_adaptive_changed(self, window, status)
+        self.__update_label(status)
 
     def _on_populated(self, widget, lazy_loading_id):
         """

@@ -412,8 +412,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             @param window as Window
             @param status as bool
         """
-        if AlbumsBoxView._on_adaptive_changed(self, window, status):
-            self.__update_label(status)
+        AlbumsBoxView._on_adaptive_changed(self, window, status)
+        self.__update_label(status)
 
     def _on_populated(self, widget, lazy_loading_id):
         """

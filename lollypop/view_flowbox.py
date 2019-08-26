@@ -136,7 +136,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
             Update artwork
             @param window as Window
             @param status as bool
-            @return bool
         """
         if LazyLoadingView._on_adaptive_changed(self, window, status):
             self.stop(True)
@@ -146,8 +145,6 @@ class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
                 child.disable_artwork()
                 self._lazy_queue.append(child)
             self.lazy_loading()
-            return True
-        return False
 
     def _on_view_leave(self, event_controller):
         """
