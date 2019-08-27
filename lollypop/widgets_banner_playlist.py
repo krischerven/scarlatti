@@ -15,11 +15,11 @@ from gi.repository import Gtk, GObject
 from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums, update_button
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.widgets_banner import BannerWidget
+from lollypop.define import App, ArtSize, ViewType
+from lollypop.widgets_banner import BannerDefaultWidget
 
 
-class PlaylistBannerWidget(BannerWidget):
+class PlaylistBannerWidget(BannerDefaultWidget):
     """
         Banner for playlist
     """
@@ -34,7 +34,7 @@ class PlaylistBannerWidget(BannerWidget):
             @param playlist_id as int
             @param view as AlbumsListView
         """
-        BannerWidget.__init__(self, view.args[0]["view_type"])
+        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
         self.__playlist_id = playlist_id
         self.__view = view
         builder = Gtk.Builder()
@@ -62,7 +62,7 @@ class PlaylistBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerWidget.set_view_type(self, view_type)
+        BannerDefaultWidget.set_view_type(self, view_type)
         duration_context = self.__duration_label.get_style_context()
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
@@ -98,21 +98,6 @@ class PlaylistBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if BannerWidget._handle_size_allocate(self, allocation):
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
-
     def _on_jump_button_clicked(self, button):
         """
             Scroll to current track
@@ -156,14 +141,3 @@ class PlaylistBannerWidget(BannerWidget):
         menu = PlaylistMenu(self.__playlist_id)
         popover = Gtk.Popover.new_from_model(button, menu)
         popover.popup()
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)

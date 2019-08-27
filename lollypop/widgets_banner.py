@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk, GObject, GLib
 
-from lollypop.define import ArtSize, ViewType, MARGIN
+from lollypop.define import ArtSize, ViewType, MARGIN, App, ArtBehaviour
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -123,3 +123,45 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)
         self.__scroll_timeout_id = GLib.timeout_add(10, emit_scroll, x, y)
+
+
+class BannerDefaultWidget(BannerWidget):
+    """
+        Banner widget with default background
+    """
+
+    def __init__(self, view_type):
+        """
+            Init bannner
+            @param view_type as ViewType
+        """
+        BannerWidget.__init__(self, view_type)
+
+#######################
+# PROTECTED           #
+#######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if BannerWidget._handle_size_allocate(self, allocation):
+            App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                allocation.width + 100,
+                ArtSize.SMALL,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR |
+                ArtBehaviour.DARKER,
+                self.__on_artwork)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_artwork(self, surface):
+        """
+            Set album artwork
+            @param surface as str
+        """
+        if surface is not None:
+            self._artwork.set_from_surface(surface)

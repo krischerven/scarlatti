@@ -14,13 +14,13 @@ from gi.repository import Gtk, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ViewType
 from lollypop.define import MARGIN, MARGIN_SMALL
-from lollypop.widgets_banner import BannerWidget
+from lollypop.widgets_banner import BannerDefaultWidget
 from lollypop.utils import update_button
 
 
-class CurrentAlbumsBannerWidget(BannerWidget):
+class CurrentAlbumsBannerWidget(BannerDefaultWidget):
     """
         Banner for current albums
     """
@@ -30,7 +30,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
             Init banner
             @param view as AlbumsListView
         """
-        BannerWidget.__init__(self, view.args[0]["view_type"])
+        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
         self.__view = view
         self.__clear_button = Gtk.Button.new_from_icon_name(
             "edit-clear-all-symbolic",
@@ -90,7 +90,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerWidget.set_view_type(self, view_type)
+        BannerDefaultWidget.set_view_type(self, view_type)
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
@@ -158,24 +158,6 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         return ArtSize.SMALL
 
 #######################
-# PROTECTED           #
-#######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if BannerWidget._handle_size_allocate(self, allocation):
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
-
-#######################
 # PRIVATE             #
 #######################
     def __albums_to_playlist(self):
@@ -218,11 +200,3 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__jump_button.set_sensitive(False)
         self.__save_button.set_sensitive(False)
         App().player.emit("status-changed")
-
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)

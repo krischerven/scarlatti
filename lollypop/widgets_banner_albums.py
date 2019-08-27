@@ -12,13 +12,13 @@
 
 from gi.repository import Gtk, GObject
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Type
-from lollypop.widgets_banner import BannerWidget
+from lollypop.define import App, ArtSize, ViewType, Type
+from lollypop.widgets_banner import BannerDefaultWidget
 from lollypop.shown import ShownLists
 from lollypop.utils import update_button
 
 
-class AlbumsBannerWidget(BannerWidget):
+class AlbumsBannerWidget(BannerDefaultWidget):
     """
         Banner for albums
     """
@@ -34,7 +34,7 @@ class AlbumsBannerWidget(BannerWidget):
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        BannerWidget.__init__(self, view_type)
+        BannerDefaultWidget.__init__(self, view_type)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         builder = Gtk.Builder()
@@ -66,7 +66,7 @@ class AlbumsBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerWidget.set_view_type(self, view_type)
+        BannerDefaultWidget.set_view_type(self, view_type)
         duration_context = self.__duration_label.get_style_context()
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
@@ -98,21 +98,6 @@ class AlbumsBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if BannerWidget._handle_size_allocate(self, allocation):
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
-
     def _on_play_button_clicked(self, button):
         """
             Play playlist
@@ -126,14 +111,3 @@ class AlbumsBannerWidget(BannerWidget):
             @param button as Gtk.Button
         """
         self.emit("play-all", True)
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)

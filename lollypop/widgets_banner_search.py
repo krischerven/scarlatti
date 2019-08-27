@@ -12,13 +12,13 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ArtSize, ArtBehaviour, Type, ViewType
-from lollypop.widgets_banner import BannerWidget
+from lollypop.define import App, ArtSize, Type, ViewType
+from lollypop.widgets_banner import BannerDefaultWidget
 from lollypop.logger import Logger
 from lollypop.utils import update_button
 
 
-class SearchBannerWidget(BannerWidget):
+class SearchBannerWidget(BannerDefaultWidget):
     """
         Banner for search
     """
@@ -28,7 +28,7 @@ class SearchBannerWidget(BannerWidget):
             Init banner
             @param view as AlbumsListView
         """
-        BannerWidget.__init__(self, view.args[0]["view_type"])
+        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SearchBannerWidget.ui")
         self.__view = view
@@ -47,7 +47,7 @@ class SearchBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerWidget.set_view_type(self, view_type)
+        BannerDefaultWidget.set_view_type(self, view_type)
         if view_type & ViewType.MEDIUM:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
@@ -104,21 +104,6 @@ class SearchBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if BannerWidget._handle_size_allocate(self, allocation):
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
-
     def _on_play_button_clicked(self, button):
         """
             Play search
@@ -163,11 +148,3 @@ class SearchBannerWidget(BannerWidget):
             @param widget as Gtk.Widget
         """
         GLib.idle_add(self.__entry.grab_focus)
-
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)

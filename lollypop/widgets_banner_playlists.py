@@ -14,13 +14,13 @@ from gi.repository import Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, ViewType
+from lollypop.define import App, ArtSize, MARGIN, ViewType
 from lollypop.define import SelectionListMask
 from lollypop.utils import popup_widget, update_button
-from lollypop.widgets_banner import BannerWidget
+from lollypop.widgets_banner import BannerDefaultWidget
 
 
-class PlaylistsBannerWidget(BannerWidget):
+class PlaylistsBannerWidget(BannerDefaultWidget):
     """
         Banner for playlists
     """
@@ -30,7 +30,7 @@ class PlaylistsBannerWidget(BannerWidget):
             Init banner
             @param view as PlaylistView
         """
-        BannerWidget.__init__(self, view.args[0]["view_type"])
+        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
         self.__view = view
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)
@@ -62,7 +62,7 @@ class PlaylistsBannerWidget(BannerWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerWidget.set_view_type(self, view_type)
+        BannerDefaultWidget.set_view_type(self, view_type)
         if view_type & ViewType.MEDIUM:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
@@ -79,24 +79,6 @@ class PlaylistsBannerWidget(BannerWidget):
             @return int
         """
         return ArtSize.SMALL
-
-#######################
-# PROTECTED           #
-#######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if BannerWidget._handle_size_allocate(self, allocation):
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
 
 #######################
 # PRIVATE             #
@@ -122,11 +104,3 @@ class PlaylistsBannerWidget(BannerWidget):
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button)
-
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)
