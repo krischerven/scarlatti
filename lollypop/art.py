@@ -124,9 +124,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         """
         try:
             from pathlib import Path
-            print("coucou")
             for p in Path(CACHE_PATH).glob("@ROUNDED*@*.jpg"):
-                print(p)
                 p.unlink()
         except Exception as e:
             Logger.error("Art::clean_all_cache(): %s", e)
