@@ -211,7 +211,7 @@ class ListsContainer:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:
                 if not App().window.is_adaptive:
-                    selection_list.select_ids([Type.SUGGESTIONS], True)
+                    selection_list.select_first()
             else:
                 selection_list.select_ids([startup_id], True)
 

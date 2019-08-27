@@ -426,6 +426,7 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         try:
             self._box.unselect_all()
             row = self._box.get_children()[0]
+            self._box.select_row(row)
             row.activate()
         except Exception as e:
             Logger.warning("SelectionList::select_first(): %s", e)
