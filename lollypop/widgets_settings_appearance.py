@@ -167,6 +167,7 @@ class AppearanceSettingsWidget(Gtk.Bin):
                 if status:
                     path = "%s/%s" % (LOLLYPOP_DATA_PATH, "banner.jpg")
                     App().art.save_pixbuf_from_data(path, data, 250, 250)
+                    App().art.emit("background-artwork-changed")
                     App().art_helper.set_banner_artwork(
                                 200,
                                 24,
@@ -189,6 +190,7 @@ class AppearanceSettingsWidget(Gtk.Bin):
             path = "%s/%s" % (LOLLYPOP_DATA_PATH, "banner.jpg")
             f = Gio.File.new_for_path(path)
             f.delete()
+            App().art.emit("background-artwork-changed")
             App().art_helper.set_banner_artwork(
                     200,
                     24,

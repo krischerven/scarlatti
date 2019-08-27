@@ -14,6 +14,7 @@ from gi.repository import Gtk, Gdk, GObject, GLib
 
 from lollypop.define import ArtSize, ViewType, MARGIN, App, ArtBehaviour
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class Overlay(Gtk.Overlay):
@@ -125,17 +126,22 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.__scroll_timeout_id = GLib.timeout_add(10, emit_scroll, x, y)
 
 
-class BannerDefaultWidget(BannerWidget):
+class BannerDefaultWidget(BannerWidget, SignalsHelper):
     """
         Banner widget with default background
     """
 
+    @signals
     def __init__(self, view_type):
         """
             Init bannner
             @param view_type as ViewType
         """
         BannerWidget.__init__(self, view_type)
+        return [
+            (App().art, "background-artwork-changed",
+             "_on_background_artwork_changed")
+        ]
 
 #######################
 # PROTECTED           #
@@ -147,6 +153,21 @@ class BannerDefaultWidget(BannerWidget):
         """
         if BannerWidget._handle_size_allocate(self, allocation):
             App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                allocation.width + 100,
+                ArtSize.SMALL,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR |
+                ArtBehaviour.DARKER,
+                self.__on_artwork)
+
+    def _on_background_artwork_changed(self, art):
+        """
+            Update background
+            @param art as Art
+        """
+        allocation = self.get_allocation()
+        App().art_helper.set_banner_artwork(
                 # +100 to prevent resize lag
                 allocation.width + 100,
                 ArtSize.SMALL,
