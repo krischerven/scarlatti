@@ -44,6 +44,9 @@ class WebSettingsWidget(Gtk.Bin):
         builder.get_object("cs-entry").set_text(key)
         switch_youtube = builder.get_object("switch_youtube")
         switch_youtube.set_state(App().settings.get_value("recent-youtube-dl"))
+        entry_invidious = builder.get_object("entry_invidious")
+        entry_invidious.set_text(
+            App().settings.get_value("invidious-server").get_string())
 
         #
         # ListenBrainz tab
@@ -137,6 +140,14 @@ class WebSettingsWidget(Gtk.Bin):
         if Gio.NetworkMonitor.get_default().get_network_available() and state:
             from lollypop.utils import install_youtube_dl
             App().task_helper.run(install_youtube_dl)
+
+    def _on_entry_invidious_changed(self, entry):
+        """
+            Update invidious server setting
+            @param entry as Gtk.entry
+        """
+        App().settings.set_value("invidious-server",
+                                 GLib.Variant("s", entry.get_text()))
 
 #######################
 # PRIVATE             #
