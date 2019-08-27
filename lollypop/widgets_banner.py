@@ -73,7 +73,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self._artwork = Gtk.Image()
         self._artwork.show()
         self._artwork.get_style_context().add_class("black")
-        self._artwork.set_opacity(0.98)
+        self._artwork.set_opacity(0.99)
         eventbox = Gtk.EventBox.new()
         eventbox.show()
         eventbox.add_events(Gdk.EventMask.ALL_EVENTS_MASK)
