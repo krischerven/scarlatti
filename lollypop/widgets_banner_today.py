@@ -135,7 +135,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
                     self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
-                    self.__on_album_artwork)
+                    self._on_artwork)
 
     def _on_play_button_clicked(self, button):
         """
@@ -159,7 +159,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
                             self._artwork.get_scale_factor(),
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
-                            self.__on_album_artwork)
+                            self._on_artwork)
 
 #######################
 # PRIVATE             #
@@ -196,13 +196,3 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param button as Gtk.Button
         """
         App().player.play_album(self.__album)
-
-    def __on_album_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)
-        else:
-            self._set_default_background()

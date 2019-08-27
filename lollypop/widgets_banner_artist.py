@@ -266,7 +266,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         self.get_scale_factor(),
                                         ArtBehaviour.BLUR_HARD |
                                         ArtBehaviour.DARKER,
-                                        self.__on_artist_artwork)
+                                        self._on_artwork)
         else:
             self._set_default_background()
 
@@ -328,16 +328,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__add_button.get_image().set_from_icon_name(
                 "list-remove-symbolic",
                 pixel_size)
-
-    def __on_artist_artwork(self, surface):
-        """
-            Set artist artwork
-            @param surface as str
-        """
-        if surface is None:
-            self._set_default_background()
-        else:
-            self._artwork.set_from_surface(surface)
 
     def __on_badge_artist_artwork(self, surface):
         """

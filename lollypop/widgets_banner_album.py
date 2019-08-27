@@ -153,7 +153,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                     self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
-                    self.__on_album_artwork)
+                    self._on_artwork)
             if allocation.width < Size.SMALL + 100:
                 self.__cover_widget.hide()
             else:
@@ -211,7 +211,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             self._artwork.get_scale_factor(),
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
-                            self.__on_album_artwork)
+                            self._on_artwork)
 
     def _on_playback_changed(self, player):
         """
@@ -264,13 +264,3 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 "text-xx-large")
             self.__info_label.get_style_context().add_class(
                 "text-x-large")
-
-    def __on_album_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)
-        else:
-            self._set_default_background()

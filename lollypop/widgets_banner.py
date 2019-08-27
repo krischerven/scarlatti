@@ -67,7 +67,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
         Gtk.Revealer.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__scroll_timeout_id = None
-        self.__default_background = False
+        self._default_background_in_use = False
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
         self.get_style_context().add_class("black")
@@ -122,7 +122,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            self.__default_background = True
+            self._default_background_in_use = True
             App().art_helper.set_banner_artwork(
                 # +100 to prevent resize lag
                 allocation.width + 100,
@@ -130,7 +130,8 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
-                self.__on_artwork)
+                self._on_artwork,
+                True)
 
     def _set_default_background(self):
         """
@@ -144,27 +145,32 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
-                self.__on_artwork)
+                self._on_artwork,
+                True)
 
     def _on_background_artwork_changed(self, art):
         """
             Update background
             @param art as Art
         """
-        if self.__default_background:
+        if self._default_background_in_use:
+            self._set_default_background()
+
+    def _on_artwork(self, surface, default_background_in_use=False):
+        """
+            Set album artwork
+            @param surface as str
+            @param default_background_in_use as bool
+        """
+        self._default_background_in_use = True
+        if surface is not None:
+            self._artwork.set_from_surface(surface)
+        else:
             self._set_default_background()
 
 #######################
 # PRIVATE             #
 #######################
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)
-
     def __on_scroll(self, event_controller, x, y):
         """
             Pass scroll
