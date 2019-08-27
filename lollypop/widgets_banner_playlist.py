@@ -16,10 +16,10 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums, update_button
 from lollypop.define import App, ArtSize, ViewType
-from lollypop.widgets_banner import BannerDefaultWidget
+from lollypop.widgets_banner import BannerWidget
 
 
-class PlaylistBannerWidget(BannerDefaultWidget):
+class PlaylistBannerWidget(BannerWidget):
     """
         Banner for playlist
     """
@@ -34,7 +34,7 @@ class PlaylistBannerWidget(BannerDefaultWidget):
             @param playlist_id as int
             @param view as AlbumsListView
         """
-        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
+        BannerWidget.__init__(self, view.args[0]["view_type"])
         self.__playlist_id = playlist_id
         self.__view = view
         builder = Gtk.Builder()
@@ -62,7 +62,7 @@ class PlaylistBannerWidget(BannerDefaultWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerDefaultWidget.set_view_type(self, view_type)
+        BannerWidget.set_view_type(self, view_type)
         duration_context = self.__duration_label.get_style_context()
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():

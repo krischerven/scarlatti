@@ -13,12 +13,12 @@
 from gi.repository import Gtk, GObject
 
 from lollypop.define import App, ArtSize, ViewType, Type
-from lollypop.widgets_banner import BannerDefaultWidget
+from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
 from lollypop.utils import update_button
 
 
-class AlbumsBannerWidget(BannerDefaultWidget):
+class AlbumsBannerWidget(BannerWidget):
     """
         Banner for albums
     """
@@ -34,7 +34,7 @@ class AlbumsBannerWidget(BannerDefaultWidget):
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        BannerDefaultWidget.__init__(self, view_type)
+        BannerWidget.__init__(self, view_type)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         builder = Gtk.Builder()
@@ -66,7 +66,7 @@ class AlbumsBannerWidget(BannerDefaultWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerDefaultWidget.set_view_type(self, view_type)
+        BannerWidget.set_view_type(self, view_type)
         duration_context = self.__duration_label.get_style_context()
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():

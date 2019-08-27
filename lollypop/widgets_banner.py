@@ -45,7 +45,7 @@ class Overlay(Gtk.Overlay):
         return (height, height)
 
 
-class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
+class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
     """
         Default banner widget
     """
@@ -58,6 +58,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         GObject.signal_new(signal, Gtk.Revealer,
                            args[0], args[1], args[2])
 
+    @signals
     def __init__(self, view_type):
         """
             Init bannner
@@ -66,6 +67,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         Gtk.Revealer.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__scroll_timeout_id = None
+        self.__default_background = False
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
         self.get_style_context().add_class("black")
@@ -88,6 +90,10 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.add(self._overlay)
         self.set_reveal_child(True)
         self.set_transition_duration(250)
+        return [
+            (App().art, "background-artwork-changed",
+             "_on_background_artwork_changed")
+        ]
 
     def set_view_type(self, view_type):
         """
@@ -108,8 +114,57 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             return ArtSize.BANNER + MARGIN * 2
 
 #######################
+# PROTECTED           #
+#######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            self.__default_background = True
+            App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                allocation.width + 100,
+                allocation.height,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR |
+                ArtBehaviour.DARKER,
+                self.__on_artwork)
+
+    def _set_default_background(self):
+        """
+            Set default background
+        """
+        allocation = self.get_allocation()
+        App().art_helper.set_banner_artwork(
+                # +100 to prevent resize lag
+                allocation.width + 100,
+                allocation.height,
+                self._artwork.get_scale_factor(),
+                ArtBehaviour.BLUR |
+                ArtBehaviour.DARKER,
+                self.__on_artwork)
+
+    def _on_background_artwork_changed(self, art):
+        """
+            Update background
+            @param art as Art
+        """
+        if self.__default_background:
+            self._set_default_background()
+
+#######################
 # PRIVATE             #
 #######################
+    def __on_artwork(self, surface):
+        """
+            Set album artwork
+            @param surface as str
+        """
+        if surface is not None:
+            self._artwork.set_from_surface(surface)
+
     def __on_scroll(self, event_controller, x, y):
         """
             Pass scroll
@@ -124,65 +179,3 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)
         self.__scroll_timeout_id = GLib.timeout_add(10, emit_scroll, x, y)
-
-
-class BannerDefaultWidget(BannerWidget, SignalsHelper):
-    """
-        Banner widget with default background
-    """
-
-    @signals
-    def __init__(self, view_type):
-        """
-            Init bannner
-            @param view_type as ViewType
-        """
-        BannerWidget.__init__(self, view_type)
-        return [
-            (App().art, "background-artwork-changed",
-             "_on_background_artwork_changed")
-        ]
-
-#######################
-# PROTECTED           #
-#######################
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if BannerWidget._handle_size_allocate(self, allocation):
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
-
-    def _on_background_artwork_changed(self, art):
-        """
-            Update background
-            @param art as Art
-        """
-        allocation = self.get_allocation()
-        App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                ArtSize.SMALL,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artwork)
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)

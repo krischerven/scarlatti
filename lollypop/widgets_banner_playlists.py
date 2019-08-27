@@ -17,10 +17,10 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, MARGIN, ViewType
 from lollypop.define import SelectionListMask
 from lollypop.utils import popup_widget, update_button
-from lollypop.widgets_banner import BannerDefaultWidget
+from lollypop.widgets_banner import BannerWidget
 
 
-class PlaylistsBannerWidget(BannerDefaultWidget):
+class PlaylistsBannerWidget(BannerWidget):
     """
         Banner for playlists
     """
@@ -30,7 +30,7 @@ class PlaylistsBannerWidget(BannerDefaultWidget):
             Init banner
             @param view as PlaylistView
         """
-        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
+        BannerWidget.__init__(self, view.args[0]["view_type"])
         self.__view = view
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)
@@ -62,7 +62,7 @@ class PlaylistsBannerWidget(BannerDefaultWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerDefaultWidget.set_view_type(self, view_type)
+        BannerWidget.set_view_type(self, view_type)
         if view_type & ViewType.MEDIUM:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON

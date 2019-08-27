@@ -16,11 +16,11 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.define import MARGIN, MARGIN_SMALL
-from lollypop.widgets_banner import BannerDefaultWidget
+from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import update_button
 
 
-class CurrentAlbumsBannerWidget(BannerDefaultWidget):
+class CurrentAlbumsBannerWidget(BannerWidget):
     """
         Banner for current albums
     """
@@ -30,7 +30,7 @@ class CurrentAlbumsBannerWidget(BannerDefaultWidget):
             Init banner
             @param view as AlbumsListView
         """
-        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
+        BannerWidget.__init__(self, view.args[0]["view_type"])
         self.__view = view
         self.__clear_button = Gtk.Button.new_from_icon_name(
             "edit-clear-all-symbolic",
@@ -90,7 +90,7 @@ class CurrentAlbumsBannerWidget(BannerDefaultWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerDefaultWidget.set_view_type(self, view_type)
+        BannerWidget.set_view_type(self, view_type)
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)

@@ -21,6 +21,7 @@ from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
 class ArtistBannerWidget(BannerWidget, SignalsHelper):
@@ -118,7 +119,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if BannerWidget._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
             self.__set_artwork(allocation.width, ArtSize.BANNER + MARGIN * 2)
             if allocation.width < Size.SMALL + 100:
                 self.__badge_artwork.hide()
@@ -263,7 +264,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         ArtBehaviour.DARKER,
                                         self.__on_artist_artwork)
         else:
-            self.__on_artist_artwork(None)
+            self._set_default_background()
 
     def __set_badge_artwork(self, art_size):
         """
@@ -326,14 +327,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param surface as str
         """
         if surface is None:
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                self.get_allocated_width() + 100,
-                ArtSize.BANNER + MARGIN * 2,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_artist_artwork)
+            self._set_default_background()
         else:
             self._artwork.set_from_surface(surface)
 

@@ -13,12 +13,12 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ArtSize, Type, ViewType
-from lollypop.widgets_banner import BannerDefaultWidget
+from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
 from lollypop.utils import update_button
 
 
-class SearchBannerWidget(BannerDefaultWidget):
+class SearchBannerWidget(BannerWidget):
     """
         Banner for search
     """
@@ -28,7 +28,7 @@ class SearchBannerWidget(BannerDefaultWidget):
             Init banner
             @param view as AlbumsListView
         """
-        BannerDefaultWidget.__init__(self, view.args[0]["view_type"])
+        BannerWidget.__init__(self, view.args[0]["view_type"])
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SearchBannerWidget.ui")
         self.__view = view
@@ -47,7 +47,7 @@ class SearchBannerWidget(BannerDefaultWidget):
             Update view type
             @param view_type as ViewType
         """
-        BannerDefaultWidget.set_view_type(self, view_type)
+        BannerWidget.set_view_type(self, view_type)
         if view_type & ViewType.MEDIUM:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
