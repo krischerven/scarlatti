@@ -63,20 +63,18 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             artists.append(App().artists.get_name(artist_id))
         self.__title_label.set_markup(
             GLib.markup_escape_text(", ".join(artists)))
-        self.__show_artwork = len(artist_ids) == 1 and\
-            App().settings.get_value("artist-artwork")
-        if self.__show_artwork:
-            self.__title_label.get_style_context().add_class("text-xx-large")
-        else:
-            self.__title_label.get_style_context().add_class("text-x-large")
+        self.__show_artwork = len(artist_ids) == 1
+        self.__title_label.get_style_context().add_class("text-x-large")
         self._overlay.add_overlay(widget)
         self._overlay.set_overlay_pass_through(widget, True)
-        self.set_view_type(view_type)
         self.__update_add_button()
         return [
                (App().art, "artist-artwork-changed",
                 "_on_artist_artwork_changed"),
-               (App().player, "playback-changed", "_on_playback_changed")
+               (App().player, "playback-changed", "_on_playback_changed"),
+               (App().settings, "changed::artist-artwork",
+                "_on_artist_artwork_setting_changed")
+
         ]
 
     def set_view_type(self, view_type):
@@ -120,11 +118,20 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            self.__set_artwork(allocation.width, ArtSize.BANNER + MARGIN * 2)
+            self.__set_artwork()
             if allocation.width < Size.SMALL + 100:
                 self.__badge_artwork.hide()
             else:
                 self.__badge_artwork.show()
+
+    def _on_artist_artwork_setting_changed(self, settings, variant):
+        """
+            Update banner
+            @param settings as Gio.Settings
+            @param value as GLib.Variant
+        """
+        self.__set_artwork()
+        self.set_view_type(self._view_type)
 
     def _on_label_button_release(self, eventbox, event):
         """
@@ -232,8 +239,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         if len(self.__artist_ids) == 1:
             artist = App().artists.get_name(self.__artist_ids[0])
             if prefix == artist:
-                width = self.get_allocated_width()
-                self.__set_artwork(width, ArtSize.BANNER + MARGIN * 2)
+                self.__set_artwork()
                 self.set_view_type(self._view_type)
 
     def _on_playback_changed(self, player):
@@ -246,19 +252,17 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __set_artwork(self, width, height):
+    def __set_artwork(self):
         """
             Set artwork
-            @param width as int
-            @param height as int
         """
         if App().settings.get_value("artist-artwork"):
             artist = App().artists.get_name(choice(self.__artist_ids))
             App().art_helper.set_artist_artwork(
                                         artist,
                                         # +100 to prevent resize lag
-                                        width + 100,
-                                        height,
+                                        self.get_allocated_width() + 100,
+                                        self.height,
                                         self.get_scale_factor(),
                                         ArtBehaviour.BLUR_HARD |
                                         ArtBehaviour.DARKER,
@@ -271,8 +275,11 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             Set artist artwork on badge
             @param art_size as int
         """
-        if self.__show_artwork:
+        if self.__show_artwork and\
+                App().settings.get_value("artist-artwork"):
+            self.__badge_artwork.show()
             self.__badge_artwork.set_margin_start(MARGIN)
+            self.__title_label.set_margin_start(0)
             artist = App().artists.get_name(self.__artist_ids[0])
             App().art_helper.set_artist_artwork(
                                         artist,
@@ -284,6 +291,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         ArtBehaviour.CACHE,
                                         self.__on_badge_artist_artwork)
         else:
+            self.__badge_artwork.hide()
+            self.__badge_artwork.set_margin_start(0)
             self.__title_label.set_margin_start(MARGIN)
 
     def __set_text_height(self):
@@ -347,5 +356,3 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__badge_artwork.get_style_context().remove_class(
                 "artwork-icon")
             self.__badge_artwork.set_from_surface(surface)
-        if self.get_allocated_width() >= Size.SMALL + 100:
-            self.__badge_artwork.show()
