@@ -42,11 +42,14 @@ class WebSettingsWidget(Gtk.Bin):
         key = App().settings.get_value("cs-api-key").get_string() or\
             App().settings.get_default_value("cs-api-key").get_string()
         builder.get_object("cs-entry").set_text(key)
-        switch_youtube = builder.get_object("switch_youtube")
-        switch_youtube.set_state(App().settings.get_value("recent-youtube-dl"))
+        uri = App().settings.get_value("invidious-server").get_string()
+        recent_youtube_dl = App().settings.get_value("recent-youtube-dl")
+        self.__switch_youtube = builder.get_object("switch_youtube")
+        self.__switch_youtube.set_state(recent_youtube_dl)
         entry_invidious = builder.get_object("entry_invidious")
-        entry_invidious.set_text(
-            App().settings.get_value("invidious-server").get_string())
+        entry_invidious.set_text(uri)
+        if uri:
+            self.__switch_youtube.set_sensitive(False)
 
         #
         # ListenBrainz tab
@@ -146,8 +149,9 @@ class WebSettingsWidget(Gtk.Bin):
             Update invidious server setting
             @param entry as Gtk.entry
         """
-        App().settings.set_value("invidious-server",
-                                 GLib.Variant("s", entry.get_text()))
+        uri = entry.get_text()
+        App().settings.set_value("invidious-server", GLib.Variant("s", uri))
+        self.__switch_youtube.set_sensitive(uri == "")
 
 #######################
 # PRIVATE             #
