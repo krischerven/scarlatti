@@ -216,6 +216,9 @@ class Application(Gtk.Application, ApplicationActions):
         """
             Start spotify timeout and start a new populate
         """
+        if Type.SUGGESTIONS not in\
+                self.settings.get_value("shown-album-lists"):
+            return
         if self.__spotify_timeout_id is None:
             self.spotify.populate_db()
             self.__spotify_timeout_id = GLib.timeout_add_seconds(
