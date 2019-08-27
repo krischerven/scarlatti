@@ -379,7 +379,7 @@ class AlbumArt:
         """
         filename = self.get_album_cache_name(album) + ".jpg"
         store_path = WEB_PATH + "/" + filename
-        self._save_pixbuf_from_data(store_path, data)
+        self.save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
         GLib.idle_add(self.album_artwork_update, album.id)
 
@@ -391,7 +391,7 @@ class AlbumArt:
         """
         filename = self.get_album_cache_name(album) + ".jpg"
         store_path = STORE_PATH + "/" + filename
-        self._save_pixbuf_from_data(store_path, data)
+        self.save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
         GLib.idle_add(self.album_artwork_update, album.id)
 
@@ -422,7 +422,7 @@ class AlbumArt:
         if uri_count > 1:
             art_uri = album.uri + "/" + filename
 
-        self._save_pixbuf_from_data(store_path, data)
+        self.save_pixbuf_from_data(store_path, data)
         dst = Gio.File.new_for_uri(art_uri)
         src = Gio.File.new_for_path(store_path)
         src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)

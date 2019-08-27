@@ -15,7 +15,7 @@ from gi.repository import GObject, Gio, GLib, GdkPixbuf
 from PIL import Image, ImageFilter
 
 from lollypop.define import ArtSize, App, TAG_EDITORS, ArtBehaviour
-from lollypop.define import STORE_PATH
+from lollypop.define import STORE_PATH, LOLLYPOP_DATA_PATH
 from lollypop.logger import Logger
 
 
@@ -50,6 +50,12 @@ class BaseArt(GObject.GObject):
             @param scale_factor as int
             @param behaviour as ArtBehaviour
         """
+        try:
+            filename = "%s/%s" % (LOLLYPOP_DATA_PATH, "banner.jpg")
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+            return self.load_behaviour(pixbuf, "", width, height, behaviour)
+        except:
+            pass
         filename = "%s/%s" % (App().data_dir, "banner.jpg")
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
         return self.load_behaviour(pixbuf, "", width, height, behaviour)
@@ -130,6 +136,34 @@ class BaseArt(GObject.GObject):
         except Exception as e:
             Logger.error("Art::clean_store(): %s" % e)
 
+    def save_pixbuf_from_data(self, path, data, width=-1, height=-1):
+        """
+            Save a pixbuf at path from data
+            @param path as str
+            @param data as bytes
+            @param width as int
+            @param height as int
+        """
+        # Create an empty file
+        if data is None:
+            f = Gio.File.new_for_path(path)
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                None)
+            fstream.close()
+        else:
+            bytes = GLib.Bytes(data)
+            stream = Gio.MemoryInputStream.new_from_bytes(bytes)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
+            if width != -1 and height != -1:
+                pixbuf = pixbuf.scale_simple(width,
+                                             height,
+                                             GdkPixbuf.InterpType.BILINEAR)
+            stream.close()
+            pixbuf.savev(path, "jpeg", ["quality"],
+                         [str(App().settings.get_value(
+                             "cover-quality").get_int32())])
+
     @property
     def kid3_available(self):
         """
@@ -149,28 +183,6 @@ class BaseArt(GObject.GObject):
 #######################
 # PROTECTED           #
 #######################
-    def _save_pixbuf_from_data(self, path, data):
-        """
-            Save a pixbuf at path from data
-            @param path as str
-            @param data as bytes
-        """
-        # Create an empty file
-        if data is None:
-            f = Gio.File.new_for_path(path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION,
-                                None)
-            fstream.close()
-        else:
-            bytes = GLib.Bytes(data)
-            stream = Gio.MemoryInputStream.new_from_bytes(bytes)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
-            stream.close()
-            pixbuf.savev(path, "jpeg", ["quality"],
-                         [str(App().settings.get_value(
-                             "cover-quality").get_int32())])
-
     def _crop_pixbuf(self, pixbuf, wanted_width, wanted_height):
         """
             Crop pixbuf
