@@ -94,7 +94,9 @@ class SpotifyHelper(GObject.Object):
         """
             Populate DB in a background task
         """
-        if get_network_available("SPOTIFY"):
+        monitor = Gio.NetworkMonitor.get_default()
+        if not monitor.get_network_metered() and\
+                get_network_available("SPOTIFY"):
             App().task_helper.run(self.__populate_db)
         return True
 
