@@ -41,6 +41,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__banner = PlaylistsBannerWidget(self)
         self.__banner.show()
+        self.__banner.connect("scroll", self._on_banner_scroll)
         self.__banner.set_view_type(self._view_type)
         self._overlay = Gtk.Overlay.new()
         self._overlay.show()

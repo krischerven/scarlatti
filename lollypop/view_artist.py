@@ -35,6 +35,7 @@ class ArtistView(View):
         self._artist_ids = artist_ids
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
         self.__banner.show()
+        self.__banner.connect("scroll", self._on_banner_scroll)
         self.__overlay = Gtk.Overlay()
         self.__overlay.show()
         self.__overlay.add_overlay(self.__banner)

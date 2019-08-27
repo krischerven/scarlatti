@@ -54,7 +54,8 @@ class PlaylistsBannerWidget(BannerWidget):
         self.__menu_button.connect("clicked", self.__on_menu_button_clicked)
         grid.add(new_button)
         grid.add(self.__menu_button)
-        self.add_overlay(grid)
+        self._overlay.add_overlay(grid)
+        self._overlay.set_overlay_pass_through(grid, True)
 
     def set_view_type(self, view_type):
         """

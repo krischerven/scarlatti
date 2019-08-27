@@ -36,7 +36,9 @@ class SearchBannerWidget(BannerWidget):
         self.__new_button = builder.get_object("new_button")
         self.__spinner = builder.get_object("spinner")
         self.__entry = builder.get_object("entry")
-        self.add_overlay(builder.get_object("widget"))
+        widget = builder.get_object("widget")
+        self._overlay.add_overlay(widget)
+        self._overlay.set_overlay_pass_through(widget, True)
         self.connect("map", self.__on_map)
         builder.connect_signals(self)
 

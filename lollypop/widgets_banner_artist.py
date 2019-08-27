@@ -68,7 +68,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__title_label.get_style_context().add_class("text-xx-large")
         else:
             self.__title_label.get_style_context().add_class("text-x-large")
-        self.add_overlay(widget)
+        self._overlay.add_overlay(widget)
+        self._overlay.set_overlay_pass_through(widget, True)
         self.set_view_type(view_type)
         self.__update_add_button()
         return [

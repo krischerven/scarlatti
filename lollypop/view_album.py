@@ -50,6 +50,7 @@ class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
         self.__banner = AlbumBannerWidget(self._album,
                                           self._view_type | ViewType.ALBUM)
         self.__banner.show()
+        self.__banner.connect("scroll", self._on_banner_scroll)
         self._overlay = Gtk.Overlay.new()
         self._overlay.show()
         self._overlay.add(self._scrolled)

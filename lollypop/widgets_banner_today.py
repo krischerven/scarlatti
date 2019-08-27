@@ -93,7 +93,8 @@ class TodayBannerWidget(BannerWidget):
         grid.add(self.__play_button)
         grid.set_margin_start(MARGIN)
         grid.set_margin_end(MARGIN)
-        self.add_overlay(grid)
+        self._overlay.add_overlay(grid)
+        self._overlay.set_overlay_pass_through(grid, True)
         self.set_reveal_child(False)
         self.connect("map", self.__on_map)
 

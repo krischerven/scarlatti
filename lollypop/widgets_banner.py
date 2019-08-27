@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject, GLib
 
 from lollypop.define import ArtSize, ViewType, MARGIN
 from lollypop.helper_size_allocation import SizeAllocationHelper
@@ -49,6 +49,14 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         Default banner widget
     """
 
+    gsignals = {
+        "scroll": (GObject.SignalFlags.RUN_FIRST, None, (float, float))
+    }
+    for signal in gsignals:
+        args = gsignals[signal]
+        GObject.signal_new(signal, Gtk.Revealer,
+                           args[0], args[1], args[2])
+
     def __init__(self, view_type):
         """
             Init bannner
@@ -56,26 +64,29 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         """
         Gtk.Revealer.__init__(self)
         SizeAllocationHelper.__init__(self)
+        self.__scroll_timeout_id = None
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
         self.get_style_context().add_class("black")
-        self.__overlay = Overlay(self)
-        self.__overlay.show()
+        self._overlay = Overlay(self)
+        self._overlay.show()
         self._artwork = Gtk.Image()
         self._artwork.show()
         self._artwork.get_style_context().add_class("black")
         self._artwork.set_opacity(0.98)
-        self.__overlay.add(self._artwork)
-        self.add(self.__overlay)
+        eventbox = Gtk.EventBox.new()
+        eventbox.show()
+        eventbox.add_events(Gdk.EventMask.ALL_EVENTS_MASK)
+        eventbox.add(self._artwork)
+        self._overlay.add(eventbox)
+        self.__event_controller = Gtk.EventControllerScroll.new(
+            eventbox, Gtk.EventControllerScrollFlags.BOTH_AXES)
+        self.__event_controller.set_propagation_phase(
+            Gtk.PropagationPhase.TARGET)
+        self.__event_controller.connect("scroll", self.__on_scroll)
+        self.add(self._overlay)
         self.set_reveal_child(True)
         self.set_transition_duration(250)
-
-    def add_overlay(self, widget):
-        """
-            Add widget to overlay
-            @param widget as Gtk.Widget
-        """
-        self.__overlay.add_overlay(widget)
 
     def set_view_type(self, view_type):
         """
@@ -94,3 +105,21 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             return ArtSize.MEDIUM + MARGIN * 2
         else:
             return ArtSize.BANNER + MARGIN * 2
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_scroll(self, event_controller, x, y):
+        """
+            Pass scroll
+            @param event_controller as Gtk.EventControllerScroll
+            @param x as int
+            @param y as int
+        """
+        def emit_scroll(x, y):
+            self.__scroll_timeout_id = None
+            self.emit("scroll", x, y)
+
+        if self.__scroll_timeout_id is not None:
+            GLib.source_remove(self.__scroll_timeout_id)
+        self.__scroll_timeout_id = GLib.timeout_add(10, emit_scroll, x, y)

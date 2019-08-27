@@ -92,6 +92,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__set_default_placeholder()
         self.__banner = SearchBannerWidget(self.__view)
         self.__banner.show()
+        self.__banner.connect("scroll", self._on_banner_scroll)
         self.__overlay = Gtk.Overlay.new()
         self.__overlay.show()
         self.__overlay.add(self._scrolled)

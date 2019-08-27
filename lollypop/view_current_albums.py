@@ -44,6 +44,7 @@ class CurrentAlbumsView(View, SignalsHelper):
                                            self.__on_dnd_finished)
         self.__banner = CurrentAlbumsBannerWidget(self.__view)
         self.__banner.show()
+        self.__banner.connect("scroll", self._on_banner_scroll)
         self.__overlay = Gtk.Overlay.new()
         self.__overlay.show()
         self.__overlay.add(self._scrolled)

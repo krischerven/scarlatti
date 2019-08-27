@@ -46,7 +46,9 @@ class PlaylistBannerWidget(BannerWidget):
         self.__shuffle_button = builder.get_object("shuffle_button")
         self.__jump_button = builder.get_object("jump_button")
         self.__menu_button = builder.get_object("menu_button")
-        self.add_overlay(builder.get_object("widget"))
+        widget = builder.get_object("widget")
+        self._overlay.add_overlay(widget)
+        self._overlay.set_overlay_pass_through(widget, True)
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
         # In DB duration calculation

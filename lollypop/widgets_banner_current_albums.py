@@ -82,7 +82,8 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         buttons.add(self.__save_button)
         buttons.add(self.__clear_button)
         grid.add(buttons)
-        self.add_overlay(grid)
+        self._overlay.add_overlay(grid)
+        self._overlay.set_overlay_pass_through(grid, True)
 
     def set_view_type(self, view_type):
         """

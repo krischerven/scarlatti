@@ -52,6 +52,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
                                           self.__on_dnd_finished)
         self._view.show()
         self.__banner = PlaylistBannerWidget(playlist_id, self._view)
+        self.__banner.connect("scroll", self._on_banner_scroll)
         self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
         self._overlay = Gtk.Overlay.new()

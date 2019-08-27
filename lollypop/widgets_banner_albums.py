@@ -45,7 +45,9 @@ class AlbumsBannerWidget(BannerWidget):
         self.__play_button = builder.get_object("play_button")
         self.__shuffle_button = builder.get_object("shuffle_button")
         self.__menu_button = builder.get_object("menu_button")
-        self.add_overlay(builder.get_object("widget"))
+        widget = builder.get_object("widget")
+        self._overlay.add_overlay(widget)
+        self._overlay.set_overlay_pass_through(widget, True)
         if genre_ids and genre_ids[0] == Type.YEARS:
             decade_str = "%s - %s" % (artist_ids[0], artist_ids[-1])
             self.__title_label.set_label(decade_str)
