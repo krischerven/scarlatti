@@ -205,7 +205,9 @@ class Application(Gtk.Application, ApplicationActions):
             dark = self.settings.get_value("dark-ui")
             settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
-        install_youtube_dl()
+        if Gio.NetworkMonitor.get_default().get_network_available() and\
+                self.settings.get_value("recent-youtube-dl"):
+            self.task_helper.run(install_youtube_dl)
         self.start_spotify()
 
     def start_spotify(self):

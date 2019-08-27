@@ -94,6 +94,11 @@
             <summary>If set, Lollypop will use this server instead of YouTube. See https://github.com/omarroth/invidious </summary>
             <description></description>
         </key>
+        <key type="b" name="recent-youtube-dl">
+            <default>false</default>
+            <summary>If true, Lollypop will not use system youtube-dl</summary>
+            <description></description>
+        </key>
         <key type="b" name="import-playlists">
             <default>false</default>
             <summary>Import playlists from collections</summary>

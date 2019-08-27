@@ -93,14 +93,14 @@ class AppearanceSettingsWidget(Gtk.Bin):
 
     def _on_switch_artwork_state_set(self, widget, state):
         """
-            Update artist artwork setting
+            Update recent-youtube-dl setting
             @param widget as Gtk.Switch
             @param state as bool
         """
-        App().settings.set_value("artist-artwork",
+        App().settings.set_value("recent-youtube-dl",
                                  GLib.Variant("b", state))
         if state:
-            App().art.cache_artists_artwork()
+            App().task
 
     def _on_combo_order_by_changed(self, widget):
         """

@@ -321,69 +321,123 @@
         <property name="margin_right">5</property>
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
-        <property name="row_spacing">10</property>
-        <property name="column_spacing">10</property>
+        <property name="row_spacing">30</property>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">&lt;b&gt;Google Web Services require an API key.&lt;/b&gt;
+            <property name="row_spacing">10</property>
+            <property name="column_spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">&lt;b&gt;Google Web Services require an API key.&lt;/b&gt;
 &lt;small&gt;Otherwise you will soon reach the default quota…
 Lollypop needs this to search for artwork.&lt;/small&gt;</property>
-            <property name="use_markup">True</property>
-            <property name="wrap">True</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="cs-entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="placeholder_text">AIzaSyAfXimyn-JsnPzAhhIuxYwgyMrj21Ee7e0</property>
+                <signal name="changed" handler="_on_entry_cs_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLinkButton">
+                <property name="label" translatable="yes">API key</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="halign">start</property>
+                <property name="relief">none</property>
+                <property name="uri">https://console.developers.google.com/apis/</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">&lt;small&gt;You need to enable "Custom Search API" and "YouTube API v3" for your project.&lt;/small&gt;</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">0</property>
-            <property name="width">2</property>
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="cs-entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <property name="placeholder_text">AIzaSyAfXimyn-JsnPzAhhIuxYwgyMrj21Ee7e0</property>
-            <signal name="changed" handler="_on_entry_cs_changed" swapped="no"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLinkButton">
-            <property name="label" translatable="yes">API key</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">start</property>
-            <property name="relief">none</property>
-            <property name="uri">https://console.developers.google.com/apis/</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
+          <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">&lt;small&gt;You need to enable "Custom Search API" and "YouTube API v3" for your project.&lt;/small&gt;</property>
-            <property name="use_markup">True</property>
-            <property name="wrap">True</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <property name="column_spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="hexpand">True</property>
+                <property name="label" translatable="yes">Use a recent version of youtube-dl
+&lt;span size="small" alpha='40000'&gt;Check this if web playback does not work&lt;/span&gt;</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="switch_youtube">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="valign">center</property>
+                <signal name="state-set" handler="_on_switch_youtube_state_set" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
-            <property name="width">2</property>
+            <property name="top_attach">1</property>
           </packing>
         </child>
       </object>
@@ -395,7 +449,7 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
       <object class="GtkLabel">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Search</property>
+        <property name="label" translatable="yes">Google</property>
       </object>
       <packing>
         <property name="position">3</property>

@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Gio
 
 from gettext import gettext as _
 
@@ -42,6 +42,8 @@ class WebSettingsWidget(Gtk.Bin):
         key = App().settings.get_value("cs-api-key").get_string() or\
             App().settings.get_default_value("cs-api-key").get_string()
         builder.get_object("cs-entry").set_text(key)
+        switch_youtube = builder.get_object("switch_youtube")
+        switch_youtube.set_state(App().settings.get_value("recent-youtube-dl"))
 
         #
         # ListenBrainz tab
@@ -123,6 +125,18 @@ class WebSettingsWidget(Gtk.Bin):
                 "computer-fail-symbolic",
                 Gtk.IconSize.MENU)
             return
+
+    def _on_switch_youtube_state_set(self, widget, state):
+        """
+            Update artist artwork setting
+            @param widget as Gtk.Switch
+            @param state as bool
+        """
+        App().settings.set_value("recent-youtube-dl",
+                                 GLib.Variant("b", state))
+        if Gio.NetworkMonitor.get_default().get_network_available() and state:
+            from lollypop.utils import install_youtube_dl
+            App().task_helper.run(install_youtube_dl)
 
 #######################
 # PRIVATE             #

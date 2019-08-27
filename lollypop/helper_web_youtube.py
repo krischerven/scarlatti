@@ -62,8 +62,13 @@ class YouTubeHelper:
             proxy = GLib.environ_getenv(GLib.get_environ(), "all_proxy")
             if proxy is not None and proxy.startswith("socks://"):
                 proxy = proxy.replace("socks://", "socks4://")
-            python_path = GLib.get_user_data_dir() + "/lollypop/python"
-            path = "%s/bin/youtube-dl" % python_path
+            if App().settings.get_value("recent-youtube-dl"):
+                python_path = GLib.get_user_data_dir() + "/lollypop/python"
+                path = "%s/bin/youtube-dl" % python_path
+                env = ["PYTHONPATH=%s" % python_path]
+            else:
+                path = "youtube-dl"
+                env = []
             # Remove playlist args
             uri = sub("list=.*", "", track.uri)
             argv_list = [
@@ -76,7 +81,7 @@ class YouTubeHelper:
                     argv.append(None)
                 (s, o, e, s) = GLib.spawn_sync(None,
                                                argv,
-                                               ["PYTHONPATH=%s" % python_path],
+                                               env,
                                                GLib.SpawnFlags.SEARCH_PATH,
                                                None)
                 if o:

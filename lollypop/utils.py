@@ -636,13 +636,7 @@ def install_youtube_dl():
     try:
         path = GLib.get_user_data_dir() + "/lollypop/python"
         argv = ["pip3", "install", "-t", path, "-U", "youtube-dl"]
-        (pid, stdin, stdout, stderr) = GLib.spawn_async(
-            argv, flags=GLib.SpawnFlags.SEARCH_PATH |
-            GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
-            standard_input=False,
-            standard_output=False,
-            standard_error=False
-        )
+        GLib.spawn_sync(None, argv, [], GLib.SpawnFlags.SEARCH_PATH, None)
     except Exception as e:
         Logger.error("install_youtube_dl: %s" % e)
 
