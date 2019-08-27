@@ -413,7 +413,7 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
                 <property name="margin_bottom">10</property>
                 <property name="hexpand">True</property>
                 <property name="label" translatable="yes">Use a recent version of youtube-dl
-&lt;span size="small" alpha='40000'&gt;Check this if web playback does not work&lt;/span&gt;</property>
+&lt;span size="small" alpha='40000'&gt;Activate this if Web playback does not work&lt;/span&gt;</property>
                 <property name="use_markup">True</property>
                 <property name="wrap">True</property>
               </object>
