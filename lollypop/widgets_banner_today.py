@@ -22,9 +22,10 @@ from lollypop.widgets_cover import CoverWidget
 from lollypop.objects_album import Album
 from lollypop.utils import update_button
 from lollypop.logger import Logger
+from lollypop.helper_signals import SignalsHelper, signals
 
 
-class TodayBannerWidget(BannerWidget):
+class TodayBannerWidget(BannerWidget, SignalsHelper):
     """
         Banner for today album
     """
@@ -51,6 +52,7 @@ class TodayBannerWidget(BannerWidget):
             Logger.error("TodayBannerWidget::__get_today_album(): %s", e)
         return Album()
 
+    @signals
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget
@@ -97,6 +99,10 @@ class TodayBannerWidget(BannerWidget):
         self._overlay.set_overlay_pass_through(grid, True)
         self.set_reveal_child(False)
         self.connect("map", self.__on_map)
+        return [
+                (App().art, "album-artwork-changed",
+                 "_on_album_artwork_changed")
+        ]
 
     def set_view_type(self, view_type):
         """
@@ -136,6 +142,23 @@ class TodayBannerWidget(BannerWidget):
            @param button as Gtk.Button
         """
         App().player.play_album(self.__album)
+
+    def _on_album_artwork_changed(self, art, album_id):
+        """
+            Update cover for album_id
+            @param art as Art
+            @param album_id as int
+        """
+        if album_id == self.__album.id:
+            App().art_helper.set_album_artwork(
+                            self.__album,
+                            # +100 to prevent resize lag
+                            self.get_allocated_width() + 100,
+                            self.height,
+                            self._artwork.get_scale_factor(),
+                            ArtBehaviour.BLUR_HARD |
+                            ArtBehaviour.DARKER,
+                            self.__on_album_artwork)
 
 #######################
 # PRIVATE             #
