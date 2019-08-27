@@ -119,10 +119,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if SizeAllocationHelper._handle_size_allocate(self, allocation):
             self.__set_artwork()
-            if allocation.width < Size.SMALL + 100:
-                self.__badge_artwork.hide()
-            else:
+            if allocation.width >= Size.SMALL + 100:
                 self.__badge_artwork.show()
+            else:
+                self.__badge_artwork.hide()
 
     def _on_artist_artwork_setting_changed(self, settings, variant):
         """
@@ -277,7 +277,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if self.__show_artwork and\
                 App().settings.get_value("artist-artwork"):
-            self.__badge_artwork.show()
             self.__badge_artwork.set_margin_start(MARGIN)
             self.__title_label.set_margin_start(0)
             artist = App().artists.get_name(self.__artist_ids[0])
@@ -345,6 +344,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             Set artist artwork on badge
             @param surface as cairo.Surface
         """
+        if self.get_allocated_width() >= Size.SMALL + 100:
+            self.__badge_artwork.show()
         if surface is None:
             self.__badge_artwork.get_style_context().add_class("artwork-icon")
             self.__badge_artwork.set_size_request(ArtSize.BANNER,
