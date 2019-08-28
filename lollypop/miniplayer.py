@@ -75,12 +75,12 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
 
         self.__grid = builder.get_object("grid")
         self._artwork = builder.get_object("cover")
-        self._on_current_changed(App().player)
         if App().player.current_track.id is not None:
             PlaybackController.on_status_changed(self, App().player)
             self.update_position()
             ProgressController.on_status_changed(self, App().player)
         self.add(builder.get_object("widget"))
+        self.connect("map", self.__on_map)
         return [
                 (App().player, "current-changed", "_on_current_changed"),
                 (App().player, "status-changed", "_on_status_changed"),
@@ -224,3 +224,10 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
         else:
             self.__cover.get_style_context().remove_class("white")
             self.__cover.set_from_surface(surface)
+
+    def __on_map(self, widget):
+        """
+            Update widget
+            @param widget as Gtk.Widget
+        """
+        self._on_current_changed(App().player)
