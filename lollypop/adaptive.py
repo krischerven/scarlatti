@@ -98,7 +98,7 @@ class AdaptiveHistory:
         if not self.__items:
             return (None, None)
         (view, _class, args) = self.__items.pop(index)
-        # Undestroyable view (sidebar, left_list)
+        # View always in memory
         if view is not None:
             return (view, args[1])
         else:
