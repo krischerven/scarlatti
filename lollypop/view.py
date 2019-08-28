@@ -16,7 +16,7 @@ from time import time
 from gettext import gettext as _
 import gc
 
-from lollypop.define import ViewType, Type, App, LoadingState
+from lollypop.define import ViewType, App, LoadingState
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 from lollypop.helper_signals import SignalsHelper, signals
@@ -39,7 +39,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.__destroyed = False
         self.__placeholder = None
         self.__scrolled_value = 0
-        self.__sidebar_id = Type.NONE
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
         self.__new_ids = []
@@ -134,13 +133,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     def stop(self):
         pass
 
-    def set_sidebar_id(self, sidebar_id):
-        """
-            Set sidebar id
-            @param sidebar_id as int
-        """
-        self.__sidebar_id = sidebar_id
-
     def should_reveal_header(self, adj):
         """
             Check if we need to reveal header
@@ -154,29 +146,12 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         return reveal
 
     @property
-    def sidebar_id(self):
-        """te
-            Get sidebar id
-            @return int
-        """
-        return self.__sidebar_id
-
-    @property
     def view_type(self):
         """
             View type less sizing
             @return ViewType
         """
         return self._view_type & ~(ViewType.MEDIUM | ViewType.SMALL)
-
-    @property
-    def args(self):
-        """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, {}, int, int) or None
-        """
-        return None
 
     @property
     def destroyed(self):

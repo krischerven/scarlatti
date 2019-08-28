@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size
+from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size, Type
 
 
 class AdaptiveView:
@@ -27,7 +27,7 @@ class AdaptiveView:
         """
             Init view
         """
-        pass
+        self.__sidebar_id = Type.NONE
 
     def destroy_later(self):
         """
@@ -37,16 +37,32 @@ class AdaptiveView:
         def do_destroy():
             self.destroy()
         self.stop()
-        if self.should_destroy:
+        if self.args is not None:
             GLib.timeout_add(1000, do_destroy)
 
+    def set_sidebar_id(self, sidebar_id):
+        """
+            Set sidebar id
+            @param sidebar_id as int
+        """
+        self.__sidebar_id = sidebar_id
+
     @property
-    def should_destroy(self):
+    def sidebar_id(self):
+        """te
+            Get sidebar id
+            @return int
         """
-            True if view should be destroyed
-            @return bool
+        return self.__sidebar_id
+
+    @property
+    def args(self):
         """
-        return True
+            Get default args for __class__, populate() plus sidebar_id and
+            scrolled position
+            @return ({}, {}, int, int) or None if should not destroy
+        """
+        return ({}, self.sidebar_id, 0)
 
 
 class AdaptiveHistory:
@@ -63,31 +79,24 @@ class AdaptiveHistory:
         """
         self.__items = []
 
-    def add_view(self, view, force_offloading=False):
+    def add_view(self, view):
         """
             Add view to history
             @param view as View
-            @param force_offloading as bool
-            @return True if view has been added
         """
-        added = False
-        # Do not add unwanted view to history
-        args = view.args
-        if args is not None:
-            view_class = view.__class__
-            if force_offloading:
+        view_class = view.__class__
+        self.__items.append((view, view_class, view.args))
+        # Offload history if too many items
+        if self.count >= self.__MAX_HISTORY_ITEMS:
+            (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
+            if view is not None:
                 view.destroy()
-                view = None
-            self.__items.append((view, view_class, args))
-            added = True
-            # Offload history if too many items
-            if self.count >= self.__MAX_HISTORY_ITEMS:
-                (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
-                if view is not None:
-                    view.destroy()
+                # This view can't be offloaded
+                if view.args is None:
+                    del self.__items[-self.__MAX_HISTORY_ITEMS]
+                else:
                     self.__items[-self.__MAX_HISTORY_ITEMS] =\
-                        (None, _class, args)
-        return added
+                        (None, _class, view.args)
 
     def pop(self, index=-1):
         """
@@ -100,7 +109,7 @@ class AdaptiveHistory:
         (view, _class, args) = self.__items.pop(index)
         # View always in memory
         if view is not None:
-            return (view, args[1])
+            return (view, view.sidebar_id)
         else:
             return self.__get_view_from_class(view, _class, args)
 
@@ -249,8 +258,8 @@ class AdaptiveStack(Gtk.Stack):
             return
         if visible_child is not None:
             visible_child.stop()
-            if not self.__history.add_view(visible_child):
-                visible_child.destroy_later()
+            if visible_child.sidebar_id != Type.NONE:
+                self.__history.add_view(visible_child)
             Gtk.Stack.set_visible_child(self, view)
             self.emit("history-changed")
         else:
@@ -286,7 +295,7 @@ class AdaptiveStack(Gtk.Stack):
             Save history to disk
         """
         visible_child = self.get_visible_child()
-        if visible_child is not None:
+        if visible_child is not None and visible_child.sidebar_id != Type.NONE:
             self.__history.add_view(visible_child)
         self.__history.save()
 

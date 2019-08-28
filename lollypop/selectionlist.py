@@ -471,20 +471,16 @@ class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
         return self._box
 
     @property
-    def should_destroy(self):
-        """
-            True if view should be destroyed
-            @return bool
-        """
-        return False
-
-    @property
     def mask(self):
         """
             Get selection list type
             @return bit mask
         """
         return self.__mask | self.__base_mask
+
+    @property
+    def args(self):
+        return None
 
     @property
     def count(self):

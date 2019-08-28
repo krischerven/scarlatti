@@ -170,10 +170,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     def args(self):
         return None
 
-    @property
-    def should_destroy(self):
-        return False
-
 #######################
 # PROTECTED           #
 #######################

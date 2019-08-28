@@ -142,6 +142,10 @@ class ViewsContainer:
             @return View
         """
         from lollypop.view_current_albums import CurrentAlbumsView
+        # Search view in children
+        for child in self._stack.get_children():
+            if isinstance(child, CurrentAlbumsView):
+                return child
         view = CurrentAlbumsView(view_type)
         view.populate()
         view.show()
