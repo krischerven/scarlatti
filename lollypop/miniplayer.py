@@ -117,6 +117,8 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             Update artwork and labels
             @param player as Player
         """
+        if self.__size == 0:
+            return
         same_artwork = self.__previous_artwork_id ==\
             App().player.current_track.album.id and not self.__per_track_cover
         if same_artwork:
