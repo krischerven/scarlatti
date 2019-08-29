@@ -120,7 +120,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param y as int
         """
         AdaptiveWindow._on_configure_event_timeout(self, width, height, x, y)
-        self.__toolbar.set_content_width(width)
         if not self.is_maximized():
             # Keep a minimal height
             if height < AdaptiveSize.SMALL:
@@ -141,7 +140,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             pos = App().settings.get_value("window-position")
             self.resize(size[0], size[1])
             self.move(pos[0], pos[1])
-            self.__toolbar.set_content_width(size[0])
             if App().settings.get_value("window-maximized"):
                 # Lets resize happen
                 GLib.idle_add(self.maximize)

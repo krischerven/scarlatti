@@ -12,15 +12,16 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Size, AdaptiveSize, MARGIN
+from lollypop.define import App, Size
 from lollypop.toolbar_playback import ToolbarPlayback
 from lollypop.toolbar_info import ToolbarInfo
 from lollypop.toolbar_title import ToolbarTitle
 from lollypop.toolbar_end import ToolbarEnd
 from lollypop.logger import Logger
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class Toolbar(Gtk.HeaderBar):
+class Toolbar(Gtk.HeaderBar, SizeAllocationHelper):
     """
         Lollypop toolbar
     """
@@ -31,6 +32,7 @@ class Toolbar(Gtk.HeaderBar):
             @param window as Window
         """
         Gtk.HeaderBar.__init__(self)
+        SizeAllocationHelper.__init__(self)
         self.__width = Size.MINI
         self.set_title("Lollypop")
         self.__toolbar_playback = ToolbarPlayback(window)
@@ -45,35 +47,14 @@ class Toolbar(Gtk.HeaderBar):
         self.pack_start(self.__toolbar_info)
         self.set_custom_title(self.__toolbar_title)
         self.pack_end(self.__toolbar_end)
-        self.set_property("spacing", MARGIN)
 
     def do_get_preferred_width(self):
         """
-            Allow snapping for screen with width < 1400
+            Allow window resize
             @return (int, int)
         """
         width = max(Size.SMALL, self.__width)
         return (Size.SMALL, width)
-
-    def set_content_width(self, window_width):
-        """
-            Calculate infos/title width
-            @param window_width as int
-        """
-        width = self.__toolbar_playback.get_preferred_width()[1]
-        width += self.__toolbar_end.get_preferred_width()[1]
-        window = self.get_window()
-        if window is not None:
-            self.__width = window.get_width()
-            available = self.__width - width
-            if available > 0:
-                if App().window.adaptive_size & (AdaptiveSize.BIG |
-                                                 AdaptiveSize.LARGE):
-                    title = available / 2
-                else:
-                    title = available
-                self.__toolbar_title.set_width(title)
-                self.__toolbar_info.set_width((available - title) / 2)
 
     def set_mini(self, mini):
         """
@@ -115,6 +96,22 @@ class Toolbar(Gtk.HeaderBar):
             @return ToolbarPlayback
         """
         return self.__toolbar_playback
+
+#######################
+# PROTECTED           #
+#######################
+    def _handle_size_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+            width = self.__toolbar_playback.get_preferred_width()[1]
+            width += self.__toolbar_end.get_preferred_width()[1]
+            available = allocation.width - width
+            title_width = available / 2.5
+            self.__toolbar_title.set_width(title_width)
+            self.__toolbar_info.set_width((available - title_width) / 2)
 
 #######################
 # PRIVATE             #
