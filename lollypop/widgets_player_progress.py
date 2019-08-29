@@ -41,6 +41,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__progress.set_sensitive(False)
         self.__progress.set_hexpand(True)
         self.__progress.set_draw_value(False)
+        self.__progress.connect("change-value", self.__on_change_value)
         self.__multi_press = Gtk.GestureMultiPress.new(self.__progress)
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("pressed", self.__on_multi_pressed)
@@ -157,6 +158,15 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_change_value(self, progress, scroll_type, value):
+        """
+            Update label
+            @param progress as Gtk.Scale
+            @param scroll_type as Gtk.ScrollType
+            @param value as float
+        """
+        self.__time_label.set_text(seconds_to_string(value))
+
     def __on_multi_pressed(self, gesture, n_press, x, y):
         """
             On press, mark player as seeking
