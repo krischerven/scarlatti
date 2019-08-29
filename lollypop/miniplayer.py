@@ -57,12 +57,15 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__gesture = GesturesHelper(
                                self.__eventbox,
                                primary_press_callback=self.__on_eventbox_press)
-        progress_widget = ProgressPlayerWidget()
-        progress_widget.show()
-        progress_widget.set_vexpand(True)
+        self.__progress_widget = ProgressPlayerWidget()
+        self.__progress_widget.show()
+        self.__progress_widget.set_vexpand(True)
         buttons_widget = ButtonsPlayerWidget(["menu-button",
                                               "black-transparent"])
         buttons_widget.show()
+        buttons_widget.update()
+        buttons_widget.set_property("halign", Gtk.Align.END)
+        buttons_widget.set_size_request(200, -1)
         self.__artwork_widget = ArtworkPlayerWidget()
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
@@ -71,17 +74,18 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         label_widget = LabelPlayerWidget()
         label_widget.show()
         label_widget.set_hexpand(True)
+        label_widget.update()
         self.__background = Gtk.Image()
         self.__background.show()
         # Assemble UI
         self.__eventbox.add(label_widget)
         self.__box.pack_start(self.__revealer, False, True, 0)
         self.__box.pack_start(bottom_box, False, False, 0)
-        bottom_box.pack_start(self.__eventbox, False, True, 0)
-        bottom_box.pack_start(buttons_widget, False, False, 0)
+        bottom_box.pack_start(self.__eventbox, False, False, 0)
+        bottom_box.pack_start(buttons_widget, True, True, 0)
         self.__revealer.add(revealer_box)
         revealer_box.pack_start(self.__artwork_widget, False, True, 0)
-        revealer_box.pack_start(progress_widget, False, True, 0)
+        revealer_box.pack_start(self.__progress_widget, False, True, 0)
         self.add(self.__background)
         self.add_overlay(self.__box)
         return [
@@ -157,6 +161,8 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         else:
             self.__revealer.set_reveal_child(True)
             self.emit("revealed", True)
+            self.__progress_widget.update()
+            self.__artwork_widget.update()
 
     def __on_artwork(self, surface):
         """
