@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.widgets_utils import Popover
 from lollypop.logger import Logger
 from lollypop.define import App, ArtSize, ArtBehaviour
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ArtworkSearchChild(Gtk.FlowBoxChild):
@@ -99,7 +99,7 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
         Search for artwork
     """
 
-    @signals
+    @signals_map
     def __init__(self):
         """
             Init widget

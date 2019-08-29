@@ -21,7 +21,7 @@ from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available
 from lollypop.view import View
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_search import SearchBannerWidget
 
 
@@ -30,7 +30,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         View for searching albums/tracks
     """
 
-    @signals
+    @signals_map
     def __init__(self, view_type):
         """
             Init Popover

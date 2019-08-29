@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Size, AdaptiveSize
+from lollypop.define import App, Size, AdaptiveSize, MARGIN
 from lollypop.toolbar_playback import ToolbarPlayback
 from lollypop.toolbar_info import ToolbarInfo
 from lollypop.toolbar_title import ToolbarTitle
@@ -38,17 +38,14 @@ class Toolbar(Gtk.HeaderBar):
         self.__toolbar_info = ToolbarInfo()
         self.__toolbar_info.show()
         self.__toolbar_title = ToolbarTitle()
+        self.__toolbar_title.show()
         self.__toolbar_end = ToolbarEnd(window)
         self.__toolbar_end.show()
         self.pack_start(self.__toolbar_playback)
         self.pack_start(self.__toolbar_info)
         self.set_custom_title(self.__toolbar_title)
         self.pack_end(self.__toolbar_end)
-
-        App().player.connect("status-changed", self.__on_status_changed)
-        App().player.connect("current-changed", self.__on_current_changed)
-        App().player.connect("next-changed", self.__on_next_changed)
-        App().player.connect("prev-changed", self.__on_prev_changed)
+        self.set_property("spacing", MARGIN)
 
     def do_get_preferred_width(self):
         """
@@ -128,32 +125,15 @@ class Toolbar(Gtk.HeaderBar):
             @param player as Player
         """
         Logger.debug("Toolbar::_on_current_changed()")
-        self.__toolbar_playback.on_current_changed(player)
-        self.__toolbar_info.on_current_changed(player)
         if App().player.current_track.id is None:
             self.__toolbar_title.hide()
         elif not App().window.miniplayer:
             self.__toolbar_title.show()
         self.__toolbar_title.on_current_changed(player)
 
-    def __on_prev_changed(self, player):
-        """
-            Update toolbar
-            @param player as Player
-        """
-        self.__toolbar_playback.on_prev_changed(player)
-
-    def __on_next_changed(self, player):
-        """
-            Update toolbar
-            @param player as Player
-        """
-        self.__toolbar_playback.on_next_changed(player)
-
     def __on_status_changed(self, player):
         """
             Update buttons and progress bar
             @param player as Player
         """
-        self.__toolbar_playback.on_status_changed(player)
         self.__toolbar_title.on_status_changed(player)

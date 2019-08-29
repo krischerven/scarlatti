@@ -17,7 +17,7 @@ from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.define import App, ViewType, MARGIN_SMALL, Size
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
 
 
@@ -26,7 +26,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         Popover showing Albums View
     """
 
-    @signals
+    @signals_map
     def __init__(self, view_type):
         """
             Init view

@@ -20,7 +20,7 @@ from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
 from lollypop.utils import set_cursor_hand2, popup_widget, update_button
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
@@ -30,7 +30,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         Banner for album
     """
 
-    @signals
+    @signals_map
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget

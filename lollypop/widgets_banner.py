@@ -14,7 +14,7 @@ from gi.repository import Gtk, Gdk, GObject, GLib
 
 from lollypop.define import ArtSize, ViewType, MARGIN, App, ArtBehaviour
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class Overlay(Gtk.Overlay):
@@ -58,7 +58,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
         GObject.signal_new(signal, Gtk.Revealer,
                            args[0], args[1], args[2])
 
-    @signals
+    @signals_map
     def __init__(self, view_type):
         """
             Init bannner

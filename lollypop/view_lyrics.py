@@ -23,7 +23,7 @@ from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_lyrics import SyncLyricsHelper
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -84,7 +84,7 @@ class LyricsView(View, InformationController,
         Show lyrics for track
     """
 
-    @signals
+    @signals_map
     def __init__(self):
         """
             Init view

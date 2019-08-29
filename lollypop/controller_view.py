@@ -11,7 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import App
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ViewControllerType:
@@ -25,7 +25,7 @@ class ViewController(SignalsHelper):
         Should be herited by a Gtk.Widget
     """
 
-    @signals
+    @signals_map
     def __init__(self, controller_type):
         """
             Init controller

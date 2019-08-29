@@ -13,10 +13,10 @@
 from gi.repository import Gtk
 
 from lollypop.define import App
-from lollypop.controller_playback import PlaybackController
+from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 
 
-class ToolbarPlayback(Gtk.Bin, PlaybackController):
+class ToolbarPlayback(Gtk.Box):
     """
         Playback toolbar
     """
@@ -26,22 +26,15 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
             Init toolbar
             @parma window as Window
         """
-        Gtk.Bin.__init__(self)
-        PlaybackController.__init__(self)
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/ToolbarPlayback.ui")
-        builder.connect_signals(self)
-
-        self.add(builder.get_object("playback"))
-
-        self._prev_button = builder.get_object("previous_button")
-        self._play_button = builder.get_object("play_button")
-        self._next_button = builder.get_object("next_button")
-        self.__back_button = builder.get_object("back_button")
-        self._play_image = builder.get_object("play_image")
-        self._pause_image = builder.get_object("pause_image")
-        self.__buttons = builder.get_object("buttons")
-
+        Gtk.Box.__init__(self)
+        self.__back_button = Gtk.Button.new_from_icon_name(
+            "go-previous-symbolic", Gtk.IconSize.BUTTON)
+        self.__back_button.show()
+        self.__player_buttons = ButtonsPlayerWidget()
+        self.__player_buttons.show()
+        self.set_spacing(10)
+        self.pack_start(self.__back_button, False, False, 0)
+        self.pack_start(self.__player_buttons, False, False, 0)
         window.container.connect("can-go-back-changed",
                                  self.__on_can_go_back_changed)
 
@@ -51,9 +44,9 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
             @param mini as bool
         """
         if mini:
-            self.__buttons.hide()
+            self.__player_buttons.hide()
         else:
-            self.__buttons.show()
+            self.__player_buttons.show()
 
     @property
     def back_button(self):
@@ -62,15 +55,6 @@ class ToolbarPlayback(Gtk.Bin, PlaybackController):
             @return Gtk.Button
         """
         return self.__back_button
-
-    @property
-    def seek_wanted(self):
-        """
-            True if previous is about seeking at beginning
-            @return bool
-        """
-        return self._prev_button.get_image().get_icon_name()[0] ==\
-            "media-seek-backward-symbolic"
 
 #######################
 # Protected           #

@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GObject
 
 from lollypop.define import App
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ApplicationMenu(Gtk.Bin, SignalsHelper):
@@ -26,7 +26,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
-    @signals
+    @signals_map
     def __init__(self):
         """
             Init popover

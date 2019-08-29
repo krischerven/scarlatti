@@ -16,23 +16,23 @@ from datetime import datetime
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, AdaptiveSize
-from lollypop.controller_information import InformationController
-from lollypop.controller_playback import PlaybackController
-from lollypop.controller_progress import ProgressController
+from lollypop.widgets_player_progress import ProgressPlayerWidget
+from lollypop.widgets_player_buttons import ButtonsPlayerWidget
+from lollypop.widgets_player_artwork import ArtworkPlayerWidget
+from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.objects_radio import Radio
 from lollypop.container import Container
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.logger import Logger
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
-                 PlaybackController, ProgressController, SignalsHelper):
+class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
     """
         Show a fullscreen window showing current track context
     """
 
-    @signals
+    @signals_map
     def __init__(self):
         """
             Init window
@@ -40,8 +40,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         Gtk.Window.__init__(self)
         AdaptiveWindow.__init__(self)
         return [
-                (App().player, "current-changed", "on_current_changed"),
-                (App().player, "status-changed", "on_status_changed")
+                (App().player, "current-changed", "_on_current_changed")
         ]
 
     def delayed_init(self):
@@ -51,54 +50,73 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         self.get_style_context().add_class("black")
         self.set_title("Lollypop")
         self.__allocation = Gdk.Rectangle()
-        PlaybackController.__init__(self)
-        ProgressController.__init__(self)
         self.set_application(App())
         self.__timeout_id = None
         self.__signal1_id = self.__signal2_id = None
+        self.__background_id = None
         self.set_decorated(False)
-
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/FullScreen.ui")
-        builder.connect_signals(self)
-
         # Calculate cover size
         screen = Gdk.Screen.get_default()
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         geometry = screen.get_monitor_geometry(monitor)
-        self.__overlay_grid = builder.get_object("overlay_grid")
         art_size_fs = ArtSize.FULLSCREEN / self.get_scale_factor()
-        font_size_fs = 11 / self.get_scale_factor()
+        font_size_fs = 40 / self.get_scale_factor()
         if geometry.width > geometry.height:
-            self.__art_size = int(art_size_fs * geometry.height / 1080)
-            self.__font_size = int(font_size_fs * geometry.height / 1080)
+            art_size = int(art_size_fs * geometry.height / 1080)
+            font_size = int(font_size_fs * geometry.height / 1080)
         else:
-            self.__art_size = int(art_size_fs * geometry.width / 1920)
-            self.__font_size = int(font_size_fs * geometry.width / 1920)
+            art_size = int(art_size_fs * geometry.width / 1920)
+            font_size = int(font_size_fs * geometry.width / 1920)
+        builder = Gtk.Builder()
+        builder.add_from_resource("/org/gnome/Lollypop/FullScreen.ui")
+        builder.connect_signals(self)
+        self.__progress_widget = ProgressPlayerWidget()
+        self.__progress_widget.show()
+        self.__progress_widget.set_property("halign", Gtk.Align.CENTER)
+        self.__progress_widget.set_size_request(500, -1)
+        self.__buttons_widget = ButtonsPlayerWidget(["menu-button",
+                                                     "black-transparent"])
+        self.__buttons_widget.show()
+        self.__buttons_widget.set_size_request(500, -1)
+        self.__buttons_widget.set_property("valign", Gtk.Align.CENTER)
+        self.__buttons_widget.set_property("halign", Gtk.Align.CENTER)
+        self.__artwork_widget = ArtworkPlayerWidget()
+        self.__artwork_widget.show()
+        self.__artwork_widget.set_vexpand(True)
+        self.__artwork_widget.set_art_size(art_size, art_size)
+        self.__artwork_widget.set_property("valign", Gtk.Align.CENTER)
+        self.__artwork_widget.set_property("halign", Gtk.Align.CENTER)
+        self.__label_widget = LabelPlayerWidget(True, font_size)
+        self.__label_widget.show()
+        self.__label_widget.set_hexpand(True)
+        self.__label_widget.set_vexpand(True)
+        self.__label_widget.set_justify(Gtk.Justification.CENTER)
+        eventbox = Gtk.EventBox.new()
+        eventbox.show()
+        eventbox.connect("button-release-event",
+                         self.__on_image_button_release_event)
+        eventbox.connect("realize", self.__on_image_realize)
+        eventbox.add(self.__artwork_widget)
+        self.__revealer = builder.get_object("revealer")
+        self.__datetime = builder.get_object("datetime")
+        self.__overlay_grid = builder.get_object("overlay_grid")
         widget = builder.get_object("widget")
-        buttons_box = builder.get_object("buttons_box")
-        labels_box = builder.get_object("labels_box")
-        progress_box = builder.get_object("progress_box")
-        event_box = builder.get_object("event_box")
         if App().settings.get_value("artist-artwork"):
-            self.__overlay_grid.attach(buttons_box, 0, 4, 2, 1)
-            self.__overlay_grid.attach(labels_box, 0, 2, 2, 1)
-            self.__overlay_grid.attach(progress_box, 0, 3, 2, 1)
-            self.__overlay_grid.attach(event_box, 2, 2, 1, 3)
-            progress_box.set_margin_start(50)
-            event_box.set_margin_end(50)
-            labels_box.set_margin_start(50)
+            self.__overlay_grid.attach(self.__buttons_widget, 0, 4, 2, 1)
+            self.__overlay_grid.attach(self.__label_widget, 0, 2, 2, 1)
+            self.__overlay_grid.attach(self.__progress_widget, 0, 3, 2, 1)
+            self.__overlay_grid.attach(eventbox, 2, 2, 1, 3)
+            self.__progress_widget.set_margin_start(50)
+            eventbox.set_margin_end(50)
+            self.__label_widget.set_margin_start(50)
+            self.__label_widget.set_property("valign", Gtk.Align.END)
+            self.__artwork_widget.set_property("valign", Gtk.Align.END)
         else:
-            self.__overlay_grid.attach(buttons_box, 0, 4, 3, 1)
-            self.__overlay_grid.attach(labels_box, 0, 2, 3, 1)
-            self.__overlay_grid.attach(progress_box, 0, 3, 3, 1)
-            self.__overlay_grid.attach(event_box, 0, 1, 3, 1)
-            event_box.set_vexpand(True)
-        self._play_button = builder.get_object("play_btn")
-        self._next_button = builder.get_object("next_btn")
-        self._prev_button = builder.get_object("prev_btn")
-        self._play_image = builder.get_object("play_image")
-        self._pause_image = builder.get_object("pause_image")
+            self.__overlay_grid.attach(self.__buttons_widget, 0, 4, 3, 1)
+            self.__overlay_grid.attach(self.__label_widget, 0, 2, 3, 1)
+            self.__overlay_grid.attach(self.__progress_widget, 0, 3, 3, 1)
+            self.__overlay_grid.attach(eventbox, 0, 1, 3, 1)
+            eventbox.set_vexpand(True)
         close_btn = builder.get_object("close_btn")
         preferences = Gio.Settings.new("org.gnome.desktop.wm.preferences")
         layout = preferences.get_value("button-layout").get_string()
@@ -109,15 +127,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             self.__overlay_grid.attach(close_btn, 2, 0, 1, 1)
             close_btn.set_property("halign", Gtk.Align.END)
         self._artwork = builder.get_object("cover")
-        self.__setup_controller()
-        self._title_label = builder.get_object("title")
-        self._artist_label = builder.get_object("artist")
-        self._album_label = builder.get_object("album")
-        self.__revealer = builder.get_object("revealer")
-        self._datetime = builder.get_object("datetime")
-        self._progress = builder.get_object("progress_scale")
-        self._timelabel = builder.get_object("playback")
-        self._total_time_label = builder.get_object("duration")
         self.connect("key-release-event", self.__on_key_release_event)
         # Add a navigation widget on the right
         self.__back_button = Gtk.Button.new_from_icon_name(
@@ -154,9 +163,11 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         """
             Setup window for current screen
         """
-        self.on_status_changed(App().player)
-        self.on_current_changed(App().player)
         Gtk.Window.do_show(self)
+        self.__buttons_widget.update()
+        self.__label_widget.update()
+        self.__progress_widget.update()
+        self.__setup_artwork_type()
         if self.__timeout_id is None:
             try:
                 interface = Gio.Settings.new("org.gnome.desktop.interface")
@@ -167,7 +178,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             self.__timeout_id = GLib.timeout_add(1000,
                                                  self.__update_datetime,
                                                  show_seconds)
-        self.update_position(App().player.position / Gst.SECOND)
+        self.__progress_widget.update_position(
+            App().player.position / Gst.SECOND)
         screen = Gdk.Screen.get_default()
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         self.fullscreen_on_monitor(screen, monitor)
@@ -186,34 +198,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             GLib.source_remove(self.__timeout_id)
             self.__timeout_id = None
         App().inhibitor.manual_uninhibit()
-
-    def on_status_changed(self, player):
-        """
-            Update controller
-            @param player as Player
-        """
-        ProgressController.on_status_changed(self, player)
-        PlaybackController.on_status_changed(self, player)
-
-    def on_current_changed(self, player):
-        """
-            Update controllers
-            @param player as Player
-        """
-        PlaybackController.on_current_changed(self, player)
-        InformationController.on_current_changed(self,
-                                                 self.__art_size,
-                                                 self.__font_size)
-        ProgressController.on_current_changed(self, player)
-        self.__update_background()
-        if player.current_track.id is not None:
-            album_name = player.current_track.album.name
-            if player.current_track.year:
-                album_name += " (%s)" % player.current_track.year
-            self._album_label.set_markup(
-                "<span font='%s'>%s</span>" %
-                                        (self.__font_size - 1,
-                                         GLib.markup_escape_text(album_name)))
 
     @property
     def miniplayer(self):
@@ -242,23 +226,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
 #######################
 # PROTECTED           #
 #######################
-    def _on_artwork(self, surface):
-        """
-            Set artwork
-            @param surface as str
-        """
-        if surface is None:
-            if isinstance(App().player.current_track, Radio):
-                icon_name = "audio-input-microphone-symbolic"
-            else:
-                icon_name = "folder-music-symbolic"
-            self._artwork.set_from_icon_name(icon_name,
-                                             Gtk.IconSize.DIALOG)
-            self._artwork.set_size_request(self.__art_size, self.__art_size)
-        else:
-            InformationController._on_artwork(self, surface)
-            self._artwork.set_size_request(-1, -1)
-
     def _on_close_button_clicked(self, button):
         """
             Destroy self
@@ -281,52 +248,22 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             button.get_image().set_from_icon_name("pan-end-symbolic",
                                                   Gtk.IconSize.BUTTON)
 
-    def _on_image_realize(self, eventbox):
+    def _on_current_changed(self, player):
         """
-            Set cursor
-            @param eventbox as Gtk.EventBox
+            Update background
+            @param player as Player
         """
-        try:
-            eventbox.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
-        except:
-            Logger.warning(_("You are using a broken cursor theme!"))
-
-    def _on_image_button_release_event(self, widget, event):
-        """
-            Change artwork type
-            @param widget as Gtk.Widget
-            @param event as Gdk.Event
-        """
-        fs_type = App().settings.get_value("fullscreen-type").get_int32()
-        if fs_type & ArtBehaviour.BLUR_HARD and\
-                fs_type & ArtBehaviour.ROUNDED:
-            fs_type = ArtBehaviour.NONE
-        elif fs_type & ArtBehaviour.NONE:
-            fs_type = ArtBehaviour.BLUR_HARD
-        elif fs_type & ArtBehaviour.BLUR_HARD:
-            fs_type |= ArtBehaviour.ROUNDED
-            fs_type &= ~ArtBehaviour.BLUR_HARD
-        elif fs_type & ArtBehaviour.ROUNDED:
-            fs_type |= ArtBehaviour.BLUR_HARD
-        else:
-            fs_type = ArtBehaviour.NONE
-        App().settings.set_value("fullscreen-type",
-                                 GLib.Variant("i", fs_type))
-        self.__setup_controller()
         self.__update_background()
-        InformationController.on_current_changed(self,
-                                                 self.__art_size,
-                                                 self.__font_size)
 
 #######################
 # PRIVATE             #
 #######################
-    def __setup_controller(self):
+    def __setup_artwork_type(self):
         """
-            Setup controller
+            Setup artwork type
         """
         fs_type = App().settings.get_value("fullscreen-type").get_int32()
-        context = self._artwork.get_style_context()
+        context = self.__artwork_widget.get_style_context()
         behaviour = ArtBehaviour.CROP_SQUARE
         if fs_type & ArtBehaviour.ROUNDED:
             context.add_class("image-rotate")
@@ -335,7 +272,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         else:
             context.remove_class("image-rotate")
             context.add_class("cover-frame")
-        InformationController.__init__(self, False, behaviour)
+        self.__artwork_widget.set_behaviour(behaviour)
+        self.__artwork_widget.update()
 
     def __update_background(self, album_artwork=False):
         """
@@ -353,6 +291,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
             # We don't want this for background, stored for album cover
             behaviour &= ~ArtBehaviour.ROUNDED
             if isinstance(App().player.current_track, Radio):
+                if self.__background_id == App().player.current_track.name:
+                    return
                 App().art_helper.set_radio_artwork(
                                     App().player.current_track.name,
                                     allocation.width,
@@ -367,6 +307,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
                     artist = App().player.current_track.album.artists[0]
                 else:
                     artist = App().player.current_track.artists[0]
+                if self.__background_id == artist:
+                    return
                 App().art_helper.set_artist_artwork(
                                     artist,
                                     allocation.width,
@@ -376,6 +318,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
                                     self.__on_artwork,
                                     False)
             else:
+                if self.__background_id == App().player.current_track.album.id:
+                    return
                 App().art_helper.set_album_artwork(
                                     App().player.current_track.album,
                                     allocation.width,
@@ -396,13 +340,47 @@ class FullScreen(Gtk.Window, AdaptiveWindow, InformationController,
         """
         now = datetime.now()
         if show_seconds:
-            self._datetime.set_label(now.strftime("%a %d %b %X"))
+            self.__datetime.set_label(now.strftime("%a %d %b %X"))
         else:
-            self._datetime.set_label(now.strftime("%a %d %b %X")[:-3])
+            self.__datetime.set_label(now.strftime("%a %d %b %X")[:-3])
         if self.__timeout_id is None:
             self.__timeout_id = GLib.timeout_add(60000, self.__update_datetime)
             return False
         return True
+
+    def __on_image_realize(self, eventbox):
+        """
+            Set cursor
+            @param eventbox as Gtk.EventBox
+        """
+        try:
+            eventbox.get_window().set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
+        except:
+            Logger.warning(_("You are using a broken cursor theme!"))
+
+    def __on_image_button_release_event(self, widget, event):
+        """
+            Change artwork type
+            @param widget as Gtk.Widget
+            @param event as Gdk.Event
+        """
+        fs_type = App().settings.get_value("fullscreen-type").get_int32()
+        if fs_type & ArtBehaviour.BLUR_HARD and\
+                fs_type & ArtBehaviour.ROUNDED:
+            fs_type = ArtBehaviour.NONE
+        elif fs_type & ArtBehaviour.NONE:
+            fs_type = ArtBehaviour.BLUR_HARD
+        elif fs_type & ArtBehaviour.BLUR_HARD:
+            fs_type |= ArtBehaviour.ROUNDED
+            fs_type &= ~ArtBehaviour.BLUR_HARD
+        elif fs_type & ArtBehaviour.ROUNDED:
+            fs_type |= ArtBehaviour.BLUR_HARD
+        else:
+            fs_type = ArtBehaviour.NONE
+        App().settings.set_value("fullscreen-type",
+                                 GLib.Variant("i", fs_type))
+        self.__setup_artwork_type()
+        self.__update_background()
 
     def __on_artwork(self, surface, album_artwork):
         """

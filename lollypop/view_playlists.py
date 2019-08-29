@@ -22,7 +22,7 @@ from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.logger import Logger
 from lollypop.helper_filtering import FilteringHelper
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -32,7 +32,7 @@ class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
         View showing playlists
     """
 
-    @signals
+    @signals_map
     def __init__(self, playlist_id, view_type):
         """
             Init PlaylistView

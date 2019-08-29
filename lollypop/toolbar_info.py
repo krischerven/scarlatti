@@ -15,49 +15,48 @@ from gi.repository import Gtk, GLib
 
 from lollypop.utils import set_cursor_hand2, popup_widget
 from lollypop.objects_radio import Radio
-from lollypop.controller_information import InformationController
+from lollypop.widgets_player_artwork import ArtworkPlayerWidget
+from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.define import App, ArtBehaviour, StorageType
 from lollypop.helper_gestures import GesturesHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
+class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
+                  SignalsHelper, GesturesHelper):
     """
         Informations toolbar
     """
 
+    @signals_map
     def __init__(self):
         """
             Init toolbar
         """
         Gtk.Bin.__init__(self)
-        InformationController.__init__(self, True,
-                                       ArtBehaviour.CROP_SQUARE |
-                                       ArtBehaviour.CACHE)
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/ToolbarInfo.ui")
-        builder.connect_signals(self)
-        self.__timeout_id = None
         self.__width = 0
-
-        self._infobox = builder.get_object("widget")
-        self._infobox.connect("realize", set_cursor_hand2)
-        self.add(self._infobox)
-        GesturesHelper.__init__(self, self._infobox)
+        horizontal_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 15)
+        horizontal_box.show()
+        self.__eventbox = Gtk.EventBox.new()
+        self.__eventbox.show()
+        self.__eventbox.connect("realize", set_cursor_hand2)
+        self.__eventbox.add(horizontal_box)
+        self.add(self.__eventbox)
+        GesturesHelper.__init__(self, self.__eventbox)
         self.special_headerbar_hack()
 
-        self.__labels = builder.get_object("nowplaying_labels")
-        self.__labels.connect("query-tooltip", self.__on_query_tooltip)
-        self.__labels.set_property("has-tooltip", True)
-
-        self._title_label = builder.get_object("title")
-        self._artist_label = builder.get_object("artist")
-        self._artwork = builder.get_object("artwork")
-        self._artwork.set_property("has-tooltip", True)
-
+        self.__label = LabelPlayerWidget()
+        self.__label.show()
+        self.__artwork = ArtworkPlayerWidget(ArtBehaviour.CROP_SQUARE |
+                                             ArtBehaviour.CACHE)
+        self.__artwork.show()
+        self.__artwork.set_property("has-tooltip", True)
+        horizontal_box.pack_start(self.__artwork, False, False, 0)
+        horizontal_box.pack_start(self.__label, False, False, 0)
         self.connect("realize", self.__on_realize)
-
-        App().art.connect("album-artwork-changed", self.__update_cover)
-        App().art.connect("radio-artwork-changed", self.__update_logo)
+        return [
+            (App().player, "status-changed", "_on_status_changed")
+        ]
 
     def do_get_preferred_width(self):
         """
@@ -91,16 +90,6 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
         else:
             self.show()
 
-    def on_current_changed(self, player):
-        """
-            Update widgets
-            player as Player
-        """
-        if self.get_realized():
-            InformationController.on_current_changed(self,
-                                                     self.__art_size,
-                                                     None)
-
     @property
     def art_size(self):
         """
@@ -112,25 +101,14 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_eventbox_realize(self, eventbox):
-        pass
-
-    def _on_artwork(self, surface):
+    def _on_status_changed(self, player):
         """
-            Set artwork
-            @param surface as str
+            Show/hide eventbox
         """
-        if surface is None:
-            if isinstance(App().player.current_track, Radio):
-                icon_name = "audio-input-microphone-symbolic"
-            else:
-                icon_name = "folder-music-symbolic"
-            self._artwork.set_from_icon_name(icon_name,
-                                             Gtk.IconSize.BUTTON)
-            self._artwork.set_size_request(self.__art_size, self.__art_size)
+        if player.is_playing:
+            self.__eventbox.show()
         else:
-            InformationController._on_artwork(self, surface)
-            self._artwork.set_size_request(-1, -1)
+            self.__eventbox.hide()
 
     def _on_primary_long_press_gesture(self, x, y):
         """
@@ -138,7 +116,7 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
             @param x as int
             @param y as int
         """
-        if App().window.is_adaptive or not self._artwork.get_visible():
+        if App().window.is_adaptive or not self.__artwork.get_visible():
             return
         if isinstance(App().player.current_track, Radio):
             return
@@ -152,7 +130,7 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
             @param y as int
             @param evnet as Gdk.Event
         """
-        if App().window.is_adaptive or not self._artwork.get_visible():
+        if App().window.is_adaptive or not self.__artwork.get_visible():
             return
         if isinstance(App().player.current_track, Radio):
             from lollypop.pop_tunein import TuneinPopover
@@ -162,7 +140,7 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
             from lollypop.pop_information import InformationPopover
             popover = InformationPopover()
             popover.populate()
-        popover.set_relative_to(self._infobox)
+        popover.set_relative_to(self.__eventbox)
         popover.popup()
 
     def _on_secondary_press_gesture(self, x, y, event):
@@ -195,13 +173,13 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
         if App().player.current_track.album_artist == name:
             pixbuf = App().art.get_radio_artwork(
                 name, self.__art_size, self.__art_size)
-            self._artwork.set_from_surface(pixbuf)
+            self.__artwork.set_from_surface(pixbuf)
 
     def __popup_menu(self):
         """
             Show contextual menu
         """
-        if App().window.is_adaptive or not self._artwork.get_visible():
+        if App().window.is_adaptive or not self.__artwork.get_visible():
             return
         track = App().player.current_track
         if track.id >= 0:
@@ -215,16 +193,15 @@ class ToolbarInfo(Gtk.Bin, InformationController, GesturesHelper):
                 menu_ext.show()
                 menu_widget.get_child_by_name("main").add(menu_ext)
             self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
-            popup_widget(menu_widget, self._infobox)
+            popup_widget(menu_widget, self.__eventbox)
 
     def __on_realize(self, toolbar):
         """
             Calculate art size
             @param toolbar as ToolbarInfos
         """
-        self.__art_size = self.get_allocated_height()
-        if App().player.current_track.id is not None:
-            self.on_current_changed(App().player)
+        art_size = self.get_allocated_height()
+        self.__artwork.set_art_size(art_size, art_size)
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """

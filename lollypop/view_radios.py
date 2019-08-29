@@ -18,7 +18,7 @@ from lollypop.widgets_radio import RadioWidget
 from lollypop.pop_tunein import TuneinPopover
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.utils import get_icon_name, get_network_available
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class RadiosView(FlowBoxView, ViewController, SignalsHelper):
@@ -26,7 +26,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         Show radios flow box
     """
 
-    @signals
+    @signals_map
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init view

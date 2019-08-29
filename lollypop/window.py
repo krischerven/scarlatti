@@ -17,7 +17,7 @@ from lollypop.container import Container
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.utils import is_unity
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
 
 
@@ -26,7 +26,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         Main window
     """
 
-    @signals
+    @signals_map
     def __init__(self):
         """
             Init window

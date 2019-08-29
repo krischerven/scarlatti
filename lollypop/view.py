@@ -19,7 +19,7 @@ import gc
 from lollypop.define import ViewType, App, LoadingState
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class View(AdaptiveView, Gtk.Grid, SignalsHelper):
@@ -27,7 +27,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         Generic view
     """
 
-    @signals
+    @signals_map
     def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init view

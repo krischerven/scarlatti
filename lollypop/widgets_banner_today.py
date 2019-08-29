@@ -22,7 +22,7 @@ from lollypop.widgets_cover import CoverWidget
 from lollypop.objects_album import Album
 from lollypop.utils import update_button
 from lollypop.logger import Logger
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -53,7 +53,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             Logger.error("TodayBannerWidget::__get_today_album(): %s", e)
         return Album()
 
-    @signals
+    @signals_map
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget

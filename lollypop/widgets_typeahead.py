@@ -13,14 +13,14 @@
 from gi.repository import Gtk, Gdk
 
 from lollypop.define import App, MARGIN_SMALL
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
     """
         Type ahead widget
     """
-    @signals
+    @signals_map
     def __init__(self):
         """
             Init widget

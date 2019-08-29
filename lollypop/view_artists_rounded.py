@@ -20,7 +20,7 @@ from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.utils import get_icon_name, get_font_height
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class RoundedArtistsView(FlowBoxView, SignalsHelper):
@@ -28,7 +28,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         Show artists in a FlowBox
     """
 
-    @signals
+    @signals_map
     def __init__(self, view_type):
         """
             Init artist view

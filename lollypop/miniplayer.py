@@ -12,19 +12,18 @@
 
 from gi.repository import Gtk, GObject
 
-from lollypop.objects_radio import Radio
 from lollypop.helper_art import ArtBehaviour
-from lollypop.controller_information import InformationController
-from lollypop.controller_progress import ProgressController
-from lollypop.controller_playback import PlaybackController
-from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import signals
 from lollypop.utils import set_cursor_hand2
-from lollypop.define import App, ArtSize, Size
+from lollypop.define import App, ArtSize, MARGIN_SMALL
+from lollypop.widgets_player_progress import ProgressPlayerWidget
+from lollypop.widgets_player_buttons import ButtonsPlayerWidget
+from lollypop.widgets_player_artwork import ArtworkPlayerWidget
+from lollypop.widgets_player_label import LabelPlayerWidget
+from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper, signals
 
 
-class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
-                 PlaybackController, SizeAllocationHelper):
+class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
     """
         Mini player shown in adaptive mode
     """
@@ -37,54 +36,54 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
         """
             Init mini player
         """
-        Gtk.Bin.__init__(self)
-        InformationController.__init__(self, False,
-                                       ArtBehaviour.BLUR_MAX |
-                                       ArtBehaviour.DARKER)
-        ProgressController.__init__(self)
-        PlaybackController.__init__(self)
+        Gtk.Overlay.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__size = 0
-        self.__cover = None
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/MiniPlayer.ui")
-        builder.connect_signals(self)
-
+        self.__previous_artwork_id = None
         self.get_style_context().add_class("black")
-        self.__grid = builder.get_object("grid")
-        self.__revealer = builder.get_object("revealer")
-        self.__revealer_box = builder.get_object("revealer_box")
-        self.__eventbox = builder.get_object("eventbox")
+        self.__box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.__box.show()
+        self.__box.get_style_context().add_class("big-padding")
+        self.__revealer = Gtk.Revealer.new()
+        self.__revealer.show()
+        revealer_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN_SMALL)
+        revealer_box.show()
+        bottom_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, MARGIN_SMALL)
+        bottom_box.show()
+        self.__eventbox = Gtk.EventBox.new()
+        self.__eventbox.show()
         self.__eventbox.connect("realize", set_cursor_hand2)
-
-        self._progress = builder.get_object("progress_scale")
-        self._progress.set_sensitive(False)
-        self._progress.set_hexpand(True)
-        self._timelabel = builder.get_object("playback")
-        self._total_time_label = builder.get_object("duration")
-
-        self._artist_label = builder.get_object("artist_label")
-        self._title_label = builder.get_object("title_label")
-
-        self._prev_button = builder.get_object("previous_button")
-        self._play_button = builder.get_object("play_button")
-        self._next_button = builder.get_object("next_button")
-        self.__back_button = builder.get_object("back_button")
-        self._play_image = builder.get_object("play_image")
-        self._pause_image = builder.get_object("pause_image")
-
-        self.__grid = builder.get_object("grid")
-        self._artwork = builder.get_object("cover")
-        if App().player.current_track.id is not None:
-            PlaybackController.on_status_changed(self, App().player)
-            self.update_position()
-            ProgressController.on_status_changed(self, App().player)
-        self.add(builder.get_object("widget"))
-        self.connect("map", self.__on_map)
+        self.__eventbox.connect("button-release-event",
+                                self.__on_button_release_event)
+        progress_widget = ProgressPlayerWidget()
+        progress_widget.show()
+        progress_widget.set_vexpand(True)
+        buttons_widget = ButtonsPlayerWidget(["menu-button",
+                                              "black-transparent"])
+        buttons_widget.show()
+        self.__artwork_widget = ArtworkPlayerWidget()
+        self.__artwork_widget.show()
+        self.__artwork_widget.set_vexpand(True)
+        self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
+                                           ArtSize.MINIPLAYER)
+        label_widget = LabelPlayerWidget()
+        label_widget.show()
+        label_widget.set_hexpand(True)
+        self.__background = Gtk.Image()
+        self.__background.show()
+        # Assemble UI
+        self.__eventbox.add(label_widget)
+        self.__box.pack_start(self.__revealer, False, True, 0)
+        self.__box.pack_start(bottom_box, False, False, 0)
+        bottom_box.pack_start(self.__eventbox, False, True, 0)
+        bottom_box.pack_start(buttons_widget, False, False, 0)
+        self.__revealer.add(revealer_box)
+        revealer_box.pack_start(self.__artwork_widget, False, True, 0)
+        revealer_box.pack_start(progress_widget, False, True, 0)
+        self.add(self.__background)
+        self.add_overlay(self.__box)
         return [
-                (App().player, "current-changed", "_on_current_changed"),
-                (App().player, "status-changed", "_on_status_changed"),
-                (App().player, "duration-changed", "on_duration_changed")
+            (App().player, "current-changed", "_on_current_changed")
         ]
 
     def do_get_preferred_width(self):
@@ -99,95 +98,29 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
         """
             Force preferred height
         """
-        (min, nat) = self.__grid.get_preferred_height()
+        (min, nat) = self.__box.get_preferred_height()
         return (min, min)
 
 #######################
 # PROTECTED           #
 #######################
-    def _on_album_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is None:
-            self.__grid.get_style_context().add_class("black")
-            self._artwork.get_style_context().add_class("black")
-        else:
-            InformationController._on_album_artwork(self, surface)
-            self.__grid.get_style_context().remove_class("black")
-            self._artwork.get_style_context().remove_class("black")
-
-    def _on_button_release_event(self, *ignore):
-        """
-            Set revealer on/off
-            @param button as Gtk.Button
-        """
-        if self.__revealer.get_reveal_child():
-            self.__revealer.set_reveal_child(False)
-            self.emit("revealed", False)
-            if self.__cover is not None:
-                self.__cover.destroy()
-                self.__cover = None
-        else:
-            if self.__cover is None:
-                self.__cover = Gtk.Image.new()
-                App().art_helper.set_frame(self.__cover,
-                                           "small-cover-frame",
-                                           ArtSize.MINIPLAYER,
-                                           ArtSize.MINIPLAYER)
-                self.__cover.set_property("halign", Gtk.Align.CENTER)
-                self.__cover.set_property("valign", Gtk.Align.CENTER)
-                self.__update_artwork()
-                self.__cover.show()
-                self.__revealer_box.pack_start(self.__cover,
-                                               True, True, 0)
-            self.__revealer.set_reveal_child(True)
-            self.emit("revealed", True)
-
     def _on_current_changed(self, player):
         """
-            Update controllers
+            Update artwork and labels
             @param player as Player
         """
-        InformationController.on_current_changed(self, self.__size, None)
-        ProgressController.on_current_changed(self, player)
-        PlaybackController.on_current_changed(self, player)
-        if self.__cover is not None:
-            self.__update_artwork()
-
-    def _on_status_changed(self, player):
-        """
-            Update controllers
-            @param player as Player
-        """
-        ProgressController.on_status_changed(self, player)
-        PlaybackController.on_status_changed(self, player)
+        same_artwork = self.__previous_artwork_id ==\
+            App().player.current_track.album.id and not self.__per_track_cover
+        if same_artwork:
+            return
+        self.__previous_artwork_id = App().player.current_track.album.id
+        self.__artwork_widget.set_artwork(
+                self.__size, self.__size, self.__on_artwork,
+                ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
 
 #######################
 # PRIVATE             #
 #######################
-    def __update_artwork(self):
-        """
-            Update artwork based on current track
-        """
-        if isinstance(App().player.current_track, Radio):
-            App().art_helper.set_radio_artwork(
-                App().player.current_track.name,
-                ArtSize.MINIPLAYER,
-                ArtSize.MINIPLAYER,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
-                self.__on_artwork)
-        else:
-            App().art_helper.set_album_artwork(
-                App().player.current_track.album,
-                ArtSize.MINIPLAYER,
-                ArtSize.MINIPLAYER,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
-                self.__on_artwork)
-
     def _handle_size_allocate(self, allocation):
         """
             Handle artwork sizing
@@ -204,9 +137,22 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
             if new_size == 1 or self.__size == new_size:
                 return
             self.__size = new_size
-            self._previous_artwork_id = None
-            InformationController.on_current_changed(
-                self, new_size + Size.MINI, None)
+            self.__artwork_widget.set_artwork(
+                new_size, new_size, self.__on_artwork,
+                ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
+
+    # FIXME GTK4
+    def __on_button_release_event(self, *ignore):
+        """
+            Set revealer on/off
+            @param button as Gtk.Button
+        """
+        if self.__revealer.get_reveal_child():
+            self.__revealer.set_reveal_child(False)
+            self.emit("revealed", False)
+        else:
+            self.__revealer.set_reveal_child(True)
+            self.emit("revealed", True)
 
     def __on_artwork(self, surface):
         """
@@ -214,20 +160,6 @@ class MiniPlayer(Gtk.Bin, InformationController, ProgressController,
             @param surface as str
         """
         if surface is None:
-            self.__cover.get_style_context().add_class("white")
-            if isinstance(App().player.current_track, Radio):
-                icon_name = "audio-input-microphone-symbolic"
-            else:
-                icon_name = "folder-music-symbolic"
-            self.__cover.set_from_icon_name(icon_name,
-                                            Gtk.IconSize.DIALOG)
+            pass
         else:
-            self.__cover.get_style_context().remove_class("white")
-            self.__cover.set_from_surface(surface)
-
-    def __on_map(self, widget):
-        """
-            Update widget
-            @param widget as Gtk.Widget
-        """
-        self._on_current_changed(App().player)
+            self.__background.set_from_surface(surface)

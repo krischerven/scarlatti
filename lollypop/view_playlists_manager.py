@@ -22,7 +22,7 @@ from lollypop.utils import popup_widget
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.widgets_banner_playlists import PlaylistsBannerWidget
 from lollypop.shown import ShownPlaylists
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class PlaylistsManagerView(FlowBoxView, SignalsHelper):
@@ -30,7 +30,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         Show playlists in a FlowBox
     """
 
-    @signals
+    @signals_map
     def __init__(self, view_type=ViewType.SCROLLED):
         """
             Init decade view

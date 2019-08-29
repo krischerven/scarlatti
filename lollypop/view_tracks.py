@@ -18,7 +18,7 @@ from lollypop.widgets_tracks import TracksWidget
 from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.utils import set_cursor_hand2
 from lollypop.define import App, Type, ViewType, AdaptiveSize, IndicatorType
 
@@ -34,7 +34,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
                           (GObject.TYPE_PYOBJECT,)),
     }
 
-    @signals
+    @signals_map
     def __init__(self, album, window, orientation, view_type):
         """
             Init view

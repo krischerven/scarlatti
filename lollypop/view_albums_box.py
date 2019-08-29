@@ -23,7 +23,7 @@ from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height, popup_widget
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_albums import AlbumsBannerWidget
 
 
@@ -32,7 +32,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         Show albums in a box
     """
 
-    @signals
+    @signals_map
     def __init__(self, genre_ids, artist_ids, view_type=ViewType.SCROLLED):
         """
             Init album view
@@ -540,7 +540,7 @@ class AlbumsSpotifyBoxView(AlbumsLineView):
         Spotify album box
     """
 
-    @signals
+    @signals_map
     def __init__(self, text, view_type):
         """
             Init view

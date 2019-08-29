@@ -31,6 +31,19 @@ def signals(f):
     return wrapper
 
 
+def signals_map(f):
+    """
+        Decorator to init signal helper
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        ret = f(*args, **kwargs)
+        SignalsHelper.__init__(args[0])
+        args[0].init_map(ret)
+
+    return wrapper
+
+
 class SignalsHelper():
     """
         Helper for autoconnect/disconnect signals on map
@@ -51,13 +64,18 @@ class SignalsHelper():
             Init signals
             @param signals as []
         """
+        self._connect_signals(signals)
+        self.__init(signals)
+
+    def init_map(self, signals):
+        """
+            Init signals on map
+            @param signals as []
+        """
         self.__signal_ids.append(
                      self.connect("map",
                                   lambda x: self._connect_signals(signals)))
-        self.connect("map", self.__on_map)
-        self.connect("unmap", self.__on_unmap)
-        self.connect("destroy",
-                     lambda x: self._disconnect_signals(signals))
+        self.__init(signals)
 
 #######################
 # PROTECTED           #
@@ -102,6 +120,16 @@ class SignalsHelper():
 #######################
 # PRIVATE             #
 #######################
+    def __init(self, signals):
+        """
+            Init signals
+            @param signals as []
+        """
+        self.connect("map", self.__on_map)
+        self.connect("unmap", self.__on_unmap)
+        self.connect("destroy",
+                     lambda x: self._disconnect_signals(signals))
+
     def __on_map(self, widget):
         """
             Run cached callbacks

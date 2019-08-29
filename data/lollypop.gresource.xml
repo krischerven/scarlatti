@@ -13,7 +13,6 @@
      <file compressed="true" preprocess="xml-stripblanks">FullScreen.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">LovedWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">LyricsView.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">MiniPlayer.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">PlaylistBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">PlaylistPopover.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">QueuePopover.ui</file>
@@ -32,9 +31,6 @@
      <file compressed="true" preprocess="xml-stripblanks">SmartPlaylistView.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SmartPlaylistWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ToolbarEnd.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">ToolbarInfo.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">ToolbarPlayback.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">ToolbarTitle.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">TuneinPopover.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">TypeAhead.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">AboutDialog.ui</file>

@@ -13,10 +13,10 @@
 from gi.repository import Gtk
 
 from lollypop.define import App
-from lollypop.controller_progress import ProgressController
+from lollypop.widgets_player_progress import ProgressPlayerWidget
 
 
-class ToolbarTitle(Gtk.Bin, ProgressController):
+class ToolbarTitle(Gtk.Bin):
     """
         Title toolbar
     """
@@ -26,20 +26,9 @@ class ToolbarTitle(Gtk.Bin, ProgressController):
             Init toolbar
         """
         Gtk.Bin.__init__(self)
-        ProgressController.__init__(self)
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/ToolbarTitle.ui")
-        builder.connect_signals(self)
-
-        self.add(builder.get_object("title"))
-
-        self._progress = builder.get_object("progress_scale")
-        self._progress.set_sensitive(False)
-        self._progress.set_hexpand(True)
-
-        self._timelabel = builder.get_object("playback")
-        self._total_time_label = builder.get_object("duration")
-        App().player.connect("duration-changed", self.on_duration_changed)
+        progress_widget = ProgressPlayerWidget()
+        progress_widget.show()
+        self.add(progress_widget)
 
     def set_width(self, width):
         """

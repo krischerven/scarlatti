@@ -14,7 +14,7 @@ from gi.repository import GObject, Gtk, Gdk
 
 from lollypop.define import App, ViewType
 from lollypop.utils import do_shift_selection
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -28,7 +28,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
                       None, (GObject.TYPE_PYOBJECT,))
     }
 
-    @signals
+    @signals_map
     def __init__(self, view_type):
         """
             Init track widget

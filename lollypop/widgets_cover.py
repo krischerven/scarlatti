@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.utils import set_cursor_hand2
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -23,7 +23,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         Widget showing current album cover
     """
 
-    @signals
+    @signals_map
     def __init__(self, album, view_type=ViewType.DEFAULT):
         """
             Init cover widget

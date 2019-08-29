@@ -20,7 +20,7 @@ from lollypop.utils import set_cursor_hand2, on_query_tooltip
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
-from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -29,7 +29,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         Banner for artist
     """
 
-    @signals
+    @signals_map
     def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
         """
             Init artist banner
