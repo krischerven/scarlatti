@@ -41,11 +41,16 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__progress.set_sensitive(False)
         self.__progress.set_hexpand(True)
         self.__progress.set_draw_value(False)
-        self.__progress.connect("button-press-event",
-                                self.__on_button_press_event)
-        self.__progress.connect("button-release-event",
-                                self.__on_button_release_event)
-        self.__progress.connect("scroll-event", self.__on_scroll_event)
+        self.__multi_press = Gtk.GestureMultiPress.new(self.__progress)
+        self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
+        self.__multi_press.connect("pressed", self.__on_multi_pressed)
+        self.__multi_press.connect("released", self.__on_multi_released)
+        self.__multi_press.set_button(0)
+        self.__event_controller = Gtk.EventControllerScroll.new(
+            self.__progress, Gtk.EventControllerScrollFlags.BOTH_AXES)
+        self.__event_controller.set_propagation_phase(
+            Gtk.PropagationPhase.TARGET)
+        self.__event_controller.connect("scroll", self.__on_scroll)
         self.__total_time_label = Gtk.Label.new()
         self.__total_time_label.show()
         self.set_spacing(10)
@@ -152,48 +157,46 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    # FIXME GTK4
-    def __on_button_press_event(self, scale, event):
+    def __on_multi_pressed(self, gesture, n_press, x, y):
         """
             On press, mark player as seeking
-            @param scale as Gtk.Scale
-            @param event as Gdk.Event
+            @param gesture as Gtk.Gesture
+            @param n_press as int
+            @param x as int
+            @param y as int
         """
         self.__seeking = True
 
-    # FIXME GTK4
-    def __on_button_release_event(self, scale, event):
+    def __on_multi_released(self, gesture, n_press, x, y):
         """
             Callback for scale release button
-            Seek player to scale value
-            @param scale as Gtk.Scale
-            @param event as Gdk.Event
+            @param gesture as Gtk.Gesture
+            @param n_press as int
+            @param x as int
+            @param y as int
         """
-        if event.button != 1:
+        if n_press != 1:
             return
-        value = scale.get_value()
+        value = self.__progress.get_value()
         App().player.seek(value)
         self.__seeking = False
         self.update_position(value)
 
-    # FIXME GTK4
-    def __on_scroll_event(self, scale, event):
+    def __on_scroll(self, event_controler, x, y):
         """
             Seek forward or backward
-            @param scale as Gtk.Scale
-            @param event as Gdk.Event
+            @param event_controller as Gtk.EventControllerScroll
+            @param x as int
+            @param y as int
         """
-        (smooth, x, y) = event.get_scroll_deltas()
-        if smooth and App().player.is_playing:
+        if x == 0:
+            diff = -y
+        else:
+            diff = -x
+        if App().player.is_playing:
             position = App().player.position / Gst.SECOND
-            if y >= 0:
-                seek = position - 5
-            elif y < 0:
-                seek = position + 5
-            if seek < 0:
-                seek = 0
-            if seek > App().player.current_track.duration:
-                seek = App().player.current_track.duration - 2
+            seek = position + diff * 5
+            seek = max(min(App().player.current_track.duration - 2, seek), 0)
             App().player.seek(seek)
             self.update_position(seek)
 
