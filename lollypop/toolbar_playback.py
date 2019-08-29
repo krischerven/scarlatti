@@ -30,6 +30,7 @@ class ToolbarPlayback(Gtk.Box):
         self.__back_button = Gtk.Button.new_from_icon_name(
             "go-previous-symbolic", Gtk.IconSize.BUTTON)
         self.__back_button.show()
+        self.__back_button.connect("clicked", self.__on_back_button_clicked)
         self.__player_buttons = ButtonsPlayerWidget()
         self.__player_buttons.show()
         self.set_spacing(10)
@@ -57,18 +58,15 @@ class ToolbarPlayback(Gtk.Box):
         return self.__back_button
 
 #######################
-# Protected           #
+# PRIVATE             #
 #######################
-    def _on_back_btn_clicked(self, button):
+    def __on_back_button_clicked(self, button):
         """
             Go back in container stack
             @param button as Gtk.Button
         """
         App().window.container.go_back()
 
-#######################
-# Private             #
-#######################
     def __on_can_go_back_changed(self, container, back):
         """
             Make button sensitive
