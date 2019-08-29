@@ -178,6 +178,10 @@ flowboxchild:selected  {
     color: @theme_fg_color;
 }
 
+.monospace {
+    font-family: Monospace;
+}
+
 .gnome-shell {
   font-family: Cantarell, Sans-Serif;
   font-size: 11pt;

@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gst, Gtk
 
 from lollypop.objects_radio import Radio
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, MARGIN_SMALL
 from lollypop.utils import seconds_to_string
 from lollypop.helper_signals import SignalsHelper, signals
 
@@ -35,6 +35,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__timeout_id = None
         self.__time_label = Gtk.Label.new()
         self.__time_label.show()
+        self.__time_label.get_style_context().add_class("monospace")
         self.__progress = Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, None)
         self.__progress.show()
         self.__progress.set_sensitive(False)
@@ -53,7 +54,8 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__event_controller.connect("scroll", self.__on_scroll)
         self.__total_time_label = Gtk.Label.new()
         self.__total_time_label.show()
-        self.set_spacing(10)
+        self.__total_time_label.get_style_context().add_class("monospace")
+        self.set_spacing(MARGIN_SMALL)
         self.pack_start(self.__time_label, False, False, 0)
         self.pack_start(self.__progress, False, True, 0)
         self.pack_start(self.__total_time_label, False, False, 0)
