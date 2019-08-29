@@ -21,9 +21,10 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         Type ahead widget
     """
     @signals_map
-    def __init__(self):
+    def __init__(self, container):
         """
             Init widget
+            @param container as Container
         """
         Gtk.Revealer.__init__(self)
         self.__current_focused_view = None
@@ -42,7 +43,7 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         self.__entry.connect("map", self.__on_map)
         self.add(widget)
         return [
-            ("App().window.container.left_list", "button-press-event",
+            (container.left_list, "button-press-event",
              "_on_list_button_press_event")
         ]
 

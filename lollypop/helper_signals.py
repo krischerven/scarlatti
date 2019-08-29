@@ -93,8 +93,6 @@ class SignalsHelper():
             name = "%s_%s" % (obj, signal)
             if name in self._connected:
                 continue
-            if isinstance(obj, str):
-                obj = eval(obj)
             callback = getattr(self, callback_str)
             obj.connect(signal, self.__on_signal, callback)
             self._connected.append(name)
@@ -112,8 +110,6 @@ class SignalsHelper():
             name = "%s_%s" % (obj, signal)
             if name not in self._connected:
                 continue
-            if isinstance(obj, str):
-                obj = eval(obj)
             obj.disconnect_by_func(self.__on_signal)
             self._connected.remove(name)
 

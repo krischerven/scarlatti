@@ -152,10 +152,10 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__sidebar.add(self.__back_button)
         self.__sidebar.add(self.__container)
         self.__sidebar.set_size_request(450, -1)
+        self.__sidebar.get_style_context().add_class("background-opacity")
         self.__container.connect("can-go-back-changed",
                                  self.__on_can_go_back_changed)
         self.connect("size-allocate", self.__on_size_allocate)
-        self.__sidebar.get_style_context().add_class("background-opacity")
         self.__revealer.add(self.__sidebar)
         self.add(widget)
 

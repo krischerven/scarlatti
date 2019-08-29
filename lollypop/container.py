@@ -110,6 +110,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         ListsContainer.__init__(self)
         AdaptiveContainer.__init__(self)
         FilterContainer.__init__(self)
+        self._grid.add(self._main_widget)
 
     def stop_all(self):
         """

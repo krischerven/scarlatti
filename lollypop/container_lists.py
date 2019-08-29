@@ -28,14 +28,13 @@ class ListsContainer:
         """
             Init container
         """
-        pass
+        self.__left_list = None
+        self.__right_list = None
 
     def setup_lists(self):
         """
             Setup container lists
         """
-        self.__left_list = None
-        self.__right_list = None
         self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
         self._sidebar.show()
         self._sidebar.listbox.connect("row-activated",
