@@ -55,7 +55,7 @@ class SignalsHelper():
             Init helper
         """
         if not hasattr(self, "_connected"):
-            self._connected = []
+            self._connected = {}
             self.__signal_ids = []
             self.__cached = {}
 
@@ -91,11 +91,12 @@ class SignalsHelper():
                                signal, callback_str)
                 continue
             name = "%s_%s" % (obj, signal)
-            if name in self._connected:
+            if name in self._connected.keys():
                 continue
             callback = getattr(self, callback_str)
-            obj.connect(signal, self.__on_signal, callback)
-            self._connected.append(name)
+            self._connected[name] = obj.connect(signal,
+                                                self.__on_signal,
+                                                callback)
 
     def _disconnect_signals(self, signals):
         """
@@ -108,10 +109,11 @@ class SignalsHelper():
                                signal, callback_str)
                 continue
             name = "%s_%s" % (obj, signal)
-            if name not in self._connected:
+            if name not in self._connected.keys():
                 continue
-            obj.disconnect_by_func(self.__on_signal)
-            self._connected.remove(name)
+            connect_id = self._connected[name]
+            obj.disconnect(connect_id)
+            del self._connected[name]
 
 #######################
 # PRIVATE             #
