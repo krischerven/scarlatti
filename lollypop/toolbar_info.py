@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib, Gdk
 
 
-from lollypop.utils import set_cursor_hand2, popup_widget
+from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.objects_radio import Radio
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
@@ -107,10 +107,10 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
             Show/hide eventbox
         """
         if player.is_playing:
-            set_cursor_hand2(self.__eventbox)
+            set_cursor_type(self.__eventbox)
             self.set_state_flags(Gtk.StateFlags.VISITED, False)
         else:
-            set_cursor_hand2(self.__eventbox, Gdk.CursorType.LEFT_PTR)
+            set_cursor_type(self.__eventbox, Gdk.CursorType.LEFT_PTR)
             self.unset_state_flags(Gtk.StateFlags.VISITED)
 
     def _on_primary_long_press_gesture(self, x, y):

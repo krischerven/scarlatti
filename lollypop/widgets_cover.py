@@ -13,7 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.utils import set_cursor_hand2
+from lollypop.utils import set_cursor_type
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -39,7 +39,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         self.__artwork.show()
         self.__artwork.get_style_context().add_class("white")
         self.add(self.__artwork)
-        self.connect("realize", set_cursor_hand2)
+        self.connect("realize", set_cursor_type)
         return [
             (App().art, "album-artwork-changed", "_on_album_artwork_changed")
         ]

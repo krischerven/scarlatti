@@ -13,7 +13,7 @@
 from gi.repository import Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN_SMALL
-from lollypop.utils import on_query_tooltip, set_cursor_hand2
+from lollypop.utils import on_query_tooltip, set_cursor_type
 from lollypop.objects_radio import Radio
 
 
@@ -49,7 +49,7 @@ class RadioWidget(Gtk.FlowBoxChild):
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             grid.show()
             self.__artwork = Gtk.Image.new()
-            self.__artwork.connect("realize", set_cursor_hand2)
+            self.__artwork.connect("realize", set_cursor_type)
             self.__artwork.show()
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)

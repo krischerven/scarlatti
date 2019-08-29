@@ -19,7 +19,7 @@ from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.utils import set_cursor_hand2
+from lollypop.utils import set_cursor_type
 from lollypop.define import App, Type, ViewType, AdaptiveSize, IndicatorType
 
 
@@ -377,7 +377,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 label.get_style_context().add_class("dim-label")
                 label.show()
                 eventbox = Gtk.EventBox()
-                eventbox.connect("realize", set_cursor_hand2)
+                eventbox.connect("realize", set_cursor_type)
                 eventbox.set_tooltip_text(_("Play"))
                 eventbox.connect("button-press-event",
                                  self.__on_disc_button_press_event,

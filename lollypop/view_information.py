@@ -20,7 +20,7 @@ from lollypop.helper_art import ArtBehaviour
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
-from lollypop.utils import set_cursor_hand2, get_network_available
+from lollypop.utils import set_cursor_type, get_network_available
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -100,8 +100,8 @@ class InformationView(View):
         self.__artist_artwork = builder.get_object("artist_artwork")
         bio_eventbox = builder.get_object("bio_eventbox")
         artist_label_eventbox = builder.get_object("artist_label_eventbox")
-        bio_eventbox.connect("realize", set_cursor_hand2)
-        artist_label_eventbox.connect("realize", set_cursor_hand2)
+        bio_eventbox.connect("realize", set_cursor_type)
+        artist_label_eventbox.connect("realize", set_cursor_type)
         self.__gesture1 = GesturesHelper(
             bio_eventbox,
             primary_press_callback=self._on_info_label_press)

@@ -19,7 +19,7 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
-from lollypop.utils import set_cursor_hand2, popup_widget, update_button
+from lollypop.utils import set_cursor_type, popup_widget, update_button
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.helper_size_allocation import SizeAllocationHelper
@@ -68,7 +68,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         markup += "\n<span alpha='40000'>%s</span>" % human_duration
         self.__info_label.set_markup(markup)
         info_eventbox = builder.get_object("info_eventbox")
-        info_eventbox.connect("realize", set_cursor_hand2)
+        info_eventbox.connect("realize", set_cursor_type)
         self.__gesture = GesturesHelper(
             info_eventbox, primary_press_callback=self._on_year_press)
         self.__widget = builder.get_object("widget")

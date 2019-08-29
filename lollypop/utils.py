@@ -104,7 +104,7 @@ def get_round_surface(image, scale_factor, radius):
     return surface
 
 
-def set_cursor_hand2(widget, cursor=Gdk.CursorType.HAND2):
+def set_cursor_type(widget, cursor=Gdk.CursorType.HAND2):
     """
         Set cursor on widget
         @param widget as Gtk.Widget

@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GObject
 
 from lollypop.helper_art import ArtBehaviour
-from lollypop.utils import set_cursor_hand2
+from lollypop.utils import set_cursor_type
 from lollypop.define import App, ArtSize, MARGIN_SMALL
 from lollypop.widgets_player_progress import ProgressPlayerWidget
 from lollypop.widgets_player_buttons import ButtonsPlayerWidget
@@ -55,7 +55,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         bottom_box.show()
         self.__eventbox = Gtk.EventBox.new()
         self.__eventbox.show()
-        self.__eventbox.connect("realize", set_cursor_hand2)
+        self.__eventbox.connect("realize", set_cursor_type)
         self.__gesture = GesturesHelper(
                                self.__eventbox,
                                primary_press_callback=self.__on_eventbox_press)
