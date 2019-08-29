@@ -21,6 +21,7 @@ from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.helper_gestures import GesturesHelper
 
 
 class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
@@ -53,8 +54,9 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__eventbox = Gtk.EventBox.new()
         self.__eventbox.show()
         self.__eventbox.connect("realize", set_cursor_hand2)
-        self.__eventbox.connect("button-release-event",
-                                self.__on_button_release_event)
+        self.__gesture = GesturesHelper(
+                               self.__eventbox,
+                               primary_press_callback=self.__on_eventbox_press)
         progress_widget = ProgressPlayerWidget()
         progress_widget.show()
         progress_widget.set_vexpand(True)
@@ -141,11 +143,13 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
                 new_size, new_size, self.__on_artwork,
                 ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
 
-    # FIXME GTK4
-    def __on_button_release_event(self, *ignore):
+    def __on_eventbox_press(self,  x, y, event):
         """
             Set revealer on/off
             @param button as Gtk.Button
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
         if self.__revealer.get_reveal_child():
             self.__revealer.set_reveal_child(False)
