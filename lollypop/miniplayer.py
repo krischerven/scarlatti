@@ -41,6 +41,8 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         SizeAllocationHelper.__init__(self)
         self.__size = 0
         self.__previous_artwork_id = None
+        self.__per_track_cover = App().settings.get_value(
+            "allow-per-track-cover")
         self.get_style_context().add_class("black")
         self.__box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.__box.show()
