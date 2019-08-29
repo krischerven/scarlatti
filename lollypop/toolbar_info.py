@@ -19,7 +19,7 @@ from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.define import App, ArtBehaviour, StorageType
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
@@ -28,7 +28,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         Informations toolbar
     """
 
-    @signals_map
+    @signals
     def __init__(self):
         """
             Init toolbar
