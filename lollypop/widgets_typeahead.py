@@ -13,22 +13,21 @@
 from gi.repository import Gtk, Gdk
 
 from lollypop.define import App, MARGIN_SMALL
-from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
+class TypeAheadWidget(Gtk.Revealer):
     """
         Type ahead widget
     """
-    @signals_map
+
     def __init__(self, container):
         """
             Init widget
             @param container as Container
         """
         Gtk.Revealer.__init__(self)
-        self.__current_focused_view = None
-        self.__focus_in_event_id = None
+        self.__multi_press_left = None
+        self.__multi_press_right = None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
         builder.connect_signals(self)
@@ -40,12 +39,7 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         self.__prev_button = builder.get_object("prev_button")
         self.__next_button.connect("clicked", lambda x: self.__search_next())
         self.__prev_button.connect("clicked", lambda x: self.__search_prev())
-        self.__entry.connect("map", self.__on_map)
         self.add(widget)
-        return [
-            (container.left_list, "button-press-event",
-             "_on_list_button_press_event")
-        ]
 
     @property
     def entry(self):
@@ -77,8 +71,8 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
             widget.activate_child()
             self.__entry.set_text("")
             self.__entry.grab_focus()
-            self.__current_focused_view = None
 
+    # FIXME GTK4
     def _on_entry_key_press_event(self, entry, event):
         """
             Handle special keys
@@ -90,6 +84,7 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         elif event.keyval == Gdk.KEY_Escape:
             App().window.container.show_filter()
 
+    # FIXME GTK4
     def _on_entry_key_release_event(self, entry, event):
         """
             Handle special keys
@@ -100,14 +95,6 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
             self.__search_prev()
         elif event.keyval == Gdk.KEY_Down:
             self.__search_next()
-
-    def _on_list_button_press_event(self, selection_list, event):
-        """
-            Force focus on list
-            @param selection_list as SelectionList
-            @param event as Gdk.Event
-        """
-        self.__current_focused_view = selection_list
 
 #######################
 # PRIVATE             #
@@ -136,15 +123,4 @@ class TypeAheadWidget(Gtk.Revealer, SignalsHelper):
         if App().window.is_adaptive:
             return App().window.container.stack
         else:
-            if self.__current_focused_view is not None:
-                return self.__current_focused_view
-            else:
-                return App().window.container.stack
-
-    def __on_map(self, widget):
-        """
-            Connect signals
-            @param widget as Gtk.Widget
-        """
-        if App().window.container.left_list.get_visible():
-            self.__current_focused_view = App().window.container.left_list
+            return App().window.container.stack
