@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Gdk
 
 
 from lollypop.utils import set_cursor_hand2, popup_widget
@@ -38,9 +38,9 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         horizontal_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 15)
         horizontal_box.show()
         self.__eventbox = Gtk.EventBox.new()
-        self.__eventbox.connect("realize", set_cursor_hand2)
         self.__eventbox.add(horizontal_box)
         self.__eventbox.set_property("halign", Gtk.Align.START)
+        self.__eventbox.show()
         self.add(self.__eventbox)
         GesturesHelper.__init__(self, self.__eventbox)
         self.special_headerbar_hack()
@@ -54,6 +54,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         horizontal_box.pack_start(self.__artwork, False, False, 0)
         horizontal_box.pack_start(self.__label, False, False, 0)
         self.connect("realize", self.__on_realize)
+        self.get_style_context().add_class("opacity-transition")
         return [
             (App().player, "status-changed", "_on_status_changed")
         ]
@@ -106,9 +107,11 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
             Show/hide eventbox
         """
         if player.is_playing:
-            self.__eventbox.show()
+            set_cursor_hand2(self.__eventbox)
+            self.set_state_flags(Gtk.StateFlags.VISITED, False)
         else:
-            self.__eventbox.hide()
+            set_cursor_hand2(self.__eventbox, Gdk.CursorType.LEFT_PTR)
+            self.unset_state_flags(Gtk.StateFlags.VISITED)
 
     def _on_primary_long_press_gesture(self, x, y):
         """

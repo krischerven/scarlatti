@@ -37,7 +37,6 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__time_label.show()
         self.__progress = Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, None)
         self.__progress.show()
-        self.__progress.set_opacity(0)
         self.__progress.set_sensitive(False)
         self.__progress.set_hexpand(True)
         self.__progress.set_draw_value(False)
@@ -59,6 +58,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.pack_start(self.__progress, False, True, 0)
         self.pack_start(self.__total_time_label, False, False, 0)
         self.connect("destroy", self.__on_destroy)
+        self.get_style_context().add_class("opacity-transition")
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "status-changed", "_on_status_changed"),
@@ -106,19 +106,14 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__progress.set_value(0.0)
         self.__time_label.set_text("0:00")
         if isinstance(App().player.current_track, Radio):
+            self.unset_state_flags(Gtk.StateFlags.VISITED)
             self.__progress.set_sensitive(False)
-            self.__progress.set_opacity(0)
-            self.__time_label.set_opacity(0)
-            self.__total_time_label.set_opacity(0)
-            self.__progress.set_range(0.0, 0.0)
         else:
+            self.set_state_flags(Gtk.StateFlags.VISITED, False)
             if not App().player.current_track.storage_type &\
                     StorageType.COLLECTION:
                 style_context.add_class("youtube-scale")
             self.__progress.set_sensitive(True)
-            self.__progress.set_opacity(1)
-            self.__time_label.set_opacity(1)
-            self.__total_time_label.set_opacity(1)
             self.__progress.set_range(0.0, App().player.current_track.duration)
             self.__total_time_label.set_text(
                 seconds_to_string(App().player.current_track.duration))
@@ -144,6 +139,8 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
                 self.__timeout_id = GLib.timeout_add(1000,
                                                      self.update_position)
         else:
+            self.unset_state_flags(Gtk.StateFlags.VISITED)
+            self.__progress.set_sensitive(False)
             if self.__timeout_id is not None:
                 GLib.source_remove(self.__timeout_id)
                 self.__timeout_id = None

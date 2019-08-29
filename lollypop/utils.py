@@ -104,15 +104,16 @@ def get_round_surface(image, scale_factor, radius):
     return surface
 
 
-def set_cursor_hand2(widget):
+def set_cursor_hand2(widget, cursor=Gdk.CursorType.HAND2):
     """
         Set cursor on widget
         @param widget as Gtk.Widget
+        @param cursor as Gdk.CursorType
     """
     try:
         window = widget.get_window()
         if window is not None:
-            window.set_cursor(Gdk.Cursor(Gdk.CursorType.HAND2))
+            window.set_cursor(Gdk.Cursor(cursor))
     except:
         pass
 
