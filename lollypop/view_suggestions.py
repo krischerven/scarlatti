@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.utils import get_network_available
-from lollypop.define import ViewType, StorageType, Size, MARGIN_SMALL
+from lollypop.define import ViewType, StorageType, Size
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_box import AlbumsPopularsBoxView
 from lollypop.view_albums_box import AlbumsRandomGenreBoxView
@@ -29,31 +29,26 @@ class SuggestionsView(FilteringHelper, View):
         View showing suggestions to user
     """
 
-    def __init__(self, view_type):
+    def __init__(self, view_type=ViewType.DEFAULT):
         """
             Init view
             @param view_type as ViewType
         """
-        View.__init__(self, view_type)
+        View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         FilteringHelper.__init__(self)
         self.__grid = Gtk.Grid()
         self.__grid.get_style_context().add_class("padding")
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self._scrolled)
-        self._viewport.add(self.__grid)
         album = TodayBannerWidget.get_today_album()
         if album.id is not None:
             self.__banner = TodayBannerWidget(album, self._view_type)
             self.__banner.show()
             self.__banner.connect("scroll", self._on_banner_scroll)
-            self._overlay.add_overlay(self.__banner)
         else:
             self.__banner = None
-        self.add(self._overlay)
+        self.add_widget(self.__grid, self.__banner)
 
     def populate(self):
         """
@@ -116,50 +111,11 @@ class SuggestionsView(FilteringHelper, View):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        return ({"view_type": self.view_type}, self.sidebar_id, position)
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update banner style
-            @param window as Window
-            @param status as bool
-        """
-        View._on_adaptive_changed(self, window, status)
-        if self.__banner is not None:
-            self.__banner.set_view_type(self._view_type)
-            self.__set_margin()
-
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        View._on_value_changed(self, adj)
-        if self.__banner is not None:
-            reveal = self.should_reveal_header(adj)
-            self.__banner.set_reveal_child(reveal)
-            if reveal:
-                self.__set_margin()
-            else:
-                self._scrolled.get_vscrollbar().set_margin_top(0)
+        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self.__grid.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __welcome_screen(self):
         """
             Show welcome screen if view empty
@@ -170,10 +126,6 @@ class SuggestionsView(FilteringHelper, View):
                 return
             else:
                 child.destroy()
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.set_policy(Gtk.PolicyType.NEVER,
-                                      Gtk.PolicyType.NEVER)
-            self._viewport.set_property("valign", Gtk.Align.FILL)
         label = Gtk.Label.new(_("Welcome on Lollypop"))
         label.get_style_context().add_class("text-xx-large")
         label.set_property("valign", Gtk.Align.END)

@@ -10,9 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-
-from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import App, ViewType, MARGIN
 from lollypop.view import View
 from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.widgets_banner_artist import ArtistBannerWidget
@@ -36,20 +34,13 @@ class ArtistView(View):
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self.__overlay = Gtk.Overlay()
-        self.__overlay.show()
-        self.__overlay.add_overlay(self.__banner)
         self.__album_box = AlbumsBoxView(genre_ids,
                                          artist_ids,
                                          (view_type |
                                           ViewType.ALBUM) &
                                          ~ViewType.SCROLLED)
         self.__album_box.get_style_context().add_class("padding")
-        self.__album_box.show()
-        self.__overlay.add(self._scrolled)
-        self._viewport.add(self.__album_box)
-        self.add(self.__overlay)
-        self.__set_margin()
+        self.add_widget(self.__album_box, self.__banner)
 
     def populate(self):
         """
@@ -77,14 +68,10 @@ class ArtistView(View):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
         return ({"genre_ids": self._genre_ids,
                  "artist_ids": self._artist_ids,
                  "view_type": self.view_type},
-                self.sidebar_id, position)
+                self.sidebar_id, self.position)
 
     @property
     def indicator(self):
@@ -103,41 +90,8 @@ class ArtistView(View):
         return self.__banner.height + MARGIN
 
 #######################
-# PROTECTED           #
-#######################
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        View._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update banner style
-            @param window as Window
-            @param status as bool
-        """
-        View._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
-
-#######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self.__album_box.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __update_jump_button(self):
         """
             Update jump button status

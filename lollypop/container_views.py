@@ -277,8 +277,7 @@ class ViewsContainer:
             Get home view
         """
         from lollypop.view_suggestions import SuggestionsView
-        view_type = ViewType.SCROLLED
-        view = SuggestionsView(view_type)
+        view = SuggestionsView()
         view.populate()
         view.show()
         return view

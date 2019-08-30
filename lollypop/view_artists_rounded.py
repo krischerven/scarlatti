@@ -15,7 +15,7 @@ from gi.repository import Gtk, Pango
 from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ViewType, MARGIN
+from lollypop.define import App, Type, MARGIN
 from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
@@ -38,6 +38,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
+        self.add_widget(self._box)
         return [
             (App().art, "artist-artwork-changed",
              "_on_artist_artwork_changed"),
@@ -92,11 +93,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        return ({"view_type": self.view_type}, self.sidebar_id, position)
+        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #

@@ -17,7 +17,7 @@ from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height, popup_widget
@@ -33,14 +33,14 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, genre_ids, artist_ids, view_type=ViewType.SCROLLED):
+    def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
         """
             Init album view
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type)
+        FlowBoxView.__init__(self, view_type | ViewType.SCROLLED)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self._widget_class = AlbumSimpleWidget
         self._genre_ids = genre_ids
@@ -62,9 +62,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                                           _("and YouTube in network settings")
                     self._box.hide()
             self._empty_icon_name = get_icon_name(genre_ids[0])
-        if view_type & ViewType.SMALL and view_type & ViewType.SCROLLED:
-            self._scrolled.set_policy(Gtk.PolicyType.NEVER,
-                                      Gtk.PolicyType.NEVER)
         return [
                 (App().scanner, "album-updated", "_on_album_updated")
         ]
@@ -105,14 +102,10 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
         return ({"genre_ids": self._genre_ids,
                  "artist_ids": self._artist_ids,
                  "view_type": self.view_type},
-                self.sidebar_id, position)
+                self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #
@@ -215,60 +208,26 @@ class AlbumsGenresBoxView(AlbumsBoxView):
         Show albums in a box for a genre (static or not)
     """
 
-    def __init__(self, genre_ids, artist_ids, view_type=ViewType.SCROLLED):
+    def __init__(self, genre_ids, artist_ids, view_type):
         """
             Init album view
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        AlbumsBoxView.__init__(self, genre_ids, artist_ids, view_type)
+        AlbumsBoxView.__init__(self, genre_ids, artist_ids,
+                               view_type |
+                               ViewType.OVERLAY |
+                               ViewType.SCROLLED)
         self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self.__overlay = Gtk.Overlay.new()
-        self.__overlay.show()
-        self.__overlay.add(self._scrolled)
-        self._viewport.add(self._box)
-        self.__overlay.add_overlay(self.__banner)
-        self.add(self.__overlay)
-        self.__set_margin()
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        AlbumsBoxView._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode for views
-        """
-        AlbumsBoxView._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
+        self.add_widget(self._box, self.__banner)
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self._box.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __on_banner_play_all(self, banner, random):
         """
             Play all albums
@@ -298,6 +257,7 @@ class AlbumsYearsBoxView(AlbumsGenresBoxView):
             @param view_type as ViewType
         """
         AlbumsGenresBoxView.__init__(self, genre_ids, artist_ids, view_type)
+        self.add_widget(self._box)
 
     def populate(self):
         """
@@ -329,6 +289,7 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
             @param index as int
         """
         AlbumsBoxView.__init__(self, [], [], view_type)
+        self.add_widget(self._box)
         self.__index = index
 
     def populate(self):
@@ -384,8 +345,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         header.set_margin_end(MARGIN)
         header.show_all()
         HorizontalScrollingHelper.__init__(self)
-        self.insert_row(0)
-        self.attach(header, 0, 0, 1, 1)
+        self.add(header)
+        self.add_widget(self._box)
 
     def populate(self, albums):
         """

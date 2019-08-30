@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Gio
 from gettext import gettext as _
 from urllib.parse import urlparse
 
-from lollypop.define import App, MARGIN_SMALL, StorageType
+from lollypop.define import App, StorageType
 from lollypop.define import Size, ViewType
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
@@ -36,7 +36,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Init Popover
             @param view_type as ViewType
         """
-        View.__init__(self, view_type)
+        View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
         self.__search_count = 0
@@ -93,14 +93,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__banner = SearchBannerWidget(self.__view)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self.__overlay = Gtk.Overlay.new()
-        self.__overlay.show()
-        self.__overlay.add(self._scrolled)
-        self._viewport.add(self.__stack)
-        self.__overlay.add_overlay(self.__banner)
-        self.add(self.__overlay)
+        self.add_widget(self.__stack, self.__banner)
         self.add(self.__bottom_buttons)
-        self.__set_margin()
         self.__banner.entry.connect("changed", self._on_search_changed)
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
@@ -226,46 +220,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 self.__stack.set_visible_child_name("placeholder")
                 self.__set_no_result_placeholder()
 
-    def _on_value_changed(self, adj):
-        """
-            Update banner
-            @param adj as Gtk.Adjustment
-        """
-        View._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode
-            @param window as Window
-            @param status as bool
-        """
-        View._on_adaptive_changed(self, window, status)
-        style_context = self.__placeholder.get_style_context()
-        if status:
-            style_context.remove_class("text-xx-large")
-            style_context.add_class("text-x-large")
-        else:
-            style_context.remove_class("text-x-large")
-            style_context.add_class("text-xx-large")
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
-
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self.__stack.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __set_no_result_placeholder(self):
         """
             Set placeholder for no result

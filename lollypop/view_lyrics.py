@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.view import View
 from lollypop.objects_radio import Radio
 from lollypop.define import App, ViewType, AdaptiveSize
-from lollypop.define import StorageType, MARGIN_SMALL
+from lollypop.define import StorageType
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
@@ -87,7 +87,7 @@ class LyricsView(View, SignalsHelper):
         """
             Init view
         """
-        View.__init__(self, ViewType.SCROLLED)
+        View.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
         self.__lyrics_text = ""
@@ -97,15 +97,10 @@ class LyricsView(View, SignalsHelper):
         self.__lyrics_label = LyricsLabel()
         self.__lyrics_label.show()
         self.__lyrics_label.set_property("halign", Gtk.Align.CENTER)
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self._scrolled)
-        self._viewport.add(self.__lyrics_label)
         self.__banner = LyricsBannerWidget(self._view_type)
         self.__banner.show()
         self.__banner.connect("translate", self.__on_translate)
-        self._overlay.add_overlay(self.__banner)
-        self.add(self._overlay)
+        self.add_widget(self.__lyrics_label, self.__banner)
         self.__sync_lyrics_helper = SyncLyricsHelper()
         self.__update_lyrics_style()
         return [
@@ -205,41 +200,9 @@ class LyricsView(View, SignalsHelper):
         """
         self.__update_lyrics_style()
 
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update banner style
-            @param window as Window
-            @param status as bool
-        """
-        View._on_adaptive_changed(self, window, status)
-        if self.__banner is not None:
-            self.__banner.set_view_type(self._view_type)
-            self.__set_margin()
-
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        View._on_value_changed(self, adj)
-        if self.__banner is not None:
-            reveal = self.should_reveal_header(adj)
-            self.__banner.set_reveal_child(reveal)
-            if reveal:
-                self.__set_margin()
-            else:
-                self._scrolled.get_vscrollbar().set_margin_top(0)
-
 ############
 # PRIVATE  #
 ############
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self.__lyrics_label.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __show_sync_lyrics(self):
         """
             Show sync lyrics for track

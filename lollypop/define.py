@@ -84,8 +84,8 @@ class ViewType:
     SMALL = 1 << 7
     MEDIUM = 1 << 8
     SCROLLED = 1 << 9
-    FULLSCREEN = 1 << 10
-    PLACEHOLDER = 1 << 11
+    OVERLAY = 1 << 10
+    FULLSCREEN = 1 << 11
     NO_PADDING = 1 << 12
     PLAYBACK = 1 << 13
 

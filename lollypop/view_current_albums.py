@@ -10,13 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-
 from lollypop.utils import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.define import App, ViewType, MARGIN_SMALL, Size
+from lollypop.define import App, ViewType, Size
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
 
@@ -32,9 +30,8 @@ class CurrentAlbumsView(View, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        View.__init__(self, view_type)
+        View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         view_type |= ViewType.PLAYBACK
-        view_type &= ~ViewType.SCROLLED
         self.__view = AlbumsListView([], [], view_type)
         self.__view.show()
         self.__view.set_external_scrolled(self._scrolled)
@@ -45,12 +42,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         self.__banner = CurrentAlbumsBannerWidget(self.__view)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self.__overlay = Gtk.Overlay.new()
-        self.__overlay.show()
-        self.__overlay.add(self._scrolled)
-        self._viewport.add(self.__view)
-        self.__overlay.add_overlay(self.__banner)
-        self.add(self.__overlay)
+        self.add_widget(self.__view, self.__banner)
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
             (App().player, "playback-changed", "_on_playback_changed")
@@ -109,39 +101,9 @@ class CurrentAlbumsView(View, SignalsHelper):
         self.__banner.save_button.set_sensitive(True)
         self.populate()
 
-    def _on_value_changed(self, adj):
-        """
-            Update banner
-            @param adj as Gtk.Adjustment
-        """
-        View._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
-    def _on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode
-            @param window as Window
-            @param status as bool
-        """
-        View._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
-
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self.__view.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __on_dnd_finished(self, dnd_helper):
         """
             Save playlist if needed

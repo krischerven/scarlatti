@@ -255,7 +255,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             Init Selection list ui
             @param base_mask as SelectionListMask
         """
-        LazyLoadingView.__init__(self, ViewType.SCROLLED | ViewType.NO_PADDING)
+        LazyLoadingView.__init__(self, ViewType.NO_PADDING)
         FilteringHelper.__init__(self)
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE
@@ -266,16 +266,21 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         self._box.set_sort_func(self.__sort_func)
         self._box.show()
         GesturesHelper.__init__(self, self._box)
-        self._scrolled.set_vexpand(True)
-        self._viewport.add(self._box)
+        self.__scrolled = Gtk.ScrolledWindow()
+        self.__scrolled.show()
+        self.__scrolled.set_property("expand", True)
+        self.__viewport = Gtk.Viewport()
+        self.__scrolled.add(self.__viewport)
+        self.__viewport.show()
+        self.__viewport.add(self._box)
         if self.__base_mask & SelectionListMask.VIEW:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.set_hexpand(True)
             self.__overlay.set_vexpand(True)
             self.__overlay.show()
-            self.__overlay.add(self._scrolled)
+            self.__overlay.add(self.__scrolled)
             self.__fastscroll = FastScroll(self._box,
-                                           self._scrolled)
+                                           self.__scrolled)
             self.__overlay.add_overlay(self.__fastscroll)
             self.add(self.__overlay)
             self.__base_mask |= SelectionListMask.LABEL
@@ -287,9 +292,9 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             self.__overlay = None
             App().settings.connect("changed::show-sidebar-labels",
                                    self.__on_show_sidebar_labels_changed)
-            self._scrolled.set_policy(Gtk.PolicyType.NEVER,
-                                      Gtk.PolicyType.AUTOMATIC)
-            self.add(self._scrolled)
+            self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                       Gtk.PolicyType.AUTOMATIC)
+            self.add(self.__scrolled)
             self.get_style_context().add_class("sidebar")
             self.__menu_button = Gtk.Button.new_from_icon_name(
                 "view-more-horizontal-symbolic", Gtk.IconSize.BUTTON)
@@ -320,7 +325,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param [(int, str, optional str)], will be deleted
         """
         self.__sort = False
-        self._scrolled.get_vadjustment().set_value(0)
+        self.__scrolled.get_vadjustment().set_value(0)
         self.clear()
         self.__add_values(values)
 
@@ -508,7 +513,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         coordinates = row.translate_coordinates(self._box, 0, 0)
         if coordinates:
-            self._scrolled.get_vadjustment().set_value(coordinates[1])
+            self.__scrolled.get_vadjustment().set_value(coordinates[1])
 
     def _on_adaptive_changed(self, window, status):
         """
@@ -579,9 +584,9 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         for row in self._box.get_children():
             row.set_mask(mask)
         if mask & SelectionListMask.ELLIPSIZE:
-            self._scrolled.set_hexpand(True)
+            self.__scrolled.set_hexpand(True)
         else:
-            self._scrolled.set_hexpand(False)
+            self.__scrolled.set_hexpand(False)
 
     def __add_values(self, values):
         """

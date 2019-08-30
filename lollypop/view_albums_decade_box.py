@@ -12,7 +12,7 @@
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_albums_decade import AlbumsDecadeWidget
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type
 from lollypop.utils import get_icon_name
 
 
@@ -63,11 +63,7 @@ class AlbumsDecadeBoxView(FlowBoxView):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        return ({"view_type": self.view_type}, self.sidebar_id, position)
+        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #

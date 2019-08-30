@@ -55,12 +55,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         if view_type & ViewType.DND:
             from lollypop.helper_dnd import DNDHelper
             self.__dnd_helper = DNDHelper(self._box, view_type)
-
-        if view_type & ViewType.SCROLLED:
-            self._scrolled.set_property("expand", True)
-            self.add(self._scrolled)
-        else:
-            self.add(self._box)
+        self.add_widget(self._box)
 
     def set_reveal(self, albums):
         """
@@ -135,14 +130,10 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
         return ({"genre_ids": self.__genre_ids,
                  "artist_ids": self.__artist_ids,
                  "view_type": self.view_type},
-                self.sidebar_id, position)
+                self.sidebar_id, self.position)
 
     @property
     def dnd_helper(self):
@@ -316,11 +307,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 children[0].reveal(True)
             else:
                 self.lazy_loading()
-            if self._view_type & ViewType.SCROLLED:
-                if self._viewport.get_child() is None:
-                    self._viewport.add(self._box)
-            elif self._box not in self.get_children():
-                self.add(self._box)
 
     def __row_for_album(self, album, reveal=False):
         """

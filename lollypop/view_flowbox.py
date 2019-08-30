@@ -116,7 +116,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             GLib.idle_add(self._add_items, items)
         else:
             self.lazy_loading()
-            self.add_widget(self._box)
 
     def _on_current_changed(self, player):
         """

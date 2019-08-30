@@ -69,11 +69,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        return ({"view_type": self.view_type}, self.sidebar_id, position)
+        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #

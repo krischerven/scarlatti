@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import App, ViewType, MARGIN
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -32,7 +32,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             @param album as Album
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type)
+        LazyLoadingView.__init__(self, view_type | ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
@@ -51,12 +51,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
                                           self._view_type | ViewType.ALBUM)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self._scrolled)
-        self._viewport.add(self.__grid)
-        self._overlay.add_overlay(self.__banner)
-        self.add(self._overlay)
+        self.add_widget(self.__grid, self.__banner)
 
     def populate(self):
         """
@@ -91,14 +86,10 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
         return ({"album": self._album,
                  "view_type": self.view_type},
                 self.sidebar_id,
-                position)
+                self.position)
 
     @property
     def filtered(self):
@@ -158,39 +149,9 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             App().window.go_back()
             return
 
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update banner style
-            @param window as Window
-            @param status as bool
-        """
-        LazyLoadingView._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
-
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        LazyLoadingView._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self.__tracks_view.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __on_tracks_populated(self, view):
         """
             Populate remaining discs

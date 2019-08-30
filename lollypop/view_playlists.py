@@ -10,11 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk
+from gi.repository import GLib
 
 from lollypop.utils import tracks_to_albums
 from lollypop.view import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type, Size
+from lollypop.define import App, ViewType, MARGIN, Type, Size
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -39,29 +39,25 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             @parma playlist_id as int
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type)
+        LazyLoadingView.__init__(self, view_type |
+                                 ViewType.SCROLLED |
+                                 ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         SizeAllocationHelper.__init__(self)
         self._playlist_id = playlist_id
         # We remove SCROLLED because we want to be the scrolled view
-        self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self._view.set_width(Size.MEDIUM)
+        self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
+        self.__view.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
-            self._view.dnd_helper.connect("dnd-finished",
-                                          self.__on_dnd_finished)
-        self._view.show()
-        self.__banner = PlaylistBannerWidget(playlist_id, self._view)
+            self.__view.dnd_helper.connect("dnd-finished",
+                                           self.__on_dnd_finished)
+        self.__view.show()
+        self.__banner = PlaylistBannerWidget(playlist_id, self.__view)
         self.__banner.connect("scroll", self._on_banner_scroll)
         self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self._scrolled)
-        self._viewport.add(self._view)
-        self._overlay.add_overlay(self.__banner)
-        self.add(self._overlay)
-        self.__banner.set_view_type(view_type)
+        self.add_widget(self.__view, self.__banner)
         return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
@@ -88,13 +84,13 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        App().task_helper.run(load, callback=(self._view.populate,))
+        App().task_helper.run(load, callback=(self.__view.populate,))
 
     def stop(self):
         """
             Stop populating
         """
-        self._view.stop()
+        self.__view.stop()
 
     def activate_child(self):
         """
@@ -135,12 +131,8 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
         return ({"playlist_id": self._playlist_id,
-                 "view_type": self.view_type}, self.sidebar_id, position)
+                 "view_type": self.view_type}, self.sidebar_id, self.position)
 
     @property
     def filtered(self):
@@ -149,7 +141,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             @return [Gtk.Widget]
         """
         filtered = []
-        for child in self._view.children:
+        for child in self.__view.children:
             filtered.append(child)
             for subchild in child.children:
                 filtered.append(subchild)
@@ -169,32 +161,11 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             Relative to scrolled widget
             @return Gtk.Widget
         """
-        return self._view
+        return self.__view
 
 #######################
 # PROTECTED           #
 #######################
-    def _on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode for views
-        """
-        LazyLoadingView._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
-
-    def _on_value_changed(self, adj):
-        """
-            Update banner
-            @param adj as Gtk.Adjustment
-        """
-        LazyLoadingView._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
     def _on_playlist_track_added(self, playlists, playlist_id, uri):
         """
             Append track to album list
@@ -206,7 +177,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
-            self._view.insert_album(album, True, -1)
+            self.__view.insert_album(album, True, -1)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
@@ -217,7 +188,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         """
         if playlist_id == self._playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
-            children = self._view.children
+            children = self.__view.children
             for album_row in children:
                 if album_row.album.id == track.album.id:
                     for track_row in album_row.children:
@@ -240,19 +211,12 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self._view.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __on_jump_to_current(self, banner):
         """
             Jump to current track
             @param banner as PlaylistBannerWidget
         """
-        self._view.jump_to_current(self._scrolled)
+        self.__view.jump_to_current(self._scrolled)
 
     def __on_dnd_finished(self, dnd_helper):
         """
@@ -261,7 +225,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         """
         if self._playlist_id >= 0:
             uris = []
-            for child in self._view.children:
+            for child in self.__view.children:
                 for track in child.album.tracks:
                     uris.append(track.uri)
             App().playlists.clear(self._playlist_id)
@@ -291,4 +255,4 @@ class SmartPlaylistsView(PlaylistsView):
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        App().task_helper.run(load, callback=(self._view.populate,))
+        App().task_helper.run(load, callback=(self.__view.populate,))

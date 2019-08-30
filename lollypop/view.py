@@ -10,13 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Pango
 
 from time import time
 from gettext import gettext as _
 import gc
 
-from lollypop.define import ViewType, App, LoadingState
+from lollypop.define import ViewType, App, LoadingState, MARGIN_SMALL
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -38,6 +38,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._view_type = view_type
         self.__destroyed = False
         self.__placeholder = None
+        self.__main_widget = None
+        self.__banner = None
         self.__scrolled_value = 0
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
@@ -46,18 +48,19 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._empty_icon_name = "emblem-music-symbolic"
 
         if view_type & ViewType.SCROLLED:
-            self._scrolled = Gtk.ScrolledWindow()
+            self.__scrolled = Gtk.ScrolledWindow()
             self.__event_controller = Gtk.EventControllerMotion.new(
-                self._scrolled)
+                self.__scrolled)
             self.__event_controller.set_propagation_phase(
                 Gtk.PropagationPhase.TARGET)
             self.__event_controller.connect("leave", self._on_view_leave)
-            self._scrolled.get_vadjustment().connect("value-changed",
-                                                     self._on_value_changed)
-            self._scrolled.show()
-            self._viewport = Gtk.Viewport()
-            self._scrolled.add(self._viewport)
-            self._viewport.show()
+            self.__scrolled.get_vadjustment().connect("value-changed",
+                                                      self._on_value_changed)
+            self.__scrolled.show()
+            self.__scrolled.set_property("expand", True)
+            self.__viewport = Gtk.Viewport()
+            self.__scrolled.add(self.__viewport)
+            self.__viewport.show()
 
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
@@ -66,17 +69,29 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             (App().window, "adaptive-changed", "_on_adaptive_changed"),
         ]
 
-    def add_widget(self, widget):
+    def add_widget(self, widget, banner=None):
         """
             Add widget to view
+            Add banner if ViewType.OVERLAY
             @param widget as Gtk.Widget
         """
-        if self._view_type & ViewType.SCROLLED:
-            if self._viewport.get_child() is None:
-                self._viewport.add(widget)
-                self.add(self._scrolled)
-                self._scrolled.set_property("expand", True)
-        elif widget not in self.get_children():
+        self.__main_widget = widget
+        if self._view_type & ViewType.OVERLAY:
+            self.__overlay = Gtk.Overlay.new()
+            self.__overlay.show()
+            if self._view_type & ViewType.SCROLLED:
+                self.__overlay.add(self.__scrolled)
+                self.__viewport.add(widget)
+            else:
+                self.__overlay.add(widget)
+            if banner is not None:
+                self.__overlay.add_overlay(banner)
+                self.__banner = banner
+            self.add(self.__overlay)
+        elif self._view_type & ViewType.SCROLLED:
+            self.__viewport.add(widget)
+            self.add(self.__scrolled)
+        else:
             self.add(widget)
 
     def stop(self):
@@ -122,12 +137,34 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         pass
 
     @property
+    def placeholder(self):
+        """
+            Get placeholder
+            @return Gtk.Widget
+        """
+        if self.__placeholder is None:
+            self.__placeholder = self.__get_placeholder()
+        return self.__placeholder
+
+    @property
     def view_type(self):
         """
             View type less sizing
             @return ViewType
         """
         return self._view_type & ~(ViewType.MEDIUM | ViewType.SMALL)
+
+    @property
+    def position(self):
+        """
+            Get scrolled position
+            @return float
+        """
+        if self._view_type & ViewType.SCROLLED:
+            position = self.__scrolled.get_vadjustment().get_value()
+        else:
+            position = 0
+        return position
 
     @property
     def destroyed(self):
@@ -154,7 +191,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             y = 100
         else:
             y = -100
-        adj = self._scrolled.get_vadjustment()
+        adj = self.__scrolled.get_vadjustment()
         new_value = adj.get_value() + y
         lower = adj.get_lower()
         upper = adj.get_upper() - adj.get_page_size()
@@ -167,6 +204,11 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param status as bool
             @return bool
         """
+        view_type = self._view_type
+        if status:
+            self._view_type |= ViewType.MEDIUM
+        else:
+            self._view_type &= ~ViewType.MEDIUM
         if self.__placeholder is not None:
             style_context = self.__placeholder.get_style_context()
             if status:
@@ -175,15 +217,30 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             else:
                 style_context.remove_class("text-x-large")
                 style_context.add_class("text-xx-large")
-        view_type = self._view_type
-        if status:
-            self._view_type |= ViewType.MEDIUM
-        else:
-            self._view_type &= ~ViewType.MEDIUM
+        elif self.__banner is not None:
+            self.__banner.set_view_type(self._view_type)
+            self.__main_widget.set_margin_top(self.__banner.height +
+                                              MARGIN_SMALL)
+            if self._view_type & ViewType.SCROLLED:
+                self.__scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
         return view_type != self._view_type
 
     def _on_value_changed(self, adj):
-        pass
+        """
+            Update margin if needed
+        """
+        if self.__banner is not None:
+            reveal = self.should_reveal_header(adj)
+            self.__banner.set_reveal_child(reveal)
+            if reveal:
+                self.__main_widget.set_margin_top(self.__banner.height +
+                                                  MARGIN_SMALL)
+                if self._view_type & ViewType.SCROLLED:
+                    self.__scrolled.get_vscrollbar().set_margin_top(
+                        self.__banner.height)
+            elif self._view_type & ViewType.SCROLLED:
+                self.__scrolled.get_vscrollbar().set_margin_top(0)
 
     def _on_album_updated(self, scanner, album_id, added):
         pass
@@ -200,6 +257,40 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __get_placeholder(self):
+        """
+            Get view placeholder
+            @return Gtk.Widget
+        """
+        label = Gtk.Label.new()
+        label.show()
+        label.set_markup("%s" % GLib.markup_escape_text(self._empty_message))
+        label.set_line_wrap_mode(Pango.WrapMode.WORD)
+        label.set_line_wrap(True)
+        label_style = label.get_style_context()
+        label_style.add_class("dim-label")
+        if App().window.is_adaptive:
+            label_style.add_class("text-x-large")
+        else:
+            label_style.add_class("text-xx-large")
+        label_style.add_class("dim-label")
+        image = Gtk.Image.new_from_icon_name(self._empty_icon_name,
+                                             Gtk.IconSize.DIALOG)
+        image.show()
+        image.get_style_context().add_class("dim-label")
+        placeholder = Gtk.Grid()
+        placeholder.show()
+        placeholder.set_margin_start(20)
+        placeholder.set_margin_end(20)
+        placeholder.set_column_spacing(20)
+        placeholder.add(image)
+        placeholder.add(label)
+        placeholder.set_vexpand(True)
+        placeholder.set_hexpand(True)
+        placeholder.set_property("halign", Gtk.Align.CENTER)
+        placeholder.set_property("valign", Gtk.Align.CENTER)
+        return placeholder
+
     def __on_destroy(self, widget):
         """
             Clean up widget
@@ -261,7 +352,7 @@ class LazyLoadingView(View):
             Set an external scrolled window for loading
             @param scrolled as Gtk.ScrolledWindow
         """
-        self._scrolled = scrolled
+        self.__scrolled = scrolled
         scrolled.get_vadjustment().connect("value-changed",
                                            self._on_value_changed)
 
@@ -284,8 +375,8 @@ class LazyLoadingView(View):
         View._on_map(self, widget)
         # Wait for viewport allocation to restore scrolled position
         if self.__scrolled_position is not None:
-            self._viewport.connect("size-allocate",
-                                   self.__on_viewport_size_allocated)
+            self.__viewport.connect("size-allocate",
+                                    self.__on_viewport_size_allocated)
         if self.__loading_state == LoadingState.ABORTED and self._lazy_queue:
             self.lazy_loading()
 
@@ -294,6 +385,7 @@ class LazyLoadingView(View):
             Update scroll value and check for lazy queue
             @param adj as Gtk.Adjustment
         """
+        View._on_value_changed(self, adj)
         if not self._lazy_queue:
             return False
         if self.__scroll_timeout_id is not None:
@@ -344,9 +436,9 @@ class LazyLoadingView(View):
             @param widget as Gtk.Widget
         """
         widget_alloc = widget.get_allocation()
-        scrolled_alloc = self._scrolled.get_allocation()
+        scrolled_alloc = self.__scrolled.get_allocation()
         try:
-            (x, y) = widget.translate_coordinates(self._scrolled, 0, 0)
+            (x, y) = widget.translate_coordinates(self.__scrolled, 0, 0)
             return (y > -widget_alloc.height or y >= 0) and\
                 y < scrolled_alloc.height
         except:
@@ -371,8 +463,8 @@ class LazyLoadingView(View):
             @param allocation as Gdk.Rectangle
         """
         if allocation.height > 1 and self.__scrolled_position is not None:
-            self._viewport.disconnect_by_func(
+            self.__viewport.disconnect_by_func(
                 self.__on_viewport_size_allocated)
-            self._scrolled.get_vadjustment().set_value(
+            self.__scrolled.get_vadjustment().set_value(
                 self.__scrolled_position)
             self.__scrolled_position = None

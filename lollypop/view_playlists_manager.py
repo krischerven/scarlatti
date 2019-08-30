@@ -10,14 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gio
 
 from locale import strcoll
 from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
-from lollypop.define import MARGIN_SMALL
 from lollypop.utils import popup_widget
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.widgets_banner_playlists import PlaylistsBannerWidget
@@ -31,24 +30,20 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type=ViewType.SCROLLED):
+    def __init__(self, view_type):
         """
             Init decade view
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type)
+        FlowBoxView.__init__(self, view_type |
+                             ViewType.SCROLLED | ViewType.OVERLAY)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__banner = PlaylistsBannerWidget(self)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
         self.__banner.set_view_type(self._view_type)
-        self._overlay = Gtk.Overlay.new()
-        self._overlay.show()
-        self._overlay.add(self._scrolled)
-        self._viewport.add(self._box)
-        self._overlay.add_overlay(self.__banner)
-        self.add(self._overlay)
+        self.add_widget(self._box, self.__banner)
         self._widget_class = PlaylistRoundedWidget
         return [
                 (App().playlists, "playlists-changed", "_on_playlist_changed")
@@ -103,11 +98,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
-        return ({"view_type": self.view_type}, self.sidebar_id, position)
+        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #
@@ -173,37 +164,9 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
                 if child.data == playlist_id:
                     child.destroy()
 
-    def _on_adaptive_changed(self, window, status):
-        """
-            Handle adaptive mode for views
-        """
-        FlowBoxView._on_adaptive_changed(self, window, status)
-        self.__banner.set_view_type(self._view_type)
-        self.__set_margin()
-
-    def _on_value_changed(self, adj):
-        """
-            Update scroll value and check for lazy queue
-            @param adj as Gtk.Adjustment
-        """
-        FlowBoxView._on_value_changed(self, adj)
-        reveal = self.should_reveal_header(adj)
-        self.__banner.set_reveal_child(reveal)
-        if reveal:
-            self.__set_margin()
-        else:
-            self._scrolled.get_vscrollbar().set_margin_top(0)
-
 #######################
 # PRIVATE             #
 #######################
-    def __set_margin(self):
-        """
-            Set margin from header
-        """
-        self._box.set_margin_top(self.__banner.height + MARGIN_SMALL)
-        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
-
     def __popup_menu(self, child):
         """
             Popup menu for playlist

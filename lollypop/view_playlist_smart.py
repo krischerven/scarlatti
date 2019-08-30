@@ -38,7 +38,6 @@ class SmartPlaylistView(View):
         builder.connect_signals(self)
         widget = builder.get_object("widget")
         self.connect("size-allocate", self.__on_size_allocate, widget)
-        self._viewport.add(widget)
         self.__listbox = builder.get_object("listbox")
         self._scrolled.set_property("expand", True)
         self.__match_toggle = builder.get_object("match_toggle")
@@ -50,7 +49,7 @@ class SmartPlaylistView(View):
         self.__bottom_box = builder.get_object("bottom_box")
         if App().playlists.get_smart(playlist_id):
             self.__match_toggle.set_active(True)
-        self.add(self._scrolled)
+        self.add_widget(widget)
 
     def populate(self):
         """
@@ -104,12 +103,8 @@ class SmartPlaylistView(View):
             scrolled position
             @return ({}, int, int)
         """
-        if self._view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
-        else:
-            position = 0
         return ({"playlist_id": self.__playlist_id},
-                self.sidebar_id, position)
+                self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #
