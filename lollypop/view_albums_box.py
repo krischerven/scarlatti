@@ -40,7 +40,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type | ViewType.SCROLLED)
+        FlowBoxView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self._widget_class = AlbumSimpleWidget
         self._genre_ids = genre_ids

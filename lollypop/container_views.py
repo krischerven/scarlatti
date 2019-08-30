@@ -267,7 +267,7 @@ class ViewsContainer:
             @param artist_ids as [int]
         """
         from lollypop.view_artist import ArtistView
-        view = ArtistView(genre_ids, artist_ids, ViewType.SCROLLED)
+        view = ArtistView(genre_ids, artist_ids)
         view.populate()
         view.show()
         return view
