@@ -57,18 +57,18 @@ class TypeAheadWidget(Gtk.Revealer):
             Filter current widget
             @param entry as Gtk.entry
         """
-        widget = self.__get_widget()
-        if widget is not None:
-            widget.search_for_child(entry.get_text())
+        view = App().window.container.focused_view
+        if view is not None:
+            view.search_for_child(entry.get_text())
 
     def _on_type_ahead_activate(self, entry):
         """
             Activate row
             @param entry as Gtk.Entry
         """
-        widget = self.__get_widget()
-        if widget is not None:
-            widget.activate_child()
+        view = App().window.container.focused_view
+        if view is not None:
+            view.activate_child()
             self.__entry.set_text("")
             self.__entry.grab_focus()
 
@@ -103,24 +103,14 @@ class TypeAheadWidget(Gtk.Revealer):
         """
             Search previous item
         """
-        widget = self.__get_widget()
-        if widget is not None:
-            widget.search_prev(self.__entry.get_text())
+        view = App().window.container.focused_view
+        if view is not None:
+            view.search_prev(self.__entry.get_text())
 
     def __search_next(self):
         """
             Search next item
         """
-        widget = self.__get_widget()
-        if widget is not None:
-            widget.search_next(self.__entry.get_text())
-
-    def __get_widget(self):
-        """
-            Get widget for activated button
-            @return Gtk.Widget
-        """
-        if App().window.is_adaptive:
-            return App().window.container.stack
-        else:
-            return App().window.container.stack
+        view = App().window.container.focused_view
+        if view is not None:
+            view.search_next(self.__entry.get_text())

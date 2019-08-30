@@ -21,7 +21,7 @@ from lollypop.helper_filtering import FilteringHelper
 from lollypop.logger import Logger
 
 
-class AlbumView(LazyLoadingView, ViewController, FilteringHelper):
+class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
     """
         Show artist albums and tracks
     """

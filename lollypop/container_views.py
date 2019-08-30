@@ -128,6 +128,7 @@ class ViewsContainer:
                 view = self._get_view_artists([], data)
         self._sidebar.select_ids(item_ids, False)
         if view is not None:
+            self.set_focused_view(view)
             ids = self._sidebar.selected_ids
             if ids:
                 view.set_sidebar_id(ids[0])

@@ -241,7 +241,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         self.emit("populated")
 
 
-class SelectionList(LazyLoadingView, FilteringHelper, GesturesHelper):
+class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
     """
         A list for artists/genres
     """

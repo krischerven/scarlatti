@@ -26,7 +26,7 @@ from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class PlaylistsView(LazyLoadingView, ViewController, FilteringHelper,
+class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
                     SignalsHelper, SizeAllocationHelper):
     """
         View showing playlists

@@ -145,6 +145,33 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.__scrolled_value = value
         return reveal
 
+    def search_for_child(self, text):
+        """
+            Search and hilight child in current view
+            @param text as str
+        """
+        pass
+
+    def activate_child(self):
+        """
+            Activate hilighted child
+        """
+        pass
+
+    def search_prev(self, text):
+        """
+            Search and hilight prev child
+            @param text as str
+        """
+        pass
+
+    def search_next(self, text):
+        """
+            Search and hilight next child
+            @param text as str
+        """
+        pass
+
     @property
     def view_type(self):
         """

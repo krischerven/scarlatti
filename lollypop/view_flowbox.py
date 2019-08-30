@@ -19,7 +19,7 @@ from lollypop.define import ViewType, MARGIN
 from lollypop.utils import get_font_height
 
 
-class FlowBoxView(LazyLoadingView, FilteringHelper, GesturesHelper):
+class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
     """
         Lazy loading FlowBox
     """

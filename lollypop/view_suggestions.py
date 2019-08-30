@@ -24,7 +24,7 @@ from lollypop.view_artists_rounded import RoundedArtistsRandomView
 from lollypop.widgets_banner_today import TodayBannerWidget
 
 
-class SuggestionsView(View, FilteringHelper):
+class SuggestionsView(FilteringHelper, View):
     """
         View showing suggestions to user
     """

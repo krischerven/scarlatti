@@ -36,9 +36,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                        title="Lollypop",
                                        icon_name="org.gnome.Lollypop")
         AdaptiveWindow.__init__(self)
-        self.__timeout = None
         self.__miniplayer = None
-        self.__timeout_configure_id = None
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         self.__multi_press = Gtk.GestureMultiPress.new(self)

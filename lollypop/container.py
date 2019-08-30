@@ -25,38 +25,6 @@ from lollypop.container_adaptive import AdaptiveContainer
 from lollypop.progressbar import ProgressBar
 
 
-class ContainerStack(AdaptiveStack):
-    """
-        Glue for filtering between stack and current view
-    """
-
-    def __init__(self):
-        """
-            Init stack
-        """
-        AdaptiveStack.__init__(self)
-
-    def search_for_child(self, text):
-        view = self.get_visible_child()
-        if view is not None and hasattr(view, "search_for_child"):
-            view.search_for_child(text)
-
-    def activate_child(self):
-        view = self.get_visible_child()
-        if view is not None and hasattr(view, "activate_child"):
-            view.activate_child()
-
-    def search_prev(self, text):
-        view = self.get_visible_child()
-        if view is not None and hasattr(view, "search_prev"):
-            view.search_prev(text)
-
-    def search_next(self, text):
-        view = self.get_visible_child()
-        if view is not None and hasattr(view, "search_next"):
-            view.search_next(text)
-
-
 class Container(Gtk.Overlay, NotificationContainer,
                 ScannerContainer, PlaylistsContainer, AdaptiveContainer,
                 ListsContainer, ViewsContainer, FilterContainer):
@@ -81,7 +49,8 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._main_widget = None
         self._sidebar_two = None
         self.__paned_position_id = None
-        self._stack = ContainerStack()
+        self.__focused_view = None
+        self._stack = AdaptiveStack()
         self._stack.get_style_context().add_class("view")
         self._stack.show()
         self.__progress = ProgressBar()
@@ -134,6 +103,13 @@ class Container(Gtk.Overlay, NotificationContainer,
             Gtk.Stack.set_visible_child(self._stack, new_view)
             view.destroy_later()
 
+    def set_focused_view(self, view):
+        """
+            Set focused view
+            @param view as View
+        """
+        self.__focused_view = view
+
     @property
     def main_widget(self):
         """
@@ -141,6 +117,14 @@ class Container(Gtk.Overlay, NotificationContainer,
             @return Gtk.Grid
         """
         return self._main_widget
+
+    @property
+    def focused_view(self):
+        """
+            Get focused view
+            @return View
+        """
+        return self.__focused_view
 
     @property
     def view(self):

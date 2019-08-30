@@ -140,6 +140,7 @@ class ListsContainer:
         """
         Logger.debug("Container::__on_sidebar_activated()")
         view = None
+        focus_set = False
         selected_ids = self._sidebar.selected_ids
         if not selected_ids:
             return
@@ -149,11 +150,15 @@ class ListsContainer:
             self.__hide_right_list()
             self.left_list.show()
             self.left_list.set_sidebar_id(Type.ARTISTS_LIST)
+            self.set_focused_view(self.left_list)
+            focus_set = True
         elif selected_ids[0] == Type.GENRES_LIST:
             self.__show_genres_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
             self.left_list.set_sidebar_id(Type.GENRES_LIST)
+            self.set_focused_view(self.left_list)
+            focus_set = True
         else:
             self.left_list.hide()
 
@@ -198,6 +203,8 @@ class ListsContainer:
         elif view is not None:
             self._stack.set_visible_child(view)
             view.set_sidebar_id(selected_ids[0])
+            if not focus_set:
+                self.set_focused_view(view)
 
     def __on_sidebar_populated(self, selection_list):
         """
@@ -230,8 +237,10 @@ class ListsContainer:
             self.__right_list_grid.show()
             self.__right_list_grid.set_state_flags(Gtk.StateFlags.VISITED,
                                                    False)
+            self.set_focused_view(self.right_list)
         else:
             view = self._get_view_artists([], selected_ids)
+            self.set_focused_view(view)
         if view is not None:
             view.show()
             view.set_sidebar_id(self.left_list.sidebar_id)
@@ -251,3 +260,4 @@ class ListsContainer:
         view.set_sidebar_id(self.left_list.sidebar_id)
         self._stack.add(view)
         self._stack.set_visible_child(view)
+        self.set_focused_view(view)
