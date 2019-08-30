@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Pango
+from gi.repository import Gtk, GLib
 
 from time import time
 from gettext import gettext as _
@@ -37,8 +37,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         Gtk.Grid.__init__(self)
         self._view_type = view_type
         self.__destroyed = False
-        self.__placeholder = None
-        self.__main_widget = None
         self.__banner = None
         self._scrolled_value = 0
         self.set_orientation(Gtk.Orientation.VERTICAL)
@@ -62,6 +60,12 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._scrolled.add(self.__viewport)
             self.__viewport.show()
 
+        # Stack for placeholder
+        self.__stack = Gtk.Stack.new()
+        self.__stack.show()
+        self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.__stack.set_transition_duration(200)
+
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
@@ -75,27 +79,47 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             Add banner if ViewType.OVERLAY
             @param widget as Gtk.Widget
         """
-        self.__main_widget = widget
+        self.__stack.add_named(widget, "main")
         if self._view_type & ViewType.OVERLAY:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
             if self._view_type & ViewType.SCROLLED:
                 self.__overlay.add(self._scrolled)
-                self.__viewport.add(widget)
+                self.__viewport.add(self.__stack)
             else:
-                self.__overlay.add(widget)
+                self.__overlay.add(self.__stack)
             if banner is not None:
                 self.__overlay.add_overlay(banner)
                 self.__banner = banner
             self.add(self.__overlay)
         elif self._view_type & ViewType.SCROLLED:
-            self.__viewport.add(widget)
+            self.__viewport.add(self.__stack)
             self.add(self._scrolled)
         else:
-            self.add(widget)
+            self.add(self.__stack)
 
     def stop(self):
         pass
+
+    def show_placeholder(self, show, new_text=None):
+        """
+            Show placeholder
+            @param show as bool
+        """
+        if show:
+            placeholder = self.__stack.get_child_by_name("placeholder")
+            if placeholder is not None:
+                placeholder.destroy()
+            message = new_text\
+                if new_text is not None\
+                else self._empty_message
+            from lollypop.placeholder import Placeholder
+            placeholder = Placeholder(message, self._empty_icon_name)
+            placeholder.show()
+            self.__stack.add_named(placeholder, "placeholder")
+            self.__stack.set_visible_child_name("placeholder")
+        else:
+            self.__stack.set_visible_child_name("main")
 
     def should_reveal_header(self, adj):
         """
@@ -135,16 +159,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param text as str
         """
         pass
-
-    @property
-    def placeholder(self):
-        """
-            Get placeholder
-            @return Gtk.Widget
-        """
-        if self.__placeholder is None:
-            self.__placeholder = self.__get_placeholder()
-        return self.__placeholder
 
     @property
     def view_type(self):
@@ -205,22 +219,17 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @return bool
         """
         view_type = self._view_type
+        if self.__stack.get_visible_child_name() == "placeholder":
+            placeholder = self.__stack.get_child_by_name("placeholder")
+            placeholder.set_adaptive(status)
         if status:
             self._view_type |= ViewType.MEDIUM
         else:
             self._view_type &= ~ViewType.MEDIUM
-        if self.__placeholder is not None:
-            style_context = self.__placeholder.get_style_context()
-            if status:
-                style_context.remove_class("text-xx-large")
-                style_context.add_class("text-x-large")
-            else:
-                style_context.remove_class("text-x-large")
-                style_context.add_class("text-xx-large")
-        elif self.__banner is not None:
+        if self.__banner is not None:
             self.__banner.set_view_type(self._view_type)
-            self.__main_widget.set_margin_top(self.__banner.height +
-                                              MARGIN_SMALL)
+            main_widget = self.__stack.get_child_by_name("main")
+            main_widget.set_margin_top(self.__banner.height + MARGIN_SMALL)
             if self._view_type & ViewType.SCROLLED:
                 self._scrolled.get_vscrollbar().set_margin_top(
                     self.__banner.height)
@@ -234,8 +243,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             reveal = self.should_reveal_header(adj)
             self.__banner.set_reveal_child(reveal)
             if reveal:
-                self.__main_widget.set_margin_top(self.__banner.height +
-                                                  MARGIN_SMALL)
+                main_widget = self.__stack.get_child_by_name("main")
+                main_widget.set_margin_top(self.__banner.height + MARGIN_SMALL)
                 if self._view_type & ViewType.SCROLLED:
                     self._scrolled.get_vscrollbar().set_margin_top(
                         self.__banner.height)
@@ -257,40 +266,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __get_placeholder(self):
-        """
-            Get view placeholder
-            @return Gtk.Widget
-        """
-        label = Gtk.Label.new()
-        label.show()
-        label.set_markup("%s" % GLib.markup_escape_text(self._empty_message))
-        label.set_line_wrap_mode(Pango.WrapMode.WORD)
-        label.set_line_wrap(True)
-        label_style = label.get_style_context()
-        label_style.add_class("dim-label")
-        if App().window.is_adaptive:
-            label_style.add_class("text-x-large")
-        else:
-            label_style.add_class("text-xx-large")
-        label_style.add_class("dim-label")
-        image = Gtk.Image.new_from_icon_name(self._empty_icon_name,
-                                             Gtk.IconSize.DIALOG)
-        image.show()
-        image.get_style_context().add_class("dim-label")
-        placeholder = Gtk.Grid()
-        placeholder.show()
-        placeholder.set_margin_start(20)
-        placeholder.set_margin_end(20)
-        placeholder.set_column_spacing(20)
-        placeholder.add(image)
-        placeholder.add(label)
-        placeholder.set_vexpand(True)
-        placeholder.set_hexpand(True)
-        placeholder.set_property("halign", Gtk.Align.CENTER)
-        placeholder.set_property("valign", Gtk.Align.CENTER)
-        return placeholder
-
     def __on_destroy(self, widget):
         """
             Clean up widget

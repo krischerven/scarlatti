@@ -41,6 +41,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__timeout_id = None
         self.__search_count = 0
         self.__current_search = ""
+        self._empty_message = _("Search for artists, albums and tracks")
+        self._empty_icon_name = "edit-find-symbolic"
         self.__cancellable = Gio.Cancellable()
         self.__search_type_action = Gio.SimpleAction.new_stateful(
                                                "search_type",
@@ -49,17 +51,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__search_type_action.connect("change-state",
                                           self.__on_search_action_change_state)
         App().add_action(self.__search_type_action)
-        self.__stack = Gtk.Stack.new()
-        self.__stack.show()
-        self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.__stack.set_transition_duration(200)
-        self.__placeholder = Gtk.Label.new()
-        self.__placeholder.show()
-        self.__placeholder.set_justify(Gtk.Justification.CENTER)
-        self.__placeholder.set_line_wrap(True)
-        self.__placeholder.set_vexpand(True)
-        self.__placeholder.get_style_context().add_class("dim-label")
-        self.__stack.add_named(self.__placeholder, "placeholder")
         self.__bottom_buttons = Gtk.Grid()
         self.__bottom_buttons.show()
         self.__bottom_buttons.get_style_context().add_class("linked")
@@ -88,12 +79,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__view.show()
         self.__view.set_external_scrolled(self._scrolled)
         self.__view.set_width(Size.MEDIUM)
-        self.__stack.add_named(self.__view, "view")
-        self.__set_default_placeholder()
         self.__banner = SearchBannerWidget(self.__view)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self.add_widget(self.__stack, self.__banner)
+        self.add_widget(self.__view, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
         return [
@@ -133,8 +122,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                                       current_search,
                                       self.__cancellable)
         else:
-            self.__stack.set_visible_child_name("placeholder")
-            self.__set_default_placeholder()
+            self.show_placeholder(True,
+                                  _("Search for artists, albums and tracks"))
             GLib.idle_add(self.__banner.spinner.stop)
 
     def set_search(self, search):
@@ -206,7 +195,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param spotify as SpotifyHelper
             @param album as Album
         """
-        self.__stack.set_visible_child_name("view")
+        self.show_placeholder(False)
         self.__view.insert_album(album, len(album.tracks) == 1, -1)
 
     def _on_search_finished(self, *ignore):
@@ -216,9 +205,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__search_count -= 1
         if self.__search_count == 0:
             self.__banner.spinner.stop()
-            if not self.__view.children:
-                self.__stack.set_visible_child_name("placeholder")
-                self.__set_no_result_placeholder()
 
 #######################
 # PRIVATE             #
@@ -227,13 +213,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Set placeholder for no result
         """
-        self.__placeholder.set_text(_("No results for this search"))
-
-    def __set_default_placeholder(self):
-        """
-            Set placeholder for no result
-        """
-        self.__placeholder.set_text(_("Search for artists, albums and tracks"))
+        self.__placeholder.set_text()
 
     def __on_search_get(self, result, search):
         """
@@ -250,9 +230,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                     reveal_albums.append(album)
             self.__view.set_reveal(reveal_albums)
             self.__view.populate(albums)
-            self.__stack.set_visible_child_name("view")
+            self.show_placeholder(False)
             self.__banner.play_button.set_sensitive(True)
             self.__banner.new_button.set_sensitive(True)
+        else:
+            self.show_placeholder(True, _("No results for this search"))
 
     def _on_search_changed(self, widget):
         """
