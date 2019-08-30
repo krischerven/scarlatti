@@ -57,7 +57,11 @@ class CurrentAlbumsView(View, SignalsHelper):
             albums = tracks_to_albums(tracks)
         else:
             albums = App().player.albums
-        self.__view.populate(albums)
+        if albums:
+            self.__view.populate(albums)
+            self.show_placeholder(False)
+        else:
+            self.show_placeholder(True)
 
     @property
     def args(self):
