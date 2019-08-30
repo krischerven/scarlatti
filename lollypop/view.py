@@ -38,6 +38,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._view_type = view_type
         self.__destroyed = False
         self.__banner = None
+        self.__placeholder = None
         self._scrolled_value = 0
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
@@ -64,7 +65,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.__stack = Gtk.Stack.new()
         self.__stack.show()
         self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.__stack.set_transition_duration(200)
+        self.__stack.set_transition_duration(100)
 
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
@@ -107,17 +108,16 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param show as bool
         """
         if show:
-            placeholder = self.__stack.get_child_by_name("placeholder")
-            if placeholder is not None:
-                placeholder.destroy()
+            if self.__placeholder is not None:
+                GLib.timeout_add(200, self.__placeholder.destroy)
             message = new_text\
                 if new_text is not None\
                 else self._empty_message
             from lollypop.placeholder import Placeholder
-            placeholder = Placeholder(message, self._empty_icon_name)
-            placeholder.show()
-            self.__stack.add_named(placeholder, "placeholder")
-            self.__stack.set_visible_child_name("placeholder")
+            self.__placeholder = Placeholder(message, self._empty_icon_name)
+            self.__placeholder.show()
+            self.__stack.add(self.__placeholder)
+            self.__stack.set_visible_child(self.__placeholder)
         else:
             self.__stack.set_visible_child_name("main")
 
@@ -219,9 +219,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @return bool
         """
         view_type = self._view_type
-        if self.__stack.get_visible_child_name() == "placeholder":
-            placeholder = self.__stack.get_child_by_name("placeholder")
-            placeholder.set_adaptive(status)
+        if self.__placeholder is not None and self.__placeholder.is_visible():
+            self.__placeholder.set_adaptive(status)
         if status:
             self._view_type |= ViewType.MEDIUM
         else:
