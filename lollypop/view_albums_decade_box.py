@@ -12,7 +12,7 @@
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_albums_decade import AlbumsDecadeWidget
-from lollypop.define import App, Type
+from lollypop.define import App, Type, ViewType
 from lollypop.utils import get_icon_name
 
 
@@ -21,14 +21,14 @@ class AlbumsDecadeBoxView(FlowBoxView):
         Show decades in a FlowBox
     """
 
-    def __init__(self, view_type):
+    def __init__(self):
         """
             Init decade view
-            @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type)
+        FlowBoxView.__init__(self, ViewType.SCROLLED)
         self._widget_class = AlbumsDecadeWidget
         self._empty_icon_name = get_icon_name(Type.YEARS)
+        self.add_widget(self._box)
 
     def populate(self):
         """

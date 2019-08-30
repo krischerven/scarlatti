@@ -287,8 +287,7 @@ class ViewsContainer:
             Get album view for decades
         """
         from lollypop.view_albums_decade_box import AlbumsDecadeBoxView
-        view_type = ViewType.SCROLLED
-        view = AlbumsDecadeBoxView(view_type)
+        view = AlbumsDecadeBoxView()
         view.populate()
         view.show()
         return view
