@@ -78,7 +78,6 @@ class AlbumsDecadeBoxView(FlowBoxView):
             Start lazy loading
             @param item ids as [int]
         """
-        self.remove_placeholder()
         FlowBoxView._add_items(self, item_ids, self._view_type)
 
     def _on_child_activated(self, flowbox, child):

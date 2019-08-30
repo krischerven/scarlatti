@@ -123,7 +123,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             Start lazy loading
             @param albums as [Album]
         """
-        self.remove_placeholder()
         FlowBoxView._add_items(self, albums, self._genre_ids, self._artist_ids,
                                self._view_type)
 
@@ -141,8 +140,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                                             self._genre_ids,
                                             self._artist_ids)
             if album_id in album_ids:
-                if self.remove_placeholder():
-                    self.add_widget(self._box)
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
         else:

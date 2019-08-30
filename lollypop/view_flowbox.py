@@ -57,10 +57,8 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param items
         """
         self._items = list(items)
-        if items and self._box.get_visible():
+        if items:
             GLib.idle_add(self._add_items, items)
-        else:
-            LazyLoadingView.populate(self)
 
     def activate_child(self):
         """

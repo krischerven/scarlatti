@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Pango
+from gi.repository import Gtk, GLib
 
 from time import time
 from gettext import gettext as _
@@ -66,43 +66,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             (App().window, "adaptive-changed", "_on_adaptive_changed"),
         ]
 
-    def populate(self):
-        """
-            Populate view with default message
-        """
-        if self._view_type & ViewType.PLACEHOLDER:
-            return
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled.hide()
-        self._view_type |= ViewType.PLACEHOLDER
-        grid = Gtk.Grid()
-        grid.set_margin_start(20)
-        grid.set_margin_end(20)
-        grid.set_column_spacing(20)
-        self.__placeholder = Gtk.Label.new()
-        self.__placeholder.set_markup("%s" % GLib.markup_escape_text(
-            self._empty_message))
-        label_style = self.__placeholder.get_style_context()
-        if App().window.is_adaptive:
-            label_style.add_class("text-x-large")
-        else:
-            label_style.add_class("text-xx-large")
-        label_style.add_class("dim-label")
-        self.__placeholder.set_line_wrap_mode(Pango.WrapMode.WORD)
-        self.__placeholder.set_line_wrap(True)
-        image = Gtk.Image.new_from_icon_name(self._empty_icon_name,
-                                             Gtk.IconSize.DIALOG)
-        image.get_style_context().add_class("dim-label")
-        grid.add(image)
-        grid.add(self.__placeholder)
-        grid.set_vexpand(True)
-        grid.set_hexpand(True)
-        grid.set_property("halign", Gtk.Align.CENTER)
-        grid.set_property("valign", Gtk.Align.CENTER)
-        grid.set_name("lollypop_placeholder")
-        grid.show_all()
-        self.add(grid)
-
     def add_widget(self, widget):
         """
             Add widget to view
@@ -115,22 +78,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 self._scrolled.set_property("expand", True)
         elif widget not in self.get_children():
             self.add(widget)
-
-    def remove_placeholder(self):
-        """
-            Remove any placeholder
-            @return bool: True if removed
-        """
-        if self._view_type & ViewType.PLACEHOLDER:
-            self._view_type & ~ViewType.PLACEHOLDER
-            if self._view_type & ViewType.SCROLLED:
-                self._scrolled.show()
-            for child in self.get_children():
-                if child.get_name() == "lollypop_placeholder":
-                    child.destroy()
-                    break
-            return True
-        return False
 
     def stop(self):
         pass
