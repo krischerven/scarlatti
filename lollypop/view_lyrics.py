@@ -16,15 +16,14 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.objects_radio import Radio
-from lollypop.define import App, ArtBehaviour, ViewType, AdaptiveSize, Size
-from lollypop.define import StorageType
-from lollypop.controller_information import InformationController
+from lollypop.define import App, ViewType, AdaptiveSize
+from lollypop.define import StorageType, MARGIN_SMALL
 from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_lyrics import SyncLyricsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.widgets_banner_lyrics import LyricsBannerWidget
 
 
 class LyricsLabel(Gtk.Stack):
@@ -78,8 +77,7 @@ class LyricsLabel(Gtk.Stack):
                 break
 
 
-class LyricsView(View, InformationController,
-                 SignalsHelper, SizeAllocationHelper):
+class LyricsView(View, SignalsHelper):
     """
         Show lyrics for track
     """
@@ -89,27 +87,25 @@ class LyricsView(View, InformationController,
         """
             Init view
         """
-        View.__init__(self, ViewType.DEFAULT)
-        InformationController.__init__(self, False,
-                                       ArtBehaviour.BLUR_MAX |
-                                       ArtBehaviour.CROP |
-                                       ArtBehaviour.DARKER)
-        SizeAllocationHelper.__init__(self)
+        View.__init__(self, ViewType.SCROLLED)
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
         self.__lyrics_text = ""
         self._empty_message = _("No track playing")
         self._empty_icon_name = "view-dual-symbolic"
         self.__cancellable = Gio.Cancellable()
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/LyricsView.ui")
-        builder.connect_signals(self)
-        self._artwork = builder.get_object("cover")
         self.__lyrics_label = LyricsLabel()
         self.__lyrics_label.show()
-        builder.get_object("viewport").add(self.__lyrics_label)
-        self.__translate_button = builder.get_object("translate_button")
-        self.__widget = builder.get_object("widget")
+        self.__lyrics_label.set_property("halign", Gtk.Align.CENTER)
+        self._overlay = Gtk.Overlay.new()
+        self._overlay.show()
+        self._overlay.add(self._scrolled)
+        self._viewport.add(self.__lyrics_label)
+        self.__banner = LyricsBannerWidget(self._view_type)
+        self.__banner.show()
+        self.__banner.connect("translate", self.__on_translate)
+        self._overlay.add_overlay(self.__banner)
+        self.add(self._overlay)
         self.__sync_lyrics_helper = SyncLyricsHelper()
         self.__update_lyrics_style()
         return [
@@ -123,28 +119,17 @@ class LyricsView(View, InformationController,
             Set lyrics
             @param track as Track
         """
-        if track.id is None:
-            if self.__widget not in self.get_children():
-                self.remove(self.__widget)
-            View.populate(self)
-            return
-        self.remove_placeholder()
-        self.add_widget(self.__widget)
         self.__current_track = track
-        size = max(self.get_allocated_width(), self.get_allocated_height())
-        self.update_artwork(size + Size.MINI, size + Size.MINI)
         self.__lyrics_label.set_text(_("Loading…"))
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
         self.__sync_lyrics_helper.load(track)
         if self.__sync_lyrics_helper.available:
-            self.__translate_button.hide()
             if self.__lyrics_timeout_id is None:
                 self.__lyrics_timeout_id = GLib.timeout_add(
                     500, self.__show_sync_lyrics)
             return
         else:
-            self.__translate_button.show()
             if self.__lyrics_timeout_id is not None:
                 GLib.source_remove(self.__lyrics_timeout_id)
                 self.__lyrics_timeout_id = None
@@ -179,22 +164,13 @@ class LyricsView(View, InformationController,
 ##############
 # PROTECTED  #
 ##############
-    def _handle_size_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
-            size = max(allocation.width, allocation.height)
-            self._previous_artwork_id = None
-            self.update_artwork(size + Size.MINI, size + Size.MINI)
-
-    def _on_translate_toggled(self, button):
+    def __on_translate(self, banner, active):
         """
             Translate lyrics
-            @param button as Gtk.Button
+            @param banner as LyricsBannerWidget
+            @param active as bool
         """
-        if button.get_active():
+        if active:
             App().task_helper.run(self.__get_blob, self.__lyrics_text,
                                   callback=(self.__lyrics_label.set_text,))
         else:
@@ -215,8 +191,8 @@ class LyricsView(View, InformationController,
             Update lyrics
             @param player as Player
         """
+        self.__banner.translate_button.set_sensitive(False)
         self.populate(App().player.current_track)
-        self.__translate_button.set_sensitive(True)
 
     def _on_adaptive_size_changed(self, window, adaptive_size):
         """
@@ -226,9 +202,41 @@ class LyricsView(View, InformationController,
         """
         self.__update_lyrics_style()
 
+    def _on_adaptive_changed(self, window, status):
+        """
+            Update banner style
+            @param window as Window
+            @param status as bool
+        """
+        View._on_adaptive_changed(self, window, status)
+        if self.__banner is not None:
+            self.__banner.set_view_type(self._view_type)
+            self.__set_margin()
+
+    def _on_value_changed(self, adj):
+        """
+            Update scroll value and check for lazy queue
+            @param adj as Gtk.Adjustment
+        """
+        View._on_value_changed(self, adj)
+        if self.__banner is not None:
+            reveal = self.should_reveal_header(adj)
+            self.__banner.set_reveal_child(reveal)
+            if reveal:
+                self.__set_margin()
+            else:
+                self._scrolled.get_vscrollbar().set_margin_top(0)
+
 ############
 # PRIVATE  #
 ############
+    def __set_margin(self):
+        """
+            Set margin from header
+        """
+        self.__lyrics_label.set_margin_top(self.__banner.height + MARGIN_SMALL)
+        self._scrolled.get_vscrollbar().set_margin_top(self.__banner.height)
+
     def __show_sync_lyrics(self):
         """
             Show sync lyrics for track
@@ -346,7 +354,6 @@ class LyricsView(View, InformationController,
         for cls in context.list_classes():
             context.remove_class(cls)
         context.add_class("lyrics")
-        context.add_class("black")
         adaptive_size = App().window.adaptive_size
         if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             if self.__sync_lyrics_helper.available:
@@ -385,8 +392,8 @@ class LyricsView(View, InformationController,
                 self.__lyrics_text = soup.find_all(
                     "div", class_=cls)[0].get_text(separator=separator)
                 self.__lyrics_label.set_text(self.__lyrics_text)
+                self.__banner.translate_button.set_sensitive(True)
             except Exception as e:
                 Logger.warning("LyricsView::__on_lyrics_downloaded(): %s", e)
         if not self.__lyrics_text and self.__downloads_running == 0:
             self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
-            self.__translate_button.set_sensitive(False)

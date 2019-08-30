@@ -70,6 +70,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
             Populate view with default message
         """
+        if self._view_type & ViewType.PLACEHOLDER:
+            return
         if self._view_type & ViewType.SCROLLED:
             self._scrolled.hide()
         self._view_type |= ViewType.PLACEHOLDER

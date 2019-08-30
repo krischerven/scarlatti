@@ -126,7 +126,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
             App().art_helper.set_banner_artwork(
                 # +100 to prevent resize lag
                 allocation.width + 100,
-                allocation.height,
+                self.height,
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
@@ -141,7 +141,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
         App().art_helper.set_banner_artwork(
                 # +100 to prevent resize lag
                 allocation.width + 100,
-                allocation.height,
+                self.height,
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.BLUR |
                 ArtBehaviour.DARKER,
