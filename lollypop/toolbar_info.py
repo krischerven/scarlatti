@@ -17,7 +17,7 @@ from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.objects_radio import Radio
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
-from lollypop.define import App, ArtBehaviour, StorageType
+from lollypop.define import App, ArtBehaviour, StorageType, MARGIN
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.helper_signals import SignalsHelper, signals
 
@@ -55,6 +55,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         horizontal_box.pack_start(self.__label, False, False, 0)
         self.connect("realize", self.__on_realize)
         self.get_style_context().add_class("opacity-transition")
+        self.set_margin_start(MARGIN)
         return [
             (App().player, "status-changed", "_on_status_changed")
         ]
