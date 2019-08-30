@@ -55,7 +55,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         horizontal_box.pack_start(self.__label, False, False, 0)
         self.connect("realize", self.__on_realize)
         self.get_style_context().add_class("opacity-transition")
-        self.set_margin_start(MARGIN)
         return [
             (App().player, "status-changed", "_on_status_changed")
         ]
@@ -204,6 +203,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
             Calculate art size
             @param toolbar as ToolbarInfos
         """
+        self.set_margin_start(MARGIN)
         art_size = self.get_allocated_height()
         self.__artwork.set_art_size(art_size, art_size)
 
