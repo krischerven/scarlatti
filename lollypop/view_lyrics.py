@@ -119,6 +119,9 @@ class LyricsView(View, SignalsHelper):
             Set lyrics
             @param track as Track
         """
+        if track.id is None:
+            self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
+            return
         self.__current_track = track
         self.__lyrics_label.set_text(_("Loading…"))
         self.__cancellable.cancel()
