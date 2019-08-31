@@ -267,13 +267,6 @@ class Application(Gtk.Application, ApplicationActions):
             scrobbler.save()
         Gio.Application.quit(self)
 
-    def set_mini(self):
-        """
-            Set mini player on/off
-        """
-        if self.__window is not None:
-            self.__window.set_mini()
-
     def load_listenbrainz(self):
         """
             Load listenbrainz support if needed

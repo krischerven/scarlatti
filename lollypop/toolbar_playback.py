@@ -39,15 +39,13 @@ class ToolbarPlayback(Gtk.Box):
         window.container.connect("can-go-back-changed",
                                  self.__on_can_go_back_changed)
 
-    def set_mini(self, mini):
+    @property
+    def player_buttons(self):
         """
-            Show/hide
-            @param mini as bool
+            Get player buttons
+            @return Gtk.Box
         """
-        if mini:
-            self.__player_buttons.hide()
-        else:
-            self.__player_buttons.show()
+        return self.__player_buttons
 
     @property
     def back_button(self):

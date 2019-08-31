@@ -172,9 +172,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__miniplayer.connect("revealed", on_revealed)
             self.__miniplayer.set_vexpand(False)
             self.__vgrid.add(self.__miniplayer)
-            self.__toolbar.set_mini(True)
         elif not show and self.__miniplayer is not None:
-            self.__toolbar.set_mini(False)
             self.__miniplayer.destroy()
             self.__miniplayer = None
             self.__container.show()

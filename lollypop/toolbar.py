@@ -62,19 +62,6 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         width = max(Size.SMALL, self.__width)
         return (Size.SMALL, width)
 
-    def set_mini(self, mini):
-        """
-            Set toolbar working when small
-            @param mini as bool
-        """
-        self.__toolbar_playback.set_mini(mini)
-        if mini:
-            self.__toolbar_title.hide()
-            self.__toolbar_info.hide()
-        elif App().player.is_playing:
-            self.__toolbar_title.show()
-            self.__toolbar_info.show()
-
     @property
     def end(self):
         """
@@ -142,9 +129,15 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             @param adaptive_size as AdaptiveSize
         """
         self.__adaptive_size = adaptive_size
-        if adaptive_size & AdaptiveSize.BIG and App().player.is_playing:
-            self.__toolbar_title.show()
-            self.__toolbar_info.show()
+        if adaptive_size & AdaptiveSize.BIG:
+            if App().player.is_playing:
+                self.__toolbar_title.show()
+                self.__toolbar_info.show()
+            self.__toolbar_playback.player_buttons.show()
+        else:
+            self.__toolbar_playback.player_buttons.hide()
+            self.__toolbar_title.hide()
+            self.__toolbar_info.hide()
 
 ############
 # PRIVATE  #
