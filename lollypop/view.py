@@ -65,8 +65,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         # Stack for placeholder
         self.__stack = Gtk.Stack.new()
         self.__stack.show()
-        self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.__stack.set_transition_duration(100)
+        self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
 
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
