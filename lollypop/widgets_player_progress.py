@@ -46,7 +46,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("pressed", self.__on_multi_pressed)
         self.__multi_press.connect("released", self.__on_multi_released)
-        self.__multi_press.set_button(0)
+        self.__multi_press.set_button(1)
         self.__event_controller = Gtk.EventControllerScroll.new(
             self.__progress, Gtk.EventControllerScrollFlags.BOTH_AXES)
         self.__event_controller.set_propagation_phase(
@@ -100,7 +100,6 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         style_context = self.__progress.get_style_context()
         style_context.remove_class("youtube-scale")
         if App().player.current_track.id is None:
-            self.__progress.set_sensitive(False)
             self.__total_time_label.set_text("")
             self.__time_label.set_text("")
             return
