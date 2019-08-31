@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gio
 
 from lollypop.logger import Logger
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
@@ -33,28 +33,20 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
 #######################
 # PROTECTED           #
 #######################
-    def _on_button_clicked(self, button):
+    def _save_from_filename(self, filename):
         """
-            Show file chooser
+            Save filename as album artwork
             @param button as Gtk.button
         """
-        dialog = Gtk.FileChooserDialog()
-        dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
-        dialog.add_buttons(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
-        dialog.set_transient_for(App().window)
-        self._close_popover()
-        response = dialog.run()
-        if response == Gtk.ResponseType.OK:
-            try:
-                f = Gio.File.new_for_path(dialog.get_filename())
-                (status, data, tag) = f.load_contents()
-                if status:
-                    App().art.add_artist_artwork(self.__artist, data)
-                self._streams = {}
-            except Exception as e:
-                Logger.error(
-                    "ArtistArtworkSearchWidget::_on_button_clicked(): %s" % e)
-        dialog.destroy()
+        try:
+            f = Gio.File.new_for_path(filename)
+            (status, data, tag) = f.load_contents()
+            if status:
+                App().art.add_artist_artwork(self.__artist, data)
+            self._streams = {}
+        except Exception as e:
+            Logger.error(
+                "ArtistArtworkSearchWidget::_save_from_filename(): %s" % e)
 
     def _on_reset_confirm(self, button):
         """

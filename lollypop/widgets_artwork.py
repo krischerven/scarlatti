@@ -182,6 +182,27 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _save_from_filename(self, filename):
+        pass
+
+    def _on_button_clicked(self, button):
+        """
+            Show file chooser
+            @param button as Gtk.button
+        """
+        dialog = Gtk.FileChooserDialog()
+        dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_buttons(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        dialog.set_transient_for(App().window)
+        file_filter = Gtk.FileFilter.new()
+        file_filter.add_pixbuf_formats()
+        dialog.set_filter(file_filter)
+        self._close_popover()
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            self._save_from_filename(dialog.get_filename())
+        dialog.destroy()
+
     def _close_popover(self):
         """
             Search for a popover in parents and close it
