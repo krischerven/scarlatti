@@ -115,7 +115,8 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             Update buttons and progress bar
             @param player as Player
         """
-        if player.is_playing and self.__adaptive_size & AdaptiveSize.BIG:
+        if player.is_playing and\
+                self.__adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             self.__toolbar_title.show()
             self.__toolbar_info.show()
         else:
@@ -129,7 +130,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             @param adaptive_size as AdaptiveSize
         """
         self.__adaptive_size = adaptive_size
-        if adaptive_size & AdaptiveSize.BIG:
+        if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             if App().player.is_playing:
                 self.__toolbar_title.show()
                 self.__toolbar_info.show()
