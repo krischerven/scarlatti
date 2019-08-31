@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gio, GLib
 from gettext import gettext as _
 
 from lollypop.pop_devices import DevicesPopover
-from lollypop.define import App, Repeat
+from lollypop.define import App, Repeat, Type
 from lollypop.progressbar import ButtonProgressBar
 
 
@@ -209,7 +209,7 @@ class ToolbarEnd(Gtk.Bin):
         def on_change_state(action, value, genre_id):
             action.set_state(value)
             ids = list(App().settings.get_value("party-ids"))
-            genre_ids = App().genres.get_ids()
+            genre_ids = App().genres.get_ids() + [Type.WEB]
             # Select all
             if genre_id is None:
                 # Update others
@@ -243,7 +243,9 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(action)
         item = Gio.MenuItem.new(_("All genres"), "app.all_party_ids")
         self.__party_submenu.append_item(item)
-        for (genre_id, name, sortname) in App().genres.get():
+        genres = App().genres.get()
+        genres.append((Type.WEB, _("Web"), _("Web")))
+        for (genre_id, name, sortname) in genres:
             in_party_ids = not party_ids or genre_id in party_ids
             action_name = "genre_%s" % genre_id
             action = Gio.SimpleAction.new_stateful(
