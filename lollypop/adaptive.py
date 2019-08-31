@@ -16,6 +16,7 @@ from pickle import dump, load
 
 from lollypop.logger import Logger
 from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size, Type
+from lollypop.define import ViewType
 
 
 class AdaptiveView:
@@ -92,11 +93,11 @@ class AdaptiveHistory:
             if view is not None:
                 view.destroy()
                 # This view can't be offloaded
-                if view.args is None:
+                if args is None:
                     del self.__items[-self.__MAX_HISTORY_ITEMS]
                 else:
                     self.__items[-self.__MAX_HISTORY_ITEMS] =\
-                        (None, _class, view.args)
+                        (None, _class, args)
 
     def pop(self, index=-1):
         """
@@ -199,13 +200,8 @@ class AdaptiveHistory:
             if view is None:
                 view = _class(**args[0])
                 # Restore scrolled position
-                # For LazyLoadingView, we can't restore this too soon
-                if hasattr(view, "_scrolled"):
-                    if hasattr(view, "_on_populated"):
-                        view.set_populated_scrolled_position(args[2])
-                    else:
-                        adj = view._scrolled.get_vadjustment()
-                        GLib.idle_add(adj.set_value, args[2])
+                if args[0]["view_type"] & ViewType.SCROLLED:
+                    view.set_populated_scrolled_position(args[2])
                 # Start populating the view
                 if hasattr(view, "populate"):
                     view.populate()

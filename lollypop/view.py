@@ -36,6 +36,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
         self._view_type = view_type
+        self.__scrolled_position = None
         self.__destroyed = False
         self.__banner = None
         self.__placeholder = None
@@ -160,6 +161,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
         pass
 
+    def set_populated_scrolled_position(self, position):
+        """
+            Set scrolled position on populated
+            @param position as int
+        """
+        if self._view_type & ViewType.SCROLLED:
+            self.__scrolled_position = position
+
     @property
     def view_type(self):
         """
@@ -258,6 +267,10 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             Delayed adaptive mode
         """
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
+        # Wait for stack allocation to restore scrolled position
+        if self.__scrolled_position is not None:
+            self.__stack.connect("size-allocate",
+                                 self.__on_stack_size_allocated)
 
     def _on_unmap(self, widget):
         pass
@@ -265,6 +278,19 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_stack_size_allocated(self, stack, allocation):
+        """
+            Restore scrolled position
+            @param stack as Gtk.Stack
+            @param allocation as Gdk.Rectangle
+        """
+        if self.__scrolled_position is not None and\
+                allocation.height > self.__scrolled_position:
+            stack.disconnect_by_func(self.__on_stack_size_allocated)
+            self._scrolled.get_vadjustment().set_value(
+                self.__scrolled_position)
+            self.__scrolled_position = None
+
     def __on_destroy(self, widget):
         """
             Clean up widget
@@ -289,7 +315,6 @@ class LazyLoadingView(View):
         self._lazy_queue = []
         self.__priority_queue = []
         self.__scroll_timeout_id = None
-        self._scrolled_position = None
         self.__lazy_loading_id = None
         self.__start_time = time()
 
@@ -312,14 +337,6 @@ class LazyLoadingView(View):
         # He we keep id just to check we are in current load
         if self.__lazy_loading_id is None:
             self.__lazy_loading_id = GLib.idle_add(self.__lazy_loading)
-
-    def set_populated_scrolled_position(self, position):
-        """
-            Set scrolled position on populated
-            @param position as int
-        """
-        if self._view_type & ViewType.SCROLLED:
-            self._scrolled_position = position
 
     def set_external_scrolled(self, scrolled):
         """
@@ -347,10 +364,6 @@ class LazyLoadingView(View):
             @param widget as Gtk.Widget
         """
         View._on_map(self, widget)
-        # Wait for viewport allocation to restore scrolled position
-        if self._scrolled_position is not None:
-            self.__viewport.connect("size-allocate",
-                                    self.__on_viewport_size_allocated)
         if self.__loading_state == LoadingState.ABORTED and self._lazy_queue:
             self.lazy_loading()
 
@@ -429,16 +442,3 @@ class LazyLoadingView(View):
         for child in self._lazy_queue:
             if self.__is_visible(child):
                 self.__priority_queue.append(child)
-
-    def __on_viewport_size_allocated(self, viewport, allocation):
-        """
-            Restore scrolled position
-            @param viewport as Gtk.Viewport
-            @param allocation as Gdk.Rectangle
-        """
-        if allocation.height > 1 and self._scrolled_position is not None:
-            self.__viewport.disconnect_by_func(
-                self.__on_viewport_size_allocated)
-            self._scrolled.get_vadjustment().set_value(
-                self._scrolled_position)
-            self._scrolled_position = None

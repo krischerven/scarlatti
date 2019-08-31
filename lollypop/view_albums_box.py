@@ -71,7 +71,11 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             Populate view
         """
         def on_load(items):
-            FlowBoxView.populate(self, items)
+            if items:
+                FlowBoxView.populate(self, items)
+                self.show_placeholder(False)
+            else:
+                self.show_placeholder(True)
 
         def load():
             album_ids = App().window.container.get_view_album_ids(
