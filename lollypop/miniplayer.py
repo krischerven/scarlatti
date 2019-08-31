@@ -72,7 +72,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__artwork_widget.set_vexpand(True)
         self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
                                            ArtSize.MINIPLAYER)
-        label_widget = LabelPlayerWidget()
+        label_widget = LabelPlayerWidget(False, 9)
         label_widget.show()
         label_widget.set_property("halign", Gtk.Align.START)
         label_widget.update()
