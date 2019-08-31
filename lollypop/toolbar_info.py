@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gdk
+from gi.repository import Gtk, GLib
 
 
 from lollypop.utils import set_cursor_type, popup_widget
@@ -19,16 +19,13 @@ from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.define import App, ArtBehaviour, StorageType, MARGIN
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.helper_signals import SignalsHelper, signals
 
 
-class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
-                  SignalsHelper, GesturesHelper):
+class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
     """
         Informations toolbar
     """
 
-    @signals
     def __init__(self):
         """
             Init toolbar
@@ -41,6 +38,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         self.__eventbox.add(horizontal_box)
         self.__eventbox.set_property("halign", Gtk.Align.START)
         self.__eventbox.show()
+        self.__eventbox.connect("realize", set_cursor_type)
         self.add(self.__eventbox)
         GesturesHelper.__init__(self, self.__eventbox)
         self.special_headerbar_hack()
@@ -53,11 +51,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         self.__artwork.set_property("has-tooltip", True)
         horizontal_box.pack_start(self.__artwork, False, False, 0)
         horizontal_box.pack_start(self.__label, False, False, 0)
-        self.get_style_context().add_class("opacity-transition")
         self.set_margin_start(MARGIN)
-        return [
-            (App().player, "status-changed", "_on_status_changed")
-        ]
 
     def do_get_preferred_width(self):
         """
@@ -92,17 +86,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
 #######################
 # PROTECTED           #
 #######################
-    def _on_status_changed(self, player):
-        """
-            Show/hide eventbox
-        """
-        if player.is_playing:
-            set_cursor_type(self.__eventbox)
-            self.set_state_flags(Gtk.StateFlags.VISITED, False)
-        else:
-            set_cursor_type(self.__eventbox, Gdk.CursorType.LEFT_PTR)
-            self.unset_state_flags(Gtk.StateFlags.VISITED)
-
     def _on_primary_long_press_gesture(self, x, y):
         """
             Show menu

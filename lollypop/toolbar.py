@@ -49,7 +49,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         self.pack_end(self.__toolbar_end)
         self.connect("realize", self.__on_realize)
         return [
-            (App().player, "status-changed", "_on_status_changed"),
+            (App().player, "current-changed", "_on_current_changed"),
             (App().window, "adaptive-size-changed",
              "_on_adaptive_size_changed")
         ]
@@ -110,12 +110,12 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             self.__toolbar_title.set_width(title_width)
             self.__toolbar_info.set_width((available - title_width) / 2)
 
-    def _on_status_changed(self, player):
+    def _on_current_changed(self, player):
         """
             Update buttons and progress bar
             @param player as Player
         """
-        if player.is_playing and\
+        if player.current_track.id is not None and\
                 self.__adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             self.__toolbar_title.show()
             self.__toolbar_info.show()
@@ -131,7 +131,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         """
         self.__adaptive_size = adaptive_size
         if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
-            if App().player.is_playing:
+            if App().player.current_track.id is not None:
                 self.__toolbar_title.show()
                 self.__toolbar_info.show()
             self.__toolbar_playback.player_buttons.show()
