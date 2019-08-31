@@ -154,14 +154,15 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         if App().player.current_track.id is None:
             self.__title_label.set_text(_("No track playing"))
         else:
-            album = App().player.current_track.album
-            markup = "%s\n" % GLib.markup_escape_text(album.name)
-            artist_name = GLib.markup_escape_text(", ".join(album.artists))
+            markup = "%s\n" % GLib.markup_escape_text(
+                App().player.current_track.name)
+            artist_name = GLib.markup_escape_text(
+                ", ".join(App().player.current_track.album.artists))
             markup += "<span size='x-small' alpha='40000'>%s</span>" %\
                 artist_name
             self.__title_label.set_markup(markup)
             App().art_helper.set_album_artwork(
-                            album,
+                            App().player.current_track.album,
                             # +100 to prevent resize lag
                             self.get_allocated_width() + 100,
                             ArtSize.BANNER + MARGIN * 2,
