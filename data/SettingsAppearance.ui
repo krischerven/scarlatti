@@ -326,7 +326,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Clean cache</property>
+            <property name="tooltip_text" translatable="yes">Reset</property>
             <property name="halign">end</property>
             <property name="valign">center</property>
             <property name="image">image2</property>
