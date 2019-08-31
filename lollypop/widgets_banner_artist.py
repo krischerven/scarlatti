@@ -112,12 +112,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _handle_width_allocate(self, allocation):
         """
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
             self.__set_artwork()
             if allocation.width >= Size.SMALL + 100:
                 self.__badge_artwork.show()

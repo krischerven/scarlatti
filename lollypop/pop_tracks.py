@@ -103,12 +103,12 @@ class TracksPopover(Popover, ViewController, SizeAllocationHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _handle_width_allocate(self, allocation):
         """
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
             App().art_helper.set_album_artwork(
                     self._album,
                     ArtSize.SMALL,

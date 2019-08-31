@@ -97,12 +97,12 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _handle_width_allocate(self, allocation):
         """
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
             width = self.__toolbar_playback.get_preferred_width()[1]
             width += self.__toolbar_end.get_preferred_width()[1]
             available = allocation.width - width

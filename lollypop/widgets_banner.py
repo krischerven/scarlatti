@@ -116,12 +116,12 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _handle_width_allocate(self, allocation):
         """
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
             self._default_background_in_use = True
             App().art_helper.set_banner_artwork(
                 # +100 to prevent resize lag

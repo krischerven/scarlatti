@@ -130,24 +130,38 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _handle_width_allocate(self, allocation):
         """
             Handle artwork sizing
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_size_allocate(self, allocation):
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
             # We use parent height because we may be collapsed
             parent = self.get_parent()
             if parent is None:
                 height = allocation.height
             else:
                 height = parent.get_allocated_height()
-            new_size = max(allocation.width, height)
-            if new_size == 1 or self.__size == new_size:
-                return
-            self.__size = new_size
             self.__artwork_widget.set_artwork(
-                new_size, new_size, self.__on_artwork,
+                allocation.width + 100, height + 100,
+                self.__on_artwork,
+                ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
+
+    def _handle_height_allocate(self, allocation):
+        """
+            Handle artwork sizing
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_height_allocate(self, allocation):
+            # We use parent height because we may be collapsed
+            parent = self.get_parent()
+            if parent is None:
+                height = allocation.height
+            else:
+                height = parent.get_allocated_height()
+            self.__artwork_widget.set_artwork(
+                allocation.width + 100, height + 100,
+                self.__on_artwork,
                 ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
 
     def __on_eventbox_press(self,  x, y, event):

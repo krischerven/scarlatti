@@ -23,26 +23,43 @@ class SizeAllocationHelper:
             Init helper
         """
         self.__allocation_timeout_id = None
-        self.__width = 0
+        self.__width = self.__height = 0
         self.connect("size-allocate", self.__on_size_allocate)
 
 #######################
 # PROTECTED           #
 #######################
-    def _handle_size_allocate(self, allocation):
+    def _handle_width_allocate(self, allocation):
         """
             @param allocation as Gtk.Allocation
             @return True if allocation is valid
         """
-        self.__allocation_timeout_id = None
         if allocation.width == 1 or self.__width == allocation.width:
             return False
         self.__width = allocation.width
         return True
 
+    def _handle_height_allocate(self, allocation):
+        """
+            @param allocation as Gtk.Allocation
+            @return True if allocation is valid
+        """
+        if allocation.height == 1 or self.__height == allocation.height:
+            return False
+        self.__height = allocation.height
+        return True
+
 #######################
 # PRIVATE             #
 #######################
+    def __handle_size_allocate(self, allocation):
+        """
+            Pass allocation to width/height handler
+        """
+        self.__allocation_timeout_id = None
+        self._handle_width_allocate(allocation)
+        self._handle_height_allocate(allocation)
+
     def __on_size_allocate(self, widget, allocation):
         """
             Filter unwanted allocations
@@ -52,4 +69,4 @@ class SizeAllocationHelper:
         if self.__allocation_timeout_id is not None:
             GLib.source_remove(self.__allocation_timeout_id)
         self.__allocation_timeout_id = GLib.idle_add(
-            self._handle_size_allocate, allocation)
+            self.__handle_size_allocate, allocation)
