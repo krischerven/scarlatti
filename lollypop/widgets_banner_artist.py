@@ -288,7 +288,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         ArtBehaviour.ROUNDED |
                                         ArtBehaviour.CROP_SQUARE |
                                         ArtBehaviour.CACHE,
-                                        self.__on_badge_artist_artwork)
+                                        self.__on_badge_artist_artwork,
+                                        art_size)
         else:
             self.__badge_artwork.hide()
             self.__badge_artwork.set_margin_start(0)
@@ -329,17 +330,17 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 "list-remove-symbolic",
                 pixel_size)
 
-    def __on_badge_artist_artwork(self, surface):
+    def __on_badge_artist_artwork(self, surface, art_size):
         """
             Set artist artwork on badge
             @param surface as cairo.Surface
+            @param art_size as int
         """
         if self.get_allocated_width() >= Size.SMALL + 100:
             self.__badge_artwork.show()
         if surface is None:
             self.__badge_artwork.get_style_context().add_class("artwork-icon")
-            self.__badge_artwork.set_size_request(ArtSize.BANNER,
-                                                  ArtSize.BANNER)
+            self.__badge_artwork.set_size_request(art_size, art_size)
             self.__badge_artwork.set_from_icon_name(
                                               "avatar-default-symbolic",
                                               Gtk.IconSize.DIALOG)
