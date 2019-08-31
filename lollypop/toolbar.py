@@ -62,8 +62,13 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper):
             @param mini as bool
         """
         self.__toolbar_playback.set_mini(mini)
-        self.__toolbar_title.set_mini(mini)
         self.__toolbar_info.set_mini(mini)
+        if mini:
+            self.__toolbar_title.hide()
+            self.__toolbar_info.hide()
+        else:
+            self.__toolbar_title.show()
+            self.__toolbar_info.show()
 
     @property
     def end(self):

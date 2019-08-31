@@ -81,16 +81,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         self.__width = width
         self.set_property("width-request", width)
 
-    def set_mini(self, mini):
-        """
-            Show/hide
-            @param mini as bool
-        """
-        if mini:
-            self.hide()
-        else:
-            self.show()
-
     @property
     def art_size(self):
         """
