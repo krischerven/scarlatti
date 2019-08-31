@@ -211,7 +211,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
 
     def __on_adaptive_size_changed(self, window, adaptive_size):
         """
-            Update internal widgets
+            show/hide miniplayer
             @param window as Gtk.Window
             @param adaptive_size as AdaptiveSize
         """

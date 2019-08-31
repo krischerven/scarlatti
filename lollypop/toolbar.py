@@ -12,13 +12,13 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Size
+from lollypop.define import App, Size, AdaptiveSize
 from lollypop.toolbar_playback import ToolbarPlayback
 from lollypop.toolbar_info import ToolbarInfo
 from lollypop.toolbar_title import ToolbarTitle
 from lollypop.toolbar_end import ToolbarEnd
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_signals import SignalsHelper, signals
 
 
 class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
@@ -26,7 +26,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         Lollypop toolbar
     """
 
-    @signals_map
+    @signals
     def __init__(self, window):
         """
             Init toolbar
@@ -35,6 +35,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         Gtk.HeaderBar.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__width = Size.MINI
+        self.__adaptive_size = AdaptiveSize.SMALL
         self.set_title("Lollypop")
         self.__toolbar_playback = ToolbarPlayback(window)
         self.__toolbar_playback.show()
@@ -48,7 +49,9 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         self.pack_end(self.__toolbar_end)
         self.connect("realize", self.__on_realize)
         return [
-            (App().player, "status-changed", "_on_status_changed")
+            (App().player, "status-changed", "_on_status_changed"),
+            (App().window, "adaptive-size-changed",
+             "_on_adaptive_size_changed")
         ]
 
     def do_get_preferred_width(self):
@@ -125,13 +128,27 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             Update buttons and progress bar
             @param player as Player
         """
-        if player.is_playing and not App().window.is_adaptive:
+        if player.is_playing and self.__adaptive_size & AdaptiveSize.BIG:
             self.__toolbar_title.show()
             self.__toolbar_info.show()
         else:
             self.__toolbar_title.hide()
             self.__toolbar_info.hide()
 
+    def _on_adaptive_size_changed(self, window, adaptive_size):
+        """
+            Update internal widgets
+            @param window as Gtk.Window
+            @param adaptive_size as AdaptiveSize
+        """
+        self.__adaptive_size = adaptive_size
+        if adaptive_size & AdaptiveSize.BIG and App().player.is_playing:
+            self.__toolbar_title.show()
+            self.__toolbar_info.show()
+
+############
+# PRIVATE  #
+############
     def __on_realize(self, toolbar):
         """
             Calculate art size
