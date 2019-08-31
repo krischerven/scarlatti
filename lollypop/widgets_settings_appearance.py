@@ -159,6 +159,9 @@ class AppearanceSettingsWidget(Gtk.Bin):
         dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         dialog.add_buttons(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
         dialog.set_transient_for(App().window)
+        file_filter = Gtk.FileFilter.new()
+        file_filter.add_pixbuf_formats()
+        dialog.set_filter(file_filter)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             try:
