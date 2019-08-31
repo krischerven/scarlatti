@@ -110,15 +110,18 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
-            App().art_helper.set_album_artwork(
-                    App().player.current_track.album,
-                    # +100 to prevent resize lag
-                    allocation.width + 100,
-                    ArtSize.BANNER + MARGIN * 2,
-                    self._artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR_HARD |
-                    ArtBehaviour.DARKER,
-                    self._on_artwork)
+            if App().player.current_track.id is None:
+                self._set_default_background()
+            else:
+                App().art_helper.set_album_artwork(
+                        App().player.current_track.album,
+                        # +100 to prevent resize lag
+                        allocation.width + 100,
+                        ArtSize.BANNER + MARGIN * 2,
+                        self._artwork.get_scale_factor(),
+                        ArtBehaviour.BLUR_HARD |
+                        ArtBehaviour.DARKER,
+                        self._on_artwork)
 
     def _on_album_artwork_changed(self, art, album_id):
         """
