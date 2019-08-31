@@ -12,27 +12,22 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App
 from lollypop.widgets_player_progress import ProgressPlayerWidget
-from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class ToolbarTitle(Gtk.Bin, SignalsHelper):
+class ToolbarTitle(Gtk.Bin):
     """
         Title toolbar
     """
 
-    @signals_map
     def __init__(self):
         """
             Init toolbar
         """
         Gtk.Bin.__init__(self)
-        self.__progress_widget = ProgressPlayerWidget()
-        self.add(self.__progress_widget)
-        return [
-            (App().player, "status-changed", "_on_status_changed")
-        ]
+        progress_widget = ProgressPlayerWidget()
+        progress_widget.show()
+        self.add(progress_widget)
 
     def set_width(self, width):
         """
@@ -40,16 +35,3 @@ class ToolbarTitle(Gtk.Bin, SignalsHelper):
             @param width as int
         """
         self.set_property("width_request", width)
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_status_changed(self, player):
-        """
-            Update buttons and progress bar
-            @param player as Player
-        """
-        if player.is_playing:
-            self.__progress_widget.show()
-        else:
-            self.__progress_widget.hide()

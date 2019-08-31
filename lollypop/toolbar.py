@@ -17,15 +17,16 @@ from lollypop.toolbar_playback import ToolbarPlayback
 from lollypop.toolbar_info import ToolbarInfo
 from lollypop.toolbar_title import ToolbarTitle
 from lollypop.toolbar_end import ToolbarEnd
-from lollypop.logger import Logger
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class Toolbar(Gtk.HeaderBar, SizeAllocationHelper):
+class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
     """
         Lollypop toolbar
     """
 
+    @signals_map
     def __init__(self, window):
         """
             Init toolbar
@@ -38,15 +39,17 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper):
         self.__toolbar_playback = ToolbarPlayback(window)
         self.__toolbar_playback.show()
         self.__toolbar_info = ToolbarInfo()
-        self.__toolbar_info.show()
         self.__toolbar_title = ToolbarTitle()
-        self.__toolbar_title.show()
         self.__toolbar_end = ToolbarEnd(window)
         self.__toolbar_end.show()
         self.pack_start(self.__toolbar_playback)
         self.pack_start(self.__toolbar_info)
         self.set_custom_title(self.__toolbar_title)
         self.pack_end(self.__toolbar_end)
+        self.connect("realize", self.__on_realize)
+        return [
+            (App().player, "status-changed", "_on_status_changed")
+        ]
 
     def do_get_preferred_width(self):
         """
@@ -62,11 +65,10 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper):
             @param mini as bool
         """
         self.__toolbar_playback.set_mini(mini)
-        self.__toolbar_info.set_mini(mini)
         if mini:
             self.__toolbar_title.hide()
             self.__toolbar_info.hide()
-        else:
+        elif App().player.is_playing:
             self.__toolbar_title.show()
             self.__toolbar_info.show()
 
@@ -118,24 +120,22 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper):
             self.__toolbar_title.set_width(title_width)
             self.__toolbar_info.set_width((available - title_width) / 2)
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_current_changed(self, player):
-        """
-            Update toolbar
-            @param player as Player
-        """
-        Logger.debug("Toolbar::_on_current_changed()")
-        if App().player.current_track.id is None:
-            self.__toolbar_title.hide()
-        elif not App().window.miniplayer:
-            self.__toolbar_title.show()
-        self.__toolbar_title.on_current_changed(player)
-
-    def __on_status_changed(self, player):
+    def _on_status_changed(self, player):
         """
             Update buttons and progress bar
             @param player as Player
         """
-        self.__toolbar_title.on_status_changed(player)
+        if player.is_playing and not App().window.is_adaptive:
+            self.__toolbar_title.show()
+            self.__toolbar_info.show()
+        else:
+            self.__toolbar_title.hide()
+            self.__toolbar_info.hide()
+
+    def __on_realize(self, toolbar):
+        """
+            Calculate art size
+            @param toolbar as ToolbarInfos
+        """
+        art_size = self.get_allocated_height()
+        self.__toolbar_info.artwork.set_art_size(art_size, art_size)

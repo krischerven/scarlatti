@@ -53,8 +53,8 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         self.__artwork.set_property("has-tooltip", True)
         horizontal_box.pack_start(self.__artwork, False, False, 0)
         horizontal_box.pack_start(self.__label, False, False, 0)
-        self.connect("realize", self.__on_realize)
         self.get_style_context().add_class("opacity-transition")
+        self.set_margin_start(MARGIN)
         return [
             (App().player, "status-changed", "_on_status_changed")
         ]
@@ -82,12 +82,12 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
         self.set_property("width-request", width)
 
     @property
-    def art_size(self):
+    def artwork(self):
         """
-            Get art size
-            return int
+            Get artwork
+            return ArtworkPlayerWidget
         """
-        return self.__art_size
+        return self.__artwork
 
 #######################
 # PROTECTED           #
@@ -147,27 +147,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
 #######################
 # PRIVATE             #
 #######################
-    def __update_cover(self, art, album_id):
-        """
-            Update cover for album_id
-            @param art as Art
-            @param album_id as int
-        """
-        if App().player.current_track.album.id == album_id:
-            self._previous_artwork_id = None
-            self.update_artwork(self.__art_size, self.__art_size)
-
-    def __update_logo(self, art, name):
-        """
-            Update logo for name
-            @param art as Art
-            @param name as str
-        """
-        if App().player.current_track.album_artist == name:
-            pixbuf = App().art.get_radio_artwork(
-                name, self.__art_size, self.__art_size)
-            self.__artwork.set_from_surface(pixbuf)
-
     def __popup_menu(self):
         """
             Show contextual menu
@@ -187,15 +166,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget,
                 menu_widget.get_child_by_name("main").add(menu_ext)
             self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
             popup_widget(menu_widget, self.__eventbox)
-
-    def __on_realize(self, toolbar):
-        """
-            Calculate art size
-            @param toolbar as ToolbarInfos
-        """
-        self.set_margin_start(MARGIN)
-        art_size = self.get_allocated_height()
-        self.__artwork.set_art_size(art_size, art_size)
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """
