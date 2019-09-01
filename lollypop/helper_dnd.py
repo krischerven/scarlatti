@@ -279,7 +279,6 @@ class DNDHelper(GObject.Object):
             @param x as int
             @param y as int
         """
-        set_cursor_type(self.__listbox, "dnd-move")
         self.__drag_begin_rows = []
         (listbox, row) = self.__get_row_at_y(y)
         if row is not None:
@@ -292,7 +291,6 @@ class DNDHelper(GObject.Object):
             (scrolled_x,
              self.__begin_scrolled_y) = row.translate_coordinates(scrolled,
                                                                   0, 0)
-        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
 
     def __on_drag_end(self, gesture, x, y):
         """
@@ -300,28 +298,31 @@ class DNDHelper(GObject.Object):
             @param x as int
             @param y as int
         """
-        set_cursor_type(self.__listbox, "default")
-        self.__unmark_all_rows()
-        if self.__drag_begin_rows:
-            (active, start_x, start_y) = gesture.get_start_point()
-            if not active:
-                return
-            y += start_y
-            (_listbox, row) = self.__get_row_at_y(y)
-            if row is not None:
-                row_height = row.get_allocated_height()
-                (row_x, row_y) = row.translate_coordinates(self.__listbox,
-                                                           0, 0)
-                if y < row_y + row_height / 2:
-                    direction = Gtk.DirectionType.UP
-                elif y > row_y - row_height / 2:
-                    direction = Gtk.DirectionType.DOWN
-                self.__do_drag_and_drop(self.__drag_begin_rows,
-                                        row, direction)
-        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
         if self.__autoscroll_timeout_id is not None:
             GLib.source_remove(self.__autoscroll_timeout_id)
             self.__autoscroll_timeout_id = None
+        if x == 0 or y == 0:
+            return
+        set_cursor_type(self.__listbox, "default")
+        self.__unmark_all_rows()
+        (active, start_x, start_y) = gesture.get_start_point()
+        if not active:
+            return
+        y += start_y
+        (listbox, row) = self.__get_row_at_y(y)
+        if row is None:
+            return
+        if self.__drag_begin_rows and row not in self.__drag_begin_rows:
+            row_height = row.get_allocated_height()
+            (row_x, row_y) = row.translate_coordinates(self.__listbox,
+                                                       0, 0)
+            if y < row_y + row_height / 2:
+                direction = Gtk.DirectionType.UP
+            elif y > row_y - row_height / 2:
+                direction = Gtk.DirectionType.DOWN
+            self.__do_drag_and_drop(self.__drag_begin_rows,
+                                    row, direction)
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
 
     def __on_drag_update(self, gesture, x, y):
         """
@@ -330,7 +331,11 @@ class DNDHelper(GObject.Object):
             @param x as int
             @param y as int
         """
+        if self.__autoscroll_timeout_id is not None:
+            GLib.source_remove(self.__autoscroll_timeout_id)
+            self.__autoscroll_timeout_id = None
         self.__unmark_all_rows()
+        set_cursor_type(self.__listbox, "dnd-move")
         (active, start_x, start_y) = gesture.get_start_point()
         if not active:
             return
@@ -347,9 +352,6 @@ class DNDHelper(GObject.Object):
         scrolled = self.__listbox.get_ancestor(Gtk.ScrolledWindow)
         if scrolled is None:
             return
-        if self.__autoscroll_timeout_id is not None:
-            GLib.source_remove(self.__autoscroll_timeout_id)
-            self.__autoscroll_timeout_id = None
         (scrolled_x, scrolled_y) = row.translate_coordinates(scrolled, 0, 0)
         diff = self.__begin_scrolled_y - scrolled_y
         if abs(diff) < 100:
