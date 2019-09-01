@@ -84,7 +84,7 @@ class DNDHelper(GObject.Object):
             else:
                 children.pop(0)
         update_track_indexes(self.__listbox, start_index, end_index)
-        GLib.idle_add(self.emit, "dnd-finished", priority=GLib.PRIORITY_LOW)
+        GLib.timeout_add(100, self.emit, "dnd-finished")
 
     def __do_drag_and_drop(self, src_rows, dest_row, direction):
         """
@@ -131,7 +131,8 @@ class DNDHelper(GObject.Object):
                     indexes.append(album_row.get_index())
             else:
                 indexes.append(row.get_index())
-        self.__destroy_rows(src_rows)
+        GLib.idle_add(self.__destroy_rows, src_rows,
+                      priority=GLib.PRIORITY_LOW)
         self.__update_album_rows(max(0, min(indexes) - 1), max(indexes) + 1)
 
     def __split_album_row(self, album_row, track_row, direction):
