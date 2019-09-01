@@ -44,14 +44,27 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         self.special_headerbar_hack()
 
         self.__label = LabelPlayerWidget()
-        self.__label.show()
         self.__artwork = ArtworkPlayerWidget(ArtBehaviour.CROP_SQUARE |
                                              ArtBehaviour.CACHE)
-        self.__artwork.show()
         self.__artwork.set_property("has-tooltip", True)
         horizontal_box.pack_start(self.__artwork, False, False, 0)
         horizontal_box.pack_start(self.__label, False, False, 0)
         self.set_margin_start(MARGIN)
+        self.connect("realize", self.__on_realize)
+
+    def show_children(self):
+        """
+            Show labels and artwork
+        """
+        self.__artwork.show()
+        self.__label.show()
+
+    def hide_children(self):
+        """
+            Hide labels and artwork, ignore self
+        """
+        self.__artwork.hide()
+        self.__label.hide()
 
     def do_get_preferred_width(self):
         """
@@ -74,14 +87,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         """
         self.__width = width
         self.set_property("width-request", width)
-
-    @property
-    def artwork(self):
-        """
-            Get artwork
-            return ArtworkPlayerWidget
-        """
-        return self.__artwork
 
 #######################
 # PROTECTED           #
@@ -168,3 +173,11 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         else:
             return False
         return True
+
+    def __on_realize(self, toolbar):
+        """
+            Calculate art size
+            @param toolbar as ToolbarInfos
+        """
+        art_size = self.get_allocated_height()
+        self.__artwork.set_art_size(art_size, art_size)

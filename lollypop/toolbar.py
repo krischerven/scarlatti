@@ -40,6 +40,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         self.__toolbar_playback = ToolbarPlayback(window)
         self.__toolbar_playback.show()
         self.__toolbar_info = ToolbarInfo()
+        self.__toolbar_info.show()
         self.__toolbar_title = ToolbarTitle()
         self.__toolbar_end = ToolbarEnd(window)
         self.__toolbar_end.show()
@@ -47,7 +48,6 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         self.pack_start(self.__toolbar_info)
         self.set_custom_title(self.__toolbar_title)
         self.pack_end(self.__toolbar_end)
-        self.connect("realize", self.__on_realize)
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().window, "adaptive-size-changed",
@@ -118,10 +118,10 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         if player.current_track.id is not None and\
                 self.__adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             self.__toolbar_title.show()
-            self.__toolbar_info.show()
+            self.__toolbar_info.show_children()
         else:
             self.__toolbar_title.hide()
-            self.__toolbar_info.hide()
+            self.__toolbar_info.hide_children()
 
     def _on_adaptive_size_changed(self, window, adaptive_size):
         """
@@ -133,20 +133,9 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             if App().player.current_track.id is not None:
                 self.__toolbar_title.show()
-                self.__toolbar_info.show()
+                self.__toolbar_info.show_children()
             self.__toolbar_playback.player_buttons.show()
         else:
             self.__toolbar_playback.player_buttons.hide()
             self.__toolbar_title.hide()
-            self.__toolbar_info.hide()
-
-############
-# PRIVATE  #
-############
-    def __on_realize(self, toolbar):
-        """
-            Calculate art size
-            @param toolbar as ToolbarInfos
-        """
-        art_size = self.get_allocated_height()
-        self.__toolbar_info.artwork.set_art_size(art_size, art_size)
+            self.__toolbar_info.hide_children()
