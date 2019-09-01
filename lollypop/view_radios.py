@@ -42,6 +42,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         self.insert_row(0)
         self.attach(builder.get_object("widget"), 0, 0, 1, 1)
         self.__pop_tunein = None
+        self.add_widget(self._box)
         if not get_network_available("TUNEIN"):
             builder.get_object("search_btn").hide()
         return [
