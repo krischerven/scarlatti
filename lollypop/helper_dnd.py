@@ -13,7 +13,7 @@
 from gi.repository import Gdk, Gtk, GLib, GObject
 
 from lollypop.objects_album import Album
-from lollypop.utils import update_track_indexes
+from lollypop.utils import update_track_indexes, set_cursor_type
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.widgets_row_track import TrackRow
 
@@ -37,18 +37,14 @@ class DNDHelper(GObject.Object):
         self.__listbox = listbox
         self.__view_type = view_type
         self.__drag_begin_rows = []
-        listbox.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, [],
-                                Gdk.DragAction.MOVE)
-        listbox.drag_source_add_text_targets()
-        listbox.drag_dest_set(Gtk.DestDefaults.DROP | Gtk.DestDefaults.MOTION,
-                              [], Gdk.DragAction.MOVE)
-        listbox.drag_dest_add_text_targets()
+        self.__autoscroll_timeout_id = None
+        self.__begin_scrolled_y = 0
         self.__gesture = Gtk.GestureDrag.new(listbox)
+        self.__gesture.set_button(Gdk.BUTTON_PRIMARY)
+        self.__gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.__gesture.connect("drag-begin", self.__on_drag_begin)
-        listbox.connect("drag-leave", self.__on_drag_leave)
-        listbox.connect("drag-motion", self.__on_drag_motion)
-        listbox.connect("drag-data-get", self.__on_drag_data_get)
-        listbox.connect("drag-data-received", self.__on_drag_data_received)
+        self.__gesture.connect("drag-end", self.__on_drag_end)
+        self.__gesture.connect("drag-update", self.__on_drag_update)
 
 #######################
 # PRIVATE             #
@@ -240,7 +236,7 @@ class DNDHelper(GObject.Object):
             @return (Gtk.ListBox, Row)
         """
         row = self.__listbox.get_row_at_y(y)
-        if row.revealed:
+        if row is not None and row.revealed:
             (listbox, subrow) = self.__get_subrow_at_y(row, y)
             if subrow is not None:
                 return (listbox, subrow)
@@ -261,12 +257,29 @@ class DNDHelper(GObject.Object):
                 return (listbox, track_row)
         return (None, None)
 
+    def __autoscroll(self, scrolled, y):
+        """
+            Auto scroll up/down
+            @param scrolled as Gtk.ScrolledWindow
+            @param y as int
+        """
+        adj = scrolled.get_vadjustment()
+        value = adj.get_value()
+        adj_value = value + y
+        adj.set_value(adj_value)
+        if adj.get_value() <= adj.get_lower() or\
+                adj.get_value() >= adj.get_upper() - adj.get_page_size():
+            self.__autoscroll_timeout_id = None
+            return False
+        return True
+
     def __on_drag_begin(self, gesture, x, y):
         """
             @param gesture as Gtk.GestureDrag
             @param x as int
             @param y as int
         """
+        set_cursor_type(self.__listbox, "dnd-move")
         self.__drag_begin_rows = []
         (listbox, row) = self.__get_row_at_y(y)
         if row is not None:
@@ -274,63 +287,74 @@ class DNDHelper(GObject.Object):
         for row in listbox.get_selected_rows():
             if row not in self.__drag_begin_rows:
                 self.__drag_begin_rows.append(row)
+        scrolled = self.__listbox.get_ancestor(Gtk.ScrolledWindow)
+        if scrolled is not None and row is not None:
+            (scrolled_x,
+             self.__begin_scrolled_y) = row.translate_coordinates(scrolled,
+                                                                  0, 0)
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
 
-    def __on_drag_leave(self, listbox, context, time):
+    def __on_drag_end(self, gesture, x, y):
         """
-            @param listbox as Gtk.ListBox
-            @param context as Gdk.DragContext
-            @param time as int
-        """
-        self.__unmark_all_rows()
-
-    def __on_drag_motion(self, listbox, context, x, y, time):
-        """
-            Add style
-            @param listbox as Gtk.ListBox
-            @param context as Gdk.DragContext
+            @param gesture as Gtk.GestureDrag
             @param x as int
             @param y as int
-            @param time as int
+        """
+        set_cursor_type(self.__listbox, "default")
+        self.__unmark_all_rows()
+        if self.__drag_begin_rows:
+            (active, start_x, start_y) = gesture.get_start_point()
+            if not active:
+                return
+            y += start_y
+            (_listbox, row) = self.__get_row_at_y(y)
+            if row is not None:
+                row_height = row.get_allocated_height()
+                (row_x, row_y) = row.translate_coordinates(self.__listbox,
+                                                           0, 0)
+                if y < row_y + row_height / 2:
+                    direction = Gtk.DirectionType.UP
+                elif y > row_y - row_height / 2:
+                    direction = Gtk.DirectionType.DOWN
+                self.__do_drag_and_drop(self.__drag_begin_rows,
+                                        row, direction)
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+        if self.__autoscroll_timeout_id is not None:
+            GLib.source_remove(self.__autoscroll_timeout_id)
+            self.__autoscroll_timeout_id = None
+
+    def __on_drag_update(self, gesture, x, y):
+        """
+            Add style
+            @param gesture as Gtk.GestureDrag
+            @param x as int
+            @param y as int
         """
         self.__unmark_all_rows()
-        (ignore, row) = self.__get_row_at_y(y)
+        (active, start_x, start_y) = gesture.get_start_point()
+        if not active:
+            return
+        current_y = y + start_y
+        (ignore, row) = self.__get_row_at_y(current_y)
         if row is None:
             return
         row_height = row.get_allocated_height()
-        (row_x, row_y) = row.translate_coordinates(listbox, 0, 0)
-        if y < row_y + 20:
+        (row_x, row_y) = row.translate_coordinates(self.__listbox, 0, 0)
+        if current_y < row_y + 20:
             row.get_style_context().add_class("drag-up")
-        elif y > row_y + row_height - 20:
+        elif current_y > row_y + row_height - 20:
             row.get_style_context().add_class("drag-down")
-
-    def __on_drag_data_get(self, listbox, context, data, info, time):
-        """
-            Unused
-        """
-        data.set_text(" ", len(" "))
-
-    def __on_drag_data_received(self, listbox, context, x, y,
-                                data, info, time):
-        """
-            @param listbox as Gtk.ListBox
-            @param context as Gdk.DragContext
-            @param x as int
-            @param y as int
-            @param data as Gtk.SelectionData
-            @param info as int
-            @param time as int
-            @param timeout as bool
-        """
-        if not self.__drag_begin_rows:
+        scrolled = self.__listbox.get_ancestor(Gtk.ScrolledWindow)
+        if scrolled is None:
             return
-        (_listbox, row) = self.__get_row_at_y(y)
-        if row is not None:
-            row_height = row.get_allocated_height()
-            (row_x, row_y) = row.translate_coordinates(listbox, 0, 0)
-            if y < row_y + row_height / 2:
-                direction = Gtk.DirectionType.UP
-            elif y > row_y - row_height / 2:
-                direction = Gtk.DirectionType.DOWN
-            self.__do_drag_and_drop(self.__drag_begin_rows,
-                                    row, direction)
-        self.__unmark_all_rows()
+        if self.__autoscroll_timeout_id is not None:
+            GLib.source_remove(self.__autoscroll_timeout_id)
+            self.__autoscroll_timeout_id = None
+        (scrolled_x, scrolled_y) = row.translate_coordinates(scrolled, 0, 0)
+        diff = self.__begin_scrolled_y - scrolled_y
+        if abs(diff) < 100:
+            return
+        self.__autoscroll_timeout_id = GLib.idle_add(self.__autoscroll,
+                                                     scrolled,
+                                                     -diff / 10000)
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
