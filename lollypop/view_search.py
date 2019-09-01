@@ -205,6 +205,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__search_count -= 1
         if self.__search_count == 0:
             self.__banner.spinner.stop()
+            if not self.__view.children:
+                self.show_placeholder(True, _("No results for this search"))
 
 #######################
 # PRIVATE             #
@@ -233,8 +235,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.show_placeholder(False)
             self.__banner.play_button.set_sensitive(True)
             self.__banner.new_button.set_sensitive(True)
-        else:
-            self.show_placeholder(True, _("No results for this search"))
 
     def _on_search_changed(self, widget):
         """
