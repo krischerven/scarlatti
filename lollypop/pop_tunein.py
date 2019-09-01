@@ -19,7 +19,6 @@ from lollypop.define import App, ArtSize, Type
 from lollypop.utils import get_network_available
 from lollypop.list import LinkedList
 from lollypop.objects_radio import Radio
-from lollypop.helper_task import TaskHelper
 
 
 class TuneItem:
@@ -151,10 +150,9 @@ class TuneinPopover(Gtk.Popover):
         self.__back_btn.set_sensitive(False)
         self.__home_btn.set_sensitive(False)
         self.__label.set_text(_("Please wait…"))
-        helper = TaskHelper()
-        helper.load_uri_content(uri,
-                                self.__cancellable,
-                                self.__on_uri_content)
+        App().task_helper.load_uri_content(uri,
+                                           self.__cancellable,
+                                           self.__on_uri_content)
 
     def __show_message(self, message=""):
         """
@@ -231,9 +229,9 @@ class TuneinPopover(Gtk.Popover):
         """
         if self.__covers_to_download and not self.__cancellable.is_cancelled():
             (item, image) = self.__covers_to_download.pop(0)
-            helper = TaskHelper()
-            helper.load_uri_content(item.LOGO, self.__cancellable,
-                                    self.__on_image_downloaded, image)
+            App().task_helper.load_uri_content(item.LOGO, self.__cancellable,
+                                               self.__on_image_downloaded,
+                                               image)
 
     def __clear(self):
         """
@@ -249,30 +247,11 @@ class TuneinPopover(Gtk.Popover):
             Add selected radio
             @param item as TuneIn Item
         """
-        # Get cover art
-        try:
-            helper = TaskHelper()
-            helper.load_uri_content(item.LOGO,
-                                    None,
-                                    self.__on_logo_uri_content,
-                                    item.TEXT)
-        except Exception as e:
-            Logger.error("TuneinPopover::__add_radio: %s" % e)
+        App().task_helper.run(App().art.cache_radio_uri,
+                              item.LOGO, item.TEXT)
         # Tunein in embbed uri in ashx files, so get content if possible
-        helper = TaskHelper()
-        helper.load_uri_content(item.URL, self.__cancellable,
-                                self.__on_item_content, item.TEXT)
-
-    def __on_logo_uri_content(self, uri, status, content, name):
-        """
-            Save image
-            @param uri as str
-            @param status as bool
-            @param content as bytes  # The image
-            @param name as str
-        """
-        if status:
-            App().art.add_radio_artwork(name, content)
+        App().task_helper.load_uri_content(item.URL, self.__cancellable,
+                                           self.__on_item_content, item.TEXT)
 
     def __on_map(self, widget):
         """
@@ -338,9 +317,8 @@ class TuneinPopover(Gtk.Popover):
             self.__scrolled.get_vadjustment().set_value(0.0)
             self.__populate(item.URL)
         elif item.TYPE == "audio":
-            if get_network_available("TUNEIN"):
-                App().task_helper.run(App().art.cache_radio_uri,
-                                      item.LOGO, item.TEXT)
+            App().task_helper.run(App().art.cache_radio_uri,
+                                  item.LOGO, item.TEXT)
             track = Radio(Type.RADIOS)
             track.name = item.TEXT
             track.set_uri(item.URL)
