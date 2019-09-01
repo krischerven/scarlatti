@@ -103,22 +103,17 @@ class RadioArt:
             Logger.error("RadioArt::get_radio_artwork(): %s" % e)
         return pixbuf
 
-    def copy_uri_to_cache(self, uri, name, width, height):
+    def cache_radio_uri(self, uri, name):
         """
             Copy uri to cache at size
             @param uri as str
             @param name as str
-            @param width as int
-            @param height as int
-            @thread safe
         """
         helper = TaskHelper()
         helper.load_uri_content(uri,
                                 None,
                                 self.__on_uri_content,
-                                name,
-                                width,
-                                height)
+                                name)
 
     def rename_radio(self, old_name, new_name):
         """
@@ -198,22 +193,16 @@ class RadioArt:
         """
         return "@@" + escape(name) + "@@radio@@"
 
-    def __on_uri_content(self, uri, status, content, name, width, height):
+    def __on_uri_content(self, uri, status, content, name):
         """
             Save image
             @param uri as str
             @param status as bool
             @param content as bytes  # The image
             @param name as str
-            @param width as int
-            @param height as int
         """
         if status:
-            filename = self.__get_radio_cache_name(name)
-            cache_path_png = "%s/%s_%s_%s.png" % (CACHE_PATH,
-                                                  filename,
-                                                  width,
-                                                  height)
+            cache_path_png = self.__get_radio_art_path(name)
             bytes = GLib.Bytes(content)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)

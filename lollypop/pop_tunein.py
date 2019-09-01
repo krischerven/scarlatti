@@ -339,15 +339,8 @@ class TuneinPopover(Gtk.Popover):
             self.__populate(item.URL)
         elif item.TYPE == "audio":
             if get_network_available("TUNEIN"):
-                # Cache for toolbar
-                App().task_helper.run(App().art.copy_uri_to_cache,
-                                      item.LOGO, item.TEXT,
-                                      App().window.toolbar.info.art_size,
-                                      App().window.toolbar.info.art_size)
-                # Cache for MPRIS
-                App().task_helper.run(App().art.copy_uri_to_cache,
-                                      item.LOGO, item.TEXT,
-                                      ArtSize.MPRIS, ArtSize.MPRIS)
+                App().task_helper.run(App().art.cache_radio_uri,
+                                      item.LOGO, item.TEXT)
             track = Radio(Type.RADIOS)
             track.name = item.TEXT
             track.set_uri(item.URL)
