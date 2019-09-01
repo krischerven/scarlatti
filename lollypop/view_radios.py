@@ -10,15 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-
 from lollypop.define import App, Type, ViewType
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_radio import RadioWidget
-from lollypop.pop_tunein import TuneinPopover
 from lollypop.controller_view import ViewController, ViewControllerType
-from lollypop.utils import get_icon_name, get_network_available
+from lollypop.utils import get_icon_name
 from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.widgets_banner_radios import RadiosBannerWidget
 
 
 class RadiosView(FlowBoxView, ViewController, SignalsHelper):
@@ -32,19 +30,15 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type)
+        FlowBoxView.__init__(self, view_type |
+                             ViewType.SCROLLED |
+                             ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._widget_class = RadioWidget
         self._empty_icon_name = get_icon_name(Type.RADIOS)
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/RadiosView.ui")
-        builder.connect_signals(self)
-        self.insert_row(0)
-        self.attach(builder.get_object("widget"), 0, 0, 1, 1)
-        self.__pop_tunein = None
-        self.add_widget(self._box)
-        if not get_network_available("TUNEIN"):
-            builder.get_object("search_btn").hide()
+        self.__banner = RadiosBannerWidget(self._view_type)
+        self.__banner.show()
+        self.add_widget(self._box, self.__banner)
         return [
                 (App().radios, "radio-changed", "_on_radio_changed"),
                 (App().player, "loading-changed", "_on_loading_changed")
@@ -83,16 +77,6 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         """
         FlowBoxView._add_items(self, radio_ids, self._view_type)
 
-    def _on_new_clicked(self, widget):
-        """
-            Show popover for adding a new radio
-            @param widget as Gtk.Widget
-        """
-        from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover()
-        popover.set_relative_to(widget)
-        popover.popup()
-
     def _on_primary_press_gesture(self, x, y, event):
         """
             Play radio
@@ -106,17 +90,6 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         App().player.load(child.track)
         child.set_loading(True)
 
-    def _on_search_clicked(self, widget):
-        """
-            Show popover for searching radios
-            @param widget as Gtk.Widget
-        """
-        if self.__pop_tunein is None:
-            self.__pop_tunein = TuneinPopover()
-            self.__pop_tunein.populate()
-        self.__pop_tunein.set_relative_to(widget)
-        self.__pop_tunein.popup()
-
     def _on_artwork_changed(self, artwork, name):
         """
             Update children artwork if matching name
@@ -126,22 +99,6 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         for child in self._box.get_children():
             if name == child.name:
                 child.set_artwork()
-
-    def _on_map(self, widget):
-        """
-            Set active ids
-        """
-        FlowBoxView._on_map(self, widget)
-
-    def _on_unmap(self, widget):
-        """
-            Destroy popover
-            @param widget as Gtk.Widget
-        """
-        FlowBoxView._on_unmap(self, widget)
-        if self.__pop_tunein is not None:
-            self.__pop_tunein.destroy()
-            self.__pop_tunein = None
 
     def _on_loading_changed(self, player, status, track):
         """
