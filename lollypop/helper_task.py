@@ -54,7 +54,7 @@ class TaskHelper:
 
     def load_uri_content(self, uri, cancellable, callback, *args):
         """
-            Load uri with libsoup
+            Load uri content async
             @param uri as str
             @param cancellable as Gio.Cancellable
             @param callback as a function
@@ -120,6 +120,26 @@ class TaskHelper:
             Logger.error("TaskHelper::load_uri_content_sync(): %s" % e)
             return (False, b"")
 
+    def send_message(self, message, cancellable, callback, *args):
+        """
+            Send message async
+            @param message as Soup.Message
+            @param cancellable as Gio.Cancellable
+            @param callback as a function
+            @callback (uri as str, status as bool, content as bytes, args)
+        """
+        try:
+            session = Soup.Session.new()
+            session.send_async(message,
+                               cancellable,
+                               self.__on_message_send_async,
+                               callback,
+                               cancellable,
+                               message.get_uri(),
+                               *args)
+        except Exception as e:
+            Logger.error("TaskHelper::send_message(): %s" % e)
+
 #######################
 # PRIVATE             #
 #######################
@@ -168,6 +188,27 @@ class TaskHelper:
             callback(uri, False, b"", *args)
 
     def __on_request_send_async(self, source, result, callback,
+                                cancellable, uri, *args):
+        """
+            Get stream and start reading from it
+            @param source as Soup.Session
+            @param result as Gio.AsyncResult
+            @param cancellable as Gio.Cancellable
+            @param callback as a function
+            @param uri as str
+        """
+        try:
+            stream = source.send_finish(result)
+            # We use a bytearray here as seems that bytes += is really slow
+            stream.read_bytes_async(4096, GLib.PRIORITY_LOW,
+                                    cancellable, self.__on_read_bytes_async,
+                                    bytearray(0), cancellable, callback, uri,
+                                    *args)
+        except Exception as e:
+            Logger.error("TaskHelper::__on_soup_msg_finished(): %s" % e)
+            callback(uri, False, b"", *args)
+
+    def __on_message_send_async(self, source, result, callback,
                                 cancellable, uri, *args):
         """
             Get stream and start reading from it

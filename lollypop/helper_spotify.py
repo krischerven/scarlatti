@@ -51,33 +51,33 @@ class SpotifyHelper(GObject.Object):
         self.__is_running = False
         self.__cancellable = Gio.Cancellable()
 
-    def get_token(self):
+    def get_token(self, cancellable):
         """
             Get a new auth token
+            @param cancellable as Gio.Cancellable
         """
         try:
+            def on_response(uri, status, data):
+                decode = json.loads(data.decode("utf-8"))
+                self.__token_expires = int(time()) + int(decode["expires_in"])
+                self.__token = decode["access_token"]
+
             token_uri = "https://accounts.spotify.com/api/token"
             credentials = "%s:%s" % (SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
             encoded = b64encode(credentials.encode("utf-8"))
             credentials = encoded.decode("utf-8")
-            session = Soup.Session.new()
             data = {"grant_type": "client_credentials"}
             msg = Soup.form_request_new_from_hash("POST", token_uri, data)
             msg.request_headers.append("Authorization",
                                        "Basic %s" % credentials)
-            status = session.send_message(msg)
-            if status == 200:
-                body = msg.get_property("response-body")
-                data = body.flatten().get_data()
-                decode = json.loads(data.decode("utf-8"))
-                self.__token_expires = int(time()) + int(decode["expires_in"])
-                self.__token = decode["access_token"]
+            App().task_helper.send_message(msg, cancellable, on_response)
         except Exception as e:
             Logger.error("SpotifyHelper::get_token(): %s", e)
 
-    def wait_for_token(self):
+    def wait_for_token(self, cancellable):
         """
             True if should wait for token
+            @param cancellable as Gio.Cancellable
             @return bool
         """
         def on_token(token):
@@ -87,7 +87,8 @@ class SpotifyHelper(GObject.Object):
             self.__token is None
         if wait and not self.__loading_token:
             self.__loading_token = True
-            App().task_helper.run(self.get_token, callback=(on_token,))
+            App().task_helper.run(self.get_token, cancellable,
+                                  callback=(on_token,))
         return wait
 
     def populate_db(self):
@@ -107,7 +108,7 @@ class SpotifyHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         try:
-            while self.wait_for_token():
+            while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
@@ -135,7 +136,7 @@ class SpotifyHelper(GObject.Object):
         """
         self.__album_ids[cancellable] = []
         try:
-            while self.wait_for_token():
+            while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
@@ -178,7 +179,7 @@ class SpotifyHelper(GObject.Object):
         self.__album_ids[cancellable] = []
         locale = getdefaultlocale()[0][0:2]
         try:
-            while self.wait_for_token():
+            while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
@@ -207,7 +208,7 @@ class SpotifyHelper(GObject.Object):
         """
         artists = []
         try:
-            while self.wait_for_token():
+            while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
@@ -240,7 +241,7 @@ class SpotifyHelper(GObject.Object):
         """
         self.__album_ids[cancellable] = []
         try:
-            while self.wait_for_token():
+            while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
@@ -324,7 +325,7 @@ class SpotifyHelper(GObject.Object):
             @return {}
         """
         try:
-            while self.wait_for_token():
+            while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
