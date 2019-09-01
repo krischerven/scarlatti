@@ -435,9 +435,10 @@ class AlbumsArtistBoxView(AlbumsLineView):
                 album_ids.remove(self.__album.id)
             return [Album(album_id) for album_id in album_ids]
 
-        artist = GLib.markup_escape_text(
-                    App().artists.get_name(self.__artist_id))
-        self._label.set_text("%s %s" % (_("Others albums from"), artist))
+        if self.__artist_id == Type.COMPILATIONS:
+            self._label.set_text(_("Others compilations:"))
+        else:
+            self._label.set_text(_("Others albums:"))
         App().task_helper.run(load, callback=(on_load,))
 
 
