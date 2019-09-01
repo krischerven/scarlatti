@@ -34,14 +34,14 @@ class RadiosBannerWidget(BannerWidget):
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)
         grid.show()
-        new_button = Gtk.Button.new_with_label(_("New radio"))
-        new_button.connect("clicked", self.__on_new_button_clicked)
-        new_button.set_property("halign", Gtk.Align.CENTER)
-        new_button.get_style_context().add_class("menu-button-48")
-        new_button.get_style_context().add_class("black-transparent")
-        new_button.get_style_context().add_class("bold")
-        new_button.set_hexpand(True)
-        new_button.show()
+        self.__new_button = Gtk.Button.new_with_label(_("New radio"))
+        self.__new_button.connect("clicked", self.__on_new_button_clicked)
+        self.__new_button.set_property("halign", Gtk.Align.CENTER)
+        self.__new_button.get_style_context().add_class("menu-button-48")
+        self.__new_button.get_style_context().add_class("black-transparent")
+        self.__new_button.get_style_context().add_class("bold")
+        self.__new_button.set_hexpand(True)
+        self.__new_button.show()
         self.__tunein_button = Gtk.Button.new()
         image = Gtk.Image.new()
         image.show()
@@ -51,7 +51,7 @@ class RadiosBannerWidget(BannerWidget):
         self.__tunein_button.get_style_context().add_class("black-transparent")
         self.__tunein_button.connect("clicked",
                                      self.__on_tunein_button_clicked)
-        grid.add(new_button)
+        grid.add(self.__new_button)
         grid.add(self.__tunein_button)
         if not get_network_available("TUNEIN"):
             self.__tunein_button.set_sensitive(False)
@@ -65,12 +65,15 @@ class RadiosBannerWidget(BannerWidget):
             @param view_type as ViewType
         """
         BannerWidget.set_view_type(self, view_type)
+        button_context = self.__new_button.get_style_context()
+        button_context.remove_class("text-large")
         if view_type & ViewType.MEDIUM:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
         else:
             style = "menu-button-48"
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
+            button_context.add_class("text-large")
         update_button(self.__tunein_button, style,
                       icon_size, "edit-find-symbolic")
 
