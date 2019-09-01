@@ -54,7 +54,7 @@ class RadiosBannerWidget(BannerWidget):
         grid.add(new_button)
         grid.add(self.__tunein_button)
         if not get_network_available("TUNEIN"):
-            self.__tunein_button.hide()
+            self.__tunein_button.set_sensitive(False)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         self.connect("unmap", self.__on_unmap)
