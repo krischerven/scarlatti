@@ -137,7 +137,6 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
                 self.__timeout_id = GLib.timeout_add(1000,
                                                      self.update_position)
         else:
-            self.__progress.set_sensitive(False)
             if self.__timeout_id is not None:
                 GLib.source_remove(self.__timeout_id)
                 self.__timeout_id = None
