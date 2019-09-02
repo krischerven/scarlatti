@@ -12,7 +12,6 @@
 
 from gi.repository import GLib, Gst, Gtk
 
-from lollypop.objects_radio import Radio
 from lollypop.define import App, StorageType, MARGIN_SMALL
 from lollypop.utils import seconds_to_string
 from lollypop.helper_signals import SignalsHelper, signals
@@ -38,7 +37,6 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__time_label.get_style_context().add_class("monospace")
         self.__progress = Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, None)
         self.__progress.show()
-        self.__progress.set_sensitive(False)
         self.__progress.set_hexpand(True)
         self.__progress.set_draw_value(False)
         self.__progress.connect("change-value", self.__on_change_value)
@@ -105,16 +103,12 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
 
         self.__progress.set_value(0.0)
         self.__time_label.set_text("0:00")
-        if isinstance(App().player.current_track, Radio):
-            self.__progress.set_sensitive(False)
-        else:
-            if not App().player.current_track.storage_type &\
-                    StorageType.COLLECTION:
-                style_context.add_class("youtube-scale")
-            self.__progress.set_sensitive(True)
-            self.__progress.set_range(0.0, App().player.current_track.duration)
-            self.__total_time_label.set_text(
-                seconds_to_string(App().player.current_track.duration))
+        if not App().player.current_track.storage_type &\
+                StorageType.COLLECTION:
+            style_context.add_class("youtube-scale")
+        self.__progress.set_range(0.0, App().player.current_track.duration)
+        self.__total_time_label.set_text(
+            seconds_to_string(App().player.current_track.duration))
 
     def _on_duration_changed(self, player, track_id):
         """

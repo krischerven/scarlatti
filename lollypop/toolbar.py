@@ -14,6 +14,7 @@ from gi.repository import Gtk
 
 from lollypop.define import App, Size, AdaptiveSize
 from lollypop.toolbar_playback import ToolbarPlayback
+from lollypop.objects_track import Track
 from lollypop.toolbar_info import ToolbarInfo
 from lollypop.toolbar_title import ToolbarTitle
 from lollypop.toolbar_end import ToolbarEnd
@@ -117,7 +118,10 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         """
         if player.current_track.id is not None and\
                 self.__adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
-            self.__toolbar_title.show()
+            if isinstance(player.current_track, Track):
+                self.__toolbar_title.show()
+            else:
+                self.__toolbar_title.hide()
             self.__toolbar_info.show_children()
         else:
             self.__toolbar_title.hide()
