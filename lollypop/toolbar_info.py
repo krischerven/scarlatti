@@ -17,7 +17,7 @@ from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.objects_radio import Radio
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
-from lollypop.define import App, ArtBehaviour, StorageType, MARGIN
+from lollypop.define import App, ArtBehaviour, StorageType, MARGIN_SMALL
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -49,7 +49,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         self.__artwork.set_property("has-tooltip", True)
         horizontal_box.pack_start(self.__artwork, False, False, 0)
         horizontal_box.pack_start(self.__label, False, False, 0)
-        self.set_margin_start(MARGIN)
+        self.set_margin_start(MARGIN_SMALL)
         self.connect("realize", self.__on_realize)
 
     def show_children(self):
