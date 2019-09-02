@@ -18,7 +18,7 @@ from lollypop.utils import get_icon_name
 
 class AlbumsGenreBoxView(FlowBoxView):
     """
-        Show decades in a FlowBox
+        Show genres in a FlowBox
     """
 
     def __init__(self, view_type):

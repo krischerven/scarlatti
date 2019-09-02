@@ -209,7 +209,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 
 class AlbumsGenresBoxView(AlbumsBoxView):
     """
-        Show albums in a box for a genre (static or not)
+        Show albums in a box for genres (static or not)
     """
 
     def __init__(self, genre_ids, artist_ids, view_type):
