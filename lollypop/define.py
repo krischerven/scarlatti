@@ -183,8 +183,9 @@ class Size:
 class OrderBy:
     ARTIST = 0
     NAME = 1
-    YEAR = 2
+    YEAR_DESC = 2
     POPULARITY = 3
+    YEAR_ASC = 4  # Not available for user
 
 
 # Order is important

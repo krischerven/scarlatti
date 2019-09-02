@@ -10,10 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from random import shuffle
+
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_albums_decade import AlbumsDecadeWidget
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, OrderBy
 from lollypop.utils import get_icon_name
+from lollypop.objects_album import Album
 
 
 class DecadesBoxView(FlowBoxView):
@@ -25,10 +28,15 @@ class DecadesBoxView(FlowBoxView):
         """
             Init decade view
         """
-        FlowBoxView.__init__(self, ViewType.SCROLLED)
+        from lollypop.widgets_banner_albums import AlbumsBannerWidget
+        FlowBoxView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
         self._widget_class = AlbumsDecadeWidget
         self._empty_icon_name = get_icon_name(Type.YEARS)
-        self.add_widget(self._box)
+        self.__banner = AlbumsBannerWidget([Type.YEARS], [], self._view_type)
+        self.__banner.show()
+        self.__banner.connect("play-all", self.__on_banner_play_all)
+        self.__banner.connect("scroll", self._on_banner_scroll)
+        self.add_widget(self._box, self.__banner)
 
     def populate(self):
         """
@@ -83,3 +91,22 @@ class DecadesBoxView(FlowBoxView):
             @param child as Gtk.FlowBoxChild
         """
         App().window.container.show_view([Type.YEARS], child.data)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_banner_play_all(self, banner, random):
+        """
+            Play all albums
+            @param banner as AlbumsBannerWidget
+            @param random as bool
+        """
+        album_ids = App().albums.get_ids([], [], True, OrderBy.YEAR_ASC)
+        if not album_ids:
+            return
+        albums = [Album(album_id) for album_id in album_ids]
+        if random:
+            shuffle(albums)
+            App().player.play_album_for_albums(albums[0], albums)
+        else:
+            App().player.play_album_for_albums(albums[0], albums)

@@ -492,7 +492,7 @@ class TracksDatabase:
         elif orderby == OrderBy.NAME:
             order = " ORDER BY albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
-        elif orderby == OrderBy.YEAR:
+        elif orderby == OrderBy.YEAR_DESC:
             order = " ORDER BY albums.timestamp DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"

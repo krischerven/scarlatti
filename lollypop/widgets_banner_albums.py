@@ -73,7 +73,7 @@ class AlbumsBannerWidget(BannerWidget):
         grid.add(linked)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
-        if genre_ids and genre_ids[0] == Type.YEARS:
+        if genre_ids and genre_ids[0] == Type.YEARS and artist_ids:
             title_str = "%s - %s" % (artist_ids[0], artist_ids[-1])
         else:
             genres = []
