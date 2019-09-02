@@ -71,43 +71,46 @@ class GenresDatabase:
                 return v[0]
             return None
 
-    def get_album_ids(self, genre_id, ignore=False):
+    def get_album_ids(self, ignore=False):
         """
             Get all availables albums for genres
-            @param genre_id as int
+            @param genre_ids as [int]
             @param ignore as bool
             @return [int]
         """
         orderby = App().settings.get_enum("orderby")
-        if OrderBy.ARTIST:
-            order = " ORDER BY artists.sortname\
+        order = " ORDER BY genres.name, "
+        if orderby == OrderBy.ARTIST:
+            order += " artists.sortname\
                      COLLATE NOCASE COLLATE LOCALIZED,\
                      albums.timestamp,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.NAME:
-            order = " ORDER BY albums.name\
+            order += " albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.YEAR_DESC:
-            order = " ORDER BY albums.timestamp DESC,\
+            order += " albums.timestamp DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         else:
-            order = " ORDER BY albums.popularity DESC,\
+            order += " albums.popularity DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         with SqlCursor(App().db) as sql:
-            filters = (genre_id, )
             request = "SELECT albums.rowid\
-                       FROM albums, album_genres\
-                       WHERE album_genres.genre_id=?\
-                       AND album_genres.album_id=albums.rowid"
+                       FROM albums, album_genres, genres,\
+                            album_artists, artists\
+                       WHERE album_genres.album_id=albums.rowid\
+                       AND album_genres.genre_id = genres.rowid\
+                       AND album_artists.artist_id = artists.rowid\
+                       AND album_artists.album_id = albums.rowid"
             if not get_network_available():
                 request += " AND albums.synced!=%s" % Type.NONE
             if ignore:
                 request += " AND albums.loved != -1"
             request += order
-            result = sql.execute(request, filters)
+            result = sql.execute(request)
             return list(itertools.chain(*result))
 
     def get(self):

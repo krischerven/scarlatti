@@ -186,6 +186,7 @@ class OrderBy:
     YEAR_DESC = 2
     POPULARITY = 3
     YEAR_ASC = 4  # Not available for user
+    GENRE = 5
 
 
 # Order is important
