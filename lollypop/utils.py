@@ -247,13 +247,15 @@ def noaccents(string):
     return v.lower()
 
 
-def sql_escape(str):
+def sql_escape(string):
     """
         Escape string for SQL request
-        @param str as str
+        @param string as str
         @param ignore as [str]
     """
-    return "".join([c for c in str if
+    nfkd_form = unicodedata.normalize("NFKD", string)
+    v = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    return "".join([c for c in v if
                     c.isalpha() or
                     c.isdigit()]).rstrip().lower()
 
