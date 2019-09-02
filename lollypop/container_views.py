@@ -286,8 +286,8 @@ class ViewsContainer:
         """
             Get album view for decades
         """
-        from lollypop.view_albums_decade_box import AlbumsDecadeBoxView
-        view = AlbumsDecadeBoxView()
+        from lollypop.view_decades_box import DecadesBoxView
+        view = DecadesBoxView()
         view.populate()
         view.show()
         return view
@@ -307,9 +307,8 @@ class ViewsContainer:
         """
             Get view for genres
         """
-        from lollypop.view_albums_genre_box import AlbumsGenreBoxView
-        view_type = ViewType.SCROLLED
-        view = AlbumsGenreBoxView(view_type)
+        from lollypop.view_genres_box import GenresBoxView
+        view = GenresBoxView()
         view.populate()
         view.show()
         return view

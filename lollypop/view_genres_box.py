@@ -11,14 +11,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.widgets_albums_decade import AlbumsDecadeWidget
+from lollypop.widgets_albums_genre import AlbumsGenreWidget
 from lollypop.define import App, Type, ViewType
 from lollypop.utils import get_icon_name
 
 
-class AlbumsDecadeBoxView(FlowBoxView):
+class GenresBoxView(FlowBoxView):
     """
-        Show decades in a FlowBox
+        Show genres in a FlowBox
     """
 
     def __init__(self):
@@ -26,8 +26,8 @@ class AlbumsDecadeBoxView(FlowBoxView):
             Init decade view
         """
         FlowBoxView.__init__(self, ViewType.SCROLLED)
-        self._widget_class = AlbumsDecadeWidget
-        self._empty_icon_name = get_icon_name(Type.YEARS)
+        self._widget_class = AlbumsGenreWidget
+        self._empty_icon_name = get_icon_name(Type.GENRES)
         self.add_widget(self._box)
 
     def populate(self):
@@ -38,21 +38,7 @@ class AlbumsDecadeBoxView(FlowBoxView):
             FlowBoxView.populate(self, items)
 
         def load():
-            (years, unknown) = App().albums.get_years()
-            decades = []
-            decade = []
-            current_d = None
-            for year in sorted(years):
-                d = year // 10
-                if current_d is not None and current_d != d:
-                    current_d = d
-                    decades.append(decade)
-                    decade = []
-                current_d = d
-                decade.append(year)
-            if decade:
-                decades.append(decade)
-            return decades
+            return App().genres.get_ids()
 
         App().task_helper.run(load, callback=(on_load,))
 
@@ -82,4 +68,4 @@ class AlbumsDecadeBoxView(FlowBoxView):
             @param flowbox as Gtk.FlowBox
             @param child as Gtk.FlowBoxChild
         """
-        App().window.container.show_view([Type.YEARS], child.data)
+        App().window.container.show_view([Type.GENRES], child.data)
