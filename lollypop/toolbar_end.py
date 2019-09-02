@@ -222,11 +222,12 @@ class ToolbarEnd(Gtk.Bin):
             elif value:
                 ids.append(genre_id)
             # Party id removed
-            elif ids and len(party_ids) > 1:
+            elif ids and len(ids) > 1:
                 ids.remove(genre_id)
             # Initial value
             else:
-                genre_ids.remove(genre_id)
+                ids = list(genre_ids)
+                ids.remove(genre_id)
             App().settings.set_value("party-ids", GLib.Variant("ai", ids))
             App().player.set_party_ids()
             App().player.set_next()
