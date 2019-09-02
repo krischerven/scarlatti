@@ -261,7 +261,6 @@ class AlbumsYearsBoxView(AlbumsGenresBoxView):
             @param view_type as ViewType
         """
         AlbumsGenresBoxView.__init__(self, genre_ids, artist_ids, view_type)
-        self.add_widget(self._box)
 
     def populate(self):
         """
