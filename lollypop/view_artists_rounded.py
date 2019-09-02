@@ -13,12 +13,14 @@
 from gi.repository import Gtk, Pango
 
 from gettext import gettext as _
+from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, MARGIN
+from lollypop.define import App, Type, MARGIN, ViewType, OrderBy
 from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
+from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_font_height
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -38,7 +40,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
-        self.add_widget(self._box)
         return [
             (App().art, "artist-artwork-changed",
              "_on_artist_artwork_changed"),
@@ -166,6 +167,43 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         RoundedArtistsView.stop(self)
 
 
+class RoundedArtistsViewWithBanner(RoundedArtistsView):
+    """
+        Show rounded artist view with a banner
+    """
+
+    def __init__(self):
+        """
+            Init artist view
+        """
+        from lollypop.widgets_banner_albums import AlbumsBannerWidget
+        RoundedArtistsView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        self.__banner = AlbumsBannerWidget([Type.ARTISTS], [], self._view_type)
+        self.__banner.show()
+        self.__banner.connect("play-all", self.__on_banner_play_all)
+        self.__banner.connect("scroll", self._on_banner_scroll)
+        self.add_widget(self._box, self.__banner)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_banner_play_all(self, banner, random):
+        """
+            Play all albums
+            @param banner as AlbumsBannerWidget
+            @param random as bool
+        """
+        album_ids = App().albums.get_ids([], [], True, OrderBy.ARTIST)
+        if not album_ids:
+            return
+        albums = [Album(album_id) for album_id in album_ids]
+        if random:
+            shuffle(albums)
+            App().player.play_album_for_albums(albums[0], albums)
+        else:
+            App().player.play_album_for_albums(albums[0], albums)
+
+
 class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
     """
         Show 6 random artists in a FlowBox
@@ -177,7 +215,6 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
             @param view_type as ViewType
         """
         RoundedArtistsView.__init__(self, view_type)
-        self.insert_row(0)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -201,9 +238,10 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         header.set_margin_end(MARGIN)
         header.show_all()
         HorizontalScrollingHelper.__init__(self)
-        self.attach(header, 0, 0, 1, 1)
+        self.add(header)
         self._label.set_property("halign", Gtk.Align.START)
         self._box.set_property("halign", Gtk.Align.CENTER)
+        self.add_widget(self._box)
 
     def populate(self):
         """

@@ -846,17 +846,19 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def get_ids(self, artist_ids, genre_ids, ignore=False):
+    def get_ids(self, artist_ids, genre_ids, ignore=False, orderby=None):
         """
             Get albums ids
             @param artist_ids as [int]
             @param genre_ids as [int]
             @param ignore as bool => ignore albums with loved == 1
+            @param orderby as OrderBy
             @return albums ids as [int]
         """
         genre_ids = remove_static(genre_ids)
         artist_ids = remove_static(artist_ids)
-        orderby = App().settings.get_enum("orderby")
+        if orderby is None:
+            orderby = App().settings.get_enum("orderby")
         if artist_ids or orderby == OrderBy.ARTIST:
             order = " ORDER BY artists.sortname\
                      COLLATE NOCASE COLLATE LOCALIZED,\

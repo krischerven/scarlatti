@@ -252,9 +252,8 @@ class ViewsContainer:
             Get rounded artists view
             @return view
         """
-        from lollypop.view_artists_rounded import RoundedArtistsView
-        view_type = ViewType.SCROLLED
-        view = RoundedArtistsView(view_type)
+        from lollypop.view_artists_rounded import RoundedArtistsViewWithBanner
+        view = RoundedArtistsViewWithBanner()
         self._stack.add(view)
         view.populate()
         view.show()
