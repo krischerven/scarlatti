@@ -179,5 +179,5 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             Calculate art size
             @param toolbar as ToolbarInfos
         """
-        art_size = self.get_allocated_height()
+        art_size = self.get_allocated_height() - 2
         self.__artwork.set_art_size(art_size, art_size)
