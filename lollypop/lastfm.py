@@ -38,14 +38,7 @@ from lollypop.goa import GoaSyncedAccount
 
 class LastFMBase:
     """
-       Lastfm:
-       We recommend you don"t distribute the API key and secret with your app,
-       and that you ask users who want to build it to apply for a key of
-       their own. We don"t believe that this would violate the terms of most
-       open-source licenses.
-       That said, we can"t stop you from distributing the key and secret if you
-       want, and if your app isn"t written in a compiled language, you don"t
-       really have much option :).
+       Base class for LastFM/LibreFM
     """
 
     def __init__(self, name):
@@ -422,6 +415,13 @@ class LibreFM(LastFMBase, LibreFMNetwork):
 class LastFM(LastFMBase, LastFMNetwork):
     """
         LastFM
+       We recommend you don"t distribute the API key and secret with your app,
+       and that you ask users who want to build it to apply for a key of
+       their own. We don"t believe that this would violate the terms of most
+       open-source licenses.
+       That said, we can"t stop you from distributing the key and secret if you
+       want, and if your app isn"t written in a compiled language, you don"t
+       really have much option :).
     """
     def __init__(self):
         """
