@@ -67,16 +67,13 @@ class LastFMBase:
             @param full_sync as bool
             @param callback as function
         """
-        if self.is_goa:
-            App().task_helper.run(self.__connect, full_sync)
-        else:
-            from lollypop.helper_passwords import PasswordsHelper
-            helper = PasswordsHelper()
-            helper.get(self.__name,
-                       self.__on_get_password,
-                       full_sync,
-                       callback,
-                       *args)
+        from lollypop.helper_passwords import PasswordsHelper
+        helper = PasswordsHelper()
+        helper.get(self.__name,
+                   self.__on_get_password,
+                   full_sync,
+                   callback,
+                   *args)
 
     def save(self):
         """
@@ -220,12 +217,20 @@ class LastFMBase:
                 self.unlove(",".join(track.artists), track.name)
 
     @property
-    def can_love(self):
+    def is_goa(self):
         """
-            True if engine can love
+            True if service is using GOA
             @return bool
         """
-        return True
+        return False
+
+    @property
+    def can_love(self):
+        """
+            True if service can love tracks
+            @return bool
+        """
+        return False
 
     @property
     def service_name(self):
@@ -234,25 +239,6 @@ class LastFMBase:
             @return str
         """
         return self.__name
-
-    @property
-    def is_goa(self):
-        return False
-
-    @property
-    def available(self):
-        """
-            Return True if Last.fm/Libre.fm submission is available
-            @return bool
-        """
-        if not self.session_key:
-            return False
-        if self.is_goa:
-            music_disabled = self.__goa.account.props.music_disabled
-            Logger.debug("Last.fm GOA scrobbling disabled: %s" %
-                         music_disabled)
-            return not music_disabled
-        return True
 
 #######################
 # PRIVATE             #
@@ -271,32 +257,20 @@ class LastFMBase:
         if self.__queue_id is None:
             self.__queue_id = GLib.timeout_add(1000, queue)
 
-    def __connect(self, full_sync=False):
+    def _connect(self, full_sync=False):
         """
             Connect service
             @param full_sync as bool
             @thread safe
         """
-        if not get_network_available("LASTFM"):
-            return
         try:
             self.session_key = ""
-            if self.is_goa:
-                auth = self.__goa.oauth2_based
-                self.api_key = auth.props.client_id
-                self.api_secret = auth.props.client_secret
-                self.session_key = auth.call_get_access_token_sync(None)[0]
-            else:
-                skg = SessionKeyGenerator(self)
-                self.session_key = skg.get_session_key(
-                    username=self.__login,
-                    password_hash=md5(self.__password))
-            if full_sync:
-                App().task_helper.run(self.__populate_loved_tracks)
-            track = App().player.current_track
-            self.playing_now(track)
+            skg = SessionKeyGenerator(self)
+            self.session_key = skg.get_session_key(
+                username=self.__login,
+                password_hash=md5(self.__password))
         except Exception as e:
-            Logger.debug("LastFM::__connect(): %s" % e)
+            Logger.debug("LastFM::_connect(): %s" % e)
 
     def __listen(self, artist, album, title, timestamp, mb_track_id):
         """
@@ -385,7 +359,7 @@ class LastFMBase:
         self.__login = attributes["login"]
         self.__password = password
         if get_network_available("LASTFM"):
-            App().task_helper.run(self.__connect, full_sync,
+            App().task_helper.run(self._connect, full_sync,
                                   callback=(callback, *args))
 
     def __on_network_available(self, monitor, spec):
@@ -411,6 +385,31 @@ class LibreFM(LastFMBase, LibreFMNetwork):
         LastFMBase.__init__(self, "librefm")
         Logger.debug("LibreFMNetwork.__init__()")
 
+    @property
+    def available(self):
+        """
+            Return True if submission is available
+            @return bool
+        """
+        return self.session_key != ""
+
+#######################
+# PRIVATE             #
+#######################
+    def _connect(self, full_sync=False):
+        """
+            Connect service
+            @param full_sync as bool
+            @thread safe
+        """
+        if not get_network_available("LASTFM"):
+            return
+        try:
+            LastFMBase._connect(self, full_sync)
+            self.playing_now(App().player.current_track)
+        except Exception as e:
+            Logger.debug("LastFM::_connect(): %s" % e)
+
 
 class LastFM(LastFMBase, LastFMNetwork):
     """
@@ -427,7 +426,6 @@ class LastFM(LastFMBase, LastFMNetwork):
         """
             Init LastFM
         """
-        self.__goa = None
         self.__goa = GoaSyncedAccount("Last.fm")
         self.__goa.connect("account-switched",
                            self.__on_goa_account_switched)
@@ -445,16 +443,74 @@ class LastFM(LastFMBase, LastFMNetwork):
                                api_secret=self.__API_SECRET)
         LastFMBase.__init__(self, "lastfm")
 
+    def connect_service(self, full_sync=False, callback=None, *args):
+        """
+            Connect service
+            @param full_sync as bool
+            @param callback as function
+        """
+        if self.is_goa:
+            App().task_helper.run(self._connect, full_sync)
+        else:
+            LastFMBase.connect_service(self, full_sync, callback, *args)
+
+    @property
+    def available(self):
+        """
+            Return True if submission is available
+            @return bool
+        """
+        if not self.session_key:
+            return False
+        if self.is_goa:
+            music_disabled = self.__goa.account.props.music_disabled
+            Logger.debug("Last.fm GOA scrobbling disabled: %s" %
+                         music_disabled)
+            return not music_disabled
+        return True
+
     @property
     def is_goa(self):
         """
-            True if using Gnome Online Account
+            True if service is using GOA
+            @return bool
         """
-        return self.__goa is not None and self.__goa.has_account
+        return self.__goa.has_account
+
+    @property
+    def can_love(self):
+        """
+            True if service can love tracks
+            @return bool
+        """
+        return True
 
 #######################
 # PRIVATE             #
 #######################
+    def _connect(self, full_sync=False):
+        """
+            Connect service
+            @param full_sync as bool
+            @thread safe
+        """
+        if not get_network_available("LASTFM"):
+            return
+        try:
+            if self.is_goa:
+                self.session_key = ""
+                auth = self.__goa.oauth2_based
+                self.api_key = auth.props.client_id
+                self.api_secret = auth.props.client_secret
+                self.session_key = auth.call_get_access_token_sync(None)[0]
+            else:
+                LastFMBase._connect(self, full_sync)
+            if full_sync:
+                App().task_helper.run(self.__populate_loved_tracks)
+            self.playing_now(App().player.current_track)
+        except Exception as e:
+            Logger.debug("LastFM::_connect(): %s" % e)
+
     def __on_goa_account_switched(self, obj):
         """
             Callback for GoaSyncedAccount signal "account-switched"
