@@ -15,7 +15,6 @@ from gi.repository import Gio, Gtk
 from gettext import gettext as _
 
 from lollypop.define import App, Type, MARGIN_SMALL
-from lollypop.menu_sync import SyncPlaylistsMenu
 
 
 class PlaylistMenu(Gio.Menu):
@@ -47,6 +46,9 @@ class PlaylistMenu(Gio.Menu):
         App().add_action(remove_action)
         remove_action.connect("activate", self.__on_remove_action_activate)
         menu.append(_("Remove playlist"), "app.remove_pl_action")
+        from lollypop.menu_playback import PlaylistPlaybackMenu
+        from lollypop.menu_sync import SyncPlaylistsMenu
+        self.append_section(_("Playback"), PlaylistPlaybackMenu(playlist_id))
         self.append_section(_("Edit"), menu)
         self.append_section(_("Synchronization"),
                             SyncPlaylistsMenu(playlist_id))

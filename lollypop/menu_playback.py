@@ -15,8 +15,49 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.define import App
+from lollypop.utils import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
+
+
+class PlaylistPlaybackMenu(Gio.Menu):
+    """
+        Contextual menu for playlists
+    """
+
+    def __init__(self, playlist_id):
+        """
+            Init menu
+            @param playlist id as int
+        """
+        Gio.Menu.__init__(self)
+        play_action = Gio.SimpleAction(name="playlist_play_action")
+        App().add_action(play_action)
+        play_action.connect("activate", self.__play, playlist_id)
+        menu_item = Gio.MenuItem.new(_("Play this playlist"),
+                                     "app.playlist_play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
+#######################
+# PRIVATE             #
+#######################
+    def __play(self, action, variant, playlist_id):
+        """
+            Play album
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param playlist_id as int
+        """
+        if App().playlists.get_smart(playlist_id):
+            tracks = []
+            request = App().playlists.get_smart_sql(playlist_id)
+            for track_id in App().db.execute(request):
+                tracks.append(Track(track_id))
+        else:
+            tracks = App().playlists.get_tracks(playlist_id)
+        albums = tracks_to_albums(tracks)
+        App().player.play_albums(albums)
 
 
 class AlbumPlaybackMenu(Gio.Menu):
