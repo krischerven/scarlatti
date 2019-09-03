@@ -211,7 +211,7 @@ class PasswordsHelper:
             @param result as Gio.AsyncResult
         """
         try:
-            self.__secret = Secret.Service.get_finish(result)
+            self.__secret = source.get_finish(result)
         except Exception as e:
             self.__secret = -1
             Logger.debug("PasswordsHelper::__on_get_secret(): %s" % e)
