@@ -58,10 +58,13 @@ class SpotifyHelper(GObject.Object):
         """
         try:
             def on_response(uri, status, data):
-                decode = json.loads(data.decode("utf-8"))
-                self.__token_expires = int(time()) + int(decode["expires_in"])
-                self.__token = decode["access_token"]
-
+                try:
+                    decode = json.loads(data.decode("utf-8"))
+                    self.__token_expires = int(time()) +\
+                        int(decode["expires_in"])
+                    self.__token = decode["access_token"]
+                except Exception as e:
+                    Logger.error("SpotifyHelper::get_token(): %s", e)
             token_uri = "https://accounts.spotify.com/api/token"
             credentials = "%s:%s" % (SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
             encoded = b64encode(credentials.encode("utf-8"))
