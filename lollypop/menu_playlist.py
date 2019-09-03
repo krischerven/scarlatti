@@ -34,18 +34,20 @@ class PlaylistMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import MenuHeader
             self.append_item(MenuHeader(Type.PLAYLISTS))
+        menu = Gio.Menu()
         save_action = Gio.SimpleAction(name="save_pl_action")
         App().add_action(save_action)
         save_action.connect("activate", self.__on_save_action_activate)
-        self.append(_("Save playlist"), "app.save_pl_action")
+        menu.append(_("Save playlist"), "app.save_pl_action")
         smart_action = Gio.SimpleAction(name="smart_action")
         App().add_action(smart_action)
         smart_action.connect("activate", self.__on_smart_action_activate)
-        self.append(_("Manage smart playlist"), "app.smart_action")
+        menu.append(_("Manage smart playlist"), "app.smart_action")
         remove_action = Gio.SimpleAction(name="remove_pl_action")
         App().add_action(remove_action)
         remove_action.connect("activate", self.__on_remove_action_activate)
-        self.append(_("Remove playlist"), "app.remove_pl_action")
+        menu.append(_("Remove playlist"), "app.remove_pl_action")
+        self.append_section(_("Edit"), menu)
         self.append_section(_("Synchronization"),
                             SyncPlaylistsMenu(playlist_id))
 
