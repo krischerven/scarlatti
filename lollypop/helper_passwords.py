@@ -187,7 +187,7 @@ class PasswordsHelper:
         """
         try:
             if result is not None:
-                items = self.__secret.search_finish(result)
+                items = source.search_finish(result)
                 for item in items:
                     item.load_secret(None,
                                      self.__on_load_secret,
