@@ -47,17 +47,17 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         SizeAllocationHelper.__init__(self)
         self._playlist_id = playlist_id
         # We remove SCROLLED because we want to be the scrolled view
-        self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self.__view.set_width(Size.MEDIUM)
+        self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
+        self._view.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
-            self.__view.dnd_helper.connect("dnd-finished",
-                                           self.__on_dnd_finished)
-        self.__view.show()
-        self.__banner = PlaylistBannerWidget(playlist_id, self.__view)
+            self._view.dnd_helper.connect("dnd-finished",
+                                          self.__on_dnd_finished)
+        self._view.show()
+        self.__banner = PlaylistBannerWidget(playlist_id, self._view)
         self.__banner.connect("scroll", self._on_banner_scroll)
         self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
-        self.add_widget(self.__view, self.__banner)
+        self.add_widget(self._view, self.__banner)
         return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
@@ -84,13 +84,13 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        App().task_helper.run(load, callback=(self.__view.populate,))
+        App().task_helper.run(load, callback=(self._view.populate,))
 
     def stop(self):
         """
             Stop populating
         """
-        self.__view.stop()
+        self._view.stop()
 
     def activate_child(self):
         """
@@ -141,7 +141,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             @return [Gtk.Widget]
         """
         filtered = []
-        for child in self.__view.children:
+        for child in self._view.children:
             filtered.append(child)
             for subchild in child.children:
                 filtered.append(subchild)
@@ -161,7 +161,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             Relative to scrolled widget
             @return Gtk.Widget
         """
-        return self.__view
+        return self._view
 
 #######################
 # PROTECTED           #
@@ -177,7 +177,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
-            self.__view.insert_album(album, True, -1)
+            self._view.insert_album(album, True, -1)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
@@ -188,7 +188,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         """
         if playlist_id == self._playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
-            children = self.__view.children
+            children = self._view.children
             for album_row in children:
                 if album_row.album.id == track.album.id:
                     for track_row in album_row.children:
@@ -216,7 +216,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             Jump to current track
             @param banner as PlaylistBannerWidget
         """
-        self.__view.jump_to_current(self._scrolled)
+        self._view.jump_to_current(self._scrolled)
 
     def __on_dnd_finished(self, dnd_helper):
         """
@@ -225,7 +225,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         """
         if self._playlist_id >= 0:
             uris = []
-            for child in self.__view.children:
+            for child in self._view.children:
                 for track in child.album.tracks:
                     uris.append(track.uri)
             App().playlists.clear(self._playlist_id)
@@ -255,4 +255,4 @@ class SmartPlaylistsView(PlaylistsView):
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        App().task_helper.run(load, callback=(self.__view.populate,))
+        App().task_helper.run(load, callback=(self._view.populate,))
