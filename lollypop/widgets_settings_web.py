@@ -161,22 +161,18 @@ class WebSettingsWidget(Gtk.Bin):
             Update *fm settings
             @param name as str (librefm/lastfm)
         """
-        if App().lastfm is None:
-            return
-        from pylast import LastFMNetwork, LibreFMNetwork
         fm = None
         for scrobbler in App().scrobblers:
-            if (isinstance(scrobbler, LibreFMNetwork) and
-                name == "librefm") or\
-                    (isinstance(scrobbler, LastFMNetwork) and
-                     name != "librefm"):
+            if scrobbler.service_name == name:
                 fm = scrobbler
                 break
-        if name == "librefm":
+        if fm is None:
+            return
+        elif name == "librefm":
             callback = self.__test_librefm_connection
             login = self.__librefm_login.get_text()
             password = self.__librefm_password.get_text()
-        elif App().lastfm is not None:
+        else:
             callback = self.__test_lastfm_connection
             login = self.__lastfm_login.get_text()
             password = self.__lastfm_password.get_text()
@@ -184,9 +180,7 @@ class WebSettingsWidget(Gtk.Bin):
             if fm is not None and login and password:
                 from lollypop.helper_passwords import PasswordsHelper
                 helper = PasswordsHelper()
-                helper.clear(name,
-                             helper.store,
-                             name,
+                helper.store(name,
                              login,
                              password,
                              self.__on_password_store,

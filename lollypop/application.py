@@ -24,7 +24,7 @@ from signal import signal, SIGINT, SIGTERM
 
 
 try:
-    from lollypop.lastfm import LastFM
+    from lollypop.lastfm import LastFM, LibreFM
 except Exception as e:
     print(e)
     print("$ sudo pip3 install pylast")
@@ -468,8 +468,7 @@ class Application(Gtk.Application, ApplicationActions):
             # We are forced to enable scrobblers here if we want full debug
             if not self.scrobblers:
                 if LastFM is not None:
-                    self.scrobblers = [LastFM("lastfm"),
-                                       LastFM("librefm")]
+                    self.scrobblers = [LastFM(), LibreFM()]
                 self.load_listenbrainz()
             if options.contains("set-rating"):
                 value = options.lookup_value("set-rating").get_string()

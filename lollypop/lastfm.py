@@ -36,7 +36,7 @@ from lollypop.logger import Logger
 from lollypop.goa import GoaSyncedAccount
 
 
-class LastFM(LastFMNetwork, LibreFMNetwork):
+class LastFMBase:
     """
        Lastfm:
        We recommend you don"t distribute the API key and secret with your app,
@@ -57,7 +57,6 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
         self.__login = ""
         self.session_key = ""
         self.__password = None
-        self.__goa = None
         self.__queue_id = None
         try:
             self.__queue = load(
@@ -65,25 +64,6 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
         except Exception as e:
             Logger.info("LastFM::__init__(): %s", e)
             self.__queue = []
-        if name == "librefm":
-            LibreFMNetwork.__init__(self)
-            Logger.debug("LibreFMNetwork.__init__()")
-        else:
-            self.__goa = GoaSyncedAccount("Last.fm")
-            self.__goa.connect("account-switched",
-                               self.on_goa_account_switched)
-            if self.is_goa:
-                Logger.debug("LastFMNetwork.__init__(goa.)")
-                auth = self.__goa.oauth2_based
-                self.__API_KEY = auth.props.client_id
-                self.__API_SECRET = auth.props.client_secret
-            else:
-                Logger.debug("LastFMNetwork.__init__(secret)")
-                self.__API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
-                self.__API_SECRET = "9254319364d73bec6c59ace485a95c98"
-            LastFMNetwork.__init__(self,
-                                   api_key=self.__API_KEY,
-                                   api_secret=self.__API_SECRET)
         self.connect_service()
         Gio.NetworkMonitor.get_default().connect("notify::network-available",
                                                  self.__on_network_available)
@@ -234,13 +214,6 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
     def get_artist_id(self, artist_name, cancellable):
         return artist_name
 
-    def on_goa_account_switched(self, obj):
-        """
-            Callback for GoaSyncedAccount signal "account-switched"
-            @param obj as GoaSyncedAccount
-        """
-        self.connect_service()
-
     def set_loved(self, track, loved):
         """
             Add or remove track from loved playlist on Last.fm
@@ -262,11 +235,16 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
         return True
 
     @property
+    def service_name(self):
+        """
+            Get service name
+            @return str
+        """
+        return self.__name
+
+    @property
     def is_goa(self):
-        """
-            True if using Gnome Online Account
-        """
-        return self.__goa is not None and self.__goa.has_account
+        return False
 
     @property
     def available(self):
@@ -426,3 +404,60 @@ class LastFM(LastFMNetwork, LibreFMNetwork):
         value = monitor.get_property("network-available")
         if value and not self.available:
             self.connect_service()
+
+
+class LibreFM(LastFMBase, LibreFMNetwork):
+    """
+        LibreFM
+    """
+    def __init__(self):
+        """
+            Init LibreFM
+        """
+        LibreFMNetwork.__init__(self)
+        LastFMBase.__init__(self, "librefm")
+        Logger.debug("LibreFMNetwork.__init__()")
+
+
+class LastFM(LastFMBase, LastFMNetwork):
+    """
+        LastFM
+    """
+    def __init__(self):
+        """
+            Init LastFM
+        """
+        self.__goa = None
+        self.__goa = GoaSyncedAccount("Last.fm")
+        self.__goa.connect("account-switched",
+                           self.__on_goa_account_switched)
+        if self.is_goa:
+            Logger.debug("LastFMNetwork.__init__(goa.)")
+            auth = self.__goa.oauth2_based
+            self.__API_KEY = auth.props.client_id
+            self.__API_SECRET = auth.props.client_secret
+        else:
+            Logger.debug("LastFMNetwork.__init__(secret)")
+            self.__API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
+            self.__API_SECRET = "9254319364d73bec6c59ace485a95c98"
+        LastFMNetwork.__init__(self,
+                               api_key=self.__API_KEY,
+                               api_secret=self.__API_SECRET)
+        LastFMBase.__init__(self, "lastfm")
+
+    @property
+    def is_goa(self):
+        """
+            True if using Gnome Online Account
+        """
+        return self.__goa is not None and self.__goa.has_account
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_goa_account_switched(self, obj):
+        """
+            Callback for GoaSyncedAccount signal "account-switched"
+            @param obj as GoaSyncedAccount
+        """
+        self.connect_service()
