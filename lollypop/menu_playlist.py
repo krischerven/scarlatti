@@ -14,7 +14,7 @@ from gi.repository import Gio, Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type, MARGIN_SMALL
+from lollypop.define import App, MARGIN_SMALL
 
 
 class PlaylistMenu(Gio.Menu):
@@ -31,8 +31,9 @@ class PlaylistMenu(Gio.Menu):
         Gio.Menu.__init__(self)
         self.__playlist_id = playlist_id
         if header:
+            name = App().playlists.get_name(playlist_id)
             from lollypop.menu_header import MenuHeader
-            self.append_item(MenuHeader(Type.PLAYLISTS))
+            self.append_item(MenuHeader(name, "emblem-documents-symbolic"))
         menu = Gio.Menu()
         save_action = Gio.SimpleAction(name="save_pl_action")
         App().add_action(save_action)
