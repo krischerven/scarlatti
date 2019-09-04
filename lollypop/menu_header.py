@@ -12,31 +12,22 @@
 
 from gi.repository import Gio, GLib
 
-from gettext import gettext as _
-
 from lollypop.objects_album import Album
-from lollypop.define import Type, App
-from lollypop.utils import get_icon_name
+from lollypop.define import App
 
 
 class MenuHeader(Gio.MenuItem):
     """
-        A menu header item
+        A simple menu header with label and icon
     """
 
-    def __init__(self, type_id):
+    def __init__(self, label, icon_name):
         """
             Init menu
-            @param type_id as int
+            @param label as str
+            @param icon_name as str
         """
         Gio.MenuItem.__init__(self)
-        from lollypop.shown import ShownLists
-        if type_id == Type.NONE:
-            label = _("Sidebar")
-            icon_name = "org.gnome.Lollypop-sidebar-symbolic"
-        else:
-            label = ShownLists.IDS[type_id]
-            icon_name = get_icon_name(type_id)
         self.set_attribute_value("header", GLib.Variant("b", True))
         self.set_attribute_value("label", GLib.Variant("s", label))
         self.set_attribute_value("icon-name", GLib.Variant("s", icon_name))

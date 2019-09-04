@@ -17,6 +17,7 @@ from hashlib import sha256
 
 from lollypop.define import Type, App, SelectionListMask
 from lollypop.shown import ShownLists, ShownPlaylists
+from lollypop.utils import get_icon_name
 
 
 class SelectionListMenu(Gio.Menu):
@@ -40,10 +41,13 @@ class SelectionListMenu(Gio.Menu):
 
         if header:
             from lollypop.menu_header import MenuHeader
-            if mask & SelectionListMask.SIDEBAR:
-                self.append_item(MenuHeader(Type.NONE))
+            if rowid is None:
+                label = _("Sidebar")
+                icon_name = "org.gnome.Lollypop-sidebar-symbolic"
             else:
-                self.append_item(MenuHeader(Type.PLAYLISTS))
+                label = ShownLists.IDS[rowid]
+                icon_name = get_icon_name(rowid)
+            self.append_item(MenuHeader(label, icon_name))
 
         if rowid is not None:
             if not App().devices and mask & (SelectionListMask.SIDEBAR |
