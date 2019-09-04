@@ -49,7 +49,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_property("has-tooltip", True)
         self.__add_button = builder.get_object("add_button")
         self.__play_button = builder.get_object("play_button")
-        self.__jump_button = builder.get_object("jump_button")
         self.__lastfm_button = builder.get_object("lastfm_button")
         builder.get_object("buttons").set_margin_end(MARGIN)
         builder.get_object("artwork_event").connect(
@@ -99,7 +98,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         for (button, icon_name) in [
                 (self.__play_button, "media-playback-start-symbolic"),
                 (self.__add_button, "list-add-symbolic"),
-                (self.__jump_button, "go-jump-symbolic"),
                 (self.__lastfm_button, "system-users-symbolic")]:
             button_style_context = button.get_style_context()
             button_style_context.remove_class("menu-button-48")
@@ -173,20 +171,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             popover.populate(self.__artist_ids)
             popover.connect("closed", lambda x: button.set_active(False))
             popover.popup()
-
-    def _on_jump_button_clicked(self, button):
-        """
-            Scroll to album
-            @parma button as Gtk.Button
-        """
-        widget = None
-        for child in self._album_box.get_children():
-            if child.album.id == App().player.current_track.album.id:
-                widget = child
-                break
-        if widget is not None:
-            y = widget.get_current_ordinate(self._album_box)
-            self._scrolled.get_vadjustment().set_value(y)
 
     def _on_badge_button_release(self, eventbox, event):
         """
