@@ -142,7 +142,7 @@ flowboxchild:selected  {
 .light-background {
     background-color: shade(@theme_bg_color, 1.05);
     border: 1px solid shade(@theme_bg_color, 0.7);
-    border-radius: 52px;
+    border-radius: 25%;
 }
 
 .no-top-border {

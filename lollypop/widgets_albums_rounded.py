@@ -161,7 +161,8 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             surface = Gdk.cairo_surface_create_from_pixbuf(
                 pixbuf, self._artwork.get_scale_factor(), None)
             self._artwork.set_from_surface(
-                    get_round_surface(surface, self._scale_factor, 50))
+                    get_round_surface(surface, self._scale_factor,
+                                      self._art_size / 4))
         self.emit("populated")
 
     def __on_unmap(self, widget):

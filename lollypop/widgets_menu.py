@@ -10,10 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
 
 from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
+from lollypop.utils import get_round_surface
 
 
 class MenuBuilder(Gtk.Stack):
@@ -79,11 +80,14 @@ class MenuBuilder(Gtk.Stack):
             if header is not None:
                 album_id = menu.get_item_attribute_value(i, "album-id")
                 artist_id = menu.get_item_attribute_value(i, "artist-id")
+                playlist_id = menu.get_item_attribute_value(i, "playlist-id")
                 icon_name = menu.get_item_attribute_value(i, "icon-name")
                 if album_id is not None:
                     self.__add_album_header(label, album_id, menu_name)
                 elif artist_id is not None:
                     self.__add_artist_header(label, artist_id, menu_name)
+                elif playlist_id is not None:
+                    self.__add_playlist_header(label, playlist_id, menu_name)
                 elif icon_name is not None:
                     self.__add_header(label, icon_name, menu_name)
             elif action is None:
@@ -252,6 +256,47 @@ class MenuBuilder(Gtk.Stack):
                 ArtBehaviour.ROUNDED,
                 self.__on_artwork,
                 artwork)
+        self.__boxes[menu_name].add(button)
+
+    def __add_playlist_header(self, text, playlist_id, menu_name):
+        """
+            Add an header for artist to close menu
+            @param text as GLib.Variant
+            @param playlist_id as GLib.Variant
+            @param menu_name as str
+        """
+        def on_load_from_cache(pixbuf, artwork):
+            if pixbuf is not None:
+                scale_factor = artwork.get_scale_factor()
+                surface = Gdk.cairo_surface_create_from_pixbuf(
+                    pixbuf.scale_simple(ArtSize.MEDIUM, ArtSize.MEDIUM,
+                                        GdkPixbuf.InterpType.BILINEAR),
+                    scale_factor, None)
+                artwork.set_from_surface(
+                        get_round_surface(surface, scale_factor,
+                                          ArtSize.MEDIUM / 4))
+                artwork.show()
+        button = Gtk.ModelButton.new()
+        button.set_alignment(0, 0.5)
+        button.connect("clicked", lambda x: self.emit("closed"))
+        button.show()
+        label = Gtk.Label.new()
+        label.set_markup(text.get_string())
+        label.show()
+        artwork = Gtk.Image.new()
+        artwork.get_style_context().add_class("light-background")
+        grid = Gtk.Grid()
+        grid.set_column_spacing(MARGIN)
+        grid.add(artwork)
+        grid.add(label)
+        button.set_image(grid)
+        button.get_style_context().add_class("padding")
+        name = App().playlists.get_name(playlist_id.get_int32())
+        App().task_helper.run(
+                App().art.get_artwork_from_cache,
+                "ROUNDED_%s" % name,
+                ArtSize.BANNER, ArtSize.BANNER,
+                callback=(on_load_from_cache, artwork))
         self.__boxes[menu_name].add(button)
 
     def __on_artwork(self, surface, artwork):

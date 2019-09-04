@@ -51,6 +51,24 @@ class ArtistMenuHeader(Gio.MenuItem):
         self.set_attribute_value("artist-id", GLib.Variant("i", artist_id))
 
 
+class PlaylistMenuHeader(Gio.MenuItem):
+    """
+        A menu header item for a playlist
+    """
+
+    def __init__(self, playlist_id):
+        """
+            Init menu
+            @param playlist_id as int
+        """
+        Gio.MenuItem.__init__(self)
+        name = App().playlists.get_name(playlist_id)
+        label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(name)
+        self.set_attribute_value("header", GLib.Variant("b", True))
+        self.set_attribute_value("label", GLib.Variant("s", label))
+        self.set_attribute_value("playlist-id", GLib.Variant("i", playlist_id))
+
+
 class AlbumMenuHeader(Gio.MenuItem):
     """
         A menu header item for Albums/Tracks

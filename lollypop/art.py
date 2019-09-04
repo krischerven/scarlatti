@@ -83,7 +83,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             @param name as str
             @param width as int
             @param height as int
-            @return bytes
+            @return GdkPixbuf.Pixbuf
         """
         try:
             cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
