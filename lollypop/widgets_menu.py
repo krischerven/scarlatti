@@ -179,7 +179,7 @@ class MenuBuilder(Gtk.Stack):
         label.show()
         artwork = Gtk.Image.new_from_icon_name(icon_name.get_string(),
                                                Gtk.IconSize.INVALID)
-        artwork.set_pixel_size(ArtSize.MEDIUM)
+        artwork.set_pixel_size(ArtSize.SMALL)
         artwork.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN)
