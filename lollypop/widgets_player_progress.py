@@ -72,6 +72,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         player = App().player
         self._on_current_changed(player)
         self._on_status_changed(player)
+        self.update_position()
 
     def update_position(self, value=None):
         """
