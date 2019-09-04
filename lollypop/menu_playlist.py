@@ -50,8 +50,10 @@ class PlaylistMenu(Gio.Menu):
         from lollypop.menu_sync import SyncPlaylistsMenu
         self.append_section(_("Playback"), PlaylistPlaybackMenu(playlist_id))
         self.append_section(_("Edit"), menu)
-        self.append_section(_("Synchronization"),
-                            SyncPlaylistsMenu(playlist_id))
+        section = Gio.Menu()
+        self.append_section(_("Add to"), section)
+        section.append_submenu(_("Devices"),
+                               SyncPlaylistsMenu(playlist_id))
 
 #######################
 # PRIVATE             #
