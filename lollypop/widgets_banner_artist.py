@@ -15,11 +15,10 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 from random import choice
 
-from lollypop.objects_album import Album
 from lollypop.utils import set_cursor_type, on_query_tooltip
+from lollypop.utils_artists import add_artist_to_playback, play_artists
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
-from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
@@ -150,47 +149,17 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
             Play artist albums
         """
-        try:
-            if App().player.is_party:
-                App().lookup_action("party").change_state(
-                    GLib.Variant("b", False))
-            album_ids = App().albums.get_ids(self.__artist_ids,
-                                             self.__genre_ids)
-            albums = [Album(album_id) for album_id in album_ids]
-            App().player.play_albums(albums)
-            self.__update_add_button()
-        except Exception as e:
-            Logger.error("ArtistView::_on_play_clicked: %s" % e)
+        play_artists(self.__artist_ids, self.__genre_ids)
+        self.__update_add_button()
 
     def _on_add_clicked(self, *ignore):
         """
             Add artist albums
         """
-        try:
-            if App().settings.get_value("show-performers"):
-                album_ids = App().tracks.get_album_ids(self.__artist_ids,
-                                                       self.__genre_ids)
-            else:
-                album_ids = App().albums.get_ids(self.__artist_ids,
-                                                 self.__genre_ids)
-            icon_name = self.__add_button.get_image().get_icon_name()[0]
-            add = icon_name == "list-add-symbolic"
-            for album_id in album_ids:
-                if add and album_id not in App().player.album_ids:
-                    App().player.add_album(Album(album_id,
-                                                 self.__genre_ids,
-                                                 self.__artist_ids))
-                elif not add and album_id in App().player.album_ids:
-                    App().player.remove_album_by_id(album_id)
-            if len(App().player.album_ids) == 0:
-                App().player.stop()
-            elif App().player.current_track.album.id\
-                    not in App().player.album_ids:
-                App().player.skip_album()
-            self.__update_add_button()
-        except Exception as e:
-            Logger.error("ArtistView::_on_add_clicked: %s" % e)
-        App().player.update_next_prev()
+        icon_name = self.__add_button.get_image().get_icon_name()[0]
+        add = icon_name == "list-add-symbolic"
+        add_artist_to_playback(self.__artist_ids, self.__genre_ids, add)
+        self.__update_add_button()
 
     def _on_similars_button_toggled(self, button):
         """

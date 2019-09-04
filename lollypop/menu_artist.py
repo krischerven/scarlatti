@@ -21,15 +21,35 @@ class ArtistMenu(Gio.Menu):
     """
         Contextual menu for artist
     """
-
-    def __init__(self, album, view_type):
+    def __init__(self, artist_id, header=False):
         """
-            Init playlists menu
-            @param album as Album
+            Init artist menu
+            @param artist_id as int
+            @param header as bool
+        """
+        Gio.Menu.__init__(self)
+        if header:
+            from lollypop.menu_header import ArtistMenuHeader
+            self.append_item(ArtistMenuHeader(artist_id))
+        from lollypop.menu_playback import ArtistPlaybackMenu
+        self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
+        self.append_section(_("Albums"),
+                            ArtistAlbumsMenu(artist_id, ViewType.DEFAULT))
+
+
+class ArtistAlbumsMenu(Gio.Menu):
+    """
+        Contextual menu for artist albums
+    """
+
+    def __init__(self, artist_id, view_type):
+        """
+            Init artist albums menu
+            @param artist id as int
             @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
-        self.__album = album
+        self.__artist_id = artist_id
         self.__set_artists_actions(view_type)
 
 #######################
@@ -58,7 +78,7 @@ class ArtistMenu(Gio.Menu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        artist_name = App().artists.get_name(self.__album.artist_ids[0])
+        artist_name = App().artists.get_name(self.__artist_id)
         target = "web://%s" % artist_name
         App().lookup_action("search").activate(GLib.Variant("s", target))
 
@@ -69,4 +89,4 @@ class ArtistMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().window.container.show_view([Type.ARTISTS],
-                                         self.__album.artist_ids)
+                                         [self.__artist_id])

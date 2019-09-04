@@ -21,7 +21,7 @@ from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
-from lollypop.utils import get_icon_name, get_font_height
+from lollypop.utils import get_icon_name, get_font_height, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -148,9 +148,41 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
                     child.destroy()
                     break
 
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Popup menu for artist at position
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        self._on_primary_long_press_gesture(x, y)
+
+    def _on_primary_long_press_gesture(self, x, y):
+        """
+            Popup menu for artist at position
+            @param x as int
+            @param y as int
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        self.__popup_menu(child)
+
 #######################
 # PRIVATE             #
 #######################
+    def __popup_menu(self, child):
+        """
+            Popup album menu at position
+            @param child ad AlbumSimpleWidget
+        """
+        from lollypop.menu_artist import ArtistMenu
+        from lollypop.widgets_menu import MenuBuilder
+        menu = ArtistMenu(child.data, App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, child.artwork)
+
     def __sort_func(self, widget1, widget2):
         """
             Sort function

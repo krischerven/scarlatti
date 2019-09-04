@@ -59,7 +59,7 @@ class ArtHelper(GObject.Object):
             @param effect as ArtBehaviour
             @param callback as function
         """
-        App().task_helper.run(self.__get_album_artwork,
+        App().task_helper.run(App().art.get_album_artwork,
                               album,
                               width,
                               height,
@@ -84,7 +84,7 @@ class ArtHelper(GObject.Object):
             @param effect as ArtBehaviour
             @param callback as function
         """
-        App().task_helper.run(self.__get_radio_artwork,
+        App().task_helper.run(App().art.get_radio_artwork,
                               radio,
                               width,
                               height,
@@ -98,19 +98,19 @@ class ArtHelper(GObject.Object):
                                         callback,
                                         *args))
 
-    def set_artist_artwork(self, artist, width, height, scale_factor,
+    def set_artist_artwork(self, name, width, height, scale_factor,
                            effect, callback, *args):
         """
             Set artwork for album id
-            @param artist as str
+            @param name as str
             @param width as int
             @param height as int
             @param scale_factor as int
             @param effect as ArtBehaviour
             @param callback as function
         """
-        App().task_helper.run(self.__get_artist_artwork,
-                              artist,
+        App().task_helper.run(App().art.get_artist_artwork,
+                              name,
                               width,
                               height,
                               scale_factor,
@@ -205,42 +205,3 @@ class ArtHelper(GObject.Object):
             ctx.rectangle(0, 0, surface.get_width(), surface.get_height())
             ctx.set_source_rgba(r, g, b, 0.5)
             ctx.fill()
-
-    def __get_album_artwork(self, album, width, height, scale_factor, effect):
-        """
-            Set artwork for album id
-            @param album as Album
-            @param width as int
-            @param height as int
-            @param scale_factor as int
-            @param effect as ArtBehaviour
-            @return GdkPixbuf.Pixbuf
-        """
-        return App().art.get_album_artwork(album, width, height,
-                                           scale_factor, effect)
-
-    def __get_radio_artwork(self, radio, width, height, scale_factor, effect):
-        """
-            Set artwork for album id
-            @param radio as str
-            @param width as int
-            @param height as int
-            @param scale_factor as int
-            @param effect as ArtBehaviour
-            @return GdkPixbuf.Pixbuf
-        """
-        return App().art.get_radio_artwork(radio, width, height,
-                                           scale_factor, effect)
-
-    def __get_artist_artwork(self, artist, width, height,
-                             scale_factor, effect):
-        """
-            Set artwork for album id
-            @param artist as str
-            @param width as int
-            @param height as int
-            @param scale_factor as int
-            @return GdkPixbuf.Pixbuf
-        """
-        return App().art.get_artist_artwork(artist, width, height,
-                                            scale_factor, effect)

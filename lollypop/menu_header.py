@@ -15,7 +15,7 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.objects_album import Album
-from lollypop.define import Type
+from lollypop.define import Type, App
 from lollypop.utils import get_icon_name
 
 
@@ -40,6 +40,24 @@ class MenuHeader(Gio.MenuItem):
         self.set_attribute_value("header", GLib.Variant("b", True))
         self.set_attribute_value("label", GLib.Variant("s", label))
         self.set_attribute_value("icon-name", GLib.Variant("s", icon_name))
+
+
+class ArtistMenuHeader(Gio.MenuItem):
+    """
+        A menu header item for an artist
+    """
+
+    def __init__(self, artist_id):
+        """
+            Init menu
+            @param artist_id as int
+        """
+        Gio.MenuItem.__init__(self)
+        name = App().artists.get_name(artist_id)
+        label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(name)
+        self.set_attribute_value("header", GLib.Variant("b", True))
+        self.set_attribute_value("label", GLib.Variant("s", label))
+        self.set_attribute_value("artist-id", GLib.Variant("i", artist_id))
 
 
 class AlbumMenuHeader(Gio.MenuItem):

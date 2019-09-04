@@ -165,7 +165,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
-            Show Context view for activated album
+            Popup menu for album at position
             @param x as int
             @param y as int
             @param event as Gdk.Event
@@ -174,7 +174,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 
     def _on_primary_long_press_gesture(self, x, y):
         """
-            Show Context view for activated album
+            Popup menu for album at position
             @param x as int
             @param y as int
         """

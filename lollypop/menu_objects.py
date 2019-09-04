@@ -17,7 +17,6 @@ from gettext import gettext as _
 
 from lollypop.define import StorageType, MARGIN_SMALL, App, CACHE_PATH
 from lollypop.menu_playlists import PlaylistsMenu
-from lollypop.menu_artist import ArtistMenu
 from lollypop.menu_edit import EditMenu
 from lollypop.menu_playback import TrackPlaybackMenu, AlbumPlaybackMenu
 from lollypop.menu_sync import SyncAlbumMenu
@@ -42,8 +41,9 @@ class AlbumMenu(Gio.Menu):
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(album))
         self.append_section(_("Playback"), AlbumPlaybackMenu(album))
+        from lollypop.menu_artist import ArtistAlbumsMenu
         self.append_section(_("Artist"),
-                            ArtistMenu(album, view_type))
+                            ArtistAlbumsMenu(album.artist_ids[0], view_type))
         section = Gio.Menu()
         if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
             section.append_submenu(_("Playlists"), PlaylistsMenu(album))

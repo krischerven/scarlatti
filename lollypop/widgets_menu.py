@@ -78,9 +78,12 @@ class MenuBuilder(Gtk.Stack):
             close = menu.get_item_attribute_value(i, "close") is not None
             if header is not None:
                 album_id = menu.get_item_attribute_value(i, "album-id")
+                artist_id = menu.get_item_attribute_value(i, "artist-id")
                 icon_name = menu.get_item_attribute_value(i, "icon-name")
                 if album_id is not None:
                     self.__add_album_header(label, album_id, menu_name)
+                elif artist_id is not None:
+                    self.__add_artist_header(label, artist_id, menu_name)
                 elif icon_name is not None:
                     self.__add_header(label, icon_name, menu_name)
             elif action is None:
@@ -188,7 +191,7 @@ class MenuBuilder(Gtk.Stack):
 
     def __add_album_header(self, text, album_id, menu_name):
         """
-            Add an header for albums to close menu
+            Add an header for album to close menu
             @param text as GLib.Variant
             @param album_id as GLib.Variant
             @param menu_name as str
@@ -213,13 +216,47 @@ class MenuBuilder(Gtk.Stack):
                 ArtSize.MEDIUM,
                 artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
-                self.__on_album_artwork,
+                self.__on_artwork,
                 artwork)
         self.__boxes[menu_name].add(button)
 
-    def __on_album_artwork(self, surface, artwork):
+    def __add_artist_header(self, text, artist_id, menu_name):
         """
-            Set album artwork
+            Add an header for artist to close menu
+            @param text as GLib.Variant
+            @param artist_id as GLib.Variant
+            @param menu_name as str
+        """
+        button = Gtk.ModelButton.new()
+        button.set_alignment(0, 0.5)
+        button.connect("clicked", lambda x: self.emit("closed"))
+        button.show()
+        label = Gtk.Label.new()
+        label.set_markup(text.get_string())
+        label.show()
+        artwork = Gtk.Image.new()
+        grid = Gtk.Grid()
+        grid.set_column_spacing(MARGIN)
+        grid.add(artwork)
+        grid.add(label)
+        button.set_image(grid)
+        button.get_style_context().add_class("padding")
+        artist_name = App().artists.get_name(artist_id.get_int32())
+        App().art_helper.set_artist_artwork(
+                artist_name,
+                ArtSize.MEDIUM,
+                ArtSize.MEDIUM,
+                artwork.get_scale_factor(),
+                ArtBehaviour.CACHE |
+                ArtBehaviour.CROP_SQUARE |
+                ArtBehaviour.ROUNDED,
+                self.__on_artwork,
+                artwork)
+        self.__boxes[menu_name].add(button)
+
+    def __on_artwork(self, surface, artwork):
+        """
+            Set artwork
             @param surface as str
             @param artwork as Gtk.Image
         """
