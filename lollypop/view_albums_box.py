@@ -405,9 +405,9 @@ class AlbumsArtistBoxView(AlbumsLineView):
             return [Album(album_id) for album_id in album_ids]
 
         if self.__artist_id == Type.COMPILATIONS:
-            self._label.set_text(_("Others compilations:"))
+            self._label.set_text(_("Others compilations"))
         else:
-            self._label.set_text(_("Others albums:"))
+            self._label.set_text(_("Others albums"))
         App().task_helper.run(load, callback=(on_load,))
 
 
@@ -459,8 +459,9 @@ class AlbumsRandomGenreBoxView(AlbumsLineView):
 
         def load():
             (genre_id, genre) = App().genres.get_random()
+            # Some albums from Rock for example
             GLib.idle_add(self._label.set_text,
-                          _("Some albums from: %s") % genre)
+                          _("Some albums from %s") % genre)
             album_ids = App().albums.get_randoms(genre_id, 20)
             return [Album(album_id) for album_id in album_ids]
 

@@ -65,7 +65,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         album_name = GLib.markup_escape_text(self.__album.name)
         self.__title_label = Gtk.Label.new()
         self.__title_label.show()
-        markup = _("<b>Album of the day: </b>\n")
+        markup = _("<b>Album of the day</b>\n")
         markup += "<span size='small' alpha='40000'>%s</span>\n" % album_name
         artist_name = GLib.markup_escape_text(", ".join(self.__album.artists))
         markup += "<span size='x-small' alpha='40000'>%s</span>" % artist_name
