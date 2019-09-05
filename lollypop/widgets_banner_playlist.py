@@ -15,6 +15,7 @@ from gi.repository import Gtk
 from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums, update_button
+from lollypop.utils import popup_widget
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.widgets_banner import BannerWidget
 
@@ -123,7 +124,17 @@ class PlaylistBannerWidget(BannerWidget):
             Show playlist menu
             @param button as Gtk.Button
         """
-        from lollypop.menu_playlist import PlaylistMenu
-        menu = PlaylistMenu(self.__playlist_id)
-        popover = Gtk.Popover.new_from_model(button, menu)
-        popover.popup()
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_playlist import PlaylistMenu, PlaylistMenuExt
+        menu = PlaylistMenu(self.__playlist_id, App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        if self.__playlist_id >= 0:
+            menu_widget = MenuBuilder(menu)
+            main = menu_widget.get_child_by_name("main")
+            menu_ext = PlaylistMenuExt(self.__playlist_id)
+            menu_ext.show()
+            main.add(menu_ext)
+        else:
+            menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
