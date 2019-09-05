@@ -301,7 +301,7 @@ class MenuBuilder(Gtk.Stack):
         name = App().playlists.get_name(playlist_id)
         App().task_helper.run(
                 App().art.get_artwork_from_cache,
-                "ROUNDED_%s" % name,
+                "ROUNDED_playlist_%s" % name,
                 ArtSize.BANNER, ArtSize.BANNER,
                 callback=(on_load_from_cache, artwork))
         self.__boxes[menu_name].add(button)

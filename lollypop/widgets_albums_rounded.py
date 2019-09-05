@@ -107,7 +107,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         if self.__cancellable.is_cancelled():
             return
         self._artwork.set_from_surface(
-            get_round_surface(surface, self._scale_factor, 50))
+            get_round_surface(surface, self._scale_factor, self._art_size / 4))
         App().art.add_artwork_to_cache("ROUNDED_%s" % self.artwork_name,
                                        surface)
         self.emit("populated")
