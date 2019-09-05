@@ -299,13 +299,13 @@ class DNDHelper(GObject.Object):
             @param x as int
             @param y as int
         """
+        set_cursor_type(self.__listbox, "default")
+        self.__unmark_all_rows()
         if self.__autoscroll_timeout_id is not None:
             GLib.source_remove(self.__autoscroll_timeout_id)
             self.__autoscroll_timeout_id = None
         if x == 0 or y == 0:
             return
-        set_cursor_type(self.__listbox, "default")
-        self.__unmark_all_rows()
         (active, start_x, start_y) = gesture.get_start_point()
         if not active:
             return
