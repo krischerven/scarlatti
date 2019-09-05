@@ -70,8 +70,8 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             f = Gio.File.new_for_path(filename)
             (status, data, tag) = f.load_contents()
             if status:
-                App().art.save_album_artwork(data, self.__album)
-            self._streams = {}
+                App().task_helper.run(App().art.save_album_artwork,
+                                      data, self.__album)
         except Exception as e:
             Logger.error(
                 "AlbumArtworkSearchWidget::_save_from_filename(): %s" % e)
@@ -117,8 +117,8 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                App().art.save_album_artwork(child.bytes, self.__album)
-                self._streams = {}
+                App().task_helper.run(App().art.save_album_artwork,
+                                      child.bytes, self.__album)
             else:
                 App().art.remove_album_artwork(self.__album)
                 App().art.save_album_artwork(None, self.__album)

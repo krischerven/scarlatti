@@ -81,9 +81,11 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                App().art.add_artist_artwork(self.__artist, child.bytes)
+                App().task_helper.run(App().art.add_artist_artwork,
+                                      self.__artist, child.bytes)
             else:
-                App().art.add_artist_artwork(self.__artist, None)
+                App().task_helper.run(App().art.add_artist_artwork,
+                                      self.__artist, None)
             self.emit("closed")
         except Exception as e:
             Logger.error("ArtistArtworkSearchWidget::_on_activate(): %s", e)
