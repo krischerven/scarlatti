@@ -16,6 +16,13 @@ from lollypop.objects_album import Album
 from lollypop.define import App
 
 
+class HeaderType:
+    DEFAULT = 1
+    ARTIST = 2
+    ALBUM = 3
+    PLAYLIST = 4
+
+
 class MenuHeader(Gio.MenuItem):
     """
         A simple menu header with label and icon
@@ -28,9 +35,11 @@ class MenuHeader(Gio.MenuItem):
             @param icon_name as str
         """
         Gio.MenuItem.__init__(self)
-        self.set_attribute_value("header", GLib.Variant("b", True))
-        self.set_attribute_value("label", GLib.Variant("s", label))
-        self.set_attribute_value("icon-name", GLib.Variant("s", icon_name))
+        header_type = GLib.Variant("i", HeaderType.DEFAULT)
+        vlabel = GLib.Variant("s", label)
+        vicon_name = GLib.Variant("s", icon_name)
+        header = [header_type, vlabel, vicon_name]
+        self.set_attribute_value("header", GLib.Variant("av", header))
 
 
 class ArtistMenuHeader(Gio.MenuItem):
@@ -44,11 +53,13 @@ class ArtistMenuHeader(Gio.MenuItem):
             @param artist_id as int
         """
         Gio.MenuItem.__init__(self)
+        header_type = GLib.Variant("i", HeaderType.ARTIST)
         name = App().artists.get_name(artist_id)
         label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(name)
-        self.set_attribute_value("header", GLib.Variant("b", True))
-        self.set_attribute_value("label", GLib.Variant("s", label))
-        self.set_attribute_value("artist-id", GLib.Variant("i", artist_id))
+        vlabel = GLib.Variant("s", label)
+        vartist_id = GLib.Variant("i", artist_id)
+        header = [header_type, vlabel, vartist_id]
+        self.set_attribute_value("header", GLib.Variant("av", header))
 
 
 class PlaylistMenuHeader(Gio.MenuItem):
@@ -62,11 +73,13 @@ class PlaylistMenuHeader(Gio.MenuItem):
             @param playlist_id as int
         """
         Gio.MenuItem.__init__(self)
+        header_type = GLib.Variant("i", HeaderType.PLAYLIST)
         name = App().playlists.get_name(playlist_id)
         label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(name)
-        self.set_attribute_value("header", GLib.Variant("b", True))
-        self.set_attribute_value("label", GLib.Variant("s", label))
-        self.set_attribute_value("playlist-id", GLib.Variant("i", playlist_id))
+        vlabel = GLib.Variant("s", label)
+        vplaylist_id = GLib.Variant("i", playlist_id)
+        header = [header_type, vlabel, vplaylist_id]
+        self.set_attribute_value("header", GLib.Variant("av", header))
 
 
 class AlbumMenuHeader(Gio.MenuItem):
@@ -80,6 +93,7 @@ class AlbumMenuHeader(Gio.MenuItem):
             @param object as Album/Track
         """
         Gio.MenuItem.__init__(self)
+        header_type = GLib.Variant("i", HeaderType.ALBUM)
         if isinstance(object, Album):
             label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(
                 object.name)
@@ -89,6 +103,7 @@ class AlbumMenuHeader(Gio.MenuItem):
                 GLib.markup_escape_text(", ".join(object.artists)),
                 GLib.markup_escape_text(object.name))
             album_id = object.album.id
-        self.set_attribute_value("header", GLib.Variant("b", True))
-        self.set_attribute_value("label", GLib.Variant("s", label))
-        self.set_attribute_value("album-id", GLib.Variant("i", album_id))
+        vlabel = GLib.Variant("s", label)
+        valbum_id = GLib.Variant("i", album_id)
+        header = [header_type, vlabel, valbum_id]
+        self.set_attribute_value("header", GLib.Variant("av", header))

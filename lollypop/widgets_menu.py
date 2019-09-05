@@ -15,6 +15,7 @@ from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
 from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
 from lollypop.utils import get_round_surface
+from lollypop.menu_header import HeaderType
 
 
 class MenuBuilder(Gtk.Stack):
@@ -72,24 +73,28 @@ class MenuBuilder(Gtk.Stack):
                 self.add_named(box, menu_name)
         n_items = menu.get_n_items()
         for i in range(0, n_items):
-            label = menu.get_item_attribute_value(i, "label")
-            action = menu.get_item_attribute_value(i, "action")
             header = menu.get_item_attribute_value(i, "header")
+            action = menu.get_item_attribute_value(i, "action")
+            label = menu.get_item_attribute_value(i, "label")
             tooltip = menu.get_item_attribute_value(i, "tooltip")
             close = menu.get_item_attribute_value(i, "close") is not None
             if header is not None:
-                album_id = menu.get_item_attribute_value(i, "album-id")
-                artist_id = menu.get_item_attribute_value(i, "artist-id")
-                playlist_id = menu.get_item_attribute_value(i, "playlist-id")
-                icon_name = menu.get_item_attribute_value(i, "icon-name")
-                if album_id is not None:
-                    self.__add_album_header(label, album_id, menu_name)
-                elif artist_id is not None:
-                    self.__add_artist_header(label, artist_id, menu_name)
-                elif playlist_id is not None:
-                    self.__add_playlist_header(label, playlist_id, menu_name)
-                elif icon_name is not None:
-                    self.__add_header(label, icon_name, menu_name)
+                header_type = header[0]
+                header_label = header[1]
+                if header_type == HeaderType.ALBUM:
+                    album_id = header[2]
+                    self.__add_album_header(header_label, album_id, menu_name)
+                elif header_type == HeaderType.ARTIST:
+                    artist_id = header[2]
+                    self.__add_artist_header(header_label, artist_id,
+                                             menu_name)
+                elif header_type == HeaderType.PLAYLIST:
+                    playlist_id = header[2]
+                    self.__add_playlist_header(header_label, playlist_id,
+                                               menu_name)
+                else:
+                    icon_name = header[2]
+                    self.__add_header(header_label, icon_name, menu_name)
             elif action is None:
                 link = menu.get_item_link(i, "section")
                 submenu = menu.get_item_link(i, "submenu")
@@ -179,9 +184,9 @@ class MenuBuilder(Gtk.Stack):
         button.connect("clicked", lambda x: self.emit("closed"))
         button.show()
         label = Gtk.Label.new()
-        label.set_markup(text.get_string())
+        label.set_markup(text)
         label.show()
-        artwork = Gtk.Image.new_from_icon_name(icon_name.get_string(),
+        artwork = Gtk.Image.new_from_icon_name(icon_name,
                                                Gtk.IconSize.INVALID)
         artwork.set_pixel_size(ArtSize.SMALL)
         artwork.show()
@@ -205,7 +210,7 @@ class MenuBuilder(Gtk.Stack):
         button.connect("clicked", lambda x: self.emit("closed"))
         button.show()
         label = Gtk.Label.new()
-        label.set_markup(text.get_string())
+        label.set_markup(text)
         label.show()
         artwork = Gtk.Image.new()
         grid = Gtk.Grid()
@@ -215,7 +220,7 @@ class MenuBuilder(Gtk.Stack):
         button.set_image(grid)
         button.get_style_context().add_class("padding")
         App().art_helper.set_album_artwork(
-                Album(album_id.get_int32()),
+                Album(album_id),
                 ArtSize.MEDIUM,
                 ArtSize.MEDIUM,
                 artwork.get_scale_factor(),
@@ -236,7 +241,7 @@ class MenuBuilder(Gtk.Stack):
         button.connect("clicked", lambda x: self.emit("closed"))
         button.show()
         label = Gtk.Label.new()
-        label.set_markup(text.get_string())
+        label.set_markup(text)
         label.show()
         artwork = Gtk.Image.new()
         grid = Gtk.Grid()
@@ -245,7 +250,7 @@ class MenuBuilder(Gtk.Stack):
         grid.add(label)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
-        artist_name = App().artists.get_name(artist_id.get_int32())
+        artist_name = App().artists.get_name(artist_id)
         App().art_helper.set_artist_artwork(
                 artist_name,
                 ArtSize.MEDIUM,
@@ -281,7 +286,7 @@ class MenuBuilder(Gtk.Stack):
         button.connect("clicked", lambda x: self.emit("closed"))
         button.show()
         label = Gtk.Label.new()
-        label.set_markup(text.get_string())
+        label.set_markup(text)
         label.show()
         artwork = Gtk.Image.new()
         artwork.get_style_context().add_class("light-background")
@@ -291,7 +296,7 @@ class MenuBuilder(Gtk.Stack):
         grid.add(label)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
-        name = App().playlists.get_name(playlist_id.get_int32())
+        name = App().playlists.get_name(playlist_id)
         App().task_helper.run(
                 App().art.get_artwork_from_cache,
                 "ROUNDED_%s" % name,
