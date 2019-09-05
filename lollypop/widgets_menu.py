@@ -37,6 +37,8 @@ class MenuBuilder(Gtk.Stack):
         Gtk.Stack.__init__(self)
         self.__boxes = {}
         self.__add_menu(menu, "main")
+        self.connect("map", self.__on_map)
+        self.connect("unmap", self.__on_unmap)
 
 #######################
 # PRIVATE             #
@@ -329,3 +331,18 @@ class MenuBuilder(Gtk.Stack):
         else:
             self.set_size_request(-1, 300)
             self.set_transition_type(Gtk.StackTransitionType.SLIDE_RIGHT)
+
+    def __on_map(self, widget):
+        """
+            Disable global shortcuts
+            Done by Gtk.Popover but not in adaptive mode
+            @param widget as Gtk.Widget
+        """
+        App().enable_special_shortcuts(False)
+
+    def __on_unmap(self, widget):
+        """
+            Enable global shortcuts
+            @param widget as Gtk.Widget
+        """
+        App().enable_special_shortcuts(True)
