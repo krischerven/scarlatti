@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 from random import choice
 
-from lollypop.utils import set_cursor_type, on_query_tooltip
+from lollypop.utils import set_cursor_type, on_query_tooltip, popup_widget
 from lollypop.utils_artists import add_artist_to_playback, play_artists
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
@@ -50,6 +50,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__add_button = builder.get_object("add_button")
         self.__play_button = builder.get_object("play_button")
         self.__lastfm_button = builder.get_object("lastfm_button")
+        self.__menu_button = builder.get_object("menu_button")
         builder.get_object("buttons").set_margin_end(MARGIN)
         builder.get_object("artwork_event").connect(
             "realize", set_cursor_type)
@@ -98,6 +99,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         for (button, icon_name) in [
                 (self.__play_button, "media-playback-start-symbolic"),
                 (self.__add_button, "list-add-symbolic"),
+                (self.__menu_button, "view-more-symbolic"),
                 (self.__lastfm_button, "system-users-symbolic")]:
             button_style_context = button.get_style_context()
             button_style_context.remove_class("menu-button-48")
@@ -158,6 +160,18 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         add = icon_name == "list-add-symbolic"
         add_artist_to_playback(self.__artist_ids, self.__genre_ids, add)
         self.__update_add_button()
+
+    def _on_menu_button_clicked(self, button):
+        """
+            Show album menu
+            @param button as Gtk.Button
+        """
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_artist import ArtistMenu
+        menu = ArtistMenu(self.__artist_ids[0], App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
     def _on_similars_button_toggled(self, button):
         """
