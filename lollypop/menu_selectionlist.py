@@ -37,7 +37,6 @@ class SelectionListMenu(Gio.Menu):
         self.__widget = widget
         self.__rowid = rowid
         self.__mask = mask
-        section = None
 
         if header:
             from lollypop.menu_header import MenuHeader
@@ -49,44 +48,23 @@ class SelectionListMenu(Gio.Menu):
                 icon_name = get_icon_name(rowid)
             self.append_item(MenuHeader(label, icon_name))
 
-        if rowid is not None:
-            if not App().devices and mask & (SelectionListMask.SIDEBAR |
-                                             SelectionListMask.VIEW):
-                section = Gio.Menu()
-                section.append(_("No connected devices"), "app.none")
-            elif mask & SelectionListMask.PLAYLISTS:
-                from lollypop.menu_sync import SyncPlaylistsMenu
-                section = SyncPlaylistsMenu(rowid)
-            elif rowid > 0:
-                from lollypop.menu_sync import SyncAlbumsMenu
-                if mask & SelectionListMask.GENRES:
-                    section = SyncAlbumsMenu([rowid], [])
-                else:
-                    section = SyncAlbumsMenu([], [rowid])
-            elif rowid == Type.ALL or rowid == Type.ARTISTS:
-                from lollypop.menu_sync import SyncAlbumsMenu
-                section = SyncAlbumsMenu([], [])
-
-            if section is not None:
-                self.append_section(_("Synchronization"), section)
-
-            # Startup menu
-            if mask & SelectionListMask.SIDEBAR:
-                startup_menu = Gio.Menu()
-                selected = rowid == App().settings.get_value(
-                    "startup-id").get_int32()
-                action = Gio.SimpleAction.new_stateful(
-                                           "default_selection_id",
-                                           None,
-                                           GLib.Variant.new_boolean(selected))
-                App().add_action(action)
-                action.connect("change-state",
-                               self.__on_default_change_state,
-                               rowid)
-                item = Gio.MenuItem.new(_("Default on startup"),
-                                        "app.default_selection_id")
-                startup_menu.append_item(item)
-                self.append_section(_("Startup"), startup_menu)
+        # Startup menu
+        if rowid is not None and mask & SelectionListMask.SIDEBAR:
+            startup_menu = Gio.Menu()
+            selected = rowid == App().settings.get_value(
+                "startup-id").get_int32()
+            action = Gio.SimpleAction.new_stateful(
+                                       "default_selection_id",
+                                       None,
+                                       GLib.Variant.new_boolean(selected))
+            App().add_action(action)
+            action.connect("change-state",
+                           self.__on_default_change_state,
+                           rowid)
+            item = Gio.MenuItem.new(_("Default on startup"),
+                                    "app.default_selection_id")
+            startup_menu.append_item(item)
+            self.append_section(_("Startup"), startup_menu)
 
         # Options
         if rowid is None and\

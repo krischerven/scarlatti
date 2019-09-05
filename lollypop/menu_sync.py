@@ -131,17 +131,17 @@ class SyncMenu(Gio.Menu):
                                   variant.get_boolean())
 
 
-class SyncAlbumMenu(SyncMenu):
+class SyncAlbumsMenu(SyncMenu):
     """
         Sync menu for album
     """
 
-    def __init__(self, album):
+    def __init__(self, albums):
         """
             Init menu
-            @param album as Album
+            @param albums as [Album]
         """
-        self.__album = album
+        self.__albums = albums
         SyncMenu.__init__(self)
 
 #######################
@@ -153,7 +153,10 @@ class SyncAlbumMenu(SyncMenu):
             @param index as int
             @return bool
         """
-        return self.__album.synced & (1 << index)
+        for album in self.__albums:
+            if not album.synced & (1 << index):
+                return False
+        return True
 
     def _set_synced(self, index, state):
         """
@@ -161,57 +164,12 @@ class SyncAlbumMenu(SyncMenu):
             @param index as int
             @param state as bool
         """
-        if state:
-            synced = self.__album.synced | (1 << index)
-        else:
-            synced = self.__album.synced & ~(1 << index)
-        App().albums.set_synced(self.__album.id, synced)
-
-
-class SyncAlbumsMenu(SyncMenu):
-    """
-        Sync menu for a genre
-    """
-
-    def __init__(self, genre_ids, artist_ids):
-        """
-            Init menu
-            @param genre_ids as [int]
-            @param artist_ids as [int]
-        """
-        self.__genre_ids = genre_ids
-        self.__artist_ids = artist_ids
-        SyncMenu.__init__(self)
-
-#######################
-# PROTECTED           #
-#######################
-    def _get_synced(self, index):
-        """
-            Get synced state for index
-            @param index as int
-            @return bool
-        """
-        synced = True
-        for album_id in App().albums.get_ids(self.__artist_ids,
-                                             self.__genre_ids):
-            if not App().albums.get_synced(album_id) & (1 << index):
-                synced = False
-        return synced
-
-    def _set_synced(self, index, state):
-        """
-            Set synced state for index
-            @param index as int
-            @param state as bool
-        """
-        for album_id in App().albums.get_ids(self.__artist_ids,
-                                             self.__genre_ids):
+        for album in self.__albums:
             if state:
-                synced = App().albums.get_synced(album_id) | (1 << index)
+                synced = album.synced | (1 << index)
             else:
-                synced = App().albums.get_synced(album_id) & ~(1 << index)
-            App().albums.set_synced(album_id, synced)
+                synced = album.synced & ~(1 << index)
+            album.set_synced(synced)
 
 
 class SyncPlaylistsMenu(SyncMenu):

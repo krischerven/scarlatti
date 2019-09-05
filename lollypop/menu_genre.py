@@ -15,6 +15,7 @@ from gi.repository import Gio
 from gettext import gettext as _
 
 from lollypop.define import App, ViewType
+from lollypop.objects_album import Album
 
 
 class GenreMenu(Gio.Menu):
@@ -37,3 +38,10 @@ class GenreMenu(Gio.Menu):
         if not view_type & ViewType.BANNER:
             from lollypop.menu_playback import GenrePlaybackMenu
             self.append_section(_("Playback"), GenrePlaybackMenu(genre_id))
+        from lollypop.menu_sync import SyncAlbumsMenu
+        section = Gio.Menu()
+        self.append_section(_("Add to"), section)
+        album_ids = App().albums.get_ids([], [genre_id], True)
+        album_ids += App().albums.get_compilation_ids([genre_id], True)
+        albums = [Album(album_id) for album_id in album_ids]
+        section.append_submenu(_("Devices"), SyncAlbumsMenu(albums))

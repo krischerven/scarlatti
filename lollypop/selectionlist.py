@@ -662,8 +662,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param y as int
             @param relative as Gtk.Widget
         """
-        if self.__base_mask & (SelectionListMask.SIDEBAR |
-                               SelectionListMask.VIEW):
+        if self.__base_mask & SelectionListMask.SIDEBAR:
             from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_menu import MenuBuilder
             if row is None:

@@ -20,7 +20,7 @@ from lollypop.define import ViewType
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_edit import EditMenu
 from lollypop.menu_playback import TrackPlaybackMenu, AlbumPlaybackMenu
-from lollypop.menu_sync import SyncAlbumMenu
+from lollypop.menu_sync import SyncAlbumsMenu
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
 
@@ -50,7 +50,7 @@ class AlbumMenu(Gio.Menu):
         if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
             section.append_submenu(_("Playlists"), PlaylistsMenu(album))
         if album.storage_type & StorageType.COLLECTION:
-            section.append_submenu(_("Devices"), SyncAlbumMenu(album))
+            section.append_submenu(_("Devices"), SyncAlbumsMenu([album]))
         if section.get_n_items() != 0:
             self.append_section(_("Add to"), section)
         self.append_section(_("Edit"), EditMenu(album))

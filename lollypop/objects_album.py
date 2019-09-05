@@ -231,6 +231,14 @@ class Album(Base):
             App().scanner.emit("artist-updated", artist_id, save)
         App().scanner.emit("album-updated", self.id, save)
 
+    def set_synced(self, mask):
+        """
+            Set synced mask
+            @param mask as int
+        """
+        self.db.set_synced(self.id, mask)
+        self.synced = mask
+
     @property
     def is_web(self):
         """
