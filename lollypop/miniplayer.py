@@ -39,7 +39,6 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         """
         Gtk.Overlay.__init__(self)
         SizeAllocationHelper.__init__(self)
-        self.__size = 0
         self.__previous_artwork_id = None
         self.__per_track_cover = App().settings.get_value(
             "allow-per-track-cover")
@@ -116,15 +115,16 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             Update artwork and labels
             @param player as Player
         """
-        if self.__size == 0:
-            return
         same_artwork = self.__previous_artwork_id ==\
             App().player.current_track.album.id and not self.__per_track_cover
         if same_artwork:
             return
         self.__previous_artwork_id = App().player.current_track.album.id
+        allocation = self.get_allocation()
         self.__artwork_widget.set_artwork(
-                self.__size, self.__size, self.__on_artwork,
+                allocation.width,
+                allocation.height,
+                self.__on_artwork,
                 ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
 
 #######################
