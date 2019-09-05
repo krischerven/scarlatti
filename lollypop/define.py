@@ -85,8 +85,7 @@ class ViewType:
     SCROLLED = 1 << 8
     OVERLAY = 1 << 9
     FULLSCREEN = 1 << 10
-    NO_PADDING = 1 << 11
-    PLAYBACK = 1 << 12
+    PLAYBACK = 1 << 11
 
 
 NetworkAccessACL = {
