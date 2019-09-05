@@ -53,6 +53,14 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget):
         self.set_size_request(self._art_size,
                               self._art_size + self.__font_height)
 
+    @property
+    def artwork_name(self):
+        """
+            Get artwork name
+            return str
+        """
+        return "decade_" + self.name
+
 #######################
 # PROTECTED           #
 #######################

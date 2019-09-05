@@ -52,15 +52,13 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
         self.set_size_request(self._art_size,
                               self._art_size + self.__font_height)
 
-    def _on_play_clicked(self, button):
+    @property
+    def artwork_name(self):
         """
-            Play decade
-            @param button as Gtk.Button
+            Get artwork name
+            return str
         """
-        if App().player.is_party:
-            App().lookup_action("party").change_state(GLib.Variant("b", False))
-        albums = [Album(album_id) for album_id in self._get_album_ids()]
-        App().player.play_albums(albums)
+        return "genre_" + self.name
 
 #######################
 # PROTECTED           #
@@ -72,6 +70,12 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
         """
         return App().albums.get_ids([], [self._data])
 
-#######################
-# PRIVATE             #
-#######################
+    def _on_play_clicked(self, button):
+        """
+            Play decade
+            @param button as Gtk.Button
+        """
+        if App().player.is_party:
+            App().lookup_action("party").change_state(GLib.Variant("b", False))
+        albums = [Album(album_id) for album_id in self._get_album_ids()]
+        App().player.play_albums(albums)

@@ -62,6 +62,14 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
         """
         return self._track_ids
 
+    @property
+    def artwork_name(self):
+        """
+            Get artwork name
+            return str
+        """
+        return "playlist_" + self.name
+
 #######################
 # PROTECTED           #
 #######################

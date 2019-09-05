@@ -150,6 +150,14 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         """
         return self._artwork
 
+    @property
+    def artwork_name(self):
+        """
+            Get artwork name
+            return str
+        """
+        return self.name
+
 #######################
 # PROTECTED           #
 #######################
