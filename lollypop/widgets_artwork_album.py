@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, GObject
 
 from gettext import gettext as _
 
@@ -24,12 +24,17 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         Search for album artwork
     """
 
-    def __init__(self, album):
+    __gsignals__ = {
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
+    def __init__(self, album, view_type):
         """
             Init search
             @param album as Album
+            @param view_type as ViewType
         """
-        ArtworkSearchWidget.__init__(self)
+        ArtworkSearchWidget.__init__(self, view_type)
         self.__album = album
 
     def populate(self):
@@ -70,17 +75,6 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         except Exception as e:
             Logger.error(
                 "AlbumArtworkSearchWidget::_save_from_filename(): %s" % e)
-
-    def _on_reset_confirm(self, button):
-        """
-            Reset artwork
-            @param button as Gtk.Button
-        """
-        ArtworkSearchWidget._on_reset_confirm(self, button)
-        App().art.remove_album_artwork(self.__album)
-        App().art.save_album_artwork(None, self.__album)
-        App().art.clean_album_cache(self.__album)
-        App().art.emit("album-artwork-changed", self.__album.id)
 
     def _get_current_search(self):
         """
@@ -123,10 +117,13 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                self._close_popover()
                 App().art.save_album_artwork(child.bytes, self.__album)
                 self._streams = {}
             else:
-                ArtworkSearchWidget._on_activate(self, flowbox, child)
+                App().art.remove_album_artwork(self.__album)
+                App().art.save_album_artwork(None, self.__album)
+                App().art.clean_album_cache(self.__album)
+                App().art.emit("album-artwork-changed", self.__album.id)
+            self.emit("closed")
         except Exception as e:
             Logger.error("AlbumArtworkSearchWidget::_on_activate(): %s", e)

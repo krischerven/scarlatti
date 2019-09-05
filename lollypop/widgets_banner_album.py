@@ -50,7 +50,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button = builder.get_object("play_button")
         self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
-        self.__cover_widget = CoverWidget(album, view_type | ViewType.MEDIUM)
+        self.__cover_widget = CoverWidget(album, view_type)
         self.__cover_widget.set_vexpand(True)
         self.__cover_widget.show()
         album_name = GLib.markup_escape_text(album.name)

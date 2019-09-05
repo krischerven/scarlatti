@@ -25,7 +25,6 @@ from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_albums import AlbumsBannerWidget
-from lollypop.menu_objects import AlbumMenu
 
 
 class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
@@ -44,7 +43,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         FlowBoxView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self._widget_class = AlbumSimpleWidget
-        self._menu_class = AlbumMenu
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         if genre_ids and genre_ids[0] < 0:
@@ -124,6 +122,17 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         FlowBoxView._add_items(self, albums, self._genre_ids, self._artist_ids,
                                self._view_type)
+
+    def _get_menu_widget(self, child):
+        """
+            Get menu widget
+            @param child as AlbumSimpleWidget
+            @return Gtk.Widget
+        """
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_objects import AlbumMenu
+        menu = AlbumMenu(child.data, self._view_type, App().window.is_adaptive)
+        return MenuBuilder(menu)
 
     def _on_album_updated(self, scanner, album_id, added):
         """

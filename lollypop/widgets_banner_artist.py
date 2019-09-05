@@ -193,10 +193,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param eventbox as Gtk.EventBox
             @param event as Gdk.Event
         """
-        from lollypop.pop_artwork import ArtworkPopover
-        pop = ArtworkPopover(self.__artist_ids[0])
-        pop.set_relative_to(eventbox)
-        pop.show()
+        from lollypop.widgets_artwork_artist import ArtistArtworkSearchWidget
+        artwork_search = ArtistArtworkSearchWidget(self.__artist_ids[0],
+                                                   self._view_type)
+        artwork_search.show()
+        artwork_search.populate()
+        popup_widget(artwork_search, eventbox)
 
     def _on_artist_artwork_changed(self, art, prefix):
         """

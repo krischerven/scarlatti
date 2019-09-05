@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from gettext import gettext as _
 
 from lollypop.define import ArtSize, MARGIN, ViewType
-from lollypop.utils import update_button, get_network_available
+from lollypop.utils import update_button, get_network_available, popup_widget
 from lollypop.widgets_banner import BannerWidget
 
 
@@ -102,10 +102,10 @@ class RadiosBannerWidget(BannerWidget):
             Show RadioPopover
             @param button as Gtk.Button
         """
-        from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover()
-        popover.set_relative_to(button)
-        popover.popup()
+        from lollypop.menu_radio import RadioMenu
+        menu_widget = RadioMenu(None, self._view_type)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
     def __on_tunein_button_clicked(self, button):
         """

@@ -71,8 +71,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         markup += "<span size='x-small' alpha='40000'>%s</span>" % artist_name
         self.__title_label.set_markup(markup)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__cover_widget = CoverWidget(self.__album,
-                                          view_type | ViewType.MEDIUM)
+        self.__cover_widget = CoverWidget(self.__album, view_type)
         self.__cover_widget.show()
         self.__cover_widget.set_vexpand(True)
         self.__play_button = Gtk.Button.new()

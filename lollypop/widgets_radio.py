@@ -59,18 +59,15 @@ class RadioWidget(Gtk.FlowBoxChild):
             self.__label.set_property("has-tooltip", True)
             self.__label.connect("query-tooltip", on_query_tooltip)
             self.__label.show()
-            self.__toggle_button = Gtk.ToggleButton.new()
-            self.__toggle_button.set_image(self.__label)
-            self.__toggle_button.set_relief(Gtk.ReliefStyle.NONE)
-            self.__toggle_button.get_style_context().add_class("light-button")
-            self.__toggle_button.connect("toggled", self.__on_label_toggled)
-            self.__toggle_button.set_hexpand(True)
-            self.__toggle_button.show()
             self.__spinner = Gtk.Spinner.new()
             self.__spinner.get_style_context().add_class("big-padding")
             self.__spinner.show()
+            self.__stack = Gtk.Stack.new()
+            self.__stack.show()
+            self.__stack.add(self.__label)
+            self.__stack.add(self.__spinner)
             grid.add(self.__artwork)
-            grid.add(self.__toggle_button)
+            grid.add(self.__stack)
             self.add(grid)
             self.set_artwork()
             self.set_selection()
@@ -130,10 +127,10 @@ class RadioWidget(Gtk.FlowBoxChild):
         """
         if loading:
             self.__spinner.start()
-            self.__toggle_button.set_image(self.__spinner)
+            self.__stack.set_visible_child(self.__spinner)
         else:
             self.__spinner.stop()
-            self.__toggle_button.set_image(self.__label)
+            self.__stack.set_visible_child(self.__label)
 
     def do_get_preferred_width(self):
         """
@@ -197,7 +194,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         return self.__label.get_text()
 
     @property
-    def track(self):
+    def data(self):
         """
             Get track
             @return int
@@ -232,21 +229,3 @@ class RadioWidget(Gtk.FlowBoxChild):
         else:
             self.__artwork.set_from_surface(surface)
         self.emit("populated")
-
-    def __on_label_toggled(self, button):
-        """
-            Show tracks popover
-            @param button as Gtk.ToggleButton
-        """
-        def on_closed(popover):
-            button.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            button.set_active(False)
-
-        if not button.get_active():
-            return
-        from lollypop.pop_radio import RadioPopover
-        popover = RadioPopover(self._track)
-        popover.set_relative_to(button)
-        popover.connect("closed", on_closed)
-        popover.popup()
-        button.set_state_flags(Gtk.StateFlags.VISITED, True)

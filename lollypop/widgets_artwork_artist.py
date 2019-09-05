@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, GObject
 
 from lollypop.logger import Logger
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
@@ -22,12 +22,17 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         Search for artist artwork
     """
 
-    def __init__(self, artist_id):
+    __gsignals__ = {
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
+    def __init__(self, artist_id, view_type):
         """
             Init search
             @param artist_id as int
+            @param view_type as ViewType
         """
-        ArtworkSearchWidget.__init__(self)
+        ArtworkSearchWidget.__init__(self, view_type)
         self.__artist = App().artists.get_name(artist_id)
 
 #######################
@@ -43,18 +48,9 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             (status, data, tag) = f.load_contents()
             if status:
                 App().art.add_artist_artwork(self.__artist, data)
-            self._streams = {}
         except Exception as e:
             Logger.error(
                 "ArtistArtworkSearchWidget::_save_from_filename(): %s" % e)
-
-    def _on_reset_confirm(self, button):
-        """
-            Reset artwork
-            @param button as Gtk.Button
-        """
-        ArtworkSearchWidget._on_reset_confirm(self, button)
-        App().art.add_artist_artwork(self.__artist, None)
 
     def _get_current_search(self):
         """
@@ -85,10 +81,9 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                self._close_popover()
                 App().art.add_artist_artwork(self.__artist, child.bytes)
-                self._streams = {}
             else:
-                ArtworkSearchWidget._on_activate(self, flowbox, child)
+                App().art.add_artist_artwork(self.__artist, None)
+            self.emit("closed")
         except Exception as e:
             Logger.error("ArtistArtworkSearchWidget::_on_activate(): %s", e)

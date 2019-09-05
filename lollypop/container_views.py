@@ -49,6 +49,7 @@ class ViewsContainer:
             self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP)
             self.go_back()
             self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+            App().enable_special_shortcuts(True)
             if self.can_go_back:
                 self.emit("can-go-back-changed", True)
 
@@ -64,6 +65,7 @@ class ViewsContainer:
         self._stack.set_visible_child(view)
         self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.emit("can-go-back-changed", False)
+        App().enable_special_shortcuts(False)
 
     def show_view(self, item_ids, data=None, switch=True):
         """

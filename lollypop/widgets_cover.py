@@ -13,7 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.utils import set_cursor_type
+from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -33,7 +33,8 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         GesturesHelper.__init__(self, self)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
-        self._album = album
+        self.__album = album
+        self.__view_type = view_type
         self.__image_button = None
         self.__artwork = Gtk.Image.new()
         self.__artwork.show()
@@ -55,7 +56,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
                                    self.__art_size,
                                    self.__art_size)
         App().art_helper.set_album_artwork(
-                self._album,
+                self.__album,
                 self.__art_size,
                 self.__art_size,
                 self.__artwork.get_scale_factor(),
@@ -71,11 +72,11 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             @param art as Art
             @param album_id as int
         """
-        if self._album is None:
+        if self.__album is None:
             return
-        if album_id == self._album.id:
+        if album_id == self.__album.id:
             App().art_helper.set_album_artwork(
-                self._album,
+                self.__album,
                 self.__art_size,
                 self.__art_size,
                 self.__artwork.get_scale_factor(),
@@ -89,10 +90,12 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        from lollypop.pop_artwork import CoversPopover
-        popover = CoversPopover(self._album)
-        popover.set_relative_to(self)
-        popover.popup()
+        from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
+        artwork_search = AlbumArtworkSearchWidget(self.__album,
+                                                  self.__view_type)
+        artwork_search.show()
+        artwork_search.populate()
+        popup_widget(artwork_search, self)
 
 #######################
 # PRIVATE             #

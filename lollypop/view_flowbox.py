@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, MARGIN, App
+from lollypop.define import ViewType, MARGIN
 from lollypop.utils import get_font_height, popup_widget
 
 
@@ -90,6 +90,14 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _get_menu_widget(self, child):
+        """
+            Get menu widget
+            @param child as Gtk.FlowBoxChild
+            @return Gtk.Widget
+        """
+        return None
+
     def _get_label_height(self):
         """
             Get wanted label height
@@ -178,12 +186,10 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             Popup album menu at position
             @param child ad RoundedArtistWidget
         """
-        from lollypop.widgets_menu import MenuBuilder
-        menu = self._menu_class(child.data, self._view_type,
-                                App().window.is_adaptive)
-        menu_widget = MenuBuilder(menu)
-        menu_widget.show()
-        popup_widget(menu_widget, child.artwork)
+        menu_widget = self._get_menu_widget(child)
+        if menu_widget is not None:
+            menu_widget.show()
+            popup_widget(menu_widget, child.artwork)
 
     def __unselect_selected(self):
         """

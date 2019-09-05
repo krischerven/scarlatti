@@ -10,30 +10,46 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gio, GObject
+
+from gettext import gettext as _
 
 from lollypop.widgets_rating import RatingWidget
-from lollypop.define import App
-from lollypop.widgets_utils import Popover
+from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, MARGIN_SMALL
+from lollypop.define import ViewType
 from lollypop.widgets_artwork_radio import RadioArtworkSearchWidget
 from lollypop.art import Art
 from lollypop.objects_radio import Radio
 
 
-# Show a popover with radio logos from the web
-class RadioPopover(Popover):
+class RadioMenu(Gtk.Grid):
     """
         Popover with radio logos from the web
     """
 
-    def __init__(self, radio=None):
+    __gsignals__ = {
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
+    def __init__(self, radio, view_type):
         """
             Init Popover
             @param radio as Radio
+            @param view_type as ViewType
+            @param header as bool
         """
-        Popover.__init__(self)
+        Gtk.Grid.__init__(self)
+        self.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__view_type = view_type
         self.__uri_artwork_id = None
         self.__radio = radio if radio is not None else Radio()
+
+        self.set_row_spacing(MARGIN)
+        self.set_margin_start(MARGIN_SMALL)
+        self.set_margin_end(MARGIN_SMALL)
+        self.set_margin_top(MARGIN)
+        self.set_margin_bottom(MARGIN)
 
         self.__stack = Gtk.Stack()
         self.__stack.set_transition_duration(1000)
@@ -41,7 +57,7 @@ class RadioPopover(Popover):
         self.__stack.show()
 
         builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/RadioPopover.ui")
+        builder.add_from_resource("/org/gnome/Lollypop/RadioMenu.ui")
         builder.connect_signals(self)
 
         self.__name_entry = builder.get_object("name")
@@ -50,10 +66,46 @@ class RadioPopover(Popover):
         self.__save_button = builder.get_object("save_button")
         self.__stack.add_named(builder.get_object("widget"), "widget")
         self.__stack.set_visible_child_name("widget")
-        self.add(self.__stack)
 
+        if view_type & ViewType.MEDIUM:
+            button = Gtk.ModelButton.new()
+            button.set_alignment(0, 0.5)
+            button.connect("clicked", lambda x: self.emit("closed"))
+            button.show()
+            label = Gtk.Label.new()
+            label.show()
+            if self.__radio.name:
+                self.__artwork = Gtk.Image.new()
+                name = "<span alpha='40000'>%s</span>" % radio.name
+                App().art_helper.set_radio_artwork(
+                                           self.__radio.name,
+                                           ArtSize.SMALL,
+                                           ArtSize.SMALL,
+                                           self.__artwork.get_scale_factor(),
+                                           ArtBehaviour.CACHE |
+                                           ArtBehaviour.CROP,
+                                           self.__on_radio_artwork)
+            else:
+                self.__artwork = Gtk.Image.new_from_icon_name(
+                    "org.gnome.Lollypop-gradio-symbolic",
+                    Gtk.IconSize.INVALID)
+                self.__artwork.set_pixel_size(ArtSize.SMALL)
+                name = "<span alpha='40000'>%s</span>" % _("New radio")
+            self.__artwork.show()
+            label.set_markup(name)
+            grid = Gtk.Grid()
+            grid.set_column_spacing(MARGIN)
+            grid.add(self.__artwork)
+            grid.add(label)
+            button.set_image(grid)
+            button.get_style_context().add_class("padding")
+            self.add(button)
+        self.add(self.__stack)
         if radio is not None:
-            rating = RatingWidget(radio)
+            if view_type & ViewType.MEDIUM:
+                rating = RatingWidget(radio, Gtk.IconSize.DND)
+            else:
+                rating = RatingWidget(radio)
             rating.show()
             builder.get_object("widget").attach(rating, 0, 2, 2, 1)
             builder.get_object("delete_button").show()
@@ -69,15 +121,14 @@ class RadioPopover(Popover):
             Save radio
             @param widget as Gtk.Widget
         """
-        self.popdown()
         self.__save_radio()
+        self.emit("closed")
 
     def _on_delete_button_clicked(self, widget):
         """
             Delete a radio
             @param widget as Gtk.Widget
         """
-        self.popdown()
         if self.__radio.id is not None:
             store = Art._RADIOS_PATH
             name = self.__radio.name
@@ -86,6 +137,7 @@ class RadioPopover(Popover):
             f = Gio.File.new_for_path(store + "/%s.png" % name)
             if f.query_exists():
                 f.delete()
+        self.emit("closed")
 
     def _on_entry_changed(self, entry):
         """
@@ -109,12 +161,12 @@ class RadioPopover(Popover):
         self.__stack.get_visible_child().hide()
         self.__save_radio()
         name = App().radios.get_name(self.__radio.id)
-        artwork_widget = RadioArtworkSearchWidget(name)
+        artwork_widget = RadioArtworkSearchWidget(name, self.__view_type)
         artwork_widget.populate()
         artwork_widget.show()
+        artwork_widget.connect("closed", lambda x: self.emit("closed"))
         self.__stack.add_named(artwork_widget, "artwork")
         self.__stack.set_visible_child_name("artwork")
-        self.set_size_request(700, 400)
 
 #######################
 # PRIVATE             #
@@ -137,3 +189,15 @@ class RadioPopover(Popover):
                 App().art.rename_radio(name, new_name)
                 self.__radio.set_uri(new_uri)
                 self.__radio.set_name(new_name)
+
+    def __on_radio_artwork(self, surface):
+        """
+            Set radio artwork
+            @param surface as str
+        """
+        if surface is None:
+            self.__artwork.set_from_icon_name(
+                                             "audio-input-microphone-symbolic",
+                                             Gtk.IconSize.DIALOG)
+        else:
+            self.__artwork.set_from_surface(surface)

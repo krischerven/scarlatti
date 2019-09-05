@@ -10,13 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, GLib, Gio, GdkPixbuf
+from gi.repository import Gtk, Gdk, GLib, Gio, GdkPixbuf, GObject
 
 from gettext import gettext as _
 
-from lollypop.widgets_utils import Popover
 from lollypop.logger import Logger
-from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -25,13 +24,19 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         Child for ArtworkSearch
     """
 
-    def __init__(self, api=None):
+    __gsignals__ = {
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
+    def __init__(self, api, view_type):
         """
             Init child
             @param api as str
+            @param view_type as ViewType
         """
         Gtk.FlowBoxChild.__init__(self)
         self.__bytes = None
+        self.__view_type = view_type
         self.__api = api
         self.__image = Gtk.Image()
         self.__image.show()
@@ -44,8 +49,8 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         grid.add(self.__label)
         grid.set_row_spacing(5)
         self.__image.get_style_context().add_class("cover-frame")
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.set_property("valign", Gtk.Align.CENTER)
+        self.__image.set_property("halign", Gtk.Align.CENTER)
+        self.__image.set_property("valign", Gtk.Align.CENTER)
         self.add(grid)
 
     def populate(self, bytes):
@@ -68,10 +73,14 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                                           pixbuf.get_width(),
                                           pixbuf.get_height())
                 self.__label.set_text(text)
+                if self.__view_type & ViewType.MEDIUM:
+                    art_size = ArtSize.MEDIUM
+                else:
+                    art_size = ArtSize.BIG
                 pixbuf = App().art.load_behaviour(pixbuf,
                                                   None,
-                                                  ArtSize.BIG * scale_factor,
-                                                  ArtSize.BIG * scale_factor,
+                                                  art_size * scale_factor,
+                                                  art_size * scale_factor,
                                                   ArtBehaviour.CROP)
                 stream.close()
             self.__bytes = bytes
@@ -100,11 +109,13 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init widget
+            @param view_type as ViewType
         """
         Gtk.Bin.__init__(self)
+        self._view_type = view_type
         self.__timeout_id = None
         self.__uri_artwork_id = None
         self.__uris = []
@@ -113,29 +124,36 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/ArtworkSearch.ui")
         builder.connect_signals(self)
-        self.__infobar = builder.get_object("infobar")
-        self.__infobar_label = builder.get_object("infobarlabel")
         widget = builder.get_object("widget")
         self.__stack = builder.get_object("stack")
         self.__entry = builder.get_object("entry")
-        self.__api_entry = builder.get_object("api_entry")
         self.__back_button = builder.get_object("back_button")
+        self.__spinner = builder.get_object("spinner")
 
         self._flowbox = Gtk.FlowBox()
         self._flowbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self._flowbox.connect("child-activated", self._on_activate)
         self._flowbox.set_max_children_per_line(100)
         self._flowbox.set_property("row-spacing", 10)
+        self._flowbox.set_property("valign", Gtk.Align.START)
+        self._flowbox.set_vexpand(True)
         self._flowbox.show()
 
         self.__label = builder.get_object("label")
         self.__label.set_text(_("Select artwork"))
 
-        builder.get_object("viewport").add(self._flowbox)
-
-        self.__spinner = builder.get_object("spinner")
-        self.__stack.add_named(builder.get_object("scrolled"), "main")
-        self.__stack.set_visible_child_name("main")
+        if self._view_type & ViewType.MEDIUM:
+            widget.add(self._flowbox)
+        else:
+            scrolled = Gtk.ScrolledWindow.new()
+            scrolled.show()
+            scrolled.set_size_request(700, 400)
+            scrolled.set_vexpand(True)
+            viewport = Gtk.Viewport.new()
+            viewport.show()
+            viewport.add(self._flowbox)
+            scrolled.add(viewport)
+            widget.add(scrolled)
         self.add(widget)
         self.connect("unmap", self.__on_unmap)
         return [
@@ -151,23 +169,28 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             grid.show()
             grid.set_row_spacing(5)
+            if self._view_type & ViewType.MEDIUM:
+                art_size = ArtSize.MEDIUM
+            else:
+                art_size = ArtSize.BIG
             image = Gtk.Image.new_from_icon_name("edit-clear-all-symbolic",
-                                                 Gtk.IconSize.DIALOG)
-            image.set_property("valign", Gtk.Align.CENTER)
-            image.set_property("halign", Gtk.Align.CENTER)
+                                                 Gtk.IconSize.INVALID)
+            image.set_pixel_size(art_size)
             context = image.get_style_context()
             context.add_class("cover-frame")
             padding = context.get_padding(Gtk.StateFlags.NORMAL)
             border = context.get_border(Gtk.StateFlags.NORMAL)
-            image.set_size_request(ArtSize.BIG + padding.left +
+            image.set_size_request(art_size + padding.left +
                                    padding.right + border.left + border.right,
-                                   ArtSize.BIG + padding.top +
+                                   art_size + padding.top +
                                    padding.bottom + border.top + border.bottom)
             image.show()
             label = Gtk.Label.new(_("Remove"))
             label.show()
             grid.add(image)
             grid.add(label)
+            grid.set_property("valign", Gtk.Align.CENTER)
+            grid.set_property("halign", Gtk.Align.CENTER)
             self._flowbox.add(grid)
             self.__search_for_artwork()
         except Exception as e:
@@ -197,22 +220,11 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
         file_filter = Gtk.FileFilter.new()
         file_filter.add_pixbuf_formats()
         dialog.set_filter(file_filter)
-        self._close_popover()
+        self.emit("closed")
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self._save_from_filename(dialog.get_filename())
         dialog.destroy()
-
-    def _close_popover(self):
-        """
-            Search for a popover in parents and close it
-        """
-        widget = self.get_parent()
-        while widget is not None:
-            if isinstance(widget, Popover):
-                widget.hide()
-                break
-            widget = widget.get_parent()
 
     def _get_current_search(self):
         """
@@ -241,34 +253,8 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
                                              self.__on_search_timeout,
                                              entry.get_text())
 
-    def _on_reset_confirm(self, button):
-        """
-            Reset cover
-            @param button as Gtk.Button
-        """
-        self.__infobar.hide()
-        self._close_popover()
-
-    def _on_info_response(self, infobar, response_id):
-        """
-            Hide infobar
-            @param widget as Gtk.Infobar
-            @param reponse id as int
-        """
-        if response_id == Gtk.ResponseType.CLOSE:
-            self.__infobar.hide()
-            self._flowbox.unselect_all()
-
     def _on_activate(self, flowbox, child):
-        """
-            An artwork has been activated
-            @param flowbox as Gtk.FlowBox
-            @param child as ArtworkSearchChild
-        """
-        self.__infobar_label.set_text(_("Reset artwork?"))
-        self.__infobar.show()
-        # GTK 3.20 https://bugzilla.gnome.org/show_bug.cgi?id=710888
-        self.__infobar.queue_resize()
+        pass
 
     def _on_uri_artwork_found(self, art, uris):
         """
@@ -314,7 +300,7 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
             @param content as bytes
             @param api as str
         """
-        child = ArtworkSearchChild(api)
+        child = ArtworkSearchChild(api, self._view_type)
         child.show()
         status = child.populate(content)
         if status:

@@ -77,6 +77,15 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         """
         FlowBoxView._add_items(self, radio_ids, self._view_type)
 
+    def _get_menu_widget(self, child):
+        """
+            Get menu widget
+            @param child as RadioWidget
+            @return Gtk.Widget
+        """
+        from lollypop.menu_radio import RadioMenu
+        return RadioMenu(child.data, self._view_type)
+
     def _on_primary_press_gesture(self, x, y, event):
         """
             Play radio
@@ -87,7 +96,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         child = self._box.get_child_at_pos(x, y)
         if child is None:
             return
-        App().player.load(child.track)
+        App().player.load(child.data)
         child.set_loading(True)
 
     def _on_artwork_changed(self, artwork, name):
@@ -105,7 +114,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             Stop loading for track child
         """
         for child in self.children:
-            if child.track.id == track.id:
+            if child.data.id == track.id:
                 child.set_loading(False)
                 break
 
@@ -119,7 +128,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         if exists:
             item = None
             for child in self._box.get_children():
-                if child.track.id == radio_id:
+                if child.data.id == radio_id:
                     item = child
                     break
             if item is None:
@@ -129,7 +138,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
                 item.rename(name)
         else:
             for child in self._box.get_children():
-                if child.track.id == radio_id:
+                if child.data.id == radio_id:
                     child.destroy()
 
 #######################

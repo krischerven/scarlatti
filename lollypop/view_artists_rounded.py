@@ -23,7 +23,6 @@ from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_font_height
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.menu_artist import ArtistMenu
 
 
 class RoundedArtistsView(FlowBoxView, SignalsHelper):
@@ -39,7 +38,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         """
         FlowBoxView.__init__(self, view_type)
         self._widget_class = RoundedArtistWidget
-        self._menu_class = ArtistMenu
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return [
@@ -107,6 +105,18 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param items as [(int, str, str)]
         """
         FlowBoxView._add_items(self, items, self._view_type)
+
+    def _get_menu_widget(self, child):
+        """
+            Get menu widget
+            @param child as AlbumSimpleWidget
+            @return Gtk.Widget
+        """
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_artist import ArtistMenu
+        menu = ArtistMenu(child.data, self._view_type,
+                          App().window.is_adaptive)
+        return MenuBuilder(menu)
 
     def _on_child_activated(self, flowbox, child):
         """
