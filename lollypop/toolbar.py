@@ -136,7 +136,8 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         self.__adaptive_size = adaptive_size
         if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             if App().player.current_track.id is not None:
-                self.__toolbar_title.show()
+                if isinstance(App().player.current_track, Track):
+                    self.__toolbar_title.show()
                 self.__toolbar_info.show_children()
             self.__toolbar_playback.player_buttons.show()
         else:
