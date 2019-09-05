@@ -223,8 +223,8 @@ class MenuBuilder(Gtk.Stack):
         button.get_style_context().add_class("padding")
         App().art_helper.set_album_artwork(
                 Album(album_id),
-                ArtSize.MEDIUM,
-                ArtSize.MEDIUM,
+                ArtSize.SMALL,
+                ArtSize.SMALL,
                 artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_artwork,
@@ -255,8 +255,8 @@ class MenuBuilder(Gtk.Stack):
         artist_name = App().artists.get_name(artist_id)
         App().art_helper.set_artist_artwork(
                 artist_name,
-                ArtSize.MEDIUM,
-                ArtSize.MEDIUM,
+                ArtSize.SMALL,
+                ArtSize.SMALL,
                 artwork.get_scale_factor(),
                 ArtBehaviour.CACHE |
                 ArtBehaviour.CROP_SQUARE |
