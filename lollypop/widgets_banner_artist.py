@@ -16,7 +16,7 @@ from gettext import gettext as _
 from random import choice
 
 from lollypop.utils import set_cursor_type, on_query_tooltip, popup_widget
-from lollypop.utils_artists import add_artist_to_playback, play_artists
+from lollypop.utils_artist import add_artist_to_playback, play_artists
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map

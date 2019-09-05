@@ -10,11 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
 from lollypop.define import App, Type
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
-from lollypop.objects_album import Album
 
 
 class AlbumsGenreWidget(RoundedAlbumsWidget):
@@ -69,13 +66,3 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
             @return [int]
         """
         return App().albums.get_ids([], [self._data])
-
-    def _on_play_clicked(self, button):
-        """
-            Play decade
-            @param button as Gtk.Button
-        """
-        if App().player.is_party:
-            App().lookup_action("party").change_state(GLib.Variant("b", False))
-        albums = [Album(album_id) for album_id in self._get_album_ids()]
-        App().player.play_albums(albums)

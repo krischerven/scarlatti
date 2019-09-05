@@ -20,6 +20,51 @@ from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 
 
+class BasePlaybackMenu(Gio.Menu):
+    """
+        Base class for playback menu
+    """
+
+    def __init__(self):
+        """
+            Init menu
+        """
+        Gio.Menu.__init__(self)
+
+    @property
+    def in_player(self):
+        """
+            True if current object in player
+            return bool
+        """
+        return False
+
+#######################
+# PROTECTED           #
+#######################
+    def _set_playback_actions(self):
+        """
+            Setup playback actions
+        """
+        if not self.in_player:
+            append_playback_action = Gio.SimpleAction(
+                name="append_playback_action")
+            App().add_action(append_playback_action)
+            append_playback_action.connect("activate",
+                                           self._append_to_playback)
+            menu_item = Gio.MenuItem.new(_("Add to playback"),
+                                         "app.append_playback_action")
+        else:
+            del_playback_action = Gio.SimpleAction(name="del_playback_action")
+            App().add_action(del_playback_action)
+            del_playback_action.connect("activate",
+                                        self._remove_from_playback)
+            menu_item = Gio.MenuItem.new(_("Remove from playback"),
+                                         "app.del_playback_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
+
 class PlaylistPlaybackMenu(Gio.Menu):
     """
         Contextual menu for a playlist
@@ -60,7 +105,7 @@ class PlaylistPlaybackMenu(Gio.Menu):
         App().player.play_albums(albums)
 
 
-class ArtistPlaybackMenu(Gio.Menu):
+class ArtistPlaybackMenu(BasePlaybackMenu):
     """
         Contextual menu for an artist
     """
@@ -70,7 +115,7 @@ class ArtistPlaybackMenu(Gio.Menu):
             Init menu
             @param artist id as int
         """
-        Gio.Menu.__init__(self)
+        BasePlaybackMenu.__init__(self)
         self.__artist_id = artist_id
         play_action = Gio.SimpleAction(name="artist_play_action")
         App().add_action(play_action)
@@ -79,52 +124,119 @@ class ArtistPlaybackMenu(Gio.Menu):
                                      "app.artist_play_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
-        self.__set_playback_actions()
+        self._set_playback_actions()
 
-#######################
-# PRIVATE             #
-#######################
-    def __set_playback_actions(self):
+    @property
+    def in_player(self):
         """
-            Set playback actions
+            True if current object in player
+            return bool
         """
         album_ids = App().albums.get_ids([self.__artist_id], [])
-        add = set(App().player.album_ids) & set(album_ids) != set(album_ids)
-        if add:
-            append_playback_action = Gio.SimpleAction(
-                name="append_playback_action")
-            App().add_action(append_playback_action)
-            append_playback_action.connect("activate",
-                                           self.__append_to_playback)
-            menu_item = Gio.MenuItem.new(_("Add to playback"),
-                                         "app.append_playback_action")
-        else:
-            del_playback_action = Gio.SimpleAction(name="del_playback_action")
-            App().add_action(del_playback_action)
-            del_playback_action.connect("activate",
-                                        self.__remove_from_playback)
-            menu_item = Gio.MenuItem.new(_("Remove from playback"),
-                                         "app.del_playback_action")
-        menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        self.append_item(menu_item)
+        return set(App().player.album_ids) & set(album_ids) == set(album_ids)
 
-    def __append_to_playback(self, action, variant):
+#######################
+# PROTECTED           #
+#######################
+    def _append_to_playback(self, action, variant):
         """
             Append track to playback
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        from lollypop.utils_artists import add_artist_to_playback
+        from lollypop.utils_artist import add_artist_to_playback
         add_artist_to_playback([self.__artist_id], (), True)
 
-    def __remove_from_playback(self, action, variant):
+    def _remove_from_playback(self, action, variant):
         """
             Delete track id from playback
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        from lollypop.utils_artists import add_artist_to_playback
+        from lollypop.utils_artist import add_artist_to_playback
         add_artist_to_playback([self.__artist_id], (), False)
+
+#######################
+# PRIVATE             #
+#######################
+    def __play(self, action, variant):
+        """
+            Play album
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        from lollypop.utils_artist import play_artists
+        play_artists([self.__artist_id], [])
+
+
+class DecadePlaybackMenu(BasePlaybackMenu):
+    """
+        Contextual menu for a decade
+    """
+
+    def __init__(self, years):
+        """
+            Init decade menu
+            @param years as [int]
+        """
+        BasePlaybackMenu.__init__(self)
+        self.__years = years
+        play_action = Gio.SimpleAction(name="decade_play_action")
+        App().add_action(play_action)
+        play_action.connect("activate", self.__play)
+        menu_item = Gio.MenuItem.new(_("Play this decade"),
+                                     "app.decade_play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+        self._set_playback_actions()
+
+    @property
+    def in_player(self):
+        """
+            True if current object in player
+            return bool
+        """
+        album_ids = self.__get_album_ids()
+        return set(App().player.album_ids) & set(album_ids) == set(album_ids)
+
+#######################
+# PROTECTED           #
+#######################
+    def _append_to_playback(self, action, variant):
+        """
+            Append track to playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        album_ids = self.__get_album_ids()
+        for album_id in album_ids:
+            album = Album(album_id)
+            App().player.add_album(album)
+        App().player.update_next_prev()
+
+    def _remove_from_playback(self, action, variant):
+        """
+            Delete track id from playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        album_ids = self.__get_album_ids()
+        for album_id in album_ids:
+            App().player.remove_album_by_id(album_id)
+        App().player.update_next_prev()
+
+#######################
+# PRIVATE             #
+#######################
+    def __get_album_ids(self):
+        """
+            Get album ids for decade
+            @return [int]
+        """
+        album_ids = []
+        for year in self.__years:
+            album_ids += App().albums.get_albums_for_year(year)
+        return album_ids
 
     def __play(self, action, variant):
         """
@@ -132,13 +244,14 @@ class ArtistPlaybackMenu(Gio.Menu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        from lollypop.utils_artists import play_artists
-        play_artists([self.__artist_id], [])
+        album_ids = self.__get_album_ids()
+        albums = [Album(album_id) for album_id in album_ids]
+        App().player.play_albums(albums)
 
 
-class AlbumPlaybackMenu(Gio.Menu):
+class AlbumPlaybackMenu(BasePlaybackMenu):
     """
-        Contextual menu for albums
+        Contextual menu for an album
     """
 
     def __init__(self, album):
@@ -146,7 +259,7 @@ class AlbumPlaybackMenu(Gio.Menu):
             Init album menu
             @param album as Album
         """
-        Gio.Menu.__init__(self)
+        BasePlaybackMenu.__init__(self)
         self.__album = album
         play_action = Gio.SimpleAction(name="album_play_action")
         App().add_action(play_action)
@@ -155,42 +268,20 @@ class AlbumPlaybackMenu(Gio.Menu):
                                      "app.album_play_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
-        self.__set_playback_actions()
+        self._set_playback_actions()
+
+    @property
+    def in_player(self):
+        """
+            True if current object in player
+            return bool
+        """
+        return self.__album.id in App().player.album_ids
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
-    def __set_playback_actions(self):
-        """
-            Set playback actions
-        """
-        if self.__album.id not in App().player.album_ids:
-            append_playback_action = Gio.SimpleAction(
-                name="append_playback_action")
-            App().add_action(append_playback_action)
-            append_playback_action.connect("activate",
-                                           self.__append_to_playback)
-            menu_item = Gio.MenuItem.new(_("Add to playback"),
-                                         "app.append_playback_action")
-        else:
-            del_playback_action = Gio.SimpleAction(name="del_playback_action")
-            App().add_action(del_playback_action)
-            del_playback_action.connect("activate",
-                                        self.__remove_from_playback)
-            menu_item = Gio.MenuItem.new(_("Remove from playback"),
-                                         "app.del_playback_action")
-        menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        self.append_item(menu_item)
-
-    def __play(self, action, variant):
-        """
-            Play album
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        App().player.play_album(self.__album)
-
-    def __append_to_playback(self, action, variant):
+    def _append_to_playback(self, action, variant):
         """
             Append track to playback
             @param Gio.SimpleAction
@@ -199,7 +290,7 @@ class AlbumPlaybackMenu(Gio.Menu):
         App().player.add_album(self.__album)
         App().player.update_next_prev()
 
-    def __remove_from_playback(self, action, variant):
+    def _remove_from_playback(self, action, variant):
         """
             Delete track id from playback
             @param Gio.SimpleAction
@@ -208,8 +299,19 @@ class AlbumPlaybackMenu(Gio.Menu):
         App().player.remove_album_by_id(self.__album.id)
         App().player.update_next_prev()
 
+#######################
+# PRIVATE             #
+#######################
+    def __play(self, action, variant):
+        """
+            Play album
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().player.play_album(self.__album)
 
-class TrackPlaybackMenu(Gio.Menu):
+
+class TrackPlaybackMenu(BasePlaybackMenu):
     """
         Contextual menu for tracks
     """
@@ -219,45 +321,66 @@ class TrackPlaybackMenu(Gio.Menu):
             Init track menu
             @param track as Track
         """
-        Gio.Menu.__init__(self)
+        BasePlaybackMenu.__init__(self)
         self.__track = track
-        self.__set_playback_actions()
+        self._set_playback_actions()
         self.__set_queue_actions()
         self.__set_stop_after_action()
+
+    @property
+    def in_player(self):
+        """
+            True if current object in player
+            return bool
+        """
+        for album in App().player.albums:
+            if self.__track.album.id == album.id:
+                if self.__track.id in album.track_ids:
+                    return True
+        return False
+
+#######################
+# PROTECTED           #
+#######################
+    def _append_to_playback(self, action, variant):
+        """
+            Append track to playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        albums = App().player.albums
+        # If album last in list, merge
+        if albums and albums[-1].id == self.__track.album.id:
+            albums[-1].append_track(self.__track)
+            App().player.set_next()
+        # Add album with only one track
+        else:
+            album = Album(self.__track.album.id)
+            album.set_tracks([self.__track])
+            if App().player.is_playing:
+                App().player.add_album(album)
+            else:
+                App().player.play_album(album)
+
+    def _remove_from_playback(self, action, variant):
+        """
+            Delete track id from playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        for album in App().player.albums:
+            if album.id == self.__track.album.id:
+                if self.__track.id in album.track_ids:
+                    index = album.track_ids.index(self.__track.id)
+                    track = album.tracks[index]
+                    album.remove_track(track)
+                    break
+        App().player.set_next()
+        App().player.set_prev()
 
 #######################
 # PRIVATE             #
 #######################
-    def __is_in_current_playlist(self):
-        """
-            Check if track in Player current playlist
-            @return bool
-        """
-        if App().player.albums:
-            for album in App().player.albums:
-                if self.__track.album.id == album.id:
-                    if self.__track.id in album.track_ids:
-                        return True
-        return False
-
-    def __set_playback_actions(self):
-        """
-            Set playback actions
-        """
-        if not self.__is_in_current_playlist():
-            append_playback_action = Gio.SimpleAction(
-                name="append_playback_action")
-            App().add_action(append_playback_action)
-            append_playback_action.connect("activate",
-                                           self.__append_to_playback)
-            self.append(_("Add to playback"), "app.append_playback_action")
-        else:
-            del_playback_action = Gio.SimpleAction(name="del_playback_action")
-            App().add_action(del_playback_action)
-            del_playback_action.connect("activate",
-                                        self.__remove_from_playback)
-            self.append(_("Remove from playback"), "app.del_playback_action")
-
     def __set_queue_actions(self):
         """
             Set queue actions
@@ -279,8 +402,7 @@ class TrackPlaybackMenu(Gio.Menu):
         """
             Add an action to stop playback after track
         """
-        if self.__is_in_current_playlist() and \
-                isinstance(self.__track, Track):
+        if self.in_player and isinstance(self.__track, Track):
             stop_after_action = Gio.SimpleAction(name="stop_after_action")
             App().add_action(stop_after_action)
             if self.__track.id == App().player.stop_after_track_id:
@@ -302,42 +424,6 @@ class TrackPlaybackMenu(Gio.Menu):
         App().player.stop_after(track_id)
         if track_id == App().player.current_track.id:
             App().player.set_next()
-
-    def __append_to_playback(self, action, variant):
-        """
-            Append track to playback
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        albums = App().player.albums
-        # If album last in list, merge
-        if albums and albums[-1].id == self.__track.album.id:
-            albums[-1].append_track(self.__track)
-            App().player.set_next()
-        # Add album with only one track
-        else:
-            album = Album(self.__track.album.id)
-            album.set_tracks([self.__track])
-            if App().player.is_playing:
-                App().player.add_album(album)
-            else:
-                App().player.play_album(album)
-
-    def __remove_from_playback(self, action, variant):
-        """
-            Delete track id from playback
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        for album in App().player.albums:
-            if album.id == self.__track.album.id:
-                if self.__track.id in album.track_ids:
-                    index = album.track_ids.index(self.__track.id)
-                    track = album.tracks[index]
-                    album.remove_track(track)
-                    break
-        App().player.set_next()
-        App().player.set_prev()
 
     def __append_to_queue(self, action, variant):
         """

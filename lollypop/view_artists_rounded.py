@@ -174,7 +174,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
     def __popup_menu(self, child):
         """
             Popup album menu at position
-            @param child ad AlbumSimpleWidget
+            @param child ad RoundedArtistWidget
         """
         from lollypop.menu_artist import ArtistMenu
         from lollypop.widgets_menu import MenuBuilder
