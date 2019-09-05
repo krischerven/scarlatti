@@ -235,6 +235,7 @@ class DecadePlaybackMenu(BasePlaybackMenu):
         """
         album_ids = []
         for year in self.__years:
+            album_ids += App().albums.get_compilations_for_year(year)
             album_ids += App().albums.get_albums_for_year(year)
         return album_ids
 
