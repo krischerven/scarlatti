@@ -90,10 +90,10 @@ class MenuBuilder(Gtk.Stack):
                     artist_id = header[2]
                     self.__add_artist_header(header_label, artist_id,
                                              menu_name)
-                elif header_type == HeaderType.PLAYLIST:
-                    playlist_id = header[2]
-                    self.__add_playlist_header(header_label, playlist_id,
-                                               menu_name)
+                elif header_type == HeaderType.ROUNDED:
+                    artwork_name = header[2]
+                    self.__add_rounded_header(header_label, artwork_name,
+                                              menu_name)
                 else:
                     icon_name = header[2]
                     self.__add_header(header_label, icon_name, menu_name)
@@ -203,8 +203,8 @@ class MenuBuilder(Gtk.Stack):
     def __add_album_header(self, text, album_id, menu_name):
         """
             Add an header for album to close menu
-            @param text as GLib.Variant
-            @param album_id as GLib.Variant
+            @param text as str
+            @param album_id as int
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
@@ -234,8 +234,8 @@ class MenuBuilder(Gtk.Stack):
     def __add_artist_header(self, text, artist_id, menu_name):
         """
             Add an header for artist to close menu
-            @param text as GLib.Variant
-            @param artist_id as GLib.Variant
+            @param text as str
+            @param artist_id as int
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
@@ -265,11 +265,11 @@ class MenuBuilder(Gtk.Stack):
                 artwork)
         self.__boxes[menu_name].add(button)
 
-    def __add_playlist_header(self, text, playlist_id, menu_name):
+    def __add_rounded_header(self, text, artwork_name, menu_name):
         """
-            Add an header for artist to close menu
-            @param text as GLib.Variant
-            @param playlist_id as GLib.Variant
+            Add an header for rounded widgets to close menu
+            @param text as str
+            @param artwork_name as str
             @param menu_name as str
         """
         def on_load_from_cache(pixbuf, artwork):
@@ -298,10 +298,9 @@ class MenuBuilder(Gtk.Stack):
         grid.add(label)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
-        name = App().playlists.get_name(playlist_id)
         App().task_helper.run(
                 App().art.get_artwork_from_cache,
-                "ROUNDED_playlist_%s" % name,
+                artwork_name,
                 ArtSize.BANNER, ArtSize.BANNER,
                 callback=(on_load_from_cache, artwork))
         self.__boxes[menu_name].add(button)

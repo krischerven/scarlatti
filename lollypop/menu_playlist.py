@@ -31,8 +31,10 @@ class PlaylistMenu(Gio.Menu):
         Gio.Menu.__init__(self)
         self.__playlist_id = playlist_id
         if header:
-            from lollypop.menu_header import PlaylistMenuHeader
-            self.append_item(PlaylistMenuHeader(playlist_id))
+            from lollypop.menu_header import RoundedMenuHeader
+            name = App().playlists.get_name(playlist_id)
+            artwork_name = "ROUNDED_playlist_%s" % name
+            self.append_item(RoundedMenuHeader(name, artwork_name))
         menu = Gio.Menu()
         save_action = Gio.SimpleAction(name="save_pl_action")
         App().add_action(save_action)

@@ -20,7 +20,7 @@ class HeaderType:
     DEFAULT = 1
     ARTIST = 2
     ALBUM = 3
-    PLAYLIST = 4
+    ROUNDED = 4
 
 
 class MenuHeader(Gio.MenuItem):
@@ -62,23 +62,23 @@ class ArtistMenuHeader(Gio.MenuItem):
         self.set_attribute_value("header", GLib.Variant("av", header))
 
 
-class PlaylistMenuHeader(Gio.MenuItem):
+class RoundedMenuHeader(Gio.MenuItem):
     """
         A menu header item for a playlist
     """
 
-    def __init__(self, playlist_id):
+    def __init__(self, name, artwork_name):
         """
             Init menu
-            @param playlist_id as int
+            @param name as str
+            @param artwork_name as str
         """
         Gio.MenuItem.__init__(self)
-        header_type = GLib.Variant("i", HeaderType.PLAYLIST)
-        name = App().playlists.get_name(playlist_id)
+        header_type = GLib.Variant("i", HeaderType.ROUNDED)
         label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(name)
         vlabel = GLib.Variant("s", label)
-        vplaylist_id = GLib.Variant("i", playlist_id)
-        header = [header_type, vlabel, vplaylist_id]
+        vartwork_name = GLib.Variant("s", artwork_name)
+        header = [header_type, vlabel, vartwork_name]
         self.set_attribute_value("header", GLib.Variant("av", header))
 
 
