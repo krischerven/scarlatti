@@ -15,8 +15,8 @@ from gi.repository import Gtk, GLib
 from lollypop.view import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, MARGIN
-from lollypop.utils import get_font_height
+from lollypop.define import ViewType, MARGIN, App
+from lollypop.utils import get_font_height, popup_widget
 
 
 class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
@@ -150,9 +150,41 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         self.__unselect_selected()
 
+    def _on_secondary_press_gesture(self, x, y, event):
+        """
+            Popup menu for artist at position
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        self._on_primary_long_press_gesture(x, y)
+
+    def _on_primary_long_press_gesture(self, x, y):
+        """
+            Popup menu for artist at position
+            @param x as int
+            @param y as int
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        self.__popup_menu(child)
+
 #######################
 # PRIVATE             #
 #######################
+    def __popup_menu(self, child):
+        """
+            Popup album menu at position
+            @param child ad RoundedArtistWidget
+        """
+        from lollypop.widgets_menu import MenuBuilder
+        menu = self._menu_class(child.data, self._view_type,
+                                App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, child.artwork)
+
     def __unselect_selected(self):
         """
             Unselect selected child

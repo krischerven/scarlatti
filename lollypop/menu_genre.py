@@ -14,26 +14,26 @@ from gi.repository import Gio
 
 from gettext import gettext as _
 
-from lollypop.define import ViewType
+from lollypop.define import App, ViewType
 
 
-class DecadeMenu(Gio.Menu):
+class GenreMenu(Gio.Menu):
     """
-        Contextual menu for a decade
+        Contextual menu for a genres
     """
-    def __init__(self, years, view_type, header=False):
+    def __init__(self, genre_id, view_type, header=False):
         """
             Init decade menu
-            @param years as [int]
+            @param genre_id as int
             @param view_type as ViewType
             @param header as bool
         """
         Gio.Menu.__init__(self)
         if header:
             from lollypop.menu_header import RoundedMenuHeader
-            name = "%s - %s" % (years[0], years[-1])
-            artwork_name = "ROUNDED_decade_%s" % name
+            name = App().genres.get_name(genre_id)
+            artwork_name = "ROUNDED_genre_%s" % name
             self.append_item(RoundedMenuHeader(name, artwork_name))
         if not view_type & ViewType.BANNER:
-            from lollypop.menu_playback import DecadePlaybackMenu
-            self.append_section(_("Playback"), DecadePlaybackMenu(years))
+            from lollypop.menu_playback import GenrePlaybackMenu
+            self.append_section(_("Playback"), GenrePlaybackMenu(genre_id))

@@ -20,11 +20,12 @@ from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
-from lollypop.utils import get_font_height, popup_widget
+from lollypop.utils import get_font_height
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_albums import AlbumsBannerWidget
+from lollypop.menu_objects import AlbumMenu
 
 
 class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
@@ -43,6 +44,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         FlowBoxView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self._widget_class = AlbumSimpleWidget
+        self._menu_class = AlbumMenu
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         if genre_ids and genre_ids[0] < 0:
@@ -141,7 +143,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 self.insert_album(Album(album_id), index)
         else:
             for child in self.children:
-                if child.album.id == album_id:
+                if child.data.id == album_id:
                     child.destroy()
                     break
 
@@ -152,7 +154,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param album_id as int
         """
         for child in self._box.get_children():
-            if child.album.id == album_id:
+            if child.data.id == album_id:
                 child.set_artwork()
 
     def _on_child_activated(self, flowbox, child):
@@ -161,43 +163,11 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param flowbox as Gtk.FlowBox
             @param child as Gtk.FlowBoxChild
         """
-        App().window.container.show_view([Type.ALBUM], child.album)
-
-    def _on_secondary_press_gesture(self, x, y, event):
-        """
-            Popup menu for album at position
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
-        """
-        self._on_primary_long_press_gesture(x, y)
-
-    def _on_primary_long_press_gesture(self, x, y):
-        """
-            Popup menu for album at position
-            @param x as int
-            @param y as int
-        """
-        child = self._box.get_child_at_pos(x, y)
-        if child is None or child.artwork is None:
-            return
-        self.__popup_menu(child)
+        App().window.container.show_view([Type.ALBUM], child.data)
 
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, child):
-        """
-            Popup album menu at position
-            @param child ad AlbumSimpleWidget
-        """
-        from lollypop.menu_objects import AlbumMenu
-        from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(child.album, ViewType.ALBUM, App().window.is_adaptive)
-        menu_widget = MenuBuilder(menu)
-        menu_widget.show()
-        popup_widget(menu_widget, child.artwork)
-
     def __on_album_popover_closed(self, popover, album_widget):
         """
             Remove overlay and restore opacity
@@ -238,7 +208,7 @@ class AlbumsGenresBoxView(AlbumsBoxView):
             @param banner as AlbumsBannerWidget
             @param random as bool
         """
-        albums = [c.album for c in self._box.get_children()]
+        albums = [c.data for c in self._box.get_children()]
         if not albums:
             return
         if random:

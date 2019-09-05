@@ -89,7 +89,7 @@ class PlaylistPlaybackMenu(Gio.Menu):
 #######################
     def __play(self, action, variant, playlist_id):
         """
-            Play album
+            Play albums
             @param Gio.SimpleAction
             @param GLib.Variant
             @param playlist_id as int
@@ -161,12 +161,91 @@ class ArtistPlaybackMenu(BasePlaybackMenu):
 #######################
     def __play(self, action, variant):
         """
-            Play album
+            Play albums
             @param Gio.SimpleAction
             @param GLib.Variant
         """
         from lollypop.utils_artist import play_artists
         play_artists([self.__artist_id], [])
+
+
+class GenrePlaybackMenu(BasePlaybackMenu):
+    """
+        Contextual menu for a genre
+    """
+
+    def __init__(self, genre_id):
+        """
+            Init decade menu
+            @param genre_id as int
+        """
+        BasePlaybackMenu.__init__(self)
+        self.__genre_id = genre_id
+        play_action = Gio.SimpleAction(name="genre_play_action")
+        App().add_action(play_action)
+        play_action.connect("activate", self.__play)
+        menu_item = Gio.MenuItem.new(_("Play this genre"),
+                                     "app.genre_play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+        self._set_playback_actions()
+
+    @property
+    def in_player(self):
+        """
+            True if current object in player
+            return bool
+        """
+        album_ids = self.__get_album_ids()
+        return set(App().player.album_ids) & set(album_ids) == set(album_ids)
+
+#######################
+# PROTECTED           #
+#######################
+    def _append_to_playback(self, action, variant):
+        """
+            Append track to playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        album_ids = self.__get_album_ids()
+        for album_id in album_ids:
+            album = Album(album_id)
+            App().player.add_album(album)
+        App().player.update_next_prev()
+
+    def _remove_from_playback(self, action, variant):
+        """
+            Delete track id from playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        album_ids = self.__get_album_ids()
+        for album_id in album_ids:
+            App().player.remove_album_by_id(album_id)
+        App().player.update_next_prev()
+
+#######################
+# PRIVATE             #
+#######################
+    def __get_album_ids(self):
+        """
+            Get album ids for genre
+            @return [int]
+        """
+        album_ids = App().albums.get_compilation_ids([self.__genre_id], True)
+        album_ids += App().albums.get_ids([], [self.__genre_id], True)
+        return album_ids
+
+    def __play(self, action, variant):
+        """
+            Play albums
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        album_ids = self.__get_album_ids()
+        albums = [Album(album_id) for album_id in album_ids]
+        App().player.play_albums(albums)
 
 
 class DecadePlaybackMenu(BasePlaybackMenu):
@@ -241,7 +320,7 @@ class DecadePlaybackMenu(BasePlaybackMenu):
 
     def __play(self, action, variant):
         """
-            Play album
+            Play albums
             @param Gio.SimpleAction
             @param GLib.Variant
         """

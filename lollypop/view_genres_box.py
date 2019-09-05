@@ -17,6 +17,7 @@ from lollypop.widgets_albums_genre import AlbumsGenreWidget
 from lollypop.define import App, Type, ViewType
 from lollypop.utils import get_icon_name
 from lollypop.objects_album import Album
+from lollypop.menu_genre import GenreMenu
 
 
 class GenresBoxView(FlowBoxView):
@@ -31,6 +32,7 @@ class GenresBoxView(FlowBoxView):
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
         FlowBoxView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
         self._widget_class = AlbumsGenreWidget
+        self._menu_class = GenreMenu
         self._empty_icon_name = get_icon_name(Type.GENRES)
         self.__banner = AlbumsBannerWidget([Type.GENRES], [], self._view_type)
         self.__banner.show()

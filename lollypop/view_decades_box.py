@@ -15,8 +15,9 @@ from random import shuffle
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_albums_decade import AlbumsDecadeWidget
 from lollypop.define import App, Type, ViewType, OrderBy
-from lollypop.utils import get_icon_name, popup_widget
+from lollypop.utils import get_icon_name
 from lollypop.objects_album import Album
+from lollypop.menu_decade import DecadeMenu
 
 
 class DecadesBoxView(FlowBoxView):
@@ -31,6 +32,7 @@ class DecadesBoxView(FlowBoxView):
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
         FlowBoxView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
         self._widget_class = AlbumsDecadeWidget
+        self._menu_class = DecadeMenu
         self._empty_icon_name = get_icon_name(Type.YEARS)
         self.__banner = AlbumsBannerWidget([Type.YEARS], [], self._view_type)
         self.__banner.show()
@@ -92,42 +94,9 @@ class DecadesBoxView(FlowBoxView):
         """
         App().window.container.show_view([Type.YEARS], child.data)
 
-    def _on_secondary_press_gesture(self, x, y, event):
-        """
-            Popup menu for artist at position
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
-        """
-        self._on_primary_long_press_gesture(x, y)
-
-    def _on_primary_long_press_gesture(self, x, y):
-        """
-            Popup menu for artist at position
-            @param x as int
-            @param y as int
-        """
-        child = self._box.get_child_at_pos(x, y)
-        if child is None or child.artwork is None:
-            return
-        self.__popup_menu(child)
-
 #######################
 # PRIVATE             #
 #######################
-    def __popup_menu(self, child):
-        """
-            Popup album menu at position
-            @param child ad PlaylistRoundedWidget
-        """
-        from lollypop.menu_decade import DecadeMenu
-        from lollypop.widgets_menu import MenuBuilder
-        menu = DecadeMenu(child.data, self._view_type,
-                          App().window.is_adaptive)
-        menu_widget = MenuBuilder(menu)
-        menu_widget.show()
-        popup_widget(menu_widget, child.artwork)
-
     def __on_banner_play_all(self, banner, random):
         """
             Play all albums

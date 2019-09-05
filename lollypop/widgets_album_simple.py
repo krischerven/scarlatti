@@ -164,7 +164,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             self.__artwork.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
     @property
-    def album(self):
+    def data(self):
         """
             @return Album
         """
