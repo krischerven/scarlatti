@@ -72,17 +72,10 @@ class NotificationManager:
         self.__action.set_icon(icon)
         self.__action.set_title(track.title)
         if track.album.name == "":
-            self.__action.set_body(
-                # TRANSLATORS: by refers to the artist,
-                _("by %s") %
-                ", ".join(track.artists))
+            self.__action.set_body(", ".join(track.artists))
         else:
-            self.__action.set_body(
-                # TRANSLATORS: by refers to the artist,
-                # from to the album
-                _("by %s, from %s") %
-                (", ".join(track.artists),
-                 track.album.name))
+            self.__action.set_body("%s - %s" % (", ".join(track.artists),
+                                                track.album.name))
         App().send_notification("current-changed", self.__action)
         if self.__notification_timeout_id is not None:
             GLib.source_remove(self.__notification_timeout_id)
