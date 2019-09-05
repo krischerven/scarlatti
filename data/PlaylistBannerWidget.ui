@@ -8,12 +8,6 @@
     <property name="icon_name">media-playback-start-symbolic</property>
     <property name="icon_size">3</property>
   </object>
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-jump-symbolic</property>
-    <property name="icon_size">3</property>
-  </object>
   <object class="GtkImage" id="image5">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -111,25 +105,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="jump_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Go to current track</property>
-            <property name="halign">start</property>
-            <property name="image">image2</property>
-            <signal name="clicked" handler="_on_jump_button_clicked" swapped="no"/>
-            <style>
-              <class name="menu-button-48"/>
-              <class name="black-transparent"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left_attach">2</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkButton" id="menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -143,7 +118,7 @@
             </style>
           </object>
           <packing>
-            <property name="left_attach">3</property>
+            <property name="left_attach">2</property>
             <property name="top_attach">0</property>
           </packing>
         </child>

@@ -55,7 +55,6 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         self._view.show()
         self.__banner = PlaylistBannerWidget(playlist_id, self._view)
         self.__banner.connect("scroll", self._on_banner_scroll)
-        self.__banner.connect("jump-to-current", self.__on_jump_to_current)
         self.__banner.show()
         self.add_widget(self._view, self.__banner)
         return [
@@ -211,13 +210,6 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
 #######################
 # PRIVATE             #
 #######################
-    def __on_jump_to_current(self, banner):
-        """
-            Jump to current track
-            @param banner as PlaylistBannerWidget
-        """
-        self._view.jump_to_current(self._scrolled)
-
     def __on_dnd_finished(self, dnd_helper):
         """
             Save playlist if needed

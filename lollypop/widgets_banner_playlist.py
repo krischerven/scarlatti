@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk
 
 from random import shuffle
 
@@ -23,10 +23,6 @@ class PlaylistBannerWidget(BannerWidget):
     """
         Banner for playlist
     """
-
-    __gsignals__ = {
-        "jump-to-current": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
 
     def __init__(self, playlist_id, view):
         """
@@ -44,7 +40,6 @@ class PlaylistBannerWidget(BannerWidget):
         self.__duration_label = builder.get_object("duration")
         self.__play_button = builder.get_object("play_button")
         self.__shuffle_button = builder.get_object("shuffle_button")
-        self.__jump_button = builder.get_object("jump_button")
         self.__menu_button = builder.get_object("menu_button")
         widget = builder.get_object("widget")
         self._overlay.add_overlay(widget)
@@ -82,8 +77,6 @@ class PlaylistBannerWidget(BannerWidget):
                       icon_size, "media-playback-start-symbolic")
         update_button(self.__shuffle_button, style,
                       icon_size, "media-playlist-shuffle-symbolic")
-        update_button(self.__jump_button, style,
-                      icon_size, "go-jump-symbolic")
         update_button(self.__menu_button, style,
                       icon_size, "view-more-symbolic")
 
@@ -98,13 +91,6 @@ class PlaylistBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
-    def _on_jump_button_clicked(self, button):
-        """
-            Scroll to current track
-            @param button as Gtk.Button
-        """
-        self.emit("jump-to-current")
-
     def _on_play_button_clicked(self, button):
         """
             Play playlist
