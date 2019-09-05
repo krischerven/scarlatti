@@ -168,7 +168,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artist import ArtistMenu
-        menu = ArtistMenu(self.__artist_ids[0], App().window.is_adaptive)
+        menu = ArtistMenu(self.__artist_ids[0], ViewType.BANNER,
+                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button)

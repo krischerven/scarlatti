@@ -178,7 +178,8 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         """
         from lollypop.menu_artist import ArtistMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = ArtistMenu(child.data, App().window.is_adaptive)
+        menu = ArtistMenu(child.data, self._view_type,
+                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, child.artwork)

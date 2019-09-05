@@ -16,6 +16,7 @@ from pickle import load, dump
 from gettext import gettext as _
 
 from lollypop.define import StorageType, MARGIN_SMALL, App, CACHE_PATH
+from lollypop.define import ViewType
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_edit import EditMenu
 from lollypop.menu_playback import TrackPlaybackMenu, AlbumPlaybackMenu
@@ -40,7 +41,8 @@ class AlbumMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(album))
-        self.append_section(_("Playback"), AlbumPlaybackMenu(album))
+        if not view_type & ViewType.BANNER:
+            self.append_section(_("Playback"), AlbumPlaybackMenu(album))
         from lollypop.menu_artist import ArtistAlbumsMenu
         self.append_section(_("Artist"),
                             ArtistAlbumsMenu(album.artist_ids[0], view_type))

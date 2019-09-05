@@ -21,20 +21,22 @@ class ArtistMenu(Gio.Menu):
     """
         Contextual menu for artist
     """
-    def __init__(self, artist_id, header=False):
+    def __init__(self, artist_id, view_type, header=False):
         """
             Init artist menu
             @param artist_id as int
+            @param view_type as ViewType
             @param header as bool
         """
         Gio.Menu.__init__(self)
         if header:
             from lollypop.menu_header import ArtistMenuHeader
             self.append_item(ArtistMenuHeader(artist_id))
-        from lollypop.menu_playback import ArtistPlaybackMenu
-        self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
+        if not view_type & ViewType.BANNER:
+            from lollypop.menu_playback import ArtistPlaybackMenu
+            self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
         self.append_section(_("Albums"),
-                            ArtistAlbumsMenu(artist_id, ViewType.ALBUM))
+                            ArtistAlbumsMenu(artist_id, view_type))
 
 
 class ArtistAlbumsMenu(Gio.Menu):
@@ -60,7 +62,7 @@ class ArtistAlbumsMenu(Gio.Menu):
             Set artist actions
             @param view_type as ViewType
         """
-        if view_type & ViewType.ALBUM:
+        if not view_type & ViewType.BANNER:
             go_artist_action = Gio.SimpleAction(name="go_artist_action")
             App().add_action(go_artist_action)
             go_artist_action.connect("activate",

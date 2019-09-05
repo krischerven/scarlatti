@@ -86,6 +86,7 @@ class ViewType:
     OVERLAY = 1 << 9
     FULLSCREEN = 1 << 10
     PLAYBACK = 1 << 11
+    BANNER = 1 << 12
 
 
 NetworkAccessACL = {
