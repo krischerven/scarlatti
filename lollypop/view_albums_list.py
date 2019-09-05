@@ -10,9 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gdk
+from gi.repository import Gtk, GLib
 
-from lollypop.utils import do_shift_selection, popup_widget
+from lollypop.utils import popup_widget
 from lollypop.utils import update_track_indexes
 from lollypop.view import LazyLoadingView
 from lollypop.objects_album import Album
@@ -229,16 +229,8 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         row = self._box.get_row_at_y(y)
         if row is None:
             return
-        if event.state & Gdk.ModifierType.CONTROL_MASK and\
-                self._view_type & ViewType.POPOVER:
-            self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-        elif event.state & Gdk.ModifierType.SHIFT_MASK and\
-                self._view_type & ViewType.POPOVER:
-            self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-            do_shift_selection(self._box, row)
-        else:
-            self._box.set_selection_mode(Gtk.SelectionMode.NONE)
-            row.reveal()
+        self._box.set_selection_mode(Gtk.SelectionMode.NONE)
+        row.reveal()
 
     def _on_secondary_press_gesture(self, x, y, event):
         """

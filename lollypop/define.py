@@ -79,15 +79,14 @@ class ViewType:
     DND = 1 << 2
     SEARCH = 1 << 3
     PLAYLISTS = 1 << 4
-    POPOVER = 1 << 5
-    ALBUM = 1 << 6
-    SMALL = 1 << 7
-    MEDIUM = 1 << 8
-    SCROLLED = 1 << 9
-    OVERLAY = 1 << 10
-    FULLSCREEN = 1 << 11
-    NO_PADDING = 1 << 12
-    PLAYBACK = 1 << 13
+    ALBUM = 1 << 5
+    SMALL = 1 << 6
+    MEDIUM = 1 << 7
+    SCROLLED = 1 << 8
+    OVERLAY = 1 << 9
+    FULLSCREEN = 1 << 10
+    NO_PADDING = 1 << 11
+    PLAYBACK = 1 << 12
 
 
 NetworkAccessACL = {
