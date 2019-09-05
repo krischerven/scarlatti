@@ -16,9 +16,10 @@ from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
 from lollypop.utils import get_round_surface
 from lollypop.menu_header import HeaderType
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class MenuBuilder(Gtk.Stack):
+class MenuBuilder(Gtk.Stack, SignalsHelper):
     """
         Advanced menu model constructor
         Does not support submenus
@@ -29,6 +30,7 @@ class MenuBuilder(Gtk.Stack):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
+    @signals_map
     def __init__(self, menu):
         """
             Init menu
@@ -39,6 +41,21 @@ class MenuBuilder(Gtk.Stack):
         self.__add_menu(menu, "main")
         self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
+        return [
+            (App().window, "adaptive-changed", "_on_adaptive_changed")
+        ]
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_adaptive_changed(self, window, status):
+        """
+            Destroy self if adaptive off
+            @param window as Window
+            @param status as bool
+        """
+        if not status:
+            self.destroy()
 
 #######################
 # PRIVATE             #
