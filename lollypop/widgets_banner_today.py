@@ -110,11 +110,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param view_type as ViewType
         """
         BannerWidget.set_view_type(self, view_type)
-        if view_type & ViewType.ADAPTIVE:
-            art_size = ArtSize.MEDIUM
-        else:
-            art_size = ArtSize.BANNER
-        self.__cover_widget.set_artwork(art_size)
+        self.__cover_widget.set_view_type(view_type)
         self.__set_text_height()
 
 #######################

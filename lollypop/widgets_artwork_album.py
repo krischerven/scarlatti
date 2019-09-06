@@ -50,9 +50,9 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             label = Gtk.Label.new()
             label.show()
             self.__artwork = Gtk.Image.new()
-            name = "<span alpha='40000'>%s</span>" % self.__artist
+            name = "<span alpha='40000'>%s</span>" % album.name
             App().art_helper.set_album_artwork(
-                                            self.__album,
+                                            album,
                                             ArtSize.SMALL,
                                             ArtSize.SMALL,
                                             self.__artwork.get_scale_factor(),
@@ -80,7 +80,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             uris = App().art.get_album_artworks(self.__album)
             # Direct load, not using loopback because not many items
             for uri in uris:
-                child = ArtworkSearchChild(_("Local"))
+                child = ArtworkSearchChild(_("Local"), self._view_type)
                 child.show()
                 f = Gio.File.new_for_uri(uri)
                 (status, content, tag) = f.load_contents()

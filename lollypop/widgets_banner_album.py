@@ -104,13 +104,11 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param view_type as ViewType
         """
         BannerWidget.set_view_type(self, view_type)
-        art_size = 0
+        self.__cover_widget.set_view_type(view_type)
         if view_type & ViewType.ADAPTIVE:
-            art_size = ArtSize.MEDIUM
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
         else:
-            art_size = ArtSize.BANNER
             style = "menu-button-48"
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
         self.__rating_widget.set_icon_size(icon_size)
@@ -118,7 +116,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if self.__cloud_image is not None:
             self.__cloud_image.set_from_icon_name("goa-panel-symbolic",
                                                   icon_size)
-        self.__cover_widget.set_artwork(art_size)
         for (button, icon_name) in [
                        (self.__menu_button, "view-more-symbolic"),
                        (self.__play_button, "media-playback-start-symbolic"),
