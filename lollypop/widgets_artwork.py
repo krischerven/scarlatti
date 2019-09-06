@@ -137,6 +137,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self._flowbox.set_property("row-spacing", 10)
         self._flowbox.set_property("valign", Gtk.Align.START)
         self._flowbox.set_vexpand(True)
+        self._flowbox.set_homogeneous(True)
         self._flowbox.show()
 
         self.__label = builder.get_object("label")
