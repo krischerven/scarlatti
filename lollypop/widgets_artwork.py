@@ -103,7 +103,7 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         return self.__bytes
 
 
-class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
+class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
     """
         Search for artwork
     """
@@ -114,7 +114,7 @@ class ArtworkSearchWidget(Gtk.Bin, SignalsHelper):
             Init widget
             @param view_type as ViewType
         """
-        Gtk.Bin.__init__(self)
+        Gtk.Grid.__init__(self)
         self._view_type = view_type
         self.__timeout_id = None
         self.__uri_artwork_id = None

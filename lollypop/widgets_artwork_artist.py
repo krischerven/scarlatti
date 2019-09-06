@@ -10,11 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GObject
+from gi.repository import Gio, GObject, Gtk
 
 from lollypop.logger import Logger
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
-from lollypop.define import App
+from lollypop.define import App, ViewType, ArtSize, ArtBehaviour, MARGIN
+from lollypop.define import MARGIN_SMALL
 
 
 class ArtistArtworkSearchWidget(ArtworkSearchWidget):
@@ -34,6 +35,39 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__artist = App().artists.get_name(artist_id)
+        if view_type & ViewType.MEDIUM:
+            self.set_row_spacing(MARGIN)
+            self.set_margin_start(MARGIN_SMALL)
+            self.set_margin_end(MARGIN_SMALL)
+            self.set_margin_top(MARGIN)
+            self.set_margin_bottom(MARGIN)
+            button = Gtk.ModelButton.new()
+            button.set_alignment(0, 0.5)
+            button.connect("clicked", lambda x: self.emit("closed"))
+            button.show()
+            label = Gtk.Label.new()
+            label.show()
+            self.__artwork = Gtk.Image.new()
+            name = "<span alpha='40000'>%s</span>" % self.__artist
+            App().art_helper.set_artist_artwork(
+                                       self.__artist,
+                                       ArtSize.SMALL,
+                                       ArtSize.SMALL,
+                                       self.__artwork.get_scale_factor(),
+                                       ArtBehaviour.ROUNDED |
+                                       ArtBehaviour.CROP_SQUARE |
+                                       ArtBehaviour.CACHE,
+                                       self.__on_artist_artwork)
+            self.__artwork.show()
+            label.set_markup(name)
+            grid = Gtk.Grid()
+            grid.set_column_spacing(MARGIN)
+            grid.add(self.__artwork)
+            grid.add(label)
+            button.set_image(grid)
+            button.get_style_context().add_class("padding")
+            self.insert_row(0)
+            self.attach(button, 0, 0, 1, 1)
 
 #######################
 # PROTECTED           #
@@ -89,3 +123,17 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             self.emit("closed")
         except Exception as e:
             Logger.error("ArtistArtworkSearchWidget::_on_activate(): %s", e)
+
+    def __on_artist_artwork(self, surface):
+        """
+            Set artist artwork
+            @param surface as cairo.Surface
+        """
+        if surface is None:
+            self.__artwork.get_style_context().add_class("artwork-icon")
+            self.__artwork.set_size_request(ArtSize.SMALL, ArtSize.SMALL)
+            self.__artwork.set_from_icon_name("avatar-default-symbolic",
+                                              Gtk.IconSize.DIALOG)
+        else:
+            self.__artwork.get_style_context().remove_class("artwork-icon")
+            self.__artwork.set_from_surface(surface)
