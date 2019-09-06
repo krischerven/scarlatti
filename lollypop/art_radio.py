@@ -94,9 +94,7 @@ class RadioArt:
                 filepath = self.__get_radio_art_path(name)
                 f = Gio.File.new_for_path(filepath)
                 if f.query_exists():
-                    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(filepath,
-                                                                    width,
-                                                                    height)
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filepath)
                     pixbuf = self.load_behaviour(pixbuf, cache_path_png,
                                                  width, height, behaviour)
         except Exception as e:

@@ -73,10 +73,8 @@ class BaseArt(GObject.GObject):
         # Crop image as square
         if behaviour & ArtBehaviour.CROP_SQUARE:
             pixbuf = self._crop_pixbuf_square(pixbuf)
-            pixbuf = pixbuf.scale_simple(width, height,
-                                         GdkPixbuf.InterpType.BILINEAR)
         # Crop image keeping ratio
-        if behaviour & ArtBehaviour.CROP:
+        elif behaviour & ArtBehaviour.CROP:
             pixbuf = self._crop_pixbuf(pixbuf, width, height)
 
         # Handle blur
@@ -95,10 +93,6 @@ class BaseArt(GObject.GObject):
                                          height,
                                          GdkPixbuf.InterpType.NEAREST)
             pixbuf = self._get_blur(pixbuf, 100)
-        elif behaviour & ArtBehaviour.CROP:
-            pixbuf = pixbuf.scale_simple(width,
-                                         height,
-                                         GdkPixbuf.InterpType.HYPER)
         else:
             pixbuf = pixbuf.scale_simple(width,
                                          height,
