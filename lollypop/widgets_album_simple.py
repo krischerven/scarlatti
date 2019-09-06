@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
-from lollypop.define import MARGIN_SMALL, Type
+from lollypop.define import MARGIN_SMALL
 from lollypop.utils import on_query_tooltip, set_cursor_type
 
 
@@ -79,16 +79,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             self.__artwork = Gtk.Image.new()
             self.__artwork.connect("realize", set_cursor_type)
             grid.add(self.__artwork)
-            if self.__view_type & ViewType.SMALL:
-                grid.add(self.__label)
-            else:
-                toggle_button = Gtk.ToggleButton.new()
-                toggle_button.set_image(self.__label)
-                toggle_button.set_relief(Gtk.ReliefStyle.NONE)
-                toggle_button.get_style_context().add_class("light-button")
-                toggle_button.connect("toggled", self.__on_label_toggled)
-                toggle_button.show()
-                grid.add(toggle_button)
+            grid.add(self.__label)
             self.set_artwork()
             self.set_selection()
             self.connect("destroy", self.__on_destroy)
@@ -214,28 +205,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             self.__artwork.set_from_surface(surface)
         self.show_all()
         self.emit("populated")
-
-    def __on_label_toggled(self, button):
-        """
-            Show tracks popover
-            @param button as Gtk.ToggleButton
-        """
-        def on_closed(popover):
-            button.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            button.set_active(False)
-
-        if not button.get_active():
-            return
-        if App().window.is_adaptive:
-            App().window.container.show_view([Type.ALBUM], self.__album)
-        else:
-            from lollypop.pop_tracks import TracksPopover
-            popover = TracksPopover(self.__album)
-            popover.set_relative_to(button)
-            popover.set_position(Gtk.PositionType.BOTTOM)
-            popover.connect("closed", on_closed)
-            popover.popup()
-            button.set_state_flags(Gtk.StateFlags.VISITED, True)
 
     def __on_destroy(self, widget):
         """
