@@ -134,7 +134,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         self.__view_type = view_type
         if self.__view_type & ViewType.SMALL:
             self.__art_size = ArtSize.MEDIUM
-        elif self.__view_type & ViewType.MEDIUM:
+        elif self.__view_type & ViewType.ADAPTIVE:
             self.__art_size = ArtSize.BANNER
         else:
             self.__art_size = ArtSize.BIG

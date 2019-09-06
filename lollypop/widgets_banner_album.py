@@ -105,7 +105,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.set_view_type(self, view_type)
         art_size = 0
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             art_size = ArtSize.MEDIUM
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
@@ -254,7 +254,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             title_context.remove_class(c)
         for c in info_context.list_classes():
             info_context.remove_class(c)
-        if self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
+        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
             self.__info_label.get_style_context().add_class(

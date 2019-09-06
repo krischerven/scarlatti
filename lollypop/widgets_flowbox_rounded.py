@@ -76,7 +76,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self.__view_type = view_type
         if self.__view_type & ViewType.SMALL:
             self._art_size = ArtSize.MEDIUM
-        elif self.__view_type & ViewType.MEDIUM:
+        elif self.__view_type & ViewType.ADAPTIVE:
             self._art_size = ArtSize.BANNER
         else:
             self._art_size = ArtSize.BIG

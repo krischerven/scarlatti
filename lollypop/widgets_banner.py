@@ -108,7 +108,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
             Get wanted height
             @return int
         """
-        if self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
+        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
             return ArtSize.MEDIUM + MARGIN * 2
         else:
             return ArtSize.BANNER + MARGIN * 2

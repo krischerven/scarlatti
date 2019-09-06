@@ -174,7 +174,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             View type less sizing
             @return ViewType
         """
-        return self._view_type & ~(ViewType.MEDIUM | ViewType.SMALL)
+        return self._view_type & ~(ViewType.ADAPTIVE | ViewType.SMALL)
 
     @property
     def position(self):
@@ -230,9 +230,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         if self.__placeholder is not None and self.__placeholder.is_visible():
             self.__placeholder.set_adaptive(status)
         if status:
-            self._view_type |= ViewType.MEDIUM
+            self._view_type |= ViewType.ADAPTIVE
         else:
-            self._view_type &= ~ViewType.MEDIUM
+            self._view_type &= ~ViewType.ADAPTIVE
         if self.__banner is not None:
             self.__banner.set_view_type(self._view_type)
             main_widget = self.__stack.get_child_by_name("main")

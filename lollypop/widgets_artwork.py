@@ -73,7 +73,7 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                                           pixbuf.get_width(),
                                           pixbuf.get_height())
                 self.__label.set_text(text)
-                if self.__view_type & ViewType.MEDIUM:
+                if self.__view_type & ViewType.ADAPTIVE:
                     art_size = ArtSize.MEDIUM
                 else:
                     art_size = ArtSize.BIG
@@ -142,7 +142,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self.__label = builder.get_object("label")
         self.__label.set_text(_("Select artwork"))
 
-        if self._view_type & ViewType.MEDIUM:
+        if self._view_type & ViewType.ADAPTIVE:
             widget.add(self._flowbox)
         else:
             scrolled = Gtk.ScrolledWindow.new()
@@ -169,7 +169,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             grid.show()
             grid.set_row_spacing(5)
-            if self._view_type & ViewType.MEDIUM:
+            if self._view_type & ViewType.ADAPTIVE:
                 art_size = ArtSize.MEDIUM
             else:
                 art_size = ArtSize.BIG

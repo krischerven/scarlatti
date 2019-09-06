@@ -65,7 +65,7 @@ class PlaylistBannerWidget(BannerWidget):
             title_context.remove_class(c)
         for c in duration_context.list_classes():
             duration_context.remove_class(c)
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")

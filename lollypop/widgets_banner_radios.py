@@ -67,7 +67,7 @@ class RadiosBannerWidget(BannerWidget):
         BannerWidget.set_view_type(self, view_type)
         button_context = self.__new_button.get_style_context()
         button_context.remove_class("text-large")
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
         else:

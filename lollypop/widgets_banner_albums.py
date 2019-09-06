@@ -95,7 +95,7 @@ class AlbumsBannerWidget(BannerWidget):
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")

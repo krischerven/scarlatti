@@ -48,7 +48,7 @@ class SearchBannerWidget(BannerWidget):
             @param view_type as ViewType
         """
         BannerWidget.set_view_type(self, view_type)
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
             self.__entry.set_size_request(200, -1)

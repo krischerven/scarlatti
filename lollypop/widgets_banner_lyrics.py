@@ -85,7 +85,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param view_type as ViewType
         """
         BannerWidget.set_view_type(self, view_type)
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             art_size = ArtSize.MEDIUM
         else:
             art_size = ArtSize.BANNER
@@ -181,7 +181,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self._view_type & (ViewType.MEDIUM | ViewType.SMALL):
+        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
         else:

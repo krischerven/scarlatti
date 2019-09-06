@@ -35,7 +35,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__artist = App().artists.get_name(artist_id)
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             self.set_row_spacing(MARGIN)
             self.set_margin_start(MARGIN_SMALL)
             self.set_margin_end(MARGIN_SMALL)

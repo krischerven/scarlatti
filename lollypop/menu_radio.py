@@ -67,7 +67,7 @@ class RadioMenu(Gtk.Grid):
         self.__stack.add_named(builder.get_object("widget"), "widget")
         self.__stack.set_visible_child_name("widget")
 
-        if view_type & ViewType.MEDIUM:
+        if view_type & ViewType.ADAPTIVE:
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
             button.connect("clicked", lambda x: self.emit("closed"))
@@ -102,7 +102,7 @@ class RadioMenu(Gtk.Grid):
             self.add(button)
         self.add(self.__stack)
         if radio is not None:
-            if view_type & ViewType.MEDIUM:
+            if view_type & ViewType.ADAPTIVE:
                 rating = RatingWidget(radio, Gtk.IconSize.DND)
             else:
                 rating = RatingWidget(radio)
