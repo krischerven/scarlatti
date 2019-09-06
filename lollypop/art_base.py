@@ -99,7 +99,6 @@ class BaseArt(GObject.GObject):
             pixbuf = pixbuf.scale_simple(width,
                                          height,
                                          GdkPixbuf.InterpType.HYPER)
-            pass
         else:
             pixbuf = pixbuf.scale_simple(width,
                                          height,
