@@ -124,7 +124,6 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         widget = builder.get_object("widget")
         self.__stack = builder.get_object("stack")
         self.__entry = builder.get_object("entry")
-        self.__back_button = builder.get_object("back_button")
         self.__spinner = builder.get_object("spinner")
 
         self._flowbox = Gtk.FlowBox()
@@ -169,7 +168,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             grid.set_row_spacing(5)
             image = Gtk.Image.new_from_icon_name("edit-clear-all-symbolic",
                                                  Gtk.IconSize.INVALID)
-            image.set_pixel_size(ArtSize.BANNER)
+            image.set_pixel_size(ArtSize.MEDIUM)
             context = image.get_style_context()
             context.add_class("cover-frame")
             padding = context.get_padding(Gtk.StateFlags.NORMAL)
