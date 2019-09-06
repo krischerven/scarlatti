@@ -198,6 +198,6 @@ class RadioMenu(Gtk.Grid):
         if surface is None:
             self.__artwork.set_from_icon_name(
                                              "audio-input-microphone-symbolic",
-                                             Gtk.IconSize.DIALOG)
+                                             Gtk.IconSize.BUTTON)
         else:
             self.__artwork.set_from_surface(surface)
