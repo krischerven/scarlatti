@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk, Gio, Pango
+from gi.repository import GLib, Gdk, Gtk, Gio, Pango
 
 from gettext import gettext as _
 from random import shuffle
@@ -173,6 +173,32 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param child as Gtk.FlowBoxChild
         """
         App().window.container.show_view([Type.ALBUM], child.data)
+
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Popup tracks menu at position
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        if event.state & Gdk.ModifierType.CONTROL_MASK:
+            self._on_tertiary_press_gesture(x, y, event)
+
+    def _on_tertiary_press_gesture(self, x, y, event):
+        """
+            Popup tracks menu at position
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        from lollypop.pop_tracks import TracksPopover
+        popover = TracksPopover(child.data)
+        popover.set_relative_to(child.artwork)
+        popover.set_position(Gtk.PositionType.BOTTOM)
+        popover.popup()
 
 #######################
 # PRIVATE             #

@@ -60,16 +60,17 @@ class StorageType:
 class ArtBehaviour:
     NONE = 1 << 0
     ROUNDED = 1 << 1
-    BLUR = 1 << 2
-    BLUR_HARD = 1 << 3
-    BLUR_MAX = 1 << 4
-    FALLBACK = 1 << 5
-    DARKER = 1 << 6
-    LIGHTER = 1 << 7
-    CROP = 1 << 8
-    CROP_SQUARE = 1 << 9
-    CACHE = 1 << 10
-    NO_CACHE = 1 << 11
+    ROUNDED_BORDER = 1 << 2
+    BLUR = 1 << 3
+    BLUR_HARD = 1 << 4
+    BLUR_MAX = 1 << 5
+    FALLBACK = 1 << 6
+    DARKER = 1 << 7
+    LIGHTER = 1 << 8
+    CROP = 1 << 9
+    CROP_SQUARE = 1 << 10
+    CACHE = 1 << 11
+    NO_CACHE = 1 << 12
 
 
 class ViewType:

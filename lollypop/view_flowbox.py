@@ -160,7 +160,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
-            Popup menu for artist at position
+            Popup menu at position
             @param x as int
             @param y as int
             @param event as Gdk.Event
@@ -169,7 +169,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 
     def _on_primary_long_press_gesture(self, x, y):
         """
-            Popup menu for artist at position
+            Popup menu at position
             @param x as int
             @param y as int
         """

@@ -21,7 +21,8 @@ class GesturesHelper():
     def __init__(self, widget, primary_long_callback=None,
                  secondary_long_callback=None,
                  primary_press_callback=None,
-                 secondary_press_callback=None):
+                 secondary_press_callback=None,
+                 tertiary_press_callback=None):
         """
             Init helper
             @param widget as Gtk.Widget
@@ -31,6 +32,7 @@ class GesturesHelper():
         self.__secondary_long_callback = secondary_long_callback
         self.__primary_press_callback = primary_press_callback
         self.__secondary_press_callback = secondary_press_callback
+        self.__tertiary_press_callback = tertiary_press_callback
         self.__long_press = Gtk.GestureLongPress.new(widget)
         self.__long_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__long_press.connect("pressed", self.__on_long_pressed)
@@ -64,6 +66,10 @@ class GesturesHelper():
     def _on_secondary_press_gesture(self, x, y, event):
         if self.__secondary_press_callback is not None:
             self.__secondary_press_callback(x, y, event)
+
+    def _on_tertiary_press_gesture(self, x, y, event):
+        if self.__tertiary_press_callback is not None:
+            self.__tertiary_press_callback(x, y, event)
 
 #######################
 # PRIVATE             #
@@ -105,5 +111,7 @@ class GesturesHelper():
         event = gesture.get_last_event(sequence)
         if gesture.get_current_button() == 1:
             self._on_primary_press_gesture(x, y, event)
+        elif gesture.get_current_button() == 2:
+            self._on_tertiary_press_gesture(x, y, event)
         else:
             self._on_secondary_press_gesture(x, y, event)
