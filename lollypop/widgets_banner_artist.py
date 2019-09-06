@@ -49,7 +49,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_property("has-tooltip", True)
         self.__add_button = builder.get_object("add_button")
         self.__play_button = builder.get_object("play_button")
-        self.__lastfm_button = builder.get_object("lastfm_button")
         self.__menu_button = builder.get_object("menu_button")
         builder.get_object("buttons").set_margin_end(MARGIN)
         builder.get_object("artwork_event").connect(
@@ -99,8 +98,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         for (button, icon_name) in [
                 (self.__play_button, "media-playback-start-symbolic"),
                 (self.__add_button, "list-add-symbolic"),
-                (self.__menu_button, "view-more-symbolic"),
-                (self.__lastfm_button, "system-users-symbolic")]:
+                (self.__menu_button, "view-more-symbolic")]:
             button_style_context = button.get_style_context()
             button_style_context.remove_class("menu-button-48")
             button_style_context.remove_class("menu-button")
@@ -168,24 +166,19 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artist import ArtistMenu
+        from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(self.__artist_ids[0], ViewType.BANNER,
                           App().window.is_adaptive)
-        menu_widget = MenuBuilder(menu)
+        menu_widget = MenuBuilder(menu, True)
+        scrolled = menu_widget.get_child_by_name("main")
         menu_widget.show()
+        menu_ext = SimilarsMenu()
+        menu_ext.show()
+        menu_ext.populate(self.__artist_ids)
+        # scrolled -> viewport -> box
+        scrolled.get_child().get_child().add(menu_ext)
+        scrolled.set_size_request(300, 400)
         popup_widget(menu_widget, button)
-
-    def _on_similars_button_toggled(self, button):
-        """
-            Show similar artists
-            @param button as Gtk.Button
-        """
-        if button.get_active():
-            from lollypop.pop_similars import SimilarsPopover
-            popover = SimilarsPopover()
-            popover.set_relative_to(button)
-            popover.populate(self.__artist_ids)
-            popover.connect("closed", lambda x: button.set_active(False))
-            popover.popup()
 
     def _on_badge_button_release(self, eventbox, event):
         """

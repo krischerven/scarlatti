@@ -12,11 +12,6 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-missing-image</property>
   </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-missing-image</property>
-  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -122,25 +117,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkToggleButton" id="lastfm_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Similar artists</property>
-            <property name="image">image3</property>
-            <signal name="toggled" handler="_on_similars_button_toggled" swapped="no"/>
-            <style>
-              <class name="menu-button-48"/>
-              <class name="black-transparent"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkButton" id="menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -156,7 +132,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <style>

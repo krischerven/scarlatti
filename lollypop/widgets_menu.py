@@ -30,14 +30,15 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
     }
 
     @signals_map
-    def __init__(self, menu):
+    def __init__(self, menu, scrolled=False):
         """
             Init menu
             @param menu as Gio.Menu
+            @param scrolled as bool
         """
         Gtk.Stack.__init__(self)
         self.__boxes = {}
-        self.__add_menu(menu, "main")
+        self.__add_menu(menu, "main", False, scrolled)
         return [
             (App().window, "adaptive-changed", "_on_adaptive_changed")
         ]
@@ -57,12 +58,13 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __add_menu(self, menu, menu_name, submenu=False):
+    def __add_menu(self, menu, menu_name, submenu, scrolled):
         """
             Build menu
             @param menu as Gio.Menu
             @param menu_name as str
-            @param submenu = False
+            @param submenu as bool
+            @param scrolled as bool
         """
         box = self.get_child_by_name(menu_name)
         if box is None:
@@ -71,13 +73,16 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             self.__boxes[menu_name] = box
             box.set_property("margin", 10)
             box.show()
-            if submenu:
+            if scrolled:
                 scrolled = Gtk.ScrolledWindow()
                 scrolled.set_policy(Gtk.PolicyType.NEVER,
                                     Gtk.PolicyType.AUTOMATIC)
                 scrolled.show()
                 scrolled.add(box)
                 self.add_named(scrolled, menu_name)
+            else:
+                self.add_named(box, menu_name)
+            if submenu:
                 button = Gtk.ModelButton.new()
                 button.get_style_context().add_class("padding")
                 button.set_property("menu-name", "main")
@@ -85,8 +90,6 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.set_label(menu_name)
                 button.show()
                 box.add(button)
-            else:
-                self.add_named(box, menu_name)
         n_items = menu.get_n_items()
         for i in range(0, n_items):
             header = menu.get_item_attribute_value(i, "header")
@@ -170,7 +173,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         box.add(sep2)
         box.show_all()
         self.__boxes[menu_name].add(box)
-        self.__add_menu(menu, menu_name)
+        self.__add_menu(menu, menu_name, False, False)
 
     def __add_submenu(self, text, menu, menu_name):
         """
@@ -180,7 +183,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         submenu_name = text.get_string()
-        self.__add_menu(menu, submenu_name, True)
+        self.__add_menu(menu, submenu_name, True, True)
         button = Gtk.ModelButton.new()
         button.set_property("menu-name", submenu_name)
         button.set_label(text.get_string())

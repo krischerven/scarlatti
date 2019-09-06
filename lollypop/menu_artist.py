@@ -37,6 +37,8 @@ class ArtistMenu(Gio.Menu):
             self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
         self.append_section(_("Albums"),
                             ArtistAlbumsMenu(artist_id, ViewType.BANNER))
+        section = Gio.Menu()
+        self.append_section(_("Similar artists"), section)
 
 
 class ArtistAlbumsMenu(Gio.Menu):

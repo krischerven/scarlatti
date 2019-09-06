@@ -13,7 +13,6 @@
 from gi.repository import Gtk, Gio, GLib, Pango
 
 from lollypop.define import App, ArtSize, ArtBehaviour
-from lollypop.widgets_utils import Popover
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
 
@@ -112,7 +111,7 @@ class ArtistRow(Gtk.ListBoxRow):
             self.__artwork.set_from_surface(surface)
 
 
-class SimilarsPopover(Popover):
+class SimilarsMenu(Gtk.Bin):
     """
         A popover with similar artists
     """
@@ -121,17 +120,22 @@ class SimilarsPopover(Popover):
         """
             Init popover
         """
-        Popover.__init__(self)
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/SimilarsPopover.ui")
-        path = GLib.get_user_data_dir() + "/lollypop/python/bin/youtube-dl"
-        self.__show_all = GLib.file_test(path, GLib.FileTest.EXISTS)
+        Gtk.Bin.__init__(self)
+        if App().settings.get_value("recent-youtube-dl"):
+            path = GLib.get_user_data_dir() + "/lollypop/python/bin/youtube-dl"
+            self.__show_all = GLib.file_test(path, GLib.FileTest.EXISTS)
+        else:
+            self.__show_all = GLib.find_program_in_path(
+                "youtube-dl") is not None
         self.__added = []
         self.__cancellable = Gio.Cancellable()
-        self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
-        self.__stack = builder.get_object("stack")
-        self.__spinner = builder.get_object("spinner")
+        self.__stack = Gtk.Stack.new()
+        self.__stack.show()
+        self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.__stack.set_transition_duration(200)
+        self.__spinner = Gtk.Spinner.new()
+        self.__spinner.show()
         self.__spinner.start()
         self.__listbox = Gtk.ListBox()
         self.__listbox.get_style_context().add_class("trackswidget")
@@ -140,8 +144,9 @@ class SimilarsPopover(Popover):
         self.__listbox.set_activate_on_single_click(True)
         self.__listbox.connect("row-activated", self.__on_row_activated)
         self.__listbox.show()
+        self.__stack.add(self.__spinner)
         self.__stack.add(self.__listbox)
-        self.add(builder.get_object("widget"))
+        self.add(self.__stack)
 
     def populate(self, artist_ids):
         """
@@ -200,13 +205,6 @@ class SimilarsPopover(Popover):
                                   callback=(self.__on_similar_artists,
                                             providers))
 
-    def __on_map(self, widget):
-        """
-            Resize widget on map
-            @param widget as Gtk.Widget
-        """
-        self.set_size_request(300, 400)
-
     def __on_unmap(self, widget):
         """
             Cancel loading
@@ -220,7 +218,6 @@ class SimilarsPopover(Popover):
             @param widget as Gtk.ListBox
             @param row as Gtk.ListBoxRow
         """
-        self.popdown()
         artist_name = row.artist_name
         (artist_id, name) = App().artists.get_id(artist_name)
         if artist_id is None:
@@ -238,7 +235,7 @@ class SimilarsPopover(Popover):
         if artists:
             (spotify_id, artist, cover_uri) = artists.pop(0)
             if artist in self.__added:
-                return
+                GLib.idle_add(self.__on_similar_artists, artists, providers)
             self.__added.append(artist)
             (artist_id, name) = App().artists.get_id(artist)
             row = None
