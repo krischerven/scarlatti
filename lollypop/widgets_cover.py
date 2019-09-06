@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.utils import set_cursor_type, popup_widget
@@ -99,7 +99,8 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         artwork_search = AlbumArtworkSearchWidget(self.__album,
                                                   self.__view_type)
         artwork_search.show()
-        artwork_search.populate()
+        # Let current animation run
+        GLib.timeout_add(250, artwork_search.populate)
         popup_widget(artwork_search, self)
 
 #######################

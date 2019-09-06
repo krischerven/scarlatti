@@ -197,7 +197,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         artwork_search = ArtistArtworkSearchWidget(self.__artist_ids[0],
                                                    self._view_type)
         artwork_search.show()
-        artwork_search.populate()
+        # Let current animation run
+        GLib.timeout_add(250, artwork_search.populate)
         popup_widget(artwork_search, eventbox)
 
     def _on_artist_artwork_changed(self, art, prefix):
