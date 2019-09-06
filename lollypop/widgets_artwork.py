@@ -73,15 +73,12 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                                           pixbuf.get_width(),
                                           pixbuf.get_height())
                 self.__label.set_text(text)
-                if self.__view_type & ViewType.ADAPTIVE:
-                    art_size = ArtSize.MEDIUM
-                else:
-                    art_size = ArtSize.BIG
-                pixbuf = App().art.load_behaviour(pixbuf,
-                                                  None,
-                                                  art_size * scale_factor,
-                                                  art_size * scale_factor,
-                                                  ArtBehaviour.CROP)
+                pixbuf = App().art.load_behaviour(
+                                                pixbuf,
+                                                None,
+                                                ArtSize.BANNER * scale_factor,
+                                                ArtSize.BANNER * scale_factor,
+                                                ArtBehaviour.CROP)
                 stream.close()
             self.__bytes = bytes
             surface = Gdk.cairo_surface_create_from_pixbuf(
@@ -170,20 +167,16 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             grid.show()
             grid.set_row_spacing(5)
-            if self._view_type & ViewType.ADAPTIVE:
-                art_size = ArtSize.MEDIUM
-            else:
-                art_size = ArtSize.BIG
             image = Gtk.Image.new_from_icon_name("edit-clear-all-symbolic",
                                                  Gtk.IconSize.INVALID)
-            image.set_pixel_size(art_size)
+            image.set_pixel_size(ArtSize.BANNER)
             context = image.get_style_context()
             context.add_class("cover-frame")
             padding = context.get_padding(Gtk.StateFlags.NORMAL)
             border = context.get_border(Gtk.StateFlags.NORMAL)
-            image.set_size_request(art_size + padding.left +
+            image.set_size_request(ArtSize.BANNER + padding.left +
                                    padding.right + border.left + border.right,
-                                   art_size + padding.top +
+                                   ArtSize.BANNER + padding.top +
                                    padding.bottom + border.top + border.bottom)
             image.show()
             label = Gtk.Label.new(_("Remove"))
