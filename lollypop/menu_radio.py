@@ -29,7 +29,6 @@ class RadioMenu(Gtk.Grid):
 
     __gsignals__ = {
         "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self, radio, view_type):

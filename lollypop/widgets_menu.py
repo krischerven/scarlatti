@@ -27,7 +27,6 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
 
     __gsignals__ = {
         "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "hidden": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     @signals_map

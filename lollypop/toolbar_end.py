@@ -193,7 +193,6 @@ class ToolbarEnd(Gtk.Bin):
         if App().window.is_adaptive:
             App().window.container.show_menu(widget)
             widget.connect("closed", self.__on_menu_closed, button)
-            widget.connect("hidden", self.__on_menu_closed, button)
         else:
             from lollypop.widgets_utils import Popover
             popover = Popover.new()
