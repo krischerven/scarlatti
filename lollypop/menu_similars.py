@@ -200,7 +200,6 @@ class SimilarsMenu(Gtk.Bin):
             @param providers as []
             @param provider as SpotifyHelper/LastFM
         """
-        artist_id = None
         if artist_id is None:
             if providers:
                 self.__populate(providers)
