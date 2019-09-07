@@ -16,7 +16,7 @@ import itertools
 from time import time
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, OrderBy, StorageType
+from lollypop.define import App, OrderBy, StorageType, Type
 from lollypop.utils import noaccents, remove_static, get_default_storage_type
 
 
@@ -1014,6 +1014,20 @@ class TracksDatabase:
                 request = "SELECT tracks.rowid FROM tracks\
                            WHERE noaccents(name) LIKE ?\
                            AND tracks.storage_type & ? LIMIT 25"
+                result = sql.execute(request, filter)
+                items += list(itertools.chain(*result))
+            for filter in [(Type.COMPILATIONS, no_accents + "%", storage_type),
+                           (Type.COMPILATIONS, "%" + no_accents, storage_type),
+                           (Type.COMPILATIONS, "%" + no_accents + "%",
+                            storage_type)]:
+                request = "SELECT DISTINCT tracks.rowid\
+                       FROM track_artists, album_artists, tracks, artists\
+                       WHERE tracks.album_id=album_artists.album_id AND\
+                       album_artists.artist_id != ? AND\
+                       track_artists.artist_id=artists.rowid AND\
+                       track_artists.track_id=tracks.rowid AND\
+                       noaccents(artists.name) LIKE ? AND\
+                       tracks.storage_type & ? LIMIT 25"
                 result = sql.execute(request, filter)
                 items += list(itertools.chain(*result))
             return list(set(items))
