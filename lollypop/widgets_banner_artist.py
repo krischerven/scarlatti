@@ -175,7 +175,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             menu_widget.show()
             menu_ext = SimilarsMenu()
             menu_ext.show()
-            menu_ext.populate(self.__artist_ids)
+            menu_ext.populate(self.__artist_ids[0])
             # scrolled -> viewport -> box
             scrolled.get_child().get_child().add(menu_ext)
             scrolled.set_size_request(300, 400)

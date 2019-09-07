@@ -12,6 +12,8 @@
 
 from gi.repository import Gtk, Gio, GLib, Pango
 
+from gettext import gettext as _
+
 from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
@@ -121,8 +123,8 @@ class SimilarsMenu(Gtk.Bin):
             True if menu is available
             @return bool
         """
-        return get_network_available("SPOTIFY") and\
-            get_network_available("YOUTUBE")
+        return get_network_available("SPOTIFY") or (
+            App().lastfm is not None and get_network_available("LASTFM"))
 
     def __init__(self):
         """
@@ -136,6 +138,7 @@ class SimilarsMenu(Gtk.Bin):
             self.__show_all = GLib.find_program_in_path(
                 "youtube-dl") is not None
         self.__added = []
+        self.__artist = ""
         self.__cancellable = Gio.Cancellable()
         self.connect("unmap", self.__on_unmap)
         self.__stack = Gtk.Stack.new()
@@ -154,25 +157,25 @@ class SimilarsMenu(Gtk.Bin):
         self.__listbox.show()
         self.__stack.add(self.__spinner)
         self.__stack.add(self.__listbox)
+        label = Gtk.Label.new(_("No results"))
+        label.get_style_context().add_class("bold")
+        label.get_style_context().add_class("dim-label")
+        label.show()
+        self.__stack.add_named(label, "no-results")
         self.add(self.__stack)
 
-    def populate(self, artist_ids):
+    def populate(self, artist_id):
         """
-            Populate view with artist ids
-            @param artist_ids as int
+            Populate view for artist id
+            @param artist_id as int
         """
         self.__added = []
-        artists = []
-        for artist_id in artist_ids:
-            if self.__cancellable.is_cancelled():
-                break
-            artist_name = App().artists.get_name(artist_id)
-            artists.append(artist_name)
-        providers = {}
+        self.__artist = App().artists.get_name(artist_id)
+        providers = []
         if get_network_available("SPOTIFY"):
-            providers[App().spotify] = artists
+            providers.append(App().spotify)
         if App().lastfm is not None and get_network_available("LASTFM"):
-            providers[App().lastfm] = artists
+            providers.append(App().lastfm)
         self.__populate(providers)
 
 #######################
@@ -181,31 +184,28 @@ class SimilarsMenu(Gtk.Bin):
     def __populate(self, providers):
         """
             Populate view with providers
-            @param providers as {}
+            @param providers as []
         """
-        for provider in providers.keys():
-            artists = providers[provider]
-            if artists:
-                artist = artists.pop(0)
-                App().task_helper.run(provider.get_artist_id,
-                                      artist, self.__cancellable,
-                                      callback=(self.__on_get_artist_id,
-                                                providers, provider))
-                del providers[provider]
-                break
+        if providers:
+            provider = providers.pop(0)
+            App().task_helper.run(provider.get_artist_id,
+                                  self.__artist, self.__cancellable,
+                                  callback=(self.__on_get_artist_id,
+                                            providers, provider))
 
     def __on_get_artist_id(self, artist_id, providers, provider):
         """
             Get similars
             @param artist_id as str
-            @param providers as {}
+            @param providers as []
             @param provider as SpotifyHelper/LastFM
         """
+        artist_id = None
         if artist_id is None:
-            if providers.keys():
+            if providers:
                 self.__populate(providers)
             else:
-                self.__stack.set_visible_child_name("no-result")
+                self.__stack.set_visible_child_name("no-results")
                 self.__spinner.stop()
         else:
             App().task_helper.run(provider.get_similar_artists,
@@ -238,7 +238,7 @@ class SimilarsMenu(Gtk.Bin):
         """
             Add artist to view
             @param artists as [str]
-            @param providers as {}
+            @param providers as []
         """
         if artists:
             (spotify_id, artist, cover_uri) = artists.pop(0)

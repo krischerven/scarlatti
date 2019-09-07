@@ -123,7 +123,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             menu_widget.show()
             menu_ext = SimilarsMenu()
             menu_ext.show()
-            menu_ext.populate([child.data])
+            menu_ext.populate(child.data)
             # scrolled -> viewport -> box
             scrolled.get_child().get_child().add(menu_ext)
             scrolled.set_size_request(300, 400)
