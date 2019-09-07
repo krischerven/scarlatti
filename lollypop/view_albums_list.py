@@ -242,6 +242,18 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         self._on_primary_long_press_gesture(x, y)
 
+    def _on_populated(self, widget, lazy_loading_id):
+        """
+            Add another album/disc
+            @param widget as AlbumWidget/TracksView
+            @parma lazy_loading_id as int
+        """
+        if widget.album in self.__reveals:
+            widget.reveal()
+            self.__reveals.remove(widget.album)
+        else:
+            LazyLoadingView._on_populated(self, widget, lazy_loading_id)
+
 #######################
 # PRIVATE             #
 #######################
@@ -288,22 +300,10 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             row = self.__row_for_album(album)
             row.show()
             self._box.add(row)
-            if album in self.__reveals:
-                self.__reveals.remove(album)
-                row.reveal()
-            else:
-                self._lazy_queue.append(row)
+            self._lazy_queue.append(row)
             GLib.idle_add(self.__add_albums, albums)
         else:
-            # If only one album, we want to reveal it
-            # Stop lazy loading and populate
-            children = self._box.get_children()
-            if len(children) == 1:
-                self.stop()
-                children[0].populate()
-                children[0].reveal(True)
-            else:
-                self.lazy_loading()
+            self.lazy_loading()
 
     def __row_for_album(self, album):
         """
