@@ -317,16 +317,28 @@ class LazyLoadingView(View):
         self.__lazy_loading_id = None
         self.__start_time = time()
 
-    def stop(self, clear=False):
+    def pause(self):
         """
-            Stop loading
-            @param clear as bool
+            Pause loading
         """
         self.__loading_state = LoadingState.ABORTED
         self.__lazy_loading_id = None
-        if clear:
-            self._lazy_queue = []
-            self.__priority_queue = []
+        if self.__scroll_timeout_id is not None:
+            GLib.source_remove(self.__scroll_timeout_id)
+            self.__scroll_timeout_id = None
+        View.stop(self)
+
+    def stop(self):
+        """
+            Stop loading and clear queue
+        """
+        self.__loading_state = LoadingState.FINISHED
+        self.__lazy_loading_id = None
+        if self.__scroll_timeout_id is not None:
+            GLib.source_remove(self.__scroll_timeout_id)
+            self.__scroll_timeout_id = None
+        self._lazy_queue = []
+        self.__priority_queue = []
         View.stop(self)
 
     def lazy_loading(self):

@@ -41,6 +41,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__timeout_id = None
         self.__search_count = 0
         self.__current_search = ""
+        self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
         self.__cancellable = Gio.Cancellable()
@@ -99,7 +100,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Populate search
             in db based on text entry current text
         """
-        self.__cancellable = Gio.Cancellable()
+        self.__view.stop()
+        self.cancel()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             state = self.__search_type_action.get_state().get_string()
@@ -248,12 +250,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             timeout = 500
         else:
             timeout = 1000
-        if self.__timeout_id:
+        if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
-            self.__timeout_id = None
-        self.cancel()
-        self.__view.stop()
-        self.__current_search = widget.get_text().strip()
         self.__timeout_id = GLib.timeout_add(
                 timeout,
                 self.__on_search_changed_timeout)
@@ -262,12 +260,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Populate widget
         """
-        if self.__view.children:
-            self.__view.stop()
-            self.__view.clear()
-            return True
         self.__timeout_id = None
-        self.populate()
+        new_search = self.__banner.entry.get_text().strip()
+        if self.__current_search != new_search:
+            self.__current_search = new_search
+            self.populate()
 
     def __on_search_action_change_state(self, action, value):
         """
@@ -275,10 +272,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
-        self.cancel()
-        self.__view.stop()
-        action.set_state(value)
-        # A new album signal may be in queue, so clear after
-        GLib.idle_add(self.__view.clear)
-        self.populate()
-        GLib.idle_add(self.__banner.entry.grab_focus)
+        new_search = self.__banner.entry.get_text().strip()
+        if self.__current_search != new_search:
+            self.__current_search = new_search
+            action.set_state(value)
+            self.populate()

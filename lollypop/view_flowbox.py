@@ -143,7 +143,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param status as bool
         """
         if LazyLoadingView._on_adaptive_changed(self, window, status):
-            self.stop(True)
+            self.pause()
             children = self._box.get_children()
             for child in children:
                 child.set_view_type(self._view_type)
