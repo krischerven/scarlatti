@@ -116,6 +116,14 @@ class SimilarsMenu(Gtk.Bin):
         A popover with similar artists
     """
 
+    def available():
+        """
+            True if menu is available
+            @return bool
+        """
+        return get_network_available("SPOTIFY") and\
+            get_network_available("YOUTUBE")
+
     def __init__(self):
         """
             Init popover

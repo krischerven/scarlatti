@@ -170,14 +170,15 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu = ArtistMenu(self.__artist_ids[0], ViewType.BANNER,
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, True)
-        scrolled = menu_widget.get_child_by_name("main")
-        menu_widget.show()
-        menu_ext = SimilarsMenu()
-        menu_ext.show()
-        menu_ext.populate(self.__artist_ids)
-        # scrolled -> viewport -> box
-        scrolled.get_child().get_child().add(menu_ext)
-        scrolled.set_size_request(300, 400)
+        if SimilarsMenu.available():
+            scrolled = menu_widget.get_child_by_name("main")
+            menu_widget.show()
+            menu_ext = SimilarsMenu()
+            menu_ext.show()
+            menu_ext.populate(self.__artist_ids)
+            # scrolled -> viewport -> box
+            scrolled.get_child().get_child().add(menu_ext)
+            scrolled.set_size_request(300, 400)
         popup_widget(menu_widget, button)
 
     def _on_badge_button_release(self, eventbox, event):
