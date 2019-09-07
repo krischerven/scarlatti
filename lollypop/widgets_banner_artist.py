@@ -50,6 +50,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__add_button = builder.get_object("add_button")
         self.__play_button = builder.get_object("play_button")
         self.__menu_button = builder.get_object("menu_button")
+        if len(artist_ids) > 1:
+            self.__menu_button.hide()
         builder.get_object("buttons").set_margin_end(MARGIN)
         builder.get_object("artwork_event").connect(
             "realize", set_cursor_type)
