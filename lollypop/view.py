@@ -99,6 +99,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         else:
             self.add(self.__stack)
 
+    def pause(self):
+        pass
+
     def stop(self):
         pass
 

@@ -253,7 +253,7 @@ class AdaptiveStack(Gtk.Stack):
         if visible_child == view:
             return
         if visible_child is not None:
-            visible_child.stop()
+            visible_child.pause()
             if visible_child.sidebar_id != Type.NONE:
                 self.__history.add_view(visible_child)
             Gtk.Stack.set_visible_child(self, view)
