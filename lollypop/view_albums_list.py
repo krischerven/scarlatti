@@ -71,7 +71,8 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param reveal as bool
             @param position as int
         """
-        row = self.__row_for_album(album, reveal)
+        self.__reveals.append(album)
+        row = self.__row_for_album(album)
         row.populate()
         row.show()
         self._box.insert(row, position)
