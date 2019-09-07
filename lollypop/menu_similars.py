@@ -192,6 +192,9 @@ class SimilarsMenu(Gtk.Bin):
                                   self.__artist, self.__cancellable,
                                   callback=(self.__on_get_artist_id,
                                             providers, provider))
+        elif not self.__listbox.get_children():
+            self.__stack.set_visible_child_name("no-results")
+            self.__spinner.stop()
 
     def __on_get_artist_id(self, artist_id, providers, provider):
         """
@@ -259,6 +262,7 @@ class SimilarsMenu(Gtk.Bin):
                 self.__listbox.add(row)
             GLib.idle_add(self.__on_similar_artists, artists, providers)
         else:
-            self.__stack.set_visible_child(self.__listbox)
-            self.__spinner.stop()
+            if self.__listbox.get_children():
+                self.__stack.set_visible_child(self.__listbox)
+                self.__spinner.stop()
             self.__populate(providers)
