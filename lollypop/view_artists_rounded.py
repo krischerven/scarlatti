@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, Gio
 
 from gettext import gettext as _
 from random import shuffle
@@ -117,8 +117,12 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(child.data, self._view_type,
                           App().window.is_adaptive)
-        menu_widget = MenuBuilder(menu, True)
-        if SimilarsMenu.available():
+        similars_available = SimilarsMenu.available()
+        if similars_available:
+            section = Gio.Menu()
+            menu.append_section(_("Similar artists"), section)
+        menu_widget = MenuBuilder(menu, similars_available)
+        if similars_available:
             scrolled = menu_widget.get_child_by_name("main")
             menu_widget.show()
             menu_ext = SimilarsMenu()
