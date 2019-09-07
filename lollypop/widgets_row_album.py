@@ -49,13 +49,12 @@ class AlbumRow(Gtk.ListBoxRow):
         else:
             return cover_height + 2
 
-    def __init__(self, album, height, view_type, reveal):
+    def __init__(self, album, height, view_type):
         """
             Init row widgets
             @param album as Album
             @param height as int
             @param view_type as ViewType
-            @param reveal as bool
             @param parent as AlbumListView
         """
         Gtk.ListBoxRow.__init__(self)
@@ -73,10 +72,6 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.connect("track-removed", self.__on_track_removed)
         self.__tracks_view.show()
-        if reveal or self.__view_type & ViewType.PLAYLISTS:
-            self.populate()
-            self.__revealer.set_reveal_child(True)
-            self.__tracks_view.populate()
 
     def populate(self):
         """
@@ -159,6 +154,8 @@ class AlbumRow(Gtk.ListBoxRow):
             Reveal/Unreveal tracks
             @param reveal as bool or None to just change state
         """
+        if self.__artwork is None:
+            self.populate()
         if self.__revealer.get_reveal_child() and reveal is not True:
             self.__revealer.set_reveal_child(False)
             if self.album.id == App().player.current_track.album.id:

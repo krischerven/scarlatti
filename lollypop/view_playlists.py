@@ -69,6 +69,10 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         """
             Populate view
         """
+        def on_load(albums):
+            self._view.set_reveal(albums)
+            self._view.populate(albums)
+
         def load():
             track_ids = []
             if self._playlist_id == Type.LOVED:
@@ -83,7 +87,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        App().task_helper.run(load, callback=(self._view.populate,))
+        App().task_helper.run(load, callback=(on_load,))
 
     def stop(self):
         """
@@ -241,10 +245,14 @@ class SmartPlaylistsView(PlaylistsView):
         """
             Populate view
         """
+        def on_load(albums):
+            self._view.set_reveal(albums)
+            self._view.populate(albums)
+
         def load():
             request = App().playlists.get_smart_sql(self._playlist_id)
             track_ids = App().db.execute(request)
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        App().task_helper.run(load, callback=(self._view.populate,))
+        App().task_helper.run(load, callback=(on_load,))

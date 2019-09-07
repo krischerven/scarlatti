@@ -284,10 +284,14 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             return
         if albums:
             album = albums.pop(0)
-            row = self.__row_for_album(album, album in self.__reveals)
+            row = self.__row_for_album(album)
             row.show()
             self._box.add(row)
-            self._lazy_queue.append(row)
+            if album in self.__reveals:
+                self.__reveals.remove(album)
+                row.reveal()
+            else:
+                self._lazy_queue.append(row)
             GLib.idle_add(self.__add_albums, albums)
         else:
             # If only one album, we want to reveal it
@@ -300,13 +304,12 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             else:
                 self.lazy_loading()
 
-    def __row_for_album(self, album, reveal=False):
+    def __row_for_album(self, album):
         """
             Get a row for track id
             @param album as Album
-            @param reveal as bool
         """
-        row = AlbumRow(album, self.__height, self._view_type, reveal)
+        row = AlbumRow(album, self.__height, self._view_type)
         row.connect("track-removed", self.__on_track_removed)
         return row
 
