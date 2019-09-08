@@ -228,6 +228,10 @@ class SimilarsMenu(Gtk.Bin):
             @param widget as Gtk.ListBox
             @param row as Gtk.ListBoxRow
         """
+        # Close popover
+        popover = self.get_ancestor(Gtk.Popover)
+        if popover is not None:
+            popover.hide()
         artist_name = row.artist_name
         artist_id = App().artists.get_id_for_escaped_string(
             sql_escape(artist_name))
