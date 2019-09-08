@@ -14,9 +14,9 @@ from gi.repository import Gtk, Gio, GLib, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour
+from lollypop.define import App, ArtSize, ArtBehaviour, Type
 from lollypop.logger import Logger
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, sql_escape
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -229,12 +229,13 @@ class SimilarsMenu(Gtk.Bin):
             @param row as Gtk.ListBoxRow
         """
         artist_name = row.artist_name
-        (artist_id, name) = App().artists.get_id(artist_name)
+        artist_id = App().artists.get_id_for_escaped_string(
+            sql_escape(artist_name))
         if artist_id is None:
             target = "web://%s" % artist_name
+            App().lookup_action("search").activate(GLib.Variant("s", target))
         else:
-            target = "local://%s" % artist_name
-        App().lookup_action("search").activate(GLib.Variant("s", target))
+            App().window.container.show_view([Type.ARTISTS], [artist_id])
 
     def __on_similar_artists(self, artists, providers):
         """
