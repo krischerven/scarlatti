@@ -13,9 +13,6 @@ if not python_bin.found()
 else
     message('Found python3 binary')
 endif
-dependency('glib-2.0')
-dependency('gobject-introspection-1.0', version: '>=1.35.9')
-dependency('gtk+-3.0', version :'>=3.20')
 
 python_dir = join_paths(get_option('prefix'), python.sysconfig_path('purelib'))
 LIBEXEC_DIR = join_paths(get_option('prefix'), get_option('libexecdir'))
