@@ -61,7 +61,7 @@ class RadioMenu(Gtk.Grid):
 
         self.__name_entry = builder.get_object("name")
         self.__uri_entry = builder.get_object("uri")
-        self.__image_button = builder.get_object("image_button")
+        self.__artwork_button = builder.get_object("artwork_button")
         self.__save_button = builder.get_object("save_button")
         self.__stack.add_named(builder.get_object("widget"), "widget")
         self.__stack.set_visible_child_name("widget")
@@ -146,13 +146,13 @@ class RadioMenu(Gtk.Grid):
         uri = self.__uri_entry.get_text()
         name = self.__name_entry.get_text()
         if name != "" and uri.find("://") != -1:
-            self.__image_button.set_sensitive(True)
+            self.__artwork_button.set_sensitive(True)
             self.__save_button.set_sensitive(True)
         else:
-            self.__image_button.set_sensitive(False)
+            self.__artwork_button.set_sensitive(False)
             self.__save_button.set_sensitive(False)
 
-    def _on_image_button_clicked(self, widget):
+    def _on_artwork_button_clicked(self, widget):
         """
             Update radio image
             @param widget as Gtk.Widget
