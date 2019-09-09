@@ -14,7 +14,7 @@ from gi.repository import Gtk, Gio, GLib, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour, Type
+from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available, sql_escape
 
@@ -24,17 +24,19 @@ class ArtistRow(Gtk.ListBoxRow):
         An artist row
     """
 
-    def __init__(self, artist_name, cover_uri, cancellable):
+    def __init__(self, artist_name, cover_uri, cancellable, storage_type):
         """
             Init row
             @param artist_name as str
             @param cover_uri as str
             @param cancellable as Gio.Cancellable
+            @param storage_type as StorageType
         """
         Gtk.ListBoxRow.__init__(self)
         self.__artist_name = artist_name
         self.__cover_uri = cover_uri
         self.__cancellable = cancellable
+        self.__storage_type = storage_type
         grid = Gtk.Grid()
         grid.set_column_spacing(5)
         label = Gtk.Label.new(artist_name)
@@ -63,6 +65,14 @@ class ArtistRow(Gtk.ListBoxRow):
             @return str
         """
         return self.__artist_name
+
+    @property
+    def storage_type(self):
+        """
+            Get storage type
+            @param storage type as StorageType
+        """
+        return self.__storage_type
 
 #######################
 # PRIVATE             #
@@ -154,6 +164,7 @@ class SimilarsMenu(Gtk.Bin):
         self.__listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         self.__listbox.set_activate_on_single_click(True)
         self.__listbox.connect("row-activated", self.__on_row_activated)
+        self.__listbox.set_sort_func(self.__sort_func)
         self.__listbox.show()
         self.__stack.add(self.__spinner)
         self.__stack.add(self.__listbox)
@@ -195,6 +206,21 @@ class SimilarsMenu(Gtk.Bin):
         elif not self.__listbox.get_children():
             self.__stack.set_visible_child_name("no-results")
             self.__spinner.stop()
+
+    def __sort_func(self, row_a, row_b):
+        """
+            Sort rows
+            @param row_a as Gtk.ListBoxRow
+            @param row_b as Gtk.ListBoxRow
+        """
+        if row_a.storage_type == StorageType.COLLECTION and\
+                row_b.storage_type == StorageType.EPHEMERAL:
+            return False
+        elif row_a.storage_type == StorageType.EPHEMERAL and\
+                row_b.storage_type == StorageType.COLLECTION:
+            return True
+        else:
+            return False
 
     def __on_get_artist_id(self, artist_id, providers, provider):
         """
@@ -252,16 +278,19 @@ class SimilarsMenu(Gtk.Bin):
             if artist in self.__added:
                 GLib.idle_add(self.__on_similar_artists, artists, providers)
             self.__added.append(artist)
-            (artist_id, name) = App().artists.get_id(artist)
+            artist_id = App().artists.get_id_for_escaped_string(
+                sql_escape(artist))
             row = None
             if artist_id is not None:
                 # We want real artist name (with case)
                 artist = App().artists.get_name(artist_id)
                 albums = App().artists.get_albums([artist_id])
                 if albums:
-                    row = ArtistRow(artist, None, self.__cancellable)
+                    row = ArtistRow(artist, None, self.__cancellable,
+                                    StorageType.COLLECTION)
             elif self.__show_all:
-                row = ArtistRow(artist, cover_uri, self.__cancellable)
+                row = ArtistRow(artist, cover_uri, self.__cancellable,
+                                StorageType.EPHEMERAL)
             if row is not None:
                 row.show()
                 self.__listbox.add(row)
