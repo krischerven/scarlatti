@@ -100,6 +100,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             in db based on text entry current text
         """
         self.__view.stop()
+        self.__view.clear()
         self.cancel()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
