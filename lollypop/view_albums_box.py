@@ -494,9 +494,7 @@ class AlbumsRandomGenreBoxView(AlbumsLineView):
 
         def load():
             (genre_id, genre) = App().genres.get_random()
-            # Translators: Some albums from Rock for example
-            GLib.idle_add(self._label.set_text,
-                          _("Some albums from %s") % genre)
+            GLib.idle_add(self._label.set_text, genre)
             album_ids = App().albums.get_randoms(genre_id, 20)
             return [Album(album_id) for album_id in album_ids]
 
