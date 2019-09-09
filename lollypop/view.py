@@ -277,7 +277,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             Restore scroll position
             @param widget as Gtk.Widget
         """
-        print(self)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
         # Wait for stack allocation to restore scrolled position
         if self.__scrolled_position is not None:
