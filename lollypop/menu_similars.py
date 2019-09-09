@@ -282,13 +282,13 @@ class SimilarsMenu(Gtk.Bin):
                 sql_escape(artist))
             row = None
             if artist_id is not None:
-                # We want real artist name (with case)
-                artist = App().artists.get_name(artist_id)
                 albums = App().artists.get_albums([artist_id])
                 if albums:
+                    # We want real artist name (with case)
+                    artist = App().artists.get_name(artist_id)
                     row = ArtistRow(artist, None, self.__cancellable,
                                     StorageType.COLLECTION)
-            elif self.__show_all:
+            if row is None and self.__show_all:
                 row = ArtistRow(artist, cover_uri, self.__cancellable,
                                 StorageType.EPHEMERAL)
             if row is not None:
