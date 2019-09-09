@@ -38,7 +38,6 @@ class LovedWidget(Gtk.Bin):
         builder.connect_signals(self)
         self.__artwork = builder.get_object("artwork")
         self.add(builder.get_object("widget"))
-        self.set_property("valign", Gtk.Align.CENTER)
         self.__set_artwork(self.__object.loved)
 
     def set_icon_size(self, icon_size):

@@ -34,7 +34,6 @@ class RatingWidget(Gtk.Bin):
         """
         Gtk.Bin.__init__(self)
         self.__object = object
-        self.set_property("valign", Gtk.Align.CENTER)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/RatingWidget.ui")
         builder.connect_signals(self)
