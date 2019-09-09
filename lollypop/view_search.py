@@ -39,7 +39,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
-        self.__search_count = 0
         self.__current_search = ""
         self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
@@ -108,21 +107,22 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             current_search = self.__current_search.lower()
             search = Search()
             if state == "local":
-                self.__search_count = 1
                 search.get(current_search,
                            StorageType.COLLECTION | StorageType.SAVED,
                            self.__cancellable,
-                           callback=(self.__on_search_get, current_search))
+                           callback=(self.__on_search_get,
+                                     current_search,
+                                     StorageType.COLLECTION |
+                                     StorageType.SAVED))
             elif state == "web":
-                self.__search_count = 2
                 search.get(current_search,
                            StorageType.EPHEMERAL |
                            StorageType.SPOTIFY_NEW_RELEASES,
                            self.__cancellable,
-                           callback=(self.__on_search_get, current_search))
-                App().task_helper.run(App().spotify.search,
-                                      current_search,
-                                      self.__cancellable)
+                           callback=(self.__on_search_get,
+                                     current_search,
+                                     StorageType.EPHEMERAL |
+                                     StorageType.SPOTIFY_NEW_RELEASES,))
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))
@@ -205,11 +205,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Stop spinner and show placeholder if not result
         """
-        self.__search_count -= 1
-        if self.__search_count == 0:
-            self.__banner.spinner.stop()
-            if not self.__view.children:
-                self.show_placeholder(True, _("No results for this search"))
+        self.__banner.spinner.stop()
+        if not self.__view.children:
+            self.show_placeholder(True, _("No results for this search"))
 
 #######################
 # PRIVATE             #
@@ -220,12 +218,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__placeholder.set_text()
 
-    def __on_search_get(self, result, search):
+    def __on_search_get(self, result, search, storage_type):
         """
             Add rows for internal results
             @param result as [(int, Album, bool)]
         """
-        self._on_search_finished()
         if result:
             albums = []
             reveal_albums = []
@@ -238,6 +235,13 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.show_placeholder(False)
             self.__banner.play_button.set_sensitive(True)
             self.__banner.new_button.set_sensitive(True)
+
+        if storage_type & StorageType.EPHEMERAL:
+            App().task_helper.run(App().spotify.search,
+                                  search,
+                                  self.__cancellable)
+        else:
+            self._on_search_finished()
 
     def _on_search_changed(self, widget):
         """
