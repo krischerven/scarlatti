@@ -281,13 +281,11 @@ class SimilarsMenu(Gtk.Bin):
             artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist))
             row = None
-            if artist_id is not None:
-                albums = App().artists.get_albums([artist_id])
-                if albums:
-                    # We want real artist name (with case)
-                    artist = App().artists.get_name(artist_id)
-                    row = ArtistRow(artist, None, self.__cancellable,
-                                    StorageType.COLLECTION)
+            if artist_id is not None and App().artists.has_albums(artist_id):
+                # We want real artist name (with case)
+                artist = App().artists.get_name(artist_id)
+                row = ArtistRow(artist, None, self.__cancellable,
+                                StorageType.COLLECTION)
             if row is None and self.__show_all:
                 row = ArtistRow(artist, cover_uri, self.__cancellable,
                                 StorageType.EPHEMERAL)

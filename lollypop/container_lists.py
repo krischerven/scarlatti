@@ -125,7 +125,7 @@ class ListsContainer:
         """
         def load():
             if App().settings.get_value("show-performers"):
-                artists = App().artists.get_all(genre_ids)
+                artists = App().artists.get_performers(genre_ids)
             else:
                 artists = App().artists.get(genre_ids)
             return artists

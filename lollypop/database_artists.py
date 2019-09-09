@@ -165,43 +165,25 @@ class ArtistsDatabase:
                 return v[0]
             return -1
 
-    def get_albums(self, artist_ids):
+    def has_albums(self, artist_id):
         """
-            Get all availables albums for artists
-            @return [int]
+            Get album for artist id
+            @param artist_id as int
+            @return bool
         """
         with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid\
                        FROM album_artists, albums\
-                       WHERE albums.rowid=album_artists.album_id AND(1=0 "
-            for artist_id in artist_ids:
-                request += "OR album_artists.artist_id=%s " % artist_id
-            request += ") ORDER BY year"
-            result = sql.execute(request)
-            return list(itertools.chain(*result))
-
-    def get_compilations(self, artist_ids):
-        """
-            Get all availables compilations for artist
-            @return [int]
-        """
-        with SqlCursor(App().db) as sql:
-            request = "SELECT DISTINCT albums.rowid FROM albums,\
-                       tracks, track_artists, album_artists\
-                       WHERE track_artists.track_id=tracks.rowid\
-                       AND album_artists.artists_id=%s\
-                       AND album_artists.album_id=albums.rowid\
-                       AND albums.rowid=tracks.album_id AND (1=0 " %\
-                Type.COMPILATIONS
-            for artist_id in artist_ids:
-                request += "OR track_artists.artist_id=%s " % artist_id
-            request += ") ORDER BY albums.year"
-            result = sql.execute(request)
-            return list(itertools.chain(*result))
+                       WHERE albums.rowid=album_artists.album_id\
+                       AND album_artists.artist_id=?\
+                       AND albums.storage_type & ?"
+            result = sql.execute(request, (artist_id, storage_type))
+            return len(list(itertools.chain(*result))) != 0
 
     def get(self, genre_ids=[]):
         """
-            Get all available album artists
+            Get all available artists
             @param genre_ids as [int]
             @return [int, str, str]
         """
@@ -239,12 +221,13 @@ class ArtistsDatabase:
                 result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
 
-    def get_all(self, genre_ids=[]):
+    def get_performers(self, genre_ids=[]):
         """
-            Get all available artists
+            Get all available performers
             @param genre_ids as [int]
             @return [int, str, str]
         """
+        genre_ids = remove_static(genre_ids)
         if App().settings.get_value("show-artist-sort"):
             select = "artists.rowid, artists.sortname, artists.sortname"
         else:

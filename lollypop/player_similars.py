@@ -110,7 +110,7 @@ class SimilarsPlayer:
             similar_artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist.lower()))
             if similar_artist_id is not None:
-                if App().artists.get_albums([similar_artist_id]):
+                if App().artists.has_albums(similar_artist_id):
                     similar_artist_ids.append(similar_artist_id)
         return similar_artist_ids
 

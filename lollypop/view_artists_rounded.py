@@ -55,7 +55,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 
         def load():
             if App().settings.get_value("show-performers"):
-                ids = App().artists.get_all()
+                ids = App().artists.get_performers()
             else:
                 ids = App().artists.get()
             return ids
