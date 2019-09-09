@@ -273,9 +273,12 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
+        # Stupid GTK API (Or am I stupid?). Fix welcome!
+        # Happens when user untoggle a toggled button
+        if value == action.get_state():
+            new_value = "local" if value.get_string() == "web" else "web"
+            action.set_state(GLib.Variant("s", new_value))
+            return
         action.set_state(value)
-        new_search = self.__banner.entry.get_text().strip()
-        if self.__current_search != new_search:
-            self.__current_search = new_search
-            action.set_state(value)
-            self.populate()
+        self.__current_search = self.__banner.entry.get_text().strip()
+        self.populate()
