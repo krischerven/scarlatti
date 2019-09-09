@@ -80,7 +80,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget.show()
         self.__rating_grid.attach(self.__rating_widget, 1, 0, 1, 1)
         self.__cover_widget.set_margin_start(MARGIN)
-        self.set_view_type(view_type)
         self._overlay.add_overlay(self.__widget)
         self._overlay.set_overlay_pass_through(self.__widget, True)
         return [
