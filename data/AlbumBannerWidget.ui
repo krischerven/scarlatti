@@ -26,7 +26,6 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="valign">center</property>
         <property name="margin_left">15</property>
         <child>
           <object class="GtkLabel" id="artist_label">
