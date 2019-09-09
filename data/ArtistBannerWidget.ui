@@ -15,7 +15,6 @@
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_size">3</property>
   </object>
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
