@@ -273,6 +273,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
+        action.set_state(value)
         new_search = self.__banner.entry.get_text().strip()
         if self.__current_search != new_search:
             self.__current_search = new_search
