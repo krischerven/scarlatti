@@ -259,12 +259,12 @@ class SimilarsMenu(Gtk.Bin):
         if popover is not None:
             popover.hide()
         artist_name = row.artist_name
-        artist_id = App().artists.get_id_for_escaped_string(
-            sql_escape(artist_name))
-        if artist_id is None:
+        if row.storage_type == StorageType.EPHEMERAL:
             target = "web://%s" % artist_name
             App().lookup_action("search").activate(GLib.Variant("s", target))
         else:
+            artist_id = App().artists.get_id_for_escaped_string(
+                sql_escape(artist_name))
             App().window.container.show_view([Type.ARTISTS], [artist_id])
 
     def __on_similar_artists(self, artists, providers):
