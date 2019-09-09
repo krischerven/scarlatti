@@ -70,6 +70,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
+        self.connect("realize", self._on_realize)
         return [
             (App().window, "adaptive-changed", "_on_adaptive_changed"),
         ]
@@ -265,17 +266,23 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         pass
 
     def _on_map(self, widget):
+        pass
+
+    def _on_unmap(self, widget):
+        pass
+
+    def _on_realize(self, widget):
         """
             Delayed adaptive mode
+            Restore scroll position
+            @param widget as Gtk.Widget
         """
+        print(self)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
         # Wait for stack allocation to restore scrolled position
         if self.__scrolled_position is not None:
             self.__stack.connect("size-allocate",
                                  self.__on_stack_size_allocated)
-
-    def _on_unmap(self, widget):
-        pass
 
 #######################
 # PRIVATE             #
