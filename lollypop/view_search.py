@@ -143,6 +143,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__banner.entry.set_text(search)
             GLib.idle_add(self.__search_type_action.set_state,
                           GLib.Variant("s", "web"))
+        self.__banner.entry.grab_focus()
 
     def cancel(self):
         """
@@ -173,7 +174,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
 
     def _on_map(self, widget):
         """
-            Init signals and grab focus
+            Disable shortcuts and update buttons
             @param widget as Gtk.Widget
         """
         View._on_map(self, widget)
@@ -182,7 +183,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
 
     def __on_unmap(self, widget):
         """
-            Clean up
+            Cancel current loading and enable shortcuts
             @param widget as Gtk.Widget
         """
         View._on_unmap(self, widget)
