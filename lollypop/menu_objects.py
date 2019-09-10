@@ -126,7 +126,6 @@ class TrackMenuExt(Gtk.Grid):
         hgrid = Gtk.Grid()
         rating = RatingWidget(track)
         rating.set_property("halign", Gtk.Align.START)
-        rating.set_margin_end(10)
         if App().window.is_adaptive:
             rating.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         rating.show()
@@ -139,8 +138,8 @@ class TrackMenuExt(Gtk.Grid):
 
         if track.year is not None:
             hgrid.add(year_label)
-        hgrid.add(rating)
         hgrid.add(loved)
+        hgrid.add(rating)
         hgrid.show()
 
         if not track.storage_type & StorageType.COLLECTION:
