@@ -331,6 +331,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         """
         AlbumsBoxView.__init__(self, [Type.NONE], [], view_type)
         self.set_row_spacing(5)
+        self.set_property("valign", Gtk.Align.START)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
         self._label.set_hexpand(True)

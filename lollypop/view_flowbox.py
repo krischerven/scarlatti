@@ -46,9 +46,8 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         self._box.set_property("valign", Gtk.Align.START)
         self._box.connect("child-activated", self._on_child_activated)
         self._box.show()
-        if not view_type & ViewType.SMALL:
-            self.__event_controller = Gtk.EventControllerMotion.new(self._box)
-            self.__event_controller.connect("motion", self.__on_box_motion)
+        self.__event_controller = Gtk.EventControllerMotion.new(self._box)
+        self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
 
     def populate(self, items):
