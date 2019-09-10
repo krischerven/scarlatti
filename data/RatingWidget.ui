@@ -5,6 +5,7 @@
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="valign">center</property>
     <child>
       <object class="GtkEventBox" id="eventbox1">
         <property name="visible">True</property>

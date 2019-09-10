@@ -87,6 +87,7 @@
             <property name="halign">start</property>
             <property name="hexpand">True</property>
             <property name="ellipsize">end</property>
+            <property name="yalign">0</property>
             <attributes>
               <attribute name="weight" value="bold"/>
             </attributes>

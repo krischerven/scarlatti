@@ -60,8 +60,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         artists = []
         for artist_id in self.__artist_ids:
             artists.append(App().artists.get_name(artist_id))
-        self.__title_label.set_markup(
-            GLib.markup_escape_text(", ".join(artists)))
+        self.__title_label.set_label(", ".join(artists))
         self.__show_artwork = len(artist_ids) == 1
         self.__title_label.get_style_context().add_class("text-x-large")
         self._overlay.add_overlay(widget)
