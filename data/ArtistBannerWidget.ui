@@ -121,7 +121,6 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="halign">start</property>
-            <property name="valign">center</property>
             <property name="image">image4</property>
             <signal name="clicked" handler="_on_menu_button_clicked" swapped="no"/>
             <style>
