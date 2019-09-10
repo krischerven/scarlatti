@@ -19,24 +19,22 @@
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="valign">center</property>
+    <property name="margin_left">15</property>
+    <property name="margin_right">15</property>
     <property name="orientation">vertical</property>
+    <property name="column_spacing">15</property>
     <child>
       <object class="GtkEventBox" id="label_event">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">start</property>
-        <property name="valign">center</property>
-        <property name="margin_right">10</property>
         <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
         <signal name="button-release-event" handler="_on_label_button_release" swapped="no"/>
         <child>
           <object class="GtkLabel" id="artist">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="valign">center</property>
-            <property name="margin_left">3</property>
-            <property name="margin_right">2</property>
             <property name="ellipsize">end</property>
             <property name="xalign">0</property>
             <attributes>
@@ -55,15 +53,10 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="valign">center</property>
-        <property name="margin_right">10</property>
-        <property name="vexpand">True</property>
         <signal name="button-release-event" handler="_on_badge_button_release" swapped="no"/>
         <child>
           <object class="GtkImage" id="badge_artwork">
             <property name="can_focus">False</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
           </object>
         </child>
       </object>
@@ -86,7 +79,6 @@
             <property name="image">image1</property>
             <signal name="clicked" handler="_on_play_clicked" swapped="no"/>
             <style>
-              <class name="menu-button-48"/>
               <class name="black-transparent"/>
             </style>
           </object>
@@ -105,7 +97,6 @@
             <property name="image">image2</property>
             <signal name="clicked" handler="_on_add_clicked" swapped="no"/>
             <style>
-              <class name="menu-button-48"/>
               <class name="black-transparent"/>
             </style>
           </object>

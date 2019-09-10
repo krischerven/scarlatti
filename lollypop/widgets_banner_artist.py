@@ -17,7 +17,7 @@ from random import choice
 
 from lollypop.utils import set_cursor_type, on_query_tooltip, popup_widget
 from lollypop.utils_artist import add_artist_to_playback, play_artists
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN, Size
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
@@ -52,7 +52,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__menu_button = builder.get_object("menu_button")
         if len(artist_ids) > 1:
             self.__menu_button.hide()
-        builder.get_object("buttons").set_margin_end(MARGIN)
         builder.get_object("artwork_event").connect(
             "realize", set_cursor_type)
         builder.get_object("label_event").connect(
@@ -85,13 +84,13 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         BannerWidget.set_view_type(self, view_type)
         art_size = 0
         if view_type & ViewType.ADAPTIVE:
-            art_size = ArtSize.MEDIUM
+            art_size = ArtSize.MEDIUM + 2
             style = "menu-button"
             icon_size = Gtk.IconSize.BUTTON
             self.__title_label.get_style_context().add_class(
                 "text-large")
         else:
-            art_size = ArtSize.BANNER
+            art_size = ArtSize.BANNER + 2
             style = "menu-button-48"
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
             self.__title_label.get_style_context().add_class(
@@ -248,8 +247,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if self.__show_artwork and\
                 App().settings.get_value("artist-artwork"):
-            self.__badge_artwork.set_margin_start(MARGIN)
-            self.__title_label.set_margin_start(0)
             artist = App().artists.get_name(self.__artist_ids[0])
             App().art_helper.set_artist_artwork(
                                         artist,
@@ -263,8 +260,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         art_size)
         else:
             self.__badge_artwork.hide()
-            self.__badge_artwork.set_margin_start(0)
-            self.__title_label.set_margin_start(MARGIN)
 
     def __set_text_height(self):
         """
