@@ -100,6 +100,10 @@ class DeviceWidget(Gtk.ListBoxRow):
         """
         revealed = self.__revealer.get_reveal_child()
         self.__revealer.set_reveal_child(not revealed)
+        if revealed:
+            button.get_image().get_style_context().remove_class("image-reveal")
+        else:
+            button.get_image().get_style_context().add_class("image-reveal")
 
     def _on_content_albums_clicked(self, button):
         """

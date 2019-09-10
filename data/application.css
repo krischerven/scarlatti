@@ -573,6 +573,10 @@ flowboxchild:selected  {
   	opacity: 1;
 }
 
+.image-reveal {
+  -gtk-icon-transform: rotate(90deg);
+}
+
 @keyframes spin {
   to { -gtk-icon-transform: rotate(1turn); }
 }
