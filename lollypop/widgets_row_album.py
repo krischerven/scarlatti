@@ -31,8 +31,6 @@ class AlbumRow(Gtk.ListBoxRow):
         "track-removed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
-    __MARGIN = 4
-
     def get_best_height(widget):
         """
             Helper to pass object it's height request
@@ -41,13 +39,15 @@ class AlbumRow(Gtk.ListBoxRow):
         ctx = widget.get_pango_context()
         layout = Pango.Layout.new(ctx)
         layout.set_text("a", 1)
-        font_height = int(AlbumRow.__MARGIN * 2 +
+        font_height = int(MARGIN_SMALL * 2 +
                           2 * layout.get_pixel_size()[1])
-        cover_height = AlbumRow.__MARGIN * 2 + ArtSize.SMALL
+        cover_height = MARGIN_SMALL * 2 + ArtSize.SMALL
+        # Don't understand what is this magic value
+        # May not work properly without Adwaita
         if font_height > cover_height:
-            return font_height + 2
+            return font_height + 4
         else:
-            return cover_height + 2
+            return cover_height + 4
 
     def __init__(self, album, height, view_type):
         """
@@ -64,6 +64,9 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__album = album
         self.__cancellable = Gio.Cancellable()
         self.set_sensitive(False)
+        context_style = self.get_style_context()
+        context_style.add_class("albumrow")
+        context_style.add_class("albumrow-collapsed")
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
         self.__tracks_view = TracksView(self.__album, None,
@@ -82,26 +85,17 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__artwork = Gtk.Image.new()
         App().art_helper.set_frame(self.__artwork, "small-cover-frame",
                                    ArtSize.SMALL, ArtSize.SMALL)
-        self.__artwork.set_margin_start(self.__MARGIN)
-        # Little hack: we do not set margin_bottom because already set by
-        # get_best_height(): we are Align.FILL
-        # This allow us to not Align.CENTER row_widget and not jump up
-        # and down on reveal()
-        self.__artwork.set_margin_top(self.__MARGIN)
-        self.get_style_context().add_class("albumrow")
         self.set_sensitive(True)
         self.set_property("has-tooltip", True)
         self.connect("query-tooltip", self.__on_query_tooltip)
-        grid = Gtk.Grid()
-        grid.set_column_spacing(8)
         if self.__album.artists:
             artists = GLib.markup_escape_text(", ".join(self.__album.artists))
         else:
             artists = _("Compilation")
         self.__artist_label = Gtk.Label.new("<b>%s</b>" % artists)
         self.__artist_label.set_use_markup(True)
-        self.__artist_label.set_hexpand(True)
         self.__artist_label.set_property("halign", Gtk.Align.START)
+        self.__artist_label.set_hexpand(True)
         self.__artist_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label = Gtk.Label.new(self.__album.name)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -129,23 +123,30 @@ class AlbumRow(Gtk.ListBoxRow):
                 "view-more-symbolic",
                 Gtk.IconSize.MENU)
         if self.__action_button is not None:
-            self.__action_button.set_margin_end(MARGIN_SMALL)
             self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
             self.__action_button.get_style_context().add_class("menu-button")
             self.__action_button.set_property("valign", Gtk.Align.CENTER)
             self.__gesture_helper = GesturesHelper(
                 self.__action_button,
                 primary_press_callback=self._on_action_button_press)
-        grid.attach(self.__artwork, 0, 0, 1, 2)
-        grid.attach(self.__artist_label, 1, 0, 1, 1)
-        grid.attach(self.__title_label, 1, 1, 1, 1)
+        header = Gtk.Grid.new()
+        header.set_column_spacing(MARGIN_SMALL)
+        header.show()
+        header.set_property("margin", MARGIN_SMALL)
+        header.attach(self.__artwork, 0, 0, 1, 2)
+        header.attach(self.__artist_label, 1, 0, 1, 1)
+        header.attach(self.__title_label, 1, 1, 1, 1)
         if self.__action_button is not None:
-            grid.attach(self.__action_button, 2, 0, 1, 2)
+            header.attach(self.__action_button, 2, 0, 1, 2)
+
         self.__revealer = Gtk.Revealer.new()
         self.__revealer.show()
-        grid.attach(self.__revealer, 0, 2, 3, 1)
         self.__revealer.add(self.__tracks_view)
-        self.add(grid)
+
+        box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        box.pack_start(header, 0, True, True)
+        box.pack_start(self.__revealer, 1, False, False)
+        self.add(box)
         self.set_playing_indicator()
         self.set_artwork()
 
@@ -158,12 +159,14 @@ class AlbumRow(Gtk.ListBoxRow):
             self.populate()
         if self.__revealer.get_reveal_child() and reveal is not True:
             self.__revealer.set_reveal_child(False)
+            self.get_style_context().add_class("albumrow-collapsed")
             if self.album.id == App().player.current_track.album.id:
                 self.set_state_flags(Gtk.StateFlags.VISITED, True)
         else:
             if not self.__tracks_view.is_populated:
                 self.__tracks_view.populate()
             self.__revealer.set_reveal_child(True)
+            self.get_style_context().remove_class("albumrow-collapsed")
             self.unset_state_flags(Gtk.StateFlags.VISITED)
 
     def set_playing_indicator(self):
