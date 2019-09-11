@@ -13,6 +13,7 @@
 from gi.repository import GLib
 
 from pickle import load, dump
+from gettext import gettext as _
 
 from lollypop.helper_web_youtube import YouTubeHelper
 from lollypop.helper_web_invidious import InvidiousHelper
@@ -74,4 +75,5 @@ class WebHelper:
             if uri:
                 Logger.info("Track URI found by %s" % helper)
                 return uri
+        GLib.idle_add(App().notify.send, _("Can't find this track on YouTube"))
         return None
