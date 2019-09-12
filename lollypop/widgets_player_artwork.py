@@ -148,6 +148,6 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             else:
                 icon_name = "folder-music-symbolic"
             self.set_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
-            self.set_size_request(self._art_size, self._art_size)
+            self.set_size_request(self.__width, self.__height)
         else:
             self.set_from_surface(surface)
