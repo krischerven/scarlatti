@@ -16,6 +16,8 @@ from time import sleep
 from re import match
 from random import shuffle
 import json
+import os
+import tempfile
 
 from lollypop.logger import Logger
 from lollypop.utils import escape
@@ -373,20 +375,19 @@ class MtpSync(GObject.Object):
             if self.__cancellable.is_cancelled():
                 break
             try:
-                name = escape(App().playlists.get_name(playlist_id))
-                dst_uri = "%s/%s.m3u" % (self.__uri, name)
+                # Get tracks
                 if App().playlists.get_smart(playlist_id):
                     request = App().playlists.get_smart_sql(playlist_id)
                     track_ids = App().db.execute(request)
                 else:
                     track_ids = App().playlists.get_track_ids(playlist_id)
-                # Create playlist
-                m3u = Gio.File.new_for_path("/tmp/lollypop_%s.m3u" % name)
-                content = "#EXTM3U\n"
+
+                # Build tracklist
+                tracklist = "#EXTM3U\n"
                 for track_id in track_ids:
-                    track = Track(track_id)
                     if self.__cancellable.is_cancelled():
                         break
+                    track = Track(track_id)
                     f = Gio.File.new_for_uri(track.uri)
                     filename = f.get_basename()
                     print(filename, escape(filename))
@@ -394,16 +395,25 @@ class MtpSync(GObject.Object):
                     uri = "%s/%s" % (album_uri, escape(filename))
                     (convertion_needed,
                      uri) = self.__is_convertion_needed(track.uri, uri)
-                    content += "%s\n" % uri
-                    m3u.replace_contents(
-                                    content.encode("utf-8"),
-                                    None,
-                                    False,
-                                    Gio.FileCreateFlags.REPLACE_DESTINATION,
-                                    self.__cancellable)
-                    dst = Gio.File.new_for_uri(dst_uri)
-                    Logger.debug("MtpSync::__write_playlists(): %s" % dst_uri)
-                    m3u.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
+                    tracklist += "%s\n" % uri
+
+                # Write playlist file
+                playlist_name = escape(App().playlists.get_name(playlist_id))
+                playlist_uri = "%s/%s.m3u" % (self.__uri, playlist_name)
+                Logger.debug("MtpSync::__write_playlists(): %s" % playlist_uri)
+                temp_uri = os.path.join(
+                    tempfile.gettempdir(),
+                    "lollypop_%s.m3u" % playlist_name
+                )
+                m3u_temp = Gio.File.new_for_path(temp_uri)
+                m3u_temp.replace_contents(
+                                        tracklist.encode("utf-8"),
+                                        None,
+                                        False,
+                                        Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                        self.__cancellable)
+                m3u = Gio.File.new_for_uri(playlist_uri)
+                m3u_temp.move(m3u, Gio.FileCopyFlags.OVERWRITE, None, None)
             except Exception as e:
                 Logger.error("MtpSync::__write_playlists(): %s", e)
 
