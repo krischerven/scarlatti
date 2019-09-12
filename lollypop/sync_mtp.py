@@ -407,11 +407,11 @@ class MtpSync(GObject.Object):
                 )
                 m3u_temp = Gio.File.new_for_path(temp_uri)
                 m3u_temp.replace_contents(
-                                        tracklist.encode("utf-8"),
-                                        None,
-                                        False,
-                                        Gio.FileCreateFlags.REPLACE_DESTINATION,
-                                        self.__cancellable)
+                                    tracklist.encode("utf-8"),
+                                    None,
+                                    False,
+                                    Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                    self.__cancellable)
                 m3u = Gio.File.new_for_uri(playlist_uri)
                 m3u_temp.move(m3u, Gio.FileCopyFlags.OVERWRITE, None, None)
             except Exception as e:

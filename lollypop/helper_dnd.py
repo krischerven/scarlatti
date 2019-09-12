@@ -155,8 +155,8 @@ class DNDHelper(GObject.Object):
         rows = album_row.children[:index]
         split_album = Album(album_row.album.id)
         split_album.set_tracks([row.track for row in rows])
-        split_album_row = AlbumRow(split_album, height, self.__view_type,
-                                   True)
+        split_album_row = AlbumRow(split_album, height, self.__view_type)
+        split_album_row.reveal()
         split_album_row.show()
         for row in rows:
             empty = album_row.album.remove_track(row.track)
@@ -183,8 +183,9 @@ class DNDHelper(GObject.Object):
                     new_album = Album(row.track.album.id)
                     new_album.set_tracks([row.track])
                     new_album_row = AlbumRow(new_album, height,
-                                             self.__view_type, True)
+                                             self.__view_type)
                     new_album_row.show()
+                    new_album_row.reveal()
                     new_rows.append(new_album_row)
             else:
                 # Merge with previous
@@ -195,7 +196,9 @@ class DNDHelper(GObject.Object):
                     new_album = Album(row.album.id)
                     new_album.set_tracks(row.album.tracks)
                     new_album_row = AlbumRow(new_album, height,
-                                             self.__view_type, False)
+                                             self.__view_type)
+                    new_album_row.populate()
+                    new_album_row.tracks_view.populate()
                     new_album_row.show()
                     new_rows.append(new_album_row)
         return new_rows
