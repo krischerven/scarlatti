@@ -109,3 +109,6 @@ class AdaptiveContainer:
         if sidebar_id not in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
             self.left_list.hide()
         self._sidebar.select_ids([sidebar_id], False)
+        visible_child = stack.get_visible_child()
+        if visible_child is not None:
+            self.set_focused_view(visible_child)
