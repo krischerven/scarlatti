@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Type
+from lollypop.define import App
 
 
 class AdaptiveContainer:
@@ -25,6 +25,7 @@ class AdaptiveContainer:
         """
         self._stack.connect("history-changed", self.__on_history_changed)
         self._stack.connect("update-sidebar-id", self.__on_update_sidebar_id)
+        self._stack.connect("set-sidebar-id", self.__on_set_sidebar_id)
         App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     def go_back(self):
@@ -99,15 +100,24 @@ class AdaptiveContainer:
             self._sidebar_two.pack1(self.left_list, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
 
-    def __on_update_sidebar_id(self, stack, sidebar_id):
+    def __on_update_sidebar_id(self, stack):
         """
-            Update selected sidebar id and focused view
+            Update sidebar id with sidebar_id
+            @param stack as ContainerStack
+        """
+        visible_child = stack.get_visible_child()
+        if visible_child is not None:
+            sidebar_id = self.sidebar_id
+            visible_child.set_sidebar_id(sidebar_id)
+
+    def __on_set_sidebar_id(self, stack, sidebar_id):
+        """
+            Set sidebar id base on current container state
             @param stack as ContainerStack
             @param sidebar_id as int
         """
-        if sidebar_id not in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
-            self.left_list.hide()
         self._sidebar.select_ids([sidebar_id], False)
         visible_child = stack.get_visible_child()
         if visible_child is not None:
+            visible_child.set_sidebar_id(sidebar_id)
             self.set_focused_view(visible_child)

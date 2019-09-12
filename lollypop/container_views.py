@@ -67,12 +67,11 @@ class ViewsContainer:
         self.emit("can-go-back-changed", False)
         App().enable_special_shortcuts(False)
 
-    def show_view(self, item_ids, data=None, switch=True):
+    def show_view(self, item_ids, data=None):
         """
             Show view for item id
             @param item_ids as [int]
             @param data as object
-            @param switch as bool
         """
         view = None
         if item_ids:
@@ -131,13 +130,9 @@ class ViewsContainer:
         self._sidebar.select_ids(item_ids, False)
         if view is not None:
             self.set_focused_view(view)
-            ids = self._sidebar.selected_ids
-            if ids:
-                view.set_sidebar_id(ids[0])
             view.show()
             self._stack.add(view)
-            if switch:
-                self._stack.set_visible_child(view)
+            self._stack.set_visible_child(view)
 
     def get_view_current(self):
         """

@@ -16,7 +16,6 @@ from pickle import dump, load
 
 from lollypop.logger import Logger
 from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size, Type
-from lollypop.define import ViewType
 
 
 class AdaptiveView:
@@ -199,9 +198,7 @@ class AdaptiveHistory:
             # Here, we are restoring an offloaded view
             if view is None:
                 view = _class(**args[0])
-                # Restore scrolled position
-                if args[0]["view_type"] & ViewType.SCROLLED:
-                    view.set_populated_scrolled_position(args[2])
+                view.set_populated_scrolled_position(args[2])
                 # Start populating the view
                 if hasattr(view, "populate"):
                     view.populate()
@@ -221,7 +218,10 @@ class AdaptiveStack(Gtk.Stack):
 
     __gsignals__ = {
         "history-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "update-sidebar-id": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        # Sidebar id needs to be updated on current view with int
+        "set-sidebar-id": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        # Set sidebar id on current view with current state
+        "update-sidebar-id": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self):
@@ -260,6 +260,7 @@ class AdaptiveStack(Gtk.Stack):
             self.emit("history-changed")
         else:
             Gtk.Stack.set_visible_child(self, view)
+        self.emit("update-sidebar-id")
 
     def go_back(self):
         """
@@ -272,7 +273,7 @@ class AdaptiveStack(Gtk.Stack):
                 if view not in self.get_children():
                     self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("update-sidebar-id", sidebar_id)
+                self.emit("set-sidebar-id", sidebar_id)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()
@@ -305,7 +306,7 @@ class AdaptiveStack(Gtk.Stack):
             if view is not None:
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("update-sidebar-id", sidebar_id)
+                self.emit("set-sidebar-id", sidebar_id)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 

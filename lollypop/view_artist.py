@@ -46,8 +46,7 @@ class ArtistView(AlbumsBoxView):
             @return ({}, int, int)
         """
         return ({"genre_ids": self._genre_ids,
-                 "artist_ids": self._artist_ids,
-                 "view_type": self.view_type},
+                 "artist_ids": self._artist_ids},
                 self.sidebar_id, self.position)
 
     @property

@@ -90,6 +90,20 @@ class ListsContainer:
             self.__left_list.overlay.add_overlay(self.__right_list_grid)
         return self.__right_list
 
+    @property
+    def sidebar_id(self):
+        """
+            Get sidebar id for current state
+            @return int
+        """
+        if self.right_list.selected_ids:
+            ids = self.right_list.selected_ids
+        elif self.left_list.selected_ids:
+            ids = self.left_list.selected_ids
+        else:
+            ids = self.sidebar.selected_ids
+        return ids[0] if ids else Type.NONE
+
 ##############
 # PROTECTED  #
 ##############
@@ -199,10 +213,8 @@ class ListsContainer:
                 and selected_ids[0] in [Type.ARTISTS_LIST,
                                         Type.GENRES_LIST]:
             self._stack.set_visible_child(self.left_list)
-            self.left_list.set_sidebar_id(selected_ids[0])
         elif view is not None:
             self._stack.set_visible_child(view)
-            view.set_sidebar_id(selected_ids[0])
             if not focus_set:
                 self.set_focused_view(view)
 
@@ -243,7 +255,6 @@ class ListsContainer:
             self.set_focused_view(view)
         if view is not None:
             view.show()
-            view.set_sidebar_id(self.left_list.sidebar_id)
             self._stack.add(view)
             self._stack.set_visible_child(view)
 
@@ -257,7 +268,6 @@ class ListsContainer:
         artist_ids = self.right_list.selected_ids
         view = self._get_view_artists(genre_ids, artist_ids)
         view.show()
-        view.set_sidebar_id(self.left_list.sidebar_id)
         self._stack.add(view)
         self._stack.set_visible_child(view)
         self.set_focused_view(view)
