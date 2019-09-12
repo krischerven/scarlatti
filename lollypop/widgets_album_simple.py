@@ -167,7 +167,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             Get name
             @return str
         """
-        return self.__label.get_text()
+        return "%s %s" % (self.__album.name, self.__album.artists)
 
     @property
     def artwork(self):
