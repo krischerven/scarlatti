@@ -78,7 +78,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         """
         queue = App().player.queue
         if queue:
-            for row in self.children:
+            for row in self.__view.children:
                 if row.revealed:
                     for subrow in row.children:
                         if subrow.track.id not in queue:
@@ -116,7 +116,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param dnd_helper as DNDHelper
         """
         albums = []
-        for child in self.children:
+        for child in self.__view.children:
             albums.append(child.album)
         App().player.set_albums(albums)
         App().player.update_next_prev()
