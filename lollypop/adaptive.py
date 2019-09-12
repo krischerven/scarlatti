@@ -221,7 +221,7 @@ class AdaptiveStack(Gtk.Stack):
 
     __gsignals__ = {
         "history-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "visible-child-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "update-sidebar-id": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
     def __init__(self):
@@ -272,7 +272,7 @@ class AdaptiveStack(Gtk.Stack):
                 if view not in self.get_children():
                     self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("visible-child-changed", sidebar_id)
+                self.emit("update-sidebar-id", sidebar_id)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()
@@ -305,7 +305,7 @@ class AdaptiveStack(Gtk.Stack):
             if view is not None:
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("visible-child-changed", sidebar_id)
+                self.emit("update-sidebar-id", sidebar_id)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 

@@ -24,8 +24,7 @@ class AdaptiveContainer:
             Init container
         """
         self._stack.connect("history-changed", self.__on_history_changed)
-        self._stack.connect("visible-child-changed",
-                            self.__on_visible_child_changed)
+        self._stack.connect("update-sidebar-id", self.__on_update_sidebar_id)
         App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     def go_back(self):
@@ -100,9 +99,9 @@ class AdaptiveContainer:
             self._sidebar_two.pack1(self.left_list, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
 
-    def __on_visible_child_changed(self, stack, sidebar_id):
+    def __on_update_sidebar_id(self, stack, sidebar_id):
         """
-            Active sidebar selected id
+            Update selected sidebar id and focused view
             @param stack as ContainerStack
             @param sidebar_id as int
         """
