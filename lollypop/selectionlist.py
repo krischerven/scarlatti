@@ -418,6 +418,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
             Clear treeview
         """
+        self.stop()
         for child in self._box.get_children():
             child.destroy()
         if self.__base_mask & SelectionListMask.VIEW:
