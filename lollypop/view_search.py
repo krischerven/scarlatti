@@ -31,10 +31,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type):
+    def __init__(self, view_type, search=""):
         """
             Init Popover
             @param view_type as ViewType
+            @param search as str
         """
         View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         Gtk.Bin.__init__(self)
@@ -85,6 +86,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.add_widget(self.__view, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
+        if search:
+            self.set_search(search)
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
@@ -155,7 +158,17 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
 
     @property
     def args(self):
-        return None
+        """
+            Get default args for __class__, populate() plus sidebar_id and
+            scrolled position
+            @return ({}, int, int)
+        """
+        if self.__search_type_action.get_state().get_string() == "local":
+            search = "local://%s" % self.__banner.entry.get_text()
+        else:
+            search = "web://%s" % self.__banner.entry.get_text()
+        return ({"view_type": self.view_type, "search": search},
+                self.sidebar_id, self.position)
 
 #######################
 # PROTECTED           #
