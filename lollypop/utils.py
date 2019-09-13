@@ -590,13 +590,16 @@ def update_track_indexes(listbox, start_index, end_index):
     if end_index == -1:
         end_index = len(children)
     for album_row in children[start_index:end_index]:
-        for track_row in album_row.children:
+        for track in album_row.album.tracks:
             if current_number is None:
-                current_number = track_row.track.number
+                current_number = track.number
                 continue
             current_number += 1
-            track_row.track.set_number(current_number)
-            track_row.update_number_label()
+            track.set_number(current_number)
+        # Update widget for revealed albums
+        if album_row.revealed:
+            for track_row in album_row.children:
+                track_row.update_number_label()
 
 
 def is_device(mount):

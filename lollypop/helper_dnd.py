@@ -131,8 +131,7 @@ class DNDHelper(GObject.Object):
                     indexes.append(album_row.get_index())
             else:
                 indexes.append(row.get_index())
-        GLib.idle_add(self.__destroy_rows, src_rows,
-                      priority=GLib.PRIORITY_LOW)
+        self.__destroy_rows(src_rows)
         self.__update_album_rows(max(0, min(indexes) - 1), max(indexes) + 1)
 
     def __split_album_row(self, album_row, track_row, direction):
@@ -198,7 +197,6 @@ class DNDHelper(GObject.Object):
                     new_album_row = AlbumRow(new_album, height,
                                              self.__view_type)
                     new_album_row.populate()
-                    new_album_row.tracks_view.populate()
                     new_album_row.show()
                     new_rows.append(new_album_row)
         return new_rows
