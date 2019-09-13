@@ -96,10 +96,13 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         if event.state & Gdk.ModifierType.CONTROL_MASK and\
                 self.__view_type & ViewType.DND:
             self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-        elif event.state & Gdk.ModifierType.SHIFT_MASK and\
-                self.__view_type & ViewType.DND:
-            self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-            do_shift_selection(self, row)
+        elif event.state & Gdk.ModifierType.SHIFT_MASK:
+            if self.__view_type & ViewType.DND:
+                self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+                do_shift_selection(self, row)
+            else:
+                App().player.append_to_queue(row.track.id, False)
+                App().player.emit("queue-changed")
         elif event.state & Gdk.ModifierType.MOD1_MASK:
             self.set_selection_mode(Gtk.SelectionMode.NONE)
             App().player.clear_albums()
