@@ -56,6 +56,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         if view_type & ViewType.DND:
             from lollypop.helper_dnd import DNDHelper
             self.__dnd_helper = DNDHelper(self._box, view_type)
+            self.__dnd_helper.add_to_block_list(self.multi_press_gesture)
         self.add_widget(self._box)
 
     def set_reveal(self, albums):

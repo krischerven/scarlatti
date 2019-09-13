@@ -37,6 +37,7 @@ class DNDHelper(GObject.Object):
         self.__listbox = listbox
         self.__view_type = view_type
         self.__drag_begin_rows = []
+        self.__gestures_to_block = []
         self.__autoscroll_timeout_id = None
         self.__begin_scrolled_y = 0
         self.__gesture = Gtk.GestureDrag.new(listbox)
@@ -45,6 +46,21 @@ class DNDHelper(GObject.Object):
         self.__gesture.connect("drag-begin", self.__on_drag_begin)
         self.__gesture.connect("drag-end", self.__on_drag_end)
         self.__gesture.connect("drag-update", self.__on_drag_update)
+
+    def add_to_block_list(self, gesture):
+        """
+            Group gesture with self
+            @param gesture as Gtk.Gesture
+        """
+        self.__gestures_to_block.append(gesture)
+
+    @property
+    def gesture(self):
+        """
+            Get gesture
+            @return Gtk.GestureDrag
+        """
+        return self.__gesture
 
 #######################
 # PRIVATE             #
@@ -315,6 +331,8 @@ class DNDHelper(GObject.Object):
         if row is None:
             return
         if self.__drag_begin_rows and row not in self.__drag_begin_rows:
+            for to_block in self.__gestures_to_block:
+                to_block.set_state(Gtk.EventSequenceState.DENIED)
             row_height = row.get_allocated_height()
             (row_x, row_y) = row.translate_coordinates(self.__listbox,
                                                        0, 0)
@@ -324,7 +342,6 @@ class DNDHelper(GObject.Object):
                 direction = Gtk.DirectionType.DOWN
             self.__do_drag_and_drop(self.__drag_begin_rows,
                                     row, direction)
-        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
 
     def __on_drag_update(self, gesture, x, y):
         """

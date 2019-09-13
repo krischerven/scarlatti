@@ -34,11 +34,10 @@ class GesturesHelper():
         self.__secondary_press_callback = secondary_press_callback
         self.__tertiary_press_callback = tertiary_press_callback
         self.__long_press = Gtk.GestureLongPress.new(widget)
-        self.__long_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
+        self.__long_press.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         self.__long_press.connect("pressed", self.__on_long_pressed)
         self.__long_press.set_button(0)
         self.__multi_press = Gtk.GestureMultiPress.new(widget)
-        self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.connect("released", self.__on_multi_released)
         self.__multi_press.set_button(0)
 
@@ -47,6 +46,14 @@ class GesturesHelper():
             Enable a special header bar hack to block mutter
         """
         self.__multi_press.connect("pressed", self.__on_multi_pressed)
+
+    @property
+    def multi_press_gesture(self):
+        """
+            Get multi press gesture
+            @return Gtk.GestureMultiPress
+        """
+        return self.__multi_press
 
 #######################
 # PROTECTED           #
