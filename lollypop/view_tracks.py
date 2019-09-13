@@ -54,6 +54,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
         self.__populated = False
         self.__orientation = orientation
         self.__cancellable = Gio.Cancellable()
+        self.__show_tag_tracknumber = App().settings.get_value(
+            "show-tag-tracknumber")
 
         if window is None:
             # Calling set_orientation() is needed
@@ -418,8 +420,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
             @param tracks as [Track]
         """
         for track in tracks:
-            if not App().settings.get_value("show-tag-tracknumber") and\
-                    not self.__view_type & ViewType.PLAYLISTS:
+            if not self.__show_tag_tracknumber and\
+                    self.__view_type & ViewType.ALBUM:
                 track.set_number(position + 1)
             row = TrackRow(track, self.__album.artist_ids, self.__view_type)
             row.show()

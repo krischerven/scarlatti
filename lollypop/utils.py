@@ -383,16 +383,13 @@ def tracks_to_albums(tracks):
         Convert tracks list to albums list
     """
     albums = []
-    position = 1
     for track in tracks:
-        track.set_number(position)
         if albums and albums[-1].id == track.album.id:
             albums[-1].append_track(track, False)
         else:
             album = track.album
             album.set_tracks([track], False)
             albums.append(album)
-        position += 1
     return albums
 
 

@@ -32,7 +32,9 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             @param album as Album
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type | ViewType.OVERLAY)
+        LazyLoadingView.__init__(self, view_type |
+                                 ViewType.OVERLAY |
+                                 ViewType.ALBUM)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
