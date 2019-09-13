@@ -159,6 +159,7 @@ class ViewsContainer:
         # Search view in children
         for (_view, _class, args) in self._stack.history.items:
             if _class == SearchView and _view is not None:
+                self._stack.history.remove(_view)
                 return _view
         view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
         view.set_search(search)
