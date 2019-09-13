@@ -33,6 +33,7 @@ class RadiosBannerWidget(BannerWidget):
         self.__pop_tunein = None
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)
+        grid.get_style_context().add_class("linked")
         grid.show()
         self.__title_label = Gtk.Label.new(
             "<b>" + _("Radios") + "</b>")
