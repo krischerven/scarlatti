@@ -157,10 +157,9 @@ class ViewsContainer:
         """
         from lollypop.view_search import SearchView
         # Search view in children
-        for child in self._stack.get_children():
-            if isinstance(child, SearchView):
-                child.set_search(search)
-                return child
+        for (_view, _class, args) in self._stack.history.items:
+            if _class == SearchView and _view is not None:
+                return _view
         view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
         view.set_search(search)
         view.populate()
