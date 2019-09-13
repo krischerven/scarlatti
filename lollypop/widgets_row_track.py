@@ -17,7 +17,6 @@ from gettext import gettext as _
 from lollypop.define import App, ViewType, MARGIN_SMALL, IndicatorType
 from lollypop.define import StorageType
 from lollypop.widgets_indicator import IndicatorWidget
-from lollypop.helper_gestures import GesturesHelper
 from lollypop.utils import seconds_to_string, on_query_tooltip, popup_widget
 
 
@@ -119,9 +118,8 @@ class TrackRow(Gtk.ListBoxRow):
             self.__action_button = None
         if self.__action_button is not None:
             self.__action_button.show()
-            self.__gesture_helper = GesturesHelper(
-                self.__action_button,
-                primary_press_callback=self._on_action_button_press)
+            self.__action_button.connect("clicked",
+                                         self.__on_action_button_clicked)
             self.__action_button.set_margin_end(MARGIN_SMALL)
             self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
             context = self.__action_button.get_style_context()
@@ -247,12 +245,13 @@ class TrackRow(Gtk.ListBoxRow):
             indicator_type |= IndicatorType.SKIP
         return indicator_type
 
-    def _on_action_button_press(self, x, y, event):
+#######################
+# PRIVATE             #
+#######################
+    def __on_action_button_clicked(self, button):
         """
             Show row menu
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
+            @param button as Gtk.Button
         """
         if self.__view_type & ViewType.PLAYBACK:
             self._track.album.remove_track(self._track)
@@ -266,8 +265,4 @@ class TrackRow(Gtk.ListBoxRow):
                 view.remove_from_playlist(self._track)
             self.emit("removed")
         else:
-            self.popup_menu(self.__action_button)
-
-#######################
-# PRIVATE             #
-#######################
+            self.popup_menu(button)
