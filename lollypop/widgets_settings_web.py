@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Gio
 
 from gettext import gettext as _
 
-from lollypop.define import App
+from lollypop.define import App, NetworkAccessACL
 from lollypop.utils import get_network_available
 from lollypop.logger import Logger
 
@@ -32,9 +32,16 @@ class WebSettingsWidget(Gtk.Bin):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SettingsWeb.ui")
 
-        if App().lastfm is not None and App().lastfm.is_goa:
-            builder.get_object("lastfm_error_label").set_text(
-                _('Using "GNOME Online Accounts" settings'))
+        acl = App().settings.get_value("network-access-acl").get_int32()
+        if App().lastfm is not None:
+            if App().lastfm.is_goa:
+                builder.get_object("lastfm_error_label").set_text(
+                    _('Using "GNOME Online Accounts" settings'))
+            elif not acl & NetworkAccessACL["LASTFM"]:
+                builder.get_object("lastfm_error_label").set_text(
+                    _('Disabled in network settings'))
+                builder.get_object("librefm_error_label").set_text(
+                    _('Disabled in network settings'))
 
         #
         # Google tab
@@ -60,10 +67,11 @@ class WebSettingsWidget(Gtk.Bin):
 
         from lollypop.helper_passwords import PasswordsHelper
         helper = PasswordsHelper()
+
         #
         # Last.fm tab
         #
-        if App().lastfm is not None:
+        if App().lastfm is not None and acl & NetworkAccessACL["LASTFM"]:
             self.__lastfm_test_image = builder.get_object("lastfm_test_image")
             self.__lastfm_login = builder.get_object("lastfm_login")
             self.__lastfm_password = builder.get_object("lastfm_password")
@@ -75,7 +83,7 @@ class WebSettingsWidget(Gtk.Bin):
         #
         # Libre.fm tab
         #
-        if App().lastfm is not None:
+        if App().lastfm is not None and acl & NetworkAccessACL["LASTFM"]:
             self.__librefm_test_image = builder.get_object(
                 "librefm_test_image")
             self.__librefm_login = builder.get_object("librefm_login")
