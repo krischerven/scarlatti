@@ -45,7 +45,6 @@ class ViewsContainer:
             @param widget as Gtk.Widget
         """
         def on_closed(widget, view):
-            App().window.toolbar.end.detach_menus()
             self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP)
             self.go_back()
             self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)

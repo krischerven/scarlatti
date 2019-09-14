@@ -108,13 +108,6 @@ class ToolbarEnd(Gtk.Bin):
         window.container.connect("can-go-back-changed",
                                  self.__on_can_go_back_changed)
 
-    def detach_menus(self):
-        """
-            Mark menus as None
-        """
-        self.__app_menu = None
-        self.__playback_menu = None
-
     @property
     def devices_popover(self):
         """
