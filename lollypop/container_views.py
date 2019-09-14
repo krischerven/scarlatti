@@ -159,6 +159,10 @@ class ViewsContainer:
             @return SearchView
         """
         from lollypop.view_search import SearchView
+        # Search view in current view
+        if self.view is not None and isinstance(self.view, SearchView):
+            self.view.grab_focus()
+            return self.view
         # Search view in children
         for (_view, _class, args) in self._stack.history.items:
             if _class == SearchView and _view is not None:

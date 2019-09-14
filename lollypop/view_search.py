@@ -149,6 +149,12 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                           GLib.Variant("s", "web"))
         self.__banner.entry.grab_focus()
 
+    def grab_focus(self):
+        """
+            Make search entry grab focus
+        """
+        self.__banner.entry.grab_focus()
+
     def cancel(self):
         """
             Cancel current search and replace cancellable
