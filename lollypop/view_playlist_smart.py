@@ -188,8 +188,7 @@ class SmartPlaylistView(View):
         else:
             request = self.__get_or_request()
         App().playlists.set_smart_sql(self.__playlist_id, request)
-        # FIXME
-        App().window.container.reload_view()
+        App().window.container.go_back()
 
     def _on_add_rule_button_clicked(self, button):
         """
