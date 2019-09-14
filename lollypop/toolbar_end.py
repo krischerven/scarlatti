@@ -147,9 +147,13 @@ class ToolbarEnd(Gtk.Bin):
             from lollypop.widgets_menu import MenuBuilder
             self.__playback_menu = MenuBuilder(self.__shuffle_menu)
             self.__playback_menu.show()
-            self.__playback_menu.connect("closed", self.__on_menu_closed,
-                                         button)
-            popup_widget(self.__playback_menu, button)
+            popover = popup_widget(self.__playback_menu, button)
+            if popover is None:
+                self.__playback_menu.connect("closed",
+                                             self.__on_menu_closed,
+                                             button)
+            else:
+                popover.connect("closed", self.__on_popover_closed, button)
         elif self.__playback_menu is not None and App().window.is_adaptive:
             self.__playback_menu.emit("closed", True)
 
@@ -173,8 +177,13 @@ class ToolbarEnd(Gtk.Bin):
                 self.__playback_menu.emit("closed", True)
             self.__app_menu = ApplicationMenu()
             self.__app_menu.show()
-            popup_widget(self.__app_menu, button)
-            self.__app_menu.connect("closed", self.__on_menu_closed, button)
+            popover = popup_widget(self.__app_menu, button)
+            if popover is None:
+                self.__app_menu.connect("closed",
+                                        self.__on_menu_closed,
+                                        button)
+            else:
+                popover.connect("closed", self.__on_popover_closed, button)
         elif self.__app_menu is not None and App().window.is_adaptive:
             self.__app_menu.emit("closed", True)
 
@@ -323,11 +332,21 @@ class ToolbarEnd(Gtk.Bin):
         """
         self.__set_shuffle_icon()
 
-    def __on_menu_closed(self, popover, hide, button):
+    def __on_menu_closed(self, menu, hide, button):
         """
-            Restore button state
-            @param popover as Popover
+            Restore button state and reset menus
+            @param menu as MenuWidget
             @param hide as bool
+            @param button as Gtk.Button
+        """
+        self.__app_menu = None
+        self.__playback_menu = None
+        button.set_active(False)
+
+    def __on_popover_closed(self, popover, button):
+        """
+            Restore button state and reset menus
+            @param popover as Gtk.Popover
             @param button as Gtk.Button
         """
         self.__app_menu = None
