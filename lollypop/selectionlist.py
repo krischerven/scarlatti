@@ -500,9 +500,18 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
     def selected_ids(self):
         """
             Get selected ids
-            @return array of ids as [int]
+            @return [int]
         """
         return [row.id for row in self._box.get_selected_rows()]
+
+    @property
+    def selected_id(self):
+        """
+            Get selected id
+            @return int
+        """
+        selected_row = self._box.get_selected_row()
+        return None if selected_row is None else selected_row.id
 
 #######################
 # PROTECTED           #

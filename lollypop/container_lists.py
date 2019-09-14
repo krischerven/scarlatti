@@ -30,6 +30,7 @@ class ListsContainer:
         """
         self.__left_list = None
         self.__right_list = None
+        self.__previous_sidebar_id = None
 
     def setup_lists(self):
         """
@@ -104,13 +105,27 @@ class ListsContainer:
             ids = self.sidebar.selected_ids
         return ids[0] if ids else Type.NONE
 
-##############
-# PROTECTED  #
-##############
-
 ############
 # PRIVATE  #
 ############
+    def __should_load_sidebar(self, selected_id):
+        """
+            True if we should reload sidebar
+            @param selected_id as int
+            @return bool
+        """
+        if selected_id is None:
+            return False
+        elif selected_id in [Type.RANDOMS,
+                             Type.SUGGESTIONS]:
+            self.__previous_sidebar_id = selected_id
+            return True
+        elif selected_id == self.__previous_sidebar_id:
+            return False
+        else:
+            self.__previous_sidebar_id = selected_id
+            return True
+
     def __hide_right_list(self, *ignore):
         """
             Hide right list
@@ -155,18 +170,18 @@ class ListsContainer:
         Logger.debug("Container::__on_sidebar_activated()")
         view = None
         focus_set = False
-        selected_ids = self._sidebar.selected_ids
-        if not selected_ids:
+        selected_id = self._sidebar.selected_id
+        if not self.__should_load_sidebar(selected_id):
             return
         # Update lists
-        if selected_ids[0] == Type.ARTISTS_LIST:
+        if selected_id == Type.ARTISTS_LIST:
             self.__show_artists_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
             self.left_list.set_sidebar_id(Type.ARTISTS_LIST)
             self.set_focused_view(self.left_list)
             focus_set = True
-        elif selected_ids[0] == Type.GENRES_LIST:
+        elif selected_id == Type.GENRES_LIST:
             self.__show_genres_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
@@ -176,42 +191,41 @@ class ListsContainer:
         else:
             self.left_list.hide()
 
-        if selected_ids[0] == Type.PLAYLISTS:
+        if selected_id == Type.PLAYLISTS:
             view = self._get_view_playlists()
-        elif selected_ids[0] == Type.LYRICS:
+        elif selected_id == Type.LYRICS:
             view = self._get_view_lyrics()
-        elif selected_ids[0] == Type.CURRENT:
+        elif selected_id == Type.CURRENT:
             view = self.get_view_current()
-        elif selected_ids[0] == Type.SEARCH:
+        elif selected_id == Type.SEARCH:
             view = self.get_view_search()
-        elif selected_ids[0] == Type.SUGGESTIONS:
+        elif selected_id == Type.SUGGESTIONS:
             view = self._get_view_suggestions()
-        elif selected_ids[0] in [Type.POPULARS,
-                                 Type.LOVED,
-                                 Type.RECENTS,
-                                 Type.NEVER,
-                                 Type.RANDOMS,
-                                 Type.WEB]:
-            view = self._get_view_albums(selected_ids, [])
-        elif selected_ids[0] == Type.RADIOS:
+        elif selected_id in [Type.POPULARS,
+                             Type.LOVED,
+                             Type.RECENTS,
+                             Type.NEVER,
+                             Type.RANDOMS,
+                             Type.WEB]:
+            view = self._get_view_albums([selected_id], [])
+        elif selected_id == Type.RADIOS:
             view = self._get_view_radios()
-        elif selected_ids[0] == Type.YEARS:
+        elif selected_id == Type.YEARS:
             view = self._get_view_albums_decades()
-        elif selected_ids[0] == Type.GENRES:
+        elif selected_id == Type.GENRES:
             view = self._get_view_genres()
-        elif selected_ids[0] == Type.ARTISTS:
+        elif selected_id == Type.ARTISTS:
             view = self._get_view_artists_rounded()
-        elif selected_ids[0] == Type.ALL:
-            view = self._get_view_albums(selected_ids, [])
-        elif selected_ids[0] == Type.COMPILATIONS:
-            view = self._get_view_albums(selected_ids, [])
+        elif selected_id == Type.ALL:
+            view = self._get_view_albums([selected_id], [])
+        elif selected_id == Type.COMPILATIONS:
+            view = self._get_view_albums([selected_id], [])
         if view is not None and view not in self._stack.get_children():
             view.show()
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted
         if App().window.is_adaptive\
-                and selected_ids[0] in [Type.ARTISTS_LIST,
-                                        Type.GENRES_LIST]:
+                and selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST]:
             self._stack.set_visible_child(self.left_list)
         elif view is not None:
             self._stack.set_visible_child(view)
