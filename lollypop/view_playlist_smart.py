@@ -86,9 +86,6 @@ class SmartPlaylistView(View):
             split_order = sql.split("ORDER BY")
             split_spaces = split_order[1].split(" ")
             orderby = split_spaces[1]
-            # UNION does not support RANDOM() in OrderBy
-            if orderby == "rand":
-                orderby = "random()"
             if split_spaces[2] in ["ASC", "DESC"]:
                 orderby += " %s" % split_spaces[2]
             self.__select_combobox.set_active_id(orderby)
@@ -120,9 +117,7 @@ class SmartPlaylistView(View):
             if child.sql is None:
                 continue
             request += "SELECT DISTINCT(tracks.rowid)"
-            if orderby == "random()":
-                request += ", random() as rand"
-            else:
+            if orderby != "random()":
                 request += ", %s" % orderby
             request += " FROM tracks"
             subrequest = " WHERE %s" % child.sql
@@ -143,10 +138,7 @@ class SmartPlaylistView(View):
                 request += ", %s" % " track_artists"
             request += subrequest + " UNION "
         request = request[:-7]  # " UNION "
-        if orderby == "random()":
-            request += " ORDER BY rand"
-        else:
-            request += " ORDER BY %s" % orderby
+        request += " ORDER BY %s" % orderby
         request += " LIMIT %s" % int(self.__limit_spin.get_value())
         return request
 

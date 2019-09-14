@@ -14,6 +14,7 @@ from gi.repository import GLib, Gio
 
 import sqlite3
 from threading import Lock
+from random import shuffle
 import itertools
 
 from lollypop.define import App, StorageType
@@ -155,17 +156,17 @@ class Database:
             @return list
         """
         try:
+            union_random = request.find("ORDER BY random()") != -1 and\
+                request.find("UNION") != -1
             with SqlCursor(App().db) as sql:
+                # Special case for UNION, does not support random()
+                if union_random:
+                    request = request.replace("ORDER BY random()", "")
                 result = sql.execute(request)
-                # Special case for OR request
-                if request.find("ORDER BY random()") == -1 and\
-                        request.find("UNION") != -1:
-                    ids = []
-                    for (id, other) in list(result):
-                        ids.append(id)
-                    return ids
-                else:
-                    return list(itertools.chain(*result))
+                ids = list(itertools.chain(*result))
+                if union_random:
+                    shuffle(ids)
+                return ids
         except Exception as e:
             Logger.error("Database::execute(): %s -> %s", e, request)
         return []
