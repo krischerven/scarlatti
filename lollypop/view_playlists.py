@@ -203,13 +203,17 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
 
     def _on_playlist_changed(self, playlists, playlist_id):
         """
-            Destroy self if removed
+            Update playlist
             @param playlists as Playlists
             @param playlist_id as int
         """
-        if playlist_id == self._playlist_id and\
-                not playlists.exists(playlist_id):
-            App().window.container.go_back()
+        if playlist_id == self._playlist_id:
+            # Playlist has been removed
+            if not playlists.exists(playlist_id):
+                App().window.container.go_back()
+            else:
+                self._view.clear()
+                self.populate()
 
 #######################
 # PRIVATE             #

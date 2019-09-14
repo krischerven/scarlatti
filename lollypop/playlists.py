@@ -509,6 +509,7 @@ class Playlists(GObject.GObject):
                         SET smart_enabled=?\
                         WHERE rowid=?",
                         (smart, playlist_id))
+            GLib.idle_add(self.emit, "playlists-changed", playlist_id)
 
     def set_smart_sql(self, playlist_id, request):
         """
@@ -521,6 +522,7 @@ class Playlists(GObject.GObject):
                         SET smart_sql=?\
                         WHERE rowid=?",
                         (request, playlist_id))
+            GLib.idle_add(self.emit, "playlists-changed", playlist_id)
 
     def get_position(self, playlist_id, track_id):
         """

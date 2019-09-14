@@ -35,7 +35,6 @@ class SmartPlaylistView(View):
         self.__size_group.set_mode(Gtk.SizeGroupMode.BOTH)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SmartPlaylistView.ui")
-        builder.connect_signals(self)
         widget = builder.get_object("widget")
         self.connect("size-allocate", self.__on_size_allocate, widget)
         self.__listbox = builder.get_object("listbox")
@@ -49,7 +48,9 @@ class SmartPlaylistView(View):
         self.__bottom_box = builder.get_object("bottom_box")
         if App().playlists.get_smart(playlist_id):
             self.__match_toggle.set_active(True)
+            self.__set_sensitive(True)
         self.add_widget(widget)
+        builder.connect_signals(self)
 
     def populate(self):
         """
@@ -202,17 +203,9 @@ class SmartPlaylistView(View):
             Enable/Disable smart playlist
             @param button as GtkButton
         """
-        App().playlists.set_smart(self.__playlist_id, button.get_active())
-        if button.get_active():
-            self.__up_box.set_sensitive(True)
-            self.__bottom_box.set_sensitive(True)
-            self.__add_rule_button.set_sensitive(True)
-            self.__listbox.set_sensitive(True)
-        else:
-            self.__up_box.set_sensitive(False)
-            self.__bottom_box.set_sensitive(False)
-            self.__add_rule_button.set_sensitive(False)
-            self.__listbox.set_sensitive(False)
+        active = button.get_active()
+        App().playlists.set_smart(self.__playlist_id, active)
+        self.__set_sensitive(active)
 
     def _on_map(self, widget):
         """
@@ -240,6 +233,22 @@ class SmartPlaylistView(View):
         widget = SmartPlaylistRow(self.__size_group)
         widget.show()
         self.__listbox.add(widget)
+
+    def __set_sensitive(self, sensitive):
+        """
+            Set view sensitive
+            @param sensitive as bool
+        """
+        if sensitive:
+            self.__up_box.set_sensitive(True)
+            self.__bottom_box.set_sensitive(True)
+            self.__add_rule_button.set_sensitive(True)
+            self.__listbox.set_sensitive(True)
+        else:
+            self.__up_box.set_sensitive(False)
+            self.__bottom_box.set_sensitive(False)
+            self.__add_rule_button.set_sensitive(False)
+            self.__listbox.set_sensitive(False)
 
     def __on_size_allocate(self, widget, allocation, child_widget):
         """
