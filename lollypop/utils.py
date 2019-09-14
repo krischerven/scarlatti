@@ -538,7 +538,7 @@ def popup_widget(widget, parent, x=None, y=None):
         @param y as int
         @return Gtk.Popover/None
     """
-    def on_closed(widget, popover):
+    def on_closed(widget, hide, popover):
         popover.popdown()
 
     if App().window.is_adaptive:
