@@ -77,6 +77,14 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         label_widget.update()
         self.__background = Gtk.Image()
         self.__background.show()
+        hide_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic",
+                                                    Gtk.IconSize.BUTTON)
+        hide_button.show()
+        hide_button.set_property("halign", Gtk.Align.END)
+        hide_context = hide_button.get_style_context()
+        hide_context.add_class("black-transparent")
+        hide_context.add_class("menu-button")
+        hide_button.connect("clicked", self.__on_eventbox_press)
         # Assemble UI
         self.__eventbox.add(label_widget)
         self.__box.pack_start(self.__revealer, False, True, 0)
@@ -84,6 +92,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         bottom_box.pack_start(self.__eventbox, True, True, 0)
         bottom_box.pack_end(buttons_widget, False, False, 0)
         self.__revealer.add(revealer_box)
+        revealer_box.pack_start(hide_button, False, False, 0)
         revealer_box.pack_start(self.__artwork_widget, False, True, 0)
         revealer_box.pack_start(self.__progress_widget, False, True, 0)
         self.add(self.__background)
@@ -164,13 +173,9 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
                 self.__on_artwork,
                 ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
 
-    def __on_eventbox_press(self,  x, y, event):
+    def __on_eventbox_press(self, *ignore):
         """
             Set revealer on/off
-            @param button as Gtk.Button
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
         """
         if self.__revealer.get_reveal_child():
             self.__revealer.set_reveal_child(False)
