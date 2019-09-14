@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.pop_devices import DevicesPopover
 from lollypop.define import App, Repeat, Type
+from lollypop.utils import popup_widget
 from lollypop.progressbar import ButtonProgressBar
 
 
@@ -153,7 +154,9 @@ class ToolbarEnd(Gtk.Bin):
             from lollypop.widgets_menu import MenuBuilder
             self.__playback_menu = MenuBuilder(self.__shuffle_menu)
             self.__playback_menu.show()
-            self.__popup_widget(self.__playback_menu, button)
+            self.__playback_menu.connect("closed", self.__on_menu_closed,
+                                         button)
+            popup_widget(self.__playback_menu, button)
         elif self.__playback_menu is not None and App().window.is_adaptive:
             self.__playback_menu.emit("closed")
 
@@ -177,30 +180,14 @@ class ToolbarEnd(Gtk.Bin):
                 self.__playback_menu.emit("closed")
             self.__app_menu = ApplicationMenu()
             self.__app_menu.show()
-            self.__popup_widget(self.__app_menu, button)
+            popup_widget(self.__app_menu, button)
+            self.__app_menu.connect("closed", self.__on_menu_closed, button)
         elif self.__app_menu is not None and App().window.is_adaptive:
             self.__app_menu.emit("closed")
 
 #######################
 # PRIVATE             #
 #######################
-    def __popup_widget(self, widget, button):
-        """
-            Popup widget
-            @param widget as Gtk.Widget
-            @param button as Gtk.Button
-        """
-        if App().window.is_adaptive:
-            App().window.container.show_menu(widget)
-            widget.connect("closed", self.__on_menu_closed, button)
-        else:
-            from lollypop.widgets_utils import Popover
-            popover = Popover.new()
-            popover.add(widget)
-            popover.set_relative_to(button)
-            popover.connect("closed", self.__on_menu_closed, button)
-            popover.popup()
-
     def __init_party_submenu(self):
         """
             Init party submenu with current ids
