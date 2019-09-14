@@ -24,10 +24,16 @@ Bilal Elmoussaoui
 Jordi Romera
 </property>
     <property name="translator_credits" translatable="yes" context="Translation credits here, put your name here!" comments="Replace me with your names">Cédric Bellegarde &lt;cedric.bellegarde@adishatz.org&gt;</property>
-    <property name="artists" translatable="yes">Reda Lazri (Lollypop icon)
-Geary Development Team (tag-list-symbolic icon)
-GNOME Project (unplayed-albums-symbolic, artists-list-symbolic icons)
-Martins D. Okoi (Description in appdata)
+    <property name="artists" translatable="yes">
+Reda Lazri:
+    Lollypop icon
+Geary Development Team:
+    tag-list-symbolic icon
+GNOME Project:
+    unplayed-albums-symbolic
+    artists-list-symbolic icons
+Martins D. Okoi:
+    Description in appdata
     </property>
     <property name="logo_icon_name">org.gnome.Lollypop</property>
     <property name="license_type">gpl-3-0</property>
