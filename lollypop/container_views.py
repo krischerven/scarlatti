@@ -44,11 +44,14 @@ class ViewsContainer:
             Show menu widget
             @param widget as Gtk.Widget
         """
-        def on_closed(widget, view):
-            self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_UP)
-            self.go_back()
-            self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-            App().enable_special_shortcuts(True)
+        def on_closed(widget, hide, view):
+            if hide:
+                self._stack.set_transition_type(
+                    Gtk.StackTransitionType.SLIDE_UP)
+                self.go_back()
+                self._stack.set_transition_type(
+                    Gtk.StackTransitionType.CROSSFADE)
+                App().enable_special_shortcuts(True)
             if self.can_go_back:
                 self.emit("can-go-back-changed", True)
 

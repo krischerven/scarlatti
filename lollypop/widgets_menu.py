@@ -26,7 +26,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     @signals_map
@@ -141,7 +141,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button.set_label(text.get_string())
         button.set_alignment(0, 0.5)
         if close:
-            button.connect("clicked", lambda x: self.emit("closed"))
+            button.connect("clicked", lambda x: self.emit("closed", True))
         if tooltip is not None:
             button.set_tooltip_markup(tooltip.get_string())
             button.set_has_tooltip(True)
@@ -200,7 +200,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("closed"))
+        button.connect("clicked", lambda x: self.emit("closed", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
@@ -226,7 +226,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("closed"))
+        button.connect("clicked", lambda x: self.emit("closed", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
@@ -257,7 +257,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("closed"))
+        button.connect("clicked", lambda x: self.emit("closed", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
@@ -302,7 +302,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 artwork.show()
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("closed"))
+        button.connect("clicked", lambda x: self.emit("closed", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)

@@ -22,7 +22,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     @signals_map
@@ -35,6 +35,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         builder.add_from_resource("/org/gnome/Lollypop/Appmenu.ui")
         widget = builder.get_object("widget")
         self.add(widget)
+        self.__equalizer_button = builder.get_object("equalizer_button")
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
         builder.connect_signals(self)
@@ -57,12 +58,14 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         popover = self.get_ancestor(Gtk.Popover)
         if popover is not None:
             popover.popdown()
+        else:
+            self.emit("closed", button != self.__equalizer_button)
 
     def _emit_closed(self, button):
         """
             Emit closed signal
         """
-        self.emit("closed")
+        self.emit("closed", False)
 
     def _on_volume_value_changed(self, scale):
         """

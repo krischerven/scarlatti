@@ -141,7 +141,7 @@ class ToolbarEnd(Gtk.Bin):
         """
         if button.get_active():
             if self.__app_menu is not None:
-                self.__app_menu.emit("closed")
+                self.__app_menu.emit("closed", True)
             self.__party_submenu.remove_all()
             self.__init_party_submenu()
             from lollypop.widgets_menu import MenuBuilder
@@ -151,7 +151,7 @@ class ToolbarEnd(Gtk.Bin):
                                          button)
             popup_widget(self.__playback_menu, button)
         elif self.__playback_menu is not None and App().window.is_adaptive:
-            self.__playback_menu.emit("closed")
+            self.__playback_menu.emit("closed", True)
 
     def _on_devices_button_toggled(self, button):
         """
@@ -170,13 +170,13 @@ class ToolbarEnd(Gtk.Bin):
         from lollypop.menu_application import ApplicationMenu
         if button.get_active():
             if self.__playback_menu is not None:
-                self.__playback_menu.emit("closed")
+                self.__playback_menu.emit("closed", True)
             self.__app_menu = ApplicationMenu()
             self.__app_menu.show()
             popup_widget(self.__app_menu, button)
             self.__app_menu.connect("closed", self.__on_menu_closed, button)
         elif self.__app_menu is not None and App().window.is_adaptive:
-            self.__app_menu.emit("closed")
+            self.__app_menu.emit("closed", True)
 
 #######################
 # PRIVATE             #
@@ -323,10 +323,11 @@ class ToolbarEnd(Gtk.Bin):
         """
         self.__set_shuffle_icon()
 
-    def __on_menu_closed(self, popover, button):
+    def __on_menu_closed(self, popover, hide, button):
         """
             Restore button state
             @param popover as Popover
+            @param hide as bool
             @param button as Gtk.Button
         """
         self.__app_menu = None
