@@ -320,7 +320,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Popup menu for album
             @param widget as Gtk.Widget
         """
-        def on_closed(popover):
+        def on_closed(popover, *ignore):
             self.unset_state_flags(Gtk.StateFlags.CHECKED)
 
         from lollypop.menu_objects import AlbumMenu

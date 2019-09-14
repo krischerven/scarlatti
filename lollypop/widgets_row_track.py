@@ -191,7 +191,7 @@ class TrackRow(Gtk.ListBoxRow):
             @param x as int
             @param y as int
         """
-        def on_closed(widget):
+        def on_closed(widget, *ignore):
             self.unset_state_flags(Gtk.StateFlags.CHECKED)
             self.set_indicator()
 
