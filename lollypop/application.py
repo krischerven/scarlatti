@@ -114,6 +114,8 @@ class Application(Gtk.Application, ApplicationActions):
         self.__scanner_timeout_id = None
         self.__spotify_timeout_id = None
         self.__scanner_uris = []
+        settings = Gio.Settings.new("org.gnome.desktop.interface")
+        self.animations = settings.get_value("enable-animations").get_boolean()
         GLib.set_application_name("Lollypop")
         GLib.set_prgname("lollypop")
         self.add_main_option("play-ids", b"a", GLib.OptionFlags.NONE,

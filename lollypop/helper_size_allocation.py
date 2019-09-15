@@ -12,6 +12,8 @@
 
 from gi.repository import GLib
 
+from lollypop.define import App
+
 
 class SizeAllocationHelper:
     """
@@ -66,7 +68,10 @@ class SizeAllocationHelper:
             @param widget as Gtk.Widget
             @param allocation as Gtk.Allocation
         """
-        if self.__allocation_timeout_id is not None:
-            GLib.source_remove(self.__allocation_timeout_id)
-        self.__allocation_timeout_id = GLib.idle_add(
-            self.__handle_size_allocate, allocation)
+        if App().animations:
+            if self.__allocation_timeout_id is not None:
+                GLib.source_remove(self.__allocation_timeout_id)
+            self.__allocation_timeout_id = GLib.idle_add(
+                self.__handle_size_allocate, allocation)
+        else:
+            self.__handle_size_allocate(allocation)
