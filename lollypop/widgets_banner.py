@@ -76,7 +76,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             self._artwork.get_style_context().add_class("black")
             self._artwork.set_opacity(0.99)
         else:
-            self._artwork.get_style_context().add_class("no-animations-banner")
+            self._artwork.get_style_context().add_class("default-banner")
         eventbox = Gtk.EventBox.new()
         eventbox.show()
         eventbox.add_events(Gdk.EventMask.ALL_EVENTS_MASK)
@@ -120,7 +120,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         if surface is not None:
             self._artwork.set_from_surface(surface)
         else:
-            self._artwork.get_style_context().add_class("no-animations-banner")
+            self._artwork.get_style_context().add_class("default-banner")
 
 #######################
 # PRIVATE             #
