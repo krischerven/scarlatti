@@ -23,7 +23,7 @@ class RadioArtworkSearchWidget(ArtworkSearchWidget):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def __init__(self, name, view_type):
@@ -79,6 +79,6 @@ class RadioArtworkSearchWidget(ArtworkSearchWidget):
             else:
                 App().task_helper.run(App().art.add_radio_artwork,
                                       self.__name, None)
-            self.emit("closed")
+            self.emit("hidden", True)
         except Exception as e:
             Logger.error("RadioArtworkSearchWidget::_on_activate(): %s", e)

@@ -200,17 +200,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         popover.set_position(Gtk.PositionType.BOTTOM)
         popover.popup()
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_album_popover_closed(self, popover, album_widget):
-        """
-            Remove overlay and restore opacity
-            @param popover as Popover
-            @param album_widget as AlbumWidget
-        """
-        album_widget.artwork.set_opacity(1)
-
 
 class AlbumsGenresBoxView(AlbumsBoxView):
     """

@@ -538,7 +538,7 @@ def popup_widget(widget, parent, x=None, y=None):
         @param y as int
         @return Gtk.Popover/None
     """
-    def on_closed(widget, hide, popover):
+    def on_hidden(widget, hide, popover):
         popover.popdown()
 
     if App().window.is_adaptive:
@@ -548,7 +548,7 @@ def popup_widget(widget, parent, x=None, y=None):
         from lollypop.widgets_utils import Popover
         popover = Popover.new()
         popover.add(widget)
-        widget.connect("closed", on_closed, popover)
+        widget.connect("hidden", on_hidden, popover)
         popover.set_relative_to(parent)
         if x is not None and y is not None:
             rect = Gdk.Rectangle()

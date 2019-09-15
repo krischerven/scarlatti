@@ -320,7 +320,7 @@ class AlbumRow(Gtk.ListBoxRow):
             Popup menu for album
             @param widget as Gtk.Widget
         """
-        def on_closed(popover, *ignore):
+        def on_hidden(popover, hide):
             self.unset_state_flags(Gtk.StateFlags.CHECKED)
 
         from lollypop.menu_objects import AlbumMenu
@@ -332,7 +332,7 @@ class AlbumRow(Gtk.ListBoxRow):
         self.set_state_flags(Gtk.StateFlags.CHECKED, True)
         popover = popup_widget(menu_widget, widget)
         if popover is not None:
-            popover.connect("closed", on_closed)
+            popover.connect("hidden", on_hidden)
 
     def __on_album_artwork(self, surface):
         """

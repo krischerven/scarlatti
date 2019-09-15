@@ -26,7 +26,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def __init__(self, album, view_type):
@@ -45,7 +45,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             self.set_margin_bottom(MARGIN)
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("closed"))
+            button.connect("clicked", lambda x: self.emit("hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -157,7 +157,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
                 App().art.save_album_artwork(None, self.__album)
                 App().art.clean_album_cache(self.__album)
                 App().art.emit("album-artwork-changed", self.__album.id)
-            self.emit("closed")
+            self.emit("hidden", True)
         except Exception as e:
             Logger.error("AlbumArtworkSearchWidget::_on_activate(): %s", e)
 

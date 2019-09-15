@@ -24,7 +24,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def __init__(self, artist_id, view_type):
@@ -43,7 +43,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             self.set_margin_bottom(MARGIN)
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("closed"))
+            button.connect("clicked", lambda x: self.emit("hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -120,7 +120,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             else:
                 App().task_helper.run(App().art.add_artist_artwork,
                                       self.__artist, None)
-            self.emit("closed")
+            self.emit("hidden", True)
         except Exception as e:
             Logger.error("ArtistArtworkSearchWidget::_on_activate(): %s", e)
 

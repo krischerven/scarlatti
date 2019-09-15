@@ -44,7 +44,7 @@ class ViewsContainer:
             Show menu widget
             @param widget as Gtk.Widget
         """
-        def on_closed(widget, hide, view):
+        def on_hidden(widget, hide, view):
             if hide:
                 self._stack.set_transition_type(
                     Gtk.StackTransitionType.SLIDE_UP)
@@ -61,7 +61,7 @@ class ViewsContainer:
         view.add_widget(widget)
         widget.get_style_context().add_class("adaptive-menu")
         widget.set_vexpand(True)
-        widget.connect("closed", on_closed, view)
+        widget.connect("hidden", on_hidden, view)
         self._stack.add(view)
         self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_DOWN)
         self._stack.set_visible_child(view)

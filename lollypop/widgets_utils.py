@@ -10,18 +10,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GObject
 
 
 class Popover(Gtk.Popover):
     """
-        Auto destroy popover on unmap
+        Overlay to be compatible with MenuWidget
     """
+    # Same signal than MenuWidget
+    __gsignals__ = {
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
+    }
 
-    def __init__(self):
+    def __init__(self, auto_destroy=True):
         """
             Init widget
+            @param auto_destroy as bool
         """
         Gtk.Popover.__init__(self)
-        # If popover is pointing to a widget, we need to destroy idle
-        self.connect("unmap", lambda x: GLib.idle_add(self.destroy))
+        self.connect("closed", self.__on_closed)
+        self.__auto_destroy = auto_destroy
+
+    def __on_closed(self, popover):
+        """
+            Destroy self
+        """
+        self.emit("hidden", True)
+        if self.__auto_destroy:
+            # If popover is pointing to a widget, we need to destroy idle
+            # Is this a GTK BUG? Why Popover exist in inspector after closed?
+            self.destroy()

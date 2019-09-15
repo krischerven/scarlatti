@@ -22,7 +22,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     @signals_map
@@ -59,13 +59,13 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         if popover is not None:
             popover.popdown()
         else:
-            self.emit("closed", button != self.__equalizer_button)
+            self.emit("hidden", button != self.__equalizer_button)
 
-    def _emit_closed(self, button):
+    def _emit_hidden(self, button):
         """
-            Emit closed signal
+            Emit hidden signal
         """
-        self.emit("closed", False)
+        self.emit("hidden", False)
 
     def _on_volume_value_changed(self, scale):
         """

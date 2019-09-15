@@ -14,9 +14,10 @@ from gi.repository import Gtk, Gio, GObject, GLib
 
 from lollypop.define import App
 from lollypop.utils import is_device
+from lollypop.widgets_utils import Popover
 
 
-class DevicesPopover(Gtk.Popover):
+class DevicesPopover(Popover):
     """
         Popover with connected devices
     """
@@ -30,7 +31,7 @@ class DevicesPopover(Gtk.Popover):
             Init popover
             @param progressbar Gtk.ProgressBar
         """
-        Gtk.Popover.__init__(self)
+        Popover.__init__(self, False)
         self.__syncing = 0
         self.__timeout_id = None
         self.__progressbar = progressbar

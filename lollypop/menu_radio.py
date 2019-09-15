@@ -28,7 +28,7 @@ class RadioMenu(Gtk.Grid):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def __init__(self, radio, view_type):
@@ -69,7 +69,7 @@ class RadioMenu(Gtk.Grid):
         if view_type & ViewType.ADAPTIVE:
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("closed"))
+            button.connect("clicked", lambda x: self.emit("hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -121,7 +121,7 @@ class RadioMenu(Gtk.Grid):
             @param widget as Gtk.Widget
         """
         self.__save_radio()
-        self.emit("closed")
+        self.emit("hidden", True)
 
     def _on_delete_button_clicked(self, widget):
         """
@@ -136,7 +136,7 @@ class RadioMenu(Gtk.Grid):
             f = Gio.File.new_for_path(store + "/%s.png" % name)
             if f.query_exists():
                 f.delete()
-        self.emit("closed")
+        self.emit("hidden", True)
 
     def _on_entry_changed(self, entry):
         """
@@ -163,7 +163,7 @@ class RadioMenu(Gtk.Grid):
         artwork_widget = RadioArtworkSearchWidget(name, self.__view_type)
         artwork_widget.populate()
         artwork_widget.show()
-        artwork_widget.connect("closed", lambda x: self.emit("closed"))
+        artwork_widget.connect("hidden", lambda x: self.emit("hidden", True))
         self.__stack.add_named(artwork_widget, "artwork")
         self.__stack.set_visible_child_name("artwork")
 
