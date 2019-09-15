@@ -25,7 +25,7 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
     """
 
     __gsignals__ = {
-        "closed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "closed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def __init__(self, api, view_type):
@@ -213,7 +213,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         file_filter = Gtk.FileFilter.new()
         file_filter.add_pixbuf_formats()
         dialog.set_filter(file_filter)
-        self.emit("closed")
+        self.emit("closed", True)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self._save_from_filename(dialog.get_filename())
