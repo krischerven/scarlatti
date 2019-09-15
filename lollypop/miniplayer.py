@@ -13,7 +13,6 @@
 from gi.repository import Gtk, GObject
 
 from lollypop.helper_art import ArtBehaviour
-from lollypop.utils import set_cursor_type
 from lollypop.define import App, ArtSize, MARGIN_SMALL
 from lollypop.widgets_player_progress import ProgressPlayerWidget
 from lollypop.widgets_player_buttons import ButtonsPlayerWidget
@@ -21,7 +20,6 @@ from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
-from lollypop.helper_gestures import GesturesHelper
 
 
 class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
@@ -52,12 +50,6 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         revealer_box.show()
         bottom_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, MARGIN_SMALL)
         bottom_box.show()
-        self.__eventbox = Gtk.EventBox.new()
-        self.__eventbox.show()
-        self.__eventbox.connect("realize", set_cursor_type)
-        self.__gesture = GesturesHelper(
-                               self.__eventbox,
-                               primary_press_callback=self.__on_eventbox_press)
         self.__progress_widget = ProgressPlayerWidget()
         self.__progress_widget.show()
         self.__progress_widget.set_vexpand(True)
@@ -71,28 +63,30 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__artwork_widget.set_vexpand(True)
         self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
                                            ArtSize.MINIPLAYER)
+        label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN_SMALL)
+        label_box.show()
         label_widget = LabelPlayerWidget(False, 9)
         label_widget.show()
-        label_widget.set_property("halign", Gtk.Align.START)
         label_widget.update()
+        self.__label_button_artwork = Gtk.Image.new_from_icon_name(
+            "pan-up-symbolic", Gtk.IconSize.BUTTON)
+        self.__label_button_artwork.show()
+        label_box.pack_start(self.__label_button_artwork, False, False, 0)
+        label_box.pack_start(label_widget, False, False, 0)
+        button = Gtk.Button.new()
+        button.show()
+        button.set_property("halign", Gtk.Align.START)
+        button.connect("clicked", self.__on_button_clicked)
+        button.set_image(label_box)
+        button.get_style_context().add_class("menu-button")
         self.__background = Gtk.Image()
         self.__background.show()
-        hide_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic",
-                                                    Gtk.IconSize.BUTTON)
-        hide_button.show()
-        hide_button.set_property("halign", Gtk.Align.END)
-        hide_context = hide_button.get_style_context()
-        hide_context.add_class("black-transparent")
-        hide_context.add_class("menu-button")
-        hide_button.connect("clicked", self.__on_eventbox_press)
         # Assemble UI
-        self.__eventbox.add(label_widget)
         self.__box.pack_start(self.__revealer, False, True, 0)
         self.__box.pack_start(bottom_box, False, False, 0)
-        bottom_box.pack_start(self.__eventbox, True, True, 0)
+        bottom_box.pack_start(button, True, True, 0)
         bottom_box.pack_end(buttons_widget, False, False, 0)
         self.__revealer.add(revealer_box)
-        revealer_box.pack_start(hide_button, False, False, 0)
         revealer_box.pack_start(self.__artwork_widget, False, True, 0)
         revealer_box.pack_start(self.__progress_widget, False, True, 0)
         self.add(self.__background)
@@ -173,18 +167,22 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
                 self.__on_artwork,
                 ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
 
-    def __on_eventbox_press(self, *ignore):
+    def __on_button_clicked(self, *ignore):
         """
             Set revealer on/off
         """
         if self.__revealer.get_reveal_child():
             self.__revealer.set_reveal_child(False)
             self.emit("revealed", False)
+            self.__label_button_artwork.set_from_icon_name(
+                "pan-up-symbolic", Gtk.IconSize.BUTTON)
         else:
             self.__revealer.set_reveal_child(True)
             self.emit("revealed", True)
             self.__progress_widget.update()
             self.__artwork_widget.update()
+            self.__label_button_artwork.set_from_icon_name(
+                "pan-down-symbolic", Gtk.IconSize.BUTTON)
 
     def __on_artwork(self, surface):
         """
