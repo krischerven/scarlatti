@@ -66,16 +66,17 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.__scroll_timeout_id = None
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
-        self.get_style_context().add_class("black")
         self._overlay = Overlay(self)
         self._overlay.show()
         self._artwork = Gtk.Image()
         self._artwork.show()
         if App().animations:
             SizeAllocationHelper.__init__(self)
+            self.get_style_context().add_class("black")
             self._artwork.get_style_context().add_class("black")
             self._artwork.set_opacity(0.99)
         else:
+            self.get_style_context().add_class("default-banner")
             self._artwork.get_style_context().add_class("default-banner")
         eventbox = Gtk.EventBox.new()
         eventbox.show()

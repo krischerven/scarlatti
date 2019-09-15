@@ -488,11 +488,12 @@ flowboxchild:selected  {
     border-bottom-width: 1px;
     border-color: alpha(@theme_fg_color, 0.2);
     border-style: solid;
+    color: @theme_selected_fg_color;
     background-image: -gtk-gradient (linear,
                                      right top,
                                      left top,
-                                     from (shade(red, 1.2)),
-                                     to (shade(red, 1.4)));
+                                     from (shade(@theme_selected_bg_color, 1.3)),
+                                     to (shade(@theme_selected_bg_color, 1.2)));
 }
 
 .menu-button-48 {
