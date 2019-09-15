@@ -34,14 +34,14 @@ class WebSettingsWidget(Gtk.Bin):
 
         acl = App().settings.get_value("network-access-acl").get_int32()
         if App().lastfm is not None:
-            if App().lastfm.is_goa:
-                builder.get_object("lastfm_error_label").set_text(
-                    _('Using "GNOME Online Accounts" settings'))
-            elif not acl & NetworkAccessACL["LASTFM"]:
+            if not acl & NetworkAccessACL["LASTFM"]:
                 builder.get_object("lastfm_error_label").set_text(
                     _('Disabled in network settings'))
                 builder.get_object("librefm_error_label").set_text(
                     _('Disabled in network settings'))
+            elif App().lastfm.is_goa:
+                builder.get_object("lastfm_error_label").set_text(
+                    _('Using "GNOME Online Accounts" settings'))
 
         #
         # Google tab
