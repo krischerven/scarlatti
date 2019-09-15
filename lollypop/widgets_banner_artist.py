@@ -236,7 +236,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         ArtBehaviour.DARKER,
                                         self._on_artwork)
         else:
-            self._set_default_background()
+            self._artwork.get_style_context().add_class("default-banner")
 
     def __set_badge_artwork(self, art_size):
         """
