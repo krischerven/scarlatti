@@ -38,7 +38,6 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         self.__image_button = None
         self.__artwork = Gtk.Image.new()
         self.__artwork.show()
-        self.__artwork.get_style_context().add_class("white")
         self.add(self.__artwork)
         self.connect("realize", set_cursor_type)
         return [
