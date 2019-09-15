@@ -16,12 +16,6 @@ gnome.compile_resources(
   )
 )
 
-install_data (
-  'banner.jpg',
-  install_dir: DATA_DIR,
-
-)
-
 # Installing the schema file 
 install_data(
   project_id + '.gschema.xml',

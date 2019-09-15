@@ -12,9 +12,8 @@
 
 from gi.repository import Gtk, Gdk, GObject, GLib
 
-from lollypop.define import ArtSize, ViewType, MARGIN, App, ArtBehaviour
+from lollypop.define import ArtSize, ViewType, MARGIN, App
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class Overlay(Gtk.Overlay):
@@ -45,7 +44,7 @@ class Overlay(Gtk.Overlay):
         return (height, height)
 
 
-class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
+class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
     """
         Default banner widget
     """
@@ -58,16 +57,13 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
         GObject.signal_new(signal, Gtk.Revealer,
                            args[0], args[1], args[2])
 
-    @signals_map
     def __init__(self, view_type):
         """
             Init bannner
             @param view_type as ViewType
         """
         Gtk.Revealer.__init__(self)
-        SizeAllocationHelper.__init__(self)
         self.__scroll_timeout_id = None
-        self._default_background_in_use = False
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
         self.get_style_context().add_class("black")
@@ -75,8 +71,12 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
         self._overlay.show()
         self._artwork = Gtk.Image()
         self._artwork.show()
-        self._artwork.get_style_context().add_class("black")
-        self._artwork.set_opacity(0.99)
+        if App().animations:
+            SizeAllocationHelper.__init__(self)
+            self._artwork.get_style_context().add_class("black")
+            self._artwork.set_opacity(0.99)
+        else:
+            self._artwork.get_style_context().add_class("no-animations-banner")
         eventbox = Gtk.EventBox.new()
         eventbox.show()
         eventbox.add_events(Gdk.EventMask.ALL_EVENTS_MASK)
@@ -90,10 +90,6 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
         self.add(self._overlay)
         self.set_reveal_child(True)
         self.set_transition_duration(250)
-        return [
-            (App().art, "background-artwork-changed",
-             "_on_background_artwork_changed")
-        ]
 
     def set_view_type(self, view_type):
         """
@@ -116,57 +112,15 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_width_allocate(self, allocation):
-        """
-            Update artwork
-            @param allocation as Gtk.Allocation
-        """
-        if SizeAllocationHelper._handle_width_allocate(self, allocation):
-            self._default_background_in_use = True
-            App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                self.height,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self._on_artwork,
-                True)
-
-    def _set_default_background(self):
-        """
-            Set default background
-        """
-        allocation = self.get_allocation()
-        App().art_helper.set_banner_artwork(
-                # +100 to prevent resize lag
-                allocation.width + 100,
-                self.height,
-                self._artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self._on_artwork,
-                True)
-
-    def _on_background_artwork_changed(self, art):
-        """
-            Update background
-            @param art as Art
-        """
-        if self._default_background_in_use:
-            self._set_default_background()
-
-    def _on_artwork(self, surface, default_background_in_use=False):
+    def _on_artwork(self, surface):
         """
             Set album artwork
             @param surface as str
-            @param default_background_in_use as bool
         """
-        self._default_background_in_use = True
         if surface is not None:
             self._artwork.set_from_surface(surface)
         else:
-            self._set_default_background()
+            self._artwork.get_style_context().add_class("no-animations-banner")
 
 #######################
 # PRIVATE             #

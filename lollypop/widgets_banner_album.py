@@ -22,7 +22,6 @@ from lollypop.utils import get_human_duration, on_query_tooltip
 from lollypop.utils import set_cursor_type, popup_widget, update_button
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
 class AlbumBannerWidget(BannerWidget, SignalsHelper):
@@ -127,7 +126,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+        if BannerWidget._handle_width_allocate(self, allocation):
             App().art_helper.set_album_artwork(
                     self.__album,
                     # +100 to prevent resize lag

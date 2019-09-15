@@ -20,7 +20,6 @@ from lollypop.utils_artist import add_artist_to_playback, play_artists
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
 class ArtistBannerWidget(BannerWidget, SignalsHelper):
@@ -114,7 +113,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+        if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
             if allocation.width >= Size.SMALL + 100:
                 self.__badge_artwork.show()

@@ -123,29 +123,6 @@ class ArtHelper(GObject.Object):
                                         callback,
                                         *args))
 
-    def set_banner_artwork(self, width, height, scale_factor,
-                           effect, callback, *args):
-        """
-            Set default artwork for banners
-            @param width as int
-            @param height as int
-            @param scale_factor as int
-            @param effect as ArtBehaviour
-            @param callback as function
-        """
-        App().task_helper.run(App().art.get_banner_artwork,
-                              width,
-                              height,
-                              scale_factor,
-                              effect,
-                              callback=(self._on_get_artwork_pixbuf,
-                                        width,
-                                        height,
-                                        scale_factor,
-                                        effect,
-                                        callback,
-                                        *args))
-
 #######################
 # PROTECTED           #
 #######################

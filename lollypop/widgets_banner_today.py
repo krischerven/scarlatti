@@ -23,7 +23,6 @@ from lollypop.objects_album import Album
 from lollypop.utils import update_button
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
 class TodayBannerWidget(BannerWidget, SignalsHelper):
@@ -121,7 +120,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+        if BannerWidget._handle_width_allocate(self, allocation):
             App().art_helper.set_album_artwork(
                     self.__album,
                     # +100 to prevent resize lag

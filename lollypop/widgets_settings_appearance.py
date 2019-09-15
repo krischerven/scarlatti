@@ -10,10 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gio
+from gi.repository import Gtk, GLib
 
-from lollypop.logger import Logger
-from lollypop.define import App, ArtBehaviour, LOLLYPOP_DATA_PATH
+from lollypop.define import App
 
 
 class AppearanceSettingsWidget(Gtk.Bin):
@@ -62,15 +61,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
             App().settings.get_value("cover-size").get_int32())
         self.add(builder.get_object("widget"))
         builder.connect_signals(self)
-
-        self.__background_artwork = builder.get_object("background_artwork")
-        App().art_helper.set_banner_artwork(
-                200,
-                24,
-                self.__background_artwork.get_scale_factor(),
-                ArtBehaviour.BLUR |
-                ArtBehaviour.DARKER,
-                self.__on_background_artwork)
 
 #######################
 # PROTECTED           #
@@ -150,61 +140,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
         App().task_helper.run(App().art.clean_all_cache)
         button.set_sensitive(False)
 
-    def _on_background_button_clicked(self, button):
-        """
-            Clean user background image
-            @param button as Gtk.Button
-        """
-        dialog = Gtk.FileChooserDialog()
-        dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
-        dialog.add_buttons(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
-        dialog.set_transient_for(App().window)
-        file_filter = Gtk.FileFilter.new()
-        file_filter.add_pixbuf_formats()
-        dialog.set_filter(file_filter)
-        response = dialog.run()
-        if response == Gtk.ResponseType.OK:
-            try:
-                f = Gio.File.new_for_path(dialog.get_filename())
-                (status, data, tag) = f.load_contents()
-                if status:
-                    path = "%s/%s" % (LOLLYPOP_DATA_PATH, "banner.jpg")
-                    App().art.save_pixbuf_from_data(path, data, 250, 250)
-                    App().art.emit("background-artwork-changed")
-                    App().art_helper.set_banner_artwork(
-                                200,
-                                24,
-                                self.__background_artwork.get_scale_factor(),
-                                ArtBehaviour.BLUR |
-                                ArtBehaviour.DARKER,
-                                self.__on_background_artwork)
-            except Exception as e:
-                Logger.error(
-                    "AppearanceSettingsWidget::"
-                    "_on_background_button_clicked(): %s" % e)
-        dialog.destroy()
-
-    def _on_reset_background_clicked(self, button):
-        """
-            Clean user background image
-            @param button as Gtk.Button
-        """
-        try:
-            path = "%s/%s" % (LOLLYPOP_DATA_PATH, "banner.jpg")
-            f = Gio.File.new_for_path(path)
-            f.delete()
-            App().art.emit("background-artwork-changed")
-            App().art_helper.set_banner_artwork(
-                    200,
-                    24,
-                    self.__background_artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR |
-                    ArtBehaviour.DARKER,
-                    self.__on_background_artwork)
-        except Exception as e:
-            Logger.error("AppearanceSettingsWidget::"
-                         "_on_reset_background_clicked(): %s", e)
-
 #######################
 # PRIVATE             #
 #######################
@@ -219,11 +154,3 @@ class AppearanceSettingsWidget(Gtk.Bin):
         App().settings.set_value("cover-size", GLib.Variant("i", value))
         App().art.update_art_size()
         App().window.container.reload_view()
-
-    def __on_background_artwork(self, surface):
-        """
-            Set album artwork
-            @param surface as str
-        """
-        if surface is not None:
-            self.__background_artwork.set_from_surface(surface)

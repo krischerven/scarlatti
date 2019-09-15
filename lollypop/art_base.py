@@ -15,7 +15,7 @@ from gi.repository import GObject, Gio, GLib, GdkPixbuf
 from PIL import Image, ImageFilter
 
 from lollypop.define import ArtSize, App, TAG_EDITORS, ArtBehaviour
-from lollypop.define import STORE_PATH, LOLLYPOP_DATA_PATH
+from lollypop.define import STORE_PATH
 from lollypop.logger import Logger
 
 
@@ -24,8 +24,6 @@ class BaseArt(GObject.GObject):
         Base art manager
     """
     __gsignals__ = {
-        "background-artwork-changed": (GObject.SignalFlags.RUN_FIRST,
-                                       None, ()),
         "album-artwork-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "artist-artwork-changed": (GObject.SignalFlags.RUN_FIRST,
                                    None, (str,)),
@@ -43,24 +41,6 @@ class BaseArt(GObject.GObject):
         self.__tag_editor = App().settings.get_value("tag-editor").get_string()
         self.__kid3_cli_search()
         self.__tag_editor_search()
-
-    def get_banner_artwork(self, width, height, scale_factor, behaviour):
-        """
-            Get default banner artwork
-            @param width as int
-            @param height as int
-            @param scale_factor as int
-            @param behaviour as ArtBehaviour
-        """
-        try:
-            filename = "%s/%s" % (LOLLYPOP_DATA_PATH, "banner.jpg")
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-            return self.load_behaviour(pixbuf, "", width, height, behaviour)
-        except:
-            pass
-        filename = "%s/%s" % (App().data_dir, "banner.jpg")
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-        return self.load_behaviour(pixbuf, "", width, height, behaviour)
 
     def load_behaviour(self, pixbuf, cache_path, width, height, behaviour):
         """
