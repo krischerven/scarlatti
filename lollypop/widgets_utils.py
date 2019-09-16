@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GLib, GObject
 
 
 class Popover(Gtk.Popover):
@@ -39,4 +39,5 @@ class Popover(Gtk.Popover):
         if self.__auto_destroy:
             # If popover is pointing to a widget, we need to destroy idle
             # Is this a GTK BUG? Why Popover exist in inspector after closed?
-            self.destroy()
+            # We delay destroy to Gio.SimpleAction in menus being activated
+            GLib.idle_add(self.destroy)
