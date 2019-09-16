@@ -153,7 +153,7 @@ class ToolbarEnd(Gtk.Bin):
                                              self.__on_menu_hidden,
                                              button)
             else:
-                popover.connect("hidden", self.__on_popover_hidden, button)
+                popover.connect("hidden", self.__on_menu_hidden, button)
         elif self.__playback_menu is not None and App().window.is_adaptive:
             self.__playback_menu.emit("hidden", True)
 

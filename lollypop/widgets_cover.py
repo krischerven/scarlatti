@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Type
 from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
@@ -94,13 +94,16 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
-        artwork_search = AlbumArtworkSearchWidget(self.__album,
-                                                  self.__view_type)
-        artwork_search.show()
-        # Let current animation run
-        GLib.timeout_add(250, artwork_search.populate)
-        popup_widget(artwork_search, self)
+        if self.__view_type & ViewType.ALBUM:
+            from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
+            artwork_search = AlbumArtworkSearchWidget(self.__album,
+                                                      self.__view_type)
+            artwork_search.show()
+            # Let current animation run
+            GLib.timeout_add(250, artwork_search.populate)
+            popup_widget(artwork_search, self)
+        else:
+            App().window.container.show_view([Type.ALBUM], self.__album)
 
 #######################
 # PRIVATE             #
