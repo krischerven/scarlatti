@@ -546,7 +546,7 @@ def popup_widget(widget, parent, x=None, y=None):
         return None
     else:
         from lollypop.widgets_utils import Popover
-        popover = Popover.new()
+        popover = Popover()
         popover.add(widget)
         widget.connect("hidden", on_hidden, popover)
         popover.set_relative_to(parent)
