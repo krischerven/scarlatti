@@ -37,7 +37,4 @@ class Popover(Gtk.Popover):
         """
         self.emit("hidden", True)
         if self.__auto_destroy:
-            # If popover is pointing to a widget, we need to destroy idle
-            # Is this a GTK BUG? Why Popover exist in inspector after closed?
-            # We delay destroy to Gio.SimpleAction in menus being activated
             GLib.idle_add(self.destroy)
