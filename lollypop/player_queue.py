@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import GLib
+
 from lollypop.objects_track import Track
 
 
@@ -44,7 +46,7 @@ class QueuePlayer:
         self.set_next()
         self.set_prev()
         if notify:
-            self.emit("queue-changed")
+            GLib.idle_add(self.emit, "queue-changed")
 
     def insert_in_queue(self, track_id, pos=0, notify=True):
         """
@@ -60,7 +62,7 @@ class QueuePlayer:
         self.set_next()
         self.set_prev()
         if notify:
-            self.emit("queue-changed")
+            GLib.idle_add(self.emit, "queue-changed")
 
     def remove_from_queue(self, track_id, notify=True):
         """
@@ -71,7 +73,7 @@ class QueuePlayer:
         if track_id in self.__queue:
             self.__queue.remove(track_id)
         if notify:
-            self.emit("queue-changed")
+            GLib.idle_add(self.emit, "queue-changed")
 
     def clear_queue(self, notify=True):
         """
@@ -81,7 +83,7 @@ class QueuePlayer:
         """
         self.__queue = []
         if notify:
-            self.emit("queue-changed")
+            GLib.idle_add(self.emit, "queue-changed")
 
     def track_in_queue(self, track):
         """

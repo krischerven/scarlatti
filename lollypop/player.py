@@ -54,7 +54,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         if self.position / Gst.SECOND > 2:
             self.seek(0)
-            self.emit("current-changed")
+            GLib.idle_add(self.emit, "current-changed")
             if not self.is_playing:
                 self.play()
         elif self._prev_track.id is not None:
@@ -98,7 +98,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self._albums[-1].set_tracks(tracks)
         else:
             self._albums.append(album)
-        self.emit("playback-changed")
+        GLib.idle_add(self.emit, "playback-changed")
 
     def remove_album(self, album):
         """
@@ -109,7 +109,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if album not in self._albums:
                 return
             self._albums.remove(album)
-            self.emit("playback-changed")
+            GLib.idle_add(self.emit, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
@@ -122,7 +122,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             for album in self._albums:
                 if album.id == album_id:
                     self.remove_album(album)
-            self.emit("playback-changed")
+            GLib.idle_add(self.emit, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album_by_id(): %s" % e)
 
@@ -144,7 +144,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         self.reset_history()
         self._albums = albums
         self.load(track)
-        self.emit("playback-changed")
+        GLib.idle_add(self.emit, "playback-changed")
 
     def play_album_for_albums(self, album, albums):
         """
@@ -159,7 +159,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
-        self.emit("playback-changed")
+        GLib.idle_add(self.emit, "playback-changed")
 
     def play_albums(self, albums):
         """
@@ -201,7 +201,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                 self.play_album(album)
             else:
                 self.add_album(album)
-        self.emit("playback-changed")
+        GLib.idle_add(self.emit, "playback-changed")
 
     def set_albums(self, albums):
         """
@@ -307,7 +307,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if prev_track.id is None:
                 prev_track = LinearPlayer.prev(self)
             self._prev_track = prev_track
-            self.emit("prev-changed")
+            GLib.idle_add(self.emit, "prev-changed")
         except Exception as e:
             Logger.error("Player::set_prev(): %s" % e)
 
@@ -334,7 +334,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self._next_track = next_track
             if next_track.is_web:
                 App().task_helper.run(self._load_from_web, next_track, False)
-            self.emit("next-changed")
+            GLib.idle_add(self.emit, "next-changed")
         except Exception as e:
             Logger.error("Player::set_next(): %s" % e)
 
@@ -347,7 +347,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if self.is_party or App().settings.get_value("shuffle"):
                 self.set_next()
                 # We send this signal to update next popover
-                self.emit("queue-changed")
+                GLib.idle_add(self.emit, "queue-changed")
             elif self._current_track.id is not None:
                 index = self.album_ids.index(
                     App().player._current_playback_track.album.id)
