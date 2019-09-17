@@ -69,7 +69,7 @@ class RadioMenu(Gtk.Grid):
         if view_type & ViewType.ADAPTIVE:
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("hidden", True))
+            button.connect("clicked", lambda x, y: self.emit("hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -163,7 +163,8 @@ class RadioMenu(Gtk.Grid):
         artwork_widget = RadioArtworkSearchWidget(name, self.__view_type)
         artwork_widget.populate()
         artwork_widget.show()
-        artwork_widget.connect("hidden", lambda x: self.emit("hidden", True))
+        artwork_widget.connect("hidden",
+                               lambda x, y: self.emit("hidden", True))
         self.__stack.add_named(artwork_widget, "artwork")
         self.__stack.set_visible_child_name("artwork")
 
