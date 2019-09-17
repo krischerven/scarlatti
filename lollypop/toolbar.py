@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from lollypop.define import App, Size, AdaptiveSize
 from lollypop.toolbar_playback import ToolbarPlayback
@@ -138,7 +138,9 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             if App().player.current_track.id is not None:
                 if isinstance(App().player.current_track, Track):
                     self.__toolbar_title.show()
-                self.__toolbar_info.show_children()
+                # If user double click headerbar to maximize window
+                # We do not want info bar to receive click signal
+                GLib.timeout_add(200, self.__toolbar_info.show_children)
             self.__toolbar_playback.player_buttons.show()
         else:
             self.__toolbar_playback.player_buttons.hide()
