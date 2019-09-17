@@ -99,8 +99,8 @@ class PlaylistBannerWidget(BannerWidget):
         """
         tracks = []
         for album_row in self.__view.children:
-            for track_row in album_row.children:
-                tracks.append(track_row.track)
+            for track in album_row.album.tracks:
+                tracks.append(track)
         if tracks:
             albums = tracks_to_albums(tracks)
             App().player.play_track_for_albums(tracks[0], albums)
@@ -112,8 +112,8 @@ class PlaylistBannerWidget(BannerWidget):
         """
         tracks = []
         for album_row in self.__view.children:
-            for track_row in album_row.children:
-                tracks.append(track_row.track)
+            for track in album_row.album.tracks:
+                tracks.append(track)
         if tracks:
             shuffle(tracks)
             albums = tracks_to_albums(tracks)
