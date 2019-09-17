@@ -85,7 +85,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                 BinPlayer.load(self, track)
             else:
                 BinPlayer._load_track(self, track)
-                self.emit("current-changed")
+                GLib.idle_add(self.emit, "current-changed")
 
     def add_album(self, album):
         """
