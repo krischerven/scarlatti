@@ -39,6 +39,7 @@ class GesturesHelper():
         self.__long_press.set_button(0)
         self.__multi_press = Gtk.GestureMultiPress.new(widget)
         self.__multi_press.connect("released", self.__on_multi_released)
+        self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.__multi_press.set_button(0)
 
     def special_headerbar_hack(self):
