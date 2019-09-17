@@ -62,7 +62,8 @@ class ArtistAlbumsMenu(Gio.Menu):
             Set artist actions
             @param view_type as ViewType
         """
-        if not view_type & ViewType.BANNER:
+        if not view_type & ViewType.BANNER and\
+                App().artists.has_albums(self.__artist_id):
             go_artist_action = Gio.SimpleAction(name="go_artist_action")
             App().add_action(go_artist_action)
             go_artist_action.connect("activate",
