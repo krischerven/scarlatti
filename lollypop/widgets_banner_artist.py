@@ -126,8 +126,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param settings as Gio.Settings
             @param value as GLib.Variant
         """
-        self.__set_artwork()
-        self.set_view_type(self._view_type)
+        if App().animations:
+            self.__set_artwork()
+            self.set_view_type(self._view_type)
 
     def _on_label_button_release(self, eventbox, event):
         """
@@ -206,7 +207,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if len(self.__artist_ids) == 1:
             artist = App().artists.get_name(self.__artist_ids[0])
-            if prefix == artist:
+            if prefix == artist and App().animations:
                 self.__set_artwork()
                 self.set_view_type(self._view_type)
 
