@@ -27,9 +27,11 @@ class InformationPopover(Popover):
         """
         Popover.__init__(self)
         self.__minimal = minimal
+        self.__width = 10
         self.__view = InformationView(minimal)
         self.__view.show()
         self.connect("map", self.__on_map)
+        self.get_style_context().add_class("padding")
         self.add(self.__view)
 
     def populate(self, artist_id=None):
@@ -38,6 +40,9 @@ class InformationPopover(Popover):
             @param artist_id as int
         """
         self.__view.populate(artist_id)
+
+    def do_get_preferred_width(self):
+        return (self.__width, self.__width)
 
 #######################
 # PROTECTED           #
@@ -53,8 +58,10 @@ class InformationPopover(Popover):
         """
         size = App().window.get_size()
         if self.__minimal:
-            self.set_size_request(min(size[0] * 0.6, 500),
+            self.__width = min(size[0] * 0.6, 500)
+            self.set_size_request(self.__width,
                                   min(size[1] * 0.5, 600))
         else:
-            self.set_size_request(min(size[0] * 0.6, 1000),
+            self.__width = min(size[0] * 0.6, 1000)
+            self.set_size_request(self.__width,
                                   min(size[1] * 0.7, 800))
