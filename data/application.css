@@ -452,7 +452,7 @@ flowboxchild:selected  {
 }
 
 .trackrow {
-    padding: 0px;
+    padding: 2px;
     min-height: 40px;
     box-shadow: none;
 	background-color: transparent;
