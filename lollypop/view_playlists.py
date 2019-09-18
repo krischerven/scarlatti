@@ -89,11 +89,11 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
 
         App().task_helper.run(load, callback=(on_load,))
 
-    def stop(self):
+    def pause(self):
         """
-            Stop populating
+            pause populating
         """
-        self._view.stop()
+        self._view.pause()
 
     def activate_child(self):
         """
