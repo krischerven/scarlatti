@@ -48,7 +48,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__search_type_action = Gio.SimpleAction.new_stateful(
                                                "search_type",
                                                GLib.VariantType.new("s"),
-                                               GLib.Variant("s", "local"))
+                                               GLib.Variant("s", ""))
         self.__search_type_action.connect("change-state",
                                           self.__on_search_action_change_state)
         App().add_action(self.__search_type_action)
@@ -188,9 +188,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 not get_network_available("SPOTIFY") or\
                 not get_network_available("YOUTUBE"):
             self.__bottom_buttons.hide()
-            self.__search_type_action.change_state(GLib.Variant("s", "local"))
         else:
             self.__bottom_buttons.show()
+        self.__search_type_action.change_state(GLib.Variant("s", "local"))
 
     def _on_map(self, widget):
         """
