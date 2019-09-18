@@ -80,6 +80,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__view.show()
         self.__view.set_external_scrolled(self._scrolled)
         self.__view.set_width(Size.MEDIUM)
+        self.__view.get_style_context().add_class("padding")
         self.__banner = SearchBannerWidget(self.__view)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
