@@ -19,7 +19,6 @@ from lollypop.define import ArtBehaviour
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import update_button
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 
 
@@ -109,10 +108,13 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             Update artwork
             @param allocation as Gtk.Allocation
         """
-        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+        if BannerWidget._handle_width_allocate(self, allocation):
             if App().player.current_track.id is None:
-                self._set_default_background()
+                self._artwork.get_style_context().add_class(
+                    "default-banner")
             else:
+                self._artwork.get_style_context().remove_class(
+                    "default-banner")
                 App().art_helper.set_album_artwork(
                         App().player.current_track.album,
                         # +100 to prevent resize lag
@@ -129,7 +131,8 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == App().player.current_track.album.id:
+        if album_id == App().player.current_track.album.id and\
+                App().animations:
             App().art_helper.set_album_artwork(
                             App().player.current_track.album,
                             # +100 to prevent resize lag
@@ -164,15 +167,16 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             markup += "<span size='x-small' alpha='40000'>%s</span>" %\
                 artist_name
             self.__title_label.set_markup(markup)
-            App().art_helper.set_album_artwork(
-                            App().player.current_track.album,
-                            # +100 to prevent resize lag
-                            self.get_allocated_width() + 100,
-                            ArtSize.BANNER + MARGIN * 2,
-                            self._artwork.get_scale_factor(),
-                            ArtBehaviour.BLUR_HARD |
-                            ArtBehaviour.DARKER,
-                            self._on_artwork)
+            if App().animations:
+                App().art_helper.set_album_artwork(
+                                App().player.current_track.album,
+                                # +100 to prevent resize lag
+                                self.get_allocated_width() + 100,
+                                ArtSize.BANNER + MARGIN * 2,
+                                self._artwork.get_scale_factor(),
+                                ArtBehaviour.BLUR_HARD |
+                                ArtBehaviour.DARKER,
+                                self._on_artwork)
 
     def __set_text_height(self):
         """
