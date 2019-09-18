@@ -19,7 +19,7 @@ from lollypop.define import App, StorageType
 from lollypop.define import Size, ViewType
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, get_youtube_dl
 from lollypop.view import View
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_search import SearchBannerWidget
@@ -184,8 +184,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Update bottom buttons based on current state
         """
-        path = GLib.get_user_data_dir() + "/lollypop/python/bin/youtube-dl"
-        if not GLib.file_test(path, GLib.FileTest.EXISTS) or\
+        (path, env) = get_youtube_dl()
+        if path is None or\
                 not get_network_available("SPOTIFY") or\
                 not get_network_available("YOUTUBE"):
             self.__bottom_buttons.hide()

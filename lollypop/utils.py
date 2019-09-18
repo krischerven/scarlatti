@@ -650,6 +650,24 @@ def install_youtube_dl():
         Logger.error("install_youtube_dl: %s" % e)
 
 
+def get_youtube_dl():
+    """
+        Get youtube-dl path and env
+        @return (str, [])
+    """
+    if App().settings.get_value("recent-youtube-dl"):
+        python_path = GLib.get_user_data_dir() + "/lollypop/python"
+        path = "%s/bin/youtube-dl" % python_path
+        env = ["PYTHONPATH=%s" % python_path]
+        f = Gio.File.new_for_path(path)
+        if f.query_exists():
+            return (path, env)
+    if GLib.find_program_in_path("youtube-dl"):
+        return ("youtube-dl", [])
+    else:
+        return (None, [])
+
+
 # From eyeD3 start
 # eyeD3 is written and maintained by:
 # Travis Shirk <travis@pobox.com>

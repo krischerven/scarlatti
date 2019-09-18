@@ -17,6 +17,7 @@ from re import sub
 
 from lollypop.define import App, GOOGLE_API_ID
 from lollypop.utils import get_network_available, get_page_score
+from lollypop.utils import get_youtube_dl
 from lollypop.logger import Logger
 
 
@@ -61,13 +62,7 @@ class YouTubeHelper:
             proxy = GLib.environ_getenv(GLib.get_environ(), "all_proxy")
             if proxy is not None and proxy.startswith("socks://"):
                 proxy = proxy.replace("socks://", "socks4://")
-            if App().settings.get_value("recent-youtube-dl"):
-                python_path = GLib.get_user_data_dir() + "/lollypop/python"
-                path = "%s/bin/youtube-dl" % python_path
-                env = ["PYTHONPATH=%s" % python_path]
-            else:
-                path = "youtube-dl"
-                env = []
+            (path, env) = get_youtube_dl()
             # Remove playlist args
             uri = sub("list=.*", "", track.uri)
             argv_list = [

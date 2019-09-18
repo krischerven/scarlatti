@@ -15,6 +15,7 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.define import App, ViewType, Type
+from lollypop.utils import get_network_available, get_youtube_dl
 
 
 class ArtistMenu(Gio.Menu):
@@ -69,11 +70,16 @@ class ArtistAlbumsMenu(Gio.Menu):
             go_artist_action.connect("activate",
                                      self.__go_to_artists)
             self.append(_("Available albums"), "app.go_artist_action")
-        search_artist_action = Gio.SimpleAction(name="search_artist_action")
-        App().add_action(search_artist_action)
-        search_artist_action.connect("activate",
-                                     self.__search_artist)
-        self.append(_("Other albums"), "app.search_artist_action")
+        (path, env) = get_youtube_dl()
+        if path is not None and\
+                get_network_available("SPOTIFY") and\
+                get_network_available("YOUTUBE"):
+            search_artist_action = Gio.SimpleAction(
+                name="search_artist_action")
+            App().add_action(search_artist_action)
+            search_artist_action.connect("activate",
+                                         self.__search_artist)
+            self.append(_("Albums on the Web"), "app.search_artist_action")
 
     def __search_artist(self, action, variant):
         """
