@@ -39,10 +39,13 @@ class LabelPlayerWidget(Gtk.Label, SignalsHelper):
         """
             Update label
         """
-        artist_text = GLib.markup_escape_text(
-            ", ".join(App().player.current_track.artists))
-        title_text = GLib.markup_escape_text(
-            App().player.current_track.title)
+        # Some tags contain \n inside them
+        # Filter this
+        artists = ", ".join(
+            App().player.current_track.artists).replace("\n", "")
+        title = App().player.current_track.title.replace("\n", "")
+        artist_text = GLib.markup_escape_text(artists)
+        title_text = GLib.markup_escape_text(title)
         if self.__font_size is None:
             markup = "<b>%s</b>" % artist_text
             markup += "\n<span size='small' alpha='50000'>%s</span>" %\
