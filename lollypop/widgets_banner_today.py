@@ -137,7 +137,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == self.__album.id:
+        if album_id == self.__album.id and App().animations:
             App().art_helper.set_album_artwork(
                             self.__album,
                             # +100 to prevent resize lag
