@@ -117,7 +117,7 @@ class TracksDatabase:
             @return track ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks")
+            result = sql.execute("SELECT rowid FROM tracks ORDER BY album_id")
             return list(itertools.chain(*result))
 
     def get_ids_for_name(self, name):

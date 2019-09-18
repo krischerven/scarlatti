@@ -69,7 +69,8 @@ class ShownPlaylists(ShownLists):
         Type.RANDOMS: _("Random tracks"),
         Type.LOVED: _("Loved tracks"),
         Type.RECENTS: _("Recently played tracks"),
-        Type.NEVER: _("Unplayed tracks")
+        Type.NEVER: _("Unplayed tracks"),
+        Type.ALL: _("All tracks")
     }
 
     def get(get_all=False):

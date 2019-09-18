@@ -291,6 +291,8 @@ class Playlists(GObject.GObject):
             track_ids = App().tracks.get_never_listened_to()
         elif playlist_id == Type.RANDOMS:
             track_ids = App().tracks.get_randoms()
+        elif playlist_id == Type.ALL:
+            track_ids = App().tracks.get_ids()
         elif playlist_id == Type.LOVED:
             track_ids = App().playlists.get_track_ids_sorted(playlist_id)
         else:

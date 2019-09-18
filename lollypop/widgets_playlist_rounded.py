@@ -79,7 +79,7 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
             @return [int]
         """
         album_ids = []
-        if App().playlists.get_smart(self._data):
+        if self._data > 0 and App().playlists.get_smart(self._data):
             request = App().playlists.get_smart_sql(self._data)
             if request is not None:
                 self._track_ids = App().db.execute(request)
