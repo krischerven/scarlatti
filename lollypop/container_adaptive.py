@@ -124,7 +124,7 @@ class AdaptiveContainer:
                     self.left_list.connect("populated",
                                            on_populated,
                                            ids[1:2])
-                    if self.left_list.sidebar_id == Type.GENRES_LIST:
+                    if ids[0] == Type.GENRES_LIST:
                         self._show_genres_list(self.left_list)
                     else:
                         self._show_artists_list(self.left_list)
