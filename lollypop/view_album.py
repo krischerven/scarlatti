@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN, Type
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -37,6 +37,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
                                  ViewType.ALBUM)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
+        self.__selection_ids = []
         self._album = album
         self.__tracks_view = TracksView(album, App().window, None, view_type)
         self.__tracks_view.show()
@@ -82,6 +83,14 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             Logger.error("AlbumView::activate_child: %s" % e)
 
     @property
+    def selection_ids(self):
+        """
+            Get selection ids (sidebar id + extra ids)
+            return [int]
+        """
+        return self.__selection_ids
+
+    @property
     def args(self):
         """
             Get default args for __class__
@@ -120,6 +129,20 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
 #######################
 # PROTECTED           #
 #######################
+    def _on_map(self, widget):
+        """
+            Set selection ids
+            @param widget as Gtk.Widget
+        """
+        LazyLoadingView._on_map(self, widget)
+        selected_ids = []
+        if self.sidebar_id == Type.GENRES_LIST:
+            selected_ids += App().window.container.left_list.selected_ids
+            selected_ids += App().window.container.right_list.selected_ids
+        elif self.sidebar_id == Type.ARTISTS_LIST:
+            selected_ids = App().window.container.left_list.selected_ids
+        self.__selection_ids = [self.sidebar_id] + selected_ids
+
     def _on_current_changed(self, player):
         """
             Update children state
