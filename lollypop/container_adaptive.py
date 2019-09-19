@@ -133,6 +133,7 @@ class AdaptiveContainer:
                     self.left_list.show()
         else:
             self.left_list.hide()
+            self.left_list.clear()
         # Restore right list
         if count > 2:
             if self.right_list.selected_ids != ids[2:3]:
