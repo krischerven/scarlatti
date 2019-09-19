@@ -72,6 +72,12 @@ class ListsContainer:
             Get right selection list
             @return SelectionList
         """
+        def on_unmap(widget):
+            """
+                Hide right list on left list hidden
+            """
+            self._hide_right_list()
+
         if self.__right_list is None:
             eventbox = Gtk.EventBox.new()
             eventbox.set_size_request(50, -1)
@@ -83,12 +89,13 @@ class ListsContainer:
             self.__right_list = SelectionList(SelectionListMask.VIEW)
             self.__right_list.show()
             self.__gesture = GesturesHelper(
-                eventbox, primary_press_callback=self.__hide_right_list)
+                eventbox, primary_press_callback=self._hide_right_list)
             self.__right_list.listbox.connect("row-activated",
                                               self.__on_right_list_activated)
             self.__right_list_grid.add(eventbox)
             self.__right_list_grid.add(self.__right_list)
             self.__left_list.overlay.add_overlay(self.__right_list_grid)
+            self.__left_list.connect("unmap", on_unmap)
         return self.__right_list
 
     @property
@@ -134,6 +141,25 @@ class ListsContainer:
         selection_list.set_mask(SelectionListMask.ARTISTS)
         App().task_helper.run(load, callback=(selection_list.populate,))
 
+    def _show_right_list(self):
+        """
+            Show right list
+        """
+        if self.__right_list is not None:
+            self.__right_list_grid.show()
+            self.__right_list_grid.set_state_flags(Gtk.StateFlags.VISITED,
+                                                   False)
+            self.set_focused_view(self.right_list)
+
+    def _hide_right_list(self, *ignore):
+        """
+            Hide right list
+        """
+        if self.__right_list is not None:
+            self.__right_list_grid.unset_state_flags(Gtk.StateFlags.VISITED)
+            GLib.timeout_add(200, self.__right_list_grid.hide)
+            self.__right_list.clear()
+
 ############
 # PRIVATE  #
 ############
@@ -155,15 +181,6 @@ class ListsContainer:
             self.__previous_sidebar_id = selected_id
             return True
 
-    def __hide_right_list(self, *ignore):
-        """
-            Hide right list
-        """
-        if self.__right_list is not None:
-            self.__right_list_grid.unset_state_flags(Gtk.StateFlags.VISITED)
-            GLib.timeout_add(200, self.__right_list_grid.hide)
-            self.__right_list.clear()
-
     def __on_sidebar_activated(self, listbox, row):
         """
             Update view based on selected object
@@ -179,18 +196,19 @@ class ListsContainer:
         # Update lists
         if selected_id == Type.ARTISTS_LIST:
             self._show_artists_list(self.left_list)
-            self.__hide_right_list()
+            self._hide_right_list()
             self.left_list.show()
             self.set_focused_view(self.left_list)
             focus_set = True
         elif selected_id == Type.GENRES_LIST:
             self._show_genres_list(self.left_list)
-            self.__hide_right_list()
+            self._hide_right_list()
             self.left_list.show()
             self.set_focused_view(self.left_list)
             focus_set = True
         else:
             self.left_list.hide()
+            self.left_list.clear()
 
         if selected_id == Type.PLAYLISTS:
             view = self._get_view_playlists()
@@ -261,10 +279,7 @@ class ListsContainer:
             if not App().window.is_adaptive:
                 view = self._get_view_albums(selected_ids, [])
             self._show_artists_list(self.right_list, selected_ids)
-            self.__right_list_grid.show()
-            self.__right_list_grid.set_state_flags(Gtk.StateFlags.VISITED,
-                                                   False)
-            self.set_focused_view(self.right_list)
+            self._show_right_list()
         else:
             view = self._get_view_artists([], selected_ids)
             self.set_focused_view(view)

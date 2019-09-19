@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App
+from lollypop.define import App, Type
 
 
 class AdaptiveContainer:
@@ -108,20 +108,40 @@ class AdaptiveContainer:
             @param stack as ContainerStack
             @param ids as int
         """
-        def on_populated(selection_list):
-            self.right_list.select_ids(ids[2:3], False)
-            self.right_list.show()
+        def on_populated(selection_list, selected_ids):
+            selection_list.select_ids(selected_ids, False)
             selection_list.disconnect_by_func(on_populated)
 
         count = len(ids)
+        # Restore sidebar
         if count > 0:
             self._sidebar.select_ids(ids[0:1], False)
+        # Restore left list
         if count > 1:
             if self.left_list.selected_ids != ids[1:2]:
-                self.left_list.select_ids(ids[1:2], False)
                 self.left_list.show()
-                if count > 2:
-                    self.right_list.connect("populated", on_populated)
-                self._show_artists_list(self.right_list, ids[1:2])
+                if self.left_list.count == 0:
+                    self.left_list.connect("populated",
+                                           on_populated,
+                                           ids[1:2])
+                    if self.left_list.sidebar_id == Type.GENRES_LIST:
+                        self._show_genres_list(self.left_list)
+                    else:
+                        self._show_artists_list(self.left_list)
+                else:
+                    self.left_list.select_ids(ids[1:2], False)
+                    self.left_list.show()
         else:
             self.left_list.hide()
+        # Restore right list
+        if count > 2:
+            if self.right_list.selected_ids != ids[2:3]:
+                self.right_list.connect("populated",
+                                        on_populated,
+                                        ids[2:3])
+                self._show_artists_list(self.right_list, ids[1:2])
+                self._show_right_list()
+            else:
+                self._hide_right_list()
+        else:
+            self._hide_right_list()
