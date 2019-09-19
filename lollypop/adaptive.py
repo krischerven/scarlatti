@@ -121,6 +121,8 @@ class AdaptiveHistory:
             # View is offloaded, create a new one
             if view is None:
                 view = self.__get_view_from_class(_class, args)
+                if selection_ids:
+                    view.set_sidebar_id(selection_ids[0])
                 view.set_populated_scrolled_position(position)
             return (view, selection_ids)
         except Exception as e:
