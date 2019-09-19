@@ -111,16 +111,21 @@ class AdaptiveHistory:
         """
             Pop last view from history
             @param index as int
-            @return (view as View, sidebar_id as int)
+            @return (view as View, selection_ids as [int])
         """
-        if not self.__items:
-            return (None, None)
-        (view, _class, args, selection_ids, position) = self.__items.pop(index)
-        # View is offloaded, create a new one
-        if view is None:
-            view = self.__get_view_from_class(view, _class)
-            view.set_populated_scrolled_position(position)
-        return (view, selection_ids)
+        try:
+            if not self.__items:
+                return (None, [])
+            (view, _class, args,
+             selection_ids, position) = self.__items.pop(index)
+            # View is offloaded, create a new one
+            if view is None:
+                view = self.__get_view_from_class(_class, args)
+                view.set_populated_scrolled_position(position)
+            return (view, selection_ids)
+        except Exception as e:
+            Logger.error("AdaptiveHistory::pop(): %s" % e)
+            self.__items = []
 
     def remove(self, view):
         """
@@ -151,11 +156,11 @@ class AdaptiveHistory:
             history = []
             for (_view, _class, args,
                  selection_ids, position) in self.__items[-50:]:
-                history.append((None, _class, args))
+                history.append((None, _class, args, selection_ids, position))
             with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
                 dump(history, f)
         except Exception as e:
-            Logger.error("Application::__save_state(): %s" % e)
+            Logger.error("AdaptiveHistory::save(): %s" % e)
 
     def load(self):
         """
@@ -165,7 +170,7 @@ class AdaptiveHistory:
             self.__items = load(
                 open(LOLLYPOP_DATA_PATH + "/history.bin", "rb"))
         except Exception as e:
-            Logger.error("Application::__save_state(): %s" % e)
+            Logger.error("AdaptiveHistory::load(): %s" % e)
 
     def exists(self, view):
         """
@@ -214,7 +219,7 @@ class AdaptiveHistory:
             Logger.warning(
                 "AdaptiveHistory::__get_view_from_class(): %s, %s",
                 _class, e)
-        return (None, None)
+        return None
 
 
 class AdaptiveStack(Gtk.Stack):
@@ -304,11 +309,11 @@ class AdaptiveStack(Gtk.Stack):
         """
         try:
             self.__history.load()
-            (view, sidebar_id) = self.__history.pop()
+            (view, selection_ids) = self.__history.pop()
             if view is not None:
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("set-sidebar-id", sidebar_id)
+                self.emit("set-selection-ids", selection_ids)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 
