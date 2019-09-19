@@ -108,12 +108,18 @@ class AdaptiveContainer:
             @param stack as ContainerStack
             @param ids as int
         """
+        def on_populated(selection_list):
+            self.right_list.select_ids(ids[2:3], False)
+            self.right_list.show()
+            selection_list.disconnect_by_func(on_populated)
+
         count = len(ids)
         if count > 0:
             self._sidebar.select_ids(ids[0:1], False)
         if count > 1:
-            self.left_list.select_ids(ids[1:2], False)
-            self.left_list.show()
-        if count > 2:
-            self.right_list.select_ids(ids[2:3], False)
-            self.right_list.show()
+            if self.left_list.selected_ids != ids[1:2]:
+                self.left_list.select_ids(ids[1:2], False)
+                self.left_list.show()
+                if count > 2:
+                    self.right_list.connect("populated", on_populated)
+                self._show_artists_list(self.right_list, ids[1:2])

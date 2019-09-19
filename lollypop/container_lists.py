@@ -105,6 +105,35 @@ class ListsContainer:
             ids = self.sidebar.selected_ids
         return ids[0] if ids else Type.NONE
 
+##############
+# PROTECTED  #
+##############
+    def _show_genres_list(self, selection_list):
+        """
+            Setup list for genres
+            @param list as SelectionList
+        """
+        def load():
+            genres = App().genres.get()
+            return genres
+        selection_list.set_mask(SelectionListMask.GENRES)
+        App().task_helper.run(load, callback=(selection_list.populate,))
+
+    def _show_artists_list(self, selection_list, genre_ids=[]):
+        """
+            Setup list for artists
+            @param list as SelectionList
+            @param genre_ids as [int]
+        """
+        def load():
+            if App().settings.get_value("show-performers"):
+                artists = App().artists.get_performers(genre_ids)
+            else:
+                artists = App().artists.get(genre_ids)
+            return artists
+        selection_list.set_mask(SelectionListMask.ARTISTS)
+        App().task_helper.run(load, callback=(selection_list.populate,))
+
 ############
 # PRIVATE  #
 ############
@@ -135,32 +164,6 @@ class ListsContainer:
             GLib.timeout_add(200, self.__right_list_grid.hide)
             self.__right_list.clear()
 
-    def __show_genres_list(self, selection_list):
-        """
-            Setup list for genres
-            @param list as SelectionList
-        """
-        def load():
-            genres = App().genres.get()
-            return genres
-        selection_list.set_mask(SelectionListMask.GENRES)
-        App().task_helper.run(load, callback=(selection_list.populate,))
-
-    def __show_artists_list(self, selection_list, genre_ids=[]):
-        """
-            Setup list for artists
-            @param list as SelectionList
-            @param genre_ids as [int]
-        """
-        def load():
-            if App().settings.get_value("show-performers"):
-                artists = App().artists.get_performers(genre_ids)
-            else:
-                artists = App().artists.get(genre_ids)
-            return artists
-        selection_list.set_mask(SelectionListMask.ARTISTS)
-        App().task_helper.run(load, callback=(selection_list.populate,))
-
     def __on_sidebar_activated(self, listbox, row):
         """
             Update view based on selected object
@@ -175,13 +178,13 @@ class ListsContainer:
             return
         # Update lists
         if selected_id == Type.ARTISTS_LIST:
-            self.__show_artists_list(self.left_list)
+            self._show_artists_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
             self.set_focused_view(self.left_list)
             focus_set = True
         elif selected_id == Type.GENRES_LIST:
-            self.__show_genres_list(self.left_list)
+            self._show_genres_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
             self.set_focused_view(self.left_list)
@@ -257,7 +260,7 @@ class ListsContainer:
         if self.left_list.mask & SelectionListMask.GENRES:
             if not App().window.is_adaptive:
                 view = self._get_view_albums(selected_ids, [])
-            self.__show_artists_list(self.right_list, selected_ids)
+            self._show_artists_list(self.right_list, selected_ids)
             self.__right_list_grid.show()
             self.__right_list_grid.set_state_flags(Gtk.StateFlags.VISITED,
                                                    False)

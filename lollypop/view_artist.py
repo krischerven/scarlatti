@@ -73,6 +73,9 @@ class ArtistView(AlbumsBoxView):
         """
         AlbumsBoxView._on_map(self, widget)
         selected_ids = []
-        if self.sidebar_id in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
+        if self.sidebar_id == Type.GENRES_LIST:
+            selected_ids += App().window.container.left_list.selected_ids
+            selected_ids += App().window.container.right_list.selected_ids
+        elif self.sidebar_id == Type.ARTISTS_LIST:
             selected_ids = App().window.container.left_list.selected_ids
         self.__selection_ids = [self.sidebar_id] + selected_ids
