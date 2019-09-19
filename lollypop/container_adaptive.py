@@ -123,3 +123,5 @@ class AdaptiveContainer:
                 if count > 2:
                     self.right_list.connect("populated", on_populated)
                 self._show_artists_list(self.right_list, ids[1:2])
+        else:
+            self.left_list.hide()
