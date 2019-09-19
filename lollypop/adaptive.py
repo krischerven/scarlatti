@@ -27,7 +27,14 @@ class AdaptiveView:
         """
             Init view
         """
-        self.__sidebar_id = Type.NONE
+        self.__sidebar_id = None
+
+    def set_sidebar_id(self, sidebar_id):
+        """
+            Set sidebar id
+            @param sidebar_id as int
+        """
+        self.__sidebar_id = sidebar_id
 
     def destroy_later(self):
         """
@@ -40,13 +47,6 @@ class AdaptiveView:
         if self.args is not None:
             GLib.timeout_add(1000, do_destroy)
 
-    def set_sidebar_id(self, sidebar_id):
-        """
-            Set sidebar id
-            @param sidebar_id as int
-        """
-        self.__sidebar_id = sidebar_id
-
     @property
     def sidebar_id(self):
         """te
@@ -56,13 +56,20 @@ class AdaptiveView:
         return self.__sidebar_id
 
     @property
+    def selection_ids(self):
+        """
+            Get selection ids (sidebar id + extra ids)
+            return [int]
+        """
+        return [self.__sidebar_id]
+
+    @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, {}, int, int) or None if should not destroy
+            Get default args for __class__
+            @return {}
         """
-        return ({}, self.sidebar_id, 0)
+        return {}
 
 
 class AdaptiveHistory:
@@ -85,10 +92,12 @@ class AdaptiveHistory:
             @param view as View
         """
         view_class = view.__class__
-        self.__items.append((view, view_class, view.args))
+        self.__items.append((view, view_class, view.args,
+                             view.selection_ids, view.position))
         # Offload history if too many items
         if self.count >= self.__MAX_HISTORY_ITEMS:
-            (view, _class, args) = self.__items[-self.__MAX_HISTORY_ITEMS]
+            (view, _class, args, selection_ids, position) = self.__items[
+                                                     -self.__MAX_HISTORY_ITEMS]
             if view is not None:
                 view.destroy()
                 # This view can't be offloaded
@@ -96,7 +105,7 @@ class AdaptiveHistory:
                     del self.__items[-self.__MAX_HISTORY_ITEMS]
                 else:
                     self.__items[-self.__MAX_HISTORY_ITEMS] =\
-                        (None, _class, args)
+                        (None, _class, args, selection_ids, position)
 
     def pop(self, index=-1):
         """
@@ -106,28 +115,29 @@ class AdaptiveHistory:
         """
         if not self.__items:
             return (None, None)
-        (view, _class, args) = self.__items.pop(index)
-        # View always in memory
-        if view is not None:
-            return (view, view.sidebar_id)
-        else:
-            return self.__get_view_from_class(view, _class, args)
+        (view, _class, args, selection_ids, position) = self.__items.pop(index)
+        # View is offloaded, create a new one
+        if view is None:
+            view = self.__get_view_from_class(view, _class)
+            view.set_populated_scrolled_position(position)
+        return (view, selection_ids)
 
     def remove(self, view):
         """
             Remove view from history
             @param view as View
         """
-        for (_view, _class, args) in self.__items:
+        for (_view, _class, args, selection_ids, position) in self.__items:
             if _view == view:
-                self.__items.remove((_view, _class, args))
+                self.__items.remove((_view, _class, args,
+                                     selection_ids, position))
                 break
 
     def reset(self):
         """
             Reset history
         """
-        for (view, _class, args) in self.__items:
+        for (view, _class, args, selection_ids, position) in self.__items:
             if view is not None:
                 view.stop()
                 view.destroy_later()
@@ -138,12 +148,12 @@ class AdaptiveHistory:
             Save history
         """
         try:
-            no_widget_history = []
-            for (_view, _class, args) in self.__items[-50:]:
-                if _class is not None:
-                    no_widget_history.append((None, _class, args))
+            history = []
+            for (_view, _class, args,
+                 selection_ids, position) in self.__items[-50:]:
+                history.append((None, _class, args))
             with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
-                dump(no_widget_history, f)
+                dump(history, f)
         except Exception as e:
             Logger.error("Application::__save_state(): %s" % e)
 
@@ -162,7 +172,7 @@ class AdaptiveHistory:
             True if view exists in history
             @return bool
         """
-        for (_view, _class, args) in self.__items:
+        for (_view, _class, args, selection_ids, position) in self.__items:
             if _view == view:
                 return True
         return False
@@ -186,24 +196,20 @@ class AdaptiveHistory:
 ############
 # PRIVATE  #
 ############
-    def __get_view_from_class(self, view, _class, args):
+    def __get_view_from_class(self, _class, args):
         """
             Get view from history
-            @param view as View
             @param _class as class
             @param args as {}
-            @return (View, sidebar_id)
+            @return View
         """
         try:
-            # Here, we are restoring an offloaded view
-            if view is None:
-                view = _class(**args[0])
-                view.set_populated_scrolled_position(args[2])
-                # Start populating the view
-                if hasattr(view, "populate"):
-                    view.populate()
-                view.show()
-            return (view, args[1])
+            view = _class(**args)
+            # Start populating the view
+            if hasattr(view, "populate"):
+                view.populate()
+            view.show()
+            return view
         except Exception as e:
             Logger.warning(
                 "AdaptiveHistory::__get_view_from_class(): %s, %s",
@@ -219,9 +225,8 @@ class AdaptiveStack(Gtk.Stack):
     __gsignals__ = {
         "history-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         # Sidebar id needs to be updated on current view with int
-        "set-sidebar-id": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        # Set sidebar id on current view with current state
-        "update-sidebar-id": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "set-selection-ids": (GObject.SignalFlags.RUN_FIRST, None,
+                              (GObject.TYPE_PYOBJECT,)),
     }
 
     def __init__(self):
@@ -253,13 +258,11 @@ class AdaptiveStack(Gtk.Stack):
         if visible_child != view:
             if visible_child is not None:
                 visible_child.pause()
-                if visible_child.sidebar_id != Type.NONE:
-                    self.__history.add_view(visible_child)
+                self.__history.add_view(visible_child)
                 Gtk.Stack.set_visible_child(self, view)
                 self.emit("history-changed")
             else:
                 Gtk.Stack.set_visible_child(self, view)
-        self.emit("update-sidebar-id")
 
     def go_back(self):
         """
@@ -267,12 +270,12 @@ class AdaptiveStack(Gtk.Stack):
         """
         if self.__history:
             visible_child = self.get_visible_child()
-            (view, sidebar_id) = self.__history.pop()
+            (view, selection_ids) = self.__history.pop()
             if view is not None:
                 if view not in self.get_children():
                     self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("set-sidebar-id", sidebar_id)
+                self.emit("set-selection-ids", selection_ids)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()

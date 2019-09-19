@@ -90,11 +90,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
     @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
+            Get default args for __class__
+            @return {}
         """
-        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
+        return {"view_type": self.view_type}
 
 #######################
 # PROTECTED           #
@@ -210,15 +209,6 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.__banner.connect("scroll", self._on_banner_scroll)
         self.add_widget(self._box, self.__banner)
-
-    @property
-    def args(self):
-        """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
-        """
-        return ({}, self.sidebar_id, self.position)
 
 #######################
 # PRIVATE             #

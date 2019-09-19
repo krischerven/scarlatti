@@ -91,11 +91,10 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
     @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
+            Get default args for __class__
+            @return {}
         """
-        return ({"view_type": self.view_type}, self.sidebar_id, self.position)
+        return {"view_type": self.view_type}
 
 #######################
 # PROTECTED           #

@@ -178,14 +178,12 @@ class ListsContainer:
             self.__show_artists_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
-            self.left_list.set_sidebar_id(Type.ARTISTS_LIST)
             self.set_focused_view(self.left_list)
             focus_set = True
         elif selected_id == Type.GENRES_LIST:
             self.__show_genres_list(self.left_list)
             self.__hide_right_list()
             self.left_list.show()
-            self.left_list.set_sidebar_id(Type.GENRES_LIST)
             self.set_focused_view(self.left_list)
             focus_set = True
         else:

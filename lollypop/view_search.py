@@ -166,16 +166,14 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
+            Get default args for __class__
+            @return {}
         """
         if self.__search_type_action.get_state().get_string() == "local":
             search = "local://%s" % self.__banner.entry.get_text()
         else:
             search = "web://%s" % self.__banner.entry.get_text()
-        return ({"view_type": self.view_type, "search": search},
-                self.sidebar_id, self.position)
+        return {"view_type": self.view_type, "search": search}
 
 #######################
 # PROTECTED           #

@@ -24,8 +24,7 @@ class AdaptiveContainer:
             Init container
         """
         self._stack.connect("history-changed", self.__on_history_changed)
-        self._stack.connect("update-sidebar-id", self.__on_update_sidebar_id)
-        self._stack.connect("set-sidebar-id", self.__on_set_sidebar_id)
+        self._stack.connect("set-selection-ids", self.__on_set_selection_ids)
         App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
     def go_back(self):
@@ -44,6 +43,9 @@ class AdaptiveContainer:
             if visible_child is not None:
                 visible_child.destroy_later()
         self.emit("can-go-back-changed", self.can_go_back)
+        visible_child = self._stack.get_visible_child()
+        if visible_child is not None:
+            self.set_focused_view(visible_child)
 
     def go_home(self):
         """
@@ -100,24 +102,18 @@ class AdaptiveContainer:
             self._sidebar_two.pack1(self.left_list, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
 
-    def __on_update_sidebar_id(self, stack):
+    def __on_set_selection_ids(self, stack, ids):
         """
-            Update sidebar id with sidebar_id
+            Set sidebar id and left/right list ids
             @param stack as ContainerStack
+            @param ids as int
         """
-        visible_child = stack.get_visible_child()
-        if visible_child is not None:
-            sidebar_id = self.sidebar_id
-            visible_child.set_sidebar_id(sidebar_id)
-
-    def __on_set_sidebar_id(self, stack, sidebar_id):
-        """
-            Set sidebar id base on current container state
-            @param stack as ContainerStack
-            @param sidebar_id as int
-        """
-        self._sidebar.select_ids([sidebar_id], False)
-        visible_child = stack.get_visible_child()
-        if visible_child is not None:
-            visible_child.set_sidebar_id(sidebar_id)
-            self.set_focused_view(visible_child)
+        count = len(ids)
+        if count > 0:
+            self._sidebar.select_ids(ids[0:1], False)
+        if count > 1:
+            self.left_list.select_ids(ids[1:2], False)
+            self.left_list.show()
+        if count > 2:
+            self.right_list.select_ids(ids[2:3], False)
+            self.right_list.show()

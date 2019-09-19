@@ -97,12 +97,10 @@ class SmartPlaylistView(View):
     @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
+            Get default args for __class__
+            @return {}
         """
-        return ({"playlist_id": self.__playlist_id},
-                self.sidebar_id, self.position)
+        return {"playlist_id": self.__playlist_id}
 
 #######################
 # PROTECTED           #

@@ -266,7 +266,13 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         pass
 
     def _on_map(self, widget):
-        pass
+        """
+            Set sidebar_id
+            @param widget as GtK.Widget
+        """
+        selected_ids = App().window.container.sidebar.selected_ids
+        if selected_ids:
+            self.set_sidebar_id(selected_ids[0])
 
     def _on_unmap(self, widget):
         pass

@@ -102,14 +102,12 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
     @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
+            Get default args for __class__
+            @return {}
         """
-        return ({"genre_ids": self._genre_ids,
-                 "artist_ids": self._artist_ids,
-                 "view_type": self.view_type},
-                self.sidebar_id, self.position)
+        return {"genre_ids": self._genre_ids,
+                "artist_ids": self._artist_ids,
+                "view_type": self.view_type}
 
 #######################
 # PROTECTED           #

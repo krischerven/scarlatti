@@ -130,12 +130,10 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
     @property
     def args(self):
         """
-            Get default args for __class__, populate() plus sidebar_id and
-            scrolled position
-            @return ({}, int, int)
+            Get default args for __class__
+            @return {}
         """
-        return ({"playlist_id": self._playlist_id,
-                 "view_type": self.view_type}, self.sidebar_id, self.position)
+        return {"playlist_id": self._playlist_id, "view_type": self.view_type}
 
     @property
     def filtered(self):
