@@ -24,6 +24,7 @@ class AdaptiveContainer:
             Init container
         """
         self._stack.connect("history-changed", self.__on_history_changed)
+        self._stack.connect("set-sidebar-id", self.__on_set_sidebar_id)
         self._stack.connect("set-selection-ids", self.__on_set_selection_ids)
         App().window.connect("adaptive-changed", self.__on_adaptive_changed)
 
@@ -102,47 +103,51 @@ class AdaptiveContainer:
             self._sidebar_two.pack1(self.left_list, False, False)
         self.emit("can-go-back-changed", self.can_go_back)
 
-    def __on_set_selection_ids(self, stack, ids):
+    def __on_set_sidebar_id(self, stack, sidebar_id):
+        """
+            Set sidebar id on container
+            @param stack as ContainerStack
+            @param sidebar_id as int
+        """
+        self._sidebar.select_ids([sidebar_id], False)
+
+    def __on_set_selection_ids(self, stack, selection_ids):
         """
             Set sidebar id and left/right list ids
             @param stack as ContainerStack
-            @param ids as int
+            @param selection_ids as {"left": [int], "right": [int])
         """
         def on_populated(selection_list, selected_ids):
             selection_list.select_ids(selected_ids, False)
             selection_list.disconnect_by_func(on_populated)
 
-        count = len(ids)
-        # Restore sidebar
-        if count > 0:
-            self._sidebar.select_ids(ids[0:1], False)
         # Restore left list
-        if count > 1:
-            if self.left_list.selected_ids != ids[1:2]:
+        if selection_ids["left"]:
+            if self.left_list.selected_ids != selection_ids["left"]:
                 self.left_list.show()
                 if self.left_list.count == 0:
                     self.left_list.connect("populated",
                                            on_populated,
-                                           ids[1:2])
-                    if ids[0] == Type.GENRES_LIST:
+                                           selection_ids["left"])
+                    if App().window.container.sidebar.selected_ids[0] ==\
+                            Type.GENRES_LIST:
                         self._show_genres_list(self.left_list)
                     else:
                         self._show_artists_list(self.left_list)
                 else:
-                    self.left_list.select_ids(ids[1:2], False)
+                    self.left_list.select_ids(selection_ids["left"], False)
                     self.left_list.show()
         else:
             self.left_list.hide()
             self.left_list.clear()
         # Restore right list
-        if count > 2:
-            if self.right_list.selected_ids != ids[2:3]:
+        if selection_ids["right"]:
+            if self.right_list.selected_ids != selection_ids["right"]:
                 self.right_list.connect("populated",
                                         on_populated,
-                                        ids[2:3])
-                self._show_artists_list(self.right_list, ids[1:2])
+                                        selection_ids["right"])
+                self._show_artists_list(self.right_list,
+                                        selection_ids["left"])
                 self._show_right_list()
-            else:
-                self._hide_right_list()
         else:
             self._hide_right_list()

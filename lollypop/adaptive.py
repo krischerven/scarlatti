@@ -15,7 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
-from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size, Type
+from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size
 
 
 class AdaptiveView:
@@ -28,6 +28,7 @@ class AdaptiveView:
             Init view
         """
         self.__sidebar_id = None
+        self.__selection_ids = {"left": [], "right": []}
 
     def set_sidebar_id(self, sidebar_id):
         """
@@ -35,6 +36,13 @@ class AdaptiveView:
             @param sidebar_id as int
         """
         self.__sidebar_id = sidebar_id
+
+    def set_selection_ids(self, selection_ids):
+        """
+            Set selection ids
+            @param selection_ids as {"left": [int], "right": [int])
+        """
+        self.__selection_ids = selection_ids
 
     def destroy_later(self):
         """
@@ -61,7 +69,7 @@ class AdaptiveView:
             Get selection ids (sidebar id + extra ids)
             return [int]
         """
-        return [self.__sidebar_id]
+        return self.__selection_ids
 
     @property
     def args(self):
@@ -92,12 +100,12 @@ class AdaptiveHistory:
             @param view as View
         """
         view_class = view.__class__
-        self.__items.append((view, view_class, view.args,
+        self.__items.append((view, view_class, view.args, view.sidebar_id,
                              view.selection_ids, view.position))
         # Offload history if too many items
         if self.count >= self.__MAX_HISTORY_ITEMS:
-            (view, _class, args, selection_ids, position) = self.__items[
-                                                     -self.__MAX_HISTORY_ITEMS]
+            (view, _class, args, sidebar_id,
+             selection_ids, position) = self.__items[-self.__MAX_HISTORY_ITEMS]
             if view is not None:
                 view.destroy()
                 # This view can't be offloaded
@@ -105,26 +113,27 @@ class AdaptiveHistory:
                     del self.__items[-self.__MAX_HISTORY_ITEMS]
                 else:
                     self.__items[-self.__MAX_HISTORY_ITEMS] =\
-                        (None, _class, args, selection_ids, position)
+                        (None, _class, args, sidebar_id,
+                         selection_ids, position)
 
     def pop(self, index=-1):
         """
             Pop last view from history
             @param index as int
-            @return (view as View, selection_ids as [int])
+            @return View
         """
         try:
             if not self.__items:
-                return (None, [])
-            (view, _class, args,
+                return None
+            (view, _class, args, sidebar_id,
              selection_ids, position) = self.__items.pop(index)
             # View is offloaded, create a new one
             if view is None:
                 view = self.__get_view_from_class(_class, args)
-                if selection_ids:
-                    view.set_sidebar_id(selection_ids[0])
+                view.set_sidebar_id(sidebar_id)
+                view.set_selection_ids(selection_ids)
                 view.set_populated_scrolled_position(position)
-            return (view, selection_ids)
+            return view
         except Exception as e:
             Logger.error("AdaptiveHistory::pop(): %s" % e)
             self.__items = []
@@ -134,9 +143,10 @@ class AdaptiveHistory:
             Remove view from history
             @param view as View
         """
-        for (_view, _class, args, selection_ids, position) in self.__items:
+        for (_view, _class, args, sidebar_id,
+             selection_ids, position) in self.__items:
             if _view == view:
-                self.__items.remove((_view, _class, args,
+                self.__items.remove((_view, _class, args, sidebar_id,
                                      selection_ids, position))
                 break
 
@@ -144,7 +154,8 @@ class AdaptiveHistory:
         """
             Reset history
         """
-        for (view, _class, args, selection_ids, position) in self.__items:
+        for (view, _class, args, sidebar_id,
+             selection_ids, position) in self.__items:
             if view is not None:
                 view.stop()
                 view.destroy_later()
@@ -156,9 +167,10 @@ class AdaptiveHistory:
         """
         try:
             history = []
-            for (_view, _class, args,
+            for (_view, _class, args, sidebar_id,
                  selection_ids, position) in self.__items[-50:]:
-                history.append((None, _class, args, selection_ids, position))
+                history.append((None, _class, args, sidebar_id,
+                                selection_ids, position))
             with open(LOLLYPOP_DATA_PATH + "/history.bin", "wb") as f:
                 dump(history, f)
         except Exception as e:
@@ -179,7 +191,8 @@ class AdaptiveHistory:
             True if view exists in history
             @return bool
         """
-        for (_view, _class, args, selection_ids, position) in self.__items:
+        for (_view, _class, args, sidebar_id,
+             selection_ids, position) in self.__items:
             if _view == view:
                 return True
         return False
@@ -230,8 +243,8 @@ class AdaptiveStack(Gtk.Stack):
     """
 
     __gsignals__ = {
-        "history-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        # Sidebar id needs to be updated on current view with int
+        "history-changed":   (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "set-sidebar-id":    (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "set-selection-ids": (GObject.SignalFlags.RUN_FIRST, None,
                               (GObject.TYPE_PYOBJECT,)),
     }
@@ -277,12 +290,13 @@ class AdaptiveStack(Gtk.Stack):
         """
         if self.__history:
             visible_child = self.get_visible_child()
-            (view, selection_ids) = self.__history.pop()
+            view = self.__history.pop()
             if view is not None:
                 if view not in self.get_children():
                     self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("set-selection-ids", selection_ids)
+                self.emit("set-sidebar-id", view.sidebar_id)
+                self.emit("set-selection-ids", view.selection_ids)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()
@@ -301,7 +315,7 @@ class AdaptiveStack(Gtk.Stack):
             Save history to disk
         """
         visible_child = self.get_visible_child()
-        if visible_child is not None and visible_child.sidebar_id != Type.NONE:
+        if visible_child is not None:
             self.__history.add_view(visible_child)
         self.__history.save()
 
@@ -311,11 +325,12 @@ class AdaptiveStack(Gtk.Stack):
         """
         try:
             self.__history.load()
-            (view, selection_ids) = self.__history.pop()
+            view = self.__history.pop()
             if view is not None:
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("set-selection-ids", selection_ids)
+                self.emit("set-sidebar-id", view.sidebar_id)
+                self.emit("set-selection-ids", view.selection_ids)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 

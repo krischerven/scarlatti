@@ -215,34 +215,11 @@ class AlbumsGenresBoxView(AlbumsBoxView):
                                view_type |
                                ViewType.OVERLAY |
                                ViewType.SCROLLED)
-        self.__selection_ids = []
         self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.__banner.connect("scroll", self._on_banner_scroll)
         self.add_widget(self._box, self.__banner)
-
-    @property
-    def selection_ids(self):
-        """
-            Get selection ids (sidebar id + extra ids)
-            return [int]
-        """
-        return self.__selection_ids
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_map(self, widget):
-        """
-            Set selection ids
-            @param widget as Gtk.Widget
-        """
-        AlbumsBoxView._on_map(self, widget)
-        selected_ids = []
-        if self.sidebar_id in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
-            selected_ids = App().window.container.left_list.selected_ids
-        self.__selection_ids = [self.sidebar_id] + selected_ids
 
 #######################
 # PRIVATE             #

@@ -16,7 +16,7 @@ from time import time
 from gettext import gettext as _
 import gc
 
-from lollypop.define import ViewType, App, LoadingState, MARGIN_SMALL
+from lollypop.define import ViewType, App, LoadingState, MARGIN_SMALL, Type
 from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -271,9 +271,17 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param widget as GtK.Widget
         """
         if self.sidebar_id is None:
-            selected_ids = App().window.container.sidebar.selected_ids
-            if selected_ids:
-                self.set_sidebar_id(selected_ids[0])
+            ids = App().window.container.sidebar.selected_ids
+            if ids:
+                self.set_sidebar_id(ids[0])
+                if self.sidebar_id == Type.GENRES_LIST:
+                    self.selection_ids["left"] =\
+                        App().window.container.left_list.selected_ids
+                    self.selection_ids["right"] =\
+                        App().window.container.right_list.selected_ids
+                elif self.sidebar_id == Type.ARTISTS_LIST:
+                    self.selection_ids["left"] =\
+                        App().window.container.left_list.selected_ids
 
     def _on_unmap(self, widget):
         pass

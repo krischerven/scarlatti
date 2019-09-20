@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import ViewType, MARGIN, Type, App
+from lollypop.define import ViewType, MARGIN
 from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.widgets_banner_artist import ArtistBannerWidget
 
@@ -32,20 +32,11 @@ class ArtistView(AlbumsBoxView):
                                ViewType.SCROLLED |
                                ViewType.OVERLAY |
                                ViewType.ALBUM)
-        self.__selection_ids = []
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
         self.__banner.show()
         self.__banner.connect("scroll", self._on_banner_scroll)
         self._box.get_style_context().add_class("padding")
         self.add_widget(self._box, self.__banner)
-
-    @property
-    def selection_ids(self):
-        """
-            Get selection ids (sidebar id + extra ids)
-            return [int]
-        """
-        return self.__selection_ids
 
     @property
     def args(self):
@@ -62,20 +53,3 @@ class ArtistView(AlbumsBoxView):
             @return int
         """
         return self.__banner.height + MARGIN
-
-#######################
-# PROTECTED           #
-#######################
-    def _on_map(self, widget):
-        """
-            Set selection ids
-            @param widget as Gtk.Widget
-        """
-        AlbumsBoxView._on_map(self, widget)
-        selected_ids = []
-        if self.sidebar_id == Type.GENRES_LIST:
-            selected_ids += App().window.container.left_list.selected_ids
-            selected_ids += App().window.container.right_list.selected_ids
-        elif self.sidebar_id == Type.ARTISTS_LIST:
-            selected_ids = App().window.container.left_list.selected_ids
-        self.__selection_ids = [self.sidebar_id] + selected_ids

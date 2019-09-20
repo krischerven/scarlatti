@@ -30,7 +30,6 @@ class ListsContainer:
         """
         self.__left_list = None
         self.__right_list = None
-        self.__previous_sidebar_id = None
 
     def setup_lists(self):
         """
@@ -163,24 +162,6 @@ class ListsContainer:
 ############
 # PRIVATE  #
 ############
-    def __should_load_sidebar(self, selected_id):
-        """
-            True if we should reload sidebar
-            @param selected_id as int
-            @return bool
-        """
-        if selected_id is None:
-            return False
-        elif selected_id in [Type.RANDOMS,
-                             Type.SUGGESTIONS]:
-            self.__previous_sidebar_id = selected_id
-            return True
-        elif selected_id == self.__previous_sidebar_id:
-            return False
-        else:
-            self.__previous_sidebar_id = selected_id
-            return True
-
     def __on_sidebar_activated(self, listbox, row):
         """
             Update view based on selected object
@@ -191,8 +172,6 @@ class ListsContainer:
         view = None
         focus_set = False
         selected_id = self._sidebar.selected_id
-        if not self.__should_load_sidebar(selected_id):
-            return
         # Update lists
         if selected_id == Type.ARTISTS_LIST:
             self._show_artists_list(self.left_list)

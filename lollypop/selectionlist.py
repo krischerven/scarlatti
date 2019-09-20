@@ -264,6 +264,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
         self._box.set_sort_func(self.__sort_func)
+        self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self._box.show()
         GesturesHelper.__init__(self, self._box)
         self.__scrolled = Gtk.ScrolledWindow()
@@ -404,7 +405,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             for row in self._box.get_children():
                 if row.id in ids:
                     rows.append(row)
-
             if rows:
                 self._box.unselect_all()
                 for row in rows:
@@ -564,15 +564,14 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        if self.__base_mask & SelectionListMask.VIEW:
-            row = self._box.get_row_at_y(y)
-            if row is not None:
-                (exists, state) = event.get_state()
-                if state & Gdk.ModifierType.CONTROL_MASK or\
-                        state & Gdk.ModifierType.SHIFT_MASK:
-                    self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-                else:
-                    self._box.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        row = self._box.get_row_at_y(y)
+        if row is not None:
+            (exists, state) = event.get_state()
+            if state & Gdk.ModifierType.CONTROL_MASK or\
+                    state & Gdk.ModifierType.SHIFT_MASK:
+                pass
+            else:
+                self._box.unselect_all()
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
