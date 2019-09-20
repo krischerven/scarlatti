@@ -38,7 +38,8 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
-        self.__tracks_view = TracksView(album, App().window, None, view_type)
+        self.__tracks_view = TracksView(album, App().window, None,
+                                        ViewType.TWO_COLUMNS | ViewType.ALBUM)
         self.__tracks_view.show()
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.set_margin_start(MARGIN)

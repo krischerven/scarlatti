@@ -317,6 +317,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param album as Album
         """
         row = AlbumRow(album, self.__height, self._view_type)
+        row.connect("activated", self.__on_row_activated)
         row.connect("track-removed", self.__on_track_removed)
         return row
 
@@ -332,6 +333,22 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 child.reveal(True)
                 y = child.translate_coordinates(self._box, 0, 0)[1]
         return y
+
+    def __on_row_activated(self, row, track):
+        """
+            Start playback
+            @param row as AlbumRow
+            @param track_id as int
+        """
+        print("ici")
+        # In party mode, just play track_id and continue party mode
+        if App().player.is_party:
+            App().player.load(track)
+        else:
+            albums = []
+            for album_row in self.children:
+                albums.append(album_row.album)
+            App().player.play_track_for_albums(track, albums)
 
     def __on_track_removed(self, row, destroy_album):
         """

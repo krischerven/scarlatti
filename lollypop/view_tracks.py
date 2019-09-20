@@ -29,6 +29,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
     """
 
     __gsignals__ = {
+        "activated": (GObject.SignalFlags.RUN_FIRST,
+                      None, (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "track-removed": (GObject.SignalFlags.RUN_FIRST, None,
                           (GObject.TYPE_PYOBJECT,)),
@@ -287,25 +289,28 @@ class TracksView(Gtk.Bin, SignalsHelper):
 
     def _on_activated(self, widget, track):
         """
-            A row has been activated, play track
+            Handle playback if album or pass signal
             @param widget as TracksWidget
             @param track as Track
         """
-        tracks = []
-        for child in self.children:
-            tracks.append(child.track)
-            child.set_state_flags(Gtk.StateFlags.NORMAL, True)
-        # Do not update album list if in party or album already available
-        if not App().player.is_party and\
-                not App().player.track_in_playback(track):
-            album = Album(track.album.id)
-            album.set_tracks(tracks)
-            if not App().settings.get_value("append-albums"):
-                App().player.clear_albums()
-            App().player.add_album(album)
-            App().player.load(album.get_track(track.id))
+        if self.__view_type & ViewType.ALBUM:
+            tracks = []
+            for child in self.children:
+                tracks.append(child.track)
+                child.set_state_flags(Gtk.StateFlags.NORMAL, True)
+            # Do not update album list if in party or album already available
+            if not App().player.is_party and\
+                    not App().player.track_in_playback(track):
+                album = Album(track.album.id)
+                album.set_tracks(tracks)
+                if not App().settings.get_value("append-albums"):
+                    App().player.clear_albums()
+                App().player.add_album(album)
+                App().player.load(album.get_track(track.id))
+            else:
+                App().player.load(track)
         else:
-            App().player.load(track)
+            self.emit("activated", track)
 
 #######################
 # PRIVATE             #

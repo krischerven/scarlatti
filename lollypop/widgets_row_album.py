@@ -27,6 +27,8 @@ class AlbumRow(Gtk.ListBoxRow):
     """
 
     __gsignals__ = {
+        "activated": (GObject.SignalFlags.RUN_FIRST,
+                      None, (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "track-removed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
@@ -72,8 +74,12 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__tracks_view = TracksView(self.__album, None,
                                         Gtk.Orientation.VERTICAL,
                                         self.__view_type)
-        self.__tracks_view.connect("populated", self.__on_tracks_populated)
-        self.__tracks_view.connect("track-removed", self.__on_track_removed)
+        self.__tracks_view.connect("activated",
+                                   self.__on_tracks_view_activated)
+        self.__tracks_view.connect("populated",
+                                   self.__on_tracks_view_populated)
+        self.__tracks_view.connect("track-removed",
+                                   self.__on_tracks_view_track_removed)
         self.__tracks_view.show()
 
     def populate(self):
@@ -379,7 +385,13 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__cancellable.cancel()
         self.__artwork = None
 
-    def __on_track_removed(self, view, row):
+    def __on_tracks_view_activated(self, view, track):
+        """
+            Pass signal
+        """
+        self.emit("activated", track)
+
+    def __on_tracks_view_track_removed(self, view, row):
         """
             Remove row
             @param view as TracksView
@@ -388,7 +400,7 @@ class AlbumRow(Gtk.ListBoxRow):
         row.destroy()
         self.emit("track-removed", len(self.children) == 0)
 
-    def __on_tracks_populated(self, view):
+    def __on_tracks_view_populated(self, view):
         """
             Populate remaining discs
             @param view as TracksView
