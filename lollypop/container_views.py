@@ -142,10 +142,10 @@ class ViewsContainer:
         """
         from lollypop.view_current_albums import CurrentAlbumsView
         # Search view in children
-        for (_view, _class, args) in self._stack.history.items:
-            if _class == CurrentAlbumsView and _view is not None:
-                self._stack.history.remove(_view)
-                return _view
+        for (_view, _class, args, sidebar_id,
+             selection_ids, position) in self._stack.history.items:
+            self._stack.history.remove(_view)
+            return _view
         view = CurrentAlbumsView(ViewType.DND)
         view.populate()
         view.show()
@@ -163,7 +163,8 @@ class ViewsContainer:
             self.view.grab_focus()
             return self.view
         # Search view in children
-        for (_view, _class, args) in self._stack.history.items:
+        for (_view, _class, args, sidebar_id,
+             selection_ids, position) in self._stack.history.items:
             if _class == SearchView and _view is not None:
                 self._stack.history.remove(_view)
                 return _view
