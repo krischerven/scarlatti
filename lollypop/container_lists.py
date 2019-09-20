@@ -162,6 +162,25 @@ class ListsContainer:
 ############
 # PRIVATE  #
 ############
+    def __should_load_sidebar(self, selected_id):
+        """
+            True if we should reload sidebar
+            @param selected_id as int
+            @return bool
+        """
+        # Check we have a valid id and a valid view
+        if selected_id is None:
+            return False
+        elif self.view is not None:
+            previous_sidebar_id = self.view.sidebar_id
+        else:
+            return True
+        # Check if loading is needed
+        if selected_id in [Type.RANDOMS, Type.SUGGESTIONS]:
+            return True
+        else:
+            return selected_id != previous_sidebar_id
+
     def __on_sidebar_activated(self, listbox, row):
         """
             Update view based on selected object
@@ -172,6 +191,8 @@ class ListsContainer:
         view = None
         focus_set = False
         selected_id = self._sidebar.selected_id
+        if not self.__should_load_sidebar(selected_id):
+            return
         # Update lists
         if selected_id == Type.ARTISTS_LIST:
             self._show_artists_list(self.left_list)
