@@ -44,8 +44,8 @@ class InternalProvider:
         if album_ids:
             genre_ids = App().albums.get_genre_ids(album_ids[0])
             artist_ids = App().artists.get(genre_ids)
-        for (artist_id, name, sortname) in artist_ids:
-            artists.append((name, name, None))
+            for (artist_id, name, sortname) in artist_ids:
+                artists.append((name, name, None))
         return artists
 
     def get_artist_id(self, artist_name, cancellable):
