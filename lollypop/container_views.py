@@ -144,8 +144,9 @@ class ViewsContainer:
         # Search view in children
         for (_view, _class, args, sidebar_id,
              selection_ids, position) in self._stack.history.items:
-            self._stack.history.remove(_view)
-            return _view
+            if _class == CurrentAlbumsView and _view is not None:
+                self._stack.history.remove(_view)
+                return _view
         view = CurrentAlbumsView(ViewType.DND)
         view.populate()
         view.show()
