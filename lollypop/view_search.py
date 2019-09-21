@@ -56,8 +56,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__bottom_buttons.show()
         self.__bottom_buttons.get_style_context().add_class("linked")
         self.__bottom_buttons.set_property("halign", Gtk.Align.CENTER)
-        local_button = Gtk.ToggleButton.new()
+        local_button = Gtk.RadioButton.new()
         local_button.show()
+        local_button.set_property("draw-indicator", False)
         image = Gtk.Image.new_from_icon_name("computer-symbolic",
                                              Gtk.IconSize.BUTTON)
         image.show()
@@ -65,8 +66,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         local_button.set_action_name("app.search_type")
         local_button.set_action_target_value(GLib.Variant("s", "local"))
         local_button.set_size_request(125, -1)
-        web_button = Gtk.ToggleButton.new()
+        web_button = Gtk.RadioButton.new_from_widget(local_button)
         web_button.show()
+        web_button.set_property("draw-indicator", False)
         image = Gtk.Image.new_from_icon_name("goa-panel-symbolic",
                                              Gtk.IconSize.BUTTON)
         image.show()
@@ -296,12 +298,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
-        # Stupid GTK API (Or am I stupid?). Fix welcome!
-        # Happens when user untoggle a toggled button
-        if value == action.get_state():
-            new_value = "local" if value.get_string() == "web" else "web"
-            action.set_state(GLib.Variant("s", new_value))
-            return
-        action.set_state(value)
-        self.__current_search = self.__banner.entry.get_text().strip()
+        if value != action.get_state():
+            action.set_state(value)
+            self.__current_search = self.__banner.entry.get_text().strip()
         self.populate()

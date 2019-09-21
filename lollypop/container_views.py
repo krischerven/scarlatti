@@ -171,7 +171,6 @@ class ViewsContainer:
                 return _view
         view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
         view.set_search(search)
-        view.populate()
         view.show()
         return view
 
