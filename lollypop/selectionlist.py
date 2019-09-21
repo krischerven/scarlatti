@@ -102,6 +102,8 @@ class SelectionListRow(Gtk.ListBoxRow):
         """
             set_artwork widget
         """
+        if self.__artwork is None:
+            return
         if self.__rowid == Type.SEPARATOR:
             pass
         elif self.__mask & SelectionListMask.ARTISTS and\
