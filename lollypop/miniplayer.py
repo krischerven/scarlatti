@@ -190,6 +190,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             @param surface as str
         """
         if surface is None:
-            pass
+            self.__background.get_style_context().add_class("black")
         else:
+            self.__background.get_style_context().remove_class("black")
             self.__background.set_from_surface(surface)

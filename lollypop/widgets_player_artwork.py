@@ -33,6 +33,9 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         self.__behaviour = behaviour
         self.__width = self.__height = 1
         self.__previous_artwork_id = None
+        self.get_style_context().add_class("small-cover-frame")
+        self.set_property("valign", Gtk.Align.CENTER)
+        self.set_property("halign", Gtk.Align.CENTER)
         self.__per_track_cover = App().settings.get_value(
             "allow-per-track-cover")
         return [
