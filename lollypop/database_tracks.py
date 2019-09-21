@@ -594,6 +594,7 @@ class TracksDatabase:
         """
             Remove album
             @param album_id as int
+            @param commit as bool
         """
         with SqlCursor(App().db, commit) as sql:
             sql.execute("DELETE FROM tracks WHERE album_id=?", (album_id,))

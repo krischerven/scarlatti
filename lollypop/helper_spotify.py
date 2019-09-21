@@ -314,20 +314,20 @@ class SpotifyHelper(GObject.Object):
                         self.search_new_releases(self.__cancellable)
                     else:
                         self.search_similar_albums(self.__cancellable)
-                self.clean_old_albums()
+                self.clean_old_albums(storage_types)
             Logger.info("Spotify download finished")
         except Exception as e:
             Logger.error("SpotifyHelper::__populate_db(): %s", e)
         self.__is_running = False
 
-    def clean_old_albums(self):
+    def clean_old_albums(self, storage_types):
         """
             Clean old albums from DB
+            @param storage_types as [StorageType]
         """
         SqlCursor.add(App().db)
         # Remove older albums
-        for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
-                             StorageType.SPOTIFY_SIMILARS]:
+        for storage_type in storage_types:
             # If too many albums, do some cleanup
             count = App().albums.get_count_for_storage_type(storage_type)
             diff = count - self.__MAX_ITEMS_PER_STORAGE_TYPE

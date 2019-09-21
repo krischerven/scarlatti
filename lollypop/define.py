@@ -55,7 +55,7 @@ class StorageType:
     SAVED = 1 << 3
     SPOTIFY_NEW_RELEASES = 1 << 4
     SPOTIFY_SIMILARS = 1 << 5
-    EXTERNAL = 1 << 4
+    EXTERNAL = 1 << 6
 
 
 class ArtBehaviour:
