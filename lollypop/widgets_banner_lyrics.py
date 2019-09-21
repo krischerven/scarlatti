@@ -159,6 +159,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         """
         if App().player.current_track.id is None:
             self.__title_label.set_text(_("No track playing"))
+            self._on_artwork(None)
         else:
             markup = "%s\n" % GLib.markup_escape_text(
                 App().player.current_track.name)

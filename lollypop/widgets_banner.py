@@ -115,12 +115,17 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Set album artwork
             @param surface as str
         """
-        if surface is not None:
-            self._artwork.set_from_surface(surface)
-            context_banner = self.get_style_context()
-            context_banner.add_class("default-banner")
-            context_banner.add_class("black")
-            self._artwork.get_style_context().remove_class("default-banner")
+        banner_context = self.get_style_context()
+        artwork_context = self._artwork.get_style_context()
+        self._artwork.set_from_surface(surface)
+        if surface is None:
+            banner_context.add_class("default-banner")
+            banner_context.remove_class("black")
+            artwork_context.add_class("default-banner")
+        else:
+            banner_context.remove_class("default-banner")
+            banner_context.add_class("black")
+            artwork_context.remove_class("default-banner")
 
 #######################
 # PRIVATE             #

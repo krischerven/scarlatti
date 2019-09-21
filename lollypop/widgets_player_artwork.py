@@ -33,7 +33,6 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         self.__behaviour = behaviour
         self.__width = self.__height = 1
         self.__previous_artwork_id = None
-        self.get_style_context().add_class("small-cover-frame")
         self.set_property("valign", Gtk.Align.CENTER)
         self.set_property("halign", Gtk.Align.CENTER)
         self.__per_track_cover = App().settings.get_value(
@@ -106,6 +105,9 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
                 scale_factor,
                 behaviour,
                 callback)
+        else:
+            self.set_from_surface(None)
+            self.get_style_context().remove_class("small-cover-frame")
 
 #######################
 # PROTECTED           #
@@ -145,6 +147,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             Set artwork
             @param surface as str
         """
+        self.get_style_context().add_class("small-cover-frame")
         if surface is None:
             if isinstance(App().player.current_track, Radio):
                 icon_name = "audio-input-microphone-symbolic"
