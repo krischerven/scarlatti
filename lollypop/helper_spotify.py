@@ -30,6 +30,7 @@ class SpotifyHelper(GObject.Object):
     """
         Helper for Spotify
     """
+    __MIN_ITEMS_PER_STORAGE_TYPE = 20
     __MAX_ITEMS_PER_STORAGE_TYPE = 50
     __gsignals__ = {
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
@@ -294,31 +295,54 @@ class SpotifyHelper(GObject.Object):
             Logger.info("Spotify download started")
             self.__is_running = True
             self.__cancellable = Gio.Cancellable()
-            self.search_similar_albums(self.__cancellable)
-            self.search_new_releases(self.__cancellable)
-            SqlCursor.add(App().db)
-            # Remove older albums
+            storage_types = []
+            # Check if storage type needs to be updated
+            # Check if albums newer than a week are enough
+            timestamp = time() - 604800
             for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
                                  StorageType.SPOTIFY_SIMILARS]:
-                # If too many albums, do some cleanup
-                count = App().albums.get_count_for_storage_type(storage_type)
-                diff = count - self.__MAX_ITEMS_PER_STORAGE_TYPE
-                if diff > 0:
-                    album_ids = App().albums.get_oldest_for_storage_type(
-                        storage_type, diff)
-                    for album_id in album_ids:
-                        App().tracks.remove_album(album_id, False)
-            # On cancel, clean not needed, done in Application::quit()
-            if not self.__cancellable.is_cancelled():
-                App().tracks.clean(False)
-                App().albums.clean(False)
-                App().artists.clean(False)
-            SqlCursor.commit(App().db)
-            SqlCursor.remove(App().db)
+                newer_albums = App().albums.get_newer_for_storage_type(
+                                                           storage_type,
+                                                           timestamp)
+                print(storage_type, timestamp, len(newer_albums))
+                if len(newer_albums) < self.__MIN_ITEMS_PER_STORAGE_TYPE:
+                    storage_types.append(storage_type)
+            # Update needed storage types
+            if storage_types:
+                for storage_type in storage_types:
+                    if storage_type == StorageType.SPOTIFY_NEW_RELEASES:
+                        self.search_new_releases(self.__cancellable)
+                    else:
+                        self.search_similar_albums(self.__cancellable)
+                self.clean_old_albums()
             Logger.info("Spotify download finished")
         except Exception as e:
             Logger.error("SpotifyHelper::__populate_db(): %s", e)
         self.__is_running = False
+
+    def clean_old_albums(self):
+        """
+            Clean old albums from DB
+        """
+        SqlCursor.add(App().db)
+        # Remove older albums
+        for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
+                             StorageType.SPOTIFY_SIMILARS]:
+            # If too many albums, do some cleanup
+            count = App().albums.get_count_for_storage_type(storage_type)
+            diff = count - self.__MAX_ITEMS_PER_STORAGE_TYPE
+            if diff > 0:
+                album_ids = App().albums.get_oldest_for_storage_type(
+                    storage_type, diff)
+                for album_id in album_ids:
+                    App().tracks.remove_album(album_id, False)
+        # On cancel, clean not needed, done in Application::quit()
+        if not self.__cancellable.is_cancelled():
+            App().tracks.clean(False)
+            App().albums.clean(False)
+            App().artists.clean(False)
+        SqlCursor.commit(App().db)
+        SqlCursor.remove(App().db)
 
     def __get_artist_albums_payload(self, spotify_id, cancellable):
         """

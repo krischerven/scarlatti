@@ -285,12 +285,26 @@ class AlbumsDatabase:
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
+    def get_newer_for_storage_type(self, storage_type, timestamp):
+        """
+            Get albums newer than timestamp for storage type
+            @param storage_type as StorageType
+            @param timestamp as int
+            @return [int]
+        """
+        with SqlCursor(App().db) as sql:
+            filters = (storage_type, timestamp)
+            request = "SELECT rowid FROM albums\
+                       WHERE storage_type=? and mtime>?"
+            result = sql.execute(request, filters)
+            return list(itertools.chain(*result))
+
     def get_oldest_for_storage_type(self, storage_type, limit):
         """
             Get albums by storage type
             @param storage_type as StorageType
             @param limit as int
-            @param offset as int
+            @return [int]
         """
         with SqlCursor(App().db) as sql:
             filters = (storage_type, limit)
@@ -303,6 +317,7 @@ class AlbumsDatabase:
         """
             Get albums count for storage type
             @param storage_type as StorageType
+            @return int
         """
         with SqlCursor(App().db) as sql:
             filters = (storage_type,)
