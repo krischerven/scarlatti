@@ -12,7 +12,7 @@
 
 from gi.repository import GLib, Gst, Gtk
 
-from lollypop.define import App, StorageType, MARGIN_SMALL
+from lollypop.define import App, MARGIN_SMALL
 from lollypop.utils import seconds_to_string
 from lollypop.helper_signals import SignalsHelper, signals
 
@@ -104,8 +104,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
 
         self.__progress.set_value(0.0)
         self.__time_label.set_text("0:00")
-        if not App().player.current_track.storage_type &\
-                StorageType.COLLECTION:
+        if App().player.current_track.is_web:
             style_context.add_class("youtube-scale")
         self.__progress.set_range(0.0, App().player.current_track.duration)
         self.__total_time_label.set_text(
