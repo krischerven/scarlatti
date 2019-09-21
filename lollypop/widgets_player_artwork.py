@@ -71,10 +71,11 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         """
         self.__behaviour = behaviour
         self.__previous_artwork_id = None
+        context_style = self.get_style_context()
         if self.__behaviour & ArtBehaviour.ROUNDED:
-            self.get_style_context().add_class("rounded")
+            context_style.add_class("rounded")
         else:
-            self.get_style_context().remove_class("rounded")
+            context_style.remove_class("rounded")
 
     def set_artwork(self, width, height, callback, behaviour):
         """
@@ -111,9 +112,6 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
                 callback)
         else:
             self.set_from_surface(None)
-            self.get_style_context().remove_class("small-cover-frame")
-            if self.__behaviour & ArtBehaviour.ROUNDED:
-                self.get_style_context().remove_class("rounded")
 
 #######################
 # PROTECTED           #
@@ -153,10 +151,11 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             Set artwork
             @param surface as str
         """
-        self.get_style_context().add_class("small-cover-frame")
-        if self.__behaviour & ArtBehaviour.ROUNDED:
-            self.get_style_context().add_class("rounded")
+        context_style = self.get_style_context()
         if surface is None:
+            context_style.add_class("white")
+            if self.__behaviour & ArtBehaviour.ROUNDED:
+                context_style.add_class("rounded")
             if isinstance(App().player.current_track, Radio):
                 icon_name = "audio-input-microphone-symbolic"
             else:
@@ -165,4 +164,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             self.set_pixel_size(self.__width / 3)
             self.set_size_request(self.__width, self.__height)
         else:
+            context_style.remove_class("white")
+            if self.__behaviour & ArtBehaviour.ROUNDED:
+                context_style.remove_class("rounded")
             self.set_from_surface(surface)

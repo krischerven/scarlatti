@@ -242,6 +242,10 @@ flowboxchild:selected  {
     color: black;
 }
 
+.rounded {
+    border-radius: 50%;
+}
+
 .black-transparent {
     background-color: alpha(black, 0.5);
     color: white;
@@ -273,10 +277,6 @@ flowboxchild:selected  {
     border: 1px solid shade(@theme_bg_color, 0.90);
     background-color: shade(@theme_bg_color, 1.5);
     color: @theme_fg_color;
-}
-
-.rounded {
-    border-radius: 50%;
 }
 
 .artwork-icon {

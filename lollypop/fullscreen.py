@@ -267,11 +267,11 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         behaviour = ArtBehaviour.CROP_SQUARE
         if fs_type & ArtBehaviour.ROUNDED:
             context.add_class("image-rotate")
-            context.remove_class("cover-frame")
+            context.remove_class("small-cover-frame")
             behaviour |= ArtBehaviour.ROUNDED
         else:
             context.remove_class("image-rotate")
-            context.add_class("cover-frame")
+            context.add_class("small-cover-frame")
         self.__artwork_widget.set_behaviour(behaviour)
         self.__artwork_widget.update()
 
