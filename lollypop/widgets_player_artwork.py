@@ -71,6 +71,10 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         """
         self.__behaviour = behaviour
         self.__previous_artwork_id = None
+        if self.__behaviour & ArtBehaviour.ROUNDED:
+            self.get_style_context().add_class("rounded")
+        else:
+            self.get_style_context().remove_class("rounded")
 
     def set_artwork(self, width, height, callback, behaviour):
         """
@@ -108,6 +112,8 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         else:
             self.set_from_surface(None)
             self.get_style_context().remove_class("small-cover-frame")
+            if self.__behaviour & ArtBehaviour.ROUNDED:
+                self.get_style_context().remove_class("rounded")
 
 #######################
 # PROTECTED           #
@@ -148,12 +154,15 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             @param surface as str
         """
         self.get_style_context().add_class("small-cover-frame")
+        if self.__behaviour & ArtBehaviour.ROUNDED:
+            self.get_style_context().add_class("rounded")
         if surface is None:
             if isinstance(App().player.current_track, Radio):
                 icon_name = "audio-input-microphone-symbolic"
             else:
                 icon_name = "folder-music-symbolic"
-            self.set_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
+            self.set_from_icon_name(icon_name, Gtk.IconSize.INVALID)
+            self.set_pixel_size(self.__width / 3)
             self.set_size_request(self.__width, self.__height)
         else:
             self.set_from_surface(surface)
