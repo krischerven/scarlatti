@@ -304,7 +304,6 @@ class SpotifyHelper(GObject.Object):
                 newer_albums = App().albums.get_newer_for_storage_type(
                                                            storage_type,
                                                            timestamp)
-                print(storage_type, timestamp, len(newer_albums))
                 if len(newer_albums) < self.__MIN_ITEMS_PER_STORAGE_TYPE:
                     storage_types.append(storage_type)
             # Update needed storage types
