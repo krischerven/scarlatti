@@ -55,6 +55,7 @@ class StorageType:
     SAVED = 1 << 3
     SPOTIFY_NEW_RELEASES = 1 << 4
     SPOTIFY_SIMILARS = 1 << 5
+    EXTERNAL = 1 << 4
 
 
 class ArtBehaviour:
@@ -132,7 +133,7 @@ class ArtSize:
 
 
 class ScanType:
-    EPHEMERAL = 0
+    EXTERNAL = 0
     NEW_FILES = 1
     FULL = 2
 

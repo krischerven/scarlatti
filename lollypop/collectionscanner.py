@@ -84,7 +84,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         App().lookup_action("update_db").set_enabled(False)
         # Stop previous scan
-        if self.is_locked() and scan_type != ScanType.EPHEMERAL:
+        if self.is_locked() and scan_type != ScanType.EXTERNAL:
             self.stop()
             GLib.timeout_add(250, self.update, scan_type, uris)
         else:
@@ -96,7 +96,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             if not uris:
                 return
             # Register to progressbar
-            if scan_type != ScanType.EPHEMERAL:
+            if scan_type != ScanType.EXTERNAL:
                 App().window.container.progress.add(self)
                 App().window.container.progress.set_fraction(0, self)
             Logger.info("Scan started")
@@ -512,11 +512,11 @@ class CollectionScanner(GObject.GObject, TagReader):
 
         SqlCursor.remove(App().db)
 
-        if scan_type != ScanType.EPHEMERAL:
+        if scan_type != ScanType.EXTERNAL:
             self.__add_monitor(dirs)
             GLib.idle_add(self.__finish, self.__new_tracks)
 
-        if scan_type == ScanType.EPHEMERAL:
+        if scan_type == ScanType.EXTERNAL:
             App().player.play_uris(self.__new_tracks)
 
     def __scan_to_handle(self, uri):
@@ -555,7 +555,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Scan new files
             for (mtime, uri) in files:
                 # Handle a stop request
-                if self.__thread is None and scan_type != ScanType.EPHEMERAL:
+                if self.__thread is None and scan_type != ScanType.EXTERNAL:
                     raise Exception("cancelled")
                 try:
                     if not self.__scan_to_handle(uri):
@@ -563,8 +563,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                     db_mtime = db_mtimes.get(uri, 0)
                     if mtime > db_mtime:
                         # If not saved, use 0 as mtime, easy delete on quit
-                        if scan_type == ScanType.EPHEMERAL:
-                            storage_type = StorageType.EPHEMERAL
+                        if scan_type == ScanType.EXTERNAL:
+                            storage_type = StorageType.EXTERNAL
                         else:
                             storage_type = StorageType.COLLECTION
                         # Do not use mtime if not intial scan
@@ -593,7 +593,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             Remove non existent tracks from DB
             @param scan_type as ScanType
         """
-        if scan_type != ScanType.EPHEMERAL and self.__thread is not None:
+        if scan_type != ScanType.EXTERNAL and self.__thread is not None:
             # We need to check files are always in collections
             if scan_type == ScanType.FULL:
                 collections = App().settings.get_music_uris()

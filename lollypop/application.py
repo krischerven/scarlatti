@@ -560,7 +560,7 @@ class Application(Gtk.Application, ApplicationActions):
         def scanner_update():
             self.__scanner_timeout_id = None
             self.player.play_uris(self.__scanner_uris)
-            self.scanner.update(ScanType.EPHEMERAL, self.__scanner_uris)
+            self.scanner.update(ScanType.EXTERNAL, self.__scanner_uris)
             self.__scanner_uris = []
 
         if self.__scanner_timeout_id is not None:

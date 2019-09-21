@@ -604,8 +604,8 @@ class TracksDatabase:
             @param commit as bool
         """
         with SqlCursor(App().db, commit) as sql:
-            sql.execute("DELETE FROM tracks WHERE storage_type=?",
-                        (StorageType.EPHEMERAL,))
+            sql.execute("DELETE FROM tracks WHERE storage_type & ?",
+                        (StorageType.EPHEMERAL | StorageType.EXTERNAL,))
 
     def del_old_for_storage_type(self, storage_type, offset=604800):
         """
