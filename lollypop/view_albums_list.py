@@ -340,7 +340,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param row as AlbumRow
             @param track_id as int
         """
-        print("ici")
         # In party mode, just play track_id and continue party mode
         if App().player.is_party:
             App().player.load(track)
