@@ -343,11 +343,17 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         # In party mode, just play track_id and continue party mode
         if App().player.is_party:
             App().player.load(track)
-        else:
+        elif self._view_type & (ViewType.SEARCH |
+                                ViewType.PLAYBACK |
+                                ViewType.PLAYLISTS):
             albums = []
             for album_row in self.children:
                 albums.append(album_row.album)
             App().player.play_track_for_albums(track, albums)
+        else:
+            App().player.remove_album_by_id(track.album.id)
+            App().player.add_album(track.album)
+            App().player.load(track)
 
     def __on_track_removed(self, row, destroy_album):
         """
