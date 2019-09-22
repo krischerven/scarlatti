@@ -31,11 +31,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type, search=""):
+    def __init__(self, view_type):
         """
             Init Popover
             @param view_type as ViewType
-            @param search as str
         """
         View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         Gtk.Bin.__init__(self)
@@ -89,8 +88,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.add_widget(self.__view, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
-        if search:
-            self.set_search(search)
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
@@ -299,6 +296,5 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param value as GLib.Variant
         """
         if value != action.get_state():
-            action.set_state(value)
             self.__current_search = self.__banner.entry.get_text().strip()
             self.populate()

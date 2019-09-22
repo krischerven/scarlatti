@@ -159,19 +159,25 @@ class ViewsContainer:
             @return SearchView
         """
         from lollypop.view_search import SearchView
+        view = None
         # Search view in current view
         if self.view is not None and isinstance(self.view, SearchView):
-            self.view.grab_focus()
-            return self.view
+            view = self.view
         # Search view in children
-        for (_view, _class, args, sidebar_id,
-             selection_ids, position) in self._stack.history.items:
-            if _class == SearchView and _view is not None:
-                self._stack.history.remove(_view)
-                return _view
-        view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
-        view.set_search(search)
-        view.show()
+        else:
+            for (_view, _class, args, sidebar_id,
+                 selection_ids, position) in self._stack.history.items:
+                if _class == SearchView and _view is not None:
+                    self._stack.history.remove(_view)
+                    view = _view
+                    break
+        if view is None:
+            view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
+            view.show()
+        if search:
+            view.set_search(search)
+        else:
+            view.grab_focus()
         return view
 
     def get_view_album_ids(self, genre_ids, artist_ids):
