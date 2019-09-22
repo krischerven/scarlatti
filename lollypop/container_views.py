@@ -76,6 +76,7 @@ class ViewsContainer:
             @param data as object
         """
         view = None
+        hide_selection_list = True
         if item_ids:
             if item_ids[0] in [Type.POPULARS,
                                Type.LOVED,
@@ -102,6 +103,7 @@ class ViewsContainer:
                 else:
                     view = self._get_view_albums([data], [])
             elif item_ids[0] == Type.ALBUM:
+                hide_selection_list = False
                 view = self._get_view_album(data)
             elif item_ids[0] == Type.YEARS:
                 if data is None:
@@ -129,6 +131,9 @@ class ViewsContainer:
             elif item_ids[0] == Type.ARTISTS:
                 view = self._get_view_artists([], data)
         self._sidebar.select_ids(item_ids, False)
+        if hide_selection_list:
+            self._hide_right_list()
+            self.left_list.hide()
         if view is not None:
             self.set_focused_view(view)
             view.show()
