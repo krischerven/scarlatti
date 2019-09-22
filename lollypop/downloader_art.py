@@ -154,7 +154,7 @@ class ArtDownloader(Downloader):
             artist_formated = GLib.uri_escape_string(
                 artist, None, True).replace(" ", "+")
             uri = "https://api.deezer.com/search/artist/?" +\
-                  "q=%s&output=json&index=0&limit=1&" % artist_formated
+                  "q=%s&output=json&index=0&limit=1" % artist_formated
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             if status:
