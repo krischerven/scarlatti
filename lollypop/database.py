@@ -202,7 +202,7 @@ class Database:
             @param artists as [str]
             @param track as str/None
             @param storage_type as int
-            @return int
+            @return bool
         """
         artist_ids = []
         for artist in artists:
@@ -212,17 +212,17 @@ class Database:
         album_id = App().albums.get_id_by(
             sql_escape(album.lower()), artist_ids)
         if album_id is None:
-            return None
+            return False
         album_storage_type = App().albums.get_storage_type(album_id)
-        # If not track to check, albums exists only if storage is different
-        # Allow to populate albums with missing tracks
-        if track is None and not album_storage_type & storage_type:
-            return album_id
+        # If not same storage type, say True!
+        # Don't want to mix StorageType.COLLECTION with some web tracks
+        if not album_storage_type & storage_type or track is None:
+            return True
         else:
             track_id = App().tracks.get_id_by(sql_escape(track.lower()),
                                               album_id,
                                               artist_ids)
-            return track_id
+            return track_id is not None
 
 #######################
 # PRIVATE             #

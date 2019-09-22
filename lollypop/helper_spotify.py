@@ -425,10 +425,11 @@ class SpotifyHelper(GObject.Object):
                 raise Exception("cancelled")
             artists = [artist["name"]
                        for artist in item["album"]["artists"]]
-            track_id = App().db.exists_in_db(item["album"]["name"],
+            exists_in_db = App().db.exists_in_db(
+                                             item["album"]["name"],
                                              artists,
                                              item["name"])
-            if track_id is not None:
+            if exists_in_db:
                 Logger.debug("SpotifyHelper: track exists in DB: %s - %s",
                              item["name"], artists)
                 continue
@@ -463,12 +464,12 @@ class SpotifyHelper(GObject.Object):
                 raise Exception("cancelled")
             artists = [artist["name"]
                        for artist in album_item["artists"]]
-            album_id = App().db.exists_in_db(
+            exists_in_db = App().db.exists_in_db(
                                     album_item["name"],
                                     artists,
                                     None,
                                     storage_type)
-            if album_id is not None:
+            if exists_in_db:
                 Logger.debug("SpotifyHelper: album exists in DB: %s - %s",
                              artists, album_item["name"])
                 continue
