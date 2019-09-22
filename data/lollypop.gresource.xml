@@ -13,7 +13,6 @@
      <file compressed="true" preprocess="xml-stripblanks">LovedWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">PlaylistBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">PlaylistPopover.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">QueuePopover.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">RadioMenu.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">RatingWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SearchBannerWidget.ui</file>

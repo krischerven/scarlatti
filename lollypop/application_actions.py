@@ -228,11 +228,12 @@ class ApplicationActions:
             about_box = get_instance(about_children, Gtk.Box)
             about_headerbar = get_instance(about_children, Gtk.HeaderBar)
             about_headerbar.set_show_close_button(False)
-            about_headerbar.get_style_context().add_class("light-button")
+            about_headerbar.get_style_context().add_class("no-border")
             about.remove(about_headerbar)
             about.remove(about_box)
             box.add(about_headerbar)
             box.add(about_box)
+            box.set_hexpand(True)
             App().window.container.show_widget(box)
         else:
             about.set_transient_for(App().window)

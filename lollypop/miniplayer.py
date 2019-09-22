@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GObject
 
 from lollypop.helper_art import ArtBehaviour
-from lollypop.define import App, ArtSize, MARGIN_SMALL
+from lollypop.define import App, ArtSize, MARGIN_SMALL, MARGIN
 from lollypop.widgets_player_progress import ProgressPlayerWidget
 from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
@@ -63,7 +63,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__artwork_widget.set_vexpand(True)
         self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
                                            ArtSize.MINIPLAYER)
-        label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN_SMALL)
+        label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN)
         label_box.show()
         label_widget = LabelPlayerWidget(False, 9)
         label_widget.show()
@@ -75,10 +75,10 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         label_box.pack_start(label_widget, False, False, 0)
         button = Gtk.Button.new()
         button.show()
+        button.get_style_context().add_class("miniplayer-button")
         button.set_property("halign", Gtk.Align.START)
         button.connect("clicked", self.__on_button_clicked)
         button.set_image(label_box)
-        button.get_style_context().add_class("menu-button")
         self.__background = Gtk.Image()
         self.__background.show()
         # Assemble UI

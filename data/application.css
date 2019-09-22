@@ -149,10 +149,6 @@ flowboxchild:selected  {
     border-top: none;
 }
 
-.invisible-widget {
-    background-color: @theme_bg_color;
-}
-
 .background-opacity {
     background-color: @theme_bg_color;
     opacity: 0.99;
@@ -247,6 +243,11 @@ flowboxchild:selected  {
 }
 
 .black-transparent {
+    background-color: alpha(black, 0.5);
+    color: white;
+}
+
+.black-transparent-hover hover {
     background-color: alpha(black, 0.5);
     color: white;
 }
@@ -402,44 +403,6 @@ flowboxchild:selected  {
     font-weight: bold;
 }
 
-.light-button {
-	box-shadow: none;
-	border-radius: 0px;
-	padding-left: 4px;
-	padding-right: 4px;
-	padding-top: 0px;
-	min-height: 48px;
-	padding-bottom: 0px;
-	background-image: none;
-	border-style: solid;
-	border-image-source: none;
-    border-bottom-width: 1px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-color: transparent;
-    background-color: transparent;
-    color: inherit;
-}
-
-.light-button label {
-    opacity: 0.9;
-}
-
-.light-button:hover {
-    background-color: shade(@theme_bg_color, 0.95);
-    border-color: shade(@theme_bg_color, 0.8);
-}
-
-.light-button:hover label {
-    opacity: 1;
-}
-
-.light-button:visited {
-    background-color: shade(@theme_bg_color, 0.95);
-    border-color: shade(@theme_bg_color, 0.8);
-}
-
 .adaptive-menu modelbutton.flat {
     min-height: 40px;
 }
@@ -576,6 +539,29 @@ flowboxchild:selected  {
 .vertical-menu-button:hover {
     color: inherit;
     border-color: alpha(@theme_fg_color, 0.1);
+  	opacity: 1;
+}
+
+.miniplayer-button {
+    opacity: 0.8;
+	box-shadow: none;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	background-image: none;
+	border-style: solid;
+	border-image-source: none;
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-color: transparent;
+    color: inherit;
+}
+
+.miniplayer-button:hover {
+    background-color: alpha(black, 0.5);
   	opacity: 1;
 }
 
