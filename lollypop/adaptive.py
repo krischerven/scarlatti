@@ -295,8 +295,9 @@ class AdaptiveStack(Gtk.Stack):
                 if view not in self.get_children():
                     self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("set-sidebar-id", view.sidebar_id)
-                self.emit("set-selection-ids", view.selection_ids)
+                if view.sidebar_id is not None:
+                    self.emit("set-sidebar-id", view.sidebar_id)
+                    self.emit("set-selection-ids", view.selection_ids)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()
@@ -329,8 +330,9 @@ class AdaptiveStack(Gtk.Stack):
             if view is not None:
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
-                self.emit("set-sidebar-id", view.sidebar_id)
-                self.emit("set-selection-ids", view.selection_ids)
+                if view.sidebar_id is not None:
+                    self.emit("set-sidebar-id", view.sidebar_id)
+                    self.emit("set-selection-ids", view.selection_ids)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 
