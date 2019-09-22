@@ -108,6 +108,10 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         try:
             if album not in self._albums:
                 return
+            if self._current_track.album == album:
+                self.skip_album()
+            else:
+                self.update_next_prev()
             self._albums.remove(album)
             GLib.idle_add(self.emit, "playback-changed")
         except Exception as e:

@@ -285,7 +285,6 @@ class AlbumRow(Gtk.ListBoxRow):
         if self.__view_type & ViewType.PLAYBACK:
             App().player.remove_album(self.__album)
             self.destroy()
-            App().player.update_next_prev()
         elif self.__album.storage_type & StorageType.EPHEMERAL:
             App().art.copy_from_web_to_store(self.__album.id)
             App().art.cache_artists_artwork()
