@@ -347,13 +347,11 @@ class ArtDownloader(Downloader):
             artist = GLib.uri_escape_string(artist, None, True)
             uri = "https://theaudiodb.com/api/v1/json/"
             uri += "%s/search.php?s=%s" % (AUDIODB_CLIENT_ID, artist)
-            print(uri)
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 uri = None
-                print(decode)
                 for item in decode["artists"]:
                     for key in ["strArtistFanart", "strArtistThumb"]:
                         uri = item[key]
