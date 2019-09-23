@@ -21,7 +21,7 @@ class Downloader:
                     "_get_audiodb_album_artwork_uri",
                     "_get_audiodb_artist_info"),
                    ("FanartTV", "_get_fanarttv_artist_artwork_uri",
-                    None,
+                    "_get_fanarttv_album_artwork_uri",
                     None),
                    ("Spotify", "_get_spotify_artist_artwork_uri",
                     "_get_spotify_album_artwork_uri", None),

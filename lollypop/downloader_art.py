@@ -285,6 +285,35 @@ class ArtDownloader(Downloader):
                            % e)
         return []
 
+    def _get_fanarttv_album_artwork_uri(self, artist, album, cancellable=None):
+        """
+            Get album artwork using FanartTV
+            @param artist as str
+            @param album as str
+            @param cancellable as Gio.Cancellable
+            @return uri as str
+            @thread safe
+        """
+        if not get_network_available("FANARTTV"):
+            return []
+        uris = []
+        try:
+            search = "%s %s" % (artist, album)
+            mbid = self.__get_musicbrainz_mbid("album", search, cancellable)
+            if mbid is None:
+                return []
+            uri = "http://webservice.fanart.tv/v3/music/albums/%s?api_key=%s"
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri % (mbid, FANARTTV_ID), cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for cover in decode["albums"][mbid]["albumcover"]:
+                    uris.append(cover["url"])
+        except Exception as e:
+            Logger.warning(
+                "ArtDownloader::_get_fanarttv_album_artwork_uri: %s" % e)
+        return uris
+
     def _get_spotify_album_artwork_uri(self, artist, album, cancellable=None):
         """
             Get album artwork using Spotify
@@ -422,20 +451,32 @@ class ArtDownloader(Downloader):
         """
         try:
             if mbid_type == "artist":
-                result_key = "artists"
+                uri = "http://musicbrainz.org/ws/2/artist/" +\
+                      "?query=%s&fmt=json"
             else:
-                result_key = "albums"
+                uri = "http://musicbrainz.org/ws/2/release-group/" +\
+                      "?query=%s&fmt=json"
             string = GLib.uri_escape_string(string, None, True)
-            uri = "http://musicbrainz.org/ws/2/artist/?query=%s:%s&fmt=json"
             helper = TaskHelper()
             helper.add_header("User-Agent",
                               "org.gnome.Lollypop/%s" % App().version)
-            (status, data) = helper.load_uri_content_sync(
-                uri % (mbid_type, string), cancellable)
+            (status, data) = helper.load_uri_content_sync(uri % string,
+                                                          cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                for item in decode[result_key]:
-                    return item["id"]
+                if mbid_type == "artist":
+                    for item in decode["artists"]:
+                        return item["id"]
+                else:
+                    mbid = None
+                    # Get album id or EP id if missing
+                    for item in decode["release-groups"]:
+                        if item["primary-type"] == "Album":
+                            mbid = item["id"]
+                            break
+                        elif item["primary-type"] == "EP" and mbid is None:
+                            mbid = item["id"]
+                return mbid
         except Exception as e:
             Logger.warning("ArtDownloader::__get_musicbrainz_mbid: %s"
                            % e)
