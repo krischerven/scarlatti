@@ -58,7 +58,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__vgrid.show()
         self.__container = Container()
         self.__container.show()
-        self.__vgrid.add(self.__container)
         self.__container.setup_lists()
         self.__toolbar = Toolbar(self)
         self.__toolbar.show()
@@ -68,6 +67,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.set_titlebar(self.__toolbar)
             self.__toolbar.set_show_close_button(
                 not App().settings.get_value("disable-csd"))
+        self.__vgrid.add(self.__container)
         self.add(self.__vgrid)
 
     @property
