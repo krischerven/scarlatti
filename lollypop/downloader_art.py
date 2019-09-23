@@ -16,7 +16,7 @@ import json
 from base64 import b64encode
 
 from lollypop.define import App, GOOGLE_API_ID, Type, AUDIODB_CLIENT_ID
-from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET
+from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, FANARTTV_ID
 from lollypop.utils import get_network_available, noaccents
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
@@ -52,8 +52,8 @@ class ArtDownloader(Downloader):
             if helper is None:
                 continue
             method = getattr(self, helper)
-            uri = method(artist, album, cancellable)
-            if uri is not None:
+            uris = method(artist, album, cancellable)
+            for uri in uris:
                 results.append((uri, api))
         GLib.idle_add(self.emit, "uri-artwork-found", results)
 
@@ -69,8 +69,8 @@ class ArtDownloader(Downloader):
             if helper is None:
                 continue
             method = getattr(self, helper)
-            uri = method(artist, cancellable)
-            if uri is not None:
+            uris = method(artist, cancellable)
+            for uri in uris:
                 results.append((uri, api))
         GLib.idle_add(self.emit, "uri-artwork-found", results)
 
@@ -140,16 +140,45 @@ class ArtDownloader(Downloader):
 #######################
 # PROTECTED           #
 #######################
+    def _get_audiodb_artist_artwork_uri(self, artist, cancellable=None):
+        """
+            Get artist artwork using AutdioDB
+            @param artist as str
+            @param cancellable as Gio.Cancellable
+            @return uri as str
+            @thread safe
+        """
+        if not get_network_available("AUDIODB"):
+            return []
+        try:
+            artist = GLib.uri_escape_string(artist, None, True)
+            uri = "https://theaudiodb.com/api/v1/json/"
+            uri += "%s/search.php?s=%s" % (AUDIODB_CLIENT_ID, artist)
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                uri = None
+                for item in decode["artists"]:
+                    for key in ["strArtistFanart", "strArtistThumb"]:
+                        uri = item[key]
+                        if uri is not None:
+                            return [uri]
+        except Exception as e:
+            Logger.warning("ArtDownloader::_get_audiodb_artist_artwork_uri: %s"
+                           % e)
+        return []
+
     def _get_deezer_artist_artwork_uri(self, artist, cancellable=None):
         """
-            Return deezer artist information
+            Get artist artwork using Deezer
             @param artist as str
             @param cancellable as Gio.Cancellable
             @return uri as str
             @tread safe
         """
         if not get_network_available("DEEZER"):
-            return None
+            return []
         try:
             artist_formated = GLib.uri_escape_string(
                 artist, None, True).replace(" ", "+")
@@ -161,22 +190,49 @@ class ArtDownloader(Downloader):
                 uri = None
                 decode = json.loads(data.decode("utf-8"))
                 uri = decode["data"][0]["picture_xl"]
-                return uri
+                return [uri]
         except Exception as e:
             Logger.warning(
                 "ArtDownloader::_get_deezer_artist_artwork_uri(): %s" % e)
-        return None
+        return []
+
+    def _get_fanarttv_artist_artwork_uri(self, artist, cancellable=None):
+        """
+            Get artist artwork using FanartTV
+            @param artist as str
+            @param cancellable as Gio.Cancellable
+            @return uri as str
+            @thread safe
+        """
+        if not get_network_available("FANARTTV"):
+            return []
+        uris = []
+        try:
+            mbid = self.__get_musicbrainz_mbid("artist", artist, cancellable)
+            if mbid is None:
+                return []
+            uri = "http://webservice.fanart.tv/v3/music/%s?api_key=%s"
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri % (mbid, FANARTTV_ID), cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for item in decode["artistbackground"]:
+                    uris.append(item["url"])
+        except Exception as e:
+            Logger.warning(
+                "ArtDownloader::_get_fanarttv_artist_artwork_uri: %s" % e)
+        return uris
 
     def _get_spotify_artist_artwork_uri(self, artist, cancellable=None):
         """
-            Return spotify artist information
+            Get artist artwork using Spotify
             @param artist as str
             @param cancellable as Gio.Cancellable
             @return uri as str
             @tread safe
         """
         if not get_network_available("SPOTIFY"):
-            return None
+            return []
         try:
             artist_formated = GLib.uri_escape_string(
                 artist, None, True).replace(" ", "+")
@@ -193,15 +249,15 @@ class ArtDownloader(Downloader):
                     if noaccents(item["name"].lower()) ==\
                             noaccents(artist.lower()):
                         uri = item["images"][0]["url"]
-                        return uri
+                        return [uri]
         except Exception as e:
             Logger.warning(
                 "ArtDownloader::_get_spotify_artist_artwork_uri(): %s" % e)
-        return None
+        return []
 
     def _get_deezer_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork uri from deezer
+            Get album artwork using Deezer
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
@@ -209,7 +265,7 @@ class ArtDownloader(Downloader):
             @tread safe
         """
         if not get_network_available("DEEZER"):
-            return None
+            return []
         try:
             album_formated = GLib.uri_escape_string(album, None, True)
             uri = "https://api.deezer.com/search/album/?" +\
@@ -223,15 +279,15 @@ class ArtDownloader(Downloader):
                     if noaccents(item["artist"]["name"].lower()) ==\
                             noaccents(artist.lower()):
                         uri = item["cover_xl"]
-                        return uri
+                        return [uri]
         except Exception as e:
             Logger.warning("ArtDownloader::__get_deezer_album_artwork_uri: %s"
                            % e)
-        return None
+        return []
 
     def _get_spotify_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork uri from spotify
+            Get album artwork using Spotify
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
@@ -239,7 +295,7 @@ class ArtDownloader(Downloader):
             @tread safe
         """
         if not get_network_available("SPOTIFY"):
-            return None
+            return []
         artists_spotify_ids = []
         try:
             token = self.__get_spotify_token(cancellable)
@@ -266,14 +322,14 @@ class ArtDownloader(Downloader):
                     for item in decode["items"]:
                         if noaccents(item["name"].lower()) ==\
                                 noaccents(album.lower()):
-                            return item["images"][0]["url"]
+                            return [item["images"][0]["url"]]
         except Exception as e:
             Logger.warning("ArtDownloader::_get_album_art_spotify_uri: %s" % e)
-        return None
+        return []
 
     def _get_itunes_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork uri from itunes
+            Get album artwork using Itunes
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
@@ -281,7 +337,7 @@ class ArtDownloader(Downloader):
             @tread safe
         """
         if not get_network_available("ITUNES"):
-            return None
+            return []
         try:
             album_formated = GLib.uri_escape_string(
                 album, None, True).replace(" ", "+")
@@ -296,15 +352,15 @@ class ArtDownloader(Downloader):
                             noaccents(artist.lower()):
                         uri = item["artworkUrl60"].replace("60x60",
                                                            "1024x1024")
-                        return uri
+                        return [uri]
         except Exception as e:
             Logger.warning("ArtDownloader::_get_album_art_itunes_uri: %s"
                            % e)
-        return None
+        return []
 
     def _get_audiodb_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork from audiodb
+            Get album artwork using AudioDB
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
@@ -312,7 +368,7 @@ class ArtDownloader(Downloader):
             @thread safe
         """
         if not get_network_available("AUDIODB"):
-            return None
+            return []
         try:
             album = GLib.uri_escape_string(album, None, True)
             artist = GLib.uri_escape_string(artist, None, True)
@@ -327,48 +383,19 @@ class ArtDownloader(Downloader):
                 if decode["album"]:
                     for item in decode["album"]:
                         uri = item["strAlbumThumb"]
-                        return uri
+                        return [uri]
         except Exception as e:
             Logger.warning("ArtDownloader::_get_audiodb_album_artwork_uri: %s"
                            % e)
-        return None
-
-    def _get_audiodb_artist_artwork_uri(self, artist, cancellable=None):
-        """
-            Get artist artwork uri from audiodb
-            @param artist as str
-            @param cancellable as Gio.Cancellable
-            @return uri as str
-            @thread safe
-        """
-        if not get_network_available("AUDIODB"):
-            return None
-        try:
-            artist = GLib.uri_escape_string(artist, None, True)
-            uri = "https://theaudiodb.com/api/v1/json/"
-            uri += "%s/search.php?s=%s" % (AUDIODB_CLIENT_ID, artist)
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                uri = None
-                for item in decode["artists"]:
-                    for key in ["strArtistFanart", "strArtistThumb"]:
-                        uri = item[key]
-                        if uri is not None:
-                            return uri
-        except Exception as e:
-            Logger.warning("ArtDownloader::_get_audiodb_artist_artwork_uri: %s"
-                           % e)
-        return None
+        return []
 
     def _get_lastfm_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork uri from lastfm
+            Get album artwork using Last.FM
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return [str]
             @tread safe
         """
         if not get_network_available("LASTFM"):
@@ -377,15 +404,43 @@ class ArtDownloader(Downloader):
             try:
                 last_album = App().lastfm.get_album(artist, album)
                 uri = last_album.get_cover_image(4)
-                return uri
+                return [uri]
             except Exception as e:
                 Logger.warning("ArtDownloader::_get_album_art_lastfm_uri: %s"
                                % e)
-        return None
+        return []
 
 #######################
 # PRIVATE             #
 #######################
+    def __get_musicbrainz_mbid(self, mbid_type, string, cancellable):
+        """
+            Get musicbrainz mbid for type and string
+            @param mbid_type as str ("artist" or "album")
+            @param string as str
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            if mbid_type == "artist":
+                result_key = "artists"
+            else:
+                result_key = "albums"
+            string = GLib.uri_escape_string(string, None, True)
+            uri = "http://musicbrainz.org/ws/2/artist/?query=%s:%s&fmt=json"
+            helper = TaskHelper()
+            helper.add_header("User-Agent",
+                              "org.gnome.Lollypop/%s" % App().version)
+            (status, data) = helper.load_uri_content_sync(
+                uri % (mbid_type, string), cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for item in decode[result_key]:
+                    return item["id"]
+        except Exception as e:
+            Logger.warning("ArtDownloader::__get_musicbrainz_mbid: %s"
+                           % e)
+        return None
+
     def __get_spotify_token(self, cancellable):
         """
             Get a new auth token
@@ -424,14 +479,17 @@ class ArtDownloader(Downloader):
                     continue
                 try:
                     method = getattr(self, helper)
-                    uri = method(artist)
-                    if uri is not None:
+                    result = method(artist)
+                    status = False
+                    for uri in result:
                         (status,
                          data) = App().task_helper.load_uri_content_sync(uri,
                                                                          None)
                         if status:
                             App().art.add_artist_artwork(artist, data)
                             break
+                    if status:
+                        break
                 except Exception as e:
                     Logger.error(
                         "ArtDownloader::__cache_artists_artwork(): %s" % e)
@@ -459,8 +517,9 @@ class ArtDownloader(Downloader):
                     if helper is None:
                         continue
                     method = getattr(self, helper)
-                    uri = method(artist, album)
-                    if uri is not None:
+                    result = method(artist, album)
+                    status = False
+                    for uri in result:
                         (status,
                          data) = App().task_helper.load_uri_content_sync(uri,
                                                                          None)
@@ -468,6 +527,8 @@ class ArtDownloader(Downloader):
                             self.__albums_history.append(album_id)
                             App().art.save_album_artwork(data, Album(album_id))
                             break
+                    if status:
+                        break
         except Exception as e:
             Logger.error("ArtDownloader::__cache_albums_art: %s" % e)
         self.__albums_history.append(album_id)

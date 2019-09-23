@@ -104,7 +104,8 @@ NetworkAccessACL = {
     "DEEZER": 1 << 11,
     "WIKIA": 1 << 12,
     "GENIUS": 1 << 13,
-    "AUDIODB": 1 << 14
+    "AUDIODB": 1 << 14,
+    "FANARTTV": 1 << 15
 }
 
 
@@ -241,6 +242,8 @@ UTF_8_ENCODING = b"\x03"
 SPOTIFY_CLIENT_ID = "0b144843878a46b2b12e0958c342c3ac"
 SPOTIFY_SECRET = "265ab8e057684f1b9e69e0c58f4881c1"
 AUDIODB_CLIENT_ID = "195003"
+FANARTTV_ID = "1cb10bc910c8d4fc34e0c78ac4e8ef46"
+
 
 STATIC_ALBUM_NAME = {
     Type.POPULARS: "Popular albums",

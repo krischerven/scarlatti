@@ -370,6 +370,14 @@ class Application(Gtk.Application, ApplicationActions):
         """
         return self.__gtk_dark
 
+    @property
+    def version(self):
+        """
+            Get Lollypop version
+            @return srt
+        """
+        return self.__version
+
 #######################
 # PRIVATE             #
 #######################
