@@ -99,9 +99,6 @@ class SelectionListMenu(Gio.Menu):
                     encoded,
                     None,
                     GLib.Variant.new_boolean(exists))
-                if item[0] in [Type.GENRES_LIST, Type.ARTISTS_LIST] and\
-                        App().settings.get_value("show-sidebar-labels"):
-                    action.set_enabled(False)
                 action.connect("change-state",
                                self.__on_shown_change_state,
                                item[0])
@@ -172,10 +169,3 @@ class SelectionListMenu(Gio.Menu):
         action.set_state(variant)
         App().settings.set_value("show-sidebar-labels",
                                  GLib.Variant("b", variant))
-        for (item_id, name, ignore) in ShownLists.get(self.__mask, True):
-            if item_id in [Type.GENRES_LIST, Type.ARTISTS_LIST]:
-                encoded = sha256(name.encode("utf-8")).hexdigest()
-                action = App().lookup_action(encoded)
-                action.set_enabled(not variant)
-                if action.get_state():
-                    action.change_state(GLib.Variant("b", not variant))
