@@ -296,5 +296,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param value as GLib.Variant
         """
         if value != action.get_state():
+            action.set_state(value)
             self.__current_search = self.__banner.entry.get_text().strip()
             self.populate()
