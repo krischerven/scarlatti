@@ -15,7 +15,7 @@ from gi.repository import Gtk, Gio, GLib, GObject, Pango
 from gettext import gettext as _
 
 from lollypop.view_tracks import TracksView
-from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL, Type
+from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL
 from lollypop.define import ArtBehaviour, StorageType
 from lollypop.utils import popup_widget
 from lollypop.helper_gestures import GesturesHelper
@@ -121,7 +121,7 @@ class AlbumRow(Gtk.ListBoxRow):
             self.__action_button.set_tooltip_text(_("Save in collection"))
         elif self.__view_type & ViewType.SEARCH:
             self.__action_button = Gtk.Button.new_from_icon_name(
-                    'avatar-default-symbolic',
+                    "media-playback-start-symbolic",
                     Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(_("Go to artist view"))
         else:
@@ -291,11 +291,7 @@ class AlbumRow(Gtk.ListBoxRow):
             self.__album.save(True)
             self.__action_button.hide()
         elif self.__view_type & ViewType.SEARCH:
-            popover = self.get_ancestor(Gtk.Popover)
-            if popover is not None:
-                popover.popdown()
-            App().window.container.show_view([Type.ARTISTS],
-                                             self.__album.artist_ids)
+            App().player.play_album(self.__album)
         elif self.__view_type & ViewType.PLAYLISTS:
             if App().player.current_track.album.id == self.__album.id:
                 # Stop playback or loop for last album
