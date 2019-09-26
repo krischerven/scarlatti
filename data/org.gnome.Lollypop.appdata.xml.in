@@ -19,8 +19,6 @@
   <releases>
     <release version="1.1.4" date="2019-07-05">
       <description>
-	<ul>Do not reload views on adaptive</ul>
-	<ul>Bugfixes</ul>
       </description>
     </release>
   </releases>
