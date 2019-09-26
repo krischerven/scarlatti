@@ -20,7 +20,7 @@ from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, MARGIN
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
-from lollypop.utils import get_font_height
+from lollypop.utils import get_font_height, get_youtube_dl
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -45,22 +45,25 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         self._widget_class = AlbumSimpleWidget
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
+        self.__populate_wanted = True
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
-                path = GLib.get_user_data_dir() +\
-                    "/lollypop/python/bin/youtube-dl"
+                (youtube_dl, env) = get_youtube_dl()
                 if not Gio.NetworkMonitor.get_default(
                         ).get_network_available():
                     self._empty_message = _("Network not available")
-                    self._box.hide()
-                elif not GLib.file_test(path, GLib.FileTest.EXISTS):
+                    self.show_placeholder(True)
+                    self.__populate_wanted = False
+                elif youtube_dl is None:
                     self._empty_message = _("Missing youtube-dl command")
-                    self._box.hide()
+                    self.show_placeholder(True)
+                    self.__populate_wanted = False
                 elif not get_network_available("SPOTIFY") or\
                         not get_network_available("YOUTUBE"):
                     self._empty_message = _("You need to enable Spotify ") + \
                                           _("and YouTube in network settings")
-                    self._box.hide()
+                    self.show_placeholder(True)
+                    self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])
         return [
                 (App().scanner, "album-updated", "_on_album_updated")
@@ -83,7 +86,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             return [Album(album_id, self._genre_ids, self._artist_ids)
                     for album_id in album_ids]
 
-        App().task_helper.run(load, callback=(on_load,))
+        if self.__populate_wanted:
+            App().task_helper.run(load, callback=(on_load,))
 
     def insert_album(self, album, position):
         """
