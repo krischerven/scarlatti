@@ -132,15 +132,19 @@ class SearchBannerWidget(BannerWidget):
         """
             Create a new playlist based on search
         """
+        current_search = self.__entry.get_text()
+        if not current_search:
+            return
         tracks = []
         for child in self.__view.children:
             tracks += child.album.tracks
         if tracks:
-            playlist_id = App().playlists.get_id(self.__current_search)
+            playlist_id = App().playlists.get_id(current_search)
             if playlist_id is None:
-                playlist_id = App().playlists.add(self.__current_search)
+                playlist_id = App().playlists.add(current_search)
             App().playlists.add_tracks(playlist_id, tracks)
-            App().window.container.show_view(Type.PLAYLISTS, [playlist_id])
+            GLib.idle_add(App().window.container.show_view,
+                          [Type.PLAYLISTS], playlist_id)
 
     def __on_map(self, widget):
         """
