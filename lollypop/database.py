@@ -216,7 +216,10 @@ class Database:
         album_storage_type = App().albums.get_storage_type(album_id)
         # If not same storage type, say True!
         # Don't want to mix StorageType.COLLECTION with some web tracks
-        if not album_storage_type & storage_type or track is None:
+        if track is None:
+            return True
+        elif album_storage_type & StorageType.COLLECTION and\
+                album_storage_type != storage_type:
             return True
         else:
             track_id = App().tracks.get_id_by(sql_escape(track.lower()),

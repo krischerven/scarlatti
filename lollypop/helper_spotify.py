@@ -426,7 +426,8 @@ class SpotifyHelper(GObject.Object):
             exists_in_db = App().db.exists_in_db(
                                              item["album"]["name"],
                                              artists,
-                                             item["name"])
+                                             item["name"],
+                                             storage_type)
             if exists_in_db:
                 Logger.debug("SpotifyHelper: track exists in DB: %s - %s",
                              item["name"], artists)
