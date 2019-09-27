@@ -215,7 +215,9 @@ class WebSettingsWidget(Gtk.Bin):
             if fm is not None and login and password:
                 from lollypop.helper_passwords import PasswordsHelper
                 helper = PasswordsHelper()
-                helper.store(name,
+                helper.clear(name,
+                             helper.store,
+                             name,
                              login,
                              password,
                              self.__on_password_store,
