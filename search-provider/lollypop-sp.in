@@ -38,6 +38,23 @@ from lollypop.database_tracks import TracksDatabase
 from lollypop.define import ArtSize, StorageType
 
 
+class TaskHelper:
+    def add_header(self, name, value):
+        pass
+
+    def run(self, command, *args, **kwargs):
+        pass
+
+    def load_uri_content(self, uri, cancellable, callback, *args):
+        pass
+
+    def load_uri_content_sync(self, uri, cancellable=None):
+        pass
+
+    def send_message(self, message, cancellable, callback, *args):
+        pass
+
+
 class Server:
     def __init__(self, con, path):
         method_outargs = {}
@@ -141,6 +158,7 @@ class SearchLollypopService(Server, Gio.Application):
         self.cursors = {}
         self.fixed_775600 = True
         self.lastfm = None
+        self.task_helper = TaskHelper()
         self.settings = Settings.new()
         self.db = Database()
         self.albums = AlbumsDatabase()
@@ -191,6 +209,8 @@ class SearchLollypopService(Server, Gio.Application):
                         track.album, ArtSize.BIG, ArtSize.BIG)
                 if surface is not None:
                     del surface
+                if gicon is None:
+                    gicon=""
                 d = { 'id': GLib.Variant('s', search_id),
                       'description': GLib.Variant('s', GLib.markup_escape_text(description)),
                       'name': GLib.Variant('s', GLib.markup_escape_text(name)),
