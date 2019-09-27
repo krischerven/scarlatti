@@ -32,9 +32,10 @@ class WebSettingsWidget(Gtk.Bin):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SettingsWeb.ui")
 
+        network_access = App().settings.get_value("network-access")
         acl = App().settings.get_value("network-access-acl").get_int32()
         if App().lastfm is not None:
-            if not acl & NetworkAccessACL["LASTFM"]:
+            if not acl & NetworkAccessACL["LASTFM"] or not network_access:
                 builder.get_object("lastfm_error_label").set_text(
                     _('Disabled in network settings'))
                 builder.get_object("librefm_error_label").set_text(
@@ -71,7 +72,9 @@ class WebSettingsWidget(Gtk.Bin):
         #
         # Last.fm tab
         #
-        if App().lastfm is not None and acl & NetworkAccessACL["LASTFM"]:
+        if App().lastfm is not None and\
+                network_access and\
+                acl & NetworkAccessACL["LASTFM"]:
             self.__lastfm_test_image = builder.get_object("lastfm_test_image")
             self.__lastfm_login = builder.get_object("lastfm_login")
             self.__lastfm_password = builder.get_object("lastfm_password")
@@ -83,7 +86,9 @@ class WebSettingsWidget(Gtk.Bin):
         #
         # Libre.fm tab
         #
-        if App().lastfm is not None and acl & NetworkAccessACL["LASTFM"]:
+        if App().lastfm is not None and\
+                network_access and\
+                acl & NetworkAccessACL["LASTFM"]:
             self.__librefm_test_image = builder.get_object(
                 "librefm_test_image")
             self.__librefm_login = builder.get_object("librefm_login")
