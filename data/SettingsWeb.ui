@@ -8,12 +8,11 @@
     <property name="tab_pos">bottom</property>
     <property name="scrollable">True</property>
     <child>
-      <object class="GtkGrid" id="lastfm_grid">
+      <object class="GtkGrid" id="lastfm_view">
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="halign">center</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
         <property name="row_spacing">20</property>
@@ -99,7 +98,12 @@
           <object class="GtkLabel" id="lastfm_error_label">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">You need to install pylast and gi secret</property>
+            <property name="opacity">0</property>
+            <property name="margin_bottom">50</property>
+            <property name="label" translatable="yes">Disabled in network settings</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -123,12 +127,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkGrid" id="librefm_grid">
+      <object class="GtkGrid" id="librefm_view">
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="halign">center</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
         <property name="row_spacing">20</property>
@@ -214,7 +217,12 @@
           <object class="GtkLabel" id="librefm_error_label">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">You need to install pylast and gi secret</property>
+            <property name="opacity">0</property>
+            <property name="margin_bottom">50</property>
+            <property name="label" translatable="yes">Disabled in network settings</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -242,11 +250,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkGrid">
+      <object class="GtkGrid" id="listenbrainz_view">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">center</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="margin_left">5</property>
         <property name="margin_right">5</property>
         <property name="margin_top">10</property>
@@ -254,7 +262,7 @@
         <property name="row_spacing">10</property>
         <property name="column_spacing">10</property>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="listenbrainz_label">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="halign">start</property>
@@ -266,7 +274,7 @@
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
+            <property name="top_attach">1</property>
             <property name="width">2</property>
           </packing>
         </child>
@@ -281,7 +289,7 @@
           </object>
           <packing>
             <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
+            <property name="top_attach">2</property>
           </packing>
         </child>
         <child>
@@ -292,7 +300,24 @@
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
+            <property name="top_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="listenbrainz_error_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="opacity">0</property>
+            <property name="margin_bottom">50</property>
+            <property name="label" translatable="yes">Disabled in network settings</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+            <property name="width">2</property>
           </packing>
         </child>
       </object>
@@ -312,11 +337,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkGrid">
+      <object class="GtkGrid" id="google_view">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">center</property>
-        <property name="valign">center</property>
+        <property name="valign">start</property>
         <property name="margin_left">5</property>
         <property name="margin_right">5</property>
         <property name="margin_top">10</property>
@@ -394,7 +419,7 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
+            <property name="top_attach">1</property>
           </packing>
         </child>
         <child>
@@ -437,7 +462,7 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
+            <property name="top_attach">2</property>
           </packing>
         </child>
         <child>
@@ -476,7 +501,22 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="google_error_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="opacity">0</property>
+            <property name="label" translatable="yes">Disabled in network settings</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
       </object>
