@@ -69,7 +69,7 @@ class RadioMenu(Gtk.Grid):
         if view_type & ViewType.ADAPTIVE:
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x, y: self.emit("hidden", True))
+            button.connect("clicked", lambda x: self.emit("hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
