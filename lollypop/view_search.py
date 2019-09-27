@@ -131,7 +131,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))
-            GLib.idle_add(self.__banner.spinner.stop)
+            self.__banner.spinner.stop()
 
     def set_search(self, search):
         """
@@ -142,12 +142,13 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         search = search.replace("%s://" % parsed.scheme, "")
         if parsed.scheme == "local":
             self.__banner.entry.set_text(search)
-            GLib.idle_add(self.__search_type_action.change_state,
-                          GLib.Variant("s", "local"))
+            self.__search_type_action.emit("change-state",
+                                           GLib.Variant("s", "local"))
         elif parsed.scheme == "web":
             self.__banner.entry.set_text(search)
-            GLib.idle_add(self.__search_type_action.change_state,
-                          GLib.Variant("s", "web"))
+            self.__search_type_action.emit("change-state",
+                                           GLib.Variant("s", "web"))
+        self.__current_search = search.strip()
         self.__banner.entry.grab_focus()
 
     def grab_focus(self):
