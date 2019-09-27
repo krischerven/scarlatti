@@ -88,6 +88,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.add_widget(self.__view, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
+        self.__search_type_action.change_state(GLib.Variant("s", "local"))
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
@@ -141,11 +142,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         search = search.replace("%s://" % parsed.scheme, "")
         if parsed.scheme == "local":
             self.__banner.entry.set_text(search)
-            GLib.idle_add(self.__search_type_action.set_state,
+            GLib.idle_add(self.__search_type_action.change_state,
                           GLib.Variant("s", "local"))
         elif parsed.scheme == "web":
             self.__banner.entry.set_text(search)
-            GLib.idle_add(self.__search_type_action.set_state,
+            GLib.idle_add(self.__search_type_action.change_state,
                           GLib.Variant("s", "web"))
         self.__banner.entry.grab_focus()
 
@@ -188,7 +189,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__bottom_buttons.hide()
         else:
             self.__bottom_buttons.show()
-        self.__search_type_action.change_state(GLib.Variant("s", "local"))
 
     def _on_map(self, widget):
         """
