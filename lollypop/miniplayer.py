@@ -43,7 +43,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.get_style_context().add_class("black")
         self.__box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
         self.__box.show()
-        self.__box.get_style_context().add_class("big-padding")
+        self.__box.get_style_context().add_class("padding")
         self.__revealer = Gtk.Revealer.new()
         self.__revealer.show()
         revealer_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN_SMALL)
