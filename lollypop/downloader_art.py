@@ -428,7 +428,7 @@ class ArtDownloader(Downloader):
             @tread safe
         """
         if not get_network_available("LASTFM"):
-            return None
+            return []
         if App().lastfm is not None:
             try:
                 last_album = App().lastfm.get_album(artist, album)
