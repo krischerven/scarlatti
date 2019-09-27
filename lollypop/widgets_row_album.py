@@ -123,7 +123,7 @@ class AlbumRow(Gtk.ListBoxRow):
             self.__action_button = Gtk.Button.new_from_icon_name(
                     "media-playback-start-symbolic",
                     Gtk.IconSize.MENU)
-            self.__action_button.set_tooltip_text(_("Go to artist view"))
+            self.__action_button.set_tooltip_text(self.__album.name)
         else:
             self.__action_button = Gtk.Button.new_from_icon_name(
                 "view-more-symbolic",
