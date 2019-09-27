@@ -35,8 +35,6 @@ class SpotifyHelper(GObject.Object):
     __gsignals__ = {
         "new-album": (GObject.SignalFlags.RUN_FIRST, None,
                       (GObject.TYPE_PYOBJECT,)),
-        "new-chart-album": (GObject.SignalFlags.RUN_FIRST, None,
-                            (GObject.TYPE_PYOBJECT, str)),
         "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
