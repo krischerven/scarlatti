@@ -86,7 +86,8 @@ class ListsContainer:
             """
                 Hide right list on left list hidden
             """
-            self._hide_right_list()
+            if not App().window.is_adaptive:
+                self._hide_right_list()
 
         if self.__right_list is None:
             eventbox = Gtk.EventBox.new()
