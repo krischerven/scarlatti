@@ -268,7 +268,7 @@ class AlbumsDatabase:
             v = result.fetchone()
             if v is not None:
                 return v[0]
-            return 0
+            return StorageType.NONE
 
     def get_for_storage_type(self, storage_type, limit):
         """
@@ -500,7 +500,7 @@ class AlbumsDatabase:
             v = result.fetchone()
             if v is not None:
                 return v[0]
-            return None
+            return ""
 
     def get_artists(self, album_id):
         """

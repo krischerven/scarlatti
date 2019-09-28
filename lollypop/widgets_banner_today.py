@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Pango
 from pickle import load, dump
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, MARGIN, ViewType
+from lollypop.define import App, ArtSize, MARGIN, ViewType, StorageType
 from lollypop.define import ArtBehaviour, LOLLYPOP_DATA_PATH
 from lollypop.widgets_banner import BannerWidget
 from lollypop.widgets_cover import CoverWidget
@@ -40,6 +40,8 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         try:
             (date, album_id) = load(
                 open(LOLLYPOP_DATA_PATH + "/today.bin", "rb"))
+            if App().albums.get_storage_type(album_id) == StorageType.NONE:
+                date = None
         except Exception as e:
             Logger.warning("TodayBannerWidget::__get_today_album(): %s", e)
         try:
