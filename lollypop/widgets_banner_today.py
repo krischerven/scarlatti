@@ -41,7 +41,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             (date, album_id) = load(
                 open(LOLLYPOP_DATA_PATH + "/today.bin", "rb"))
             if App().albums.get_storage_type(album_id) == StorageType.NONE:
-                date = None
+                date = 0
         except Exception as e:
             Logger.warning("TodayBannerWidget::__get_today_album(): %s", e)
         try:
