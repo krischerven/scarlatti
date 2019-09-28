@@ -17,6 +17,17 @@ from lollypop.selectionlist import SelectionList
 from lollypop.define import App, Type, SelectionListMask
 from lollypop.shown import ShownLists
 from lollypop.helper_gestures import GesturesHelper
+from lollypop.view import View
+
+
+class NoneView(View):
+    """
+        A view that do nothing
+    """
+
+    @property
+    def args(self):
+        return None
 
 
 class ListsContainer:
@@ -212,7 +223,11 @@ class ListsContainer:
             self.left_list.hide()
             self.left_list.clear()
 
-        if selected_id == Type.PLAYLISTS:
+        if selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST] and not\
+                App().window.is_adaptive:
+            view = NoneView()
+            view.show()
+        elif selected_id == Type.PLAYLISTS:
             view = self._get_view_playlists()
         elif selected_id == Type.LYRICS:
             view = self._get_view_lyrics()
