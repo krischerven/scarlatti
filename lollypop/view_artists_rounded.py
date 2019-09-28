@@ -210,6 +210,14 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
         self.__banner.connect("scroll", self._on_banner_scroll)
         self.add_widget(self._box, self.__banner)
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__
+            @return {}
+        """
+        return {}
+
 #######################
 # PRIVATE             #
 #######################
