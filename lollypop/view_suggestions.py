@@ -42,7 +42,7 @@ class SuggestionsView(FilteringHelper, View):
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
         album = TodayBannerWidget.get_today_album()
-        if album.id is not None:
+        if album is not None:
             self.__banner = TodayBannerWidget(album, self._view_type)
             self.__banner.show()
             self.__banner.connect("scroll", self._on_banner_scroll)

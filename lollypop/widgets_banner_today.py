@@ -33,7 +33,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
     def get_today_album():
         """
             Get today album
-            @return Album
+            @return Album/None
         """
         current_date = GLib.DateTime.new_now_local().get_day_of_year()
         (date, album_id) = (0, None)
@@ -52,7 +52,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             return Album(album_id)
         except Exception as e:
             Logger.error("TodayBannerWidget::__get_today_album(): %s", e)
-        return Album()
+        return None
 
     @signals_map
     def __init__(self, album, view_type=ViewType.DEFAULT):
