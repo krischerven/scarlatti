@@ -434,7 +434,7 @@ class AlbumsArtistBoxView(AlbumsLineView):
         if self.__artist_id == Type.COMPILATIONS:
             self._label.set_text(_("Others compilations"))
         else:
-            self._label.set_text(_("Others albums"))
+            self._label.set_text(App().artists.get_name(self.__artist_id))
         App().task_helper.run(load, callback=(on_load,))
 
 
