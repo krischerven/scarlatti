@@ -99,6 +99,8 @@ class AdaptiveHistory:
             Add view to history
             @param view as View
         """
+        if view.args is None:
+            return
         view_class = view.__class__
         self.__items.append((view, view_class, view.args, view.sidebar_id,
                              view.selection_ids, view.position))
