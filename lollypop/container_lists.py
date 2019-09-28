@@ -171,6 +171,8 @@ class ListsContainer:
         # Check we have a valid id and a valid view
         if selected_id is None:
             return False
+        elif App().window.is_adaptive:
+            return True
         elif self.view is not None:
             previous_sidebar_id = self.view.sidebar_id
         else:
