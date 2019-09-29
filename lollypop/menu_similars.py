@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
 from lollypop.logger import Logger
-from lollypop.utils import get_network_available, sql_escape
+from lollypop.utils import get_network_available, sql_escape, get_youtube_dl
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -141,12 +141,8 @@ class SimilarsMenu(Gtk.Bin):
             Init popover
         """
         Gtk.Bin.__init__(self)
-        if App().settings.get_value("recent-youtube-dl"):
-            path = GLib.get_user_data_dir() + "/lollypop/python/bin/youtube-dl"
-            self.__show_all = GLib.file_test(path, GLib.FileTest.EXISTS)
-        else:
-            self.__show_all = GLib.find_program_in_path(
-                "youtube-dl") is not None
+        (path, env) = get_youtube_dl()
+        self.__show_all = path is not None
         self.__added = []
         self.__artist = ""
         self.__cancellable = Gio.Cancellable()
