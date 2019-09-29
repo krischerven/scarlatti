@@ -99,8 +99,7 @@ class Container(Gtk.Overlay, NotificationContainer,
             new_view.populate()
             new_view.show()
             self._stack.add(new_view)
-            Gtk.Stack.set_visible_child(self._stack, new_view)
-            view.destroy_later()
+            self._stack.set_visible_child(new_view)
 
     def set_focused_view(self, view):
         """
