@@ -31,10 +31,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type):
+    def __init__(self, view_type, initial_search=""):
         """
             Init Popover
             @param view_type as ViewType
+            @param initial_search as str
         """
         View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         Gtk.Bin.__init__(self)
@@ -44,38 +45,29 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
         self.__cancellable = Gio.Cancellable()
-        self.__search_type_action = Gio.SimpleAction.new_stateful(
-                                               "search_type",
-                                               GLib.VariantType.new("s"),
-                                               GLib.Variant("s", ""))
-        self.__search_type_action.connect("change-state",
-                                          self.__on_search_action_change_state)
-        App().add_action(self.__search_type_action)
         self.__bottom_buttons = Gtk.Grid()
         self.__bottom_buttons.show()
         self.__bottom_buttons.get_style_context().add_class("linked")
         self.__bottom_buttons.set_property("halign", Gtk.Align.CENTER)
-        local_button = Gtk.RadioButton.new()
-        local_button.show()
-        local_button.set_property("draw-indicator", False)
+        self.__local_button = Gtk.RadioButton.new()
+        self.__local_button.show()
+        self.__local_button.set_property("draw-indicator", False)
+        self.__local_button.set_name("local")
         image = Gtk.Image.new_from_icon_name("computer-symbolic",
                                              Gtk.IconSize.BUTTON)
         image.show()
-        local_button.set_image(image)
-        local_button.set_action_name("app.search_type")
-        local_button.set_action_target_value(GLib.Variant("s", "local"))
-        local_button.set_size_request(125, -1)
-        web_button = Gtk.RadioButton.new_from_widget(local_button)
+        self.__local_button.set_image(image)
+        self.__local_button.set_size_request(125, -1)
+        web_button = Gtk.RadioButton.new_from_widget(self.__local_button)
         web_button.show()
         web_button.set_property("draw-indicator", False)
+        web_button.set_name("web")
         image = Gtk.Image.new_from_icon_name("goa-panel-symbolic",
                                              Gtk.IconSize.BUTTON)
         image.show()
         web_button.set_image(image)
-        web_button.set_action_name("app.search_type")
-        web_button.set_action_target_value(GLib.Variant("s", "web"))
         web_button.set_size_request(125, -1)
-        self.__bottom_buttons.add(local_button)
+        self.__bottom_buttons.add(self.__local_button)
         self.__bottom_buttons.add(web_button)
         self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
         self.__view.show()
@@ -88,7 +80,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.add_widget(self.__view, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
-        self.__search_type_action.change_state(GLib.Variant("s", "local"))
+        self.set_search(initial_search)
+        self.__local_button.connect("clicked", self.__on_button_clicked)
+        web_button.connect("clicked", self.__on_button_clicked)
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
@@ -108,7 +102,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.cancel()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
-            state = self.__search_type_action.get_state().get_string()
+            state = self.__get_current_search_state()
             current_search = self.__current_search.lower()
             search = Search()
             if state == "local":
@@ -140,15 +134,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         parsed = urlparse(search)
         search = search.replace("%s://" % parsed.scheme, "")
-        if parsed.scheme == "local":
-            self.__banner.entry.set_text(search)
-            self.__search_type_action.emit("change-state",
-                                           GLib.Variant("s", "local"))
-        elif parsed.scheme == "web":
-            self.__banner.entry.set_text(search)
-            self.__search_type_action.emit("change-state",
-                                           GLib.Variant("s", "web"))
         self.__current_search = search.strip()
+        self.__set_current_search_state(parsed.scheme)
+        self.__banner.entry.set_text(search)
         self.__banner.entry.grab_focus()
 
     def grab_focus(self):
@@ -170,11 +158,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Get default args for __class__
             @return {}
         """
-        if self.__search_type_action.get_state().get_string() == "local":
+        if self.__get_current_search_state() == "local":
             search = "local://%s" % self.__banner.entry.get_text()
         else:
             search = "web://%s" % self.__banner.entry.get_text()
-        return {"view_type": self.view_type, "search": search}
+        return {"view_type": self.view_type, "initial_search": search}
 
 #######################
 # PROTECTED           #
@@ -231,6 +219,26 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __set_current_search_state(self, state):
+        """
+            Set current search state
+            @param state as str
+        """
+        for button in self.__local_button.get_group():
+            if button.get_name() == state:
+                button.set_active(True)
+                break
+
+    def __get_current_search_state(self):
+        """
+            Get current search state in buttons group
+            @return str
+        """
+        for button in self.__local_button.get_group():
+            if button.get_active():
+                return button.get_name()
+        return "local"
+
     def __set_no_result_placeholder(self):
         """
             Set placeholder for no result
@@ -269,7 +277,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__banner.play_button.set_sensitive(False)
         self.__banner.new_button.set_sensitive(False)
-        state = self.__search_type_action.get_state().get_string()
+        state = self.__get_current_search_state()
         if state == "local":
             timeout = 500
         else:
@@ -290,13 +298,12 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__current_search = new_search
             self.populate()
 
-    def __on_search_action_change_state(self, action, value):
+    def __on_button_clicked(self, button):
         """
-            Update action value
-            @param action as Gio.SimpleAction
-            @param value as GLib.Variant
+            Reload search for current button
+            @param button as Gtk.RadioButton
         """
-        if value != action.get_state():
-            action.set_state(value)
+        if button.get_active():
             self.__current_search = self.__banner.entry.get_text().strip()
-            self.populate()
+            if self.__current_search:
+                self.populate()
