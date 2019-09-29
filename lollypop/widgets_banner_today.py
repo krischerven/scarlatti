@@ -46,7 +46,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             Logger.warning("TodayBannerWidget::__get_today_album(): %s", e)
         try:
             if date != current_date:
-                album_id = App().albums.get_randoms(1)[0]
+                album_id = App().albums.get_randoms(None, 1)[0]
                 dump((current_date, album_id),
                      open(LOLLYPOP_DATA_PATH + "/today.bin", "wb"))
             return Album(album_id)
