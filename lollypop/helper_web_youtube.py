@@ -26,11 +26,13 @@ class YouTubeHelper:
         YoutTube helper
     """
 
+    __BAD_SCORE = 1000000
+
     def __init__(self):
         """
             Init heApper
         """
-        self.__fallback = False
+        self.__fallback = True
 
     def get_uri(self, track, cancellable):
         """
@@ -112,7 +114,7 @@ class YouTubeHelper:
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 dic = {}
-                best = 10000000
+                best = self.__BAD_SCORE
                 for i in decode["items"]:
                     score = get_page_score(i["snippet"]["title"],
                                            track.name,
@@ -173,10 +175,8 @@ class YouTubeHelper:
             dic = {}
             best = self.__BAD_SCORE
             for (yid, title) in ytems:
-                score = self.__get_youtube_score(title,
-                                                 track.name,
-                                                 track.artists[0],
-                                                 track.album.name)
+                score = get_page_score(title, track.name,
+                                       track.artists[0], track.album.name)
                 if score < best:
                     best = score
                 elif score == best:
@@ -230,10 +230,8 @@ class YouTubeHelper:
             dic = {}
             best = self.__BAD_SCORE
             for (yid, title) in ytems:
-                score = self.__get_youtube_score(title,
-                                                 track.name,
-                                                 track.artists[0],
-                                                 track.album.name)
+                score = get_page_score(title, track.name,
+                                       track.artists[0], track.album.name)
                 if score < best:
                     best = score
                 elif score == best:
