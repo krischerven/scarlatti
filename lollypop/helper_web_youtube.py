@@ -32,7 +32,7 @@ class YouTubeHelper:
         """
             Init heApper
         """
-        self.__fallback = True
+        self.__fallback = False
 
     def get_uri(self, track, cancellable):
         """
