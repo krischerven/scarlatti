@@ -277,14 +277,20 @@ class AdaptiveStack(Gtk.Stack):
             @param view as View
         """
         visible_child = self.get_visible_child()
-        if visible_child != view:
-            if visible_child is not None:
-                visible_child.pause()
+        if visible_child == view:
+            return
+        elif visible_child is not None:
+            visible_child.pause()
+            # Do not add visible child if same than view or similar
+            if visible_child.__class__ != view.__class__ and\
+                    visible_child.args != view.args:
                 self.__history.add_view(visible_child)
-                Gtk.Stack.set_visible_child(self, view)
-                self.emit("history-changed")
             else:
-                Gtk.Stack.set_visible_child(self, view)
+                visible_child.destroy_later()
+            Gtk.Stack.set_visible_child(self, view)
+            self.emit("history-changed")
+        else:
+            Gtk.Stack.set_visible_child(self, view)
 
     def go_back(self):
         """
