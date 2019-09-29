@@ -170,20 +170,17 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(self.__artist_ids[0], ViewType.BANNER,
                           App().window.is_adaptive)
-        similars_available = SimilarsMenu.available()
-        if similars_available:
-            section = Gio.Menu()
-            menu.append_section(_("Similar artists"), section)
-        menu_widget = MenuBuilder(menu, similars_available)
-        if similars_available:
-            scrolled = menu_widget.get_child_by_name("main")
-            menu_widget.show()
-            menu_ext = SimilarsMenu()
-            menu_ext.show()
-            menu_ext.populate(self.__artist_ids[0])
-            # scrolled -> viewport -> box
-            scrolled.get_child().get_child().add(menu_ext)
-            scrolled.set_size_request(300, 400)
+        section = Gio.Menu()
+        menu.append_section(_("Similar artists"), section)
+        menu_widget = MenuBuilder(menu, True)
+        scrolled = menu_widget.get_child_by_name("main")
+        menu_widget.show()
+        menu_ext = SimilarsMenu()
+        menu_ext.show()
+        menu_ext.populate(self.__artist_ids[0])
+        # scrolled -> viewport -> box
+        scrolled.get_child().get_child().add(menu_ext)
+        scrolled.set_size_request(300, 400)
         popup_widget(menu_widget, button)
 
     def _on_badge_button_release(self, eventbox, event):

@@ -36,8 +36,9 @@ class ArtistMenu(Gio.Menu):
         if not view_type & ViewType.BANNER:
             from lollypop.menu_playback import ArtistPlaybackMenu
             self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
-        self.append_section(_("Albums"),
-                            ArtistAlbumsMenu(artist_id, ViewType.BANNER))
+        menu = ArtistAlbumsMenu(artist_id, view_type)
+        if menu.get_n_items() != 0:
+            self.append_section(_("Albums"), menu)
 
 
 class ArtistAlbumsMenu(Gio.Menu):

@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available, sql_escape, get_youtube_dl
+from lollypop.utils_artist import ArtistProvider
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -128,14 +129,6 @@ class SimilarsMenu(Gtk.Bin):
         A popover with similar artists
     """
 
-    def available():
-        """
-            True if menu is available
-            @return bool
-        """
-        return get_network_available("SPOTIFY") or (
-            App().lastfm is not None and get_network_available("LASTFM"))
-
     def __init__(self):
         """
             Init popover
@@ -183,6 +176,8 @@ class SimilarsMenu(Gtk.Bin):
             providers.append(App().spotify)
         if App().lastfm is not None and get_network_available("LASTFM"):
             providers.append(App().lastfm)
+        if not providers:
+            providers = [ArtistProvider()]
         self.__populate(providers)
 
 #######################
