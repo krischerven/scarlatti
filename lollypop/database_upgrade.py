@@ -149,7 +149,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             33: "ALTER TABLE artists ADD mb_artist_id TEXT",
             34: self.__upgrade_31,
             35: "UPDATE albums SET synced=2 WHERE synced=1",
-            36: self.__upgrade_36
+            36: self.__upgrade_36,
+            37: self.__upgrade_37
         }
 
 #######################
@@ -656,3 +657,16 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                          WHERE mtime = -1", (StorageType.SAVED,))
             sql.execute("UPDATE albums SET storage_type=?\
                          WHERE mtime = -1", (StorageType.SAVED,))
+
+    def __upgrade_37(self, db):
+        """
+            Update Type.WEB and Type.COMPILATIONS
+        """
+        App().settings.reset("shown-album-lists")
+        with SqlCursor(db, True) as sql:
+            sql.execute("UPDATE track_genres SET genre_id=-9\
+                         WHERE genre_id=-22")
+            sql.execute("UPDATE album_genres SET genre_id=-9\
+                         WHERE genre_id=-22")
+            sql.execute("UPDATE album_artists SET artist_id=-10\
+                         WHERE artist_id=-2001")
