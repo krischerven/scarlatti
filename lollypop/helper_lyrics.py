@@ -176,7 +176,7 @@ class LyricsHelper:
             if len(split) > 1:
                 title = split[1]
         else:
-            title = track.name,
+            title = track.name
         if escape:
             return GLib.uri_escape_string(title, None, False)
         else:
