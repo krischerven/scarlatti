@@ -10,18 +10,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gio, Pango
+from gi.repository import Gtk, GLib, Pango
 
 from gettext import gettext as _
 
 from lollypop.view import View
-from lollypop.objects_radio import Radio
 from lollypop.define import App, ViewType, AdaptiveSize
 from lollypop.define import StorageType
-from lollypop.utils import escape, get_network_available
 from lollypop.logger import Logger
-from lollypop.helper_task import TaskHelper
-from lollypop.helper_lyrics import SyncLyricsHelper
+from lollypop.helper_lyrics import LyricsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_lyrics import LyricsBannerWidget
 
@@ -82,6 +79,7 @@ class LyricsView(View, SignalsHelper):
         Show lyrics for track
     """
 
+    # TODO add https://www.musixmatch.com support
     @signals_map
     def __init__(self):
         """
@@ -93,7 +91,6 @@ class LyricsView(View, SignalsHelper):
         self.__lyrics_text = ""
         self._empty_message = _("No track playing")
         self._empty_icon_name = "view-dual-symbolic"
-        self.__cancellable = Gio.Cancellable()
         self.__lyrics_label = LyricsLabel()
         self.__lyrics_label.show()
         self.__lyrics_label.set_property("halign", Gtk.Align.CENTER)
@@ -101,7 +98,7 @@ class LyricsView(View, SignalsHelper):
         self.__banner.show()
         self.__banner.connect("translate", self.__on_translate)
         self.add_widget(self.__lyrics_label, self.__banner)
-        self.__sync_lyrics_helper = SyncLyricsHelper()
+        self.__lyrics_helper = LyricsHelper()
         self.__update_lyrics_style()
         return [
                 (App().window, "adaptive-size-changed",
@@ -114,46 +111,38 @@ class LyricsView(View, SignalsHelper):
             Set lyrics
             @param track as Track
         """
+        self.__lyrics_label.set_text("")
         if track.id is None:
-            self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
             return
-        self.__current_track = track
         self.__lyrics_label.set_text(_("Loading…"))
-        self.__cancellable.cancel()
-        self.__cancellable = Gio.Cancellable()
-        self.__sync_lyrics_helper.load(track)
-        if self.__sync_lyrics_helper.available:
+        self.__lyrics_helper.load(track)
+        # First check synced lyrics
+        if self.__lyrics_helper.available:
             if self.__lyrics_timeout_id is None:
                 self.__lyrics_timeout_id = GLib.timeout_add(
                     500, self.__show_sync_lyrics)
             return
         else:
+            lyrics = ""
             if self.__lyrics_timeout_id is not None:
                 GLib.source_remove(self.__lyrics_timeout_id)
                 self.__lyrics_timeout_id = None
-        # First try to get lyrics from tags
-        self.__lyrics_text = ""
-        if self.__current_track.storage_type & StorageType.COLLECTION:
-            from lollypop.tagreader import TagReader, Discoverer
-            tagreader = TagReader()
-            discoverer = Discoverer()
-            try:
-                info = discoverer.get_info(self.__current_track.uri)
-            except:
-                info = None
-            if info is not None:
-                tags = info.get_tags()
-                self.__lyrics_text = tagreader.get_lyrics(tags)
-        if self.__lyrics_text:
-            self.__lyrics_label.set_text(self.__lyrics_text)
-        else:
-            if get_network_available("WIKIA"):
-                self.__download_wikia_lyrics()
-            if get_network_available("GENIUS"):
-                self.__download_genius_lyrics()
-            if self.__downloads_running == 0:
-                self.__lyrics_label.set_text(
-                    _("You have disabled lyrics search in network settings !"))
+            if track.storage_type & StorageType.COLLECTION:
+                from lollypop.tagreader import TagReader, Discoverer
+                tagreader = TagReader()
+                discoverer = Discoverer()
+                try:
+                    info = discoverer.get_info(track.uri)
+                except:
+                    info = None
+                if info is not None:
+                    tags = info.get_tags()
+                    lyrics = tagreader.get_lyrics(tags)
+            if lyrics:
+                self.__lyrics_label.set_text(lyrics)
+            else:
+                self.__lyrics_helper.get_lyrics_from_web(track,
+                                                         self.__on_lyrics)
 
     @property
     def args(self):
@@ -179,6 +168,7 @@ class LyricsView(View, SignalsHelper):
             Connect player signal
             @param widget as Gtk.Widget
         """
+        self.__lyrics_helper.cancel()
         View._on_unmap(self, widget)
         if self.__lyrics_timeout_id is not None:
             GLib.source_remove(self.__lyrics_timeout_id)
@@ -209,7 +199,7 @@ class LyricsView(View, SignalsHelper):
         """
         timestamp = App().player.position / 1000000
         (previous, current, next) =\
-            self.__sync_lyrics_helper.get_lyrics_for_timestamp(timestamp)
+            self.__lyrics_helper.get_lyrics_for_timestamp(timestamp)
         lyrics = ""
         for line in previous:
             if line:
@@ -243,75 +233,6 @@ class LyricsView(View, SignalsHelper):
             Logger.error("LyricsView::__get_blob(): %s", e)
             return _("Can't translate this lyrics")
 
-    def __download_wikia_lyrics(self):
-        """
-            Downloas lyrics from wikia
-        """
-        self.__downloads_running += 1
-        # Update lyrics
-        if isinstance(self.__current_track, Radio):
-            split = " ".join(self.__current_track.artists).split(" - ")
-            if len(split) < 2:
-                return
-            artist = GLib.uri_escape_string(
-                split[0],
-                None,
-                False)
-            title = GLib.uri_escape_string(
-                split[1],
-                None,
-                False)
-        else:
-            if self.__current_track.artists:
-                artist = GLib.uri_escape_string(
-                    self.__current_track.artists[0],
-                    None,
-                    False)
-            elif self.__current_track.album_artists:
-                artist = self.__current_track.album_artists[0]
-            else:
-                artist = ""
-            title = GLib.uri_escape_string(
-                self.__current_track.name,
-                None,
-                False)
-        uri = "https://lyrics.wikia.com/wiki/%s:%s" % (artist, title)
-        helper = TaskHelper()
-        helper.load_uri_content(uri,
-                                self.__cancellable,
-                                self.__on_lyrics_downloaded,
-                                "lyricbox",
-                                "\n")
-
-    def __download_genius_lyrics(self):
-        """
-            Download lyrics from genius
-        """
-        self.__downloads_running += 1
-        # Update lyrics
-        if isinstance(self.__current_track, Radio):
-            split = App().player.current_track.name.split(" - ")
-            if len(split) < 2:
-                return
-            artist = split[0]
-            title = split[1]
-        else:
-            if self.__current_track.artists:
-                artist = self.__current_track.artists[0]
-            elif self.__current_track.album_artists:
-                artist = self.__current_track.album_artists[0]
-            else:
-                artist = ""
-            title = self.__current_track.name
-        string = escape("%s %s" % (artist, title))
-        uri = "https://genius.com/%s-lyrics" % string.replace(" ", "-")
-        helper = TaskHelper()
-        helper.load_uri_content(uri,
-                                self.__cancellable,
-                                self.__on_lyrics_downloaded,
-                                "song_body-lyrics",
-                                "")
-
     def __update_lyrics_style(self):
         """
             Update lyrics style based on current view width
@@ -322,44 +243,32 @@ class LyricsView(View, SignalsHelper):
         context.add_class("lyrics")
         adaptive_size = App().window.adaptive_size
         if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
-            if self.__sync_lyrics_helper.available:
+            if self.__lyrics_helper.available:
                 context.add_class("text-xx-large")
             else:
                 context.add_class("text-x-large")
         elif adaptive_size & AdaptiveSize.NORMAL:
-            if self.__sync_lyrics_helper.available:
+            if self.__lyrics_helper.available:
                 context.add_class("text-x-large")
             else:
                 context.add_class("text-large")
         elif adaptive_size & AdaptiveSize.MEDIUM:
-            if self.__sync_lyrics_helper.available:
+            if self.__lyrics_helper.available:
                 context.add_class("text-large")
             else:
                 context.add_class("text-medium")
-        elif self.__sync_lyrics_helper.available:
+        elif self.__lyrics_helper.available:
             context.add_class("text-medium")
 
-    def __on_lyrics_downloaded(self, uri, status, data, cls, separator):
+    def __on_lyrics(self, lyrics):
         """
-            Show lyrics
-            @param uri as str
-            @param status as bool
-            @param data as bytes
-            @param cls as str
-            @param separator as str
+            Set lyrics
+            @param lyrics as str/None
         """
-        self.__downloads_running -= 1
-        if self.__lyrics_text:
-            return
-        if status:
-            try:
-                from bs4 import BeautifulSoup
-                soup = BeautifulSoup(data, 'html.parser')
-                self.__lyrics_text = soup.find_all(
-                    "div", class_=cls)[0].get_text(separator=separator)
-                self.__lyrics_label.set_text(self.__lyrics_text)
-                self.__banner.translate_button.set_sensitive(True)
-            except Exception as e:
-                Logger.warning("LyricsView::__on_lyrics_downloaded(): %s", e)
-        if not self.__lyrics_text and self.__downloads_running == 0:
+        if lyrics is None:
+            self.__lyrics_label.set_text(
+                    _("You have disabled lyrics search in network settings !"))
+        elif lyrics == "":
             self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
+        else:
+            self.__lyrics_label.set_text(lyrics)
