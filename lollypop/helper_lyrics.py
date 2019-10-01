@@ -162,54 +162,47 @@ class LyricsHelper:
         else:
             callback("")
 
-    def __get_title(self, track):
+    def __get_title(self, track, escape=False):
         """
             Get track title for lyrics
             @param track as Track
+            @param escape as bool
             @return str
         """
         # Update lyrics
+        title = ""
         if isinstance(track, Radio):
             split = " ".join(track.artists).split(" - ")
-            if len(split) < 2:
-                return ""
-            title = GLib.uri_escape_string(
-                split[1],
-                None,
-                False)
+            if len(split) > 1:
+                title = split[1]
         else:
-            title = GLib.uri_escape_string(
-                track.name,
-                None,
-                False)
-        return title
+            title = track.name,
+        if escape:
+            return GLib.uri_escape_string(title, None, False)
+        else:
+            return title
 
-    def __get_artist(self, track):
+    def __get_artist(self, track, escape=False):
         """
             Get track artist for lyrics
             @param track as Track
+            @param escape as bool
             @return str
         """
         # Update lyrics
+        artist = ""
         if isinstance(track, Radio):
             split = " ".join(track.artists).split(" - ")
             if len(split) > 0:
-                artist = GLib.uri_escape_string(
-                    split[0],
-                    None,
-                    False)
-            else:
-                artist = ""
+                artist = split[0]
         else:
             if track.artists:
-                artist = GLib.uri_escape_string(
-                    track.artists[0],
-                    None,
-                    False)
+                artist = track.artists[0]
             elif track.album_artists:
                 artist = track.album_artists[0]
-            else:
-                artist = ""
+        if escape:
+            return GLib.uri_escape_string(artist, None, False)
+        else:
             return artist
 
     def __download_wikia_lyrics(self, track, methods, callback):
@@ -219,8 +212,8 @@ class LyricsHelper:
             @param methods as []
             @param callback as function
         """
-        title = self.__get_title(track)
-        artist = self.__get_artist(track)
+        title = self.__get_title(track, True)
+        artist = self.__get_artist(track, True)
         uri = "https://lyrics.wikia.com/wiki/%s:%s" % (artist, title)
         helper = TaskHelper()
         helper.load_uri_content(uri,
@@ -239,8 +232,8 @@ class LyricsHelper:
             @param methods as []
             @param callback as function
         """
-        title = self.__get_title(track)
-        artist = self.__get_artist(track)
+        title = self.__get_title(track, False)
+        artist = self.__get_artist(track, False)
         string = escape("%s %s" % (artist, title))
         uri = "https://genius.com/%s-lyrics" % string.replace(" ", "-")
         helper = TaskHelper()
