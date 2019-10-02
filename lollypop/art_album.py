@@ -16,7 +16,7 @@ from random import choice
 
 from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
-from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH
+from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import escape, is_readonly
@@ -82,7 +82,7 @@ class AlbumArt:
             filename = self.get_album_cache_name(album) + ".jpg"
             self.__update_album_uri(album)
             if album.storage_type & StorageType.EPHEMERAL:
-                store_path = WEB_PATH + "/" + filename
+                store_path = TMP_PATH + "/" + filename
             else:
                 store_path = STORE_PATH + "/" + filename
             uris = [
@@ -241,7 +241,7 @@ class AlbumArt:
         try:
             album = Album(album_id)
             filename = self.get_album_cache_name(album) + ".jpg"
-            web_path = WEB_PATH + "/" + filename
+            web_path = TMP_PATH + "/" + filename
             store_path = STORE_PATH + "/" + filename
             web_file = Gio.File.new_for_path(web_path)
             store_file = Gio.File.new_for_path(store_path)
@@ -378,7 +378,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = WEB_PATH + "/" + filename
+        store_path = TMP_PATH + "/" + filename
         self.save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
         GLib.idle_add(self.album_artwork_update, album.id)

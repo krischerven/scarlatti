@@ -18,7 +18,7 @@ from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
-from lollypop.define import CACHE_PATH, WEB_PATH, STORE_PATH, App
+from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH, App
 from lollypop.utils import create_dir, escape
 
 from shutil import rmtree
@@ -40,7 +40,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         ArtDownloader.__init__(self)
         create_dir(CACHE_PATH)
         create_dir(STORE_PATH)
-        create_dir(WEB_PATH)
+        create_dir(TMP_PATH)
 
     def add_artwork_to_cache(self, name, surface):
         """
@@ -114,7 +114,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             Remove all covers from cache
         """
         try:
-            rmtree(WEB_PATH)
+            rmtree(TMP_PATH)
         except Exception as e:
             Logger.error("Art::clean_web(): %s", e)
 
