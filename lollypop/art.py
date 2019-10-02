@@ -16,11 +16,13 @@ from lollypop.art_base import BaseArt
 from lollypop.art_album import AlbumArt
 from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
+from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
-from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH, App
+from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH, App, StorageType
 from lollypop.utils import create_dir, escape
 
+from time import sleep
 from shutil import rmtree
 
 
@@ -108,6 +110,44 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
                                                 width, height)
         f = Gio.File.new_for_path(cache_path_jpg)
         return f.query_exists()
+
+    def clean_old_artwork(self):
+        """
+            Slow silent cleaner: web albums are removed from SQL queries
+            so we may have unwanted artwork on disk
+        """
+        def cleaner():
+            sleep(10)
+            f = Gio.File.new_for_path(STORE_PATH)
+            infos = f.enumerate_children(
+                                    "standard::name",
+                                    Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
+                                    None)
+            # Get all files in store
+            files = []
+            for info in infos:
+                sleep(0.1)
+                f = infos.get_child(info)
+                files.append(f.get_basename())
+            # Remove wanted files
+            for storage_type in [StorageType.SAVED,
+                                 StorageType.SPOTIFY_NEW_RELEASES,
+                                 StorageType.SPOTIFY_SIMILARS]:
+                for album_id in App().albums.get_for_storage_type(
+                        storage_type):
+                    sleep(0.1)
+                    album = Album(album_id)
+                    filename = self.get_album_cache_name(album) + ".jpg"
+                    if filename in files:
+                        files.remove(filename)
+            # Delete remaining files
+            for filename in files:
+                sleep(1)
+                store_path = STORE_PATH + "/" + filename
+                f = Gio.File.new_for_path(store_path)
+                f.delete()
+
+        App().task_helper.run(cleaner)
 
     def clean_web(self):
         """

@@ -190,11 +190,12 @@ class Application(Gtk.Application, ApplicationActions):
         self.player = Player()
         self.inhibitor = Inhibitor()
         self.scanner = CollectionScanner()
-        self.art = Art()
         self.notify = NotificationManager()
-        self.art.update_art_size()
         self.task_helper = TaskHelper()
         self.art_helper = ArtHelper()
+        self.art = Art()
+        self.art.update_art_size()
+        self.art.clean_old_artwork()
         self.spotify = SpotifyHelper()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS

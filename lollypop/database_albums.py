@@ -270,7 +270,7 @@ class AlbumsDatabase:
                 return v[0]
             return StorageType.NONE
 
-    def get_for_storage_type(self, storage_type, limit):
+    def get_for_storage_type(self, storage_type, limit=-1):
         """
             Get albums by storage type
             @param storage_type as StorageType
