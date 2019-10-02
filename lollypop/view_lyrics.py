@@ -111,6 +111,7 @@ class LyricsView(View, SignalsHelper):
             Set lyrics
             @param track as Track
         """
+        self.__banner.translate_button.set_sensitive(False)
         self.__lyrics_label.set_text("")
         if track.id is None:
             return
@@ -179,7 +180,6 @@ class LyricsView(View, SignalsHelper):
             Update lyrics
             @param player as Player
         """
-        self.__banner.translate_button.set_sensitive(False)
         self.populate(App().player.current_track)
 
     def _on_adaptive_size_changed(self, window, adaptive_size):
@@ -272,3 +272,4 @@ class LyricsView(View, SignalsHelper):
             self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
         else:
             self.__lyrics_label.set_text(lyrics)
+            self.__banner.translate_button.set_sensitive(True)
