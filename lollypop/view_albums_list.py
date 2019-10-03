@@ -64,7 +64,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             Set albums to reveal on populate
             @param albums as [Album]
         """
-        self.__reveals = albums
+        self.__reveals = list(albums)
 
     def insert_album(self, album, reveal, position):
         """
