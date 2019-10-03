@@ -646,17 +646,21 @@ class AlbumsDatabase:
             @param limit as int
             @return [int]
         """
-        # Last month
-        timestamp = time() - 2419200
-        with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
-            request = "SELECT DISTINCT albums.rowid FROM albums, tracks\
-                       WHERE albums.storage_type & ? AND\
-                             tracks.ltime > ? AND\
-                             albums.rowid = tracks.album_id\
-                       ORDER BY albums.popularity DESC LIMIT ?"
-            result = sql.execute(request, (storage_type, timestamp, limit))
-            return list(itertools.chain(*result))
+        # Two weeks, one month
+        for delta in [1209600, 2678400]:
+            timestamp = time() - delta
+            with SqlCursor(App().db) as sql:
+                storage_type = get_default_storage_type()
+                request = "SELECT DISTINCT albums.rowid FROM albums, tracks\
+                           WHERE albums.storage_type & ? AND\
+                                 tracks.ltime > ? AND\
+                                 albums.rowid = tracks.album_id\
+                           ORDER BY albums.popularity DESC LIMIT ?"
+                result = sql.execute(request, (storage_type, timestamp, limit))
+                album_ids = list(itertools.chain(*result))
+                if album_ids:
+                    return album_ids
+        return []
 
     def get_loved_albums(self):
         """
