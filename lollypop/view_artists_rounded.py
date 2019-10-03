@@ -129,13 +129,32 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         scrolled.set_size_request(300, 400)
         return menu_widget
 
-    def _on_child_activated(self, flowbox, child):
+    def _on_primary_press_gesture(self, x, y, event):
         """
-            Enter child
-            @param flowbox as Gtk.FlowBox
-            @param child as Gtk.FlowBoxChild
+            Show artist's albums
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
         App().window.container.show_view([Type.ARTISTS], [child.data])
+
+    def _on_tertiary_press_gesture(self, x, y, event):
+        """
+            Play artist
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        album_ids = App().albums.get_ids([child.data], [])
+        albums = [Album(album_id) for album_id in album_ids]
+        if albums:
+            App().player.play_album_for_albums(albums[0], albums)
 
     def _on_artist_artwork_changed(self, art, prefix):
         """
