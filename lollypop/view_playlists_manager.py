@@ -14,7 +14,8 @@ from locale import strcoll
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType
-from lollypop.utils import popup_widget
+from lollypop.utils import popup_widget, tracks_to_albums
+from lollypop.objects_track import Track
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.widgets_banner_playlists import PlaylistsBannerWidget
 from lollypop.shown import ShownPlaylists
@@ -107,13 +108,39 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         FlowBoxView._add_items(self, playlist_ids, self._view_type)
 
-    def _on_child_activated(self, flowbox, child):
+    def _on_primary_press_gesture(self, x, y, event):
         """
-            Enter child
-            @param flowbox as Gtk.FlowBox
-            @param child as Gtk.FlowBoxChild
+            Show artist's albums
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
         """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
         App().window.container.show_view([Type.PLAYLISTS], child.data)
+
+    def _on_tertiary_press_gesture(self, x, y, event):
+        """
+            Play artist
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        child = self._box.get_child_at_pos(x, y)
+        if child is None or child.artwork is None:
+            return
+        track_ids = []
+        if child.data > 0 and App().playlists.get_smart(child.data):
+            request = App().playlists.get_smart_sql(child.data)
+            if request is not None:
+                track_ids = App().db.execute(request)
+        else:
+            track_ids = App().playlists.get_track_ids(child.data)
+        tracks = [Track(track_id) for track_id in track_ids]
+        albums = tracks_to_albums(tracks)
+        if albums:
+            App().player.play_album_for_albums(albums[0], albums)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
