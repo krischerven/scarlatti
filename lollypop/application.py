@@ -256,7 +256,7 @@ class Application(Gtk.Application, ApplicationActions):
             @param vacuum as bool
         """
         self.__window.hide()
-        if self.spotify.is_running():
+        if self.spotify.is_running:
             self.spotify.stop()
             GLib.timeout_add(100, self.quit, vacuum)
             return

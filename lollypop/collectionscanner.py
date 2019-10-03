@@ -87,6 +87,9 @@ class CollectionScanner(GObject.GObject, TagReader):
         if self.is_locked() and scan_type != ScanType.EXTERNAL:
             self.stop()
             GLib.timeout_add(250, self.update, scan_type, uris)
+        elif App().spotify.is_running:
+            App().stop_spotify()
+            GLib.timeout_add(250, self.update, scan_type, uris)
         else:
             self.__disable_compilations = not App().settings.get_value(
                 "show-compilations")
@@ -474,7 +477,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         self.__new_non_album_artists = []
         SqlCursor.add(App().db)
-        App().stop_spotify()
         App().art.clean_rounded()
 
         if not App().tracks.get_mtimes():

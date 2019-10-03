@@ -269,18 +269,19 @@ class SpotifyHelper(GObject.Object):
             GLib.idle_add(self.emit, "search-finished")
         del self.__album_ids[cancellable]
 
-    def is_running(self):
-        """
-            Return populate status
-        """
-        return self.__is_running
-
     def stop(self):
         """
             Stop db populate
         """
         if not self.__cancellable.is_cancelled():
             self.__cancellable.cancel()
+
+    @property
+    def is_running(self):
+        """
+            Return populate status
+        """
+        return self.__is_running
 
 #######################
 # PRIVATE             #
