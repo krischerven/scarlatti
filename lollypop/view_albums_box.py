@@ -184,7 +184,14 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param event as Gdk.Event
         """
         if event.state & Gdk.ModifierType.CONTROL_MASK:
-            self._on_tertiary_press_gesture(x, y, event)
+            child = self._box.get_child_at_pos(x, y)
+            if child is None or child.artwork is None:
+                return
+            from lollypop.pop_tracks import TracksPopover
+            popover = TracksPopover(child.data)
+            popover.set_relative_to(child.artwork)
+            popover.set_position(Gtk.PositionType.BOTTOM)
+            popover.popup()
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """
@@ -194,13 +201,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param event as Gdk.Event
         """
         child = self._box.get_child_at_pos(x, y)
-        if child is None or child.artwork is None:
-            return
-        from lollypop.pop_tracks import TracksPopover
-        popover = TracksPopover(child.data)
-        popover.set_relative_to(child.artwork)
-        popover.set_position(Gtk.PositionType.BOTTOM)
-        popover.popup()
+        App().player.play_album(child.data)
 
 
 class AlbumsGenresBoxView(AlbumsBoxView):
