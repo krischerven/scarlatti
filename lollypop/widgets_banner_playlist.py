@@ -38,6 +38,7 @@ class PlaylistBannerWidget(BannerWidget):
         builder.add_from_resource(
             "/org/gnome/Lollypop/PlaylistBannerWidget.ui")
         self.__title_label = builder.get_object("title")
+        self.__spinner = builder.get_object("spinner")
         self.__duration_label = builder.get_object("duration")
         self.__play_button = builder.get_object("play_button")
         self.__shuffle_button = builder.get_object("shuffle_button")
@@ -80,6 +81,14 @@ class PlaylistBannerWidget(BannerWidget):
                       icon_size, "media-playlist-shuffle-symbolic")
         update_button(self.__menu_button, style,
                       icon_size, "view-more-symbolic")
+
+    @property
+    def spinner(self):
+        """
+            Get spinner
+            @return Gtk.Spinner
+        """
+        return self.__spinner
 
     @property
     def height(self):

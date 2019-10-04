@@ -55,7 +55,7 @@
         <property name="halign">start</property>
       </object>
       <packing>
-        <property name="left_attach">1</property>
+        <property name="left_attach">2</property>
         <property name="top_attach">0</property>
       </packing>
     </child>
@@ -127,7 +127,19 @@
         </style>
       </object>
       <packing>
-        <property name="left_attach">2</property>
+        <property name="left_attach">3</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSpinner" id="spinner">
+        <property name="width_request">48</property>
+        <property name="height_request">48</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
         <property name="top_attach">0</property>
       </packing>
     </child>
