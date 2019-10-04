@@ -155,18 +155,34 @@ class Database:
             @param request as str
             @return list
         """
+        requests = []
         try:
             union_random = request.find("ORDER BY random()") != -1 and\
                 request.find("UNION") != -1
+            # Special case for UNION, does not support random()
+            # Optimisation, split request and add LIMIT
+            if union_random:
+                request = request.replace("ORDER BY random()", "")
+                limit_position = request.find("LIMIT")
+                limit_str = request[limit_position:]
+                limit_int = int(limit_str.replace("LIMIT ", ""))
+                # Remove limit from main request
+                request = request.replace(limit_str, "")
+                for request in request.split("UNION"):
+                    request += "LIMIT %s" % (limit_int * 20)
+                    requests.append(request)
+            else:
+                requests = [request]
+            ids = []
             with SqlCursor(App().db) as sql:
-                # Special case for UNION, does not support random()
-                if union_random:
-                    request = request.replace("ORDER BY random()", "")
-                result = sql.execute(request)
-                ids = list(itertools.chain(*result))
+                for request in requests:
+                    result = sql.execute(request)
+                    ids += list(itertools.chain(*result))
                 if union_random:
                     shuffle(ids)
-                return ids
+                    return ids[:limit_int]
+                else:
+                    return ids
         except Exception as e:
             Logger.error("Database::execute(): %s -> %s", e, request)
         return []
