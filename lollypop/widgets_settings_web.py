@@ -32,31 +32,36 @@ class WebSettingsWidget(Gtk.Bin):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SettingsWeb.ui")
 
+        self.__widgets = [(builder.get_object("listenbrainz_view"),
+                           builder.get_object("listenbrainz_error_label"),
+                           NetworkAccessACL["MUSICBRAINZ"],
+                           False),
+                          (builder.get_object("google_view"),
+                           builder.get_object("google_error_label"),
+                           NetworkAccessACL["GOOGLE"],
+                           False)]
+
         # First check lastfm support is available
         if App().lastfm is None:
             builder.get_object("lastfm_error_label").set_text(
                 _("You need to install pylast and gi secret"))
             builder.get_object("librefm_error_label").set_text(
                 _("You need to install pylast and gi secret"))
-            builder.get_object("lastfm_error_label").show()
-            builder.get_object("librefm_error_label").show()
-        elif App().lastfm.is_goa:
-            builder.get_object("lastfm_error_label").set_text(
-                _('Using "GNOME Online Accounts" settings'))
-            builder.get_object("lastfm_error_label").show()
+            builder.get_object("lastfm_error_label").set_opacity(1)
+            builder.get_object("librefm_error_label").set_opacity(1)
+            builder.get_object("lastfm_view").set_sensitive(False)
+            builder.get_object("librefm_view").set_sensitive(False)
 
-        self.__widgets = [(builder.get_object("lastfm_view"),
-                           builder.get_object("lastfm_error_label"),
-                           NetworkAccessACL["LASTFM"]),
-                          (builder.get_object("librefm_view"),
-                           builder.get_object("librefm_error_label"),
-                           NetworkAccessACL["LASTFM"]),
-                          (builder.get_object("listenbrainz_view"),
-                           builder.get_object("listenbrainz_error_label"),
-                           NetworkAccessACL["MUSICBRAINZ"]),
-                          (builder.get_object("google_view"),
-                           builder.get_object("google_error_label"),
-                           NetworkAccessACL["GOOGLE"])]
+        else:
+            self.__widgets += [(builder.get_object("lastfm_view"),
+                                builder.get_object("lastfm_error_label"),
+                                NetworkAccessACL["LASTFM"],
+                                App().lastfm.is_goa),
+                               (builder.get_object("librefm_view"),
+                                builder.get_object("librefm_error_label"),
+                                NetworkAccessACL["LASTFM"],
+                                False)]
+
         # Check web services access
         self.__check_acls()
 
@@ -183,13 +188,18 @@ class WebSettingsWidget(Gtk.Bin):
         """
         network_access = App().settings.get_value("network-access")
         acls = App().settings.get_value("network-access-acl").get_int32()
-        for (view, label, acl) in self.__widgets:
-            if network_access and acls & acl:
-                view.set_sensitive(True)
-                label.set_opacity(0)
-            else:
+        for (view, label, acl, is_goa) in self.__widgets:
+            if not network_access or not acls & acl:
                 view.set_sensitive(False)
                 label.set_opacity(1)
+                label.set_text(_("Disabled in network settings"))
+            elif is_goa:
+                view.set_sensitive(False)
+                label.set_opacity(1)
+                label.set_text(_('Using "GNOME Online Accounts" settings'))
+            else:
+                view.set_sensitive(True)
+                label.set_opacity(0)
 
     def __update_fm_settings(self, name):
         """
