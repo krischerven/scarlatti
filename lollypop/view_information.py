@@ -109,7 +109,11 @@ class InformationView(View):
         self.__bio_label = builder.get_object("bio_label")
         if artist_id is None and App().player.current_track.id is not None:
             builder.get_object("header").show()
-            artist_id = App().player.current_track.album.artist_ids[0]
+            if App().player.current_track.album.artist_ids[0] ==\
+                    Type.COMPILATIONS:
+                artist_id = App().player.current_track.artist_ids[0]
+            else:
+                artist_id = App().player.current_track.album.artist_ids[0]
             title_label.set_text(App().player.current_track.title)
         self.__artist_name = App().artists.get_name(artist_id)
         if self.__minimal:
