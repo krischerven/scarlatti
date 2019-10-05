@@ -279,7 +279,7 @@ class ShufflePlayer(BasePlayer):
         """
         self.__to_play_albums = list(self._albums)
         shuffle(self.__to_play_albums)
-        self.__not_played_albums = list(self.__not_played_albums)
+        self.__not_played_albums = list(self.__to_play_albums)
         self.__history = []
         self.__already_played_tracks = {}
         if App().player.current_track.id is not None:
