@@ -22,7 +22,7 @@ from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_network_available
 
 
 class BinPlayer(BasePlayer):
@@ -288,14 +288,17 @@ class BinPlayer(BasePlayer):
                 App().task_helper.run(self.__update_current_duration,
                                       track, uri)
 
-        from lollypop.helper_web import WebHelper
-        helper = WebHelper()
-        helper.set_uri(track, self.__cancellable)
-        uri = helper.get_track_content(track)
-        if uri is not None:
-            GLib.idle_add(play_uri, uri)
+        if get_network_available():
+            from lollypop.helper_web import WebHelper
+            helper = WebHelper()
+            helper.set_uri(track, self.__cancellable)
+            uri = helper.get_track_content(track)
+            if uri is not None:
+                GLib.idle_add(play_uri, uri)
+            else:
+                self.next()
         else:
-            self.next()
+            self.skip_album()
 
     def _scrobble(self, finished, finished_start_time):
         """
