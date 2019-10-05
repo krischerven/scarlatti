@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib, Gtk, Gdk
 
 from gettext import gettext as _
 
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, CACHE_PATH
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
@@ -69,6 +69,15 @@ class EditMenu(Gio.Menu):
                                          "app.remove_album_action")
             menu_item.set_attribute_value("close", GLib.Variant("b", True))
             self.append_item(menu_item)
+        if self.__object.is_web:
+            clean_action = Gio.SimpleAction(name="clean_album_action")
+            App().add_action(clean_action)
+            clean_action.connect("activate",
+                                 self.__on_clean_action_activate)
+            menu_item = Gio.MenuItem.new(_("Clean cache"),
+                                         "app.clean_album_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            self.append_item(menu_item)
         if not self.__object.storage_type & StorageType.COLLECTION:
             buy_action = Gio.SimpleAction(name="buy_album_action")
             App().add_action(buy_action)
@@ -111,6 +120,20 @@ class EditMenu(Gio.Menu):
         Gtk.show_uri_on_window(App().window,
                                uri,
                                Gdk.CURRENT_TIME)
+
+    def __on_clean_action_activate(self, action, variant):
+        """
+            clean album cache
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        try:
+            for track in self.__object.tracks:
+                escaped = GLib.uri_escape_string(track.uri, None, True)
+                f = Gio.File.new_for_path("%s/web_%s" % (CACHE_PATH, escaped))
+                f.delete(None)
+        except Exception as e:
+            Logger.error("EditMenu::__on_clean_action_activate():", e)
 
     def __on_save_action_activate(self, action, variant, save):
         """
