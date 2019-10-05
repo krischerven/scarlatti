@@ -123,8 +123,8 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 label = Gtk.Label.new(text)
                 label.get_style_context().add_class("text-large")
                 label.show()
-                self._tracks_widget_left[0].add(label)
-                self._tracks_widget_left[0].show()
+                self._tracks_widget_left[-1].add(label)
+                self._tracks_widget_left[-1].show()
 
     def append_row(self, track):
         """
@@ -135,7 +135,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
         """
         self.__init()
         self.__album.append_track(track)
-        self.__add_tracks(self._tracks_widget_left[0], [track])
+        self.__add_tracks(self._tracks_widget_left[-1], [track])
 
     def append_rows(self, tracks):
         """
@@ -145,7 +145,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
         """
         self.__init()
         self.__album.append_tracks(tracks)
-        self.__add_tracks(self._tracks_widget_left[0], tracks)
+        self.__add_tracks(self._tracks_widget_left[-1], tracks)
 
     def get_current_ordinate(self, parent):
         """
