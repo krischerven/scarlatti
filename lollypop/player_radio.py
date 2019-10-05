@@ -15,6 +15,7 @@ from gi.repository import TotemPlParser, Gst, Gio, GLib
 from lollypop.define import App
 from lollypop.player_base import BasePlayer
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 
 
 class RadioPlayer(BasePlayer):
@@ -37,9 +38,9 @@ class RadioPlayer(BasePlayer):
         if Gio.NetworkMonitor.get_default().get_network_available():
             try:
                 if self._current_track.is_web:
-                    GLib.idle_add(self.emit, "loading-changed", False,
-                                  self._current_track.album)
-                GLib.idle_add(self.emit, "loading-changed", True, track.album)
+                    emit_signal(self, "loading-changed", False,
+                                self._current_track.album)
+                emit_signal(self, "loading-changed", True, track.album)
                 self._current_track = track
                 if track.uri.find("youtu.be") != -1 or\
                         track.uri.find("youtube.com") != -1:
@@ -90,9 +91,9 @@ class RadioPlayer(BasePlayer):
         self._current_track = track
         if play:
             self._playbin.set_state(Gst.State.PLAYING)
-            GLib.idle_add(self.emit, "status-changed")
+            emit_signal(self, "status-changed")
         else:
-            GLib.idle_add(self.emit, "current-changed")
+            emit_signal(self, "current-changed")
 
     def __on_parse_finished(self, parser, result, track, play):
         """
@@ -106,7 +107,7 @@ class RadioPlayer(BasePlayer):
         if self._current_track == track:
             self.__start_playback(track, play)
         else:
-            GLib.idle_add(self.emit, "loading-changed", False, track.album)
+            emit_signal(self, "loading-changed", False, track.album)
 
     def __on_entry_parsed(self, parser, uri, metadata, track, play):
         """
@@ -121,4 +122,4 @@ class RadioPlayer(BasePlayer):
         if self._current_track == track:
             track.set_uri(uri)
         else:
-            GLib.idle_add(self.emit, "loading-changed", False, track.album)
+            emit_signal(self, "loading-changed", False, track.album)

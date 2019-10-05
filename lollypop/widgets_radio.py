@@ -13,7 +13,7 @@
 from gi.repository import Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN_SMALL
-from lollypop.utils import on_query_tooltip, set_cursor_type
+from lollypop.utils import on_query_tooltip, set_cursor_type, emit_signal
 from lollypop.objects_radio import Radio
 
 
@@ -228,4 +228,4 @@ class RadioWidget(Gtk.FlowBoxChild):
                                              Gtk.IconSize.DIALOG)
         else:
             self.__artwork.set_from_surface(surface)
-        self.emit("populated")
+        emit_signal(self, "populated")

@@ -20,7 +20,7 @@ import os
 import tempfile
 
 from lollypop.logger import Logger
-from lollypop.utils import escape
+from lollypop.utils import escape, emit_signal
 from lollypop.define import App, Type
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
@@ -277,22 +277,22 @@ class MtpSync(GObject.Object):
                         break
                     self.__copy_file(src_uri, dst_uri)
                     self.__done += 1
-                    GLib.idle_add(self.emit, "sync-progress",
-                                  self.__done / self.__total)
+                    emit_signal(self, "sync-progress",
+                                self.__done / self.__total)
                 except Exception as e:
                     Logger.error("MtpSync::__copy_files(): %s", e)
             Logger.debug("Writing playlists")
             if not self.__cancellable.is_cancelled():
                 self.__write_playlists(playlist_ids)
-            GLib.idle_add(self.emit, "sync-progress",
-                          self.__done / self.__total + 1)
+            emit_signal(self, "sync-progress",
+                        self.__done / self.__total + 1)
             Logger.debug("Creating unsync")
             if not self.__cancellable.is_cancelled():
                 d = Gio.File.new_for_uri(self.__uri + "/unsync")
                 if not d.query_exists():
                     d.make_directory_with_parents()
-            GLib.idle_add(self.emit, "sync-progress",
-                          self.__done / self.__total + 2)
+            emit_signal(self, "sync-progress",
+                        self.__done / self.__total + 2)
         except Exception as e:
             Logger.error("MtpSync::__sync(): %s" % e)
         finally:
@@ -302,9 +302,9 @@ class MtpSync(GObject.Object):
             self.cancel()
             if self.__errors_count != 0:
                 Logger.debug("Sync errors")
-                GLib.idle_add(self.emit, "sync-errors", self.__last_error)
+                emit_signal(self, "sync-errors", self.__last_error)
             Logger.debug("Sync finished")
-            GLib.idle_add(self.emit, "sync-finished")
+            emit_signal(self, "sync-finished")
 
     def cancel(self):
         """

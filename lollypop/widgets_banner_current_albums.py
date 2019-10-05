@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.define import MARGIN, MARGIN_SMALL
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import update_button
+from lollypop.utils import update_button, emit_signal
 
 
 class CurrentAlbumsBannerWidget(BannerWidget):
@@ -199,4 +199,4 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__clear_button.set_sensitive(False)
         self.__jump_button.set_sensitive(False)
         self.__save_button.set_sensitive(False)
-        App().player.emit("status-changed")
+        emit_signal(App().player, "status-changed")

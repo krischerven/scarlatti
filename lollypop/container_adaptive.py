@@ -13,6 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, Type
+from lollypop.utils import emit_signal
 
 
 class AdaptiveContainer:
@@ -43,7 +44,7 @@ class AdaptiveContainer:
                 Gtk.Stack.set_visible_child(self._stack, self.left_list)
             if visible_child is not None:
                 visible_child.destroy_later()
-        self.emit("can-go-back-changed", self.can_go_back)
+        emit_signal(self, "can-go-back-changed", self.can_go_back)
         visible_child = self._stack.get_visible_child()
         if visible_child is not None:
             self.set_focused_view(visible_child)
@@ -57,7 +58,7 @@ class AdaptiveContainer:
         Gtk.Stack.set_visible_child(self._stack, self._sidebar)
         if visible_child is not None:
             visible_child.destroy_later()
-        self.emit("can-go-back-changed", False)
+        emit_signal(self, "can-go-back-changed", False)
 
     @property
     def can_go_back(self):
@@ -83,7 +84,7 @@ class AdaptiveContainer:
             @param stack as Gtk.Stack
         """
         if self.can_go_back:
-            self.emit("can-go-back-changed", True)
+            emit_signal(self, "can-go-back-changed", True)
 
     def __on_adaptive_changed(self, window, status):
         """
@@ -101,7 +102,7 @@ class AdaptiveContainer:
             self._stack.remove(self.left_list)
             self._main_widget.attach(self._sidebar, 0, 0, 1, 1)
             self._sidebar_two.pack1(self.left_list, False, False)
-        self.emit("can-go-back-changed", self.can_go_back)
+        emit_signal(self, "can-go-back-changed", self.can_go_back)
 
     def __on_set_sidebar_id(self, stack, sidebar_id):
         """

@@ -14,7 +14,7 @@ from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
 from lollypop.define import MARGIN_SMALL
-from lollypop.utils import on_query_tooltip, set_cursor_type
+from lollypop.utils import on_query_tooltip, set_cursor_type, emit_signal
 
 
 class AlbumSimpleWidget(Gtk.FlowBoxChild):
@@ -204,7 +204,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         else:
             self.__artwork.set_from_surface(surface)
         self.show_all()
-        self.emit("populated")
+        emit_signal(self, "populated")
 
     def __on_destroy(self, widget):
         """

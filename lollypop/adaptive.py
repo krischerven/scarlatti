@@ -15,6 +15,7 @@ from gi.repository import GObject, Gtk, GLib
 from pickle import dump, load
 
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size
 
 
@@ -288,7 +289,7 @@ class AdaptiveStack(Gtk.Stack):
             else:
                 visible_child.destroy_later()
             Gtk.Stack.set_visible_child(self, view)
-            self.emit("history-changed")
+            emit_signal(self, "history-changed")
         else:
             Gtk.Stack.set_visible_child(self, view)
 
@@ -304,8 +305,8 @@ class AdaptiveStack(Gtk.Stack):
                     self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
                 if view.sidebar_id is not None:
-                    self.emit("set-sidebar-id", view.sidebar_id)
-                    self.emit("set-selection-ids", view.selection_ids)
+                    emit_signal(self, "set-sidebar-id", view.sidebar_id)
+                    emit_signal(self, "set-selection-ids", view.selection_ids)
                 if visible_child is not None:
                     visible_child.stop()
                     visible_child.destroy_later()
@@ -339,8 +340,8 @@ class AdaptiveStack(Gtk.Stack):
                 self.add(view)
                 Gtk.Stack.set_visible_child(self, view)
                 if view.sidebar_id is not None:
-                    self.emit("set-sidebar-id", view.sidebar_id)
-                    self.emit("set-selection-ids", view.selection_ids)
+                    emit_signal(self, "set-sidebar-id", view.sidebar_id)
+                    emit_signal(self, "set-selection-ids", view.selection_ids)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
 
@@ -384,7 +385,7 @@ class AdaptiveWindow:
         """
         if is_adaptive != self.__is_adaptive:
             self.__is_adaptive = is_adaptive
-            self.emit("adaptive-changed", is_adaptive)
+            emit_signal(self, "adaptive-changed", is_adaptive)
 
     @property
     def adaptive_size(self):
@@ -430,7 +431,7 @@ class AdaptiveWindow:
             adaptive_size = AdaptiveSize.LARGE
         if adaptive_size != self.__adaptive_size:
             self.__adaptive_size = adaptive_size
-            self.emit("adaptive-size-changed", adaptive_size)
+            emit_signal(self, "adaptive-size-changed", adaptive_size)
 
 ############
 # PRIVATE  #

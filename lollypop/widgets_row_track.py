@@ -18,6 +18,7 @@ from lollypop.define import App, ViewType, MARGIN_SMALL, IndicatorType
 from lollypop.define import StorageType
 from lollypop.widgets_indicator import IndicatorWidget
 from lollypop.utils import seconds_to_string, on_query_tooltip, popup_widget
+from lollypop.utils import emit_signal
 
 
 class TrackRow(Gtk.ListBoxRow):
@@ -257,12 +258,12 @@ class TrackRow(Gtk.ListBoxRow):
             self._track.album.remove_track(self._track)
             App().player.set_next()
             App().player.set_prev()
-            self.emit("removed")
+            emit_signal(self, "removed")
         elif self.__view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
                 view.remove_from_playlist(self._track)
-            self.emit("removed")
+            emit_signal(self, "removed")
         else:
             self.popup_menu(button)

@@ -17,7 +17,7 @@ from random import shuffle
 
 from lollypop.define import App, Type
 from lollypop.objects_album import Album
-from lollypop.utils import get_round_surface
+from lollypop.utils import get_round_surface, emit_signal
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 
 
@@ -110,7 +110,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             get_round_surface(surface, self._scale_factor, self._art_size / 4))
         App().art.add_artwork_to_cache("ROUNDED_%s" % self.artwork_name,
                                        surface)
-        self.emit("populated")
+        emit_signal(self, "populated")
 
     def __draw_surface(self, surface, ctx, positions, album_ids, set_surface):
         """
@@ -165,7 +165,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             self._artwork.set_from_surface(
                     get_round_surface(surface, self._scale_factor,
                                       self._art_size / 4))
-        self.emit("populated")
+        emit_signal(self, "populated")
 
     def __on_unmap(self, widget):
         """

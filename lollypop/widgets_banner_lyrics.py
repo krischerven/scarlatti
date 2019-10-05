@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, MARGIN, ViewType
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import update_button
+from lollypop.utils import update_button, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 
@@ -198,4 +198,4 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             Emit signals
             @param button as Gtk.ToggleButton
         """
-        self.emit("translate", button.get_active())
+        emit_signal(self, "translate", button.get_active())

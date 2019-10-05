@@ -14,6 +14,7 @@
 from lollypop.define import App, StorageType
 from lollypop.objects_track import Track
 from lollypop.objects import Base
+from lollypop.utils import emit_signal
 
 
 class Disc:
@@ -228,8 +229,8 @@ class Album(Base):
             track.save(save)
         self.reset("mtime")
         for artist_id in self.artist_ids:
-            App().scanner.emit("artist-updated", artist_id, save)
-        App().scanner.emit("album-updated", self.id, save)
+            emit_signal(App().scanner, "artist-updated", artist_id, save)
+        emit_signal(App().scanner, "album-updated", self.id, save)
 
     def set_synced(self, mask):
         """

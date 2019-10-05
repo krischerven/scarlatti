@@ -17,7 +17,7 @@ import re
 from lollypop.helper_task import TaskHelper
 from lollypop.logger import Logger
 from lollypop.define import ArtBehaviour, CACHE_PATH
-from lollypop.utils import escape
+from lollypop.utils import escape, emit_signal
 
 
 class RadioArt:
@@ -149,7 +149,7 @@ class RadioArt:
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()
             pixbuf.savev(filepath, "png", [None], [None])
-        GLib.idle_add(self.emit, "radio-artwork-changed", name)
+        emit_signal(self, "radio-artwork-changed", name)
 
     def uncache_radio_artwork(self, name):
         """
@@ -206,4 +206,4 @@ class RadioArt:
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()
             pixbuf.savev(cache_path_png, "png", [None], [None])
-            self.emit("radio-artwork-changed", name)
+            emit_signal(self, "radio-artwork-changed", name)

@@ -18,6 +18,7 @@ from threading import Lock
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 
 
 class Radios(GObject.GObject):
@@ -64,7 +65,7 @@ class Radios(GObject.GObject):
             result = sql.execute("INSERT INTO radios (name, url, popularity)\
                                   VALUES (?, ?, ?)",
                                  (name, uri, 0))
-            GLib.idle_add(self.emit, "radio-changed", result.lastrowid)
+            emit_signal(self, "radio-changed", result.lastrowid)
             return result.lastrowid
 
     def exists(self, radio_id):
@@ -92,7 +93,7 @@ class Radios(GObject.GObject):
                         SET name=?\
                         WHERE rowid=?",
                         (name, radio_id))
-            GLib.idle_add(self.emit, "radio-changed", radio_id)
+            emit_signal(self, "radio-changed", radio_id)
 
     def remove(self, radio_id):
         """
@@ -103,7 +104,7 @@ class Radios(GObject.GObject):
             sql.execute("DELETE FROM radios\
                         WHERE rowid=?",
                         (radio_id,))
-            GLib.idle_add(self.emit, "radio-changed", radio_id)
+            emit_signal(self, "radio-changed", radio_id)
 
     def get(self):
         """

@@ -22,6 +22,7 @@ from lollypop.define import Type, App, ArtSize, SelectionListMask
 from lollypop.define import ArtBehaviour, ViewType
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, on_query_tooltip, popup_widget
+from lollypop.utils import emit_signal
 
 
 class SelectionListRow(Gtk.ListBoxRow):
@@ -70,7 +71,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             separator.show()
             self.add(separator)
             self.set_sensitive(False)
-            self.emit("populated")
+            emit_signal(self, "populated")
         else:
             self.__grid = Gtk.Grid()
             self.__grid.set_column_spacing(7)
@@ -124,10 +125,10 @@ class SelectionListRow(Gtk.ListBoxRow):
             self.__artwork.set_from_icon_name(icon_name, Gtk.IconSize.INVALID)
             self.__artwork.set_pixel_size(20)
             self.__artwork.show()
-            self.emit("populated")
+            emit_signal(self, "populated")
         else:
             self.__artwork.hide()
-            self.emit("populated")
+            emit_signal(self, "populated")
 
     def set_mask(self, mask=None):
         """
@@ -240,7 +241,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         else:
             self.__artwork.get_style_context().remove_class("artwork-icon")
             self.__artwork.set_from_surface(surface)
-        self.emit("populated")
+        emit_signal(self, "populated")
 
 
 class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
@@ -613,7 +614,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             if self.mask & SelectionListMask.ARTISTS:
                 self.__fastscroll.populate()
             self.__sort = True
-            self.emit("populated")
+            emit_signal(self, "populated")
             self.lazy_loading()
             # Scroll to first selected item
             for row in self._box.get_selected_rows():

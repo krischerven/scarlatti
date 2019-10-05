@@ -13,6 +13,7 @@
 from gi.repository import Gtk, GObject
 
 from lollypop.define import App
+from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -59,13 +60,13 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         if popover is not None:
             popover.popdown()
         else:
-            self.emit("hidden", button != self.__equalizer_button)
+            emit_signal(self, "hidden", button != self.__equalizer_button)
 
     def _emit_hidden(self, button):
         """
             Emit hidden signal
         """
-        self.emit("hidden", False)
+        emit_signal(self, "hidden", False)
 
     def _on_volume_value_changed(self, scale):
         """

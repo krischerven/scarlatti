@@ -12,6 +12,8 @@
 
 from gi.repository import Gtk, GLib, GObject
 
+from lollypop.utils import emit_signal
+
 
 class Popover(Gtk.Popover):
     """
@@ -35,6 +37,6 @@ class Popover(Gtk.Popover):
         """
             Destroy self
         """
-        self.emit("hidden", True)
+        emit_signal(self, "hidden", True)
         if self.__auto_destroy:
             GLib.idle_add(self.destroy)

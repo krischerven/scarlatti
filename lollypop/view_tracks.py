@@ -19,7 +19,7 @@ from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.utils import set_cursor_type
+from lollypop.utils import set_cursor_type, emit_signal
 from lollypop.define import App, Type, ViewType, AdaptiveSize, IndicatorType
 
 
@@ -96,7 +96,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 widget.show()
                 GLib.idle_add(load_disc, items, disc_number, position)
             else:
-                GLib.idle_add(self.emit, "populated")
+                emit_signal(self, "populated")
 
         self.__init()
         if self.__discs_to_load:
@@ -115,7 +115,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             load_disc(items, disc_number)
         else:
             self.__populated = True
-            self.emit("populated")
+            emit_signal(self, "populated")
             if not self.children:
                 text = (_("""This album has no track."""
                           """ Check tags, all 'album artist'"""
@@ -310,7 +310,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             else:
                 App().player.load(track)
         else:
-            self.emit("activated", track)
+            emit_signal(self, "activated", track)
 
 #######################
 # PRIVATE             #
@@ -439,7 +439,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Pass signal
             @param row as TrackRow
         """
-        self.emit("track-removed", row)
+        emit_signal(self, "track-removed", row)
 
     def __on_key_press_event(self, widget, event):
         """

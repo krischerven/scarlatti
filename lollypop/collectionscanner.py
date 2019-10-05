@@ -32,7 +32,7 @@ from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
 from lollypop.utils import is_audio, is_pls, get_mtime, profile, create_dir
-from lollypop.utils import split_list, symlink_ok
+from lollypop.utils import split_list, symlink_ok, emit_signal
 
 
 SCAN_QUERY_INFO = "{},{},{},{},{},{}".format(
@@ -230,11 +230,11 @@ class CollectionScanner(GObject.GObject, TagReader):
             for artist_id in added_album_artist_ids:
                 if artist_id in self.__new_non_album_artists:
                     self.__new_non_album_artists.remove(artist_id)
-                GLib.idle_add(self.emit, "artist-updated", artist_id, True)
+                emit_signal(self, "artist-updated", artist_id, True)
             for genre_id in genre_ids:
-                GLib.idle_add(self.emit, "genre-updated", genre_id, True)
+                emit_signal(self, "genre-updated", genre_id, True)
             if album_added:
-                GLib.idle_add(self.emit, "album-updated", album_id, True)
+                emit_signal(self, "album-updated", album_id, True)
         return (track_id, album_id)
 
     def update_track(self, track_id, artist_ids, genre_ids):
@@ -291,14 +291,11 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().artists.clean()
             SqlCursor.commit(App().db)
             if notify and App().albums.get_name(album_id) is None:
-                GLib.idle_add(self.emit, "album-updated",
-                              album_id, False)
+                emit_signal(self, "album-updated", album_id, False)
                 for artist_id in album_artist_ids + artist_ids:
-                    GLib.idle_add(self.emit, "artist-updated",
-                                  artist_id, False)
+                    emit_signal(self, "artist-updated", artist_id, False)
                 for genre_id in genre_ids:
-                    GLib.idle_add(self.emit, "genre-updated",
-                                  genre_id, False)
+                    emit_signal(self, "genre-updated", genre_id, False)
             return (track_pop, track_rate, track_ltime, album_mtime,
                     track_loved, album_loved, album_pop, album_rate)
         except Exception as e:
@@ -347,7 +344,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         App().lookup_action("update_db").set_enabled(True)
         App().window.container.progress.set_fraction(1.0, self)
         self.stop()
-        self.emit("scan-finished", modifications)
+        emit_signal(self, "scan-finished", modifications)
         # Update max count value
         App().albums.update_max_count()
         App().start_spotify()
@@ -587,7 +584,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         for artist_id in self.__new_non_album_artists:
             album_ids = App().albums.get_ids([artist_id], [])
             if album_ids:
-                self.emit("artist-updated", artist_id, True)
+                emit_signal(self, "artist-updated", artist_id, True)
         SqlCursor.remove(App().db)
 
     def __remove_old_tracks(self, uris, scan_type):

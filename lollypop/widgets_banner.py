@@ -13,6 +13,7 @@
 from gi.repository import Gtk, Gdk, GObject, GLib
 
 from lollypop.define import ArtSize, ViewType, MARGIN, App
+from lollypop.utils import emit_signal
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -139,7 +140,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         """
         def emit_scroll(x, y):
             self.__scroll_timeout_id = None
-            self.emit("scroll", x, y)
+            emit_signal(self, "scroll", x, y)
 
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)

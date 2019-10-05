@@ -19,7 +19,7 @@ from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
-from lollypop.utils import escape, is_readonly
+from lollypop.utils import escape, is_readonly, emit_signal
 from lollypop.helper_task import TaskHelper
 
 
@@ -271,7 +271,7 @@ class AlbumArt:
             Announce album cover update
             @param album_id as int
         """
-        self.emit("album-artwork-changed", album_id)
+        emit_signal(self, "album-artwork-changed", album_id)
 
     def remove_album_artwork(self, album):
         """

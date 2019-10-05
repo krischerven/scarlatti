@@ -17,7 +17,7 @@ from base64 import b64encode
 
 from lollypop.define import App, GOOGLE_API_ID, Type, AUDIODB_CLIENT_ID
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, FANARTTV_ID
-from lollypop.utils import get_network_available, noaccents
+from lollypop.utils import get_network_available, noaccents, emit_signal
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
 from lollypop.downloader import Downloader
@@ -55,7 +55,7 @@ class ArtDownloader(Downloader):
             uris = method(artist, album, cancellable)
             for uri in uris:
                 results.append((uri, api))
-        GLib.idle_add(self.emit, "uri-artwork-found", results)
+        emit_signal(self, "uri-artwork-found", results)
 
     def search_artist_artwork(self, artist, cancellable):
         """
@@ -72,7 +72,7 @@ class ArtDownloader(Downloader):
             uris = method(artist, cancellable)
             for uri in uris:
                 results.append((uri, api))
-        GLib.idle_add(self.emit, "uri-artwork-found", results)
+        emit_signal(self, "uri-artwork-found", results)
 
     def cache_album_artwork(self, album_id):
         """
@@ -102,7 +102,7 @@ class ArtDownloader(Downloader):
             @param cancellable as Gio.Cancellable
         """
         if not get_network_available("GOOGLE"):
-            GLib.idle_add(self.emit, "uri-artwork-found", None)
+            emit_signal(self, "uri-artwork-found", None)
             return
         key = App().settings.get_value("cs-api-key").get_string() or\
             App().settings.get_default_value("cs-api-key").get_string()
@@ -122,7 +122,7 @@ class ArtDownloader(Downloader):
             @param cancellable as Gio.Cancellable
         """
         if not get_network_available("STARTPAGE"):
-            GLib.idle_add(self.emit, "uri-artwork-found", None)
+            emit_signal(self, "uri-artwork-found", None)
             return
         uri = "https://www.startpage.com/do/search?flimgsize=isz%3Al"
         uri += "&image-size-select=&flimgexwidth=&flimgexheight=&abp=-1"
@@ -584,16 +584,16 @@ class ArtDownloader(Downloader):
         """
         try:
             if not loaded:
-                self.emit("uri-artwork-found", [])
+                emit_signal(self, "uri-artwork-found", [])
                 return
             decode = json.loads(content.decode("utf-8"))
             results = []
             for item in decode["items"]:
                 if item["link"] is not None:
                     results.append((item["link"], "Google"))
-            self.emit("uri-artwork-found", results)
+            emit_signal(self, "uri-artwork-found", results)
         except Exception as e:
-            self.emit("uri-artwork-found", [])
+            emit_signal(self, "uri-artwork-found", [])
             Logger.error("ArtDownloader::__on_load_google_content(): %s: %s"
                          % (e, content))
 
@@ -620,15 +620,15 @@ class ArtDownloader(Downloader):
                 GLib.idle_add(search_in_data, lines, found_uris)
             else:
                 results = [(uri, "Startpage") for uri in found_uris]
-                self.emit("uri-artwork-found", results)
+                emit_signal(self, "uri-artwork-found", results)
 
         try:
             if not loaded:
-                self.emit("uri-artwork-found", [])
+                emit_signal(self, "uri-artwork-found", [])
                 return
             lines = content.decode("utf-8").splitlines()
             search_in_data(lines)
         except Exception as e:
-            self.emit("uri-artwork-found", [])
+            emit_signal(self, "uri-artwork-found", [])
             Logger.error("ArtDownloader::__on_load_startpage_content(): %s"
                          % e)

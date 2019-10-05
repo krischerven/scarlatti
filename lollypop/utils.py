@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 import unicodedata
 import cairo
 import time
+from threading import current_thread
 from functools import wraps
 
 from lollypop.logger import Logger
@@ -365,6 +366,19 @@ def format_artist_name(name):
             strlen = len(special) + 1
             name = name[strlen:] + ", " + special
     return name
+
+
+def emit_signal(obj, signal, *args):
+    """
+        Emit signal
+        @param obj as GObject.Object
+        @param signal as str
+        @thread safe
+    """
+    if current_thread().getName() == "MainThread":
+        obj.emit(signal, *args)
+    else:
+        GLib.idle_add(obj.emit, signal, *args)
 
 
 def translate_artist_name(name):

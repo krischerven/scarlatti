@@ -31,8 +31,7 @@ class BasePlayer(GObject.GObject):
         "volume-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "queue-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "playback-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "rate-changed": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "party-changed": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
+        "rate-changed": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
     }
 
     def __init__(self):

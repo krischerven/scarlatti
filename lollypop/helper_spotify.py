@@ -20,6 +20,7 @@ from locale import getdefaultlocale
 
 from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep, get_network_available
+from lollypop.utils import emit_signal
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
@@ -266,7 +267,7 @@ class SpotifyHelper(GObject.Object):
         except Exception as e:
             Logger.warning("SpotifyHelper::search(): %s", e)
         if not cancellable.is_cancelled():
-            GLib.idle_add(self.emit, "search-finished")
+            emit_signal(self, "search-finished")
         del self.__album_ids[cancellable]
 
     def stop(self):
@@ -402,7 +403,7 @@ class SpotifyHelper(GObject.Object):
                     if status:
                         App().art.save_album_artwork(data, album)
                 if storage_type & StorageType.EPHEMERAL:
-                    GLib.idle_add(self.emit, "new-album", album)
+                    emit_signal(self, "new-album", album)
         except Exception as e:
             Logger.error(
                 "SpotifyHelper::__download_cover(): %s", e)

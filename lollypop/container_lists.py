@@ -18,6 +18,7 @@ from lollypop.define import App, Type, SelectionListMask
 from lollypop.shown import ShownLists
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.view import View
+from lollypop.utils import emit_signal
 
 
 class NoneView(View):
@@ -254,7 +255,7 @@ class ListsContainer:
         """
         if App().settings.get_value("save-state"):
             self._stack.load_history()
-            self.emit("can-go-back-changed", self.can_go_back)
+            emit_signal(self, "can-go-back-changed", self.can_go_back)
         else:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:

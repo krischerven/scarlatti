@@ -21,6 +21,7 @@ from gettext import gettext as _
 from lollypop.logger import Logger
 from lollypop.define import App, Type
 from lollypop.sync_mtp import MtpSync
+from lollypop.utils import emit_signal
 
 
 class DeviceWidget(Gtk.ListBoxRow):
@@ -138,7 +139,7 @@ class DeviceWidget(Gtk.ListBoxRow):
             index = self.__get_device_index()
             if index is not None:
                 App().task_helper.run(self.__mtp_sync.sync, uri, index)
-                self.emit("syncing", True)
+                emit_signal(self, "syncing", True)
                 button.set_label(_("Cancel"))
         else:
             self.__mtp_sync.cancel()
@@ -331,7 +332,7 @@ class DeviceWidget(Gtk.ListBoxRow):
             Emit finished signal
             @param mtp_sync as MtpSync
         """
-        self.emit("syncing", False)
+        emit_signal(self, "syncing", False)
         self.__progress = 0
         self.__sync_button.set_label(_("Synchronize"))
         self.__sync_button.set_sensitive(True)

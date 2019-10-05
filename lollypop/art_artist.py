@@ -15,7 +15,7 @@ from gi.repository import GLib, GdkPixbuf, Gio
 from lollypop.define import ArtBehaviour, ArtSize
 from lollypop.define import CACHE_PATH
 from lollypop.logger import Logger
-from lollypop.utils import escape
+from lollypop.utils import escape, emit_signal
 
 
 class ArtistArt:
@@ -82,7 +82,7 @@ class ArtistArt:
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()
             pixbuf.savev(filepath, "jpeg", ["quality"], ["100"])
-        GLib.idle_add(self.emit, "artist-artwork-changed", artist)
+        emit_signal(self, "artist-artwork-changed", artist)
 
     def get_artist_artwork(self, artist, width, height, scale_factor,
                            behaviour=ArtBehaviour.CACHE):

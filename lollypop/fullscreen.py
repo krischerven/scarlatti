@@ -24,6 +24,7 @@ from lollypop.objects_radio import Radio
 from lollypop.container import Container
 from lollypop.adaptive import AdaptiveWindow
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -244,7 +245,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
                                                   Gtk.IconSize.BUTTON)
         else:
             self.__revealer.set_reveal_child(True)
-            self.emit("adaptive-changed", True)
+            emit_signal(self, "adaptive-changed", True)
             button.get_image().set_from_icon_name("pan-end-symbolic",
                                                   Gtk.IconSize.BUTTON)
 

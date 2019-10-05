@@ -16,7 +16,7 @@ import json
 from locale import getdefaultlocale
 
 from lollypop.define import App, AUDIODB_CLIENT_ID
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, emit_signal
 from lollypop.logger import Logger
 from lollypop.downloader import Downloader
 from lollypop.wikipedia import Wikipedia
@@ -39,7 +39,7 @@ class InfoDownloader(Downloader):
             @param artist as str
         """
         if not get_network_available("DATA"):
-            self.emit("artist-info-changed", artist)
+            emit_signal(self, "artist-info-changed", artist)
             return
         App().task_helper.run(self.__cache_artist_info, artist)
 
@@ -116,4 +116,4 @@ class InfoDownloader(Downloader):
             self.save_artist_information(artist, content)
         except Exception as e:
             Logger.info("InfoDownloader::__cache_artist_info(): %s" % e)
-        GLib.idle_add(self.emit, "artist-info-changed", artist)
+        emit_signal(self, "artist-info-changed", artist)

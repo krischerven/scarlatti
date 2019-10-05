@@ -15,6 +15,7 @@ from gi.repository import Gtk, Gdk, GLib, Gio, GdkPixbuf, GObject
 from gettext import gettext as _
 
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -213,7 +214,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         file_filter = Gtk.FileFilter.new()
         file_filter.add_pixbuf_formats()
         dialog.set_filter(file_filter)
-        self.emit("hidden", True)
+        emit_signal(self, "hidden", True)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self._save_from_filename(dialog.get_filename())

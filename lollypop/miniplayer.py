@@ -20,6 +20,7 @@ from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.utils import emit_signal
 
 
 class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
@@ -173,12 +174,12 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         """
         if self.__revealer.get_reveal_child():
             self.__revealer.set_reveal_child(False)
-            self.emit("revealed", False)
+            emit_signal(self, "revealed", False)
             self.__label_button_artwork.set_from_icon_name(
                 "pan-up-symbolic", Gtk.IconSize.BUTTON)
         else:
             self.__revealer.set_reveal_child(True)
-            self.emit("revealed", True)
+            emit_signal(self, "revealed", True)
             self.__progress_widget.update()
             self.__artwork_widget.update()
             self.__label_button_artwork.set_from_icon_name(

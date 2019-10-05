@@ -19,6 +19,7 @@ from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN, MARGIN_SMALL
 from lollypop.define import ViewType
 from lollypop.widgets_artwork_radio import RadioArtworkSearchWidget
 from lollypop.art import Art
+from lollypop.utils import emit_signal
 from lollypop.objects_radio import Radio
 
 
@@ -69,7 +70,8 @@ class RadioMenu(Gtk.Grid):
         if view_type & ViewType.ADAPTIVE:
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("hidden", True))
+            button.connect("clicked",
+                           lambda x: emit_signal(self, "hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -121,7 +123,7 @@ class RadioMenu(Gtk.Grid):
             @param widget as Gtk.Widget
         """
         self.__save_radio()
-        self.emit("hidden", True)
+        emit_signal(self, "hidden", True)
 
     def _on_delete_button_clicked(self, widget):
         """
@@ -136,7 +138,7 @@ class RadioMenu(Gtk.Grid):
             f = Gio.File.new_for_path(store + "/%s.png" % name)
             if f.query_exists():
                 f.delete()
-        self.emit("hidden", True)
+        emit_signal(self, "hidden", True)
 
     def _on_entry_changed(self, entry):
         """
@@ -164,7 +166,7 @@ class RadioMenu(Gtk.Grid):
         artwork_widget.populate()
         artwork_widget.show()
         artwork_widget.connect("hidden",
-                               lambda x, y: self.emit("hidden", True))
+                               lambda x, y: emit_signal(self, "hidden", True))
         self.__stack.add_named(artwork_widget, "artwork")
         self.__stack.set_visible_child_name("artwork")
 

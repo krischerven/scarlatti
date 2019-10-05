@@ -16,7 +16,7 @@ from lollypop.define import App, ScanType, AdaptiveSize
 from lollypop.container import Container
 from lollypop.toolbar import Toolbar
 from lollypop.adaptive import AdaptiveWindow
-from lollypop.utils import is_unity
+from lollypop.utils import is_unity, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
 
@@ -157,12 +157,12 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             miniplayer.set_vexpand(revealed)
             if revealed:
                 self.__container.hide()
-                self.__container.emit("can-go-back-changed", False)
+                emit_signal(self.__container, "can-go-back-changed", False)
                 self.toolbar.end.home_button.set_sensitive(False)
             else:
                 self.__container.show()
-                self.__container.emit("can-go-back-changed",
-                                      self.__container.can_go_back)
+                emit_signal(self.__container, "can-go-back-changed",
+                            self.__container.can_go_back)
                 self.toolbar.end.home_button.set_sensitive(True)
         if show and self.__miniplayer is None:
             from lollypop.miniplayer import MiniPlayer

@@ -13,7 +13,7 @@
 from gi.repository import Gtk, Gio, GObject, GLib
 
 from lollypop.define import App
-from lollypop.utils import is_device
+from lollypop.utils import is_device, emit_signal
 from lollypop.widgets_utils import Popover
 
 
@@ -81,7 +81,8 @@ class DevicesPopover(Popover):
         widget.show()
         self.__listbox.add(widget)
         self.__listbox.show()
-        self.emit("content-changed", len(self.__listbox.get_children()))
+        emit_signal(self, "content-changed",
+                    len(self.__listbox.get_children()))
 
     @property
     def devices(self):
@@ -132,7 +133,8 @@ class DevicesPopover(Popover):
             widget.show()
             self.__listbox.add(widget)
             self.__listbox.show()
-        self.emit("content-changed", len(self.__listbox.get_children()))
+        emit_signal(self, "content-changed",
+                    len(self.__listbox.get_children()))
 
     def __remove_device(self, mount):
         """
@@ -144,7 +146,8 @@ class DevicesPopover(Popover):
             if widget.uri == uri:
                 widget.disconnect_by_func(self.__on_syncing)
                 widget.destroy()
-        self.emit("content-changed", len(self.__listbox.get_children()))
+        emit_signal(self, "content-changed",
+                    len(self.__listbox.get_children()))
 
     def __update_progress(self):
         """

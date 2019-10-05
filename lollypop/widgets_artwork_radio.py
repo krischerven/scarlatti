@@ -15,6 +15,7 @@ from gi.repository import Gio, GObject
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
 from lollypop.define import App
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 
 
 class RadioArtworkSearchWidget(ArtworkSearchWidget):
@@ -79,6 +80,6 @@ class RadioArtworkSearchWidget(ArtworkSearchWidget):
             else:
                 App().task_helper.run(App().art.add_radio_artwork,
                                       self.__name, None)
-            self.emit("hidden", True)
+            emit_signal(self, "hidden", True)
         except Exception as e:
             Logger.error("RadioArtworkSearchWidget::_on_activate(): %s", e)

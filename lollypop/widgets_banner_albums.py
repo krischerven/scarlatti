@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, GObject
 from lollypop.define import App, ArtSize, ViewType, Type, MARGIN
 from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
-from lollypop.utils import update_button
+from lollypop.utils import update_button, emit_signal
 
 
 class AlbumsBannerWidget(BannerWidget):
@@ -124,11 +124,11 @@ class AlbumsBannerWidget(BannerWidget):
             Play playlist
             @param button as Gtk.Button
         """
-        self.emit("play-all", False)
+        emit_signal(self, "play-all", False)
 
     def __on_shuffle_button_clicked(self, button):
         """
             Play playlist shuffled
             @param button as Gtk.Button
         """
-        self.emit("play-all", True)
+        emit_signal(self, "play-all", True)

@@ -26,6 +26,7 @@ from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.objects_radio import Radio
 from lollypop.define import App, Type, LOLLYPOP_DATA_PATH
+from lollypop.utils import emit_signal
 
 
 class Player(BinPlayer, QueuePlayer, RadioPlayer,
@@ -54,7 +55,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         if self.position / Gst.SECOND > 2:
             self.seek(0)
-            GLib.idle_add(self.emit, "current-changed")
+            emit_signal(self, "current-changed")
             if not self.is_playing:
                 self.play()
         elif self._prev_track.id is not None:
@@ -85,7 +86,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                 BinPlayer.load(self, track)
             else:
                 BinPlayer._load_track(self, track)
-                GLib.idle_add(self.emit, "current-changed")
+                emit_signal(self, "current-changed")
 
     def add_album(self, album):
         """
@@ -98,7 +99,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self._albums[-1].set_tracks(tracks)
         else:
             self._albums.append(album)
-        GLib.idle_add(self.emit, "playback-changed")
+        emit_signal(self, "playback-changed")
 
     def remove_album(self, album):
         """
@@ -113,7 +114,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             else:
                 self.update_next_prev()
             self._albums.remove(album)
-            GLib.idle_add(self.emit, "playback-changed")
+            emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
@@ -126,7 +127,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             for album in self._albums:
                 if album.id == album_id:
                     self.remove_album(album)
-            GLib.idle_add(self.emit, "playback-changed")
+            emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album_by_id(): %s" % e)
 
@@ -145,10 +146,9 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
-        self.reset_history()
         self._albums = albums
         self.load(track)
-        GLib.idle_add(self.emit, "playback-changed")
+        emit_signal(self, "playback-changed")
 
     def play_album_for_albums(self, album, albums):
         """
@@ -158,12 +158,11 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         """
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
-        self.reset_history()
         if App().settings.get_value("shuffle"):
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
-        GLib.idle_add(self.emit, "playback-changed")
+        emit_signal(self, "playback-changed")
 
     def play_albums(self, albums):
         """
@@ -205,7 +204,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                 self.play_album(album)
             else:
                 self.add_album(album)
-        GLib.idle_add(self.emit, "playback-changed")
+        emit_signal(self, "playback-changed")
 
     def set_albums(self, albums):
         """
@@ -218,6 +217,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             Clear all albums
         """
         self._albums = []
+        emit_signal(self, "playback-changed")
 
     def stop_after(self, track_id):
         """
@@ -305,13 +305,12 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         if isinstance(self.current_track, Radio):
             return
         try:
-            prev_track = ShufflePlayer.prev(self)
-
-            # Get a linear track then
-            if prev_track.id is None:
+            if App().settings.get_value("shuffle") or self.__is_party:
+                prev_track = ShufflePlayer.prev(self)
+            else:
                 prev_track = LinearPlayer.prev(self)
             self._prev_track = prev_track
-            GLib.idle_add(self.emit, "prev-changed")
+            emit_signal(self, "prev-changed")
         except Exception as e:
             Logger.error("Player::set_prev(): %s" % e)
 
@@ -326,19 +325,15 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             return
         try:
             next_track = QueuePlayer.next(self)
-
-            # Look at shuffle
             if next_track.id is None:
-                next_track = ShufflePlayer.next(self)
-
-            # Get a linear track then
-            if next_track.id is None:
-                next_track = LinearPlayer.next(self)
-
+                if App().settings.get_value("shuffle") or self.__is_party:
+                    next_track = ShufflePlayer.next(self)
+                else:
+                    next_track = LinearPlayer.next(self)
             self._next_track = next_track
             if next_track.is_web:
                 App().task_helper.run(self._load_from_web, next_track, False)
-            GLib.idle_add(self.emit, "next-changed")
+            emit_signal(self, "next-changed")
         except Exception as e:
             Logger.error("Player::set_next(): %s" % e)
 
@@ -351,7 +346,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             if self.is_party or App().settings.get_value("shuffle"):
                 self.set_next()
                 # We send this signal to update next popover
-                GLib.idle_add(self.emit, "queue-changed")
+                emit_signal(self, "queue-changed")
             elif self._current_track.id is not None:
                 index = self.album_ids.index(
                     App().player._current_playback_track.album.id)
@@ -454,8 +449,8 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self._current_playback_track = self._current_track
         ShufflePlayer._on_stream_start(self, bus, message)
         BinPlayer._on_stream_start(self, bus, message)
-        self.set_prev()
         self.set_next()
+        self.set_prev()
 
 #######################
 # PRIVATE             #

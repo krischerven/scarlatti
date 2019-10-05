@@ -13,6 +13,7 @@
 from gi.repository import Gio, GObject, Gtk
 
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
 from lollypop.define import App, ViewType, ArtSize, ArtBehaviour, MARGIN
 from lollypop.define import MARGIN_SMALL
@@ -43,7 +44,8 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             self.set_margin_bottom(MARGIN)
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("hidden", True))
+            button.connect("clicked",
+                           lambda x: emit_signal(self, "hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -120,7 +122,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             else:
                 App().task_helper.run(App().art.add_artist_artwork,
                                       self.__artist, None)
-            self.emit("hidden", True)
+            emit_signal(self, "hidden", True)
         except Exception as e:
             Logger.error("ArtistArtworkSearchWidget::_on_activate(): %s", e)
 

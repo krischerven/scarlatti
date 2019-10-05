@@ -20,6 +20,7 @@ except:
     pass
 
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 
 
 class GoaSyncedAccount(GObject.Object):
@@ -47,7 +48,7 @@ class GoaSyncedAccount(GObject.Object):
         try:
             self._client = Goa.Client.new_sync()
             self.__find_account()
-            self.emit("account-switched")
+            emit_signal(self, "account-switched")
             self._client.connect("account-added", self.__on_account_added)
             self._client.connect("account-removed", self.__on_account_removed)
             self._client.connect("account-changed", self.__on_account_changed)
@@ -126,7 +127,7 @@ class GoaSyncedAccount(GObject.Object):
         Logger.debug("GOA account added")
         if self._proxy is None and self.__account_matches_provider(proxy):
             self._proxy = proxy
-            self.emit("account-switched")
+            emit_signal(self, "account-switched")
 
     def __on_account_removed(self, client, proxy):
         """
@@ -137,7 +138,7 @@ class GoaSyncedAccount(GObject.Object):
         Logger.debug("GOA account removed")
         if self._proxy == proxy:
             self.__find_account()
-            self.emit("account-switched")
+            emit_signal(self, "account-switched")
 
     def __on_account_changed(self, client, proxy):
         """

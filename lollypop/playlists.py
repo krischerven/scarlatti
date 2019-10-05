@@ -25,7 +25,7 @@ from lollypop.objects_track import Track
 from lollypop.sqlcursor import SqlCursor
 from lollypop.localized import LocalizedCollation
 from lollypop.shown import ShownPlaylists
-from lollypop.utils import get_mtime
+from lollypop.utils import get_mtime, emit_signal
 from lollypop.logger import Logger
 from lollypop.database_upgrade import DatabasePlaylistsUpgrade
 
@@ -108,7 +108,7 @@ class Playlists(GObject.GObject):
             result = sql.execute("INSERT INTO playlists (name, mtime)\
                                   VALUES (?, ?)",
                                  (name, 0))
-            GLib.idle_add(self.emit, "playlists-changed", result.lastrowid)
+            emit_signal(self, "playlists-changed", result.lastrowid)
             return result.lastrowid
 
     def exists(self, playlist_id):
@@ -138,7 +138,7 @@ class Playlists(GObject.GObject):
                         SET name=?\
                         WHERE rowid=?",
                         (name, playlist_id))
-        GLib.idle_add(self.emit, "playlists-changed", playlist_id)
+        emit_signal(self, "playlists-changed", playlist_id)
         App().art.remove_artwork_from_cache("ROUNDED_%s" % name)
 
     def remove(self, playlist_id):
@@ -153,7 +153,7 @@ class Playlists(GObject.GObject):
             sql.execute("DELETE FROM tracks\
                         WHERE playlist_id=?",
                         (playlist_id,))
-            GLib.idle_add(self.emit, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-changed", playlist_id)
 
     def clear(self, playlist_id):
         """
@@ -175,7 +175,7 @@ class Playlists(GObject.GObject):
         if self.exists_track(playlist_id, uri):
             return
         if signal:
-            self.emit("playlist-track-added", playlist_id, uri)
+            emit_signal(self, "playlist-track-added", playlist_id, uri)
         with SqlCursor(self, True) as sql:
             sql.execute("INSERT INTO tracks VALUES (?, ?)", (playlist_id, uri))
 
@@ -211,7 +211,7 @@ class Playlists(GObject.GObject):
         if not self.exists_track(playlist_id, uri):
             return
         if signal:
-            self.emit("playlist-track-removed", playlist_id, uri)
+            emit_signal(self, "playlist-track-removed", playlist_id, uri)
         with SqlCursor(self, True) as sql:
             sql.execute("DELETE FROM tracks WHERE uri=? AND playlist_id=?",
                         (uri, playlist_id))
@@ -511,7 +511,7 @@ class Playlists(GObject.GObject):
                         SET smart_enabled=?\
                         WHERE rowid=?",
                         (smart, playlist_id))
-            GLib.idle_add(self.emit, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-changed", playlist_id)
 
     def set_smart_sql(self, playlist_id, request):
         """
@@ -524,7 +524,7 @@ class Playlists(GObject.GObject):
                         SET smart_sql=?\
                         WHERE rowid=?",
                         (request, playlist_id))
-            GLib.idle_add(self.emit, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-changed", playlist_id)
 
     def get_position(self, playlist_id, track_id):
         """

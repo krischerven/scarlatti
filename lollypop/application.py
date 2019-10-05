@@ -32,7 +32,7 @@ except Exception as e:
 
 from lollypop.utils import set_proxy_from_gnome, install_youtube_dl
 from lollypop.application_actions import ApplicationActions
-from lollypop.utils import is_audio, is_pls
+from lollypop.utils import is_audio, is_pls, emit_signal
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
 from lollypop.database import Database
 from lollypop.player import Player
@@ -552,8 +552,8 @@ class Application(Gtk.Application, ApplicationActions):
             elif self.__window is not None:
                 if not self.__window.is_visible():
                     self.__window.present()
-                    self.player.emit("status-changed")
-                    self.player.emit("current-changed")
+                    emit_signal(self.player, "status-changed")
+                    emit_signal(self.player, "current-changed")
             Gdk.notify_startup_complete()
         except Exception as e:
             Logger.error("Application::__on_command_line(): %s", e)

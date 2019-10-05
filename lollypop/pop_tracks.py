@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.view_tracks import TracksView
 from lollypop.define import App, ViewType, ArtSize, ArtBehaviour
 from lollypop.define import MARGIN_SMALL, Size
+from lollypop.utils import emit_signal
 from lollypop.widgets_utils import Popover
 from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -198,7 +199,7 @@ class TracksPopover(Popover, ViewController, SizeAllocationHelper):
         self.__show_append(False)
         if App().player.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
-        self.emit("play-all-from")
+        emit_signal(self, "play-all-from")
 
     def __on_album_artwork(self, surface):
         """

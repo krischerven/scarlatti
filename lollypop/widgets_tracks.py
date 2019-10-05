@@ -13,7 +13,7 @@
 from gi.repository import GObject, Gtk, Gdk
 
 from lollypop.define import App, ViewType
-from lollypop.utils import do_shift_selection
+from lollypop.utils import do_shift_selection, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -101,16 +101,14 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
                 self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
                 do_shift_selection(self, row)
             else:
-                App().player.append_to_queue(row.track.id, False)
-                App().player.emit("queue-changed")
+                App().player.append_to_queue(row.track.id, True)
         elif event.state & Gdk.ModifierType.MOD1_MASK:
             self.set_selection_mode(Gtk.SelectionMode.NONE)
             App().player.clear_albums()
-            App().player.reset_history()
             App().player.load(row.track)
         else:
             self.set_selection_mode(Gtk.SelectionMode.NONE)
-            self.emit("activated", row.track)
+            emit_signal(self, "activated", row.track)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """

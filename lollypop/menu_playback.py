@@ -15,7 +15,7 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.define import App
-from lollypop.utils import tracks_to_albums
+from lollypop.utils import tracks_to_albums, emit_signal
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 
@@ -512,7 +512,7 @@ class TrackPlaybackMenu(BasePlaybackMenu):
             @param GLib.Variant
         """
         App().player.append_to_queue(self.__track.id, False)
-        App().player.emit("queue-changed")
+        emit_signal(App().player, "queue-changed")
 
     def __remove_from_queue(self, action, variant):
         """
@@ -521,4 +521,4 @@ class TrackPlaybackMenu(BasePlaybackMenu):
             @param GLib.Variant
         """
         App().player.remove_from_queue(self.__track.id, False)
-        App().player.emit("queue-changed")
+        emit_signal(App().player, "queue-changed")

@@ -10,9 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
-import random
+from random import shuffle, random
 
 from lollypop.define import Repeat, App
 from lollypop.player_base import BasePlayer
@@ -20,6 +18,7 @@ from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
 from lollypop.objects_album import Album
 from lollypop.list import LinkedList
+from lollypop.utils import emit_signal
 from lollypop.logger import Logger
 
 
@@ -34,21 +33,18 @@ class ShufflePlayer(BasePlayer):
             Init shuffle player
         """
         BasePlayer.__init__(self)
-        # Party mode
-        self.__is_party = False
-        self.reset_history()
-        App().settings.connect("changed::shuffle", self.__set_shuffle)
-
-    def reset_history(self):
-        """
-            Reset history
-        """
+        # Albums to play, different from _albums for a better shuffle
+        self.__to_play_albums = []
+        # Albums who never have been played
+        self.__not_played_albums = []
         # Tracks already played
         self.__history = []
-        # Albums already played
-        self.__already_played_albums = []
-        # Tracks already played for albums
+        # Tracks already played by albums
         self.__already_played_tracks = {}
+        # Party mode
+        self.__is_party = False
+        App().settings.connect("changed::shuffle", self.__set_shuffle)
+        self.connect("playback-changed", self.__on_playback_changed)
 
     def next(self):
         """
@@ -58,12 +54,10 @@ class ShufflePlayer(BasePlayer):
         repeat = App().settings.get_enum("repeat")
         if repeat == Repeat.TRACK:
             return self._current_playback_track
-        track = Track()
-        if App().settings.get_value("shuffle") or self.__is_party:
-            if self.shuffle_has_next:
-                track = self.__history.next.value
-            elif self._albums:
-                track = self.__get_next()
+        if self.shuffle_has_next:
+            track = self.__history.next.value
+        elif self._albums:
+            track = self.__get_next()
         return track
 
     def prev(self):
@@ -74,12 +68,10 @@ class ShufflePlayer(BasePlayer):
         repeat = App().settings.get_enum("repeat")
         if repeat == Repeat.TRACK:
             return self._current_playback_track
-        track = Track()
-        if App().settings.get_value("shuffle") or self.__is_party:
-            if self.shuffle_has_prev:
-                track = self.__history.prev.value
-            else:
-                track = self._current_playback_track
+        if self.shuffle_has_prev:
+            track = self.__history.prev.value
+        else:
+            track = self._current_playback_track
         return track
 
     def set_party(self, party):
@@ -91,7 +83,6 @@ class ShufflePlayer(BasePlayer):
         if party == self.__is_party:
             return
         self.__is_party = party
-        self.reset_history()
 
         if self._plugins1.rgvolume is not None and\
            self._plugins2.rgvolume is not None:
@@ -115,11 +106,10 @@ class ShufflePlayer(BasePlayer):
         else:
             # We want current album to continue playback
             self._albums = [self._current_playback_track.album]
+            emit_signal(self, "playback-changed")
         if self._current_playback_track.id is not None:
             self.set_next()
             self.set_prev()
-        GLib.idle_add(self.emit, "party-changed", party)
-        GLib.idle_add(self.emit, "playback-changed")
 
     def set_party_ids(self):
         """
@@ -133,6 +123,7 @@ class ShufflePlayer(BasePlayer):
         for album_id in album_ids:
             album = Album(album_id, [], [], True)
             self._albums.append(album)
+        emit_signal(self, "playback-changed")
 
     @property
     def is_party(self):
@@ -195,7 +186,6 @@ class ShufflePlayer(BasePlayer):
                 # Initial history
                 new_list = LinkedList(self._current_playback_track)
                 self.__history = new_list
-            self.__add_to_shuffle_history(self._current_playback_track)
 
 #######################
 # PRIVATE             #
@@ -229,8 +219,10 @@ class ShufflePlayer(BasePlayer):
                     # All track dones
                     # Try to get another one track after reseting history
                     if track.id is None:
-                        self.__already_played_albums = []
-                        self.__already_played_tracks = {}
+                        self.__to_play_albums = list(self._albums)
+                        shuffle(self.__to_play_albums)
+                        self.__not_played_albums = list(
+                            self.__not_played_albums)
                         self.__history = []
                         repeat = App().settings.get_enum("repeat")
                         if repeat == Repeat.ALL:
@@ -245,26 +237,47 @@ class ShufflePlayer(BasePlayer):
             Return a random track and make sure it has never been played
             @return Track
         """
-        for album in sorted(self._albums, key=lambda *args: random.random()):
+        # True if all albums have been played on time
+        if not self.__not_played_albums:
+            self.__not_played_albums = list(self.__to_play_albums)
+        for album in self.__not_played_albums:
             for track in sorted(album.tracks,
-                                key=lambda *args: random.random()):
-                # Ignore current track, not an issue if playing one track
-                # in shuffle because LinearPlayer will handle next()
-                if track != App().player.current_track and (
-                        album not in self.__already_played_tracks.keys() or
-                        track not in self.__already_played_tracks[album]):
+                                key=lambda *args: random()):
+                if not self.__in_shuffle_history(track):
+                    self.__add_to_shuffle_history(track)
+                    self.__not_played_albums.remove(album)
                     return track
-            if album in self.__already_played_tracks.keys():
-                self.__already_played_tracks.pop(album)
-                self.__already_played_albums.append(album)
+            self.__to_play_albums.remove(album)
         return Track()
+
+    def __in_shuffle_history(self, track):
+        """
+            True if track in shuffle history
+            @param track as Track
+            @return bool
+        """
+        return track.album.id in self.__already_played_tracks.keys() and\
+            track.id in self.__already_played_tracks[track.album.id]
 
     def __add_to_shuffle_history(self, track):
         """
             Add a track to shuffle history
             @param track as Track
         """
-        if track.album not in self.__already_played_tracks.keys():
-            self.__already_played_tracks[track.album] = []
-        if track not in self.__already_played_tracks[track.album]:
-            self.__already_played_tracks[track.album].append(track)
+        if track.album.id not in self.__already_played_tracks.keys():
+            self.__already_played_tracks[track.album.id] = []
+        if track not in self.__already_played_tracks[track.album.id]:
+            self.__already_played_tracks[track.album.id].append(track.id)
+
+    def __on_playback_changed(self, player):
+        """
+            Reset history
+            @param player as Player
+        """
+        self.__to_play_albums = list(self._albums)
+        shuffle(self.__to_play_albums)
+        self.__not_played_albums = list(self.__not_played_albums)
+        self.__history = []
+        self.__already_played_tracks = {}
+        if App().player.current_track.id is not None:
+            self.__add_to_shuffle_history(App().player.current_track)

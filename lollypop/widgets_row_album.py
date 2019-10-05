@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.view_tracks import TracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL
 from lollypop.define import ArtBehaviour, StorageType
-from lollypop.utils import popup_widget
+from lollypop.utils import popup_widget, emit_signal
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -350,7 +350,7 @@ class AlbumRow(Gtk.ListBoxRow):
         self.show_all()
         # TracksView will not emit populated
         if not self.revealed:
-            self.emit("populated")
+            emit_signal(self, "populated")
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """
@@ -384,7 +384,7 @@ class AlbumRow(Gtk.ListBoxRow):
         """
             Pass signal
         """
-        self.emit("activated", track)
+        emit_signal(self, "activated", track)
 
     def __on_tracks_view_track_removed(self, view, row):
         """
@@ -393,7 +393,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param row as TrackRow
         """
         row.destroy()
-        self.emit("track-removed", len(self.children) == 0)
+        emit_signal(self, "track-removed", len(self.children) == 0)
 
     def __on_tracks_view_populated(self, view):
         """
@@ -404,4 +404,4 @@ class AlbumRow(Gtk.ListBoxRow):
         if self.revealed and not self.__tracks_view.is_populated:
             self.__tracks_view.populate()
         else:
-            self.emit("populated")
+            emit_signal(self, "populated")

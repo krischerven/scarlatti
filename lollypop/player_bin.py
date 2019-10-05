@@ -22,6 +22,7 @@ from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
+from lollypop.utils import emit_signal
 
 
 class BinPlayer(BasePlayer):
@@ -96,7 +97,7 @@ class BinPlayer(BasePlayer):
                 self.load(self._next_track)
         else:
             self._playbin.set_state(Gst.State.PLAYING)
-            GLib.idle_add(self.emit, "status-changed")
+            emit_signal(self, "status-changed")
 
     def pause(self):
         """
@@ -106,7 +107,7 @@ class BinPlayer(BasePlayer):
             self._playbin.set_state(Gst.State.NULL)
         else:
             self._playbin.set_state(Gst.State.PAUSED)
-        GLib.idle_add(self.emit, "status-changed")
+        emit_signal(self, "status-changed")
 
     def stop(self, force=False):
         """
@@ -115,15 +116,14 @@ class BinPlayer(BasePlayer):
         """
         self._current_track = Track()
         self._playbin.set_state(Gst.State.NULL)
-        GLib.idle_add(self.emit, "status-changed")
-        GLib.idle_add(self.emit, "current-changed")
+        emit_signal(self, "status-changed")
+        emit_signal(self, "current-changed")
         if force:
             self._prev_track = Track()
             self._next_track = Track()
-            GLib.idle_add(App().player.emit, "prev-changed")
-            GLib.idle_add(App().player.emit, "next-changed")
-            self._albums = []
-            self.reset_history()
+            emit_signal(self, "prev-changed")
+            emit_signal(self, "next-changed")
+            self.clear_albums()
 
     def stop_all(self):
         """
@@ -169,7 +169,7 @@ class BinPlayer(BasePlayer):
                                       Gst.SeekFlags.FLUSH |
                                       Gst.SeekFlags.KEY_UNIT,
                                       position * Gst.SECOND)
-            GLib.idle_add(self.emit, "seeked", position)
+            emit_signal(self, "seeked", position)
 
     @property
     def plugins(self):
@@ -259,13 +259,13 @@ class BinPlayer(BasePlayer):
             self.__cancellable.cancel()
             self.__cancellable = Gio.Cancellable()
             if self._current_track.is_web:
-                GLib.idle_add(self.emit, "loading-changed", False, track)
+                emit_signal(self, "loading-changed", False, track)
             self._current_track = track
             # We check track is URI track, if yes, do a load from Web
             # Will not work if we add another music provider one day
             track_uri = App().tracks.get_uri(track.id)
             if track.is_web and track.uri == track_uri:
-                GLib.idle_add(self.emit, "loading-changed", True, track)
+                emit_signal(self, "loading-changed", True, track)
                 App().task_helper.run(self._load_from_web, track)
                 return False
             else:
@@ -322,14 +322,12 @@ class BinPlayer(BasePlayer):
             @param message as Gst.Message
         """
         if self._current_track.is_web:
-            GLib.idle_add(self.emit,
-                          "loading-changed",
-                          False,
-                          self._current_track.album)
+            emit_signal(self, "loading-changed", False,
+                        self._current_track.album)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)
-        GLib.idle_add(self.emit, "current-changed")
+        emit_signal(self, "current-changed")
         for scrobbler in App().scrobblers:
             if scrobbler.available:
                 scrobbler.playing_now(self._current_track)
@@ -350,7 +348,7 @@ class BinPlayer(BasePlayer):
         title = reader.get_title(tags, "")
         if len(title) > 1 and self._current_track.artists != [title]:
             self._current_track.artists = [title]
-            GLib.idle_add(self.emit, "current-changed")
+            emit_signal(self, "current-changed")
 
     def _on_bus_element(self, bus, message):
         """
@@ -368,10 +366,8 @@ class BinPlayer(BasePlayer):
             @param message as Gst.Message
         """
         if self._current_track.is_web:
-            GLib.idle_add(self.emit,
-                          "loading-changed",
-                          False,
-                          self.current_track.album)
+            emit_signal(self, "loading-changed", False,
+                        self._current_track.album)
         Logger.info("Player::_on_bus_error(): %s" % message.parse_error()[1])
         if self.current_track.id is not None and self.current_track.id >= 0:
             if self.__codecs.is_missing_codec(message):
@@ -555,7 +551,7 @@ class BinPlayer(BasePlayer):
             if duration != track.duration and duration > 0:
                 App().tracks.set_duration(track.id, int(duration))
                 track.reset("duration")
-                GLib.idle_add(self.emit, "duration-changed", track.id)
+                emit_signal(self, "duration-changed", track.id)
         except Exception as e:
             Logger.error("BinPlayer::__update_current_duration(): %s" % e)
 
@@ -571,4 +567,4 @@ class BinPlayer(BasePlayer):
         else:
             vol = self.__playbin2.get_volume(GstAudio.StreamVolumeFormat.CUBIC)
             self.__playbin1.set_volume(GstAudio.StreamVolumeFormat.CUBIC, vol)
-        GLib.idle_add(self.emit, "volume-changed")
+        emit_signal(self, "volume-changed")

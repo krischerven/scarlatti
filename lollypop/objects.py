@@ -14,6 +14,7 @@
 from lollypop.radios import Radios
 from lollypop.logger import Logger
 from lollypop.define import App, Type
+from lollypop.utils import emit_signal
 
 
 class Base:
@@ -132,7 +133,7 @@ class Base:
         if self.id == Type.RADIOS:
             radios = Radios()
             radios.set_rate(self._radio_id, rate)
-            App().player.emit("rate-changed", self._radio_id, rate)
+            emit_signal(App().player, "rate-changed", self._radio_id, rate)
         else:
             self.db.set_rate(self.id, rate)
-            App().player.emit("rate-changed", self.id, rate)
+            emit_signal(App().player, "rate-changed", self.id, rate)

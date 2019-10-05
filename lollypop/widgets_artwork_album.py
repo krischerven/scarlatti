@@ -15,6 +15,7 @@ from gi.repository import Gio, GObject, Gtk
 from gettext import gettext as _
 
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
 from lollypop.define import App, Type, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.define import ArtBehaviour, ArtSize
@@ -45,7 +46,8 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             self.set_margin_bottom(MARGIN)
             button = Gtk.ModelButton.new()
             button.set_alignment(0, 0.5)
-            button.connect("clicked", lambda x: self.emit("hidden", True))
+            button.connect("clicked",
+                           lambda x: emit_signal(self, "hidden", True))
             button.show()
             label = Gtk.Label.new()
             label.show()
@@ -156,8 +158,9 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
                 App().art.remove_album_artwork(self.__album)
                 App().art.save_album_artwork(None, self.__album)
                 App().art.clean_album_cache(self.__album)
-                App().art.emit("album-artwork-changed", self.__album.id)
-            self.emit("hidden", True)
+                emit_signal(App().art, "album-artwork-changed",
+                            self.__album.id)
+            emit_signal(self, "hidden", True)
         except Exception as e:
             Logger.error("AlbumArtworkSearchWidget::_on_activate(): %s", e)
 

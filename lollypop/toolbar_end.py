@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.pop_devices import DevicesPopover
 from lollypop.define import App, Repeat, Type
-from lollypop.utils import popup_widget
+from lollypop.utils import popup_widget, emit_signal
 from lollypop.progressbar import ButtonProgressBar
 
 
@@ -141,7 +141,7 @@ class ToolbarEnd(Gtk.Bin):
         """
         if button.get_active():
             if self.__app_menu is not None:
-                self.__app_menu.emit("hidden", True)
+                emit_signal(self.__app_menu, "hidden", True)
             self.__party_submenu.remove_all()
             self.__init_party_submenu()
             from lollypop.widgets_menu import MenuBuilder
@@ -155,7 +155,7 @@ class ToolbarEnd(Gtk.Bin):
             else:
                 popover.connect("hidden", self.__on_menu_hidden, button)
         elif self.__playback_menu is not None and App().window.is_adaptive:
-            self.__playback_menu.emit("hidden", True)
+            emit_signal(self.__playback_menu, "hidden", True)
 
     def _on_devices_button_toggled(self, button):
         """
@@ -174,7 +174,7 @@ class ToolbarEnd(Gtk.Bin):
         from lollypop.menu_application import ApplicationMenu
         if button.get_active():
             if self.__playback_menu is not None:
-                self.__playback_menu.emit("hidden", True)
+                emit_signal(self.__playback_menu, "hidden", True)
             self.__app_menu = ApplicationMenu()
             self.__app_menu.show()
             popover = popup_widget(self.__app_menu, button)
@@ -185,7 +185,7 @@ class ToolbarEnd(Gtk.Bin):
             else:
                 popover.connect("hidden", self.__on_menu_hidden, button)
         elif self.__app_menu is not None and App().window.is_adaptive:
-            self.__app_menu.emit("hidden", True)
+            emit_signal(self.__app_menu, "hidden", True)
 
 #######################
 # PRIVATE             #

@@ -14,7 +14,7 @@ from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
 
 from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
-from lollypop.utils import get_round_surface
+from lollypop.utils import get_round_surface, emit_signal
 from lollypop.menu_header import HeaderType
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -141,7 +141,8 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button.set_label(text.get_string())
         button.set_alignment(0, 0.5)
         if close:
-            button.connect("clicked", lambda x: self.emit("hidden", True))
+            button.connect("clicked",
+                           lambda x: emit_signal(self, "hidden", True))
         if tooltip is not None:
             button.set_tooltip_markup(tooltip.get_string())
             button.set_has_tooltip(True)
@@ -200,7 +201,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("hidden", True))
+        button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
@@ -226,7 +227,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("hidden", True))
+        button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
@@ -257,7 +258,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("hidden", True))
+        button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
@@ -302,7 +303,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 artwork.show()
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)
-        button.connect("clicked", lambda x: self.emit("hidden", True))
+        button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
