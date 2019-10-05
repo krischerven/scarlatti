@@ -78,14 +78,12 @@ class InformationView(View):
         self.__cancellable = Gio.Cancellable()
         self.__minimal = minimal
         self.__artist_name = ""
-        self.__artist_id = None
 
     def populate(self, artist_id=None):
         """
             Show information for artists
             @param artist_id as int
         """
-        self.__artist_id = artist_id
         builder = Gtk.Builder()
         builder.add_from_resource(
             "/org/gnome/Lollypop/ArtistInformation.ui")
