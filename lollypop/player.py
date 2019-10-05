@@ -305,7 +305,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         if isinstance(self.current_track, Radio):
             return
         try:
-            if App().settings.get_value("shuffle") or self.__is_party:
+            if App().settings.get_value("shuffle") or self.is_party:
                 prev_track = ShufflePlayer.prev(self)
             else:
                 prev_track = LinearPlayer.prev(self)
@@ -326,7 +326,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         try:
             next_track = QueuePlayer.next(self)
             if next_track.id is None:
-                if App().settings.get_value("shuffle") or self.__is_party:
+                if App().settings.get_value("shuffle") or self.is_party:
                     next_track = ShufflePlayer.next(self)
                 else:
                     next_track = LinearPlayer.next(self)
