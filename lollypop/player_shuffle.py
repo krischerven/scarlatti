@@ -240,15 +240,18 @@ class ShufflePlayer(BasePlayer):
         # True if all albums have been played on time
         if not self.__not_played_albums:
             self.__not_played_albums = list(self.__to_play_albums)
-        for album in self.__not_played_albums:
+        while self.__not_played_albums:
+            album = self.__not_played_albums.pop(0)
             for track in sorted(album.tracks,
                                 key=lambda *args: random()):
                 if not self.__in_shuffle_history(track):
                     self.__add_to_shuffle_history(track)
-                    self.__not_played_albums.remove(album)
                     return track
             self.__to_play_albums.remove(album)
-        return Track()
+        if self.__to_play_albums:
+            return self.__get_tracks_random()
+        else:
+            return Track()
 
     def __in_shuffle_history(self, track):
         """
