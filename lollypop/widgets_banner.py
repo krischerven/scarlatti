@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, GObject, GLib
+from gi.repository import Gtk, Gdk, GObject
 
 from lollypop.define import ArtSize, ViewType, MARGIN, App
 from lollypop.utils import emit_signal
@@ -64,7 +64,6 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             @param view_type as ViewType
         """
         Gtk.Revealer.__init__(self)
-        self.__scroll_timeout_id = None
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
         self._overlay = Overlay(self)
@@ -138,10 +137,4 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             @param x as int
             @param y as int
         """
-        def emit_scroll(x, y):
-            self.__scroll_timeout_id = None
-            emit_signal(self, "scroll", x, y)
-
-        if self.__scroll_timeout_id is not None:
-            GLib.source_remove(self.__scroll_timeout_id)
-        self.__scroll_timeout_id = GLib.timeout_add(10, emit_scroll, x, y)
+        emit_signal(self, "scroll", x, y)
