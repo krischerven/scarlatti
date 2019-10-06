@@ -610,7 +610,13 @@ class CollectionScanner(GObject.GObject, TagReader):
                             in_collection = True
                             break
                 f = Gio.File.new_for_uri(uri)
-                if not in_collection or not f.query_exists():
+                if not in_collection:
+                    Logger.warning(
+                        "Removed, not in collection anymore: %s -> %s",
+                        uri, collections)
+                    self.del_from_db(uri, True)
+                elif not f.query_exists():
+                    Logger.warning("Removed, file has been deleted: %s", uri)
                     self.del_from_db(uri, True)
 
     def __add2db(self, discoverer, uri,
