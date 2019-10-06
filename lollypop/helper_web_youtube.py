@@ -32,7 +32,7 @@ class YouTubeHelper:
         """
             Init heApper
         """
-        self.__fallback = False
+        pass
 
     def get_uri(self, track, cancellable):
         """
@@ -41,14 +41,7 @@ class YouTubeHelper:
             @return uri as str
             @param cancellable as Gio.Cancellable
         """
-        youtube_id = None
-        if self.__fallback:
-            if get_network_available("STARTPAGE"):
-                youtube_id = self.__get_youtube_id_start(track, cancellable)
-            elif get_network_available("DUCKDUCKGO"):
-                youtube_id = self.__get_youtube_id_duckduck(track, cancellable)
-        else:
-            youtube_id = self.__get_youtube_id(track, cancellable)
+        youtube_id = self.__get_youtube_id(track, cancellable)
         if youtube_id is None:
             return ""
         else:
@@ -133,8 +126,10 @@ class YouTubeHelper:
                     return dic[best]
         except:
             Logger.warning("YouTubeHelper::__get_youtube_id(): %s", data)
-            self.__fallback = True
-            return self.get_uri(track, cancellable)
+            if get_network_available("STARTPAGE"):
+                return self.__get_youtube_id_start(track, cancellable)
+            elif get_network_available("DUCKDUCKGO"):
+                return self.__get_youtube_id_duckduck(track, cancellable)
         return None
 
     def __get_youtube_id_start(self, track, cancellable):
