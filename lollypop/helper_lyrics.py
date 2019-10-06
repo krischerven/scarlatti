@@ -79,7 +79,7 @@ class LyricsHelper:
             current = ""
         return (previous, [" ", current, " "], next)
 
-    def get_lyrics_from_web(self, track, callback):
+    def get_lyrics_from_web(self, track, callback, *args):
         """
             Get lyrics from web for track
             @param track as Track
@@ -92,9 +92,9 @@ class LyricsHelper:
         if get_network_available("GENIUS"):
             methods.append(self.__download_genius_lyrics)
         if methods:
-            self.__get_lyrics_from_web(track, methods, callback)
+            self.__get_lyrics_from_web(track, methods, callback, *args)
         else:
-            callback(None)
+            callback(None, *args)
 
     def cancel(self):
         """
@@ -149,7 +149,7 @@ class LyricsHelper:
         except Exception as e:
             Logger.error("SyncLyricsHelper::__get_timestamps(): %s", e)
 
-    def __get_lyrics_from_web(self, track, methods, callback):
+    def __get_lyrics_from_web(self, track, methods, callback, *args):
         """
             Get lyrics from web for track
             @param track as Track
@@ -158,9 +158,9 @@ class LyricsHelper:
         """
         if methods:
             method = methods.pop(0)
-            method(track, methods, callback)
+            method(track, methods, callback, *args)
         else:
-            callback("")
+            callback("", *args)
 
     def __get_title(self, track, escape=False):
         """
@@ -205,7 +205,7 @@ class LyricsHelper:
         else:
             return artist
 
-    def __download_wikia_lyrics(self, track, methods, callback):
+    def __download_wikia_lyrics(self, track, methods, callback, *args):
         """
             Downloas lyrics from wikia
             @param track as Track
@@ -223,9 +223,10 @@ class LyricsHelper:
                                 "\n",
                                 track,
                                 methods,
-                                callback)
+                                callback,
+                                *args)
 
-    def __download_genius_lyrics(self, track, methods, callback):
+    def __download_genius_lyrics(self, track, methods, callback, *args):
         """
             Download lyrics from genius
             @param track as Track
@@ -244,10 +245,11 @@ class LyricsHelper:
                                 "",
                                 track,
                                 methods,
-                                callback)
+                                callback,
+                                *args)
 
     def __on_lyrics_downloaded(self, uri, status, data, cls, separator,
-                               track, methods, callback):
+                               track, methods, callback, *args):
         """
             Search lyrics and pass to callback
             @param uri as str
@@ -265,8 +267,8 @@ class LyricsHelper:
                 soup = BeautifulSoup(data, 'html.parser')
                 lyrics = soup.find_all(
                     "div", class_=cls)[0].get_text(separator=separator)
-                callback(lyrics)
+                callback(lyrics, *args)
                 return
             except Exception as e:
                 Logger.warning("LyricsView::__on_lyrics_downloaded(): %s", e)
-        self.__get_lyrics_from_web(track, methods, callback)
+        self.__get_lyrics_from_web(track, methods, callback, *args)

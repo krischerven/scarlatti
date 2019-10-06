@@ -84,6 +84,13 @@ class Track(Base):
         """
         self._number = number
 
+    def set_name(self, name):
+        """
+            Set name
+            @param name as str
+        """
+        self._name = name
+
     def set_loved(self, loved):
         """
             Mark album as loved

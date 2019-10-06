@@ -79,6 +79,8 @@ class LyricsView(View, SignalsHelper):
         Show lyrics for track
     """
 
+    __FILTERS = ["[explicit]", "(explicit)"]
+
     # TODO add https://www.musixmatch.com support
     @signals_map
     def __init__(self):
@@ -143,7 +145,9 @@ class LyricsView(View, SignalsHelper):
                 self.__lyrics_label.set_text(lyrics)
             else:
                 self.__lyrics_helper.get_lyrics_from_web(track,
-                                                         self.__on_lyrics)
+                                                         self.__on_lyrics,
+                                                         False,
+                                                         track)
 
     @property
     def args(self):
@@ -260,16 +264,28 @@ class LyricsView(View, SignalsHelper):
         elif self.__lyrics_helper.available:
             context.add_class("text-medium")
 
-    def __on_lyrics(self, lyrics):
+    def __on_lyrics(self, lyrics, filtered, track):
         """
             Set lyrics
             @param lyrics as str/None
+            @param filtered as bool
+            @param track as Track
         """
         if lyrics is None:
             self.__lyrics_label.set_text(
                     _("You have disabled lyrics search in network settings !"))
         elif lyrics == "":
-            self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
+            if filtered:
+                self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
+            else:
+                name = track.name.lower()
+                for _filter in self.__FILTERS:
+                    name = name.replace(_filter, "")
+                track.set_name(name)
+                self.__lyrics_helper.get_lyrics_from_web(track,
+                                                         self.__on_lyrics,
+                                                         True,
+                                                         track)
         else:
             self.__lyrics_label.set_text(lyrics)
             self.__banner.translate_button.set_sensitive(True)
