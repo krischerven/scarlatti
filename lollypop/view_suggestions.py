@@ -45,7 +45,6 @@ class SuggestionsView(FilteringHelper, View):
         if album is not None:
             self.__banner = TodayBannerWidget(album, self._view_type)
             self.__banner.show()
-            self.__banner.connect("scroll", self._on_banner_scroll)
         else:
             self.__banner = None
         self.add_widget(self.__grid, self.__banner)
@@ -145,20 +144,3 @@ class SuggestionsView(FilteringHelper, View):
         self.__grid.add(image)
         GLib.idle_add(label.set_state_flags, Gtk.StateFlags.VISITED, True)
         GLib.idle_add(image.set_state_flags, Gtk.StateFlags.VISITED, True)
-
-    def __on_banner_scroll(self, banner, x, y):
-        """
-            Pass event to scrolled
-            @param banner as BannerWidget
-            @param x as float
-            @param y as float
-        """
-        if y > 0:
-            y = 100
-        else:
-            y = -100
-        adj = self._scrolled.get_vadjustment()
-        new_value = adj.get_value() + y
-        lower = adj.get_lower()
-        upper = adj.get_upper() - adj.get_page_size()
-        adj.set_value(max(lower, min(new_value, upper)))

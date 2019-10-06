@@ -53,7 +53,6 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
         self.__banner = AlbumBannerWidget(self._album,
                                           self._view_type | ViewType.ALBUM)
         self.__banner.show()
-        self.__banner.connect("scroll", self._on_banner_scroll)
         self.add_widget(self.__grid, self.__banner)
 
     def populate(self):

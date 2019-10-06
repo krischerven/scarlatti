@@ -93,6 +93,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             if banner is not None:
                 self.__overlay.add_overlay(banner)
                 self.__banner = banner
+                self.__banner.connect("scroll", self.__on_banner_scroll)
             self.add(self.__overlay)
         elif self._view_type & ViewType.SCROLLED:
             self.__viewport.add(self.__stack)
@@ -206,23 +207,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     def _on_view_leave(self, event_controller):
         pass
 
-    def _on_banner_scroll(self, banner, x, y):
-        """
-            Pass to scrolled
-            @param banner as BannerWidget
-            @param x as float
-            @param y as float
-        """
-        if y > 0:
-            y = 100
-        else:
-            y = -100
-        adj = self._scrolled.get_vadjustment()
-        new_value = adj.get_value() + y
-        lower = adj.get_lower()
-        upper = adj.get_upper() - adj.get_page_size()
-        adj.set_value(max(lower, min(new_value, upper)))
-
     def _on_adaptive_changed(self, window, status):
         """
             Handle adaptive mode for views
@@ -301,6 +285,23 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_banner_scroll(self, banner, x, y):
+        """
+            Pass to scrolled
+            @param banner as BannerWidget
+            @param x as float
+            @param y as float
+        """
+        if y > 0:
+            y = 100
+        else:
+            y = -100
+        adj = self._scrolled.get_vadjustment()
+        new_value = adj.get_value() + y
+        lower = adj.get_lower()
+        upper = adj.get_upper() - adj.get_page_size()
+        adj.set_value(max(lower, min(new_value, upper)))
+
     def __on_stack_size_allocated(self, stack, allocation):
         """
             Restore scrolled position

@@ -54,7 +54,6 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
                                           self.__on_dnd_finished)
         self._view.show()
         self._banner = PlaylistBannerWidget(playlist_id, self._view)
-        self._banner.connect("scroll", self._on_banner_scroll)
         self._banner.show()
         self.add_widget(self._view, self._banner)
         return [

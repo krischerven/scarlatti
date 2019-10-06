@@ -76,7 +76,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__view.get_style_context().add_class("padding")
         self.__banner = SearchBannerWidget(self.__view)
         self.__banner.show()
-        self.__banner.connect("scroll", self._on_banner_scroll)
         self.add_widget(self.__view, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)

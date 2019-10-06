@@ -34,7 +34,6 @@ class ArtistView(AlbumsBoxView):
                                ViewType.ALBUM)
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
         self.__banner.show()
-        self.__banner.connect("scroll", self._on_banner_scroll)
         self._box.get_style_context().add_class("padding")
         self.add_widget(self._box, self.__banner)
 

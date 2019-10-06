@@ -41,7 +41,6 @@ class CurrentAlbumsView(View, SignalsHelper):
                                            self.__on_dnd_finished)
         self.__banner = CurrentAlbumsBannerWidget(self.__view)
         self.__banner.show()
-        self.__banner.connect("scroll", self._on_banner_scroll)
         self.add_widget(self.__view, self.__banner)
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
