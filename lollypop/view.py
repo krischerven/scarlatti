@@ -300,7 +300,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         new_value = adj.get_value() + y
         lower = adj.get_lower()
         upper = adj.get_upper() - adj.get_page_size()
-        adj.set_value(max(lower, min(new_value, upper)))
+        if new_value != lower and new_value != upper:
+            adj.set_value(new_value)
 
     def __on_stack_size_allocated(self, stack, allocation):
         """
