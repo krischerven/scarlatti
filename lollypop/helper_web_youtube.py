@@ -105,6 +105,7 @@ class YouTubeHelper:
                             None,
                             True)
         key = App().settings.get_value("cs-api-key").get_string()
+        data = b""
         try:
             uri = "https://www.googleapis.com/youtube/v3/" +\
                   "search?part=snippet&q=%s&" % search +\
@@ -130,8 +131,8 @@ class YouTubeHelper:
                     return None
                 else:
                     return dic[best]
-        except Exception as e:
-            Logger.warning("YouTubeHelper::__get_youtube_id(): %s", e)
+        except:
+            Logger.warning("YouTubeHelper::__get_youtube_id(): %s", data)
             self.__fallback = True
             return self.get_uri(track, cancellable)
         return None
