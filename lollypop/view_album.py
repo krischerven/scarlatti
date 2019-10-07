@@ -72,7 +72,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             for child in self.filtered:
                 style_context = child.get_style_context()
                 if style_context.has_class("typeahead"):
-                    if hasattr(child, "album"):
+                    if hasattr(child, "data"):
                         child.activate()
                     else:
                         track = child.track
