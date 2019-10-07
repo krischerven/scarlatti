@@ -13,6 +13,7 @@
 from gi.repository import Gst, GstAudio, GstPbutils, GLib, Gio
 
 from time import time
+from gettext import gettext as _
 
 from lollypop.player_base import BasePlayer
 from lollypop.tagreader import TagReader, Discoverer
@@ -296,6 +297,8 @@ class BinPlayer(BasePlayer):
             if uri is not None:
                 GLib.idle_add(play_uri, uri)
             elif play:
+                GLib.idle_add(
+                    App().notify.send, _("Can't find this track on YouTube"))
                 self.next()
         elif play:
             self.skip_album()
