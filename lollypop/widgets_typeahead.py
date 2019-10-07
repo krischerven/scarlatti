@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk
 
-from lollypop.define import App, MARGIN_SMALL
+from lollypop.define import App
 
 
 class TypeAheadWidget(Gtk.Revealer):
@@ -32,8 +32,6 @@ class TypeAheadWidget(Gtk.Revealer):
         builder.add_from_resource("/org/gnome/Lollypop/TypeAhead.ui")
         builder.connect_signals(self)
         widget = builder.get_object("widget")
-        widget.set_margin_top(MARGIN_SMALL)
-        widget.set_margin_bottom(2)
         self.__entry = builder.get_object("entry")
         self.__next_button = builder.get_object("next_button")
         self.__prev_button = builder.get_object("prev_button")
@@ -71,6 +69,13 @@ class TypeAheadWidget(Gtk.Revealer):
             view.activate_child()
             self.__entry.set_text("")
             self.__entry.grab_focus()
+
+    def _on_close_button_clicked(self, button):
+        """
+            Close widget
+            @param button as Gtk.Button
+        """
+        self.set_reveal_child(False)
 
     # FIXME GTK4
     def _on_entry_key_press_event(self, entry, event):
