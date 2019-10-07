@@ -152,6 +152,7 @@ class Album(Base):
             self._tracks.append(Track(track.id, self))
         else:
             self._tracks.append(track)
+            track.set_album(self)
 
     def append_tracks(self, tracks, clone=True):
         """
