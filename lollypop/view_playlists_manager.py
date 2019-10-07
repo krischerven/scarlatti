@@ -107,6 +107,14 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         FlowBoxView._add_items(self, playlist_ids, self._view_type)
 
+    def _on_child_activated(self, flowbox, child):
+        """
+            Navigate into child
+            @param flowbox as Gtk.FlowBox
+            @param child as Gtk.FlowBoxChild
+        """
+        App().window.container.show_view([Type.PLAYLISTS], child.data)
+
     def _on_primary_press_gesture(self, x, y, event):
         """
             Show artist's albums
@@ -117,7 +125,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        App().window.container.show_view([Type.PLAYLISTS], child.data)
+        child.activate()
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """

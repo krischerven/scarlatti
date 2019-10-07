@@ -168,6 +168,14 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             if child.data.id == album_id:
                 child.set_artwork()
 
+    def _on_child_activated(self, flowbox, child):
+        """
+            Navigate into child
+            @param flowbox as Gtk.FlowBox
+            @param child as Gtk.FlowBoxChild
+        """
+        App().window.container.show_view([Type.ALBUM], child.data)
+
     def _on_primary_press_gesture(self, x, y, event):
         """
             Popup tracks menu at position
@@ -185,7 +193,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             popover.set_position(Gtk.PositionType.BOTTOM)
             popover.popup()
         else:
-            App().window.container.show_view([Type.ALBUM], child.data)
+            child.activate()
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """

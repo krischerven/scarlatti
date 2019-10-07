@@ -94,6 +94,14 @@ class DecadesBoxView(FlowBoxView):
                           App().window.is_adaptive)
         return MenuBuilder(menu)
 
+    def _on_child_activated(self, flowbox, child):
+        """
+            Navigate into child
+            @param flowbox as Gtk.FlowBox
+            @param child as Gtk.FlowBoxChild
+        """
+        App().window.container.show_view([Type.YEARS], child.data)
+
     def _on_primary_press_gesture(self, x, y, event):
         """
             Show artist's albums
@@ -104,7 +112,7 @@ class DecadesBoxView(FlowBoxView):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        App().window.container.show_view([Type.YEARS], child.data)
+        child.activate()
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """
