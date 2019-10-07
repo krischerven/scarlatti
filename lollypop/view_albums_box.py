@@ -192,8 +192,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             popover.set_relative_to(child.artwork)
             popover.set_position(Gtk.PositionType.BOTTOM)
             popover.popup()
-        else:
-            child.activate()
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """

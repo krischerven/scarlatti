@@ -85,16 +85,12 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         from lollypop.menu_radio import RadioMenu
         return RadioMenu(child.data, self._view_type)
 
-    def _on_primary_press_gesture(self, x, y, event):
+    def _on_child_activated(self, flowbox, child):
         """
-            Play radio
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
+            Navigate into child
+            @param flowbox as Gtk.FlowBox
+            @param child as Gtk.FlowBoxChild
         """
-        child = self._box.get_child_at_pos(x, y)
-        if child is None:
-            return
         App().player.load(child.data)
         child.set_loading(True)
 

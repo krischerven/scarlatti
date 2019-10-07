@@ -87,18 +87,6 @@ class GenresBoxView(FlowBoxView):
         """
         App().window.container.show_view([Type.GENRES], child.data)
 
-    def _on_primary_press_gesture(self, x, y, event):
-        """
-            Show artist's albums
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
-        """
-        child = self._box.get_child_at_pos(x, y)
-        if child is None or child.artwork is None:
-            return
-        child.activate()
-
     def _on_tertiary_press_gesture(self, x, y, event):
         """
             Play artist
