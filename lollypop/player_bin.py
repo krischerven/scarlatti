@@ -295,9 +295,9 @@ class BinPlayer(BasePlayer):
             uri = helper.get_track_content(track)
             if uri is not None:
                 GLib.idle_add(play_uri, uri)
-            else:
+            elif play:
                 self.next()
-        else:
+        elif play:
             self.skip_album()
 
     def _scrobble(self, finished, finished_start_time):
