@@ -298,7 +298,9 @@ class BinPlayer(BasePlayer):
                 GLib.idle_add(play_uri, uri)
             elif play:
                 GLib.idle_add(
-                    App().notify.send, _("Can't find this track on YouTube"))
+                    App().notify.send,
+                    "Lollypop",
+                    _("Can't find this track on YouTube"))
                 self.next()
         elif play:
             self.skip_album()
@@ -382,7 +384,7 @@ class BinPlayer(BasePlayer):
                 self.stop()
             else:
                 (error, parsed) = message.parse_error()
-                App().notify.send(parsed)
+                App().notify.send("Lollypop", parsed)
                 self.stop()
 
     def _on_bus_eos(self, bus, message):

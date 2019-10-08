@@ -323,7 +323,7 @@ class ApplicationActions:
                     heart = "⏭"
                 else:
                     heart = "♡"
-                App().notify.send("%s - %s: %s" %
+                App().notify.send("Lollypop", "%s - %s: %s" %
                                   (", ".join(track.artists),
                                    track.name,
                                    heart))
