@@ -201,4 +201,5 @@ class RatingWidget(Gtk.Bin):
             except Exception as e:
                 Logger.error("RatingWidget::__on_can_set_popularity(): %s" % e)
         if not worked:
-            App().notify.send(_("You need to install kid3-cli"))
+            App().notify.send("Lollypop",
+                              _("You need to install kid3-cli"))

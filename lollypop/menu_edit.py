@@ -180,5 +180,5 @@ class EditMenu(Gio.Menu):
                 Logger.error(
                     "MenuPopover::__on_edit_tag_action_activate(): %s", e)
         if not worked:
-            App().notify.send(
-                _("Please install <i>easytag</i> or <i>kid3-qt</i>"))
+            App().notify.send("Lollypop",
+                              _("Please install Easytag or Kid3"))

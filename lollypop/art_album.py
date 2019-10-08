@@ -486,4 +486,5 @@ class AlbumArt:
             self.clean_album_cache(Album(album_id))
             GLib.timeout_add(2000, self.album_artwork_update, album_id)
         else:
-            App().notify.send(_("You need to install kid3-cli"))
+            App().notify.send("Lollypop",
+                              _("You need to install kid3-cli"))

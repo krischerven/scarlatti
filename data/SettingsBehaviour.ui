@@ -218,7 +218,7 @@
           <object class="GtkSwitch" id="switch_artwork_tags">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">Save changes to files</property>
+            <property name="tooltip_text" translatable="yes">You need to install kid3-cli</property>
             <property name="halign">end</property>
             <property name="valign">center</property>
             <signal name="state-set" handler="_on_switch_artwork_tags_state_set" swapped="no"/>
