@@ -14,6 +14,7 @@ from gi.repository import GLib, GdkPixbuf, Gio, Gst
 
 from random import choice
 from gettext import gettext as _
+from time import time
 
 from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
@@ -289,7 +290,7 @@ class AlbumArt:
                     f.delete(None)
                 except Exception as e:
                     Logger.error("AlbumArt::remove_album_artwork(): %s" % e)
-        self.__write_image_to_tags("", album.id)
+        self.__write_image_to_tags("", album)
 
     def clean_album_cache(self, album, width=-1, height=-1):
         """
@@ -449,20 +450,21 @@ class AlbumArt:
                      "jpeg", ["quality"], [str(App().settings.get_value(
                                            "cover-quality").get_int32())])
         self.__write_image_to_tags("%s/lollypop_cover_tags.jpg" %
-                                   CACHE_PATH, album.id)
+                                   CACHE_PATH, album)
 
-    def __write_image_to_tags(self, path, album_id):
+    def __write_image_to_tags(self, path, album):
         """
             Save album at path to album tags
             @param path as str
-            @param album_id as int
+            @param album as Album
         """
         files = []
-        for uri in App().albums.get_track_uris(album_id):
-            try:
-                files.append(GLib.filename_from_uri(uri)[0])
-            except:
-                pass
+        for track in album.tracks:
+            App().tracks.set_mtime(track.id, int(time()) + 10)
+            filename = GLib.filename_from_uri(track.uri)[0]
+            if filename is not None:
+                files.append(filename)
+
         worked = False
         cover = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
         arguments = [["kid3-cli", "-c", "set picture:'%s' ''" % cover],
@@ -483,8 +485,8 @@ class AlbumArt:
             except Exception as e:
                 Logger.error("AlbumArt::__write_image_to_tags(): %s" % e)
         if worked:
-            self.clean_album_cache(Album(album_id))
-            GLib.timeout_add(2000, self.album_artwork_update, album_id)
+            self.clean_album_cache(album)
+            GLib.timeout_add(2000, self.album_artwork_update, album.id)
         else:
             App().notify.send("Lollypop",
                               _("You need to install kid3-cli"))
