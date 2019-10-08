@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib, Gtk, Gdk
 
 from gettext import gettext as _
 
-from lollypop.define import App, StorageType, CACHE_PATH
+from lollypop.define import App, StorageType, CACHE_PATH, TAG_EDITORS
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
@@ -98,13 +98,6 @@ class EditMenu(Gio.Menu):
         menu_item = Gio.MenuItem.new(_("Modify information"),
                                      "app.edit_tag_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        if not App().art.tag_editor:
-            edit_tag_action.set_enabled(False)
-            menu_item.set_attribute_value(
-                "tooltip",
-                GLib.Variant(
-                    "s",
-                    _("Please install <i>easytag</i> or <i>kid3-qt</i>")))
         self.append_item(menu_item)
 
     def __on_buy_action_activate(self, action, variant):
@@ -155,19 +148,37 @@ class EditMenu(Gio.Menu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        try:
-            path = GLib.filename_from_uri(self.__object.uri)[0]
-            if GLib.find_program_in_path("flatpak-spawn") is not None:
-                argv = ["flatpak-spawn", "--host", App().art.tag_editor, path]
-            else:
-                argv = [App().art.tag_editor, path]
-            (pid, stdin, stdout, stderr) = GLib.spawn_async(
-                argv, flags=GLib.SpawnFlags.SEARCH_PATH |
-                GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
-                standard_input=False,
-                standard_output=False,
-                standard_error=False
-            )
-        except Exception as e:
-            Logger.error("MenuPopover::__on_edit_tag_action_activate(): %s"
-                         % e)
+        tag_editor = App().settings.get_value("tag-editor").get_string()
+        if not tag_editor:
+            for editor in TAG_EDITORS:
+                if GLib.find_program_in_path(editor):
+                    tag_editor = editor
+                    break
+        if not tag_editor:
+            # Lollypop advertising a Qt software but it is the best
+            # tag editor
+            tag_editor = "kid3-qt"
+        worked = False
+        path = GLib.filename_from_uri(self.__object.uri)[0]
+        if path is None:
+            return
+        arguments = [
+            [tag_editor, path],
+            ["flatpak-spawn", "--host", tag_editor, path]]
+        for argv in arguments:
+            try:
+                (pid, stdin, stdout, stderr) = GLib.spawn_async(
+                    argv, flags=GLib.SpawnFlags.SEARCH_PATH |
+                    GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
+                    standard_input=False,
+                    standard_output=False,
+                    standard_error=False
+                )
+                worked = True
+                break
+            except Exception as e:
+                Logger.error(
+                    "MenuPopover::__on_edit_tag_action_activate(): %s", e)
+        if not worked:
+            App().notify.send(
+                _("Please install <i>easytag</i> or <i>kid3-qt</i>"))

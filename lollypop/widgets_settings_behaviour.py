@@ -12,8 +12,6 @@
 
 from gi.repository import Gtk, GLib
 
-from gettext import gettext as _
-
 from lollypop.define import App, NetworkAccessACL, StorageType
 
 
@@ -57,9 +55,7 @@ class BehaviourSettingsWidget(Gtk.Bin):
         switch_mix_party.set_state(App().settings.get_value("party-mix"))
 
         switch_artwork_tags = builder.get_object("switch_artwork_tags")
-
-        # Check for kid3-cli
-        self.__check_for_kid3(switch_artwork_tags)
+        switch_artwork_tags.set_state(App().settings.get_value("save-to-tags"))
 
         self.__popover_transitions = builder.get_object("popover-transitions")
         self.__scale_transition_duration = builder.get_object(
@@ -211,18 +207,3 @@ class BehaviourSettingsWidget(Gtk.Bin):
 #######################
 # PRIVATE             #
 #######################
-    def __check_for_kid3(self, switch):
-        """
-            Update grid/switch based on result
-            @param switch as Gtk.Switch
-        """
-        if not App().art.kid3_available:
-            box = switch.get_parent()
-            switch.destroy()
-            label = Gtk.Label.new(_("You need to install kid3-cli"))
-            label.get_style_context().add_class("dim-label")
-            label.set_property("halign", Gtk.Align.END)
-            label.show()
-            box.pack_end(label, False, False, 0)
-        else:
-            switch.set_state(App().settings.get_value("save-to-tags"))

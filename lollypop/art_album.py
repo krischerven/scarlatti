@@ -13,6 +13,7 @@
 from gi.repository import GLib, GdkPixbuf, Gio, Gst
 
 from random import choice
+from gettext import gettext as _
 
 from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
@@ -456,19 +457,18 @@ class AlbumArt:
             @param path as str
             @param album_id as int
         """
-        if self.kid3_available:
-            files = []
-            for uri in App().albums.get_track_uris(album_id):
-                try:
-                    files.append(GLib.filename_from_uri(uri)[0])
-                except:
-                    pass
-            cover = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
-            if GLib.find_program_in_path("flatpak-spawn") is not None:
-                argv = ["flatpak-spawn", "--host", "kid3-cli",
-                        "-c", "set picture:'%s' ''" % cover]
-            else:
-                argv = ["kid3-cli", "-c", "set picture:'%s' ''" % cover]
+        files = []
+        for uri in App().albums.get_track_uris(album_id):
+            try:
+                files.append(GLib.filename_from_uri(uri)[0])
+            except:
+                pass
+        worked = False
+        cover = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
+        arguments = [["kid3-cli", "-c", "set picture:'%s' ''" % cover],
+                     ["flatpak-spawn", "--host", "kid3-cli",
+                      "-c", "set picture:'%s' ''" % cover]]
+        for argv in arguments:
             argv += files
             try:
                 (pid, stdin, stdout, stderr) = GLib.spawn_async(
@@ -478,9 +478,12 @@ class AlbumArt:
                     standard_output=False,
                     standard_error=False
                 )
+                worked = True
+                break
             except Exception as e:
-                Logger.error("AlbumArt::__on_kid3_result(): %s" % e)
+                Logger.error("AlbumArt::__write_image_to_tags(): %s" % e)
+        if worked:
             self.clean_album_cache(Album(album_id))
-            # FIXME Should be better to send all covers at once and listen
-            # to as signal but it works like this
             GLib.timeout_add(2000, self.album_artwork_update, album_id)
+        else:
+            App().notify.send(_("You need to install kid3-cli"))

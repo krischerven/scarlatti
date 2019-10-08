@@ -169,33 +169,36 @@ class RatingWidget(Gtk.Bin):
             Set popularity as kid3 is installed
             @param pop as int
         """
-        try:
-            if App().art.kid3_available:
-                if pop == 0:
-                    value = 0
-                elif pop == 1:
-                    value = 1
-                elif pop == 2:
-                    value = 64
-                elif pop == 3:
-                    value = 128
-                elif pop == 4:
-                    value = 196
-                else:
-                    value = 255
-                path = GLib.filename_from_uri(self.__object.uri)[0]
-                if GLib.find_program_in_path("flatpak-spawn") is not None:
-                    argv = ["flatpak-spawn", "--host", "kid3-cli", "-c",
-                            "set POPM %s" % value, path]
-                else:
-                    argv = ["kid3-cli", "-c", "set POPM %s" % value, path]
-                if App().scanner.inotify is not None:
-                    App().scanner.inotify.disable()
+        if pop == 0:
+            value = 0
+        elif pop == 1:
+            value = 1
+        elif pop == 2:
+            value = 64
+        elif pop == 3:
+            value = 128
+        elif pop == 4:
+            value = 196
+        else:
+            value = 255
+        path = GLib.filename_from_uri(self.__object.uri)[0]
+        arguments = [["kid3-cli", "-c", "set POPM %s" % value, path],
+                     ["flatpak-spawn", "--host", "kid3-cli", "-c",
+                      "set POPM %s" % value, path]]
+        if App().scanner.inotify is not None:
+            App().scanner.inotify.disable()
+        worked = False
+        for argv in arguments:
+            try:
                 (pid, stdin, stdout, stderr) = GLib.spawn_async(
                     argv, flags=GLib.SpawnFlags.SEARCH_PATH |
                     GLib.SpawnFlags.STDOUT_TO_DEV_NULL
                 )
                 # Force mtime update to not run a collection update
                 App().tracks.set_mtime(self.__object.id, int(time()) + 10)
-        except Exception as e:
-            Logger.error("RatingWidget::__on_can_set_popularity(): %s" % e)
+                worked = True
+                break
+            except Exception as e:
+                Logger.error("RatingWidget::__on_can_set_popularity(): %s" % e)
+        if not worked:
+            App().notify.send(_("You need to install kid3-cli"))
