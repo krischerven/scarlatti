@@ -150,7 +150,11 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             34: self.__upgrade_31,
             35: "UPDATE albums SET synced=2 WHERE synced=1",
             36: self.__upgrade_36,
-            37: self.__upgrade_37
+            37: self.__upgrade_37,
+            38: """CREATE TABLE albums_timed_popularity (
+                                                album_id INT NOT NULL,
+                                                mtime INT NOT NULL,
+                                                popularity INT NOT NULL)"""
         }
 
 #######################

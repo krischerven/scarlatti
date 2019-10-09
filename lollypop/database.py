@@ -82,6 +82,10 @@ class Database:
     __create_album_genres = """CREATE TABLE album_genres (
                                                 album_id INT NOT NULL,
                                                 genre_id INT NOT NULL)"""
+    __create_album_timed_popularity = """CREATE TABLE albums_timed_popularity (
+                                                album_id INT NOT NULL,
+                                                mtime INT NOT NULL,
+                                                popularity INT NOT NULL)"""
     __create_tracks = """CREATE TABLE tracks (id INTEGER PRIMARY KEY,
                                               name TEXT NOT NULL,
                                               uri TEXT NOT NULL,

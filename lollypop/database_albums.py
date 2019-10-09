@@ -366,7 +366,8 @@ class AlbumsDatabase:
             @raise sqlite3.OperationalError on db update
         """
         with SqlCursor(App().db, True) as sql:
-            result = sql.execute("SELECT popularity from albums WHERE rowid=?",
+            # First increment popularity
+            result = sql.execute("SELECT popularity FROM albums WHERE rowid=?",
                                  (album_id,))
             pop = result.fetchone()
             if pop:
@@ -374,8 +375,26 @@ class AlbumsDatabase:
             else:
                 current = 0
             current += pop_to_add
-            sql.execute("UPDATE albums set popularity=? WHERE rowid=?",
+            sql.execute("UPDATE albums SET popularity=? WHERE rowid=?",
                         (current, album_id))
+            # Then increment timed popularity
+            result = sql.execute("SELECT popularity\
+                                  FROM albums_timed_popularity\
+                                  WHERE album_id=?",
+                                 (album_id,))
+            pop = result.fetchone()
+            mtime = int(time())
+            if pop is not None:
+                popularity = pop[0] + 1
+                sql.execute("UPDATE albums_timed_popularity\
+                             SET popularity=?, mtime=?\
+                             WHERE album_id=?",
+                            (popularity, mtime, album_id))
+            else:
+                sql.execute("INSERT INTO albums_timed_popularity\
+                             (album_id, popularity, mtime)\
+                             VALUES (?, 1, ?)",
+                            (album_id, mtime))
 
     def get_higher_popularity(self):
         """
@@ -646,20 +665,18 @@ class AlbumsDatabase:
             @param limit as int
             @return [int]
         """
-        # Two weeks, one month
-        for delta in [1209600, 2678400]:
-            timestamp = time() - delta
-            with SqlCursor(App().db) as sql:
-                storage_type = get_default_storage_type()
-                request = "SELECT DISTINCT albums.rowid FROM albums, tracks\
-                           WHERE albums.storage_type & ? AND\
-                                 tracks.ltime > ? AND\
-                                 albums.rowid = tracks.album_id\
-                           ORDER BY albums.popularity DESC LIMIT ?"
-                result = sql.execute(request, (storage_type, timestamp, limit))
-                album_ids = list(itertools.chain(*result))
-                if album_ids:
-                    return album_ids
+        with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
+            request = "SELECT DISTINCT albums.rowid\
+                       FROM albums, albums_timed_popularity\
+                       WHERE albums.storage_type & ? AND\
+                             albums.rowid = albums_timed_popularity.album_id\
+                       ORDER BY albums_timed_popularity.popularity DESC\
+                       LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
+            album_ids = list(itertools.chain(*result))
+            if album_ids:
+                return album_ids
         return []
 
     def get_loved_albums(self):
@@ -1263,6 +1280,14 @@ class AlbumsDatabase:
             sql.execute("DELETE FROM album_artists\
                          WHERE album_artists.album_id NOT IN (\
                             SELECT albums.rowid FROM albums)")
+            sql.execute("DELETE FROM albums_timed_popularity\
+                         WHERE albums_timed_popularity.album_id NOT IN (\
+                            SELECT albums.rowid FROM albums)")
+            # We clear timed popularity based on mtime
+            # For now, we don't need to keep more data than a month
+            month = int(time()) - 2678400
+            sql.execute("DELETE FROM albums_timed_popularity\
+                         WHERE albums_timed_popularity.mtime < ?", (month,))
 
     @property
     def max_count(self):
