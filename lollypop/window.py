@@ -39,10 +39,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__miniplayer = None
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
-        self.__multi_press = Gtk.GestureMultiPress.new(self)
-        self.__multi_press.set_propagation_phase(Gtk.PropagationPhase.TARGET)
-        self.__multi_press.connect("released", self.__on_back_button_clicked)
-        self.__multi_press.set_button(8)
+        # Does not work with a Gtk.Gesture in GTK3
+        self.connect("button-release-event", self.__on_button_release_event)
         self.connect("window-state-event", self.__on_window_state_event)
         self.connect("adaptive-size-changed", self.__on_adaptive_size_changed)
         return [
@@ -189,15 +187,15 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             # initialisation is finished...
             GLib.timeout_add(1000, App().scanner.update, ScanType.FULL)
 
-    def __on_back_button_clicked(self, gesture, n_press, x, y):
+    def __on_button_release_event(self, window, event):
         """
             Handle special mouse buttons
-            @param gesture as Gtk.Gesture
-            @param n_press as int
-            @param x as int
-            @param y as int
+            @param window as Gtk.Window
+            @param event as Gdk.EventButton
         """
-        App().window.go_back()
+        if event.button == 8:
+            App().window.container.go_back()
+            return True
 
     def __on_window_state_event(self, widget, event):
         """
