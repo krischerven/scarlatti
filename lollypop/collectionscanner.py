@@ -438,7 +438,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                         # We only support symlinks on collections root
                         elif info.get_is_symlink():
                             Logger.info(
-                                "Symlinks on files is not supported: %s",
+                                "Symlinks are not supported: %s",
                                 child_uri)
                             continue
                         elif info.get_file_type() == Gio.FileType.DIRECTORY:
