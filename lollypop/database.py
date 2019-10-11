@@ -139,6 +139,7 @@ class Database:
                     sql.execute(self.__create_genres)
                     sql.execute(self.__create_album_genres)
                     sql.execute(self.__create_album_artists)
+                    sql.execute(self.__create_album_timed_popularity)
                     sql.execute(self.__create_tracks)
                     sql.execute(self.__create_track_artists)
                     sql.execute(self.__create_track_genres)
