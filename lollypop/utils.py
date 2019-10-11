@@ -575,19 +575,6 @@ def popup_widget(widget, parent, x=None, y=None):
         return popover
 
 
-def symlink_ok(uri, uris):
-    """
-        Check if file/dir is a symlink and need to be handled
-        @param file_type as Gio.FileType
-        @param uri as file/dir URI
-        @param uris as base URIS
-    """
-    for base_uri in uris:
-        if uri.startswith(base_uri):
-            return False
-    return True
-
-
 def update_track_indexes(listbox, start_index, end_index):
     """
         Update track number from start_index + 1 to end_index

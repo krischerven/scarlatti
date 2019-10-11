@@ -32,7 +32,7 @@ from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
 from lollypop.utils import is_audio, is_pls, get_mtime, profile, create_dir
-from lollypop.utils import split_list, symlink_ok, emit_signal
+from lollypop.utils import split_list, emit_signal
 
 
 SCAN_QUERY_INFO = "{},{},{},{},{},{}".format(
@@ -425,13 +425,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 info = f.query_info(SCAN_QUERY_INFO,
                                     Gio.FileQueryInfoFlags.NONE,
                                     None)
-                if info.get_is_symlink():
-                    target = info.get_symlink_target()
-                    f = Gio.File.new_for_path(target)
-                    if f.query_exists() and\
-                            symlink_ok(f.get_uri(), uris):
-                        walk_uris.append(f.get_uri())
-                elif info.get_file_type() == Gio.FileType.DIRECTORY:
+                if info.get_file_type() == Gio.FileType.DIRECTORY:
                     dirs.append(uri)
                     infos = f.enumerate_children(SCAN_QUERY_INFO,
                                                  Gio.FileQueryInfoFlags.NONE,
@@ -441,12 +435,12 @@ class CollectionScanner(GObject.GObject, TagReader):
                         child_uri = f.get_uri()
                         if info.get_is_hidden():
                             continue
-                        if info.get_is_symlink():
-                            target = info.get_symlink_target()
-                            f = Gio.File.new_for_path(target)
-                            if f.query_exists() and\
-                                    symlink_ok(f.get_uri(), uris):
-                                walk_uris.append(f.get_uri())
+                        # We only support symlinks on collections root
+                        elif info.get_is_symlink():
+                            Logger.info(
+                                "Symlinks on files is not supported: %s",
+                                child_uri)
+                            continue
                         elif info.get_file_type() == Gio.FileType.DIRECTORY:
                             dirs.append(child_uri)
                             walk_uris.append(child_uri)
