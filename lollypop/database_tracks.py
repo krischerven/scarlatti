@@ -579,13 +579,13 @@ class TracksDatabase:
     def get_mtimes(self):
         """
             Get mtime for tracks
-            WARNING: Should be called before anything is shown on screen
             @return dict of {uri as string: mtime as int}
         """
         with SqlCursor(App().db) as sql:
             mtimes = {}
             result = sql.execute("SELECT DISTINCT uri, mtime\
-                                  FROM tracks")
+                                  FROM tracks WHERE storage_type & ?",
+                                 (StorageType.COLLECTION,))
             for row in result:
                 mtimes.update((row,))
             return mtimes
