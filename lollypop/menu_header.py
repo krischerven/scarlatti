@@ -67,17 +67,16 @@ class RoundedMenuHeader(Gio.MenuItem):
         A menu header item for a playlist
     """
 
-    def __init__(self, name, artwork_name):
+    def __init__(self, name):
         """
             Init menu
             @param name as str
-            @param artwork_name as str
         """
         Gio.MenuItem.__init__(self)
         header_type = GLib.Variant("i", HeaderType.ROUNDED)
         label = "<span alpha='40000'>%s</span>" % GLib.markup_escape_text(name)
         vlabel = GLib.Variant("s", label)
-        vartwork_name = GLib.Variant("s", artwork_name)
+        vartwork_name = GLib.Variant("s", name)
         header = [header_type, vlabel, vartwork_name]
         self.set_attribute_value("header", GLib.Variant("av", header))
 

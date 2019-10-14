@@ -12,6 +12,8 @@
 
 from gi.repository import GLib, GdkPixbuf, Gio
 
+from hashlib import md5
+
 from lollypop.define import ArtBehaviour, ArtSize
 from lollypop.define import CACHE_PATH
 from lollypop.logger import Logger
@@ -144,8 +146,7 @@ class ArtistArt:
             Get a uniq string for artist
             @param artist as str
         """
-        name = "@ARTIST@_%s" % (escape(artist)[:100])
-        return name
+        return md5(artist.encode("utf-8")).hexdigest()
 
     def uncache_artist_artwork(self, artist):
         """

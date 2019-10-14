@@ -319,6 +319,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         App().task_helper.run(
                 App().art.get_artwork_from_cache,
                 artwork_name,
+                "ROUNDED",
                 ArtSize.BANNER, ArtSize.BANNER,
                 callback=(on_load_from_cache, artwork))
         self.__boxes[menu_name].add(button)

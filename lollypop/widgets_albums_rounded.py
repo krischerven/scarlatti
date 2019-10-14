@@ -63,12 +63,13 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             Set artwork
         """
         RoundedFlowBoxWidget.set_artwork(self)
-        if App().art.artwork_exists_in_cache("ROUNDED_%s" % self.artwork_name,
+        if App().art.artwork_exists_in_cache(self.artwork_name,
+                                             "ROUNDED",
                                              self._art_size,
                                              self._art_size):
             App().task_helper.run(
                 App().art.get_artwork_from_cache,
-                "ROUNDED_%s" % self.artwork_name,
+                self.artwork_name, "ROUNDED",
                 self._art_size, self._art_size,
                 callback=(self.__on_load_from_cache,))
         else:
@@ -108,8 +109,9 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             return
         self._artwork.set_from_surface(
             get_round_surface(surface, self._scale_factor, self._art_size / 4))
-        App().art.add_artwork_to_cache("ROUNDED_%s" % self.artwork_name,
-                                       surface)
+        App().art.add_artwork_to_cache(self.artwork_name,
+                                       surface,
+                                       "ROUNDED")
         emit_signal(self, "populated")
 
     def __draw_surface(self, surface, ctx, positions, album_ids, set_surface):

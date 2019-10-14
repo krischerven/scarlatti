@@ -33,7 +33,7 @@ class GenreMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import RoundedMenuHeader
             name = App().genres.get_name(genre_id)
-            artwork_name = "ROUNDED_genre_%s" % name
+            artwork_name = "genre_%s" % name
             self.append_item(RoundedMenuHeader(name, artwork_name))
         if not view_type & ViewType.BANNER:
             from lollypop.menu_playback import GenrePlaybackMenu

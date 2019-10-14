@@ -32,7 +32,7 @@ class DecadeMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import RoundedMenuHeader
             name = "%s - %s" % (years[0], years[-1])
-            artwork_name = "ROUNDED_decade_%s" % name
+            artwork_name = "decade_%s" % name
             self.append_item(RoundedMenuHeader(name, artwork_name))
         if not view_type & ViewType.BANNER:
             from lollypop.menu_playback import DecadePlaybackMenu

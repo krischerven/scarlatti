@@ -12,6 +12,8 @@
 
 from gi.repository import Gio, GdkPixbuf, Gdk
 
+from hashlib import md5
+
 from lollypop.art_base import BaseArt
 from lollypop.art_album import AlbumArt
 from lollypop.art_artist import ArtistArt
@@ -20,7 +22,7 @@ from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
 from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH, App, StorageType
-from lollypop.utils import create_dir, escape
+from lollypop.utils import create_dir
 
 from time import sleep
 from shutil import rmtree
@@ -44,19 +46,22 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         create_dir(STORE_PATH)
         create_dir(TMP_PATH)
 
-    def add_artwork_to_cache(self, name, surface):
+    def add_artwork_to_cache(self, name, surface, prefix):
         """
             Add artwork to cache
             @param name as str
             @param surface as cairo.Surface
+            @param prefix as str
             @thread safe
         """
         try:
+            encoded = md5(name.encode("utf-8")).hexdigest()
             width = surface.get_width()
             height = surface.get_height()
-            cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
-                                                    escape(name),
-                                                    width, height)
+            cache_path_jpg = "%s/@%s@%s_%s_%s.jpg" % (CACHE_PATH,
+                                                      prefix,
+                                                      encoded,
+                                                      width, height)
             pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, width, height)
             pixbuf.savev(cache_path_jpg, "jpeg", ["quality"],
                          [str(App().settings.get_value(
@@ -64,14 +69,18 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         except Exception as e:
             Logger.error("Art::add_artwork_to_cache(): %s" % e)
 
-    def remove_artwork_from_cache(self, name):
+    def remove_artwork_from_cache(self, name, prefix):
         """
             Remove artwork from cache
             @param name as str
+            @param prefix as str
         """
         try:
             from glob import glob
-            search = "%s/@%s@_*.jpg" % (CACHE_PATH, escape(name))
+            encoded = md5(name.encode("utf-8")).hexdigest()
+            search = "%s/@%s@%s_*.jpg" % (CACHE_PATH,
+                                          prefix,
+                                          encoded)
             pathes = glob(search)
             for path in pathes:
                 f = Gio.File.new_for_path(path)
@@ -79,35 +88,41 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         except Exception as e:
             Logger.error("Art::remove_artwork_from_cache(): %s" % e)
 
-    def get_artwork_from_cache(self, name, width, height):
+    def get_artwork_from_cache(self, name, prefix, width, height):
         """
             Get artwork from cache
             @param name as str
+            @param prefix as str
             @param width as int
             @param height as int
             @return GdkPixbuf.Pixbuf
         """
         try:
-            cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
-                                                    escape(name),
-                                                    width, height)
+            encoded = md5(name.encode("utf-8")).hexdigest()
+            cache_path_jpg = "%s/@%s@%s_%s_%s.jpg" % (CACHE_PATH,
+                                                      prefix,
+                                                      encoded,
+                                                      width, height)
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path_jpg)
             return pixbuf
         except Exception as e:
             Logger.warning("Art::get_artwork_from_cache(): %s" % e)
             return None
 
-    def artwork_exists_in_cache(self, name, width, height):
+    def artwork_exists_in_cache(self, name, prefix, width, height):
         """
             True if artwork exists in cache
             @param name as str
+            @param prefix as str
             @param width as int
             @param height as int
             @return bool
         """
-        cache_path_jpg = "%s/@%s@_%s_%s.jpg" % (CACHE_PATH,
-                                                escape(name),
-                                                width, height)
+        encoded = md5(name.encode("utf-8")).hexdigest()
+        cache_path_jpg = "%s/@%s@%s_%s_%s.jpg" % (CACHE_PATH,
+                                                  prefix,
+                                                  encoded,
+                                                  width, height)
         f = Gio.File.new_for_path(cache_path_jpg)
         return f.query_exists()
 

@@ -13,6 +13,7 @@
 from gi.repository import GLib, GdkPixbuf, Gio, Gst
 
 from random import choice
+from hashlib import md5
 from gettext import gettext as _
 from time import time
 
@@ -21,7 +22,7 @@ from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
-from lollypop.utils import escape, is_readonly, emit_signal
+from lollypop.utils import is_readonly, emit_signal
 from lollypop.helper_task import TaskHelper
 
 
@@ -349,10 +350,10 @@ class AlbumArt:
             Get a uniq string for album
             @param album as Album
         """
-        name = "%s_%s_%s" % (" ".join(album.artists)[:100],
-                             album.name[:100],
+        name = "%s_%s_%s" % (" ".join(album.artists),
+                             album.name,
                              album.year)
-        return "@ALBUM@" + escape(name)
+        return md5(name.encode("utf-8")).hexdigest()
 
 #######################
 # PRIVATE             #
