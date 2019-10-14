@@ -35,7 +35,6 @@ class ArtDownloader(Downloader):
         """
         Downloader.__init__(self)
         self.__albums_queue = []
-        self.__albums_history = []
         self.__artists_queue = []
         self.__in_albums_download = False
         self.__in_artists_download = False
@@ -80,8 +79,7 @@ class ArtDownloader(Downloader):
             Download album artwork
             @param album_id as int
         """
-        if album_id in self.__albums_history or\
-                not get_network_available("DATA"):
+        if not get_network_available("DATA"):
             return
         self.__albums_queue.append(album_id)
         if not self.__in_albums_download:
@@ -133,12 +131,6 @@ class ArtDownloader(Downloader):
         App().task_helper.load_uri_content(uri,
                                            cancellable,
                                            self.__on_load_startpage_content)
-
-    def reset_history(self):
-        """
-            Reset download history
-        """
-        self.__albums_history = []
 
 #######################
 # PROTECTED           #
@@ -518,21 +510,26 @@ class ArtDownloader(Downloader):
         try:
             while self.__artists_queue:
                 artist = self.__artists_queue.pop()
+                found = False
                 for (api, helper, a_helper, b_helper) in self._WEBSERVICES:
                     if helper is None:
                         continue
                     method = getattr(self, helper)
                     result = method(artist)
-                    status = False
                     for uri in result:
                         (status,
                          data) = App().task_helper.load_uri_content_sync(
                             uri, None)
                         if status:
+                            found = True
                             App().art.add_artist_artwork(artist, data)
                             break
-                    if status:
+                    # Found, do not search in another helper
+                    if found:
                         break
+                # Not found, save empty artwork
+                if not found:
+                    App().art.add_artist_artwork(artist, None)
         except Exception as e:
             Logger.error("ArtDownloader::__cache_artists_artwork(): %s" % e)
         self.__in_artists_download = False
@@ -554,25 +551,29 @@ class ArtDownloader(Downloader):
                     artist = ""
                 else:
                     artist = ", ".join(App().albums.get_artists(album_id))
+                found = False
                 for (api, a_helper, helper, b_helper) in self._WEBSERVICES:
                     if helper is None:
                         continue
                     method = getattr(self, helper)
                     result = method(artist, album)
-                    status = False
                     for uri in result:
                         (status,
                          data) = App().task_helper.load_uri_content_sync(uri,
                                                                          None)
                         if status:
-                            self.__albums_history.append(album_id)
+                            found = True
                             App().art.save_album_artwork(data, Album(album_id))
                             break
-                    if status:
+                    # Found, do not search in another helper
+                    if found:
                         break
+                # Not found, save empty artwork
+                # FIXME move album as first arg
+                if not found:
+                    App().art.save_album_artwork(None, Album(album_id))
         except Exception as e:
             Logger.error("ArtDownloader::__cache_albums_artwork: %s" % e)
-        self.__albums_history.append(album_id)
         self.__in_albums_download = False
 
     def __on_load_google_content(self, uri, loaded, content):
