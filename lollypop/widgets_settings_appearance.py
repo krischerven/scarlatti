@@ -99,8 +99,6 @@ class AppearanceSettingsWidget(Gtk.Bin):
         """
         App().settings.set_value("artist-artwork",
                                  GLib.Variant("b", state))
-        if state:
-            App().art.cache_artists_artwork()
 
     def _on_combo_order_by_changed(self, widget):
         """

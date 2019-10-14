@@ -131,8 +131,9 @@ class ArtistArt:
                     try:
                         pixbuf = GdkPixbuf.Pixbuf.new_from_file(path)
                     except:
-                        pass  # Empty file
-                if pixbuf is None:
+                        return None
+                else:
+                    self.cache_artist_artwork(artist)
                     return None
                 pixbuf = self.load_behaviour(pixbuf, cache_path_jpg,
                                              width, height, behaviour)

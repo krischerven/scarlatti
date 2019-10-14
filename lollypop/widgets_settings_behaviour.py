@@ -107,7 +107,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
         acl = App().settings.set_value("network-access-acl",
                                        GLib.Variant("i", acl))
         App().art.reset_history()
-        App().art.cache_artists_artwork()
         if key == "SPOTIFY" and not state:
             for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
                                  StorageType.SPOTIFY_SIMILARS]:

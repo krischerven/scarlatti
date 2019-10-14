@@ -287,7 +287,8 @@ class AlbumRow(Gtk.ListBoxRow):
             self.destroy()
         elif self.__album.storage_type & StorageType.EPHEMERAL:
             App().art.copy_from_web_to_store(self.__album.id)
-            App().art.cache_artists_artwork()
+            for artist in self.__album.artists:
+                App().art.cache_artist_artwork(artist)
             self.__album.save(True)
             self.__action_button.hide()
         elif self.__view_type & ViewType.SEARCH:
