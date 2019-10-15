@@ -173,7 +173,10 @@ class Database:
                 limit_int = int(limit_str.replace("LIMIT ", ""))
                 # Remove limit from main request
                 request = request.replace(limit_str, "")
-                for request in request.split("UNION"):
+                request_split = request.split("UNION")
+                sublimit = limit_int // len(request_split)
+                for request in request_split:
+                    request += " ORDER BY random() LIMIT %s" % sublimit
                     requests.append(request)
             else:
                 requests = [request]
