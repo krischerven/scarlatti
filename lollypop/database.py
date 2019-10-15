@@ -14,6 +14,7 @@ from gi.repository import GLib, Gio
 
 import sqlite3
 from threading import Lock
+from random import shuffle
 import itertools
 
 from lollypop.define import App, StorageType
@@ -173,8 +174,6 @@ class Database:
                 # Remove limit from main request
                 request = request.replace(limit_str, "")
                 for request in request.split("UNION"):
-                    request += "ORDER BY random()"
-                    request += "LIMIT %s" % limit_int
                     requests.append(request)
             else:
                 requests = [request]
@@ -184,6 +183,7 @@ class Database:
                     result = sql.execute(request)
                     ids += list(itertools.chain(*result))
                 if union_random:
+                    shuffle(ids)
                     return ids[:limit_int]
                 else:
                     return ids
