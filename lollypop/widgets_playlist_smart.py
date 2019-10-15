@@ -116,8 +116,8 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
                 value = "%" + request_value + "%"
             else:
                 value = request_value
-            sql = "(track_genres.genre_id = genres.rowid" +\
-                  " AND tracks.rowid = track_genres.track_id" +\
+            sql = "(album_genres.genre_id = genres.rowid" +\
+                  " AND tracks.album_id = album_genres.album_id" +\
                   " AND ((genres.name %s '%s' COLLATE NOCASE)) )"
             sql = sql % (request_check, value)
         elif request_type == "album":
