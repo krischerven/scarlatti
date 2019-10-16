@@ -419,6 +419,7 @@ class AlbumArt:
         filename = self.get_album_cache_name(album) + ".jpg"
         store_path = STORE_PATH + "/" + filename
         save_to_tags = App().settings.get_value("save-to-tags")
+        # Multiple albums at same path
         uri_count = App().albums.get_uri_count(album.uri)
         art_uri = album.uri + "/" + self.__favorite
 
