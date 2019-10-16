@@ -94,7 +94,7 @@ class Container(Gtk.Overlay, NotificationContainer,
             Reload current view
         """
         view = self._stack.get_visible_child()
-        if view is not None:
+        if view is not None and view.args is not None:
             new_view = view.__class__(**view.args)
             new_view.populate()
             new_view.show()
