@@ -385,7 +385,7 @@ class AlbumsDatabase:
             pop = result.fetchone()
             mtime = int(time())
             if pop is not None:
-                popularity = pop[0] + 1
+                popularity = pop[0] + pop_to_add
                 sql.execute("UPDATE albums_timed_popularity\
                              SET popularity=?, mtime=?\
                              WHERE album_id=?",
