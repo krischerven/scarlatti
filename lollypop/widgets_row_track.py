@@ -65,14 +65,12 @@ class TrackRow(Gtk.ListBoxRow):
         self._indicator = IndicatorWidget(self, view_type)
         self._indicator.show()
         self._grid.add(self._indicator)
-        if view_type & ViewType.ALBUM:
-            self._num_label = Gtk.Label.new()
-            self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
-            self._num_label.set_width_chars(4)
-            self._num_label.get_style_context().add_class("dim-label")
-            self._num_label.show()
-            self.update_number_label()
-            self._grid.add(self._num_label)
+        self._num_label = Gtk.Label.new()
+        self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self._num_label.set_width_chars(4)
+        self._num_label.get_style_context().add_class("dim-label")
+        self.update_number_label()
+        self._grid.add(self._num_label)
         self.__title_label = Gtk.Label.new(
             GLib.markup_escape_text(self._track.name))
         self.__title_label.set_use_markup(True)
@@ -175,18 +173,19 @@ class TrackRow(Gtk.ListBoxRow):
         """
             Update position label for row
         """
-        if not self.__view_type & ViewType.ALBUM:
-            return
         if App().player.track_in_queue(self._track):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
-        elif self._track.number > 0:
+            self._num_label.show()
+        elif self.__view_type & ViewType.ALBUM and self._track.number > 0:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text(str(self._track.number))
+            self._num_label.show()
         else:
             self._num_label.get_style_context().remove_class("queued")
             self._num_label.set_text("")
+            self._num_label.hide()
 
     def popup_menu(self, parent, x=None, y=None):
         """
