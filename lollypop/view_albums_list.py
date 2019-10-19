@@ -252,8 +252,9 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         # Calculate tracks position
         if not widget.revealed:
             for track in widget.album.tracks:
-                self.__position += 1
-                track.set_number(self.__position)
+                if not App().settings.get_value("show-tag-tracknumber"):
+                    self.__position += 1
+                    track.set_number(self.__position)
         if widget.album in self.__reveals:
             widget.reveal()
             self.__reveals.remove(widget.album)

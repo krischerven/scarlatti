@@ -55,7 +55,6 @@ class Track(Base):
         Base.__init__(self, App().tracks)
         self.id = track_id
         self._uri = None
-        self._number = 0
 
         if album is None:
             from lollypop.objects_album import Album
@@ -184,14 +183,6 @@ class Track(Base):
                 break
             i += 1
         return i
-
-    @property
-    def number(self):
-        """
-            Get track number, may not be equal to position
-            @return int
-        """
-        return self._number
 
     @property
     def first(self):
