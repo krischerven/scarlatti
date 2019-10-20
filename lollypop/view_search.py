@@ -82,6 +82,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.set_search(initial_search)
         self.__local_button.connect("clicked", self.__on_button_clicked)
         web_button.connect("clicked", self.__on_button_clicked)
+        self.show_placeholder(True,
+                              _("Search for artists, albums and tracks"))
         return [
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
