@@ -54,16 +54,25 @@ class ArtistAlbumsMenu(Gio.Menu):
         """
         Gio.Menu.__init__(self)
         self.__artist_id = artist_id
-        self.__set_artists_actions(view_type)
+        self.__set_actions(view_type)
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_artists_actions(self, view_type):
+    def __set_actions(self, view_type):
         """
             Set artist actions
             @param view_type as ViewType
         """
+        show_tracks_action = Gio.SimpleAction.new_stateful(
+            "show_tracks_action",
+            None,
+            GLib.Variant.new_boolean(
+                App().settings.get_value("show-artist-tracks")))
+        App().add_action(show_tracks_action)
+        show_tracks_action.connect("change-state",
+                                   self.__on_show_tracks_change_state)
+        self.append(_("Show tracks"), "app.show_tracks_action")
         if not view_type & ViewType.BANNER and\
                 App().artists.has_albums(self.__artist_id):
             go_artist_action = Gio.SimpleAction(name="go_artist_action")
@@ -100,3 +109,13 @@ class ArtistAlbumsMenu(Gio.Menu):
         """
         App().window.container.show_view([Type.ARTISTS],
                                          [self.__artist_id])
+
+    def __on_show_tracks_change_state(self, action, variant):
+        """
+            Save option and reload view
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        action.set_state(variant)
+        App().settings.set_value("show-artist-tracks", variant)
+        App().window.container.reload_view()
