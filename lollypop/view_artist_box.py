@@ -15,9 +15,9 @@ from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.widgets_banner_artist import ArtistBannerWidget
 
 
-class ArtistView(AlbumsBoxView):
+class ArtistViewBox(AlbumsBoxView):
     """
-        Show artist albums
+        Show artist albums in a box
     """
 
     def __init__(self, genre_ids, artist_ids):

@@ -61,7 +61,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param album
             @param view_type as ViewType
         """
-        BannerWidget.__init__(self, view_type)
+        BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__album = album
         album_name = GLib.markup_escape_text(self.__album.name)
         self.__title_label = Gtk.Label.new()

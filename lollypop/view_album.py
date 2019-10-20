@@ -32,9 +32,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             @param album as Album
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type |
-                                 ViewType.OVERLAY |
-                                 ViewType.ALBUM)
+        LazyLoadingView.__init__(self, view_type | ViewType.ALBUM)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self._album = album
@@ -50,8 +48,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
         self.__grid.set_row_spacing(10)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.add(self.__tracks_view)
-        self.__banner = AlbumBannerWidget(self._album,
-                                          self._view_type | ViewType.ALBUM)
+        self.__banner = AlbumBannerWidget(self._album, self._view_type)
         self.__banner.show()
         self.add_widget(self.__grid, self.__banner)
 
@@ -156,16 +153,17 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             @param view as TracksView
         """
         if self.__tracks_view.is_populated:
-            from lollypop.view_albums_box import AlbumsArtistBoxView
-            for artist_id in self._album.artist_ids:
-                others_box = AlbumsArtistBoxView(self._album, artist_id,
-                                                 ViewType.SMALL |
-                                                 ViewType.ALBUM |
-                                                 ViewType.SCROLLED)
-                others_box.set_margin_start(MARGIN)
-                others_box.set_margin_end(MARGIN)
-                others_box.populate()
-                self.__grid.add(others_box)
-                self.__others_boxes.append(others_box)
+            if self._view_type & ViewType.OVERLAY:
+                from lollypop.view_albums_box import AlbumsArtistBoxView
+                for artist_id in self._album.artist_ids:
+                    others_box = AlbumsArtistBoxView(self._album, artist_id,
+                                                     ViewType.SMALL |
+                                                     ViewType.ALBUM |
+                                                     ViewType.SCROLLED)
+                    others_box.set_margin_start(MARGIN)
+                    others_box.set_margin_end(MARGIN)
+                    others_box.populate()
+                    self.__grid.add(others_box)
+                    self.__others_boxes.append(others_box)
         else:
             self.__tracks_view.populate()

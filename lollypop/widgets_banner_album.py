@@ -78,8 +78,11 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget.show()
         self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
         self.__cover_widget.set_margin_start(MARGIN)
-        self._overlay.add_overlay(self.__widget)
-        self._overlay.set_overlay_pass_through(self.__widget, True)
+        if view_type & ViewType.OVERLAY:
+            self._overlay.add_overlay(self.__widget)
+            self._overlay.set_overlay_pass_through(self.__widget, True)
+        else:
+            self.add(self.__widget)
         return [
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed"),
@@ -127,15 +130,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            App().art_helper.set_album_artwork(
-                    self.__album,
-                    # +100 to prevent resize lag
-                    allocation.width + 100,
-                    ArtSize.BANNER + MARGIN * 2,
-                    self._artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR_HARD |
-                    ArtBehaviour.DARKER,
-                    self._on_artwork)
+            if self._view_type & ViewType.ALBUM:
+                App().art_helper.set_album_artwork(
+                        self.__album,
+                        # +100 to prevent resize lag
+                        allocation.width + 100,
+                        ArtSize.BANNER + MARGIN * 2,
+                        self._artwork.get_scale_factor(),
+                        ArtBehaviour.BLUR_HARD |
+                        ArtBehaviour.DARKER,
+                        self._on_artwork)
             if allocation.width < Size.SMALL + 100:
                 self.__cover_widget.hide()
             else:
@@ -184,7 +188,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == self.__album.id and App().animations:
+        if album_id == self.__album.id and\
+                self._view_type & ViewType.ALBUM and\
+                App().animations:
             App().art_helper.set_album_artwork(
                             self.__album,
                             # +100 to prevent resize lag

@@ -35,7 +35,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param artist_ids as [int]
             @param view_type as ViewType (Unused)
         """
-        BannerWidget.__init__(self, view_type)
+        BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         builder = Gtk.Builder()
