@@ -51,6 +51,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button = builder.get_object("play_button")
         self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
+        if view_type & ViewType.OVERLAY:
+            self.__play_button.get_style_context().add_class(
+                "black-transparent")
+            self.__add_button.get_style_context().add_class(
+                "black-transparent")
+            self.__menu_button.get_style_context().add_class(
+                "black-transparent")
         self.__cover_widget = CoverWidget(album, view_type)
         self.__cover_widget.show()
         self.__title_label.set_label(album.name)
