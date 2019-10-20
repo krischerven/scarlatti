@@ -30,7 +30,7 @@ class PlaylistsBannerWidget(BannerWidget):
             Init banner
             @param view as PlaylistView
         """
-        BannerWidget.__init__(self, view.args["view_type"])
+        BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
         self.__view = view
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)

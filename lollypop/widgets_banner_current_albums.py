@@ -30,7 +30,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
             Init banner
             @param view as AlbumsListView
         """
-        BannerWidget.__init__(self, view.args["view_type"])
+        BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
         self.__view = view
         self.__clear_button = Gtk.Button.new_from_icon_name(
             "edit-clear-all-symbolic",
