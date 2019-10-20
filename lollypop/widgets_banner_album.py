@@ -248,7 +248,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         year_context.remove_class("text-medium")
         duration_context.remove_class("text-x-large")
         duration_context.remove_class("text-medium")
-        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
+        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL) or\
+                not self._view_type & ViewType.OVERLAY:
             title_context.add_class("text-x-large")
             artist_context.add_class("text-x-large")
             year_context.add_class("text-medium")

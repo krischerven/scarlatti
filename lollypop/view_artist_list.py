@@ -10,16 +10,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from lollypop.define import ViewType, MARGIN, App
 from lollypop.widgets_banner_artist import ArtistBannerWidget
 from lollypop.view_album import AlbumView
 from lollypop.objects_album import Album
-from lollypop.view import View
+from lollypop.view import LazyLoadingView
 
 
-class ArtistViewList(View):
+class ArtistViewList(LazyLoadingView):
     """
         Show artist albums in a list with tracks
     """
@@ -30,7 +30,7 @@ class ArtistViewList(View):
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
-        View.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        LazyLoadingView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
@@ -43,12 +43,8 @@ class ArtistViewList(View):
         """
             Populate list
         """
-        for album_id in App().albums.get_ids(self.__artist_ids,
-                                             self.__genre_ids):
-            view = AlbumView(Album(album_id), ViewType.DEFAULT)
-            view.populate()
-            view.show()
-            self.__list.add(view)
+        album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids)
+        self.__add_albums(album_ids)
 
     @property
     def args(self):
@@ -65,3 +61,24 @@ class ArtistViewList(View):
             @return int
         """
         return self.__banner.height + MARGIN
+
+#######################
+# PRIVATE             #
+#######################
+    def __add_albums(self, album_ids):
+        """
+            Add albums to the view
+            Start lazy loading
+            @param album_ids as [int]
+        """
+        if self._lazy_queue is None or self.destroyed:
+            return
+        if album_ids:
+            album_id = album_ids.pop(0)
+            widget = AlbumView(Album(album_id), ViewType.DEFAULT)
+            widget.show()
+            self.__list.add(widget)
+            self._lazy_queue.append(widget)
+            GLib.idle_add(self.__add_albums, album_ids)
+        else:
+            self.lazy_loading()
