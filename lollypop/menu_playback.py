@@ -31,6 +31,11 @@ class PlaybackMenu(Gio.Menu):
         """
         Gio.Menu.__init__(self)
         menu = Gio.Menu()
+        save_playback_action = Gio.SimpleAction.new(name="save_playback")
+        save_playback_action.connect(
+            "activate", self.__on_save_playback_action_activate)
+        App().add_action(save_playback_action)
+        menu.append(_("Create a new playlist"), "app.save_playback")
         show_track_number_action = Gio.SimpleAction.new_stateful(
                 "show_track_number",
                 None,
@@ -40,11 +45,6 @@ class PlaybackMenu(Gio.Menu):
         show_track_number_action.connect(
             "change-state", self.__on_show_track_number_change_state)
         menu.append(_("Show tracks number"), "app.show_track_number")
-        save_playback_action = Gio.SimpleAction.new(name="save_playback")
-        save_playback_action.connect(
-            "activate", self.__on_save_playback_action_activate)
-        App().add_action(save_playback_action)
-        menu.append(_("Create a new playlist"), "app.save_playback")
         self.append_section(_("Playing albums"), menu)
 
     def __on_show_track_number_change_state(self, action, variant):
