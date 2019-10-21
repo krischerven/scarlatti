@@ -12,19 +12,23 @@
 
 from lollypop.view import View
 from lollypop.define import ViewType
-from lollypop.widgets_equalizer import EqualizerWidget
 
 
-class EqualizerView(View):
+class MenuView(View):
     """
-        Show equalizer widget
+        Show a menu
     """
 
-    def __init__(self):
+    def __init__(self, menu):
         """
             Init view
+            @param menu as Gtk.Widget
         """
         View.__init__(self, ViewType.SCROLLED)
-        widget = EqualizerWidget()
-        widget.show()
-        self.add(widget)
+        menu.get_style_context().add_class("adaptive-menu")
+        menu.set_vexpand(True)
+        self.add_widget(menu)
+
+    @property
+    def args(self):
+        return None

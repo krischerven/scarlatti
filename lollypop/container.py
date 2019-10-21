@@ -109,6 +109,8 @@ class Container(Gtk.Overlay, NotificationContainer,
             new_view.show()
             self._stack.add(new_view)
             self._stack.set_visible_child(new_view)
+        else:
+            App().lookup_action("reload").change_state(GLib.Variant("b", True))
 
     def set_focused_view(self, view):
         """

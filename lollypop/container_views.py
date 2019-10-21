@@ -58,12 +58,9 @@ class ViewsContainer:
             if self.can_go_back:
                 emit_signal(self, "can-go-back-changed", True)
 
-        from lollypop.view import View
-        view = View(ViewType.SCROLLED)
+        from lollypop.view_menu import MenuView
+        view = MenuView(widget)
         view.show()
-        view.add_widget(widget)
-        widget.get_style_context().add_class("adaptive-menu")
-        widget.set_vexpand(True)
         widget.connect("hidden", on_hidden, view)
         self._stack.add(view)
         self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_DOWN)

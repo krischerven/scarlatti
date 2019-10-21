@@ -55,7 +55,7 @@ class PlaybackMenu(Gio.Menu):
         """
         action.set_state(variant)
         App().settings.set_value("show-tag-tracknumber", variant)
-        App().lookup_action("reload").change_state(GLib.Variant("b", True))
+        App().window.container.reload_view()
 
     def __on_save_playback_action_activate(self, action, variant):
         """

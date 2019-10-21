@@ -107,6 +107,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 self.add(self.__banner)
             self.add(self.__stack)
 
+    def populate(self):
+        pass
+
     def pause(self):
         pass
 

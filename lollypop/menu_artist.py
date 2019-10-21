@@ -119,4 +119,4 @@ class ArtistAlbumsMenu(Gio.Menu):
         """
         action.set_state(variant)
         App().settings.set_value("show-artist-tracks", variant)
-        App().lookup_action("reload").change_state(GLib.Variant("b", True))
+        App().window.container.reload_view()
