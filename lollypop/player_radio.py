@@ -13,12 +13,11 @@
 from gi.repository import TotemPlParser, Gst, Gio, GLib
 
 from lollypop.define import App
-from lollypop.player_base import BasePlayer
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 
 
-class RadioPlayer(BasePlayer):
+class RadioPlayer:
     """
         Radio player
     """
@@ -27,7 +26,7 @@ class RadioPlayer(BasePlayer):
         """
             Init radio player
         """
-        BasePlayer.__init__(self)
+        pass
 
     def load(self, track, play=True):
         """

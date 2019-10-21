@@ -13,7 +13,6 @@
 from random import shuffle, random
 
 from lollypop.define import Repeat, App
-from lollypop.player_base import BasePlayer
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
 from lollypop.objects_album import Album
@@ -22,7 +21,7 @@ from lollypop.utils import emit_signal
 from lollypop.logger import Logger
 
 
-class ShufflePlayer(BasePlayer):
+class ShufflePlayer:
     """
         Shuffle player
         Manage shuffle tracks and party mode
@@ -32,7 +31,6 @@ class ShufflePlayer(BasePlayer):
         """
             Init shuffle player
         """
-        BasePlayer.__init__(self)
         # Albums to play, different from _albums for a better shuffle
         self.__to_play_albums = []
         # Albums who never have been played

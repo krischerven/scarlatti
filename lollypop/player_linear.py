@@ -11,12 +11,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import Repeat, App
-from lollypop.player_base import BasePlayer
 from lollypop.objects_track import Track
 from lollypop.logger import Logger
 
 
-class LinearPlayer(BasePlayer):
+class LinearPlayer:
     """
         Manage normal playback
     """
@@ -25,7 +24,7 @@ class LinearPlayer(BasePlayer):
         """
             Init linear player
         """
-        BasePlayer.__init__(self)
+        pass
 
     def next(self):
         """

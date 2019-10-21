@@ -15,7 +15,6 @@ from gi.repository import Gst, GstAudio, GstPbutils, GLib, Gio
 from time import time
 from gettext import gettext as _
 
-from lollypop.player_base import BasePlayer
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.player_plugins import PluginsPlayer
 from lollypop.define import GstPlayFlags, App
@@ -26,7 +25,7 @@ from lollypop.objects_radio import Radio
 from lollypop.utils import emit_signal, get_network_available
 
 
-class BinPlayer(BasePlayer):
+class BinPlayer:
     """
         Gstreamer bin player
     """
@@ -35,9 +34,13 @@ class BinPlayer(BasePlayer):
         """
             Init playbin
         """
-        BasePlayer.__init__(self)
         self.__cancellable = Gio.Cancellable()
         self.__codecs = Codecs()
+        self._current_track = Track()
+        self._current_playback_track = Track()
+        self._next_track = Track()
+        self._prev_track = Track()
+        self._crossfading = False
         self._playbin = self.__playbin1 = Gst.ElementFactory.make(
             "playbin", "player")
         self.__playbin2 = Gst.ElementFactory.make("playbin", "player")
