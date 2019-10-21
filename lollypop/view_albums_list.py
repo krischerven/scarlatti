@@ -89,16 +89,13 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             self.__add_albums(list(albums))
             self._albums = albums
 
-    def jump_to_current(self, scrolled=None):
+    def jump_to_current(self):
         """
             Scroll to album
-            @param scrolled as Gtk.Scrolled/None
         """
-        if scrolled is None:
-            scrolled = self._scrolled
         y = self.__get_current_ordinate()
         if y is not None:
-            scrolled.get_vadjustment().set_value(y)
+            self._scrolled.get_vadjustment().set_value(y)
 
     def clear(self, clear_albums=False):
         """
@@ -319,7 +316,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         y = None
         for child in self._box.get_children():
             if child.album.id == App().player.current_track.album.id:
-                child.populate()
                 child.reveal(True)
                 y = child.translate_coordinates(self._box, 0, 0)[1]
         return y

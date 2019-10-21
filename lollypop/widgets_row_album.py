@@ -91,6 +91,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
             Populate widget content
         """
         if self.__artwork is not None:
+            self.emit("populated")
             return
         self.__artwork = Gtk.Image.new()
         App().art_helper.set_frame(self.__artwork, "small-cover-frame",
@@ -343,7 +344,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         else:
             self.__artwork.set_from_surface(surface)
         self.show_all()
-        # TracksView will not emit populated
+        # TracksView will emit populated
         if not self.revealed:
             emit_signal(self, "populated")
 
