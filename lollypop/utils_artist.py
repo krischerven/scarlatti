@@ -86,4 +86,3 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
             App().player.skip_album()
     except Exception as e:
         Logger.error("add_artist_to_playback(): %s" % e)
-    App().player.update_next_prev()

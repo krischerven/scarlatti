@@ -180,12 +180,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         (icon_name, icon_size) = button.get_image().get_icon_name()
         if icon_name == "list-add-symbolic":
             App().player.add_album(self.__album)
-            App().player.update_next_prev()
             button.get_image().set_from_icon_name("list-remove-symbolic",
                                                   icon_size)
         else:
             App().player.remove_album_by_id(self.__album.id)
-            App().player.update_next_prev()
             button.get_image().set_from_icon_name("list-add-symbolic",
                                                   icon_size)
 

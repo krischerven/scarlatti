@@ -64,7 +64,6 @@ class SimilarsPlayer:
             album_id = album_ids.pop(0)
             if album_id not in self.album_ids:
                 self.add_album(Album(album_id))
-                self.update_next_prev()
                 return True
         return False
 

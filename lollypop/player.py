@@ -99,6 +99,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             self._albums[-1].set_tracks(tracks)
         else:
             self._albums.append(album)
+        self.update_next_prev()
         emit_signal(self, "playback-changed")
 
     def remove_album(self, album):
@@ -111,9 +112,8 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
                 return
             if self._current_track.album == album:
                 self.skip_album()
-            else:
-                self.update_next_prev()
             self._albums.remove(album)
+            self.update_next_prev()
             emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
@@ -127,6 +127,7 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             for album in self._albums:
                 if album.id == album_id:
                     self.remove_album(album)
+            self.update_next_prev()
             emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album_by_id(): %s" % e)
@@ -211,12 +212,14 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
             Set player albums
         """
         self._albums = albums
+        self.update_next_prev()
 
     def clear_albums(self):
         """
             Clear all albums
         """
         self._albums = []
+        self.update_next_prev()
         emit_signal(self, "playback-changed")
 
     def stop_after(self, track_id):
@@ -489,6 +492,8 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         self._albums = albums
         if track is not None:
             self.load(track)
+        else:
+            self.update_next_prev()
 
     def __play_albums(self, album, albums):
         """
@@ -505,3 +510,5 @@ class Player(BinPlayer, QueuePlayer, RadioPlayer,
         self._albums = albums
         if track is not None:
             self.load(track)
+        else:
+            self.update_next_prev()

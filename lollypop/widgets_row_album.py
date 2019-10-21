@@ -389,6 +389,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         """
         row.destroy()
         if len(self.children) == 0:
+            App().player.remove_album(self.__album)
             self.destroy()
 
     def __on_tracks_view_populated(self, view):
@@ -432,24 +433,11 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
                     App().player.remove_album(self.__album)
             else:
                 App().player.remove_album(self.__album)
-            App().player.update_next_prev()
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
                 view.remove_from_playlist(self.__album)
             self.destroy()
-
-    def __on_add_button_press(self, x, y, event):
-        """
-            Add album to playback
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
-        """
-        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-            return True
-        App().player.add_album(self.__album)
-        self.__gesture_add.widget.set_sensitive(False)
 
     def __on_save_button_press(self, x, y, event):
         """
