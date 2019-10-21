@@ -74,7 +74,7 @@ class ArtistAlbumsMenu(Gio.Menu):
             show_tracks_action.connect("change-state",
                                        self.__on_show_tracks_change_state)
             self.append(_("Show tracks"), "app.show_tracks_action")
-        if not view_type & ViewType.BANNER and\
+        if not view_type & ViewType.ARTIST and\
                 App().artists.has_albums(self.__artist_id):
             go_artist_action = Gio.SimpleAction(name="go_artist_action")
             App().add_action(go_artist_action)

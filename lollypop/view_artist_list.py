@@ -30,7 +30,8 @@ class ArtistViewList(LazyLoadingView):
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
-        LazyLoadingView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        LazyLoadingView.__init__(self, ViewType.SCROLLED |
+                                 ViewType.OVERLAY | ViewType.ARTIST)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
