@@ -159,7 +159,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self.__album, ViewType.BANNER,
+        menu = AlbumMenu(self.__album, self._view_type | ViewType.BANNER,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()

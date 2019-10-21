@@ -168,7 +168,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
-        menu = ArtistMenu(self.__artist_ids[0], ViewType.BANNER,
+        menu = ArtistMenu(self.__artist_ids[0],
+                          self._view_type | ViewType.BANNER,
                           App().window.is_adaptive)
         section = Gio.Menu()
         menu.append_section(_("Similar artists"), section)
