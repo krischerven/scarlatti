@@ -13,7 +13,6 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.utils import popup_widget
-from lollypop.utils import update_track_indexes
 from lollypop.view import LazyLoadingView
 from lollypop.objects_album import Album
 from lollypop.define import App, ViewType, MARGIN
@@ -319,7 +318,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         row = AlbumRow(album, self.__height, self._view_type)
         row.connect("activated", self.__on_row_activated)
-        row.connect("track-removed", self.__on_track_removed)
         return row
 
     def __get_current_ordinate(self):
@@ -353,13 +351,3 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             App().player.remove_album_by_id(track.album.id)
             App().player.add_album(track.album)
             App().player.load(track)
-
-    def __on_track_removed(self, row, destroy_album):
-        """
-            Pass signal
-            @param row as AlbumRow
-        """
-        start_index = row.get_index()
-        update_track_indexes(self._box, start_index, -1)
-        if destroy_album:
-            self.destroy()
