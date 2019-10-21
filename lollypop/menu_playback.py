@@ -209,9 +209,7 @@ class GenrePlaybackMenu(BasePlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
-        for album_id in album_ids:
-            album = Album(album_id)
-            App().player.add_album(album)
+        App().player.add_album_ids(album_ids)
 
     def _remove_from_playback(self, action, variant):
         """
@@ -220,8 +218,7 @@ class GenrePlaybackMenu(BasePlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
-        for album_id in album_ids:
-            App().player.remove_album_by_id(album_id)
+        App().player.remove_album_by_ids(album_ids)
 
 #######################
 # PRIVATE             #
@@ -286,9 +283,7 @@ class DecadePlaybackMenu(BasePlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
-        for album_id in album_ids:
-            album = Album(album_id)
-            App().player.add_album(album)
+        App().player.add_album_ids(album_ids)
 
     def _remove_from_playback(self, action, variant):
         """
@@ -297,8 +292,7 @@ class DecadePlaybackMenu(BasePlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
-        for album_id in album_ids:
-            App().player.remove_album_by_id(album_id)
+        App().player.remove_album_by_ids(album_ids)
 
 #######################
 # PRIVATE             #

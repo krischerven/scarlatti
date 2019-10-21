@@ -38,14 +38,33 @@ class AlbumsPlayer:
             Add album to player
             @param album as Album
         """
-        # Merge album if previous is same
-        if self._albums and self._albums[-1].id == album.id:
-            tracks = list(set(self._albums[-1].tracks) | set(album.tracks))
-            self._albums[-1].set_tracks(tracks)
-        else:
-            self._albums.append(album)
-        self.update_next_prev()
-        emit_signal(self, "playback-changed")
+        self.add_albums([album])
+
+    def add_album_ids(self, album_ids):
+        """
+            Add album ids to player
+            @param album_ids as [int]
+        """
+        self.add_albums([Album(album_id) for album_id in album_ids])
+
+    def add_albums(self, albums):
+        """
+            Add albums to player
+            @param albums as [Album]
+        """
+        try:
+            for album in albums:
+                # Merge album if previous is same
+                if self._albums and self._albums[-1].id == album.id:
+                    tracks = list(set(self._albums[-1].tracks) |
+                                  set(album.tracks))
+                    self._albums[-1].set_tracks(tracks)
+                else:
+                    self._albums.append(album)
+            self.update_next_prev()
+            emit_signal(self, "playback-changed")
+        except Exception as e:
+            Logger.error("Player::add_albums(): %s" % e)
 
     def remove_album(self, album):
         """
@@ -65,17 +84,25 @@ class AlbumsPlayer:
 
     def remove_album_by_id(self, album_id):
         """
-            Remove all instance of album with id from albums
+            Remove all instances of album id
             @param album_id as int
         """
+        self.remove_album_by_ids([album_id])
+
+    def remove_album_by_ids(self, album_ids):
+        """
+            Remove all instances of album ids
+            @param album_ids as [int]
+        """
         try:
-            for album in self._albums:
-                if album.id == album_id:
-                    self.remove_album(album)
+            for album_id in album_ids:
+                for album in self._albums:
+                    if album.id == album_id:
+                        self.remove_album(album)
             self.update_next_prev()
             emit_signal(self, "playback-changed")
         except Exception as e:
-            Logger.error("Player::remove_album_by_id(): %s" % e)
+            Logger.error("Player::remove_album_by_ids(): %s" % e)
 
     def play_album(self, album):
         """
