@@ -28,6 +28,7 @@ class GesturesHelper():
             @param widget as Gtk.Widget
             @params as callbacks
         """
+        self.__widget = widget
         self.__primary_long_callback = primary_long_callback
         self.__secondary_long_callback = secondary_long_callback
         self.__primary_press_callback = primary_press_callback
@@ -47,6 +48,14 @@ class GesturesHelper():
             Enable a special header bar hack to block mutter
         """
         self.__multi_press.connect("pressed", self.__on_multi_pressed)
+
+    @property
+    def widget(self):
+        """
+            Get widget
+            @return Gtk.Widget
+        """
+        return self.__widget
 
     @property
     def multi_press_gesture(self):
