@@ -46,14 +46,17 @@ class ArtistRow(Gtk.ListBoxRow):
         self.__artwork = Gtk.Image.new()
         self.__artwork.set_size_request(ArtSize.SMALL,
                                         ArtSize.SMALL)
-        App().art_helper.set_artist_artwork(artist_name,
-                                            ArtSize.SMALL,
-                                            ArtSize.SMALL,
-                                            self.get_scale_factor(),
-                                            ArtBehaviour.CROP |
-                                            ArtBehaviour.CACHE |
-                                            ArtBehaviour.ROUNDED,
-                                            self.__on_artist_artwork)
+        if App().art.artist_artwork_exists(artist_name)[0]:
+            App().art_helper.set_artist_artwork(artist_name,
+                                                ArtSize.SMALL,
+                                                ArtSize.SMALL,
+                                                self.get_scale_factor(),
+                                                ArtBehaviour.CROP |
+                                                ArtBehaviour.CACHE |
+                                                ArtBehaviour.ROUNDED,
+                                                self.__on_artist_artwork)
+        else:
+            self.__on_artist_artwork(None)
         grid.add(self.__artwork)
         grid.add(label)
         grid.show_all()

@@ -160,8 +160,9 @@ class ArtDownloader(Downloader):
                         if uri is not None:
                             return [uri]
         except Exception as e:
-            Logger.warning("ArtDownloader::_get_audiodb_artist_artwork_uri: %s"
-                           % e)
+            Logger.warning(
+                "ArtDownloader::_get_audiodb_artist_artwork_uri: %s : %s"
+                % (e, artist))
         return []
 
     def _get_deezer_artist_artwork_uri(self, artist, cancellable=None):
@@ -188,7 +189,8 @@ class ArtDownloader(Downloader):
                 return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_deezer_artist_artwork_uri(): %s" % e)
+                "ArtDownloader::_get_deezer_artist_artwork_uri(): %s : %s"
+                % (e, artist))
         return []
 
     def _get_fanarttv_artist_artwork_uri(self, artist, cancellable=None):
@@ -215,7 +217,8 @@ class ArtDownloader(Downloader):
                     uris.append(item["url"])
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_fanarttv_artist_artwork_uri: %s" % e)
+                "ArtDownloader::_get_fanarttv_artist_artwork_uri: %s : %s"
+                % (e, artist))
         return uris
 
     def _get_spotify_artist_artwork_uri(self, artist, cancellable=None):
@@ -247,7 +250,8 @@ class ArtDownloader(Downloader):
                         return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_spotify_artist_artwork_uri(): %s" % e)
+                "ArtDownloader::_get_spotify_artist_artwork_uri(): %s : %s"
+                % (e, artist))
         return []
 
     def _get_deezer_album_artwork_uri(self, artist, album, cancellable=None):
