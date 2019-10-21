@@ -36,7 +36,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__width = 0
-        self.__position = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self._albums = []
@@ -105,7 +104,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
             Clear the view
         """
-        self.__position = 0
         for child in self._box.get_children():
             GLib.idle_add(child.destroy)
         if clear_albums:
@@ -248,12 +246,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param widget as AlbumWidget/TracksView
             @parma lazy_loading_id as int
         """
-        # Calculate tracks position
-        if not widget.revealed:
-            for track in widget.album.tracks:
-                if not App().settings.get_value("show-tag-tracknumber"):
-                    self.__position += 1
-                    track.set_number(self.__position)
         if widget.album in self.__reveals:
             widget.reveal()
             self.__reveals.remove(widget.album)
