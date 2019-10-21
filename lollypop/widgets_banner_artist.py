@@ -35,7 +35,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param artist_ids as [int]
             @param view_type as ViewType (Unused)
         """
-        BannerWidget.__init__(self, view_type)
+        BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         builder = Gtk.Builder()
@@ -168,7 +168,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
-        menu = ArtistMenu(self.__artist_ids[0], ViewType.BANNER,
+        menu = ArtistMenu(self.__artist_ids[0],
+                          self._view_type | ViewType.BANNER,
                           App().window.is_adaptive)
         section = Gio.Menu()
         menu.append_section(_("Similar artists"), section)

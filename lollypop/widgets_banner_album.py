@@ -51,6 +51,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button = builder.get_object("play_button")
         self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
+        if view_type & ViewType.OVERLAY:
+            self.__play_button.get_style_context().add_class(
+                "black-transparent")
+            self.__add_button.get_style_context().add_class(
+                "black-transparent")
+            self.__menu_button.get_style_context().add_class(
+                "black-transparent")
         self.__cover_widget = CoverWidget(album, view_type)
         self.__cover_widget.show()
         self.__title_label.set_label(album.name)
@@ -78,8 +85,11 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget.show()
         self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
         self.__cover_widget.set_margin_start(MARGIN)
-        self._overlay.add_overlay(self.__widget)
-        self._overlay.set_overlay_pass_through(self.__widget, True)
+        if view_type & ViewType.OVERLAY:
+            self._overlay.add_overlay(self.__widget)
+            self._overlay.set_overlay_pass_through(self.__widget, True)
+        else:
+            self.add(self.__widget)
         return [
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed"),
@@ -127,15 +137,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            App().art_helper.set_album_artwork(
-                    self.__album,
-                    # +100 to prevent resize lag
-                    allocation.width + 100,
-                    ArtSize.BANNER + MARGIN * 2,
-                    self._artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR_HARD |
-                    ArtBehaviour.DARKER,
-                    self._on_artwork)
+            if self._view_type & ViewType.ALBUM:
+                App().art_helper.set_album_artwork(
+                        self.__album,
+                        # +100 to prevent resize lag
+                        allocation.width + 100,
+                        ArtSize.BANNER + MARGIN * 2,
+                        self._artwork.get_scale_factor(),
+                        ArtBehaviour.BLUR_HARD |
+                        ArtBehaviour.DARKER,
+                        self._on_artwork)
             if allocation.width < Size.SMALL + 100:
                 self.__cover_widget.hide()
             else:
@@ -148,7 +159,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self.__album, ViewType.BANNER,
+        menu = AlbumMenu(self.__album, self._view_type | ViewType.BANNER,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
@@ -184,7 +195,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == self.__album.id and App().animations:
+        if album_id == self.__album.id and\
+                self._view_type & ViewType.ALBUM and\
+                App().animations:
             App().art_helper.set_album_artwork(
                             self.__album,
                             # +100 to prevent resize lag
@@ -242,7 +255,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         year_context.remove_class("text-medium")
         duration_context.remove_class("text-x-large")
         duration_context.remove_class("text-medium")
-        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
+        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL) or\
+                not self._view_type & ViewType.OVERLAY:
             title_context.add_class("text-x-large")
             artist_context.add_class("text-x-large")
             year_context.add_class("text-medium")

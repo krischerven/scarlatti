@@ -29,7 +29,7 @@ class RadiosBannerWidget(BannerWidget):
             Init banner
             @param view_type as ViewType
         """
-        BannerWidget.__init__(self, view_type)
+        BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__pop_tunein = None
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)

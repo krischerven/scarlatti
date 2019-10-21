@@ -97,8 +97,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self.add(self.__overlay)
         elif self._view_type & ViewType.SCROLLED:
             self.__viewport.add(self.__stack)
+            if banner is not None:
+                self.__banner = banner
+                self.add(self.__banner)
             self.add(self._scrolled)
         else:
+            if banner is not None:
+                self.__banner = banner
+                self.add(self.__banner)
             self.add(self.__stack)
 
     def pause(self):
@@ -223,11 +229,12 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._view_type &= ~ViewType.ADAPTIVE
         if self.__banner is not None:
             self.__banner.set_view_type(self._view_type)
-            main_widget = self.__stack.get_child_by_name("main")
-            main_widget.set_margin_top(self.__banner.height + MARGIN_SMALL)
-            if self._view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(
-                    self.__banner.height)
+            if view_type & ViewType.OVERLAY:
+                main_widget = self.__stack.get_child_by_name("main")
+                main_widget.set_margin_top(self.__banner.height + MARGIN_SMALL)
+                if self._view_type & ViewType.SCROLLED:
+                    self._scrolled.get_vscrollbar().set_margin_top(
+                        self.__banner.height)
         return view_type != self._view_type
 
     def _on_value_changed(self, adj):

@@ -31,7 +31,7 @@ class PlaylistBannerWidget(BannerWidget):
             @param playlist_id as int
             @param view as AlbumsListView
         """
-        BannerWidget.__init__(self, view.args["view_type"])
+        BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
         self.__playlist_id = playlist_id
         self.__view = view
         builder = Gtk.Builder()

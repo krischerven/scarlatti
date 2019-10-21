@@ -88,6 +88,7 @@ class ViewType:
     FULLSCREEN = 1 << 10
     PLAYBACK = 1 << 11
     BANNER = 1 << 12
+    ARTIST = 1 << 13
 
 
 NetworkAccessACL = {

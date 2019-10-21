@@ -32,7 +32,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
     }
 
     @signals_map
-    def __init__(self, view_type=ViewType.DEFAULT):
+    def __init__(self, view_type=ViewType.OVERLAY):
         """
             Init cover widget
             @param album

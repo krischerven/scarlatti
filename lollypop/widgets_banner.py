@@ -66,26 +66,27 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         Gtk.Revealer.__init__(self)
         self._view_type = view_type
         self.set_property("valign", Gtk.Align.START)
-        self._overlay = Overlay(self)
-        self._overlay.show()
-        self._artwork = Gtk.Image()
-        self._artwork.show()
-        if App().animations:
-            SizeAllocationHelper.__init__(self)
-            self._artwork.set_opacity(0.99)
-        self.get_style_context().add_class("default-banner")
-        self._artwork.get_style_context().add_class("default-banner")
-        eventbox = Gtk.EventBox.new()
-        eventbox.show()
-        eventbox.add_events(Gdk.EventMask.ALL_EVENTS_MASK)
-        eventbox.add(self._artwork)
-        self._overlay.add(eventbox)
-        self.__event_controller = Gtk.EventControllerScroll.new(
-            eventbox, Gtk.EventControllerScrollFlags.BOTH_AXES)
-        self.__event_controller.set_propagation_phase(
-            Gtk.PropagationPhase.TARGET)
-        self.__event_controller.connect("scroll", self.__on_scroll)
-        self.add(self._overlay)
+        if view_type & ViewType.OVERLAY:
+            self._overlay = Overlay(self)
+            self._overlay.show()
+            self._artwork = Gtk.Image()
+            self._artwork.show()
+            if App().animations:
+                SizeAllocationHelper.__init__(self)
+                self._artwork.set_opacity(0.99)
+            self.get_style_context().add_class("default-banner")
+            self._artwork.get_style_context().add_class("default-banner")
+            eventbox = Gtk.EventBox.new()
+            eventbox.show()
+            eventbox.add_events(Gdk.EventMask.ALL_EVENTS_MASK)
+            eventbox.add(self._artwork)
+            self._overlay.add(eventbox)
+            self.__event_controller = Gtk.EventControllerScroll.new(
+                eventbox, Gtk.EventControllerScrollFlags.BOTH_AXES)
+            self.__event_controller.set_propagation_phase(
+                Gtk.PropagationPhase.TARGET)
+            self.__event_controller.connect("scroll", self.__on_scroll)
+            self.add(self._overlay)
         self.set_reveal_child(True)
         self.set_transition_duration(250)
 

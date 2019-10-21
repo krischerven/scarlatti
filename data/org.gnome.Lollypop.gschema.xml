@@ -164,6 +164,11 @@
             <summary>Show performers</summary>
             <description></description>
         </key>
+        <key type="b" name="show-artist-tracks">
+            <default>false</default>
+            <summary>Show tracks in artist view</summary>
+            <description></description>
+        </key>
         <key type="b" name="artist-artwork">
             <default>true</default>
             <summary>Show artist artwork</summary>

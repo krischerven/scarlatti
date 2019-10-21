@@ -34,7 +34,7 @@ class AlbumsBannerWidget(BannerWidget):
             @param artist_ids as [int]
             @param view_type as ViewType
         """
-        BannerWidget.__init__(self, view_type)
+        BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         grid = Gtk.Grid.new()

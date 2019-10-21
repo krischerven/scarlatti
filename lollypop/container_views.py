@@ -281,8 +281,12 @@ class ViewsContainer:
             @param genre_ids as [int]
             @param artist_ids as [int]
         """
-        from lollypop.view_artist import ArtistView
-        view = ArtistView(genre_ids, artist_ids)
+        if App().settings.get_value("show-artist-tracks"):
+            from lollypop.view_artist_list import ArtistViewList
+            view = ArtistViewList(genre_ids, artist_ids)
+        else:
+            from lollypop.view_artist_box import ArtistViewBox
+            view = ArtistViewBox(genre_ids, artist_ids)
         view.populate()
         view.show()
         return view
@@ -313,7 +317,8 @@ class ViewsContainer:
             @param album as Album
         """
         from lollypop.view_album import AlbumView
-        view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED
+        view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED |\
+            ViewType.OVERLAY
         view = AlbumView(album, view_type)
         view.populate()
         return view
