@@ -20,6 +20,62 @@ from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 
 
+class PlaybackMenu(Gio.Menu):
+    """
+        Menu for playback section (current albums)
+    """
+
+    def __init__(self):
+        """
+            Init menu
+        """
+        Gio.Menu.__init__(self)
+        menu = Gio.Menu()
+        show_track_number_action = Gio.SimpleAction.new_stateful(
+                "show_track_number",
+                None,
+                GLib.Variant.new_boolean(
+                    App().settings.get_value("show-tag-tracknumber")))
+        App().add_action(show_track_number_action)
+        show_track_number_action.connect(
+            "change-state", self.__on_show_track_number_change_state)
+        menu.append(_("Show tracks number"), "app.show_track_number")
+        save_playback_action = Gio.SimpleAction.new(name="save_playback")
+        save_playback_action.connect(
+            "activate", self.__on_save_playback_action_activate)
+        App().add_action(save_playback_action)
+        menu.append(_("Create a new playlist"), "app.save_playback")
+        self.append_section(_("Playing albums"), menu)
+
+    def __on_show_track_number_change_state(self, action, variant):
+        """
+            Update settings and reload view
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        action.set_state(variant)
+        App().settings.set_value("show-tag-tracknumber", variant)
+        App().window.container.reload_view()
+
+    def __on_save_playback_action_activate(self, action, variant):
+        """
+            Create a new playlist based on current playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        def albums_to_playlist():
+            tracks = []
+            for album in App().player.albums:
+                tracks += album.tracks
+            if tracks:
+                import datetime
+                now = datetime.datetime.now()
+                date_string = now.strftime("%Y-%m-%d-%H:%M:%S")
+                playlist_id = App().playlists.add(date_string)
+                App().playlists.add_tracks(playlist_id, tracks)
+        App().task_helper.run(albums_to_playlist)
+
+
 class BasePlaybackMenu(Gio.Menu):
     """
         Base class for playback menu

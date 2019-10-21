@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.define import MARGIN, MARGIN_SMALL
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import update_button, emit_signal
+from lollypop.utils import update_button, emit_signal, popup_widget
 
 
 class CurrentAlbumsBannerWidget(BannerWidget):
@@ -38,23 +38,22 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__clear_button.set_relief(Gtk.ReliefStyle.NONE)
         self.__clear_button.set_tooltip_text(_("Clear albums"))
         self.__clear_button.set_sensitive(App().player.albums)
-        self.__clear_button.connect("clicked", self.__on_clear_clicked)
+        self.__clear_button.connect("clicked", self.__on_clear_button_clicked)
         self.__clear_button.get_style_context().add_class("black-transparent")
         self.__clear_button.show()
-        self.__save_button = Gtk.Button.new_from_icon_name(
-            "document-new-symbolic",
+        self.__menu_button = Gtk.Button.new_from_icon_name(
+            "view-more-symbolic",
             Gtk.IconSize.LARGE_TOOLBAR)
-        self.__save_button.set_relief(Gtk.ReliefStyle.NONE)
-        self.__save_button.set_tooltip_text(_("Create a new playlist"))
-        self.__save_button.set_sensitive(App().player.albums)
-        self.__save_button.connect("clicked", self.__on_save_clicked)
-        self.__save_button.get_style_context().add_class("black-transparent")
-        self.__save_button.show()
+        self.__menu_button.set_relief(Gtk.ReliefStyle.NONE)
+        self.__menu_button.set_sensitive(App().player.albums)
+        self.__menu_button.connect("clicked", self.__on_menu_button_clicked)
+        self.__menu_button.get_style_context().add_class("black-transparent")
+        self.__menu_button.show()
         self.__jump_button = Gtk.Button.new_from_icon_name(
             "go-jump-symbolic",
             Gtk.IconSize.LARGE_TOOLBAR)
         self.__jump_button.set_relief(Gtk.ReliefStyle.NONE)
-        self.__jump_button.connect("clicked", self.__on_jump_clicked)
+        self.__jump_button.connect("clicked", self.__on_jump_button_clicked)
         self.__jump_button.set_tooltip_text(_("Go to current track"))
         self.__jump_button.set_sensitive(App().player.albums)
         self.__jump_button.get_style_context().add_class("black-transparent")
@@ -79,8 +78,8 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         buttons.get_style_context().add_class("linked")
         buttons.set_property("valign", Gtk.Align.CENTER)
         buttons.add(self.__jump_button)
-        buttons.add(self.__save_button)
         buttons.add(self.__clear_button)
+        buttons.add(self.__menu_button)
         grid.add(buttons)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
@@ -104,8 +103,8 @@ class CurrentAlbumsBannerWidget(BannerWidget):
             title_context.add_class("text-x-large")
         update_button(self.__clear_button, style,
                       icon_size, "edit-clear-all-symbolic")
-        update_button(self.__save_button, style,
-                      icon_size, "document-new-symbolic")
+        update_button(self.__menu_button, style,
+                      icon_size, "view-more-symbolic")
         update_button(self.__jump_button, style,
                       icon_size, "go-jump-symbolic")
 
@@ -134,12 +133,12 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         return self.__clear_button
 
     @property
-    def save_button(self):
+    def menu_button(self):
         """
-            Get save button
+            Get menu button
             @return Gtk.Button
         """
-        return self.__save_button
+        return self.__menu_button
 
     @property
     def jump_button(self):
@@ -160,36 +159,26 @@ class CurrentAlbumsBannerWidget(BannerWidget):
 #######################
 # PRIVATE             #
 #######################
-    def __albums_to_playlist(self):
-        """
-            Create a new playlist based on search
-        """
-        tracks = []
-        for child in self.children:
-            tracks += child.album.tracks
-        if tracks:
-            import datetime
-            now = datetime.datetime.now()
-            date_string = now.strftime("%Y-%m-%d-%H:%M:%S")
-            playlist_id = App().playlists.add(date_string)
-            App().playlists.add_tracks(playlist_id, tracks)
-
-    def __on_jump_clicked(self, button):
+    def __on_jump_button_clicked(self, button):
         """
             Scroll to album
             @param button as Gtk.Button
         """
         self.__view.jump_to_current()
 
-    def __on_save_clicked(self, button):
+    def __on_menu_button_clicked(self, button):
         """
             Save to playlist
             @param button as Gtk.Button
         """
-        button.set_sensitive(False)
-        App().task_helper.run(self.__albums_to_playlist)
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_playback import PlaybackMenu
+        menu = PlaybackMenu()
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
-    def __on_clear_clicked(self, button):
+    def __on_clear_button_clicked(self, button):
         """
             Clear albums
             @param button as Gtk.Button
@@ -198,5 +187,5 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__view.populate([])
         self.__clear_button.set_sensitive(False)
         self.__jump_button.set_sensitive(False)
-        self.__save_button.set_sensitive(False)
+        self.__menu_button.set_sensitive(False)
         emit_signal(App().player, "status-changed")

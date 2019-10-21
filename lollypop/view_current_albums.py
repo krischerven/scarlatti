@@ -107,7 +107,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         self.__view.clear()
         self.__banner.clear_button.set_sensitive(True)
         self.__banner.jump_button.set_sensitive(True)
-        self.__banner.save_button.set_sensitive(True)
+        self.__banner.menu_button.set_sensitive(True)
         self.populate()
 
 #######################
