@@ -49,14 +49,6 @@ class GenresBoxView(FlowBoxView):
 
         App().task_helper.run(load, callback=(on_load,))
 
-    @property
-    def args(self):
-        """
-            Get default args for __class__
-            @return {}
-        """
-        return {"view_type": self.view_type}
-
 #######################
 # PROTECTED           #
 #######################
