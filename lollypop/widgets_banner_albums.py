@@ -81,7 +81,9 @@ class AlbumsBannerWidget(BannerWidget):
                 if genre_id < 0:
                     genres.append(ShownLists.IDS[genre_id])
                 else:
-                    genres.append(App().genres.get_name(genre_id))
+                    genre = App().genres.get_name(genre_id)
+                    if genre is not None:
+                        genres.append(genre)
             title_str = ",".join(genres)
         self.__title_label.set_markup("<b>%s</b>" %
                                       GLib.markup_escape_text(title_str))
