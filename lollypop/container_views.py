@@ -53,6 +53,8 @@ class ViewsContainer:
                 self._stack.set_transition_type(
                     Gtk.StackTransitionType.CROSSFADE)
                 App().enable_special_shortcuts(True)
+                if App().lookup_action("reload").get_state():
+                    self.reload_view()
             if self.can_go_back:
                 emit_signal(self, "can-go-back-changed", True)
 

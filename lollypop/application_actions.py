@@ -73,6 +73,13 @@ class ApplicationActions:
         App().set_accels_for_action("app.search('')", ["<Control>f"])
         search_action.connect("activate", self.__on_search_activate)
 
+        # Special action to queue a view reload
+        reload_action = Gio.SimpleAction.new_stateful(
+                "reload",
+                None,
+                GLib.Variant.new_boolean(False))
+        App().add_action(reload_action)
+
         self.__setup_global_shortcuts()
         self.enable_special_shortcuts(True)
 
