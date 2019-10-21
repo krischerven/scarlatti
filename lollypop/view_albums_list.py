@@ -13,7 +13,6 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.utils import popup_widget
-from lollypop.utils import update_track_indexes
 from lollypop.view import LazyLoadingView
 from lollypop.objects_album import Album
 from lollypop.define import App, ViewType, MARGIN
@@ -37,7 +36,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         LazyLoadingView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__width = 0
-        self.__position = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self._albums = []
@@ -106,7 +104,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
             Clear the view
         """
-        self.__position = 0
         for child in self._box.get_children():
             GLib.idle_add(child.destroy)
         if clear_albums:
@@ -249,12 +246,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param widget as AlbumWidget/TracksView
             @parma lazy_loading_id as int
         """
-        # Calculate tracks position
-        if not widget.revealed:
-            for track in widget.album.tracks:
-                if not App().settings.get_value("show-tag-tracknumber"):
-                    self.__position += 1
-                    track.set_number(self.__position)
         if widget.album in self.__reveals:
             widget.reveal()
             self.__reveals.remove(widget.album)
@@ -319,7 +310,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         row = AlbumRow(album, self.__height, self._view_type)
         row.connect("activated", self.__on_row_activated)
-        row.connect("track-removed", self.__on_track_removed)
         return row
 
     def __get_current_ordinate(self):
@@ -353,13 +343,3 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             App().player.remove_album_by_id(track.album.id)
             App().player.add_album(track.album)
             App().player.load(track)
-
-    def __on_track_removed(self, row, destroy_album):
-        """
-            Pass signal
-            @param row as AlbumRow
-        """
-        start_index = row.get_index()
-        update_track_indexes(self._box, start_index, -1)
-        if destroy_album:
-            self.destroy()

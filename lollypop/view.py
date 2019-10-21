@@ -246,7 +246,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self.__banner.set_reveal_child(reveal)
             if reveal:
                 main_widget = self.__stack.get_child_by_name("main")
-                main_widget.set_margin_top(self.__banner.height + MARGIN_SMALL)
+                if main_widget is not None:
+                    main_widget.set_margin_top(self.__banner.height +
+                                               MARGIN_SMALL)
                 if self._view_type & ViewType.SCROLLED:
                     self._scrolled.get_vscrollbar().set_margin_top(
                         self.__banner.height)

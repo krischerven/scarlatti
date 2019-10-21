@@ -31,7 +31,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         "activated": (GObject.SignalFlags.RUN_FIRST,
                       None, (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "track-removed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def get_best_height(widget):
@@ -389,7 +388,8 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
             @param row as TrackRow
         """
         row.destroy()
-        emit_signal(self, "track-removed", len(self.children) == 0)
+        if len(self.children) == 0:
+            self.destroy()
 
     def __on_tracks_view_populated(self, view):
         """
