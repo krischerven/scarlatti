@@ -17,7 +17,7 @@ from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType, MARGIN
+from lollypop.define import App, Type, ViewType, MARGIN, ScanUpdate
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height, get_youtube_dl
@@ -65,7 +65,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])
         return [
-                (App().scanner, "album-updated", "_on_album_updated")
+            (App().scanner, "album-updated", "_on_album_updated")
         ]
 
     def populate(self):
@@ -140,18 +140,19 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         menu = AlbumMenu(child.data, self._view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
-    def _on_album_updated(self, scanner, album_id, added):
+    def _on_album_updated(self, scanner, album_id, scan_update):
         """
             Handles changes in collection
             @param scanner as CollectionScanner
             @param album_id as int
-            @param added as bool
+            @param scan_update as ScanUpdate
         """
-        for child in self.children:
-            if child.data.id == album_id:
-                child.destroy()
-                break
-        if added:
+        if scan_update == ScanUpdate.REMOVED:
+            for child in self.children:
+                if child.data.id == album_id:
+                    child.destroy()
+                    break
+        if scan_update == ScanUpdate.ADDED:
             album_ids = App().window.container.get_view_album_ids(
                                             self._genre_ids,
                                             self._artist_ids)

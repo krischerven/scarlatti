@@ -12,16 +12,19 @@
 
 from gi.repository import Gtk, GLib, GObject
 
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN, ScanUpdate
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
+from lollypop.objects_album import Album
 
 
-class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
+class AlbumView(FilteringHelper, LazyLoadingView,
+                ViewController, SignalsHelper):
     """
         Show artist albums and tracks
     """
@@ -30,6 +33,7 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
+    @signals_map
     def __init__(self, album, view_type):
         """
             Init ArtistView
@@ -47,6 +51,10 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__banner = AlbumBannerWidget(self.__album, self._view_type)
         self.add_widget(self.__grid, self.__banner)
+        return [
+            (App().scanner, "scan-finished", "_on_scan_finished"),
+            (App().scanner, "album-updated", "_on_album_updated")
+        ]
 
     def populate(self):
         """
@@ -128,6 +136,30 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
 #######################
 # PROTECTED           #
 #######################
+    def _on_scan_finished(self, scanner, modifications):
+        """
+            Reload album if needed
+            @param scanner as CollectionScanner
+            @param modifications as bool
+        """
+        if not self.get_sensitive():
+            App().window.container.reload_view()
+
+    def _on_album_updated(self, scanner, album_id, scan_update):
+        """
+            Handles changes in collection
+            @param scanner as CollectionScanner
+            @param album_id as int
+            @param scan_update as ScanUpdate
+        """
+        if album_id != self.__album.id:
+            return
+        if scan_update == ScanUpdate.REMOVED:
+            self.destroy()
+        elif scan_update == ScanUpdate.MODIFIED:
+            self.set_sensitive(False)
+            self.__album = Album(self.__album.id)
+
     def _on_current_changed(self, player):
         """
             Update children state
@@ -142,18 +174,6 @@ class AlbumView(FilteringHelper, LazyLoadingView, ViewController):
             @param track_id as int
         """
         self.__tracks_view.update_duration(track_id)
-
-    def _on_album_updated(self, scanner, album_id, added):
-        """
-            Handles changes in collection
-            @param scanner as CollectionScanner
-            @param album_id as int
-            @param added as bool
-        """
-        # Check we are not destroyed
-        if album_id == self.__album.id and not added:
-            App().window.go_back()
-            return
 
 #######################
 # PRIVATE             #

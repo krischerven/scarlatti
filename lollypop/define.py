@@ -140,6 +140,12 @@ class ScanType:
     FULL = 2
 
 
+class ScanUpdate:
+    ADDED = 0
+    REMOVED = 1
+    MODIFIED = 2
+
+
 class SelectionListMask:
     NONE = 1 << 0
     SIDEBAR = 1 << 1

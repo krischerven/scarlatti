@@ -26,7 +26,7 @@ import json
 from multiprocessing import cpu_count
 
 from lollypop.inotify import Inotify
-from lollypop.define import App, ScanType, Type, StorageType
+from lollypop.define import App, ScanType, Type, StorageType, ScanUpdate
 from lollypop.sqlcursor import SqlCursor
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
@@ -52,7 +52,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         "scan-finished": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
         "artist-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, bool)),
         "genre-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, bool)),
-        "album-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, bool))
+        "album-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
     }
 
     _WEB_COLLECTION = GLib.get_user_data_dir() + "/lollypop/web_collection"
@@ -234,7 +234,10 @@ class CollectionScanner(GObject.GObject, TagReader):
             for genre_id in genre_ids:
                 emit_signal(self, "genre-updated", genre_id, True)
             if album_added:
-                emit_signal(self, "album-updated", album_id, True)
+                emit_signal(self, "album-updated", album_id, ScanUpdate.ADDED)
+            else:
+                emit_signal(self, "album-updated", album_id,
+                            ScanUpdate.MODIFIED)
         return (track_id, album_id)
 
     def update_track(self, track_id, artist_ids, genre_ids):
@@ -290,11 +293,15 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().artists.clean()
             SqlCursor.commit(App().db)
             if not App().albums.get_name(album_id):
-                emit_signal(self, "album-updated", album_id, False)
+                emit_signal(self, "album-updated", album_id,
+                            ScanUpdate.REMOVED)
                 for artist_id in album_artist_ids + artist_ids:
                     emit_signal(self, "artist-updated", artist_id, False)
                 for genre_id in genre_ids:
                     emit_signal(self, "genre-updated", genre_id, False)
+            else:
+                emit_signal(self, "album-updated", album_id,
+                            ScanUpdate.MODIFIED)
             return (track_pop, track_rate, track_ltime, album_mtime,
                     track_loved, album_loved, album_pop, album_rate)
         except Exception as e:

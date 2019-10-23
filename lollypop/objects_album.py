@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, ScanUpdate
 from lollypop.objects_track import Track
 from lollypop.objects import Base
 from lollypop.utils import emit_signal
@@ -231,7 +231,7 @@ class Album(Base):
         self.reset("mtime")
         for artist_id in self.artist_ids:
             emit_signal(App().scanner, "artist-updated", artist_id, save)
-        emit_signal(App().scanner, "album-updated", self.id, save)
+        emit_signal(App().scanner, "album-updated", self.id, ScanUpdate.ADDED)
 
     def set_synced(self, mask):
         """
