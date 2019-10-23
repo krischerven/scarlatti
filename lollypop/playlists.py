@@ -141,13 +141,15 @@ class Playlists(GObject.GObject):
                         WHERE rowid=?",
                         (name, playlist_id))
         emit_signal(self, "playlists-changed", playlist_id)
-        App().art.remove_artwork_from_cache(name, "ROUNDED")
+        App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
 
     def remove(self, playlist_id):
         """
             Remove playlist
             @param playlist_id as int
         """
+        name = self.get_name(playlist_id)
+        App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
         with SqlCursor(self, True) as sql:
             sql.execute("DELETE FROM playlists\
                         WHERE rowid=?",
@@ -594,7 +596,7 @@ class Playlists(GObject.GObject):
         try:
             name = self.get_name(playlist_id)
             # Clear cache
-            App().art.remove_artwork_from_cache(name, "ROUNDED")
+            App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
             uri = self.get_sync_uri(playlist_id)
             if uri is None:
                 return
