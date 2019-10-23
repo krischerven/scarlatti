@@ -588,8 +588,7 @@ class TagReader:
             @param artists as [string]
             @param sortnames as [string]
             @param mb_artist_ids as [string]
-            @return [int]
-            @commit needed
+            @return ([int], [int]): (added artist ids, artist ids)
         """
         artist_ids = []
         added_artist_ids = []
@@ -637,11 +636,10 @@ class TagReader:
         """
             Add genres to db
             @param genres as string
-            @return genre ids as [int]
-            @commit needed
+            @return ([int], [int]): (added genre ids, genre ids)
         """
-        # Get all genre ids
         genre_ids = []
+        added_genre_ids = []
         for genre in genres.split(";"):
             genre = genre.strip()
             if genre != "":
@@ -649,8 +647,9 @@ class TagReader:
                 genre_id = App().genres.get_id(genre)
                 if genre_id is None:
                     genre_id = App().genres.add(genre)
+                    added_genre_ids.append(genre_id)
                 genre_ids.append(genre_id)
-        return genre_ids
+        return (added_genre_ids, genre_ids)
 
     def add_album(self, album_name, mb_album_id, artist_ids,
                   uri, loved, popularity, rate, synced, mtime, storage_type):

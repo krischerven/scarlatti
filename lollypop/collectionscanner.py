@@ -50,8 +50,8 @@ class CollectionScanner(GObject.GObject, TagReader):
     """
     __gsignals__ = {
         "scan-finished": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
-        "artist-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, bool)),
-        "genre-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, bool)),
+        "artist-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "genre-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "album-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
     }
 
@@ -204,9 +204,10 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                  album_rate, album_synced,
                                                  album_mtime, storage_type)
         if genres is None:
+            added_genre_ids = []
             genre_ids = [Type.WEB]
         else:
-            genre_ids = self.add_genres(genres)
+            (added_genre_ids, genre_ids) = self.add_genres(genres)
 
         # Add track to db
         Logger.debug("CollectionScanner::save_track(): Add track")
@@ -230,9 +231,10 @@ class CollectionScanner(GObject.GObject, TagReader):
             for artist_id in added_album_artist_ids:
                 if artist_id in self.__new_non_album_artists:
                     self.__new_non_album_artists.remove(artist_id)
-                emit_signal(self, "artist-updated", artist_id, True)
-            for genre_id in genre_ids:
-                emit_signal(self, "genre-updated", genre_id, True)
+                emit_signal(self, "artist-updated", artist_id,
+                            ScanUpdate.ADDED)
+            for genre_id in added_genre_ids:
+                emit_signal(self, "genre-updated", genre_id, ScanUpdate.ADDED)
             if album_added:
                 emit_signal(self, "album-updated", album_id, ScanUpdate.ADDED)
             else:
@@ -296,9 +298,11 @@ class CollectionScanner(GObject.GObject, TagReader):
                 emit_signal(self, "album-updated", album_id,
                             ScanUpdate.REMOVED)
                 for artist_id in album_artist_ids + artist_ids:
-                    emit_signal(self, "artist-updated", artist_id, False)
+                    emit_signal(self, "artist-updated", artist_id,
+                                ScanUpdate.REMOVED)
                 for genre_id in genre_ids:
-                    emit_signal(self, "genre-updated", genre_id, False)
+                    emit_signal(self, "genre-updated", genre_id,
+                                ScanUpdate.REMOVED)
             else:
                 emit_signal(self, "album-updated", album_id,
                             ScanUpdate.MODIFIED)
@@ -585,7 +589,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         for artist_id in self.__new_non_album_artists:
             album_ids = App().albums.get_ids([artist_id], [])
             if album_ids:
-                emit_signal(self, "artist-updated", artist_id, True)
+                emit_signal(self, "artist-updated",
+                            artist_id, ScanUpdate.ADDED)
         SqlCursor.remove(App().db)
 
     def __remove_old_tracks(self, uris, scan_type):
