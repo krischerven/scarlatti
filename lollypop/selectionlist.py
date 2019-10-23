@@ -262,11 +262,9 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         FilteringHelper.__init__(self)
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE
-        self.__sort = False
         self.__animation_timeout_id = None
         self.__height = SelectionListRow.get_best_height(self)
         self._box = Gtk.ListBox()
-        self._box.set_sort_func(self.__sort_func)
         self._box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self._box.show()
         GesturesHelper.__init__(self, self._box)
@@ -328,7 +326,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             Populate view with values
             @param [(int, str, optional str)], will be deleted
         """
-        self.__sort = False
+        self._box.set_sort_func(None)
         self.__scrolled.get_vadjustment().set_value(0)
         self.clear()
         LazyLoadingView.populate(self, values)
@@ -348,10 +346,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             Add item to list
             @param value as (int, str, optional str)
         """
-        # Do not add value if already exists
-        for child in self._box.get_children():
-            if child.id == value[0]:
-                return
+        self._box.set_sort_func(self.__sort_func)
         LazyLoadingView.populate(self, [value])
 
     def update_value(self, object_id, name):
@@ -599,13 +594,12 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         self.__popup_menu(y)
 
-    def _on_intial_loading(self):
+    def _on_initial_loading(self):
         """
             Update fastscroll and scroll to first item
         """
         if self.mask & SelectionListMask.ARTISTS:
             self.__fastscroll.populate()
-        self.__sort = True
         emit_signal(self, "populated")
         # Scroll to first selected item
         for row in self._box.get_selected_rows():
@@ -633,8 +627,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param row_a as SelectionListRow
             @param row_b as SelectionListRow
         """
-        if not self.__sort:
-            return False
         a_index = row_a.id
         b_index = row_b.id
 

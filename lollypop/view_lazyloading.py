@@ -114,7 +114,7 @@ class LazyLoadingView(View):
         """
         pass
 
-    def _on_intial_loading(self):
+    def _on_initial_loading(self):
         """
             Initial loading is finished
         """
@@ -170,7 +170,7 @@ class LazyLoadingView(View):
             else:
                 self.__initial_loading_id = None
         else:
-            self._on_intial_loading()
+            self._on_initial_loading()
             self.lazy_loading()
             self.__initial_loading_id = None
 
