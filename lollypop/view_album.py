@@ -155,7 +155,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         if album_id != self.__album.id:
             return
         if scan_update == ScanUpdate.REMOVED:
-            self.destroy()
+            App().window.container.go_back()
         elif scan_update == ScanUpdate.MODIFIED:
             self.set_sensitive(False)
             self.__album = Album(self.__album.id)
