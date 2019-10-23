@@ -72,6 +72,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         markup += "<span size='x-small' alpha='40000'>%s</span>" % artist_name
         self.__title_label.set_markup(markup)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.__title_label.set_xalign(0.0)
         self.__cover_widget = CoverWidget(self.__album, view_type)
         self.__cover_widget.show()
         self.__cover_widget.set_vexpand(True)
