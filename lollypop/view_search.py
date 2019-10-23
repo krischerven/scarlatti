@@ -214,7 +214,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Stop spinner and show placeholder if not result
         """
         self.__banner.spinner.stop()
-        if not self.__view.children:
+        if not self.__view.albums:
             self.show_placeholder(True, _("No results for this search"))
 
 #######################

@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from lollypop.define import ViewType, MARGIN, App
 from lollypop.widgets_banner_artist import ArtistBannerWidget
@@ -45,7 +45,7 @@ class ArtistViewList(LazyLoadingView):
             Populate list
         """
         album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids)
-        self.__add_albums(album_ids)
+        LazyLoadingView.populate(self, album_ids)
 
     @property
     def args(self):
@@ -64,22 +64,17 @@ class ArtistViewList(LazyLoadingView):
         return self.__banner.height + MARGIN
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
-    def __add_albums(self, album_ids):
+    def _get_child(self, album_id):
         """
-            Add albums to the view
-            Start lazy loading
-            @param album_ids as [int]
+            Get an album view widget
+            @param album_id as int
+            @return AlbumView
         """
-        if self._lazy_queue is None or self.destroyed:
-            return
-        if album_ids:
-            album_id = album_ids.pop(0)
-            widget = AlbumView(Album(album_id), ViewType.DEFAULT)
-            widget.show()
-            self.__list.add(widget)
-            self._lazy_queue.append(widget)
-            GLib.idle_add(self.__add_albums, album_ids)
-        else:
-            self.lazy_loading()
+        if self.destroyed:
+            return None
+        widget = AlbumView(Album(album_id), ViewType.DEFAULT)
+        widget.show()
+        self.__list.add(widget)
+        return widget

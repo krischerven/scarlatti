@@ -32,7 +32,7 @@ class LazyLoadingView(View):
         View.__init__(self, view_type)
         self.__loading_state = LoadingState.NONE
         self.__initial_queue = []
-        self._lazy_queue = []
+        self.__lazy_queue = []
         self.__priority_queue = []
         self.__scroll_timeout_id = None
         self.__initial_loading_id = None
@@ -73,10 +73,17 @@ class LazyLoadingView(View):
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)
             self.__scroll_timeout_id = None
-        self._lazy_queue = []
+        self.__lazy_queue = []
         self.__initial_queue = []
         self.__priority_queue = []
         View.stop(self)
+
+    def queue_lazy_loading(self, widget):
+        """
+            Queue widget into lazy loading
+            @param widget as Gtk.Widget
+        """
+        self.__lazy_queue.append(widget)
 
     def lazy_loading(self):
         """
@@ -126,7 +133,7 @@ class LazyLoadingView(View):
             @param widget as Gtk.Widget
         """
         View._on_map(self, widget)
-        if self.__loading_state == LoadingState.ABORTED and self._lazy_queue:
+        if self.__loading_state == LoadingState.ABORTED and self.__lazy_queue:
             self.lazy_loading()
 
     def _on_value_changed(self, adj):
@@ -135,7 +142,7 @@ class LazyLoadingView(View):
             @param adj as Gtk.Adjustment
         """
         View._on_value_changed(self, adj)
-        if not self._lazy_queue:
+        if not self.__lazy_queue:
             return False
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)
@@ -165,7 +172,7 @@ class LazyLoadingView(View):
             value = self.__initial_queue.pop(0)
             child = self._get_child(value)
             if child is not None:
-                self._lazy_queue.append(child)
+                self.__lazy_queue.append(child)
                 GLib.idle_add(self.__add_values)
             else:
                 self.__initial_loading_id = None
@@ -181,9 +188,9 @@ class LazyLoadingView(View):
         widget = None
         if self.__priority_queue:
             widget = self.__priority_queue.pop(0)
-            self._lazy_queue.remove(widget)
-        elif self._lazy_queue:
-            widget = self._lazy_queue.pop(0)
+            self.__lazy_queue.remove(widget)
+        elif self.__lazy_queue:
+            widget = self.__lazy_queue.pop(0)
         if widget is not None:
             widget.connect("populated",
                            self._on_populated,
@@ -218,6 +225,6 @@ class LazyLoadingView(View):
         if self.__lazy_loading_id is None:
             return
         self.__priority_queue = []
-        for child in self._lazy_queue:
+        for child in self.__lazy_queue:
             if self.__is_visible(child):
                 self.__priority_queue.append(child)

@@ -135,7 +135,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             for child in children:
                 child.set_view_type(self._view_type)
                 child.disable_artwork()
-                self._lazy_queue.append(child)
+                self.queue_lazy_loading(child)
             self.lazy_loading()
 
     def _on_view_leave(self, event_controller):

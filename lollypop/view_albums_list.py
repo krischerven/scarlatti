@@ -38,7 +38,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         self.__width = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
-        self._albums = []
+        self.__albums = []
         self.__reveals = []
         # Calculate default album height based on current pango context
         # We may need to listen to screen changes
@@ -71,6 +71,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param reveal as bool
             @param position as int
         """
+        self.__albums.append(album)
         self.__reveals.append(album)
         row = self.__row_for_album(album)
         row.populate()
@@ -82,12 +83,10 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             Populate widget with album rows
             @param albums as [Album]
         """
-        if albums:
-            self._lazy_queue = []
-            for child in self._box.get_children():
-                GLib.idle_add(child.destroy)
-            self.__add_albums(list(albums))
-            self._albums = albums
+        self.__albums = albums
+        for child in self._box.get_children():
+            GLib.idle_add(child.destroy)
+        LazyLoadingView.populate(self, albums)
 
     def jump_to_current(self):
         """
@@ -131,6 +130,14 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 "view_type": self.view_type}
 
     @property
+    def albums(self):
+        """
+            Get albums
+            @return [Album]
+        """
+        return self.__albums
+
+    @property
     def dnd_helper(self):
         """
             Get Drag & Drop helper
@@ -157,6 +164,19 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _get_child(self, album):
+        """
+            Get an album view widget
+            @param album as Album
+            @return AlbumRow
+        """
+        if self.destroyed:
+            return None
+        row = self.__row_for_album(album)
+        row.show()
+        self._box.add(row)
+        return row
+
     def _on_current_changed(self, player):
         """
             Update children state
@@ -281,23 +301,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         style_context = row.get_style_context()
         if style_context.has_class("drag-down"):
             row.reveal(True)
-
-    def __add_albums(self, albums):
-        """
-            Add items to the view
-            @param albums ids as [Album]
-        """
-        if self._lazy_queue is None or self.destroyed:
-            return
-        if albums:
-            album = albums.pop(0)
-            row = self.__row_for_album(album)
-            row.show()
-            self._box.add(row)
-            self._lazy_queue.append(row)
-            GLib.idle_add(self.__add_albums, albums)
-        else:
-            self.lazy_loading()
 
     def __row_for_album(self, album):
         """
