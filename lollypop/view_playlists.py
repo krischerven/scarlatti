@@ -13,7 +13,7 @@
 from gi.repository import GLib
 
 from lollypop.utils import tracks_to_albums
-from lollypop.view import LazyLoadingView
+from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, Type, Size
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track

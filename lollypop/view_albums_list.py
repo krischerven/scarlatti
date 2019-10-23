@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib
 
 from lollypop.utils import popup_widget
-from lollypop.view import LazyLoadingView
+from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.objects_album import Album
 from lollypop.define import App, ViewType, MARGIN
 from lollypop.controller_view import ViewController, ViewControllerType

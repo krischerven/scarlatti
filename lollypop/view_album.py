@@ -16,7 +16,7 @@ from lollypop.define import App, ViewType, MARGIN
 from lollypop.view_tracks import TracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
-from lollypop.view import LazyLoadingView
+from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.logger import Logger
 

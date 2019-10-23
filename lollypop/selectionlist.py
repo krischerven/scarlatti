@@ -14,7 +14,7 @@ from gi.repository import Gtk, Gdk, GLib, GObject, Pango
 
 from locale import strcoll
 
-from lollypop.view import LazyLoadingView
+from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.fastscroll import FastScroll

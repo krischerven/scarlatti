@@ -16,7 +16,7 @@ from lollypop.define import ViewType, MARGIN, App
 from lollypop.widgets_banner_artist import ArtistBannerWidget
 from lollypop.view_album import AlbumView
 from lollypop.objects_album import Album
-from lollypop.view import LazyLoadingView
+from lollypop.view_lazyloading import LazyLoadingView
 
 
 class ArtistViewList(LazyLoadingView):
