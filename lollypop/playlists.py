@@ -104,12 +104,14 @@ class Playlists(GObject.GObject):
         """
         if name == _("Loved tracks"):
             return Type.LOVED
+        lastrowid = 0
         with SqlCursor(self, True) as sql:
             result = sql.execute("INSERT INTO playlists (name, mtime)\
                                   VALUES (?, ?)",
                                  (name, 0))
-            emit_signal(self, "playlists-changed", result.lastrowid)
-            return result.lastrowid
+            lastrowid = result.lastrowid
+        emit_signal(self, "playlists-changed", lastrowid)
+        return lastrowid
 
     def exists(self, playlist_id):
         """
@@ -153,7 +155,7 @@ class Playlists(GObject.GObject):
             sql.execute("DELETE FROM tracks\
                         WHERE playlist_id=?",
                         (playlist_id,))
-            emit_signal(self, "playlists-changed", playlist_id)
+        emit_signal(self, "playlists-changed", playlist_id)
 
     def clear(self, playlist_id):
         """

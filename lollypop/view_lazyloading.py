@@ -31,11 +31,27 @@ class LazyLoadingView(View):
         """
         View.__init__(self, view_type)
         self.__loading_state = LoadingState.NONE
+        self.__initial_queue = []
         self._lazy_queue = []
         self.__priority_queue = []
         self.__scroll_timeout_id = None
+        self.__initial_loading_id = None
         self.__lazy_loading_id = None
         self.__start_time = time()
+
+    def populate(self, values):
+        """
+            Populate view with values
+            @param values as [object]
+        """
+        if self.__initial_queue:
+            for value in values:
+                if value not in self.__initial_queue:
+                    self.__initial_queue.append(value)
+        else:
+            self.__initial_queue = list(values)
+        if self.__initial_loading_id is None:
+            self.__initial_loading_id = GLib.idle_add(self.__add_values)
 
     def pause(self):
         """
@@ -58,6 +74,7 @@ class LazyLoadingView(View):
             GLib.source_remove(self.__scroll_timeout_id)
             self.__scroll_timeout_id = None
         self._lazy_queue = []
+        self.__initial_queue = []
         self.__priority_queue = []
         View.stop(self)
 
@@ -89,6 +106,20 @@ class LazyLoadingView(View):
 #######################
 # PROTECTED           #
 #######################
+    def _get_child(self, value):
+        """
+            Get child for value
+            @param value as object
+            @return object
+        """
+        pass
+
+    def _on_intial_loading(self):
+        """
+            Initial loading is finished
+        """
+        pass
+
     def _on_map(self, widget):
         """
             Restore backup and load
@@ -126,6 +157,23 @@ class LazyLoadingView(View):
 #######################
 # PRIVATE             #
 #######################
+    def __add_values(self):
+        """
+            Add values to initial loading
+        """
+        if self.__initial_queue:
+            value = self.__initial_queue.pop(0)
+            child = self._get_child(value)
+            if child is not None:
+                self._lazy_queue.append(child)
+                GLib.idle_add(self.__add_values)
+            else:
+                self.__initial_loading_id = None
+        else:
+            self._on_intial_loading()
+            self.lazy_loading()
+            self.__initial_loading_id = None
+
     def __lazy_loading(self):
         """
             Load the view in a lazy way

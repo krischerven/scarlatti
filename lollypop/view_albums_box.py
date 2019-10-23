@@ -42,7 +42,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         FlowBoxView.__init__(self, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
-        self._widget_class = AlbumSimpleWidget
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         self.__populate_wanted = True
@@ -116,14 +115,19 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _add_items(self, albums):
+    def _get_child(self, value):
         """
-            Add albums to the view
-            Start lazy loading
-            @param albums as [Album]
+            Get a child for view
+            @param value as object
+            @return row as SelectionListRow
         """
-        FlowBoxView._add_items(self, albums, self._genre_ids, self._artist_ids,
-                               self._view_type)
+        if self.destroyed:
+            return None
+        widget = AlbumSimpleWidget(value,  self._genre_ids, self._artist_ids,
+                                   self._view_type, self.font_height)
+        self._box.insert(widget, -1)
+        widget.show()
+        return widget
 
     def _get_menu_widget(self, child):
         """

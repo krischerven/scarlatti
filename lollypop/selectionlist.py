@@ -331,7 +331,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         self.__sort = False
         self.__scrolled.get_vadjustment().set_value(0)
         self.clear()
-        self.__add_values(values)
+        LazyLoadingView.populate(self, values)
 
     def remove_value(self, object_id):
         """
@@ -348,13 +348,11 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             Add item to list
             @param value as (int, str, optional str)
         """
-        self.__sort = True
         # Do not add value if already exists
         for child in self._box.get_children():
             if child.id == value[0]:
                 return
-        row = self.__add_value(value[0], value[1], value[2])
-        row.populate()
+        LazyLoadingView.populate(self, [value])
 
     def update_value(self, object_id, name):
         """
@@ -371,7 +369,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         if not found:
             if self.__base_mask & SelectionListMask.VIEW:
                 self.__fastscroll.clear()
-            row = self.__add_value(object_id, name, name)
+            row = self._get_child((object_id, name, name))
             row.populate()
             if self.mask & SelectionListMask.ARTISTS:
                 self.__fastscroll.populate()
@@ -392,7 +390,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         item_ids = set([child.id for child in self._box.get_children()])
         for value in values:
             if not value[0] in item_ids:
-                row = self.__add_value(value[0], value[1], value[2])
+                row = self._get_child(value)
                 row.populate()
         if self.mask & SelectionListMask.ARTISTS:
             self.__fastscroll.populate()
@@ -519,6 +517,22 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _get_child(self, value):
+        """
+            Get a child for view
+            @param value as [(int, str, optional str)]
+            @return row as SelectionListRow
+        """
+        (rowid, name, sortname) = value
+        if rowid > 0 and self.mask & SelectionListMask.ARTISTS:
+            used = sortname if sortname else name
+            self.__fastscroll.add_char(used[0])
+        row = SelectionListRow(rowid, name, sortname,
+                               self.mask, self.__height)
+        row.show()
+        self._box.add(row)
+        return row
+
     def _scroll_to_child(self, row):
         """
             Scroll to row
@@ -585,6 +599,19 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         self.__popup_menu(y)
 
+    def _on_intial_loading(self):
+        """
+            Update fastscroll and scroll to first item
+        """
+        if self.mask & SelectionListMask.ARTISTS:
+            self.__fastscroll.populate()
+        self.__sort = True
+        emit_signal(self, "populated")
+        # Scroll to first selected item
+        for row in self._box.get_selected_rows():
+            GLib.idle_add(self._scroll_to_child, row)
+            break
+
 #######################
 # PRIVATE             #
 #######################
@@ -599,44 +626,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             self.__scrolled.set_hexpand(True)
         else:
             self.__scrolled.set_hexpand(False)
-
-    def __add_values(self, values):
-        """
-            Add values to the list
-            @param items as [(int, str, str)]
-        """
-        if values:
-            (rowid, name, sortname) = values.pop(0)
-            row = self.__add_value(rowid, name, sortname)
-            self._lazy_queue.append(row)
-            GLib.idle_add(self.__add_values, values)
-        else:
-            if self.mask & SelectionListMask.ARTISTS:
-                self.__fastscroll.populate()
-            self.__sort = True
-            emit_signal(self, "populated")
-            self.lazy_loading()
-            # Scroll to first selected item
-            for row in self._box.get_selected_rows():
-                GLib.idle_add(self._scroll_to_child, row)
-                break
-
-    def __add_value(self, rowid, name, sortname):
-        """
-            Add value to list
-            @param rowid as int
-            @param name as str
-            @param sortname as str
-            @return row as SelectionListRow
-        """
-        if rowid > 0 and self.mask & SelectionListMask.ARTISTS:
-            used = sortname if sortname else name
-            self.__fastscroll.add_char(used[0])
-        row = SelectionListRow(rowid, name, sortname,
-                               self.mask, self.__height)
-        row.show()
-        self._box.add(row)
-        return row
 
     def __sort_func(self, row_a, row_b):
         """

@@ -10,7 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
+
+from locale import strcoll
 
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
@@ -31,7 +33,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         LazyLoadingView.__init__(self, view_type)
         FilteringHelper.__init__(self)
-        self._widget_class = None
         self._items = []
         self.__hovered_child = None
         self.__font_height = get_font_height()
@@ -55,9 +56,16 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             Populate items
             @param items
         """
-        self._items = list(items)
-        if items:
-            GLib.idle_add(self._add_items, items)
+        LazyLoadingView.populate(self, items)
+
+    def add_value(self, item):
+        """
+            Insert item
+            @param item as (int, str, str)
+        """
+        # Setup sort on insert
+        self._box.set_sort_func(self.__sort_func)
+        LazyLoadingView.populate(self, [item])
 
     def activate_child(self):
         """
@@ -103,26 +111,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             @return int
         """
         return 0
-
-    def _add_items(self, items, *args):
-        """
-            Add items to the view
-            Start lazy loading
-            @param items as [int]
-        """
-        if self._lazy_queue is None or self.destroyed:
-            return
-        if items:
-            widget = self._widget_class(
-                items.pop(0), *args, self.__font_height)
-            widget.set_property("halign", Gtk.Align.START)
-            widget.set_property("valign", Gtk.Align.START)
-            self._box.insert(widget, -1)
-            widget.show()
-            self._lazy_queue.append(widget)
-            GLib.idle_add(self._add_items, items)
-        else:
-            self.lazy_loading()
 
     def _on_current_changed(self, player):
         """
@@ -180,6 +168,14 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __sort_func(self, widget1, widget2):
+        """
+            Sort function
+            @param widget1 as RoundedArtistWidget
+            @param widget2 as RoundedArtistWidget
+        """
+        return strcoll(widget1.sortname, widget2.sortname)
+
     def __popup_menu(self, child):
         """
             Popup album menu at position

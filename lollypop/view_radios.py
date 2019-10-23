@@ -34,7 +34,6 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
                              ViewType.SCROLLED |
                              ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.RADIO)
-        self._widget_class = RadioWidget
         self._empty_icon_name = get_icon_name(Type.RADIOS)
         self.__banner = RadiosBannerWidget(self._view_type)
         self.__banner.show()
@@ -68,13 +67,18 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _add_items(self, radio_ids):
+    def _get_child(self, value):
         """
-            Add radios to the view
-            Start lazy loading
-            @param radio ids as [int]
+            Get a child for view
+            @param value as object
+            @return row as SelectionListRow
         """
-        FlowBoxView._add_items(self, radio_ids, self._view_type)
+        if self.destroyed:
+            return None
+        widget = RadioWidget(value, self._view_type, self.font_height)
+        self._box.insert(widget, -1)
+        widget.show()
+        return widget
 
     def _get_menu_widget(self, child):
         """

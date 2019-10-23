@@ -16,7 +16,6 @@ from gettext import gettext as _
 import gc
 
 from lollypop.define import ViewType, App, MARGIN_SMALL, Type
-from lollypop.logger import Logger
 from lollypop.adaptive import AdaptiveView
 from lollypop.helper_signals import SignalsHelper, signals_map
 

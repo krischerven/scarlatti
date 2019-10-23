@@ -30,7 +30,6 @@ class DecadesBoxView(FlowBoxView):
         """
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
         FlowBoxView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
-        self._widget_class = AlbumsDecadeWidget
         self._empty_icon_name = get_icon_name(Type.YEARS)
         self.__banner = AlbumsBannerWidget([Type.YEARS], [], self._view_type)
         self.__banner.show()
@@ -66,13 +65,18 @@ class DecadesBoxView(FlowBoxView):
 #######################
 # PROTECTED           #
 #######################
-    def _add_items(self, item_ids, *args):
+    def _get_child(self, value):
         """
-            Add albums to the view
-            Start lazy loading
-            @param item ids as [int]
+            Get a child for view
+            @param value as object
+            @return row as SelectionListRow
         """
-        FlowBoxView._add_items(self, item_ids, self._view_type)
+        if self.destroyed:
+            return None
+        widget = AlbumsDecadeWidget(value, self._view_type, self.font_height)
+        self._box.insert(widget, -1)
+        widget.show()
+        return widget
 
     def _get_menu_widget(self, child):
         """

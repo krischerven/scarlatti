@@ -67,6 +67,8 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._grid.add(self._label)
         self._artwork.connect("realize", set_cursor_type)
         self.add(self._grid)
+        self.set_property("halign", Gtk.Align.START)
+        self.set_property("valign", Gtk.Align.START)
 
     def set_view_type(self, view_type):
         """

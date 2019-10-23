@@ -17,7 +17,6 @@ from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, MARGIN, ViewType, OrderBy
-from locale import strcoll
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
@@ -37,7 +36,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, view_type)
-        self._widget_class = RoundedArtistWidget
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return [
@@ -62,21 +60,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 
         App().task_helper.run(load, callback=(on_load,))
 
-    def add_value(self, item):
-        """
-            Insert item
-            @param item as (int, str, str)
-        """
-        for child in self._box.get_children():
-            if child.data == item[0]:
-                return
-        # Setup sort on insert
-        self._box.set_sort_func(self.__sort_func)
-        widget = RoundedArtistWidget(item, self._view_type, self.font_height)
-        widget.populate()
-        widget.show()
-        self._box.insert(widget, -1)
-
     def remove_value(self, item_id):
         """
             Remove value
@@ -98,12 +81,18 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _add_items(self, items, *args):
+    def _get_child(self, value):
         """
-            Add artists to the view
-            @param items as [(int, str, str)]
+            Get a child for view
+            @param value as object
+            @return row as SelectionListRow
         """
-        FlowBoxView._add_items(self, items, self._view_type)
+        if self.destroyed:
+            return None
+        widget = RoundedArtistWidget(value, self._view_type, self.font_height)
+        self._box.insert(widget, -1)
+        widget.show()
+        return widget
 
     def _get_menu_widget(self, child):
         """
@@ -189,14 +178,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __sort_func(self, widget1, widget2):
-        """
-            Sort function
-            @param widget1 as RoundedArtistWidget
-            @param widget2 as RoundedArtistWidget
-        """
-        return strcoll(widget1.sortname, widget2.sortname)
-
     def __on_destroy(self, widget):
         """
             Stop loading

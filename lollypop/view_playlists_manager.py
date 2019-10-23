@@ -41,7 +41,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self.__banner.show()
         self.__banner.set_view_type(self._view_type)
         self.add_widget(self._box, self.__banner)
-        self._widget_class = PlaylistRoundedWidget
         return [
                 (App().playlists, "playlists-changed", "_on_playlist_changed")
         ]
@@ -59,24 +58,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             return items
 
         App().task_helper.run(load, callback=(on_load,))
-
-    def add_value(self, item):
-        """
-            Insert item
-            @param item as (int, str, str)
-        """
-        for child in self._box.get_children():
-            if child.data == item[0]:
-                return
-        # Setup sort on insert
-        self._box.set_sort_func(self.__sort_func)
-        from lollypop.utils import get_font_height
-        widget = PlaylistRoundedWidget(item[0],
-                                       self._view_type,
-                                       get_font_height())
-        widget.populate()
-        widget.show()
-        self._box.insert(widget, -1)
 
     def remove_value(self, item_id):
         """
@@ -99,13 +80,19 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _add_items(self, playlist_ids, *args):
+    def _get_child(self, value):
         """
-            Add albums to the view
-            Start lazy loading
-            @param playlist_ids as [int]
+            Get a child for view
+            @param value as object
+            @return row as SelectionListRow
         """
-        FlowBoxView._add_items(self, playlist_ids, self._view_type)
+        if self.destroyed:
+            return None
+        widget = PlaylistRoundedWidget(value, self._view_type,
+                                       self.font_height)
+        self._box.insert(widget, -1)
+        widget.show()
+        return widget
 
     def _on_child_activated(self, flowbox, child):
         """
@@ -165,18 +152,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         exists = playlists.exists(playlist_id)
         if exists:
-            item = None
-            for child in self._box.get_children():
-                if child.data == playlist_id:
-                    item = child
-                    break
-            if item is None:
-                # Setup sort on insert
-                self._box.set_sort_func(self.__sort_func)
-                self._add_items([playlist_id])
-            else:
-                name = App().playlists.get_name(playlist_id)
-                item.rename(name)
+            self.add_value(playlist_id)
         else:
             for child in self._box.get_children():
                 if child.data == playlist_id:
