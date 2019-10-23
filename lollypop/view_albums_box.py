@@ -147,20 +147,17 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param album_id as int
             @param added as bool
         """
-        if added and (not self._genre_ids or
-                      self._genre_ids[0] >= 0 or
-                      self._genre_ids[0] == Type.ALL):
+        for child in self.children:
+            if child.data.id == album_id:
+                child.destroy()
+                break
+        if added:
             album_ids = App().window.container.get_view_album_ids(
                                             self._genre_ids,
                                             self._artist_ids)
             if album_id in album_ids:
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
-        else:
-            for child in self.children:
-                if child.data.id == album_id:
-                    child.destroy()
-                    break
 
     def _on_artwork_changed(self, artwork, album_id):
         """

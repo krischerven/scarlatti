@@ -227,7 +227,7 @@ class CollectionsSettingsWidget(Gtk.Bin):
         if uris:
             App().stop_spotify()
             uri = uris.pop(0)
-            App().scanner.del_from_db(uri, True, False)
+            App().scanner.del_from_db(uri, True)
             self.__progress.set_fraction((count - len(uris)) / count)
             GLib.idle_add(self.__reset_database, uris, count, history)
         else:

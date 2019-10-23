@@ -251,12 +251,11 @@ class CollectionScanner(GObject.GObject, TagReader):
         for genre_id in genre_ids:
             App().tracks.add_genre(track_id, genre_id)
 
-    def del_from_db(self, uri, backup, notify=True):
+    def del_from_db(self, uri, backup):
         """
             Delete track from db
             @param uri as str
             @param backup as bool
-            @param notify as bool => send signal about cleanup
             @return (popularity, ltime, mtime,
                      loved album, album_popularity)
         """
@@ -290,7 +289,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().genres.clean()
             App().artists.clean()
             SqlCursor.commit(App().db)
-            if notify and App().albums.get_name(album_id) is None:
+            if not App().albums.get_name(album_id):
                 emit_signal(self, "album-updated", album_id, False)
                 for artist_id in album_artist_ids + artist_ids:
                     emit_signal(self, "artist-updated", artist_id, False)
