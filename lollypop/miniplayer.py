@@ -54,6 +54,8 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__progress_widget = ProgressPlayerWidget()
         self.__progress_widget.show()
         self.__progress_widget.set_vexpand(True)
+        self.__progress_widget.set_margin_start(MARGIN)
+        self.__progress_widget.set_margin_end(MARGIN)
         buttons_widget = ButtonsPlayerWidget(["menu-button",
                                               "black-transparent"])
         buttons_widget.show()
