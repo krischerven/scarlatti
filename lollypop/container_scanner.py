@@ -10,10 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
-from gettext import gettext as _
-
 from lollypop.define import App, SelectionListMask, Type, ScanUpdate
 
 
@@ -26,30 +22,12 @@ class ScannerContainer:
         """
             Init container
         """
-        App().scanner.connect("scan-finished", self.__on_scan_finished)
         App().scanner.connect("genre-updated", self.__on_genre_updated)
         App().scanner.connect("artist-updated", self.__on_artist_updated)
 
 ############
 # PRIVATE  #
 ############
-    def __on_scan_finished(self, scanner, modifications):
-        """
-            Update lists
-            @param scanner as CollectionScanner
-            @param modifications as bool
-        """
-        if modifications:
-            from lollypop.app_notification import AppNotification
-            notification = AppNotification(_("New tracks available"),
-                                           [_("Refresh")],
-                                           [lambda: self.reload_view()])
-            self.add_overlay(notification)
-            notification.show()
-            notification.set_reveal_child(True)
-            GLib.timeout_add(5000, notification.set_reveal_child, False)
-            GLib.timeout_add(10000, notification.destroy)
-
     def __on_genre_updated(self, scanner, genre_id, scan_update):
         """
             Add genre to genre list
