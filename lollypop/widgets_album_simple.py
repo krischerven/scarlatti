@@ -42,11 +42,8 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         self.__artwork = None
         self.__font_height = font_height
         self.set_view_type(view_type)
-        # No padding, we don't want user to activate widget while clicking
-        # on toggle button
-        self.get_style_context().add_class("no-padding")
-        self.set_margin_start(MARGIN_SMALL)
-        self.set_margin_end(MARGIN_SMALL)
+        self.set_property("halign", Gtk.Align.START)
+        self.set_property("valign", Gtk.Align.START)
 
     def populate(self):
         """
