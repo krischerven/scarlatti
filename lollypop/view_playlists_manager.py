@@ -152,7 +152,16 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         exists = playlists.exists(playlist_id)
         if exists:
-            self.add_value(playlist_id)
+            item = None
+            for child in self._box.get_children():
+                if child.data == playlist_id:
+                    item = child
+                    break
+            if item is None:
+                self.add_value(playlist_id)
+            else:
+                name = App().playlists.get_name(playlist_id)
+                item.rename(name)
         else:
             for child in self._box.get_children():
                 if child.data == playlist_id:
