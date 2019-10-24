@@ -291,8 +291,8 @@ class Playlists(GObject.GObject):
                 track_ids.append(track)
         elif playlist_id == Type.RECENTS:
             track_ids = App().tracks.get_recently_listened_to()
-        elif playlist_id == Type.NEVER:
-            track_ids = App().tracks.get_never_listened_to()
+        elif playlist_id == Type.LITTLE:
+            track_ids = App().tracks.get_little_played()
         elif playlist_id == Type.RANDOMS:
             track_ids = App().tracks.get_randoms()
         elif playlist_id == Type.ALL:

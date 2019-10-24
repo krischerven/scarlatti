@@ -841,17 +841,17 @@ class TracksDatabase:
             sql.execute("UPDATE tracks set ltime=? WHERE rowid=?",
                         (time, track_id))
 
-    def get_never_listened_to(self):
+    def get_little_played(self):
         """
-            Return random tracks never listened to
+            Return random tracks little played
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:
             storage_type = get_default_storage_type()
-            result = sql.execute("SELECT tracks.rowid\
+            result = sql.execute("SELECT rowid\
                                   FROM tracks\
-                                  WHERE ltime=0 AND storage_type & ?\
-                                  ORDER BY random() LIMIT 100",
+                                  WHERE storage_type & ?\
+                                  ORDER BY ltime, random() LIMIT 100",
                                  (storage_type,))
             return list(itertools.chain(*result))
 

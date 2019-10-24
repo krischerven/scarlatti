@@ -26,7 +26,7 @@ class ShownLists:
         Type.RANDOMS: _("Random albums"),
         Type.LOVED: _("Loved albums"),
         Type.RECENTS: _("Recently added albums"),
-        Type.NEVER: _("Unplayed albums"),
+        Type.LITTLE: _("Little played albums"),
         Type.PLAYLISTS: _("Playlists"),
         Type.RADIOS: _("Radios"),
         Type.YEARS: _("Years"),
@@ -69,7 +69,7 @@ class ShownPlaylists(ShownLists):
         Type.RANDOMS: _("Random tracks"),
         Type.LOVED: _("Loved tracks"),
         Type.RECENTS: _("Recently played tracks"),
-        Type.NEVER: _("Unplayed tracks"),
+        Type.LITTLE: _("Little played tracks"),
         Type.ALL: _("All tracks")
     }
 

@@ -509,7 +509,7 @@ def get_icon_name(object_id):
         icon = "media-playlist-shuffle-symbolic"
     elif object_id == Type.LOVED:
         icon = "emblem-favorite-symbolic"
-    elif object_id == Type.NEVER:
+    elif object_id == Type.LITTLE:
         icon = "org.gnome.Lollypop-unplayed-albums-symbolic"
     elif object_id == Type.YEARS:
         icon = "x-office-calendar-symbolic"

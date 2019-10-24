@@ -1072,9 +1072,9 @@ class AlbumsDatabase:
                                  (album_id,))
             return list(itertools.chain(*result))
 
-    def get_never_listened_to(self):
+    def get_little_played(self):
         """
-            Return random albums never listened to
+            Return random albums little played
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
@@ -1084,8 +1084,8 @@ class AlbumsDatabase:
                                   WHERE albums.loved != -1 AND\
                                   albums.storage_type & ? AND\
                                   albums.rowid=tracks.album_id\
-                                  AND albums.popularity = 0\
-                                  ORDER BY random() LIMIT 100",
+                                  ORDER BY albums.popularity, tracks.ltime,\
+                                  random() LIMIT 100",
                                  (storage_type,))
             return list(itertools.chain(*result))
 

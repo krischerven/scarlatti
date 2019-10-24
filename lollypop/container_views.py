@@ -81,7 +81,7 @@ class ViewsContainer:
             if item_ids[0] in [Type.POPULARS,
                                Type.LOVED,
                                Type.RECENTS,
-                               Type.NEVER,
+                               Type.LITTLE,
                                Type.RANDOMS,
                                Type.WEB]:
                 view = self._get_view_albums(item_ids, [])
@@ -203,8 +203,8 @@ class ViewsContainer:
             items = App().albums.get_loved_albums()
         elif genre_ids and genre_ids[0] == Type.RECENTS:
             items = App().albums.get_recents()
-        elif genre_ids and genre_ids[0] == Type.NEVER:
-            items = App().albums.get_never_listened_to()
+        elif genre_ids and genre_ids[0] == Type.LITTLE:
+            items = App().albums.get_little_played()
         elif genre_ids and genre_ids[0] == Type.RANDOMS:
             items = App().albums.get_randoms()
         elif genre_ids and genre_ids[0] == Type.COMPILATIONS:

@@ -221,7 +221,7 @@ class ListsContainer:
         elif selected_id in [Type.POPULARS,
                              Type.LOVED,
                              Type.RECENTS,
-                             Type.NEVER,
+                             Type.LITTLE,
                              Type.RANDOMS,
                              Type.WEB]:
             view = self._get_view_albums([selected_id], [])

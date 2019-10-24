@@ -205,7 +205,7 @@ class Type:
     RANDOMS = -4
     RECENTS = -5
     LOVED = -6
-    NEVER = -7
+    LITTLE = -7
     ALL = -8
     # WEB is stored in DB, can't be changed
     WEB = -9
@@ -250,17 +250,3 @@ SPOTIFY_CLIENT_ID = "0b144843878a46b2b12e0958c342c3ac"
 SPOTIFY_SECRET = "265ab8e057684f1b9e69e0c58f4881c1"
 AUDIODB_CLIENT_ID = "195003"
 FANARTTV_ID = "1cb10bc910c8d4fc34e0c78ac4e8ef46"
-
-
-STATIC_ALBUM_NAME = {
-    Type.POPULARS: "Popular albums",
-    Type.RANDOMS: "Random albums",
-    Type.LOVED: "Loved albums",
-    Type.RECENTS: "Recently added albums",
-    Type.NEVER: "Unplayed albums",
-    Type.PLAYLISTS: "Playlists",
-    Type.RADIOS: "Radios",
-    Type.YEARS: "Years",
-    Type.ALL: "All albums",
-    Type.COMPILATIONS: "Compilations"
-}
