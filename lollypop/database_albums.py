@@ -1079,12 +1079,11 @@ class AlbumsDatabase:
         """
         with SqlCursor(App().db) as sql:
             storage_type = get_default_storage_type()
-            result = sql.execute("SELECT DISTINCT albums.rowid\
-                                  FROM albums, tracks\
-                                  WHERE albums.loved != -1 AND\
-                                  albums.storage_type & ? AND\
-                                  albums.rowid=tracks.album_id\
-                                  ORDER BY albums.popularity, tracks.ltime,\
+            result = sql.execute("SELECT album_id\
+                                  FROM tracks\
+                                  WHERE storage_type & ?\
+                                  GROUP BY album_id\
+                                  ORDER BY SUM(ltime)/COUNT(ltime), \
                                   random() LIMIT 100",
                                  (storage_type,))
             return list(itertools.chain(*result))
