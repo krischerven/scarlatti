@@ -84,26 +84,13 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         art_size = 0
         if view_type & ViewType.ADAPTIVE:
             art_size = ArtSize.MEDIUM + 2
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             self.__title_label.get_style_context().add_class(
                 "text-large")
         else:
             art_size = ArtSize.BANNER + 2
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             self.__title_label.get_style_context().add_class(
                 "text-xx-large")
         self.__set_badge_artwork(art_size)
-        for (button, icon_name) in [
-                (self.__play_button, "media-playback-start-symbolic"),
-                (self.__add_button, "list-add-symbolic"),
-                (self.__menu_button, "view-more-symbolic")]:
-            button_style_context = button.get_style_context()
-            button_style_context.remove_class("menu-button-48")
-            button_style_context.remove_class("menu-button")
-            button_style_context.add_class(style)
-            button.get_image().set_from_icon_name(icon_name, icon_size)
         self.__set_text_height()
 
 #######################
@@ -149,7 +136,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             Play artist albums
         """
         play_artists(self.__artist_ids, self.__genre_ids)
-        self.__update_add_button()
 
     def _on_add_clicked(self, *ignore):
         """
@@ -158,7 +144,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         icon_name = self.__add_button.get_image().get_icon_name()[0]
         add = icon_name == "list-add-symbolic"
         add_artist_to_playback(self.__artist_ids, self.__genre_ids, add)
-        self.__update_add_button()
 
     def _on_menu_button_clicked(self, button):
         """
@@ -279,20 +264,19 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids)
         add = set(App().player.album_ids) & set(album_ids) != set(album_ids)
-        (name, pixel_size) = self.__add_button.get_image().get_icon_name()
         if add:
             # Translators: artist context
             self.__add_button.set_tooltip_text(_("Add to current playlist"))
             self.__add_button.get_image().set_from_icon_name(
                 "list-add-symbolic",
-                pixel_size)
+                Gtk.IconSize.LARGE_TOOLBAR)
         else:
             # Translators: artist context
             self.__add_button.set_tooltip_text(
                 _("Remove from current playlist"))
             self.__add_button.get_image().set_from_icon_name(
                 "list-remove-symbolic",
-                pixel_size)
+                Gtk.IconSize.LARGE_TOOLBAR)
 
     def __on_badge_artist_artwork(self, surface, art_size):
         """

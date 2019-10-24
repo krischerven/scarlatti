@@ -14,8 +14,7 @@ from gi.repository import Gtk
 
 from random import shuffle
 
-from lollypop.utils import get_human_duration, tracks_to_albums, update_button
-from lollypop.utils import popup_widget
+from lollypop.utils import get_human_duration, tracks_to_albums, popup_widget
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.widgets_banner import BannerWidget
 
@@ -67,20 +66,10 @@ class PlaylistBannerWidget(BannerWidget):
         for c in duration_context.list_classes():
             duration_context.remove_class(c)
         if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")
         else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             title_context.add_class("text-x-large")
             duration_context.add_class("text-large")
-        update_button(self.__play_button, style,
-                      icon_size, "media-playback-start-symbolic")
-        update_button(self.__shuffle_button, style,
-                      icon_size, "media-playlist-shuffle-symbolic")
-        update_button(self.__menu_button, style,
-                      icon_size, "view-more-symbolic")
 
     @property
     def spinner(self):

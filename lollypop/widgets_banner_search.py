@@ -15,7 +15,6 @@ from gi.repository import Gtk, GLib
 from lollypop.define import App, ArtSize, Type, ViewType
 from lollypop.widgets_banner import BannerWidget
 from lollypop.logger import Logger
-from lollypop.utils import update_button
 
 
 class SearchBannerWidget(BannerWidget):
@@ -49,17 +48,9 @@ class SearchBannerWidget(BannerWidget):
         """
         BannerWidget.set_view_type(self, view_type)
         if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             self.__entry.set_size_request(200, -1)
         else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             self.__entry.set_size_request(400, -1)
-        update_button(self.__play_button, style,
-                      icon_size, "media-playback-start-symbolic")
-        update_button(self.__new_button, style,
-                      icon_size, "document-new-symbolic")
 
     @property
     def spinner(self):

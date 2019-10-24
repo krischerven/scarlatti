@@ -69,8 +69,7 @@
             <property name="relief">none</property>
             <signal name="clicked" handler="_on_play_button_clicked" swapped="no"/>
             <style>
-              <class name="black-transparent"/>
-              <class name="menu-button-48"/>
+              <class name="banner-button"/>
             </style>
           </object>
           <packing>
@@ -92,8 +91,7 @@
             <property name="relief">none</property>
             <signal name="clicked" handler="_on_new_button_clicked" swapped="no"/>
             <style>
-              <class name="black-transparent"/>
-              <class name="menu-button-48"/>
+              <class name="banner-button"/>
             </style>
           </object>
           <packing>

@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, MARGIN, ViewType
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import update_button, emit_signal
+from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 
@@ -46,21 +46,19 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         self.__cover_artwork.show()
         self.__cover_artwork.set_vexpand(True)
         self.__translate_button = Gtk.ToggleButton.new()
-        self.__translate_button.show()
-        image = Gtk.Image.new()
+        image = Gtk.Image.new_from_icon_name(
+            "accessories-dictionary-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         image.show()
         self.__translate_button.set_image(image)
+        self.__translate_button.show()
         self.__translate_button.connect("toggled",
                                         self.__on_lyrics_button_toggled)
         self.__translate_button.get_style_context().add_class(
-            "black-transparent")
+            "banner-button")
         self.__translate_button.set_property("valign", Gtk.Align.CENTER)
         self.__translate_button.set_property("halign", Gtk.Align.END)
         self.__translate_button.set_hexpand(True)
         self.__translate_button.set_sensitive(False)
-        update_button(self.__translate_button, "menu-button-48",
-                      Gtk.IconSize.LARGE_TOOLBAR,
-                      "accessories-dictionary-symbolic")
         grid = Gtk.Grid()
         grid.show()
         grid.set_column_spacing(MARGIN)

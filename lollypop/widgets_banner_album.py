@@ -19,7 +19,7 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
-from lollypop.utils import set_cursor_type, popup_widget, update_button
+from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -52,12 +52,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
         if view_type & ViewType.OVERLAY:
-            self.__play_button.get_style_context().add_class(
-                "black-transparent")
-            self.__add_button.get_style_context().add_class(
-                "black-transparent")
-            self.__menu_button.get_style_context().add_class(
-                "black-transparent")
+            style = "banner-button"
+        else:
+            style = "menu-button"
+        self.__play_button.get_style_context().add_class(style)
+        self.__add_button.get_style_context().add_class(style)
+        self.__menu_button.get_style_context().add_class(style)
         self.__cover_widget = CoverWidget(album, view_type)
         self.__cover_widget.show()
         self.__title_label.set_label(album.name)
@@ -85,11 +85,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget.show()
         self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
         self.__cover_widget.set_margin_start(MARGIN)
+        self.__rating_widget.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
+        self.__loved_widget.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         if view_type & ViewType.OVERLAY:
             self._overlay.add_overlay(self.__widget)
             self._overlay.set_overlay_pass_through(self.__widget, True)
         else:
             self.add(self.__widget)
+        self.__update_add_button()
         return [
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed"),
@@ -103,19 +106,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.set_view_type(self, view_type)
         self.__cover_widget.set_view_type(view_type)
-        if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
-        else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
-        self.__rating_widget.set_icon_size(icon_size)
-        self.__loved_widget.set_icon_size(icon_size)
-        for (button, icon_name) in [
-                       (self.__menu_button, "view-more-symbolic"),
-                       (self.__play_button, "media-playback-start-symbolic"),
-                       (self.__add_button, self.__get_add_button_icon_name())]:
-            update_button(button, style, icon_size, icon_name)
         self.__set_text_height()
 
     def set_selected(self, selected):
@@ -177,15 +167,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Add/Remove album
            @param button as Gtk.Button
         """
-        (icon_name, icon_size) = button.get_image().get_icon_name()
-        if icon_name == "list-add-symbolic":
-            App().player.add_album(self.__album)
-            button.get_image().set_from_icon_name("list-remove-symbolic",
-                                                  icon_size)
-        else:
+        if self.__album.id in App().player.album_ids:
             App().player.remove_album_by_id(self.__album.id)
-            button.get_image().set_from_icon_name("list-add-symbolic",
-                                                  icon_size)
+        else:
+            App().player.add_album(self.__album)
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -211,9 +196,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Update add button
             @param player as Player
         """
-        (icon_name, icon_size) = self.__add_button.get_image().get_icon_name()
-        icon_name = self.__get_add_button_icon_name()
-        self.__add_button.get_image().set_from_icon_name(icon_name, icon_size)
+        self.__update_add_button()
 
     def _on_year_press(self, x, y, event):
         """
@@ -227,15 +210,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __get_add_button_icon_name(self):
+    def __update_add_button(self):
         """
-            Get add button icon name
-            @return str
+            Set image as +/-
         """
         if self.__album.id in App().player.album_ids:
-            return "list-remove-symbolic"
+            self.__add_button.get_image().set_from_icon_name(
+                "list-remove-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         else:
-            return "list-add-symbolic"
+            self.__add_button.get_image().set_from_icon_name(
+                "list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
 
     def __set_text_height(self):
         """

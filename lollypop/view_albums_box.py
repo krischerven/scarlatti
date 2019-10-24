@@ -24,7 +24,6 @@ from lollypop.utils import get_font_height, get_youtube_dl
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.widgets_banner_albums import AlbumsBannerWidget
 
 
 class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
@@ -226,6 +225,7 @@ class AlbumsGenresBoxView(AlbumsBoxView):
                                view_type |
                                ViewType.OVERLAY |
                                ViewType.SCROLLED)
+        from lollypop.widgets_banner_albums import AlbumsBannerWidget
         self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
@@ -341,8 +341,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         self._forward_button = Gtk.Button.new_from_icon_name(
                                                        "go-next-symbolic",
                                                        Gtk.IconSize.BUTTON)
-        self._backward_button.get_style_context().add_class("menu-button-48")
-        self._forward_button.get_style_context().add_class("menu-button-48")
+        self._backward_button.get_style_context().add_class("menu-button")
+        self._forward_button.get_style_context().add_class("menu-button")
         header = Gtk.Grid()
         header.set_column_spacing(10)
         header.add(self._label)

@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, GObject
 from lollypop.define import App, ArtSize, ViewType, Type, MARGIN
 from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
-from lollypop.utils import update_button, emit_signal
+from lollypop.utils import emit_signal
 
 
 class AlbumsBannerWidget(BannerWidget):
@@ -50,21 +50,15 @@ class AlbumsBannerWidget(BannerWidget):
         linked.get_style_context().add_class("linked")
         linked.set_margin_end(MARGIN)
         linked.set_property("halign", Gtk.Align.END)
-        self.__play_button = Gtk.Button.new()
+        self.__play_button = Gtk.Button.new_from_icon_name(
+            "media-playback-start-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         self.__play_button.show()
-        self.__play_button.get_style_context().add_class(
-            "black-transparent")
+        self.__play_button.get_style_context().add_class("banner-button")
         self.__play_button.connect("clicked", self.__on_play_button_clicked)
-        image = Gtk.Image.new()
-        image.show()
-        self.__play_button.set_image(image)
-        self.__shuffle_button = Gtk.Button.new()
+        self.__shuffle_button = Gtk.Button.new_from_icon_name(
+            "media-playlist-shuffle-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         self.__shuffle_button.show()
-        self.__shuffle_button.get_style_context().add_class(
-            "black-transparent")
-        image = Gtk.Image.new()
-        image.show()
-        self.__shuffle_button.set_image(image)
+        self.__shuffle_button.get_style_context().add_class("banner-button")
         self.__shuffle_button.connect("clicked",
                                       self.__on_shuffle_button_clicked)
         linked.add(self.__play_button)
@@ -98,17 +92,9 @@ class AlbumsBannerWidget(BannerWidget):
         for c in title_context.list_classes():
             title_context.remove_class(c)
         if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")
         else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             title_context.add_class("text-x-large")
-        update_button(self.__play_button, style,
-                      icon_size, "media-playback-start-symbolic")
-        update_button(self.__shuffle_button, style,
-                      icon_size, "media-playlist-shuffle-symbolic")
 
     @property
     def height(self):

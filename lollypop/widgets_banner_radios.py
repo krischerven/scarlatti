@@ -15,7 +15,7 @@ from gi.repository import Gtk, Pango
 from gettext import gettext as _
 
 from lollypop.define import ArtSize, MARGIN, ViewType
-from lollypop.utils import update_button, get_network_available, popup_widget
+from lollypop.utils import get_network_available, popup_widget
 from lollypop.widgets_banner import BannerWidget
 
 
@@ -33,7 +33,6 @@ class RadiosBannerWidget(BannerWidget):
         self.__pop_tunein = None
         grid = Gtk.Grid()
         grid.set_property("valign", Gtk.Align.CENTER)
-        grid.get_style_context().add_class("linked")
         grid.show()
         self.__title_label = Gtk.Label.new(
             "<b>" + _("Radios") + "</b>")
@@ -43,27 +42,25 @@ class RadiosBannerWidget(BannerWidget):
         self.__title_label.get_style_context().add_class("dim-label")
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__new_button = Gtk.Button.new()
-        image = Gtk.Image.new()
-        image.show()
-        self.__new_button.set_image(image)
+        self.__new_button = Gtk.Button.new_from_icon_name(
+            "document-new-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         self.__new_button.connect("clicked", self.__on_new_button_clicked)
         self.__new_button.set_property("halign", Gtk.Align.CENTER)
-        self.__new_button.get_style_context().add_class("menu-button-48")
-        self.__new_button.get_style_context().add_class("black-transparent")
-        self.__new_button.get_style_context().add_class("bold")
+        self.__new_button.get_style_context().add_class("banner-button")
         self.__new_button.show()
-        self.__tunein_button = Gtk.Button.new()
-        image = Gtk.Image.new()
-        image.show()
-        self.__tunein_button.set_image(image)
+        self.__tunein_button = Gtk.Button.new_from_icon_name(
+            "edit-find-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         self.__tunein_button.show()
-        self.__tunein_button.get_style_context().add_class("black-transparent")
+        self.__tunein_button.get_style_context().add_class("banner-button")
         self.__tunein_button.connect("clicked",
                                      self.__on_tunein_button_clicked)
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.show()
+        box.get_style_context().add_class("linked")
+        box.add(self.__new_button)
+        box.add(self.__tunein_button)
         grid.add(self.__title_label)
-        grid.add(self.__new_button)
-        grid.add(self.__tunein_button)
+        grid.add(box)
         grid.set_margin_start(MARGIN)
         grid.set_margin_end(MARGIN)
         if not get_network_available("TUNEIN"):
@@ -82,17 +79,9 @@ class RadiosBannerWidget(BannerWidget):
         for c in title_context.list_classes():
             title_context.remove_class(c)
         if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")
         else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             title_context.add_class("text-x-large")
-        update_button(self.__tunein_button, style,
-                      icon_size, "edit-find-symbolic")
-        update_button(self.__new_button, style,
-                      icon_size, "document-new-symbolic")
 
     @property
     def height(self):

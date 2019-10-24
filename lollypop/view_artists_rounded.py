@@ -254,8 +254,8 @@ class RoundedArtistsRandomView(RoundedArtistsView, HorizontalScrollingHelper):
         self._forward_button = Gtk.Button.new_from_icon_name(
                                                    "go-next-symbolic",
                                                    Gtk.IconSize.BUTTON)
-        self._backward_button.get_style_context().add_class("menu-button-48")
-        self._forward_button.get_style_context().add_class("menu-button-48")
+        self._backward_button.get_style_context().add_class("menu-button")
+        self._forward_button.get_style_context().add_class("menu-button")
         header = Gtk.Grid()
         header.set_column_spacing(10)
         header.add(self._label)

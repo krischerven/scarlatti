@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, MARGIN, ViewType
 from lollypop.define import SelectionListMask
-from lollypop.utils import popup_widget, update_button
+from lollypop.utils import popup_widget
 from lollypop.widgets_banner import BannerWidget
 
 
@@ -44,27 +44,25 @@ class PlaylistsBannerWidget(BannerWidget):
         self.__title_label.get_style_context().add_class("dim-label")
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__new_button = Gtk.Button.new()
-        image = Gtk.Image.new()
-        image.show()
-        self.__new_button.set_image(image)
+        self.__new_button = Gtk.Button.new_from_icon_name(
+            "document-new-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         self.__new_button.connect("clicked", self.__on_new_button_clicked)
         self.__new_button.set_property("halign", Gtk.Align.CENTER)
-        self.__new_button.get_style_context().add_class("menu-button-48")
-        self.__new_button.get_style_context().add_class("black-transparent")
-        self.__new_button.get_style_context().add_class("bold")
+        self.__new_button.get_style_context().add_class("banner-button")
         self.__new_button.show()
-        self.__menu_button = Gtk.Button.new()
-        image = Gtk.Image.new()
-        image.show()
-        self.__menu_button.set_image(image)
+        self.__menu_button = Gtk.Button.new_from_icon_name(
+            "view-more-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         self.__menu_button.show()
-        self.__menu_button.get_style_context().add_class("black-transparent")
+        self.__menu_button.get_style_context().add_class("banner-button")
         self.__menu_button.set_property("halign", Gtk.Align.END)
         self.__menu_button.connect("clicked", self.__on_menu_button_clicked)
+        box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        box.show()
+        box.get_style_context().add_class("linked")
+        box.add(self.__new_button)
+        box.add(self.__menu_button)
         grid.add(self.__title_label)
-        grid.add(self.__new_button)
-        grid.add(self.__menu_button)
+        grid.add(box)
         grid.set_margin_start(MARGIN)
         grid.set_margin_end(MARGIN)
         self._overlay.add_overlay(grid)
@@ -80,17 +78,9 @@ class PlaylistsBannerWidget(BannerWidget):
         for c in title_context.list_classes():
             title_context.remove_class(c)
         if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")
         else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             title_context.add_class("text-x-large")
-        update_button(self.__menu_button, style,
-                      icon_size, "view-more-symbolic")
-        update_button(self.__new_button, style,
-                      icon_size, "document-new-symbolic")
 
     @property
     def height(self):

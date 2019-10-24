@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.define import MARGIN, MARGIN_SMALL
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import update_button, emit_signal, popup_widget
+from lollypop.utils import emit_signal, popup_widget
 
 
 class CurrentAlbumsBannerWidget(BannerWidget):
@@ -39,7 +39,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__clear_button.set_tooltip_text(_("Clear albums"))
         self.__clear_button.set_sensitive(App().player.albums)
         self.__clear_button.connect("clicked", self.__on_clear_button_clicked)
-        self.__clear_button.get_style_context().add_class("black-transparent")
+        self.__clear_button.get_style_context().add_class("banner-button")
         self.__clear_button.show()
         self.__menu_button = Gtk.Button.new_from_icon_name(
             "view-more-symbolic",
@@ -47,7 +47,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__menu_button.set_relief(Gtk.ReliefStyle.NONE)
         self.__menu_button.set_sensitive(App().player.albums)
         self.__menu_button.connect("clicked", self.__on_menu_button_clicked)
-        self.__menu_button.get_style_context().add_class("black-transparent")
+        self.__menu_button.get_style_context().add_class("banner-button")
         self.__menu_button.show()
         self.__jump_button = Gtk.Button.new_from_icon_name(
             "go-jump-symbolic",
@@ -56,7 +56,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__jump_button.connect("clicked", self.__on_jump_button_clicked)
         self.__jump_button.set_tooltip_text(_("Go to current track"))
         self.__jump_button.set_sensitive(App().player.albums)
-        self.__jump_button.get_style_context().add_class("black-transparent")
+        self.__jump_button.get_style_context().add_class("banner-button")
         self.__jump_button.show()
         self.__title_label = Gtk.Label.new(
             "<b>" + _("Playing albums") + "</b>")
@@ -94,19 +94,9 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         for c in title_context.list_classes():
             title_context.remove_class(c)
         if view_type & ViewType.ADAPTIVE:
-            style = "menu-button"
-            icon_size = Gtk.IconSize.BUTTON
             title_context.add_class("text-large")
         else:
-            style = "menu-button-48"
-            icon_size = Gtk.IconSize.LARGE_TOOLBAR
             title_context.add_class("text-x-large")
-        update_button(self.__clear_button, style,
-                      icon_size, "edit-clear-all-symbolic")
-        update_button(self.__menu_button, style,
-                      icon_size, "view-more-symbolic")
-        update_button(self.__jump_button, style,
-                      icon_size, "go-jump-symbolic")
 
     @property
     def spinner(self):

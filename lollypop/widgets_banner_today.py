@@ -20,7 +20,6 @@ from lollypop.define import ArtBehaviour, LOLLYPOP_DATA_PATH
 from lollypop.widgets_banner import BannerWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.objects_album import Album
-from lollypop.utils import update_button
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -82,13 +81,12 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         image.show()
         self.__play_button.set_image(image)
         self.__play_button.connect("clicked", self.__on_play_button_clicked)
-        self.__play_button.get_style_context().add_class("black-transparent")
+        self.__play_button.get_style_context().add_class("banner-button")
         self.__play_button.set_property("valign", Gtk.Align.CENTER)
         self.__play_button.set_property("halign", Gtk.Align.END)
         self.__play_button.set_hexpand(True)
-        update_button(self.__play_button, "menu-button-48",
-                      Gtk.IconSize.LARGE_TOOLBAR,
-                      "media-playback-start-symbolic")
+        self.__play_button.get_image().set_from_icon_name(
+            "media-playback-start-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
         grid = Gtk.Grid()
         grid.show()
         grid.set_column_spacing(MARGIN)

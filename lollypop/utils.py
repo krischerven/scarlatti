@@ -528,21 +528,6 @@ def get_icon_name(object_id):
     return icon
 
 
-def update_button(button, style, icon_size, icon_name):
-    """
-        Update button style
-        @param button as Gtk.Button
-        @param style as str
-        @param icon_size as Gtk.Icon_Size
-        @param icon_name as str
-    """
-    context = button.get_style_context()
-    context.remove_class("menu-button-48")
-    context.remove_class("menu-button")
-    context.add_class(style)
-    button.get_image().set_from_icon_name(icon_name, icon_size)
-
-
 def popup_widget(widget, parent, x=None, y=None):
     """
         Popup menu on widget as x, y
