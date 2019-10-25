@@ -106,7 +106,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.set_view_type(self, view_type)
         self.__cover_widget.set_view_type(view_type)
-        self.__set_text_height()
+        self.__set_text_height(False)
 
     def set_selected(self, selected):
         """
@@ -137,6 +137,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                         ArtBehaviour.BLUR_HARD |
                         ArtBehaviour.DARKER,
                         self._on_artwork)
+            self.__set_text_height(allocation.width < Size.MEDIUM)
             if allocation.width < Size.SMALL + 100:
                 self.__cover_widget.hide()
             else:
@@ -221,9 +222,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__add_button.get_image().set_from_icon_name(
                 "list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
 
-    def __set_text_height(self):
+    def __set_text_height(self, small):
         """
-            Set text height
+            Set text height base on current view_type or small
+            @param small as bool
         """
         title_context = self.__title_label.get_style_context()
         artist_context = self.__artist_label.get_style_context()
@@ -237,7 +239,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         year_context.remove_class("text-medium")
         duration_context.remove_class("text-x-large")
         duration_context.remove_class("text-medium")
-        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL) or\
+        if small or self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL) or\
                 not self._view_type & ViewType.OVERLAY:
             title_context.add_class("text-x-large")
             artist_context.add_class("text-x-large")
