@@ -20,10 +20,12 @@ from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.utils import set_cursor_type, emit_signal
-from lollypop.define import App, Type, ViewType, AdaptiveSize, IndicatorType
+from lollypop.define import App, Type, ViewType, IndicatorType
+from lollypop.define import Size
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class TracksView(Gtk.Bin, SignalsHelper):
+class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
     """
         Responsive view showing discs on one or two rows
     """
@@ -79,9 +81,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
                          window,
                          Gtk.Orientation.HORIZONTAL)
             return [
-                    (window, "adaptive-size-changed",
-                     "_on_adaptive_size_changed"),
-                    (App().player, "loading-changed", "_on_loading_changed")
+                (App().player, "loading-changed", "_on_loading_changed")
             ]
 
     def populate(self):
@@ -236,6 +236,19 @@ class TracksView(Gtk.Bin, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_width_allocate(self, allocation):
+        """
+            Change columns disposition
+            @param allocation as Gtk.Allocation
+        """
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+            if allocation.width >= Size.MEDIUM:
+                orientation = Gtk.Orientation.HORIZONTAL
+            else:
+                orientation = Gtk.Orientation.VERTICAL
+            if self.__orientation != orientation:
+                self.__set_orientation(orientation)
+
     def _on_loading_changed(self, player, status, track):
         """
             Update row loading status
@@ -250,19 +263,6 @@ class TracksView(Gtk.Bin, SignalsHelper):
                 row.set_indicator(IndicatorType.LOADING)
             else:
                 row.set_indicator()
-
-    def _on_adaptive_size_changed(self, widget, adaptive_size):
-        """
-            Change columns disposition
-            @param widget as Gtk.Widget
-            @param adaptive_size as AdaptiveSize
-        """
-        if adaptive_size & (AdaptiveSize.LARGE | AdaptiveSize.BIG):
-            orientation = Gtk.Orientation.HORIZONTAL
-        else:
-            orientation = Gtk.Orientation.VERTICAL
-        if self.__orientation != orientation:
-            self.__set_orientation(orientation)
 
     def _on_album_updated(self, scanner, album_id):
         """
@@ -320,6 +320,7 @@ class TracksView(Gtk.Bin, SignalsHelper):
             Init main widget
         """
         if self.__responsive_widget is None:
+            SizeAllocationHelper.__init__(self)
             if self.__view_type & ViewType.DND:
                 self.connect("key-press-event", self.__on_key_press_event)
             self.__responsive_widget = Gtk.Grid()
@@ -474,5 +475,4 @@ class TracksView(Gtk.Bin, SignalsHelper):
         if orientation == Gtk.Orientation.VERTICAL:
             self.__set_orientation(orientation)
         elif window is not None:
-            self._on_adaptive_size_changed(window,
-                                           window.adaptive_size)
+            self._handle_width_allocate(self.get_allocation())
