@@ -72,9 +72,9 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         context_style.add_class("albumrow-collapsed")
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
-        self.__tracks_view = TracksView(self.__album, None,
-                                        Gtk.Orientation.VERTICAL,
-                                        self.__view_type)
+        self.__tracks_view = TracksView(self.__album,
+                                        self.__view_type |
+                                        ViewType.SINGLE_COLUMN)
         self.__tracks_view.connect("activated",
                                    self.__on_tracks_view_activated)
         self.__tracks_view.connect("populated",

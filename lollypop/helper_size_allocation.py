@@ -18,13 +18,18 @@ class SizeAllocationHelper:
         Listen to size-allocate signal and ignore unwanted allocations
     """
 
-    def __init__(self):
+    def __init__(self, use_parent=False):
         """
             Init helper
+            @param use_parent as bool: follow parent size allocation
         """
         self.__allocation_timeout_id = None
         self.__width = self.__height = 0
-        self.connect("size-allocate", self.__on_size_allocate)
+        if use_parent:
+            parent = self.get_parent()
+            parent.connect("size-allocate", self.__on_size_allocate)
+        else:
+            self.connect("size-allocate", self.__on_size_allocate)
 
 #######################
 # PROTECTED           #

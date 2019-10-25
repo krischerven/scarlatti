@@ -39,12 +39,10 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
     }
 
     @signals_map
-    def __init__(self, album, window, orientation, view_type):
+    def __init__(self, album, view_type):
         """
             Init view
             @param album as Album
-            @param window as AdaptiveWindow/None
-            @param orientation as Gtk.Orientation/None
             @param view_type as ViewType
         """
         Gtk.Bin.__init__(self)
@@ -55,34 +53,15 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         self.__discs = []
         self.__discs_to_load = []
         self.__responsive_widget = None
+        self.__orientation = None
         self.__populated = False
-        self.__orientation = orientation
         self.__cancellable = Gio.Cancellable()
         self.__show_tag_tracknumber = App().settings.get_value(
             "show-tag-tracknumber")
-
-        if window is None:
-            # Calling set_orientation() is needed
-            return [
-                    (App().player, "loading-changed", "_on_loading_changed")
-            ]
-        if App().settings.get_value("force-single-column") or\
-                not self.__view_type & ViewType.TWO_COLUMNS:
-            self.connect("realize",
-                         self.__on_realize,
-                         window,
-                         Gtk.Orientation.VERTICAL)
-            return [
-                    (App().player, "loading-changed", "_on_loading_changed")
-            ]
-        else:
-            self.connect("realize",
-                         self.__on_realize,
-                         window,
-                         Gtk.Orientation.HORIZONTAL)
-            return [
-                (App().player, "loading-changed", "_on_loading_changed")
-            ]
+        self.connect("realize", self.__on_realize)
+        return [
+            (App().player, "loading-changed", "_on_loading_changed")
+        ]
 
     def populate(self):
         """
@@ -104,14 +83,14 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             disc_number = disc.number
             tracks = disc.tracks
             items = []
-            if self.__view_type & ViewType.TWO_COLUMNS:
+            if self.__view_type & ViewType.SINGLE_COLUMN:
+                items.append((self._tracks_widget_left[0], tracks))
+            else:
                 mid_tracks = int(0.5 + len(tracks) / 2)
                 items.append((self._tracks_widget_left[disc_number],
                               tracks[:mid_tracks]))
                 items.append((self._tracks_widget_right[disc_number],
                               tracks[mid_tracks:]))
-            else:
-                items.append((self._tracks_widget_left[0], tracks))
             load_disc(items, disc_number)
         else:
             self.__populated = True
@@ -242,7 +221,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             @param allocation as Gtk.Allocation
         """
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
-            if allocation.width >= Size.MEDIUM:
+            if allocation.width >= Size.NORMAL:
                 orientation = Gtk.Orientation.HORIZONTAL
             else:
                 orientation = Gtk.Orientation.VERTICAL
@@ -320,21 +299,18 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             Init main widget
         """
         if self.__responsive_widget is None:
-            SizeAllocationHelper.__init__(self)
             if self.__view_type & ViewType.DND:
                 self.connect("key-press-event", self.__on_key_press_event)
             self.__responsive_widget = Gtk.Grid()
             self.__responsive_widget.set_column_spacing(20)
             self.__responsive_widget.set_column_homogeneous(True)
             self.__responsive_widget.set_property("valign", Gtk.Align.START)
-            if self.__view_type & ViewType.TWO_COLUMNS:
-                self.__discs = self.__album.discs
-            else:
+            if self.__view_type & ViewType.SINGLE_COLUMN:
                 self.__discs = [self.__album.one_disc]
+            else:
+                self.__discs = self.__album.discs
             for disc in self.__discs:
                 self.__add_disc_container(disc.number)
-            if self.__orientation is not None:
-                self.__set_orientation(self.__orientation)
             self.add(self.__responsive_widget)
             self.__responsive_widget.show()
             self.__discs_to_load = list(self.__discs)
@@ -356,6 +332,9 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             Set columns orientation
             @param orientation as Gtk.Orientation
         """
+        if self.__orientation == orientation:
+            return
+        self.__orientation = orientation
         for child in self.__responsive_widget.get_children():
             self.__responsive_widget.remove(child)
         idx = 0
@@ -408,7 +387,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
                 self.__responsive_widget.attach(
                           self._tracks_widget_left[disc.number],
                           0, idx, 1, 1)
-            if self.__view_type & ViewType.TWO_COLUMNS:
+            if not self.__view_type & ViewType.SINGLE_COLUMN:
                 if orientation == Gtk.Orientation.VERTICAL:
                     self.__responsive_widget.attach(
                                self._tracks_widget_right[disc.number],
@@ -465,14 +444,19 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         album.set_tracks(disc.tracks)
         App().player.play_album(album)
 
-    def __on_realize(self, widget, window, orientation):
+    def __on_realize(self, widget):
         """
             Set initial orientation
             @param widget as Gtk.Widget
             @param window as AdaptiveWindow
             @param orientation as Gtk.Orientation
         """
-        if orientation == Gtk.Orientation.VERTICAL:
-            self.__set_orientation(orientation)
-        elif window is not None:
-            self._handle_width_allocate(self.get_allocation())
+        if self.__view_type & ViewType.SINGLE_COLUMN or\
+                App().settings.get_value("force-single-column"):
+            self.__set_orientation(Gtk.Orientation.VERTICAL)
+        elif self.__view_type & ViewType.TWO_COLUMNS:
+            self.__set_orientation(Gtk.Orientation.HORIZONTAL)
+        else:
+            # We need to listen to parent allocation as currently, we have
+            # no children
+            SizeAllocationHelper.__init__(self, True)

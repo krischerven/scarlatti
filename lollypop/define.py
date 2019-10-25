@@ -77,18 +77,19 @@ class ArtBehaviour:
 class ViewType:
     DEFAULT = 1 << 0
     TWO_COLUMNS = 1 << 1
-    DND = 1 << 2
-    SEARCH = 1 << 3
-    PLAYLISTS = 1 << 4
-    ALBUM = 1 << 5
-    SMALL = 1 << 6
-    ADAPTIVE = 1 << 7
-    SCROLLED = 1 << 8
-    OVERLAY = 1 << 9
-    FULLSCREEN = 1 << 10
-    PLAYBACK = 1 << 11
-    BANNER = 1 << 12
-    ARTIST = 1 << 13
+    SINGLE_COLUMN = 1 << 2
+    DND = 1 << 3
+    SEARCH = 1 << 4
+    PLAYLISTS = 1 << 5
+    ALBUM = 1 << 6
+    SMALL = 1 << 7
+    ADAPTIVE = 1 << 8
+    SCROLLED = 1 << 9
+    OVERLAY = 1 << 10
+    FULLSCREEN = 1 << 11
+    PLAYBACK = 1 << 12
+    BANNER = 1 << 13
+    ARTIST = 1 << 14
 
 
 NetworkAccessACL = {

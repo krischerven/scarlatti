@@ -41,10 +41,12 @@ class TracksPopover(Popover, ViewController, SizeAllocationHelper):
         window_width = App().window.get_allocated_width()
         wanted_width = min(Size.NORMAL, window_width * 0.5)
         wanted_height = Size.MINI
-        orientation = Gtk.Orientation.VERTICAL if wanted_width < Size.MEDIUM\
-            else Gtk.Orientation.HORIZONTAL
-        self.__tracks_view = TracksView(album, None, orientation,
-                                        ViewType.TWO_COLUMNS | ViewType.ALBUM)
+        view_type = ViewType.ALBUM
+        if wanted_width > Size.MEDIUM:
+            view_type |= ViewType.TWO_COLUMNS
+        else:
+            view_type |= ViewType.SINGLE_COLUMN
+        self.__tracks_view = TracksView(album, view_type)
         self.__tracks_view.show()
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.populate()

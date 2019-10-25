@@ -60,8 +60,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         """
             Populate the view with album
         """
-        self.__tracks_view = TracksView(self.__album, App().window, None,
-                                        ViewType.TWO_COLUMNS | ViewType.ALBUM)
+        self.__tracks_view = TracksView(self.__album, ViewType.ALBUM)
         self.__tracks_view.show()
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.set_margin_start(MARGIN)
