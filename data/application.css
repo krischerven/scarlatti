@@ -353,7 +353,7 @@ flowboxchild:selected  {
 }
 
 .albumrow {
-    padding: 0px;
+    padding: 2px;
     border-radius: 5px;
     box-shadow: none;
 	background-color: transparent;
