@@ -282,8 +282,7 @@ class AdaptiveStack(Gtk.Stack):
             return
         elif visible_child is not None:
             visible_child.pause()
-            # Do not add visible child if same than view or similar
-            if visible_child.__class__ != view.__class__ and\
+            if visible_child.__class__ != view.__class__ or\
                     visible_child.args != view.args:
                 self.__history.add_view(visible_child)
             else:
