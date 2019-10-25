@@ -98,10 +98,8 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
         request_check = self.__operand_combobox.get_active_id()
         sql = None
         if request_type == "rating":
-            sql = "( ((tracks.rate %s '%s'))" +\
-                  " OR ((albums.rate %s '%s')) )"
-            sql = sql % (request_check, self.__rate,
-                         request_check, self.__rate)
+            sql = "( ((tracks.rate %s '%s')) )"
+            sql = sql % (request_check, self.__rate)
         elif request_type == "year":
             value = int(self.__spin_button.get_value())
             sql = "( ((tracks.year %s '%s')) )"

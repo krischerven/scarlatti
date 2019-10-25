@@ -164,8 +164,8 @@ class SmartPlaylistView(View):
             request += ", %s" % "artists"
         if subrequest.find(" albums.") != -1:
             request += ", %s" % "albums"
-        if subrequest.find(" track_genres.") != -1:
-            request += ", %s" % "track_genres"
+        if subrequest.find(" album_genres.") != -1:
+            request += ", %s" % "album_genres"
         if subrequest.find(" track_artists.") != -1:
             request += ", %s" % "track_artists"
         subrequest += " ORDER BY %s" % orderby
