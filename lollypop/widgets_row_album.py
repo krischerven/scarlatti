@@ -145,7 +145,11 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         header = Gtk.Grid.new()
         header.set_column_spacing(MARGIN_SMALL)
         header.show()
-        header.set_property("margin", MARGIN_SMALL)
+        header.set_margin_start(MARGIN_SMALL)
+        # 2px for trackrow padding
+        header.set_margin_end(MARGIN_SMALL + 2)
+        header.set_margin_top(2)
+        header.set_margin_bottom(2)
         header.attach(self.__artwork, 0, 0, 1, 2)
         header.attach(self.__artist_label, 1, 0, 1, 1)
         header.attach(self.__title_label, 1, 1, 1, 1)
