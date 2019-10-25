@@ -20,7 +20,7 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
         A smart playlist widget (WHERE SQL subrequest)
     """
     __TEXT = ["genre", "album", "artist"]
-    __INT = ["rating", "year", "bpm"]
+    __INT = ["rating", "popularity", "year", "bpm"]
 
     def __init__(self, size_group):
         """
@@ -85,6 +85,10 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
             self.__type_combobox.set_active_id("rating")
             self.__rate = int(value)
             self._on_leave_notify_event(None, None)
+        elif t == "tracks.popularity":
+            self.__type_combobox.set_active_id("popularity")
+            self.__rate = int(value)
+            self._on_leave_notify_event(None, None)
         else:
             self.destroy()
 
@@ -99,6 +103,9 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
         sql = None
         if request_type == "rating":
             sql = "( ((tracks.rate %s '%s')) )"
+            sql = sql % (request_check, self.__rate)
+        elif request_type == "popularity":
+            sql = "( ((tracks.popularity %s '%s')) )"
             sql = sql % (request_check, self.__rate)
         elif request_type == "year":
             value = int(self.__spin_button.get_value())
@@ -170,7 +177,7 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
 
         if combobox.get_active_id() in ["year", "bpm"]:
             self.__stack.set_visible_child_name("int")
-        elif combobox.get_active_id() == "rating":
+        elif combobox.get_active_id() in ["rating", "popularity"]:
             self.__stack.set_visible_child_name("rating")
         else:
             self.__stack.set_visible_child_name("text")

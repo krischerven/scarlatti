@@ -302,11 +302,11 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         if self.__view_type & ViewType.SEARCH and\
                 self.__album.id not in App().player.album_ids:
             button.get_image().set_from_icon_name("list-add-symbolic",
-                                                  Gtk.IconSize.MENU)
+                                                  Gtk.IconSize.LARGE_TOOLBAR)
             button.set_tooltip_text(_("Add to playback"))
         else:
             button.get_image().set_from_icon_name("list-remove-symbolic",
-                                                  Gtk.IconSize.MENU)
+                                                  Gtk.IconSize.LARGE_TOOLBAR)
             if self.__view_type & ViewType.PLAYLISTS:
                 button.set_tooltip_text(_("Remove from playlist"))
             else:

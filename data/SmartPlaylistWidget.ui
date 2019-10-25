@@ -29,6 +29,7 @@
           <item id="artist" translatable="yes">Artist</item>
           <item id="album" translatable="yes">Album</item>
           <item id="rating" translatable="yes">Rating</item>
+          <item id="popularity" translatable="yes">Popularity</item>
           <item id="year" translatable="yes">Year</item>
           <item id="bpm" translatable="yes">BPM</item>
         </items>
