@@ -42,7 +42,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self.__banner.set_view_type(self._view_type)
         self.add_widget(self._box, self.__banner)
         return [
-                (App().playlists, "playlists-changed", "_on_playlist_changed")
+            (App().playlists, "playlists-changed", "_on_playlist_changed")
         ]
 
     def populate(self):
@@ -59,15 +59,13 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
 
         App().task_helper.run(load, callback=(on_load,))
 
-    def remove_value(self, item_id):
+    def add_value(self, item):
         """
-            Remove value
-            @param item_id as int
+            Override FlowBox method to be compatible with SelectionList
+            Needed by SelectionListMenu
+            @param item as (int, str, str)
         """
-        for child in self._box.get_children():
-            if child.data == item_id:
-                child.destroy()
-                break
+        FlowBoxView.add_value(self, item[0])
 
     @property
     def args(self):
