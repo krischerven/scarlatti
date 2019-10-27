@@ -34,7 +34,6 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__timeout_id = None
         self.__time_label = Gtk.Label.new()
         self.__time_label.show()
-        self.__time_label.get_style_context().add_class("monospace")
         self.__progress = Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, None)
         self.__progress.show()
         self.__progress.set_hexpand(True)
@@ -52,7 +51,6 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         self.__event_controller.connect("scroll", self.__on_scroll)
         self.__total_time_label = Gtk.Label.new()
         self.__total_time_label.show()
-        self.__total_time_label.get_style_context().add_class("monospace")
         self.set_spacing(MARGIN_SMALL)
         self.pack_start(self.__time_label, False, False, 0)
         self.pack_start(self.__progress, False, True, 0)
@@ -84,7 +82,9 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
                 value = App().player.position / Gst.SECOND
             if value is not None and value >= 0:
                 self.__progress.set_value(value)
-                self.__time_label.set_text(seconds_to_string(value))
+                time_string = seconds_to_string(value)
+                self.__time_label.set_markup(
+                    "<span font_features='tnum'>%s</span>" % time_string)
         return True
 
 #######################
@@ -103,12 +103,13 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             return
 
         self.__progress.set_value(0.0)
-        self.__time_label.set_text("0:00")
+        self.__time_label.set_markup("<span font_features='tnum'>0:00</span>")
         if App().player.current_track.is_web:
             style_context.add_class("youtube-scale")
         self.__progress.set_range(0.0, App().player.current_track.duration)
-        self.__total_time_label.set_text(
-            seconds_to_string(App().player.current_track.duration))
+        time_string = seconds_to_string(App().player.current_track.duration)
+        self.__total_time_label.set_markup(
+            "<span font_features='tnum'>%s</span>" % time_string)
 
     def _on_duration_changed(self, player, track_id):
         """
@@ -119,7 +120,9 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         if track_id == player.current_track.id:
             duration = player.current_track.duration
             self.__progress.set_range(0.0, duration)
-            self.__total_time_label.set_text(seconds_to_string(duration))
+            time_string = seconds_to_string(duration)
+            self.__total_time_label.set_markup(
+                "<span font_features='tnum'>%s</span>" % time_string)
 
     def _on_status_changed(self, player):
         """
@@ -152,7 +155,9 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             @param scroll_type as Gtk.ScrollType
             @param value as float
         """
-        self.__time_label.set_text(seconds_to_string(value))
+        time_string = seconds_to_string(value)
+        self.__time_label.set_markup(
+            "<span font_features='tnum'>%s</span>" % time_string)
 
     def __on_multi_pressed(self, gesture, n_press, x, y):
         """
