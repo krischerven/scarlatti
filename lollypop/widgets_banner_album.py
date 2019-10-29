@@ -127,7 +127,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            if self._view_type & ViewType.ALBUM:
+            if self._artwork is not None and self._view_type & ViewType.ALBUM:
                 App().art_helper.set_album_artwork(
                         self.__album,
                         # +100 to prevent resize lag
@@ -179,7 +179,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == self.__album.id and\
+        if self._artwork is not None and\
+                album_id == self.__album.id and\
                 self._view_type & ViewType.ALBUM and\
                 App().animations:
             App().art_helper.set_album_artwork(
