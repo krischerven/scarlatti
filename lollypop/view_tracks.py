@@ -102,8 +102,8 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
                 label = Gtk.Label.new(text)
                 label.get_style_context().add_class("text-large")
                 label.show()
-                self._tracks_widget_left[-1].add(label)
-                self._tracks_widget_left[-1].show()
+                self.__responsive_widget.insert_row(0)
+                self.__responsive_widget.attach(label, 0, 0, 2, 1)
 
     def append_row(self, track):
         """
