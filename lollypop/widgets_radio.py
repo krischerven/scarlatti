@@ -193,7 +193,15 @@ class RadioWidget(Gtk.FlowBoxChild):
             Get name
             @return str
         """
-        return self.__label.get_text()
+        return self._track.name
+
+    @property
+    def sortname(self):
+        """
+            Get sortname
+            @return str
+        """
+        return self._track.name
 
     @property
     def data(self):

@@ -131,7 +131,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
                     item = child
                     break
             if item is None:
-                self._add_items([radio_id])
+                self.add_value(radio_id)
             else:
                 name = App().radios.get_name(radio_id)
                 item.rename(name)

@@ -61,12 +61,14 @@ class Radios(GObject.GObject):
             @param uri as str
             @return radio id as int
         """
+        lastrowid = 0
         with SqlCursor(self, True) as sql:
             result = sql.execute("INSERT INTO radios (name, url, popularity)\
                                   VALUES (?, ?, ?)",
                                  (name, uri, 0))
-            emit_signal(self, "radio-changed", result.lastrowid)
-            return result.lastrowid
+            lastrowid = result.lastrowid
+        emit_signal(self, "radio-changed", lastrowid)
+        return lastrowid
 
     def exists(self, radio_id):
         """
@@ -104,7 +106,7 @@ class Radios(GObject.GObject):
             sql.execute("DELETE FROM radios\
                         WHERE rowid=?",
                         (radio_id,))
-            emit_signal(self, "radio-changed", radio_id)
+        emit_signal(self, "radio-changed", radio_id)
 
     def get(self):
         """
