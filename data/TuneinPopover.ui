@@ -25,7 +25,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Go back</property>
         <property name="halign">start</property>
-        <property name="valign">start</property>
+        <property name="valign">center</property>
         <property name="margin_start">5</property>
         <property name="margin_top">1</property>
         <property name="margin_bottom">3</property>
@@ -57,6 +57,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Go home</property>
         <property name="halign">start</property>
+        <property name="valign">center</property>
         <property name="margin_top">1</property>
         <property name="margin_bottom">3</property>
         <property name="hexpand">True</property>
@@ -73,6 +74,9 @@
       <object class="GtkSearchEntry">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="valign">center</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
         <property name="primary_icon_name">edit-find-symbolic</property>
         <property name="primary_icon_activatable">False</property>
         <property name="primary_icon_sensitive">False</property>
