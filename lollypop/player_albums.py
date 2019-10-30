@@ -17,7 +17,7 @@ from random import choice, shuffle
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
-from lollypop.define import App
+from lollypop.define import App, Repeat
 from lollypop.utils import emit_signal
 
 
@@ -208,7 +208,19 @@ class AlbumsPlayer:
                 index = self.album_ids.index(
                     App().player._current_playback_track.album.id)
                 if index + 1 >= len(self._albums):
-                    next_album = self._albums[0]
+                    repeat = App().settings.get_enum("repeat")
+                    if repeat == Repeat.AUTO:
+                        genre_ids = self._current_track.genre_ids
+                        if genre_ids:
+                            album_ids = App().albums.get_randoms(genre_ids[0],
+                                                                 1)
+                            if album_ids:
+                                next_album = Album(album_ids[0])
+                                self.add_album(next_album)
+                    elif repeat == Repeat.ALL:
+                        next_album = self._albums[0]
+                    else:
+                        self.stop()
                 else:
                     next_album = self._albums[index + 1]
                 self.load(next_album.tracks[0])
