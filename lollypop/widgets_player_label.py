@@ -14,6 +14,7 @@ from gi.repository import GLib, Gtk, Pango
 
 from lollypop.define import App
 from lollypop.helper_signals import SignalsHelper, signals
+from lollypop.utils import on_query_tooltip
 
 
 class LabelPlayerWidget(Gtk.Label, SignalsHelper):
@@ -31,6 +32,8 @@ class LabelPlayerWidget(Gtk.Label, SignalsHelper):
         self.__fullscreen = fullscreen
         self.__font_size = font_size
         self.set_ellipsize(Pango.EllipsizeMode.END)
+        self.set_has_tooltip(True)
+        self.connect("query-tooltip", on_query_tooltip)
         return [
             (App().player, "current-changed", "_on_current_changed"),
         ]
