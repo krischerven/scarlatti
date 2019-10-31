@@ -752,28 +752,18 @@ class AlbumsDatabase:
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
-    def get_discs(self, album_id, genre_ids):
+    def get_discs(self, album_id):
         """
             Get disc numbers
             @param album_id as int
-            @param genre_ids as [int]
             @return [disc as int]
         """
-        genre_ids = remove_static(genre_ids)
         with SqlCursor(App().db) as sql:
-            filters = (album_id,)
-            filters += tuple(genre_ids)
             request = "SELECT DISTINCT discnumber\
-                       FROM tracks, track_genres\
+                       FROM tracks\
                        WHERE tracks.album_id=?\
-                       AND track_genres.track_id = tracks.rowid"
-            if genre_ids:
-                request += " AND ("
-                for genre_id in genre_ids:
-                    request += "track_genres.genre_id=? OR "
-                request += "1=0)"
-            request += " ORDER BY discnumber"
-            result = sql.execute(request, filters)
+                       ORDER BY discnumber"
+            result = sql.execute(request, (album_id,))
             return list(itertools.chain(*result))
 
     def get_track_uris(self, album_id):

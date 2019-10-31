@@ -310,7 +310,9 @@ class Album(Base):
             @return [Disc]
         """
         if not self._discs:
-            disc_numbers = self.db.get_discs(self.id, self.genre_ids)
-            self._discs = [Disc(self, number, self.__disallow_ignored_tracks)
-                           for number in disc_numbers]
+            disc_numbers = self.db.get_discs(self.id)
+            for disc_number in disc_numbers:
+                disc = Disc(self, disc_number, self.__disallow_ignored_tracks)
+                if disc.tracks:
+                    self._discs.append(disc)
         return self._discs
