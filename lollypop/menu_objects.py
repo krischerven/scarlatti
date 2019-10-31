@@ -68,6 +68,9 @@ class MinTrackMenu(Gio.Menu):
             @param track as Track
         """
         Gio.Menu.__init__(self)
+        from lollypop.menu_artist import ArtistAlbumsMenu
+        menu = ArtistAlbumsMenu(track.artist_ids[0], ViewType.DEFAULT)
+        self.append_section(_("Artist"), menu)
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu(track))
