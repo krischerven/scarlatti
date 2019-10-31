@@ -448,7 +448,29 @@ class TagReader:
                 continue
             if m.data[0:4] == b"POPM":
                 # Get tag
-                popm = m.data[11]
+                
+                """
+                Location of rating for common media players:
+                - Plain POPM is located in m.data[11]
+                - Media Monkey is located in m.data[19] and we are searching m.data[10:40] for "no@email"
+                - WinAMP is located in m.data[28] and we are searching m.data[10:40] for "rating@winamp.com"
+                - Windows Media Player is located in m.data[40] and we are searching m.data[10:40] for "Windows Media Player 9 Series"
+                """
+                
+                if m.data[10:40].find(b"Windows Media Player 9 Series") >= 0:
+                     location = 40
+                     Logger.debug("Rating type: Windows Media Player Location: %s Rating: %s", location, m.data[location])
+                elif m.data[10:40].find(b"rating@winamp.com") >= 0:
+                     location = 28
+                     Logger.debug("Rating type: WinAMP Location: %s Rating: %s", location, m.data[location])
+                elif m.data[10:40].find(b"no@email") >= 0:
+                     location = 19
+                     Logger.debug("Rating type: MediaMonkey Location: %s Rating: %s", location, m.data[location])
+                else:
+                     location = 11
+                     Logger.debug("Rating type: none Location: %s Rating: %s", location, m.data[location])
+                
+                popm = m.data[location]
                 if popm == 0:
                     value = 0
                 elif popm == 1:
@@ -459,11 +481,13 @@ class TagReader:
                     value = 3
                 elif popm == 196:
                     value = 4
-                else:
+                elif popm == 255:
                     value = 5
+                else:
+                    value = 0
                 return value
         return 0
-
+        
     def get_lyrics(self, tags):
         """
             Return lyrics for tags
