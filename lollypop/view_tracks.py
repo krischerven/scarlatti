@@ -114,7 +114,9 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
         self.__init()
         self.__album.append_track(track)
-        self.__add_tracks(self._tracks_widget_left[-1], [track])
+        for key in self._tracks_widget_left.keys():
+            self.__add_tracks(self._tracks_widget_left[key], [track])
+            return
 
     def append_rows(self, tracks):
         """
@@ -124,7 +126,9 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
         self.__init()
         self.__album.append_tracks(tracks)
-        self.__add_tracks(self._tracks_widget_left[-1], tracks)
+        for key in self._tracks_widget_left.keys():
+            self.__add_tracks(self._tracks_widget_left[key], tracks)
+            return
 
     def get_current_ordinate(self, parent):
         """
