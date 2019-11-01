@@ -41,6 +41,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
         self.__current_search = ""
+        self.__search_empty = True
         self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
@@ -98,6 +99,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Populate search
             in db based on text entry current text
         """
+        self.__search_empty = True
         self.__view.stop()
         self.__view.clear()
         self.cancel()
@@ -206,6 +208,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param spotify as SpotifyHelper
             @param album as Album
         """
+        self.__search_empty = False
         self.show_placeholder(False)
         if len(album.tracks) == 1:
             self.__view.add_reveal_albums([album])
@@ -216,7 +219,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Stop spinner and show placeholder if not result
         """
         self.__banner.spinner.stop()
-        if not self.__view.albums:
+        if self.__search_empty:
             self.show_placeholder(True, _("No results for this search"))
 
 #######################
@@ -254,6 +257,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param result as [(int, Album, bool)]
         """
         if result:
+            self.__search_empty = False
             albums = []
             reveal_albums = []
             for (album, in_tracks) in result:

@@ -69,7 +69,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param index as int
         """
         children = self.children
-        if index < len(children) and children[index].album.id == album.id:
+        if index < len(children) + 1 and children[index].album.id == album.id:
             children[index].tracks_view.append_rows(album.tracks)
         else:
             row = AlbumRow(album, self.__height, self._view_type)
@@ -135,14 +135,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         return {"genre_ids": self.__genre_ids,
                 "artist_ids": self.__artist_ids,
                 "view_type": self.view_type}
-
-    @property
-    def albums(self):
-        """
-            Get albums
-            @return [Album]
-        """
-        return [row.album for row in self.children]
 
     @property
     def dnd_helper(self):
