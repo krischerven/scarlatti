@@ -273,7 +273,7 @@ class LyricsView(View, SignalsHelper):
         """
         if lyrics is None:
             self.__lyrics_label.set_text(
-                    _("You have disabled lyrics search in network settings !"))
+                    _("Network not available"))
         elif lyrics == "":
             if filtered:
                 self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
