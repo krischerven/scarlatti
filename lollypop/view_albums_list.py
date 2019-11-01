@@ -14,7 +14,6 @@ from gi.repository import Gtk, GLib
 
 from lollypop.utils import popup_widget
 from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.objects_album import Album
 from lollypop.define import App, ViewType, MARGIN
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
@@ -38,7 +37,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         self.__width = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
-        self.__albums = []
         self.__reveals = []
         # Calculate default album height based on current pango context
         # We may need to listen to screen changes
@@ -54,27 +52,34 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         if view_type & ViewType.DND:
             from lollypop.helper_dnd import DNDHelper
             self.__dnd_helper = DNDHelper(self._box, view_type)
-            self.__dnd_helper.add_to_block_list(self.multi_press_gesture)
+            self.__dnd_helper.connect("dnd-insert", self.__on_dnd_insert)
         self.add_widget(self._box)
 
-    def set_reveal(self, albums):
+    def add_reveal_albums(self, albums):
         """
-            Set albums to reveal on populate
+            Add albums to reveal list
             @param albums as [Album]
         """
-        self.__reveals = list(albums)
+        self.__reveals += list(albums)
 
-    def insert_album(self, album, reveal, position):
+    def insert_album(self, album, position):
         """
             Add an album
             @param album as Album
             @param reveal as bool
             @param position as int
         """
-        self.__albums.append(album)
-        self.__reveals.append(album)
-        row = self.__row_for_album(album)
+        row = AlbumRow(album, self.__height, self._view_type)
         row.populate()
+        self.insert_row(row, position)
+
+    def insert_row(self, row, position):
+        """
+            Insert row at position
+            @param row as AlbumRow
+            @param position as int
+        """
+        row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.insert(row, position)
 
@@ -83,7 +88,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             Populate widget with album rows
             @param albums as [Album]
         """
-        self.__albums = albums
         for child in self._box.get_children():
             GLib.idle_add(child.destroy)
         LazyLoadingView.populate(self, albums)
@@ -135,7 +139,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             Get albums
             @return [Album]
         """
-        return self.__albums
+        return [row.album for row in self.children]
 
     @property
     def dnd_helper(self):
@@ -172,7 +176,8 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         if self.destroyed:
             return None
-        row = self.__row_for_album(album)
+        row = AlbumRow(album, self.__height, self._view_type)
+        row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.add(row)
         return row
@@ -203,28 +208,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         for child in self.children:
             child.tracks_view.update_duration(track_id)
-
-    def _on_album_updated(self, scanner, album_id, added):
-        """
-            Handles changes in collection
-            @param scanner as CollectionScanner
-            @param album_id as int
-            @param added as bool
-        """
-        if self._view_type & (ViewType.SEARCH | ViewType.DND):
-            return
-        if added:
-            album_ids = App().window.container.get_view_album_ids(
-                                            self.__genre_ids,
-                                            self.__artist_ids)
-            if album_id not in album_ids:
-                return
-            index = album_ids.index(album_id)
-            self.insert_album(Album(album_id), False, index)
-        else:
-            for child in self._box.get_children():
-                if child.album.id == album_id:
-                    child.destroy()
 
     def _on_primary_long_press_gesture(self, x, y):
         """
@@ -302,15 +285,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         if style_context.has_class("drag-down"):
             row.reveal(True)
 
-    def __row_for_album(self, album):
-        """
-            Get a row for track id
-            @param album as Album
-        """
-        row = AlbumRow(album, self.__height, self._view_type)
-        row.connect("activated", self.__on_row_activated)
-        return row
-
     def __get_current_ordinate(self):
         """
             If current track in widget, return it ordinate,
@@ -322,6 +296,15 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 child.reveal(True)
                 y = child.translate_coordinates(self._box, 0, 0)[1]
         return y
+
+    def __on_dnd_insert(self, dnd_helper, row, index):
+        """
+            Insert row at index
+            @param dnd_helper as DNDHelper
+            @param row as AlbumRow
+            @param index as int
+        """
+        self.insert_row(row, index)
 
     def __on_row_activated(self, row, track):
         """

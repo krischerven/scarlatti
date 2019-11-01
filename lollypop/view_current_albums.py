@@ -58,7 +58,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             albums = App().player.albums
         if albums:
             if len(albums) == 1:
-                self.__view.set_reveal(albums)
+                self.__view.add_reveal_albums(albums)
             self.__view.populate(albums)
             self.show_placeholder(False)
         else:

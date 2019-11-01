@@ -92,7 +92,6 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         row = self.get_row_at_y(y)
         if row is None:
             return
-
         if event.state & Gdk.ModifierType.CONTROL_MASK and\
                 self.__view_type & ViewType.DND:
             self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)

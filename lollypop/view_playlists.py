@@ -69,7 +69,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             Populate view
         """
         def on_load(albums):
-            self._view.set_reveal(albums)
+            self._view.add_reveal_albums(albums)
             self._view.populate(albums)
 
         def load():
@@ -177,7 +177,8 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
-            self._view.insert_album(album, True, -1)
+            self.__view.add_reveal_albums([album])
+            self._view.insert_album(album, -1)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
@@ -248,7 +249,7 @@ class SmartPlaylistsView(PlaylistsView):
         """
         def on_load(albums):
             self._banner.spinner.stop()
-            self._view.set_reveal(albums)
+            self._view.add_reveal_albums(albums)
             self._view.populate(albums)
 
         def load():

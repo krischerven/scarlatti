@@ -207,7 +207,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param album as Album
         """
         self.show_placeholder(False)
-        self.__view.insert_album(album, len(album.tracks) == 1, -1)
+        if len(album.tracks) == 1:
+            self.__view.add_reveal_albums([album])
+        self.__view.insert_album(album, -1)
 
     def _on_search_finished(self, *ignore):
         """
@@ -258,7 +260,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 albums.append(album)
                 if in_tracks:
                     reveal_albums.append(album)
-            self.__view.set_reveal(reveal_albums)
+            self.__view.add_reveal_albums(reveal_albums)
             self.__view.populate(albums)
             self.show_placeholder(False)
             self.__banner.play_button.set_sensitive(True)

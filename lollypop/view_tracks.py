@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gtk, Gdk, Gio, Pango, GObject
+from gi.repository import GLib, Gtk, Gio, Pango, GObject
 
 from gettext import gettext as _
 
@@ -303,8 +303,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             Init main widget
         """
         if self.__responsive_widget is None:
-            if self.__view_type & ViewType.DND:
-                self.connect("key-press-event", self.__on_key_press_event)
             self.__responsive_widget = Gtk.Grid()
             self.__responsive_widget.set_column_spacing(20)
             self.__responsive_widget.set_column_homogeneous(True)
@@ -424,18 +422,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             @param row as TrackRow
         """
         emit_signal(self, "track-removed", row)
-
-    def __on_key_press_event(self, widget, event):
-        """
-            Handle keyboard events (DEL, ...)
-            @param widget as Gtk.Widget
-            @param event as Gdk.EventKey
-        """
-        if event.keyval == Gdk.KEY_Delete:
-            for child in self.children:
-                if child.get_state_flags() & Gtk.StateFlags.SELECTED:
-                    pass
-                    # TODO and remove signal usage
 
     def __on_disc_button_press_event(self, button, event, disc):
         """

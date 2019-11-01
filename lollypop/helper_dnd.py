@@ -24,6 +24,8 @@ class DNDHelper(GObject.Object):
     """
 
     __gsignals__ = {
+        "dnd-insert": (GObject.SignalFlags.RUN_FIRST, None,
+                       (GObject.TYPE_PYOBJECT, int)),
         "dnd-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -37,7 +39,6 @@ class DNDHelper(GObject.Object):
         self.__listbox = listbox
         self.__view_type = view_type
         self.__drag_begin_rows = []
-        self.__gestures_to_block = []
         self.__autoscroll_timeout_id = None
         self.__begin_scrolled_y = 0
         self.__gesture = Gtk.GestureDrag.new(listbox)
@@ -46,13 +47,6 @@ class DNDHelper(GObject.Object):
         self.__gesture.connect("drag-begin", self.__on_drag_begin)
         self.__gesture.connect("drag-end", self.__on_drag_end)
         self.__gesture.connect("drag-update", self.__on_drag_update)
-
-    def add_to_block_list(self, gesture):
-        """
-            Group gesture with self
-            @param gesture as Gtk.Gesture
-        """
-        self.__gestures_to_block.append(gesture)
 
     @property
     def gesture(self):
@@ -123,12 +117,12 @@ class DNDHelper(GObject.Object):
                                                      direction)
             index = album_row.get_index()
             if split_album_row is not None:
-                self.__listbox.insert(split_album_row, index)
+                self.emit("dnd-insert", split_album_row, index)
                 index += 1
             elif direction == Gtk.DirectionType.DOWN:
                 index += 1
             for row in new_rows:
-                self.__listbox.insert(row, index)
+                self.emit("dnd-insert", row, index)
                 index += 1
         else:
             index = dest_row.get_index()
@@ -136,7 +130,7 @@ class DNDHelper(GObject.Object):
             if direction == Gtk.DirectionType.DOWN:
                 index += 1
             for row in new_rows:
-                self.__listbox.insert(row, index)
+                self.emit("dnd-insert", row, index)
                 index += 1
         # Calculate update range
         for row in src_rows:
@@ -330,8 +324,6 @@ class DNDHelper(GObject.Object):
         if row is None:
             return
         if self.__drag_begin_rows and row not in self.__drag_begin_rows:
-            for to_block in self.__gestures_to_block:
-                to_block.set_state(Gtk.EventSequenceState.DENIED)
             row_height = row.get_allocated_height()
             (row_x, row_y) = row.translate_coordinates(self.__listbox,
                                                        0, 0)
@@ -339,8 +331,9 @@ class DNDHelper(GObject.Object):
                 direction = Gtk.DirectionType.UP
             elif y > row_y - row_height / 2:
                 direction = Gtk.DirectionType.DOWN
-            self.__do_drag_and_drop(self.__drag_begin_rows,
-                                    row, direction)
+            GLib.idle_add(self.__do_drag_and_drop,
+                          self.__drag_begin_rows,
+                          row, direction)
 
     def __on_drag_update(self, gesture, x, y):
         """
@@ -377,4 +370,3 @@ class DNDHelper(GObject.Object):
         self.__autoscroll_timeout_id = GLib.idle_add(self.__autoscroll,
                                                      scrolled,
                                                      -diff / 10000)
-        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
