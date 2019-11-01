@@ -62,26 +62,29 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         self.__reveals += list(albums)
 
-    def insert_album(self, album, position):
+    def insert_album(self, album, index):
         """
-            Add an album
+            Insert album at index
             @param album as Album
-            @param reveal as bool
-            @param position as int
+            @param index as int
         """
-        row = AlbumRow(album, self.__height, self._view_type)
-        row.populate()
-        self.insert_row(row, position)
+        children = self.children
+        if index < len(children) and children[index].album.id == album.id:
+            children[index].tracks_view.append_rows(album.tracks)
+        else:
+            row = AlbumRow(album, self.__height, self._view_type)
+            row.populate()
+            self.insert_row(row, index)
 
-    def insert_row(self, row, position):
+    def insert_row(self, row, index):
         """
-            Insert row at position
+            Insert row at index
             @param row as AlbumRow
-            @param position as int
+            @param index as int
         """
         row.connect("activated", self.__on_row_activated)
         row.show()
-        self._box.insert(row, position)
+        self._box.insert(row, index)
 
     def populate(self, albums):
         """

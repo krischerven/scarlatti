@@ -177,7 +177,7 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
-            self.__view.add_reveal_albums([album])
+            self._view.add_reveal_albums([album])
             self._view.insert_album(album, -1)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
