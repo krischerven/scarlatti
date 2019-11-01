@@ -152,8 +152,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     child.destroy()
                     break
 
-        if scan_update == ScanUpdate.ADDED and\
-                self._genre_ids[0] != Type.NONE:  # AlbumsLineView
+        if scan_update == ScanUpdate.ADDED and self._genre_ids and\
+                Type.NONE not in self._genre_ids:  # AlbumsLineView
             album_ids = App().window.container.get_view_album_ids(
                                             self._genre_ids,
                                             self._artist_ids)
