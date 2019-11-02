@@ -293,7 +293,8 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         """
             Update button state
         """
-        self.__update_list_button(self.__gesture_list.widget)
+        if self.__artwork is not None:
+            self.__update_list_button(self.__gesture_list.widget)
 
 #######################
 # PRIVATE             #
