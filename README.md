@@ -1,8 +1,8 @@
 # Lollypop music player
 
-[![Please do not theme this app](https://stopthemingmy.app/badge.svg)](https://stopthemingmy.app) 
-
 ![Lollypop logo](https://gitlab.gnome.org/gnumdk/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
+
+![Support Lollypop](https://www.patreon.com/gnumdk)
 
 Lollypop is a new GNOME music playing application.
 
