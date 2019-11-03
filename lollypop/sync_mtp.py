@@ -441,6 +441,7 @@ class MtpSync(GObject.Object):
                     None)
                 if len(list(infos)) == 0:
                     parent.delete(self.__cancellable)
+                infos.close(None)
             except Exception as e:
                 Logger.error("MtpSync::__delete_old_uris(): %s", e)
 
@@ -476,6 +477,7 @@ class MtpSync(GObject.Object):
                             continue
                         f = infos.get_child(info)
                         children.append(f.get_uri())
+                infos.close(None)
             except Exception as e:
                 Logger.error("MtpSync::__get_track_files(): %s, %s" % (e, uri))
         return children

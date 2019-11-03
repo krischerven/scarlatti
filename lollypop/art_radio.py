@@ -168,6 +168,7 @@ class RadioArt:
                 basename = f.get_basename()
                 if re.search(r"%s_.*\.png" % re.escape(cache_name), basename):
                     f.delete()
+            infos.close(None)
         except Exception as e:
             Logger.error("RadioArt::clean_radio_cache(): %s, %s" %
                          (e, cache_name))

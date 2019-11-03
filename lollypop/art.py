@@ -144,6 +144,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
                 sleep(0.1)
                 f = infos.get_child(info)
                 files.append(f.get_basename())
+            infos.close(None)
             # Remove wanted files
             for storage_type in [StorageType.SAVED,
                                  StorageType.SPOTIFY_NEW_RELEASES,

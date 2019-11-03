@@ -123,6 +123,7 @@ class AlbumArt:
             all_uris.append(f.get_uri())
         for uri in filter(lambda p: p.lower().endswith(self._MIMES), all_uris):
             return uri
+        infos.close(None)
         return None
 
     def get_album_artworks(self, album):
@@ -145,6 +146,7 @@ class AlbumArt:
             for uri in filter(lambda p: p.lower().endswith(self._MIMES),
                               all_uris):
                 uris.append(uri)
+            infos.close(None)
         except Exception as e:
             Logger.error("AlbumArt::get_album_artworks(): %s", e)
         return uris
