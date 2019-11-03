@@ -71,6 +71,9 @@ class BehaviourSettingsWidget(Gtk.Bin):
         builder.get_object("network_button").set_sensitive(
             network_access)
 
+        replaygain_combo = builder.get_object("replaygain_combo")
+        replaygain_combo.set_active(App().settings.get_enum(("replay-gain")))
+
         acl = App().settings.get_value("network-access-acl").get_int32()
         for key in NetworkAccessACL.keys():
             if acl & NetworkAccessACL[key]:
@@ -201,6 +204,16 @@ class BehaviourSettingsWidget(Gtk.Bin):
             @param state as bool
         """
         App().settings.set_value("save-to-tags", GLib.Variant("b", state))
+
+    def _on_combo_replaygain_by_changed(self, widget):
+        """
+            Update replaygain setting
+            @param widget as Gtk.ComboBoxText
+        """
+        App().settings.set_enum("replay-gain", widget.get_active())
+        for plugin in App().player.plugins:
+            plugin.init()
+        App().player.reload_track()
 
 #######################
 # PRIVATE             #
