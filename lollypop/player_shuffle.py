@@ -82,15 +82,6 @@ class ShufflePlayer:
             return
         self.__is_party = party
 
-        if self._plugins1.rgvolume is not None and\
-           self._plugins2.rgvolume is not None:
-            if party:
-                self._plugins1.rgvolume.props.album_mode = 0
-                self._plugins2.rgvolume.props.album_mode = 0
-            else:
-                self._plugins1.rgvolume.props.album_mode = 1
-                self._plugins2.rgvolume.props.album_mode = 1
-
         if party:
             self.set_party_ids()
             if self._albums:
@@ -190,18 +181,10 @@ class ShufflePlayer:
 #######################
     def __set_shuffle(self, settings, value):
         """
-            Update playback based on shuffle status
+            Update next track
             @param settings as Gio.Settings
             @param value as GLib.Variant
         """
-        if self._plugins1.rgvolume is not None and\
-           self._plugins2.rgvolume is not None:
-            if value:
-                self._plugins1.rgvolume.props.album_mode = 0
-                self._plugins2.rgvolume.props.album_mode = 0
-            else:
-                self._plugins1.rgvolume.props.album_mode = 1
-                self._plugins2.rgvolume.props.album_mode = 1
         if self._current_playback_track.id is not None:
             self.set_next()
 
