@@ -6,6 +6,11 @@
        <value nick="suspend" value="2"/>
        <value nick="both" value="3"/>
     </enum>
+    <enum id="org.gnome.Lollypop.ReplayGain">
+       <value nick="none" value="0"/>
+       <value nick="track" value="1"/>
+       <value nick="album" value="2"/>
+    </enum>
     <enum id="org.gnome.Lollypop.Notifications">
        <value nick="none" value="0"/>
        <value nick="all" value="1"/>
@@ -306,6 +311,11 @@
         <key type="b" name="shuffle">
             <default>false</default>
             <summary>Shuffle tracks</summary>
+            <description></description>
+        </key>
+        <key enum="org.gnome.Lollypop.ReplayGain" name="replay-gain">
+            <default>'album'</default>
+            <summary>Replay gain state</summary>
             <description></description>
         </key>
         <key enum="org.gnome.Lollypop.PowerManagement" name="power-management">

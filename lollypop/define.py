@@ -172,6 +172,12 @@ class PowerManagement:
     BOTH = 3             # Inhibit screensaver and suspend
 
 
+class ReplayGain:
+    NONE = 0
+    TRACK = 1
+    ALBUM = 1
+
+
 class AdaptiveSize:
     NONE = 1 << 0
     SMALL = 1 << 1
