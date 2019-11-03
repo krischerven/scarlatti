@@ -61,23 +61,23 @@ class PluginsPlayer:
                 self.__equalizer.link(new_bin)
 
             # Replay gain
-            replay_gain = App().settings.get_value("replay-gain")
+            replay_gain = App().settings.get_enum("replay-gain")
             if replay_gain != ReplayGain.NONE:
-                self.rgvolume = Gst.ElementFactory.make("rgvolume", "rgvolume")
+                rgvolume = Gst.ElementFactory.make("rgvolume", "rgvolume")
                 if replay_gain == ReplayGain.ALBUM:
-                    self.rgvolume.props.album_mode = 1
+                    rgvolume.props.album_mode = 1
                 else:
-                    self.rgvolume.props.album_mode = 0
-                self.rgvolume.props.pre_amp = App().settings.get_value(
+                    rgvolume.props.album_mode = 0
+                rgvolume.props.pre_amp = App().settings.get_value(
                     "replaygain").get_double()
-                bin.add(self.rgvolume)
-                new_bin.link(self.rgvolume)
+                bin.add(rgvolume)
+                new_bin.link(rgvolume)
                 new_bin = Gst.ElementFactory.make("audioconvert", "ac4")
                 bin.add(new_bin)
-                self.rgvolume.link(new_bin)
+                rgvolume.link(new_bin)
                 rglimiter = Gst.ElementFactory.make("rglimiter", "rglimiter")
                 bin.add(rglimiter)
-                self.rgvolume.link(rglimiter)
+                rgvolume.link(rglimiter)
 
             audiosink = Gst.ElementFactory.make("autoaudiosink",
                                                 "autoaudiosink")
