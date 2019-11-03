@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App
+from lollypop.define import App, Size
 from lollypop.view_information import InformationView
 from lollypop.widgets_utils import Popover
 
@@ -58,10 +58,10 @@ class InformationPopover(Popover):
         """
         size = App().window.get_size()
         if self.__minimal:
-            self.__width = min(size[0] * 0.6, 500)
+            self.__width = min(size[0] * 0.95, 500)
             self.set_size_request(self.__width,
                                   min(size[1] * 0.5, 600))
         else:
-            self.__width = min(size[0] * 0.6, 1000)
+            self.__width = Size.NORMAL
             self.set_size_request(self.__width,
                                   min(size[1] * 0.7, 800))
