@@ -151,7 +151,7 @@
         </key>
         <key type="d" name="replaygain">
             <default>3.0</default>
-            <summary>Replay gain value in dB</summary>
+            <summary>ReplayGain value in dB</summary>
             <description>Between -15 and 15</description>
         </key>
         <key type="i" name="convert-bitrate">
@@ -315,7 +315,7 @@
         </key>
         <key enum="org.gnome.Lollypop.ReplayGain" name="replay-gain">
             <default>'album'</default>
-            <summary>Replay gain state</summary>
+            <summary>ReplayGain state</summary>
             <description></description>
         </key>
         <key enum="org.gnome.Lollypop.PowerManagement" name="power-management">
