@@ -360,14 +360,17 @@
         <property name="can_focus">False</property>
         <property name="spacing">5</property>
         <child>
-          <object class="GtkLabel" id="orderby_label">
+          <object class="GtkLinkButton">
+            <property name="label" translatable="yes">ReplayGain</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="halign">start</property>
             <property name="hexpand">True</property>
-            <property name="label" translatable="yes">ReplayGain</property>
-            <property name="wrap">True</property>
-            <property name="xalign">0</property>
+            <property name="relief">none</property>
+            <style>
+              <class name="no-padding"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
