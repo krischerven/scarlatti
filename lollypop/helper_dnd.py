@@ -370,3 +370,4 @@ class DNDHelper(GObject.Object):
         self.__autoscroll_timeout_id = GLib.idle_add(self.__autoscroll,
                                                      scrolled,
                                                      -diff / 10000)
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
