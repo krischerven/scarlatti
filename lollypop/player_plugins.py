@@ -63,6 +63,7 @@ class PluginsPlayer:
                 rgvolume.props.pre_amp = App().settings.get_value(
                     "replaygain").get_double()
                 bin.add(rgvolume)
+                previous_bin.link(rgvolume)
                 rglimiter = Gst.ElementFactory.make("rglimiter", "rglimiter")
                 bin.add(rglimiter)
                 rgvolume.link(rglimiter)
