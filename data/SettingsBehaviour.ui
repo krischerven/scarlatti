@@ -368,6 +368,7 @@
             <property name="halign">start</property>
             <property name="hexpand">True</property>
             <property name="relief">none</property>
+            <property name="uri">https://wikipedia.org/wiki/ReplayGain</property>
             <style>
               <class name="no-padding"/>
             </style>
