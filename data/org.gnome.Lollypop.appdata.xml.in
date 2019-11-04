@@ -8,9 +8,9 @@
   <name>Lollypop</name>
   <summary>Play and organize your music collection</summary>
   <description>
-    <p>Lollypop is a lightweight modern music player designed to work excellently on the GNOME desktop environment. Lollypop also features a party mode which will automatically select party-related playlists to play; a full-screen view which lets you visually access the player from your couch thanks to its HiDPI support; and native support for replay gain.</p>
+    <p>Lollypop is a lightweight modern music player designed to work excellently on the GNOME desktop environment. It also features a party mode which will auto-select party-related playlists; access the player from your couch in fullscreen thanks to HiDPI support; and native support for ReplayGain.</p>
     <ul>
-      <li><b>Multiple Audio Formats –</b> Play mp3/4, ogg and flac files</li>
+      <li><b>Multiple Audio Formats –</b> Play MP3/4, Ogg Vorbis and FLAC files</li>
       <li><b>Metadata –</b> Fetch lyrics, artist bio, and automatically download cover arts</li>
       <li><b>Synchronization –</b> Sync Lollypop with your Android device via MTP</li>
       <li><b>Audio Scrobbling –</b> You can scrob songs to Last.fm, Libre.fm and ListenBrainz</li>
