@@ -39,26 +39,18 @@ class PluginsPlayer:
             bin = Gst.ElementFactory.make("bin", "bin")
 
             # Internal volume manager
-            initial_bin = Gst.ElementFactory.make("audioconvert", "ac1")
-            bin.add(initial_bin)
             self.volume = Gst.ElementFactory.make("volume", "volume")
             self.volume.props.volume = 0.0
             bin.add(self.volume)
-            initial_bin.link(self.volume)
-
-            new_bin = Gst.ElementFactory.make("audioconvert", "ac2")
-            bin.add(new_bin)
-            self.volume.link(new_bin)
+            previous_bin = self.volume
 
             # Equalizer
             if App().settings.get_value("equalizer-enabled"):
                 self.__equalizer = Gst.ElementFactory.make("equalizer-10bands",
                                                            "equalizer-10bands")
                 bin.add(self.__equalizer)
-                new_bin.link(self.__equalizer)
-                new_bin = Gst.ElementFactory.make("audioconvert", "ac3")
-                bin.add(new_bin)
-                self.__equalizer.link(new_bin)
+                previous_bin.link(self.__equalizer)
+                previous_bin = self.__equalizer
 
             # Replay gain
             replay_gain = App().settings.get_enum("replay-gain")
@@ -71,22 +63,19 @@ class PluginsPlayer:
                 rgvolume.props.pre_amp = App().settings.get_value(
                     "replaygain").get_double()
                 bin.add(rgvolume)
-                new_bin.link(rgvolume)
-                new_bin = Gst.ElementFactory.make("audioconvert", "ac4")
-                bin.add(new_bin)
-                rgvolume.link(new_bin)
                 rglimiter = Gst.ElementFactory.make("rglimiter", "rglimiter")
                 bin.add(rglimiter)
                 rgvolume.link(rglimiter)
+                previous_bin = rglimiter
 
             audiosink = Gst.ElementFactory.make("autoaudiosink",
                                                 "autoaudiosink")
             bin.add(audiosink)
-            new_bin.link(audiosink)
+            previous_bin.link(audiosink)
 
             bin.add_pad(Gst.GhostPad.new(
                 "sink",
-                initial_bin.get_static_pad("sink")))
+                self.volume.get_static_pad("sink")))
             self.__playbin.set_property("audio-sink", bin)
             self.update_equalizer()
         except Exception as e:
