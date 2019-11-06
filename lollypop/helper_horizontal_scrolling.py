@@ -34,6 +34,12 @@ class HorizontalScrollingHelper:
         self._scrolled.set_policy(Gtk.PolicyType.AUTOMATIC,
                                   Gtk.PolicyType.NEVER)
 
+    def __del__(self):
+        """
+            Remove ref cycle
+        """
+        self.__adjustment = None
+
 #######################
 # PROTECTED           #
 #######################
