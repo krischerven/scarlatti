@@ -153,6 +153,8 @@ class Application(Gtk.Application, ApplicationActions):
         self.register(None)
         if self.get_is_remote():
             Gdk.notify_startup_complete()
+        if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
+            gc.set_debug(gc.DEBUG_LEAK)
 
     def init(self):
         """
@@ -270,9 +272,8 @@ class Application(Gtk.Application, ApplicationActions):
         for scrobbler in self.scrobblers:
             scrobbler.save()
         Gio.Application.quit(self)
-        if self.debug:
+        if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
             gc.collect()
-            print("\nGARBAGE OBJECTS:")
             for x in gc.garbage:
                 s = str(x)
                 print(type(x), "\n  ", s)
@@ -482,7 +483,6 @@ class Application(Gtk.Application, ApplicationActions):
             args = app_cmd_line.get_arguments()
             options = app_cmd_line.get_options_dict()
             if options.contains("debug"):
-                gc.set_debug(gc.DEBUG_LEAK)
                 self.debug = True
             # We are forced to enable scrobblers here if we want full debug
             if not self.scrobblers:
