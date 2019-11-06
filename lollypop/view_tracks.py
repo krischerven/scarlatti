@@ -67,16 +67,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
             Populate tracks lazy
         """
-        def load_disc(items, disc_number, position=0):
-            if items:
-                (widget, tracks) = items.pop(0)
-                self.__add_tracks(widget, tracks, position)
-                position += len(tracks)
-                widget.show()
-                GLib.idle_add(load_disc, items, disc_number, position)
-            else:
-                emit_signal(self, "populated")
-
         self.__init()
         if self.__discs_to_load:
             disc = self.__discs_to_load.pop(0)
@@ -91,7 +81,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
                               tracks[:mid_tracks]))
                 items.append((self._tracks_widget_right[disc_number],
                               tracks[mid_tracks:]))
-            load_disc(items, disc_number)
+            self.__load_disc(items, disc_number)
         else:
             self.__populated = True
             emit_signal(self, "populated")
@@ -328,6 +318,22 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
                                                       self._on_activated)
         self._tracks_widget_right[disc_number].connect("activated",
                                                        self._on_activated)
+
+    def __load_disc(self, items, disc_number, position=0):
+        """
+            Load discs
+            @param items as (TrackWidget, [Tracks])
+            @param disc_number as int
+            @param position as int
+        """
+        if items:
+            (widget, tracks) = items.pop(0)
+            self.__add_tracks(widget, tracks, position)
+            position += len(tracks)
+            widget.show()
+            GLib.idle_add(self.__load_disc, items, disc_number, position)
+        else:
+            emit_signal(self, "populated")
 
     def __set_orientation(self, orientation):
         """

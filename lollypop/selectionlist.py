@@ -260,6 +260,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         LazyLoadingView.__init__(self, ViewType.DEFAULT)
         FilteringHelper.__init__(self)
+        self.__selection_pending_ids = []
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE
         self.__animation_timeout_id = None
@@ -432,6 +433,20 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             row.activate()
         except Exception as e:
             Logger.warning("SelectionList::select_first(): %s", e)
+
+    def set_selection_pending_ids(self, pending_ids):
+        """
+            Set selection pending ids
+            @param pending_ids
+        """
+        self.__selection_pending_ids = pending_ids
+
+    def select_pending_ids(self):
+        """
+            Select pending ids
+        """
+        self.select_ids(self.__selection_pending_ids)
+        self.__selection_pending_ids = []
 
     def activate_child(self):
         """

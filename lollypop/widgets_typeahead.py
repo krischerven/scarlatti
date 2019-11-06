@@ -20,10 +20,9 @@ class TypeAheadWidget(Gtk.Revealer):
         Type ahead widget
     """
 
-    def __init__(self, container):
+    def __init__(self):
         """
             Init widget
-            @param container as Container
         """
         Gtk.Revealer.__init__(self)
         self.__multi_press_left = None

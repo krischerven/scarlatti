@@ -118,18 +118,13 @@ class AdaptiveContainer:
             @param stack as ContainerStack
             @param selection_ids as {"left": [int], "right": [int])
         """
-        def on_populated(selection_list, selected_ids):
-            selection_list.select_ids(selected_ids, False)
-            selection_list.disconnect_by_func(on_populated)
-
         # Restore left list
         if selection_ids["left"]:
             if self.left_list.selected_ids != selection_ids["left"]:
                 self.left_list.show()
                 if self.left_list.count == 0:
-                    self.left_list.connect("populated",
-                                           on_populated,
-                                           selection_ids["left"])
+                    self.left_list.set_selection_pending_ids(
+                        selection_ids["left"])
                     if App().window.container.sidebar.selected_ids[0] ==\
                             Type.GENRES_LIST:
                         self._show_genres_list(self.left_list)
@@ -144,8 +139,7 @@ class AdaptiveContainer:
         # Restore right list
         if selection_ids["right"]:
             if self.right_list.selected_ids != selection_ids["right"]:
-                self.right_list.connect("populated",
-                                        on_populated,
+                self.right_list.set_selection_pending_ids(
                                         selection_ids["right"])
                 self._show_artists_list(self.right_list,
                                         selection_ids["left"])

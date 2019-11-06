@@ -95,7 +95,7 @@ class GesturesHelper():
     def __on_destroy(self, widget):
         """
             Remove ref cycle
-            @parma widget as Gtk.Widget
+            @param widget as Gtk.Widget
         """
         self.__widget = None
 

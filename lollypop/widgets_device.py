@@ -66,6 +66,7 @@ class DeviceWidget(Gtk.ListBoxRow):
         for encoder in self.__mtp_sync._GST_ENCODER.keys():
             if not self.__mtp_sync.check_encoder_status(encoder):
                 self.__builder.get_object(encoder).set_sensitive(False)
+        self.connect("destroy", self.__on_destroy)
 
     @property
     def uri(self):
@@ -345,3 +346,10 @@ class DeviceWidget(Gtk.ListBoxRow):
         """
         App().task_helper.run(self.__get_basename_for_sync,
                               callback=(self.__set_combobox_content,))
+
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle
+            @param widget as Gtk.Widget
+        """
+        self.__builder = None

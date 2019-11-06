@@ -108,6 +108,8 @@ class ListsContainer:
             self.__right_list_grid.add(self.__right_list)
             self.__left_list.overlay.add_overlay(self.__right_list_grid)
             self.__left_list.connect("unmap", on_unmap)
+            self.__left_list.connect("populated", self.__on_list_populated)
+            self.__right_list.connect("populated", self.__on_list_populated)
         return self.__right_list
 
     @property
@@ -299,3 +301,10 @@ class ListsContainer:
         self._stack.add(view)
         self._stack.set_visible_child(view)
         self.set_focused_view(view)
+
+    def __on_list_populated(self, selection_list):
+        """
+            Select pending ids
+            @param selection_list as SelectionList
+        """
+        selection_list.select_pending_ids()

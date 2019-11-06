@@ -24,7 +24,7 @@ class FilterContainer:
             Init container
         """
         self.__index = 0
-        self.__type_ahead = TypeAheadWidget(self)
+        self.__type_ahead = TypeAheadWidget()
         self.__type_ahead.show()
         self._grid.add(self.__type_ahead)
 
