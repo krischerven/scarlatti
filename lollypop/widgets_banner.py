@@ -90,6 +90,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             self.add(self._overlay)
         self.set_reveal_child(True)
         self.set_transition_duration(250)
+        self.connect("destroy", self.__on_destroy)
 
     def set_view_type(self, view_type):
         """
@@ -132,6 +133,13 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle
+            @param widget as Gtk.Widget
+        """
+        self.__event_controller = None
+
     def __on_scroll(self, event_controller, x, y):
         """
             Pass scroll

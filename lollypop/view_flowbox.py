@@ -175,6 +175,14 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             return
         self.__popup_menu(child)
 
+    def _on_destroy(self, widget):
+        """
+            Clean up widget
+            @param widget as Gtk.Widget
+        """
+        LazyLoadingView._on_destroy(self, widget)
+        self.__event_controller = None
+
 #######################
 # PRIVATE             #
 #######################

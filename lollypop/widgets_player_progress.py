@@ -207,6 +207,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             Stop timeout
             @param widget as Gtk.Widget
         """
+        self.__event_controller = None
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
             self.__timeout_id = None

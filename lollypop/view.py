@@ -65,7 +65,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self.__stack.show()
         self.__stack.set_transition_type(Gtk.StackTransitionType.NONE)
 
-        self.connect("destroy", self.__on_destroy)
+        self.connect("destroy", self._on_destroy)
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
         self.connect("realize", self._on_realize)
@@ -292,6 +292,15 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self.__stack.connect("size-allocate",
                                  self.__on_stack_size_allocated)
 
+    def _on_destroy(self, widget):
+        """
+            Clean up widget
+            @param widget as Gtk.Widget
+        """
+        self.__destroyed = True
+        self.__event_controller = None
+        gc.collect()
+
 #######################
 # PRIVATE             #
 #######################
@@ -325,11 +334,3 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._scrolled.get_vadjustment().set_value(
                 self.__scrolled_position)
             self.__scrolled_position = None
-
-    def __on_destroy(self, widget):
-        """
-            Clean up widget
-            @param widget as Gtk.Widget
-        """
-        self.__destroyed = True
-        gc.collect()
