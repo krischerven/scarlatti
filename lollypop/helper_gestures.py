@@ -97,6 +97,13 @@ class GesturesHelper():
             Remove ref cycle
             @param widget as Gtk.Widget
         """
+        self.__primary_long_callback = None
+        self.__secondary_long_callback = None
+        self.__primary_press_callback = None
+        self.__secondary_press_callback = None
+        self.__tertiary_press_callback = None
+        self.__long_press = None
+        self.__multi_press = None
         self.__widget = None
 
     def __on_long_pressed(self, gesture, x, y):

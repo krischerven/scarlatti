@@ -48,7 +48,6 @@ class Overlay(Gtk.Overlay):
 #######################
 # PRIVATE             #
 #######################
-
     def __on_destroy(self, widget):
         """
             Remove ref cycle
