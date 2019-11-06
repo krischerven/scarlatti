@@ -21,6 +21,7 @@ Gst.init(None)
 from threading import current_thread
 from pickle import dump
 from signal import signal, SIGINT, SIGTERM
+import gc
 
 
 try:
@@ -269,6 +270,12 @@ class Application(Gtk.Application, ApplicationActions):
         for scrobbler in self.scrobblers:
             scrobbler.save()
         Gio.Application.quit(self)
+        if self.debug:
+            gc.collect()
+            print("\nGARBAGE OBJECTS:")
+            for x in gc.garbage:
+                s = str(x)
+                print(type(x), "\n  ", s)
 
     def load_listenbrainz(self):
         """
@@ -475,6 +482,7 @@ class Application(Gtk.Application, ApplicationActions):
             args = app_cmd_line.get_arguments()
             options = app_cmd_line.get_options_dict()
             if options.contains("debug"):
+                gc.set_debug(gc.DEBUG_LEAK)
                 self.debug = True
             # We are forced to enable scrobblers here if we want full debug
             if not self.scrobblers:

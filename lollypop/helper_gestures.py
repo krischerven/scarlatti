@@ -29,6 +29,7 @@ class GesturesHelper():
             @params as callbacks
         """
         self.__widget = widget
+        widget.connect("destroy", self.__on_destroy)
         self.__primary_long_callback = primary_long_callback
         self.__secondary_long_callback = secondary_long_callback
         self.__primary_press_callback = primary_press_callback
@@ -91,6 +92,13 @@ class GesturesHelper():
 #######################
 # PRIVATE             #
 #######################
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle
+            @parma widget as Gtk.Widget
+        """
+        self.__widget = None
+
     def __on_long_pressed(self, gesture, x, y):
         """
             Check long pressed button
