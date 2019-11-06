@@ -59,14 +59,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
 
         App().task_helper.run(load, callback=(on_load,))
 
-    def add_value(self, item):
-        """
-            Override FlowBox method to be compatible with SelectionList
-            Needed by SelectionListMenu
-            @param item as (int, str, str)
-        """
-        FlowBoxView.add_value(self, item[0])
-
     @property
     def args(self):
         """
