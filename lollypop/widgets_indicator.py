@@ -134,6 +134,7 @@ class IndicatorWidget(Gtk.EventBox):
             Clear timeout
             @param widget as Gtk.Widget
         """
+        self.__row = None
         self.clear()
 
     def __play_loved(self):
