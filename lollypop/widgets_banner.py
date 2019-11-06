@@ -28,6 +28,7 @@ class Overlay(Gtk.Overlay):
         """
         Gtk.Overlay.__init__(self)
         self.__banner = banner
+        banner.connect("destroy", self.__on_destroy)
 
     def do_get_preferred_width(self):
         """
@@ -43,6 +44,17 @@ class Overlay(Gtk.Overlay):
         """
         height = self.__banner.height
         return (height, height)
+
+#######################
+# PRIVATE             #
+#######################
+
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle
+            @param widget as Gtk.Widget
+        """
+        self.__banner = None
 
 
 class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
