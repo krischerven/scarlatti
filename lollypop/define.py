@@ -126,10 +126,10 @@ class IndicatorType:
 
 
 class ArtSize:
-    SMALL = 50
+    SMALL = 50     # Depends on cover-size in gsettings
     MEDIUM = 100
-    BANNER = 150
-    BIG = 200
+    BANNER = 150   # Depends on cover-size in gsettings
+    BIG = 200      # Depends on cover-size in gsettings
     MINIPLAYER = 300
     FULLSCREEN = 400
     MPRIS = 900
@@ -189,8 +189,8 @@ class AdaptiveSize:
 
 class Size:
     MINI = 250
-    SMALL = 400
-    MEDIUM = 720  # Librem Phone
+    SMALL = 360  # Librem Phone
+    MEDIUM = 720
     NORMAL = 1000
     BIG = 1300
 
