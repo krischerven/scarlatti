@@ -43,6 +43,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.connect("button-release-event", self.__on_button_release_event)
         self.connect("window-state-event", self.__on_window_state_event)
         self.connect("adaptive-size-changed", self.__on_adaptive_size_changed)
+        self.connect("destroy", self.__on_destroy)
         return [
             (App().player, "current-changed", "_on_current_changed")
         ]
@@ -214,3 +215,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__show_miniplayer(adaptive_size & (AdaptiveSize.SMALL |
                                                 AdaptiveSize.MEDIUM |
                                                 AdaptiveSize.NORMAL))
+
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle, just to prevent output on DEBUG_LEAK
+            @param widget as Gtk.Widget
+        """
+        self.__toolbar = None
