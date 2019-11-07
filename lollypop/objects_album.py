@@ -29,6 +29,12 @@ class Disc:
         self.__number = disc_number
         self.__disallow_ignored_tracks = disallow_ignored_tracks
 
+    def __del__(self):
+        """
+            Remove ref cycles
+        """
+        self.__album = None
+
     def set_tracks(self, tracks):
         """
             Set disc tracks
