@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib, GObject
 
-from lollypop.define import App, ArtSize, ViewType, Type, MARGIN
+from lollypop.define import App, ArtSize, ViewType, Type, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.shown import ShownLists
 from lollypop.utils import emit_signal
@@ -82,20 +82,6 @@ class AlbumsBannerWidget(BannerWidget):
         self.__title_label.set_markup("<b>%s</b>" %
                                       GLib.markup_escape_text(title_str))
 
-    def set_view_type(self, view_type):
-        """
-            Update view type
-            @param view_type as ViewType
-        """
-        BannerWidget.set_view_type(self, view_type)
-        title_context = self.__title_label.get_style_context()
-        for c in title_context.list_classes():
-            title_context.remove_class(c)
-        if view_type & ViewType.ADAPTIVE:
-            title_context.add_class("text-large")
-        else:
-            title_context.add_class("text-x-large")
-
     @property
     def height(self):
         """
@@ -103,6 +89,25 @@ class AlbumsBannerWidget(BannerWidget):
             @return int
         """
         return ArtSize.SMALL
+
+#######################
+# PROTECTED           #
+#######################
+    def _handle_width_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if BannerWidget._handle_width_allocate(self, allocation):
+            title_context = self.__title_label.get_style_context()
+            for c in title_context.list_classes():
+                title_context.remove_class(c)
+            if self.width <= Size.MEDIUM:
+                self.__title_label.get_style_context().add_class(
+                    "text-large")
+            else:
+                self.__title_label.get_style_context().add_class(
+                    "text-x-large")
 
 #######################
 # PRIVATE             #

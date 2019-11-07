@@ -14,7 +14,7 @@ from gi.repository import Gtk, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import ArtSize, MARGIN, ViewType
+from lollypop.define import ArtSize, MARGIN, ViewType, Size
 from lollypop.utils import get_network_available, popup_widget
 from lollypop.widgets_banner import BannerWidget
 
@@ -90,6 +90,25 @@ class RadiosBannerWidget(BannerWidget):
             @return int
         """
         return ArtSize.SMALL
+
+#######################
+# PROTECTED           #
+#######################
+    def _handle_width_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if BannerWidget._handle_width_allocate(self, allocation):
+            title_context = self.__title_label.get_style_context()
+            for c in title_context.list_classes():
+                title_context.remove_class(c)
+            if self.width <= Size.MEDIUM:
+                self.__title_label.get_style_context().add_class(
+                    "text-large")
+            else:
+                self.__title_label.get_style_context().add_class(
+                    "text-x-large")
 
 #######################
 # PRIVATE             #

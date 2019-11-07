@@ -39,7 +39,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         self._empty_icon_name = "emblem-documents-symbolic"
         self.__banner = PlaylistsBannerWidget(self)
         self.__banner.show()
-        self.__banner.set_view_type(self._view_type)
         self.add_widget(self._box, self.__banner)
         return [
             (App().playlists, "playlists-changed", "_on_playlist_changed")

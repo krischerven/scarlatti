@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from random import shuffle
 
 from lollypop.utils import get_human_duration, tracks_to_albums, popup_widget
-from lollypop.define import App, ArtSize, ViewType
+from lollypop.define import App, ArtSize, ViewType, Size
 from lollypop.widgets_banner import BannerWidget
 
 
@@ -90,6 +90,24 @@ class PlaylistBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_width_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+        """
+        if BannerWidget._handle_width_allocate(self, allocation):
+            duration_context = self.__duration_label.get_style_context()
+            title_context = self.__title_label.get_style_context()
+            for c in title_context.list_classes():
+                title_context.remove_class(c)
+            for c in duration_context.list_classes():
+                duration_context.remove_class(c)
+            if self.width <= Size.MEDIUM:
+                title_context.add_class("text-large")
+            else:
+                title_context.add_class("text-x-large")
+                duration_context.add_class("text-large")
+
     def _on_play_button_clicked(self, button):
         """
             Play playlist
