@@ -445,18 +445,11 @@ class CollectionScanner(GObject.GObject, TagReader):
                         child_uri = f.get_uri()
                         if info.get_is_hidden():
                             continue
-                        # We only support symlinks on collections root
-                        elif info.get_is_symlink():
-                            Logger.info(
-                                "Symlinks are not supported: %s",
-                                child_uri)
+                        # User do not want internal symlinks
+                        elif info.get_is_symlink() and\
+                                App().settings.get_value("ignore-symlinks"):
                             continue
-                        elif info.get_file_type() == Gio.FileType.DIRECTORY:
-                            dirs.append(child_uri)
-                            walk_uris.append(child_uri)
-                        else:
-                            mtime = get_mtime(info)
-                            files.append((mtime, child_uri))
+                        walk_uris.append(child_uri)
                     infos.close(None)
                 # Only happens if files passed as args
                 else:
