@@ -173,6 +173,7 @@ class ListsContainer:
             self.__right_list_grid.unset_state_flags(Gtk.StateFlags.VISITED)
             GLib.timeout_add(200, self.__right_list_grid.hide)
             self.__right_list.clear()
+            self.set_focused_view(self.left_list)
 
 ############
 # PRIVATE  #
@@ -190,7 +191,12 @@ class ListsContainer:
         if selected_id is None:
             return
         # Update lists
-        if selected_id == Type.ARTISTS_LIST:
+        if selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST] and\
+                self.type_ahead.get_reveal_child() and\
+                self.left_list.get_visible():
+            self.set_focused_view(self.left_list)
+            focus_set = True
+        elif selected_id == Type.ARTISTS_LIST:
             self._show_artists_list(self.left_list)
             self._hide_right_list()
             self.left_list.show()
