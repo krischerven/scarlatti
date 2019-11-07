@@ -56,10 +56,10 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__progress_widget.set_vexpand(True)
         self.__progress_widget.set_margin_start(MARGIN)
         self.__progress_widget.set_margin_end(MARGIN)
-        buttons_widget = ButtonsPlayerWidget(["banner-button"])
+        buttons_widget = ButtonsPlayerWidget(["banner-button-small"])
         buttons_widget.show()
         buttons_widget.update()
-        buttons_widget.set_size_request(200, -1)
+        buttons_widget.set_property("valign", Gtk.Align.CENTER)
         self.__artwork_widget = ArtworkPlayerWidget()
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
@@ -70,10 +70,9 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         label_widget = LabelPlayerWidget(False, 9)
         label_widget.show()
         label_widget.update()
-        self.__label_button_artwork = Gtk.Image.new_from_icon_name(
-            "pan-up-symbolic", Gtk.IconSize.BUTTON)
-        self.__label_button_artwork.show()
-        label_box.pack_start(self.__label_button_artwork, False, False, 0)
+        self.__artwork_button = Gtk.Image.new()
+        self.__artwork_button.show()
+        label_box.pack_start(self.__artwork_button, False, False, 0)
         label_box.pack_start(label_widget, False, False, 0)
         button = Gtk.Button.new()
         button.show()
@@ -131,6 +130,13 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
                 allocation.height,
                 self.__on_artwork,
                 ArtBehaviour.BLUR_HARD | ArtBehaviour.DARKER)
+        App().art_helper.set_album_artwork(
+                App().player.current_track.album,
+                ArtSize.SMALL,
+                ArtSize.SMALL,
+                self.__artwork_button.get_scale_factor(),
+                ArtBehaviour.NONE,
+                self.__on_button_artwork)
 
 #######################
 # PRIVATE             #
@@ -176,15 +182,20 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         if self.__revealer.get_reveal_child():
             self.__revealer.set_reveal_child(False)
             emit_signal(self, "revealed", False)
-            self.__label_button_artwork.set_from_icon_name(
-                "pan-up-symbolic", Gtk.IconSize.BUTTON)
+            self.__artwork_button.show()
         else:
             self.__revealer.set_reveal_child(True)
             emit_signal(self, "revealed", True)
             self.__progress_widget.update()
             self.__artwork_widget.update()
-            self.__label_button_artwork.set_from_icon_name(
-                "pan-down-symbolic", Gtk.IconSize.BUTTON)
+            self.__artwork_button.hide()
+
+    def __on_button_artwork(self, surface):
+        """
+           Set artwork on button
+           @param surface as cairo.Surface
+        """
+        self.__artwork_button.set_from_surface(surface)
 
     def __on_artwork(self, surface):
         """
