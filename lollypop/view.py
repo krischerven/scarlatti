@@ -104,6 +104,8 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 self.__banner = banner
                 self.add(self.__banner)
             self.add(self.__stack)
+        if banner is not None:
+            banner.connect("height-changed", self.__on_banner_height_changed)
 
     def populate(self):
         pass
@@ -228,14 +230,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self._view_type |= ViewType.ADAPTIVE
         else:
             self._view_type &= ~ViewType.ADAPTIVE
-        if self.__banner is not None:
-            self.__banner.set_view_type(self._view_type)
-            if view_type & ViewType.OVERLAY:
-                main_widget = self.__stack.get_child_by_name("main")
-                main_widget.set_margin_top(self.__banner.height + MARGIN_SMALL)
-                if self._view_type & ViewType.SCROLLED:
-                    self._scrolled.get_vscrollbar().set_margin_top(
-                        self.__banner.height)
         return view_type != self._view_type
 
     def _on_value_changed(self, adj):
@@ -304,6 +298,17 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __on_banner_height_changed(self, banner):
+        """
+            Update scroll margin
+            @param banner as BannerWidget
+        """
+        if self._view_type & ViewType.OVERLAY:
+            main_widget = self.__stack.get_child_by_name("main")
+            main_widget.set_margin_top(banner.height + MARGIN_SMALL)
+            if self._view_type & ViewType.SCROLLED:
+                self._scrolled.get_vscrollbar().set_margin_top(banner.height)
+
     def __on_banner_scroll(self, banner, x, y):
         """
             Pass to scrolled

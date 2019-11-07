@@ -214,7 +214,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
 
     @property
     def adaptive_size(self):
-        return AdaptiveSize.SMALL
+        return AdaptiveSize.PHONE
 
     @property
     def container(self):

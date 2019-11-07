@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk, GObject
 
-from lollypop.define import ArtSize, ViewType, MARGIN, App
+from lollypop.define import ArtSize, ViewType, MARGIN, App, Size
 from lollypop.utils import emit_signal
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
@@ -62,7 +62,8 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
     """
 
     gsignals = {
-        "scroll": (GObject.SignalFlags.RUN_FIRST, None, (float, float))
+        "scroll": (GObject.SignalFlags.RUN_FIRST, None, (float, float)),
+        "height-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
     for signal in gsignals:
         args = gsignals[signal]
@@ -77,6 +78,8 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         Gtk.Revealer.__init__(self)
         self._artwork = None
         self._view_type = view_type
+        self.__height = 1
+        self.__width = 1
         self.set_property("valign", Gtk.Align.START)
         if view_type & ViewType.OVERLAY:
             self._overlay = Overlay(self)
@@ -103,12 +106,13 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.set_transition_duration(250)
         self.connect("destroy", self.__on_destroy)
 
-    def set_view_type(self, view_type):
+    @property
+    def width(self):
         """
-            Update widget internals for view_type
-            @param view_type as ViewType
+            Get current width
+            @return int
         """
-        self._view_type = view_type
+        return self.__width
 
     @property
     def height(self):
@@ -116,14 +120,37 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Get wanted height
             @return int
         """
-        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
-            return ArtSize.MEDIUM + MARGIN * 2
-        else:
-            return ArtSize.BANNER + MARGIN * 2
+        return self.__height
 
 #######################
 # PROTECTED           #
 #######################
+    def _handle_width_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+            @return bool
+        """
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+            self.__width = allocation.width
+            # If not SMALL, we add sidebar width because we want banners
+            # to calculate sizing with sidebar included. Allows to prevent
+            # glitch when sidebar is auto shown
+            if not App().window.is_adaptive:
+                sidebar_width = App().window.container.sidebar.\
+                    get_allocated_width()
+                self.__width += sidebar_width
+            if self.__width <= Size.SMALL:
+                height = ArtSize.MEDIUM
+            elif self.__width <= Size.MEDIUM:
+                height = ArtSize.MEDIUM + MARGIN * 2
+            else:
+                height = ArtSize.BANNER + MARGIN * 2
+            if height != self.__height:
+                self.__height = height
+                emit_signal(self, "height-changed")
+            return True
+
     def _on_artwork(self, surface):
         """
             Set album artwork

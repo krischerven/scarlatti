@@ -15,11 +15,10 @@ from gi.repository import Gtk, GLib, Pango, GObject
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, MARGIN, ViewType
-from lollypop.define import ArtBehaviour
+from lollypop.define import ArtBehaviour, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 
 
 class LyricsBannerWidget(BannerWidget, SignalsHelper):
@@ -42,9 +41,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label = Gtk.Label.new()
         self.__title_label.show()
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__cover_artwork = ArtworkPlayerWidget()
-        self.__cover_artwork.show()
-        self.__cover_artwork.set_vexpand(True)
+        self.__title_label.set_vexpand(True)
         self.__translate_button = Gtk.ToggleButton.new()
         image = Gtk.Image.new_from_icon_name(
             "accessories-dictionary-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
@@ -62,7 +59,6 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         grid = Gtk.Grid()
         grid.show()
         grid.set_column_spacing(MARGIN)
-        grid.add(self.__cover_artwork)
         grid.add(self.__title_label)
         grid.add(self.__translate_button)
         grid.set_margin_start(MARGIN)
@@ -75,20 +71,6 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed")
         ]
-
-    def set_view_type(self, view_type):
-        """
-            Update widget internals for view_type
-            @param view_type as ViewType
-        """
-        BannerWidget.set_view_type(self, view_type)
-        if view_type & ViewType.ADAPTIVE:
-            art_size = ArtSize.MEDIUM
-        else:
-            art_size = ArtSize.BANNER
-        self.__cover_artwork.set_art_size(art_size, art_size)
-        self.__cover_artwork.update()
-        self.__set_text_height()
 
     @property
     def translate_button(self):
@@ -107,21 +89,8 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            if App().player.current_track.id is None:
-                self._artwork.get_style_context().add_class(
-                    "default-banner")
-            else:
-                self._artwork.get_style_context().remove_class(
-                    "default-banner")
-                App().art_helper.set_album_artwork(
-                        App().player.current_track.album,
-                        # +100 to prevent resize lag
-                        allocation.width + 100,
-                        ArtSize.BANNER + MARGIN * 2,
-                        self._artwork.get_scale_factor(),
-                        ArtBehaviour.BLUR_HARD |
-                        ArtBehaviour.DARKER,
-                        self._on_artwork)
+            self.__set_artwork()
+            self.__set_internal_size()
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -129,17 +98,8 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == App().player.current_track.album.id and\
-                App().animations:
-            App().art_helper.set_album_artwork(
-                            App().player.current_track.album,
-                            # +100 to prevent resize lag
-                            self.get_allocated_width() + 100,
-                            self.height,
-                            self._artwork.get_scale_factor(),
-                            ArtBehaviour.BLUR_HARD |
-                            ArtBehaviour.DARKER,
-                            self._on_artwork)
+        if album_id == App().player.current_track.album.id:
+            self.__set_artwork()
 
     def _on_current_changed(self, player):
         """
@@ -151,6 +111,28 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __set_artwork(self):
+        """
+            Set artwork
+        """
+        if not App().animations:
+            return
+        if App().player.current_track.id is None:
+            self._artwork.get_style_context().add_class(
+                "default-banner")
+        else:
+            self._artwork.get_style_context().remove_class(
+                "default-banner")
+            App().art_helper.set_album_artwork(
+                    App().player.current_track.album,
+                    # +100 to prevent resize lag
+                    self.width + 100,
+                    ArtSize.BANNER + MARGIN * 2,
+                    self._artwork.get_scale_factor(),
+                    ArtBehaviour.BLUR_HARD |
+                    ArtBehaviour.DARKER,
+                    self._on_artwork)
+
     def __update(self):
         """
             Update banner
@@ -177,14 +159,14 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
                                 ArtBehaviour.DARKER,
                                 self._on_artwork)
 
-    def __set_text_height(self):
+    def __set_internal_size(self):
         """
             Set text height
         """
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
+        if self.width <= Size.MEDIUM:
             self.__title_label.get_style_context().add_class(
                 "text-x-large")
         else:

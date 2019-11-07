@@ -180,16 +180,18 @@ class ReplayGain:
 
 class AdaptiveSize:
     NONE = 1 << 0
-    SMALL = 1 << 1
-    MEDIUM = 1 << 2
-    NORMAL = 1 << 3
-    BIG = 1 << 4
-    LARGE = 1 << 5
+    PHONE = 1 << 1
+    SMALL = 1 << 2
+    MEDIUM = 1 << 3
+    NORMAL = 1 << 4
+    BIG = 1 << 5
+    LARGE = 1 << 6
 
 
 class Size:
     MINI = 250
-    SMALL = 360  # Librem Phone
+    PHONE = 360  # Librem Phone
+    SMALL = 500
     MEDIUM = 720
     NORMAL = 1000
     BIG = 1300

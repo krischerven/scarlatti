@@ -36,7 +36,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         Gtk.HeaderBar.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__width = Size.MINI
-        self.__adaptive_size = AdaptiveSize.SMALL
+        self.__adaptive_size = AdaptiveSize.PHONE
         self.set_title("Lollypop")
         self.__toolbar_playback = ToolbarPlayback(window)
         self.__toolbar_playback.show()
@@ -60,8 +60,8 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             Allow window resize
             @return (int, int)
         """
-        width = max(Size.SMALL, self.__width)
-        return (Size.SMALL, width)
+        width = max(Size.PHONE, self.__width)
+        return (Size.PHONE, width)
 
     @property
     def end(self):

@@ -212,7 +212,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param window as Gtk.Window
             @param adaptive_size as AdaptiveSize
         """
-        self.__show_miniplayer(adaptive_size & (AdaptiveSize.SMALL |
+        self.__show_miniplayer(adaptive_size & (AdaptiveSize.PHONE |
+                                                AdaptiveSize.SMALL |
                                                 AdaptiveSize.MEDIUM |
                                                 AdaptiveSize.NORMAL))
 

@@ -85,8 +85,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget.show()
         self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
         self.__cover_widget.set_margin_start(MARGIN)
-        self.__rating_widget.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
-        self.__loved_widget.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         if view_type & ViewType.OVERLAY:
             self._overlay.add_overlay(self.__widget)
             self._overlay.set_overlay_pass_through(self.__widget, True)
@@ -98,15 +96,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                  "_on_album_artwork_changed"),
                 (App().player, "playback-changed", "_on_playback_changed")
         ]
-
-    def set_view_type(self, view_type):
-        """
-            Update widget internals for view_type
-            @param view_type as ViewType
-        """
-        BannerWidget.set_view_type(self, view_type)
-        self.__cover_widget.set_view_type(view_type)
-        self.__set_text_height(False)
 
     def set_selected(self, selected):
         """
@@ -127,21 +116,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            if self._artwork is not None and self._view_type & ViewType.ALBUM:
-                App().art_helper.set_album_artwork(
-                        self.__album,
-                        # +100 to prevent resize lag
-                        allocation.width + 100,
-                        ArtSize.BANNER + MARGIN * 2,
-                        self._artwork.get_scale_factor(),
-                        ArtBehaviour.BLUR_HARD |
-                        ArtBehaviour.DARKER,
-                        self._on_artwork)
-            self.__set_text_height(allocation.width < Size.MEDIUM)
-            if allocation.width < Size.SMALL + 100:
-                self.__cover_widget.hide()
-            else:
-                self.__cover_widget.show()
+            self.__set_artwork()
+            self.__set_internal_size()
 
     def _on_menu_button_clicked(self, button):
         """
@@ -179,19 +155,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if self._artwork is not None and\
-                album_id == self.__album.id and\
-                self._view_type & ViewType.ALBUM and\
-                App().animations:
-            App().art_helper.set_album_artwork(
-                            self.__album,
-                            # +100 to prevent resize lag
-                            self.get_allocated_width() + 100,
-                            self.height,
-                            self._artwork.get_scale_factor(),
-                            ArtBehaviour.BLUR_HARD |
-                            ArtBehaviour.DARKER,
-                            self._on_artwork)
+        if album_id == self.__album.id:
+            self.__set_artwork()
 
     def _on_playback_changed(self, player):
         """
@@ -212,6 +177,23 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __set_artwork(self):
+        """
+            Set artwork on banner
+        """
+        if self._artwork is not None and\
+                self._view_type & ViewType.ALBUM and\
+                App().animations:
+            App().art_helper.set_album_artwork(
+                            self.__album,
+                            # +100 to prevent resize lag
+                            self.width + 100,
+                            self.height,
+                            self._artwork.get_scale_factor(),
+                            ArtBehaviour.BLUR_HARD |
+                            ArtBehaviour.DARKER,
+                            self._on_artwork)
+
     def __update_add_button(self):
         """
             Set image as +/-
@@ -223,31 +205,44 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__add_button.get_image().set_from_icon_name(
                 "list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
 
-    def __set_text_height(self, small):
+    def __set_internal_size(self):
         """
-            Set text height base on current view_type or small
-            @param small as bool
+            Set content size based on available width
         """
-        title_context = self.__title_label.get_style_context()
-        artist_context = self.__artist_label.get_style_context()
-        year_context = self.__year_label.get_style_context()
-        duration_context = self.__duration_label.get_style_context()
-        title_context.remove_class("text-xx-large")
-        title_context.remove_class("text-x-large")
-        artist_context.remove_class("text-xx-large")
-        artist_context.remove_class("text-x-large")
-        year_context.remove_class("text-x-large")
-        year_context.remove_class("text-medium")
-        duration_context.remove_class("text-x-large")
-        duration_context.remove_class("text-medium")
-        if small or self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL) or\
-                not self._view_type & ViewType.OVERLAY:
-            title_context.add_class("text-x-large")
-            artist_context.add_class("text-x-large")
-            year_context.add_class("text-medium")
-            duration_context.add_class("text-medium")
+        # Text size
+        for label in [self.__title_label,
+                      self.__artist_label,
+                      self.__year_label,
+                      self.__duration_label]:
+            context = label.get_style_context()
+            for c in context.list_classes():
+                context.remove_class(c)
+
+        if self.width <= Size.SMALL:
+            art_size = None
+            icon_size = Gtk.IconSize.BUTTON
+            cls_title = "text-medium"
+            cls_others = "text-small"
+        elif self.width <= Size.MEDIUM:
+            art_size = ArtSize.MEDIUM
+            icon_size = Gtk.IconSize.BUTTON
+            cls_title = "text-large"
+            cls_others = "text-medium"
         else:
-            title_context.add_class("text-xx-large")
-            artist_context.add_class("text-xx-large")
-            year_context.add_class("text-x-large")
-            duration_context.add_class("text-x-large")
+            art_size = ArtSize.BANNER
+            icon_size = Gtk.IconSize.LARGE_TOOLBAR
+            cls_title = "text-x-large"
+            cls_others = "text-large"
+        self.__title_label.get_style_context().add_class(cls_title)
+        self.__artist_label.get_style_context().add_class(cls_title)
+        self.__year_label.get_style_context().add_class(cls_others)
+        self.__duration_label.get_style_context().add_class(cls_others)
+
+        self.__rating_widget.set_icon_size(icon_size)
+        self.__loved_widget.set_icon_size(icon_size)
+
+        if art_size is None:
+            self.__cover_widget.hide()
+        else:
+            self.__cover_widget.show()
+            self.__cover_widget.set_art_size(art_size)

@@ -41,17 +41,6 @@ class SearchBannerWidget(BannerWidget):
         self.connect("map", self.__on_map)
         builder.connect_signals(self)
 
-    def set_view_type(self, view_type):
-        """
-            Update view type
-            @param view_type as ViewType
-        """
-        BannerWidget.set_view_type(self, view_type)
-        if view_type & ViewType.ADAPTIVE:
-            self.__entry.set_size_request(200, -1)
-        else:
-            self.__entry.set_size_request(400, -1)
-
     @property
     def spinner(self):
         """
@@ -95,6 +84,14 @@ class SearchBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
+    def _handle_width_allocate(self, allocation):
+        """
+            Update entry width
+            @param allocation as Gtk.Allocation
+        """
+        if BannerWidget._handle_width_allocate(self, allocation):
+            self.__entry.set_size_request(self.width / 4, -1)
+
     def _on_play_button_clicked(self, button):
         """
             Play search

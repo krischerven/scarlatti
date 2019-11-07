@@ -420,6 +420,8 @@ class AdaptiveWindow:
             self.set_adaptive(True)
         else:
             self.set_adaptive(False)
+        if width <= Size.PHONE:
+            adaptive_size = AdaptiveSize.PHONE
         if width <= Size.SMALL:
             adaptive_size = AdaptiveSize.SMALL
         elif width <= Size.MEDIUM:

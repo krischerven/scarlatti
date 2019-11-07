@@ -44,16 +44,11 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             (App().art, "album-artwork-changed", "_on_album_artwork_changed")
         ]
 
-    def set_view_type(self, view_type):
+    def set_art_size(self, art_size):
         """
-            Set cover artwork
-            @param view_type as ViewType
+            Set cover artwork size
+            @param art_size as int
         """
-        self.__view_type = view_type
-        if view_type & ViewType.ADAPTIVE:
-            art_size = ArtSize.MEDIUM
-        else:
-            art_size = ArtSize.BANNER
         self.__art_size = art_size
         App().art_helper.set_frame(self.__artwork,
                                    "small-cover-frame",

@@ -26,7 +26,7 @@
         <property name="is_focus">True</property>
         <property name="halign">center</property>
         <property name="valign">center</property>
-        <property name="margin_start">2</property>
+        <property name="margin_left">10</property>
         <property name="hexpand">True</property>
         <property name="primary_icon_name">edit-find-symbolic</property>
         <property name="primary_icon_activatable">False</property>

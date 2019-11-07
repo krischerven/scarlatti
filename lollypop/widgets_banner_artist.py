@@ -75,24 +75,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
 
         ]
 
-    def set_view_type(self, view_type):
-        """
-            Update widget internals for view_type
-            @param view_type as ViewType
-        """
-        BannerWidget.set_view_type(self, view_type)
-        art_size = 0
-        if view_type & ViewType.ADAPTIVE:
-            art_size = ArtSize.MEDIUM + 2
-            self.__title_label.get_style_context().add_class(
-                "text-large")
-        else:
-            art_size = ArtSize.BANNER + 2
-            self.__title_label.get_style_context().add_class(
-                "text-xx-large")
-        self.__set_badge_artwork(art_size)
-        self.__set_text_height(False)
-
 #######################
 # PROTECTED           #
 #######################
@@ -103,11 +85,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
-            self.__set_text_height(allocation.width < Size.MEDIUM)
-            if allocation.width >= Size.MEDIUM / 1.5:
-                self.__badge_artwork.show()
-            else:
-                self.__badge_artwork.hide()
+            self.__set_internal_size()
 
     def _on_artist_artwork_setting_changed(self, settings, variant):
         """
@@ -115,9 +93,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param settings as Gio.Settings
             @param value as GLib.Variant
         """
-        if App().animations:
-            self.__set_artwork()
-            self.set_view_type(self._view_type)
+        self.__set_artwork()
 
     def _on_label_button_release(self, eventbox, event):
         """
@@ -192,9 +168,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if len(self.__artist_ids) == 1:
             artist = App().artists.get_name(self.__artist_ids[0])
-            if prefix == artist and App().animations:
+            if prefix == artist:
                 self.__set_artwork()
-                self.set_view_type(self._view_type)
 
     def _on_playback_changed(self, player):
         """
@@ -210,12 +185,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
             Set artwork
         """
-        if App().settings.get_value("artist-artwork"):
+        if App().settings.get_value("artist-artwork") and App().animations:
             artist = App().artists.get_name(choice(self.__artist_ids))
             App().art_helper.set_artist_artwork(
                                         artist,
                                         # +100 to prevent resize lag
-                                        self.get_allocated_width() + 100,
+                                        self.width + 100,
                                         self.height,
                                         self.get_scale_factor(),
                                         ArtBehaviour.BLUR_HARD |
@@ -245,20 +220,29 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.__badge_artwork.hide()
 
-    def __set_text_height(self, small):
+    def __set_internal_size(self):
         """
-            Set text height base on view type or small
-            @param small as bool
+            Set content size based on current width
         """
+        # Text size
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if small or self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
+        if self.width <= Size.SMALL:
+            art_size = None
+            cls = "text-medium"
+        elif self.width <= Size.MEDIUM:
+            art_size = ArtSize.MEDIUM
+            cls = "text-large"
         else:
-            self.__title_label.get_style_context().add_class(
-                "text-xx-large")
+            art_size = ArtSize.BANNER
+            cls = "text-x-large"
+        self.__title_label.get_style_context().add_class(cls)
+        if art_size is None:
+            self.__badge_artwork.hide()
+        else:
+            self.__badge_artwork.show()
+            self.__set_badge_artwork(art_size)
 
     def __update_add_button(self):
         """

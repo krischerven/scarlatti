@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Pango
 from pickle import load, dump
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, MARGIN, ViewType, StorageType
+from lollypop.define import App, ArtSize, MARGIN, ViewType, StorageType, Size
 from lollypop.define import ArtBehaviour, LOLLYPOP_DATA_PATH
 from lollypop.widgets_banner import BannerWidget
 from lollypop.widgets_cover import CoverWidget
@@ -72,9 +72,9 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_markup(markup)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label.set_xalign(0.0)
+        self.__title_label.set_vexpand(True)
         self.__cover_widget = CoverWidget(self.__album, view_type)
         self.__cover_widget.show()
-        self.__cover_widget.set_vexpand(True)
         self.__play_button = Gtk.Button.new()
         self.__play_button.show()
         image = Gtk.Image.new()
@@ -104,15 +104,6 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
                  "_on_album_artwork_changed")
         ]
 
-    def set_view_type(self, view_type):
-        """
-            Update widget internals for view_type
-            @param view_type as ViewType
-        """
-        BannerWidget.set_view_type(self, view_type)
-        self.__cover_widget.set_view_type(view_type)
-        self.__set_text_height()
-
 #######################
 # PROTECTED           #
 #######################
@@ -122,10 +113,11 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
+            self.__set_internal_size()
             App().art_helper.set_album_artwork(
                     self.__album,
                     # +100 to prevent resize lag
-                    allocation.width + 100,
+                    self.width + 100,
                     ArtSize.BANNER + MARGIN * 2,
                     self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
@@ -142,7 +134,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             App().art_helper.set_album_artwork(
                             self.__album,
                             # +100 to prevent resize lag
-                            self.get_allocated_width() + 100,
+                            self.width + 100,
                             self.height,
                             self._artwork.get_scale_factor(),
                             ArtBehaviour.BLUR_HARD |
@@ -152,19 +144,25 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __set_text_height(self):
+    def __set_internal_size(self):
         """
-            Set text height
+            Set content size based on current width
         """
+        # Text size
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self._view_type & (ViewType.ADAPTIVE | ViewType.SMALL):
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
+        if self.width <= Size.SMALL:
+            art_size = ArtSize.SMALL
+            cls = "text-large"
+        elif self.width <= Size.MEDIUM:
+            art_size = ArtSize.MEDIUM
+            cls = "text-x-large"
         else:
-            self.__title_label.get_style_context().add_class(
-                "text-xx-large")
+            art_size = ArtSize.BANNER
+            cls = "text-xx-large"
+        self.__title_label.get_style_context().add_class(cls)
+        self.__cover_widget.set_art_size(art_size)
 
     def __on_map(self, widget):
         """
