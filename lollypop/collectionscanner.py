@@ -435,17 +435,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                 info = f.query_info(SCAN_QUERY_INFO,
                                     Gio.FileQueryInfoFlags.NONE,
                                     None)
-                # Ignore hidden files
-                if info.get_is_hidden():
-                    continue
-                # Ignore internal symlinks, we do not want to add tracks
-                # multiple times
-                if info.get_is_symlink():
-                    target = info.get_symlink_target()
-                    f = Gio.File.new_for_path(target)
-                    if self.__is_symlink_internal(f.get_uri(), uris):
-                        continue
-                # Add directory content to walked uris
                 if info.get_file_type() == Gio.FileType.DIRECTORY:
                     dirs.append(uri)
                     infos = f.enumerate_children(SCAN_QUERY_INFO,
@@ -453,7 +442,21 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                  None)
                     for info in infos:
                         f = infos.get_child(info)
-                        walk_uris.append(f.get_uri())
+                        child_uri = f.get_uri()
+                        if info.get_is_hidden():
+                            continue
+                        # We only support symlinks on collections root
+                        elif info.get_is_symlink():
+                            Logger.info(
+                                "Symlinks are not supported: %s",
+                                child_uri)
+                            continue
+                        elif info.get_file_type() == Gio.FileType.DIRECTORY:
+                            dirs.append(child_uri)
+                            walk_uris.append(child_uri)
+                        else:
+                            mtime = get_mtime(info)
+                            files.append((mtime, child_uri))
                     infos.close(None)
                 # Only happens if files passed as args
                 else:
@@ -711,14 +714,3 @@ class CollectionScanner(GObject.GObject, TagReader):
                         tracknumber, discnumber, discname, year, timestamp,
                         track_mtime, track_pop, track_rate, track_loved,
                         track_ltime, mb_track_id, bpm, storage_type)
-
-    def __is_symlink_internal(self, uri, uris):
-        """
-            True if symlink as uri is included in uris
-            @param uri as str
-            @param uris as [str]
-        """
-        for base_uri in uris:
-            if uri.startswith(base_uri):
-                return True
-        return False
