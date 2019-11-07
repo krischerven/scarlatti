@@ -35,7 +35,6 @@ class Discoverer:
         """
             Init discover
         """
-        GstPbutils.pb_utils_init()
         self._discoverer = GstPbutils.Discoverer.new(10 * Gst.SECOND)
 
     def get_info(self, uri):

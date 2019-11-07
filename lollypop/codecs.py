@@ -24,7 +24,6 @@ class Codecs:
         """
             Init installer
         """
-        GstPbutils.pb_utils_init()
         self._messages = []
 
     def install(self):
