@@ -47,7 +47,6 @@ class DNDHelper(GObject.Object):
         self.__gesture.connect("drag-begin", self.__on_drag_begin)
         self.__gesture.connect("drag-end", self.__on_drag_end)
         self.__gesture.connect("drag-update", self.__on_drag_update)
-        self.connect("destroy", self.__on_destroy)
 
     @property
     def gesture(self):
@@ -284,14 +283,6 @@ class DNDHelper(GObject.Object):
             self.__autoscroll_timeout_id = None
             return False
         return True
-
-    def __on_destroy(self, widget):
-        """
-            Remove ref cycle
-            @param widget as Gtk.Widget
-        """
-        self.__listbox = None
-        self.__view_type = None
 
     def __on_drag_begin(self, gesture, x, y):
         """
