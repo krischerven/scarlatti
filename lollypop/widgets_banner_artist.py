@@ -104,7 +104,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
             self.__set_text_height(allocation.width < Size.MEDIUM)
-            if allocation.width >= Size.SMALL + 100:
+            if allocation.width >= Size.MEDIUM / 1.5:
                 self.__badge_artwork.show()
             else:
                 self.__badge_artwork.hide()
@@ -286,7 +286,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param surface as cairo.Surface
             @param art_size as int
         """
-        if self.get_allocated_width() >= Size.SMALL + 100:
+        if self.get_allocated_width() >= Size.MEDIUM / 1.5:
             self.__badge_artwork.show()
         if surface is None:
             self.__badge_artwork.get_style_context().add_class("artwork-icon")
