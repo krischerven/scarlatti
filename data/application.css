@@ -530,21 +530,25 @@ flowboxchild:selected  {
     opacity: 0.5;
 }
 
+.menu-button:checked {
+    background-color: @theme_selected_bg_color;
+}
+
+
 .menu-button:hover {
     color: inherit;
     border-color: alpha(@theme_fg_color, 0.1);
   	opacity: 1;
 }
 
-.vertical-menu-button {
-    opacity: 0.9;
+.light-button {
+    opacity: 0.8;
 	box-shadow: none;
-	min-height: 24px;
-	min-width: 24px;
-	padding-left: 4px;
-	padding-right: 4px;
-	padding-top: 4px;
-	padding-bottom: 4px;
+	min-height: 32px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 0px;
+	padding-bottom: 0px;
 	background-image: none;
 	border-style: solid;
 	border-image-source: none;
@@ -552,17 +556,21 @@ flowboxchild:selected  {
     border-top-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
-    border-color: transparent;
-    color: inherit;
-}
-
-.vertical-menu-button:disabled {
-    opacity: 0.4;
-}
-
-.vertical-menu-button:hover {
-    color: inherit;
     border-color: alpha(@theme_fg_color, 0.1);
+    color: inherit;
+}
+
+.light-button:disabled {
+    opacity: 0.5;
+}
+
+.light-button:checked {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+.light-button:hover {
+    border-color: alpha(@theme_fg_color, 0.2);
   	opacity: 1;
 }
 

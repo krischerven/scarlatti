@@ -16,7 +16,7 @@ from gettext import gettext as _
 from urllib.parse import urlparse
 
 from lollypop.define import App, StorageType
-from lollypop.define import Size, ViewType
+from lollypop.define import Size, ViewType, MARGIN_SMALL
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available, get_youtube_dl
@@ -48,12 +48,14 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__cancellable = Gio.Cancellable()
         self.__bottom_buttons = Gtk.Grid()
         self.__bottom_buttons.show()
-        self.__bottom_buttons.get_style_context().add_class("linked")
         self.__bottom_buttons.set_property("halign", Gtk.Align.CENTER)
+        self.__bottom_buttons.set_margin_bottom(MARGIN_SMALL)
+        self.__bottom_buttons.get_style_context().add_class("linked")
         self.__local_button = Gtk.RadioButton.new()
         self.__local_button.show()
         self.__local_button.set_property("draw-indicator", False)
         self.__local_button.set_name("local")
+        self.__local_button.get_style_context().add_class("light-button")
         image = Gtk.Image.new_from_icon_name("computer-symbolic",
                                              Gtk.IconSize.BUTTON)
         image.show()
@@ -63,6 +65,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         web_button.show()
         web_button.set_property("draw-indicator", False)
         web_button.set_name("web")
+        web_button.get_style_context().add_class("light-button")
         image = Gtk.Image.new_from_icon_name("goa-panel-symbolic",
                                              Gtk.IconSize.BUTTON)
         image.show()
