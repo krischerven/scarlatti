@@ -31,12 +31,9 @@ class LazyLoadingView(View):
         """
         View.__init__(self, view_type)
         self.__loading_state = LoadingState.NONE
-        self.__initial_queue = []
         self.__lazy_queue = []
         self.__priority_queue = []
         self.__scroll_timeout_id = None
-        self.__initial_loading_id = None
-        self.__lazy_loading_id = None
         self.__start_time = time()
 
     def populate(self, values):
@@ -44,21 +41,13 @@ class LazyLoadingView(View):
             Populate view with values
             @param values as [object]
         """
-        if self.__initial_queue:
-            for value in values:
-                if value not in self.__initial_queue:
-                    self.__initial_queue.append(value)
-        else:
-            self.__initial_queue = list(values)
-        if self.__initial_loading_id is None:
-            self.__initial_loading_id = GLib.idle_add(self.__add_values)
+        self.__add_values(values)
 
     def pause(self):
         """
             Pause loading
         """
         self.__loading_state = LoadingState.ABORTED
-        self.__lazy_loading_id = None
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)
             self.__scroll_timeout_id = None
@@ -69,12 +58,10 @@ class LazyLoadingView(View):
             Stop loading and clear queue
         """
         self.__loading_state = LoadingState.FINISHED
-        self.__lazy_loading_id = None
         if self.__scroll_timeout_id is not None:
             GLib.source_remove(self.__scroll_timeout_id)
             self.__scroll_timeout_id = None
         self.__lazy_queue = []
-        self.__initial_queue = []
         self.__priority_queue = []
         View.stop(self)
 
@@ -89,9 +76,19 @@ class LazyLoadingView(View):
         """
             Load the view in a lazy way
         """
-        # He we keep id just to check we are in current load
-        if self.__lazy_loading_id is None:
-            self.__lazy_loading_id = GLib.idle_add(self.__lazy_loading)
+        widget = None
+        if self.__priority_queue:
+            widget = self.__priority_queue.pop(0)
+            self.__lazy_queue.remove(widget)
+        elif self.__lazy_queue:
+            widget = self.__lazy_queue.pop(0)
+        if widget is not None:
+            widget.connect("populated", self._on_populated)
+            widget.populate()
+        else:
+            self.__loading_state = LoadingState.FINISHED
+            Logger.debug("LazyLoadingView::lazy_loading(): %s",
+                         time() - self.__start_time)
 
     def set_external_scrolled(self, scrolled):
         """
@@ -121,12 +118,6 @@ class LazyLoadingView(View):
         """
         pass
 
-    def _on_initial_loading(self):
-        """
-            Initial loading is finished
-        """
-        pass
-
     def _on_map(self, widget):
         """
             Restore backup and load
@@ -148,60 +139,42 @@ class LazyLoadingView(View):
             GLib.source_remove(self.__scroll_timeout_id)
         self.__scroll_timeout_id = GLib.timeout_add(200, self.__lazy_or_not)
 
-    def _on_populated(self, widget, lazy_loading_id):
+    def _on_populated(self, widget):
         """
             Add another album/disc
             @param widget as AlbumWidget/TracksView
-            @parma lazy_loading_id as int
         """
-        if lazy_loading_id != self.__lazy_loading_id:
+        if self.__loading_state != LoadingState.RUNNING:
             return
         if not widget.is_populated:
             widget.populate()
         else:
-            self.__lazy_loading()
+            self.lazy_loading()
+
+    def _on_initial_loading(self):
+        """
+            Initial loading is finished
+        """
+        pass
 
 #######################
 # PRIVATE             #
 #######################
-    def __add_values(self):
+    def __add_values(self, values):
         """
-            Add values to initial loading
+            Add widget from values
+            @param values as []
         """
-        if self.__initial_queue:
-            value = self.__initial_queue.pop(0)
+        if values:
+            value = values.pop(0)
             child = self._get_child(value)
             if child is not None:
                 self.__lazy_queue.append(child)
-                GLib.idle_add(self.__add_values)
-            else:
-                self.__initial_loading_id = None
-        else:
+            GLib.idle_add(self.__add_values, values)
+        elif self.__loading_state != LoadingState.RUNNING:
+            self.__loading_state = LoadingState.RUNNING
             self._on_initial_loading()
             self.lazy_loading()
-            self.__initial_loading_id = None
-
-    def __lazy_loading(self):
-        """
-            Load the view in a lazy way
-        """
-        widget = None
-        if self.__priority_queue:
-            widget = self.__priority_queue.pop(0)
-            self.__lazy_queue.remove(widget)
-        elif self.__lazy_queue:
-            widget = self.__lazy_queue.pop(0)
-        if widget is not None:
-            widget.connect("populated",
-                           self._on_populated,
-                           self.__lazy_loading_id)
-            # https://gitlab.gnome.org/World/lollypop/issues/1884
-            GLib.idle_add(widget.populate)
-        else:
-            self.__lazy_loading_id = None
-            self.__loading_state = LoadingState.FINISHED
-            Logger.debug("LazyLoadingView::lazy_loading(): %s",
-                         time() - self.__start_time)
 
     def __is_visible(self, widget):
         """
@@ -222,9 +195,8 @@ class LazyLoadingView(View):
             Add visible widgets to lazy queue
         """
         self.__scroll_timeout_id = None
-        if self.__lazy_loading_id is None:
-            return
-        self.__priority_queue = []
-        for child in self.__lazy_queue:
-            if self.__is_visible(child):
-                self.__priority_queue.append(child)
+        if self.__loading_state == LoadingState.RUNNING:
+            self.__priority_queue = []
+            for child in self.__lazy_queue:
+                if self.__is_visible(child):
+                    self.__priority_queue.append(child)

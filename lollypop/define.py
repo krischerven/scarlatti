@@ -113,8 +113,9 @@ NetworkAccessACL = {
 
 class LoadingState:
     NONE = 0
-    ABORTED = 1
-    FINISHED = 2
+    RUNNING = 1
+    ABORTED = 2
+    FINISHED = 3
 
 
 class IndicatorType:
