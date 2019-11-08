@@ -82,6 +82,7 @@ class LazyLoadingView(View):
             self.__lazy_queue.remove(widget)
         elif self.__lazy_queue:
             widget = self.__lazy_queue.pop(0)
+
         if widget is not None:
             widget.connect("populated", self._on_populated)
             widget.populate()
@@ -125,6 +126,7 @@ class LazyLoadingView(View):
         """
         View._on_map(self, widget)
         if self.__loading_state == LoadingState.ABORTED and self.__lazy_queue:
+            self.__loading_state = LoadingState.RUNNING
             self.lazy_loading()
 
     def _on_value_changed(self, adj):
