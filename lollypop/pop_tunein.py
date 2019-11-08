@@ -291,7 +291,7 @@ class TuneinPopover(Gtk.Popover):
             @param image as Gtk.Image
         """
         if status:
-            bytes = GLib.Bytes(content)
+            bytes = GLib.Bytes.new(content)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             if stream is not None:
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(

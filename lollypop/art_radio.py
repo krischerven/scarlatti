@@ -144,7 +144,7 @@ class RadioArt:
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)
             fstream.close()
         else:
-            bytes = GLib.Bytes(data)
+            bytes = GLib.Bytes.new(data)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()
@@ -202,7 +202,7 @@ class RadioArt:
         """
         if status:
             cache_path_png = self.__get_radio_art_path(name)
-            bytes = GLib.Bytes(content)
+            bytes = GLib.Bytes.new(content)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()

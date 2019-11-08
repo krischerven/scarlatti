@@ -62,7 +62,7 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         """
         try:
             scale_factor = self.get_scale_factor()
-            gbytes = GLib.Bytes(bytes)
+            gbytes = GLib.Bytes.new(bytes)
             stream = Gio.MemoryInputStream.new_from_bytes(gbytes)
             if stream is not None:
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)

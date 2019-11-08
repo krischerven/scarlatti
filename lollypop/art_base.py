@@ -123,7 +123,7 @@ class BaseArt(GObject.GObject):
                                 None)
             fstream.close()
         else:
-            bytes = GLib.Bytes(data)
+            bytes = GLib.Bytes.new(data)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             if width != -1 and height != -1:
@@ -211,7 +211,7 @@ class BaseArt(GObject.GObject):
         tmp = Image.frombytes(mode, (width, height),
                               data, "raw", mode, stride)
         tmp = tmp.filter(ImageFilter.GaussianBlur(gaussian))
-        bytes = GLib.Bytes.new(tmp.tobytes())
+        bytes = GLib.Bytes.new.new(tmp.tobytes())
         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(bytes,
                                                  GdkPixbuf.Colorspace.RGB,
                                                  has_alpha,

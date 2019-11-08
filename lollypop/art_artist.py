@@ -79,7 +79,7 @@ class ArtistArt:
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)
             fstream.close()
         else:
-            bytes = GLib.Bytes(data)
+            bytes = GLib.Bytes.new(data)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()

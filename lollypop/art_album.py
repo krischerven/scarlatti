@@ -199,7 +199,7 @@ class AlbumArt:
                     if uri is not None:
                         f = Gio.File.new_for_uri(uri)
                         (status, data, tag) = f.load_contents(None)
-                        bytes = GLib.Bytes(data)
+                        bytes = GLib.Bytes.new(data)
                         stream = Gio.MemoryInputStream.new_from_bytes(bytes)
                         pixbuf = GdkPixbuf.Pixbuf.new_from_stream(
                             stream, None)
@@ -223,7 +223,7 @@ class AlbumArt:
                     if uri is not None:
                         f = Gio.File.new_for_uri(uri)
                         (status, data, tag) = f.load_contents(None)
-                        bytes = GLib.Bytes(data)
+                        bytes = GLib.Bytes.new(data)
                         stream = Gio.MemoryInputStream.new_from_bytes(bytes)
                         pixbuf = GdkPixbuf.Pixbuf.new_from_stream(
                             stream, None)
@@ -339,7 +339,7 @@ class AlbumArt:
             if exist:
                 (exist, mapflags) = sample.get_buffer().map(Gst.MapFlags.READ)
             if exist:
-                bytes = GLib.Bytes(mapflags.data)
+                bytes = GLib.Bytes.new(mapflags.data)
                 stream = Gio.MemoryInputStream.new_from_bytes(bytes)
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
                 stream.close()
@@ -460,7 +460,7 @@ class AlbumArt:
             @param album as Album
         """
         # https://bugzilla.gnome.org/show_bug.cgi?id=747431
-        bytes = GLib.Bytes(data)
+        bytes = GLib.Bytes.new(data)
         stream = Gio.MemoryInputStream.new_from_bytes(bytes)
         pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(stream,
                                                            ArtSize.MPRIS,
