@@ -256,6 +256,10 @@ flowboxchild:selected  {
 	min-width: 48px;
 }
 
+.cover-background {
+    background-color: shade(@theme_bg_color, 1.5);
+}
+
 .cover-frame {
     border: 1px solid shade(@theme_bg_color, 0.8);
     background-color: shade(@theme_bg_color, 1.5);

@@ -153,7 +153,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         """
         context_style = self.get_style_context()
         if surface is None:
-            context_style.add_class("white")
+            context_style.add_class("cover-background")
             if self.__behaviour & ArtBehaviour.ROUNDED:
                 context_style.add_class("rounded")
             if isinstance(App().player.current_track, Radio):
@@ -164,7 +164,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             self.set_pixel_size(self.__width / 3)
             self.set_size_request(self.__width, self.__height)
         else:
-            context_style.remove_class("white")
+            context_style.remove_class("cover-background")
             if self.__behaviour & ArtBehaviour.ROUNDED:
                 context_style.remove_class("rounded")
             self.set_from_surface(surface)
