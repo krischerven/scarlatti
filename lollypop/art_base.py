@@ -211,7 +211,7 @@ class BaseArt(GObject.GObject):
         tmp = Image.frombytes(mode, (width, height),
                               data, "raw", mode, stride)
         tmp = tmp.filter(ImageFilter.GaussianBlur(gaussian))
-        bytes = GLib.Bytes.new.new(tmp.tobytes())
+        bytes = GLib.Bytes.new(tmp.tobytes())
         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(bytes,
                                                  GdkPixbuf.Colorspace.RGB,
                                                  has_alpha,
