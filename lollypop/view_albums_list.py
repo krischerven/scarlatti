@@ -234,17 +234,16 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         self._on_primary_long_press_gesture(x, y)
 
-    def _on_populated(self, widget, lazy_loading_id):
+    def _on_populated(self, widget):
         """
             Add another album/disc
             @param widget as AlbumWidget/TracksView
-            @parma lazy_loading_id as int
         """
         if widget.album in self.__reveals:
             widget.reveal()
             self.__reveals.remove(widget.album)
         else:
-            LazyLoadingView._on_populated(self, widget, lazy_loading_id)
+            LazyLoadingView._on_populated(self, widget)
 
 #######################
 # PRIVATE             #

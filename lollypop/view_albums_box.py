@@ -363,13 +363,12 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         AlbumsBoxView._on_adaptive_changed(self, window, status)
         self.__update_label(status)
 
-    def _on_populated(self, widget, lazy_loading_id):
+    def _on_populated(self, widget):
         """
             Update button state
             @param widget as Gtk.Widget
-            @parma lazy_loading_id as int
         """
-        AlbumsBoxView._on_populated(self, widget, lazy_loading_id)
+        AlbumsBoxView._on_populated(self, widget)
         if self.is_populated:
             self._update_buttons()
 
