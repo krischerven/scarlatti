@@ -63,7 +63,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
 
     gsignals = {
         "scroll": (GObject.SignalFlags.RUN_FIRST, None, (float, float)),
-        "height-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "height-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
     for signal in gsignals:
         args = gsignals[signal]
@@ -78,7 +78,6 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         Gtk.Revealer.__init__(self)
         self._artwork = None
         self._view_type = view_type
-        self.__height = 1
         self.__width = 1
         self.set_property("valign", Gtk.Align.START)
         if view_type & ViewType.OVERLAY:
@@ -106,6 +105,14 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.set_transition_duration(250)
         self.connect("destroy", self.__on_destroy)
 
+    def set_artwork_for_width(self, width):
+        """
+            Set banner artwork for width, call this before showing banner
+            @param width as int
+        """
+        self.__update_width(width)
+        self._set_artwork()
+
     @property
     def width(self):
         """
@@ -120,7 +127,13 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Get wanted height
             @return int
         """
-        return self.__height
+        if self.__width <= Size.SMALL:
+            height = ArtSize.MEDIUM
+        elif self.__width <= Size.MEDIUM:
+            height = ArtSize.MEDIUM + MARGIN * 2
+        else:
+            height = ArtSize.BANNER + MARGIN * 2
+        return height
 
 #######################
 # PROTECTED           #
@@ -132,24 +145,16 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             @return bool
         """
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
-            self.__width = allocation.width
-            # If not SMALL, we add sidebar width because we want banners
-            # to calculate sizing with sidebar included. Allows to prevent
-            # glitch when sidebar is auto shown
-            if not App().window.is_adaptive:
-                sidebar_width = App().window.container.sidebar.\
-                    get_allocated_width()
-                self.__width += sidebar_width
-            if self.__width <= Size.SMALL:
-                height = ArtSize.MEDIUM
-            elif self.__width <= Size.MEDIUM:
-                height = ArtSize.MEDIUM + MARGIN * 2
-            else:
-                height = ArtSize.BANNER + MARGIN * 2
-            if height != self.__height:
-                self.__height = height
-                emit_signal(self, "height-changed")
-            return True
+            if allocation.width != self.__width:
+                self.__update_width(allocation.width)
+                emit_signal(self, "height-changed", self.height)
+                return True
+
+    def _set_artwork(self):
+        """
+            Set artwork on banner
+        """
+        pass
 
     def _on_artwork(self, surface):
         """
@@ -171,6 +176,20 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __update_width(self, width):
+        """
+            Update internal width
+            @param width as int
+        """
+        self.__width = width
+        # If not SMALL, we add sidebar width because we want banners
+        # to calculate sizing with sidebar included. Allows to prevent
+        # glitch when sidebar is auto shown
+        if not App().window.is_adaptive:
+            sidebar_width = App().window.container.sidebar.\
+                get_allocated_width()
+            self.__width += sidebar_width
+
     def __on_destroy(self, widget):
         """
             Remove ref cycle

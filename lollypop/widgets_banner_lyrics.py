@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Pango, GObject
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, MARGIN, ViewType
+from lollypop.define import App, MARGIN, ViewType
 from lollypop.define import ArtBehaviour, Size
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import emit_signal
@@ -89,29 +89,10 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            self.__set_artwork()
+            self._set_artwork()
             self.__set_internal_size()
 
-    def _on_album_artwork_changed(self, art, album_id):
-        """
-            Update cover for album_id
-            @param art as Art
-            @param album_id as int
-        """
-        if album_id == App().player.current_track.album.id:
-            self.__set_artwork()
-
-    def _on_current_changed(self, player):
-        """
-            Update labels and artwork
-            @param player as Player
-        """
-        self.__update()
-
-#######################
-# PRIVATE             #
-#######################
-    def __set_artwork(self):
+    def _set_artwork(self):
         """
             Set artwork
         """
@@ -127,12 +108,31 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
                     App().player.current_track.album,
                     # +100 to prevent resize lag
                     self.width + 100,
-                    ArtSize.BANNER + MARGIN * 2,
+                    self.height,
                     self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
                     self._on_artwork)
 
+    def _on_album_artwork_changed(self, art, album_id):
+        """
+            Update cover for album_id
+            @param art as Art
+            @param album_id as int
+        """
+        if album_id == App().player.current_track.album.id:
+            self._set_artwork()
+
+    def _on_current_changed(self, player):
+        """
+            Update labels and artwork
+            @param player as Player
+        """
+        self.__update()
+
+#######################
+# PRIVATE             #
+#######################
     def __update(self):
         """
             Update banner
@@ -148,16 +148,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             markup += "<span size='x-small' alpha='40000'>%s</span>" %\
                 artist_name
             self.__title_label.set_markup(markup)
-            if App().animations:
-                App().art_helper.set_album_artwork(
-                                App().player.current_track.album,
-                                # +100 to prevent resize lag
-                                self.get_allocated_width() + 100,
-                                ArtSize.BANNER + MARGIN * 2,
-                                self._artwork.get_scale_factor(),
-                                ArtBehaviour.BLUR_HARD |
-                                ArtBehaviour.DARKER,
-                                self._on_artwork)
+            self._set_artwork()
 
     def __set_internal_size(self):
         """

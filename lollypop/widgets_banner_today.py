@@ -112,11 +112,18 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
+            self._set_artwork()
+
+    def _set_artwork(self):
+        """
+            Set artwork on banner
+        """
+        if App().animations:
             App().art_helper.set_album_artwork(
                     self.__album,
                     # +100 to prevent resize lag
                     self.width + 100,
-                    ArtSize.BANNER + MARGIN * 2,
+                    self.height,
                     self._artwork.get_scale_factor(),
                     ArtBehaviour.BLUR_HARD |
                     ArtBehaviour.DARKER,
@@ -128,16 +135,8 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param art as Art
             @param album_id as int
         """
-        if album_id == self.__album.id and App().animations:
-            App().art_helper.set_album_artwork(
-                            self.__album,
-                            # +100 to prevent resize lag
-                            self.width + 100,
-                            self.height,
-                            self._artwork.get_scale_factor(),
-                            ArtBehaviour.BLUR_HARD |
-                            ArtBehaviour.DARKER,
-                            self._on_artwork)
+        if album_id == self.__album.id:
+            self._set_artwork()
 
 #######################
 # PRIVATE             #

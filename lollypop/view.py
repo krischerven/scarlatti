@@ -280,6 +280,12 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             Restore scroll position
             @param widget as Gtk.Widget
         """
+        parent = widget.get_parent()
+        if self.__banner is not None and parent is not None:
+            width = parent.get_allocated_width()
+            self.__banner.set_artwork_for_width(width)
+            self.__on_banner_height_changed(self.__banner,
+                                            self.__banner.height)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
         # Wait for stack allocation to restore scrolled position
         if self.__scrolled_position is not None:
@@ -298,16 +304,17 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __on_banner_height_changed(self, banner):
+    def __on_banner_height_changed(self, banner, height):
         """
             Update scroll margin
             @param banner as BannerWidget
+            @param height as int
         """
         if self._view_type & ViewType.OVERLAY:
             main_widget = self.__stack.get_child_by_name("main")
-            main_widget.set_margin_top(banner.height + MARGIN_SMALL)
+            main_widget.set_margin_top(height + MARGIN_SMALL)
             if self._view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(banner.height)
+                self._scrolled.get_vscrollbar().set_margin_top(height)
 
     def __on_banner_scroll(self, banner, x, y):
         """
