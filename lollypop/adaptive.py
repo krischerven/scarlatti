@@ -152,8 +152,6 @@ class AdaptiveHistory:
                 self.__items.remove((_view, _class, args, sidebar_id,
                                      selection_ids, position))
                 break
-            view.destroy()
-            del view
 
     def reset(self):
         """
