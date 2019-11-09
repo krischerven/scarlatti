@@ -41,7 +41,7 @@ class LinearPlayer:
         # next album
         if new_track_position >= len(album.track_ids):
             try:
-                pos = self.album_ids.index(album.id)
+                pos = self.albums.index(album)
                 # we are on last album, go to first
                 if pos + 1 >= len(self._albums):
                     if repeat == Repeat.ALL:
@@ -74,7 +74,7 @@ class LinearPlayer:
         # Previous album
         if new_track_position < 0:
             try:
-                pos = self.album_ids.index(album.id)
+                pos = self.albums.index(album)
                 if pos - 1 < 0:  # we are on last album, go to first
                     if repeat == Repeat.ALL:
                         pos = len(self._albums) - 1
