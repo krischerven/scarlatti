@@ -72,6 +72,15 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
                  "_on_album_artwork_changed")
         ]
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__set_artwork()
+        self.__set_internal_size()
+
     @property
     def translate_button(self):
         """
@@ -89,30 +98,8 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            self._set_artwork()
+            self.__set_artwork()
             self.__set_internal_size()
-
-    def _set_artwork(self):
-        """
-            Set artwork
-        """
-        if not App().animations:
-            return
-        if App().player.current_track.id is None:
-            self._artwork.get_style_context().add_class(
-                "default-banner")
-        else:
-            self._artwork.get_style_context().remove_class(
-                "default-banner")
-            App().art_helper.set_album_artwork(
-                    App().player.current_track.album,
-                    # +100 to prevent resize lag
-                    self.width + 100,
-                    self.height,
-                    self._artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR_HARD |
-                    ArtBehaviour.DARKER,
-                    self._on_artwork)
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -121,7 +108,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             @param album_id as int
         """
         if album_id == App().player.current_track.album.id:
-            self._set_artwork()
+            self.__set_artwork()
 
     def _on_current_changed(self, player):
         """
@@ -148,7 +135,29 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             markup += "<span size='x-small' alpha='40000'>%s</span>" %\
                 artist_name
             self.__title_label.set_markup(markup)
-            self._set_artwork()
+            self.__set_artwork()
+
+    def __set_artwork(self):
+        """
+            Set artwork
+        """
+        if not App().animations:
+            return
+        if App().player.current_track.id is None:
+            self._artwork.get_style_context().add_class(
+                "default-banner")
+        else:
+            self._artwork.get_style_context().remove_class(
+                "default-banner")
+            App().art_helper.set_album_artwork(
+                    App().player.current_track.album,
+                    # +100 to prevent resize lag
+                    self.width + 100,
+                    self.height,
+                    self._artwork.get_scale_factor(),
+                    ArtBehaviour.BLUR_HARD |
+                    ArtBehaviour.DARKER,
+                    self._on_artwork)
 
     def __set_internal_size(self):
         """

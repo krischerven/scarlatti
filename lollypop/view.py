@@ -283,7 +283,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         parent = widget.get_parent()
         if self.__banner is not None and parent is not None:
             width = parent.get_allocated_width()
-            self.__banner.set_artwork_for_width(width)
+            self.__banner.update_for_width(width)
             self.__on_banner_height_changed(self.__banner,
                                             self.__banner.height)
         self._on_adaptive_changed(App().window, App().window.is_adaptive)

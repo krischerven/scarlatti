@@ -102,6 +102,15 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
                  "_on_album_artwork_changed")
         ]
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__set_artwork()
+        self.__set_internal_size()
+
 #######################
 # PROTECTED           #
 #######################
@@ -111,10 +120,22 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
+            self.__set_artwork()
             self.__set_internal_size()
-            self._set_artwork()
 
-    def _set_artwork(self):
+    def _on_album_artwork_changed(self, art, album_id):
+        """
+            Update cover for album_id
+            @param art as Art
+            @param album_id as int
+        """
+        if album_id == self.__album.id:
+            self.__set_artwork()
+
+#######################
+# PRIVATE             #
+#######################
+    def __set_artwork(self):
         """
             Set artwork on banner
         """
@@ -129,18 +150,6 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
                     ArtBehaviour.DARKER,
                     self._on_artwork)
 
-    def _on_album_artwork_changed(self, art, album_id):
-        """
-            Update cover for album_id
-            @param art as Art
-            @param album_id as int
-        """
-        if album_id == self.__album.id:
-            self._set_artwork()
-
-#######################
-# PRIVATE             #
-#######################
     def __set_internal_size(self):
         """
             Set content size based on current width

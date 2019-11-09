@@ -105,13 +105,12 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.set_transition_duration(250)
         self.connect("destroy", self.__on_destroy)
 
-    def set_artwork_for_width(self, width):
+    def update_for_width(self, width):
         """
-            Set banner artwork for width, call this before showing banner
+            Update banner internals for width, call this before showing banner
             @param width as int
         """
-        self.__update_width(width)
-        self._set_artwork()
+        self.__width = width
 
     @property
     def width(self):
@@ -119,7 +118,15 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Get current width
             @return int
         """
-        return self.__width
+        # If not SMALL, we add sidebar width because we want banners
+        # to calculate sizing with sidebar included. Allows to prevent
+        # glitch when sidebar is auto shown
+        if not App().window.is_adaptive:
+            sidebar_width = App().window.container.sidebar.\
+                get_allocated_width()
+            return self.__width + sidebar_width
+        else:
+            return self.__width
 
     @property
     def height(self):
@@ -127,9 +134,9 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Get wanted height
             @return int
         """
-        if self.__width <= Size.SMALL:
+        if self.width <= Size.SMALL:
             height = ArtSize.MEDIUM
-        elif self.__width <= Size.MEDIUM:
+        elif self.width <= Size.MEDIUM:
             height = ArtSize.MEDIUM + MARGIN * 2
         else:
             height = ArtSize.BANNER + MARGIN * 2
@@ -146,15 +153,10 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         """
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
             if allocation.width != self.__width:
-                self.__update_width(allocation.width)
+                self.__width = allocation.width
                 emit_signal(self, "height-changed", self.height)
                 return True
-
-    def _set_artwork(self):
-        """
-            Set artwork on banner
-        """
-        pass
+        return False
 
     def _on_artwork(self, surface):
         """
@@ -176,20 +178,6 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __update_width(self, width):
-        """
-            Update internal width
-            @param width as int
-        """
-        self.__width = width
-        # If not SMALL, we add sidebar width because we want banners
-        # to calculate sizing with sidebar included. Allows to prevent
-        # glitch when sidebar is auto shown
-        if not App().window.is_adaptive:
-            sidebar_width = App().window.container.sidebar.\
-                get_allocated_width()
-            self.__width += sidebar_width
-
     def __on_destroy(self, widget):
         """
             Remove ref cycle

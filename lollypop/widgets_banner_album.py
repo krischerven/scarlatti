@@ -97,6 +97,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 (App().player, "playback-changed", "_on_playback_changed")
         ]
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__set_artwork()
+        self.__set_internal_size()
+
     def set_selected(self, selected):
         """
             Mark widget as selected
@@ -116,25 +125,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            self._set_artwork()
+            self.__set_artwork()
             self.__set_internal_size()
-
-    def _set_artwork(self):
-        """
-            Set artwork on banner
-        """
-        if self._artwork is not None and\
-                self._view_type & ViewType.ALBUM and\
-                App().animations:
-            App().art_helper.set_album_artwork(
-                            self.__album,
-                            # +100 to prevent resize lag
-                            self.width + 100,
-                            self.height,
-                            self._artwork.get_scale_factor(),
-                            ArtBehaviour.BLUR_HARD |
-                            ArtBehaviour.DARKER,
-                            self._on_artwork)
 
     def _on_menu_button_clicked(self, button):
         """
@@ -173,7 +165,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param album_id as int
         """
         if album_id == self.__album.id:
-            self._set_artwork()
+            self.__set_artwork()
 
     def _on_playback_changed(self, player):
         """
@@ -194,6 +186,23 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __set_artwork(self):
+        """
+            Set artwork on banner
+        """
+        if self._artwork is not None and\
+                self._view_type & ViewType.ALBUM and\
+                App().animations:
+            App().art_helper.set_album_artwork(
+                            self.__album,
+                            # +100 to prevent resize lag
+                            self.width + 100,
+                            self.height,
+                            self._artwork.get_scale_factor(),
+                            ArtBehaviour.BLUR_HARD |
+                            ArtBehaviour.DARKER,
+                            self._on_artwork)
+
     def __update_add_button(self):
         """
             Set image as +/-
