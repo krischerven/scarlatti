@@ -75,6 +75,15 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
 
         ]
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__set_artwork()
+        self.__set_internal_size()
+
 #######################
 # PROTECTED           #
 #######################
