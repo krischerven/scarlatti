@@ -65,31 +65,19 @@ class LazyLoadingView(View):
         self.__priority_queue = []
         View.stop(self)
 
+    def lazy_loading(self):
+        """
+            Load the view in a lazy way
+        """
+        self.__loading_state = LoadingState.RUNNING
+        self.__lazy_loading()
+
     def queue_lazy_loading(self, widget):
         """
             Queue widget into lazy loading
             @param widget as Gtk.Widget
         """
         self.__lazy_queue.append(widget)
-
-    def lazy_loading(self):
-        """
-            Load the view in a lazy way
-        """
-        widget = None
-        if self.__priority_queue:
-            widget = self.__priority_queue.pop(0)
-            self.__lazy_queue.remove(widget)
-        elif self.__lazy_queue:
-            widget = self.__lazy_queue.pop(0)
-
-        if widget is not None:
-            widget.connect("populated", self._on_populated)
-            widget.populate()
-        else:
-            self.__loading_state = LoadingState.FINISHED
-            Logger.debug("LazyLoadingView::lazy_loading(): %s",
-                         time() - self.__start_time)
 
     def set_external_scrolled(self, scrolled):
         """
@@ -126,7 +114,6 @@ class LazyLoadingView(View):
         """
         View._on_map(self, widget)
         if self.__loading_state == LoadingState.ABORTED and self.__lazy_queue:
-            self.__loading_state = LoadingState.RUNNING
             self.lazy_loading()
 
     def _on_value_changed(self, adj):
@@ -151,7 +138,7 @@ class LazyLoadingView(View):
         if not widget.is_populated:
             widget.populate()
         else:
-            self.lazy_loading()
+            self.__lazy_loading()
 
     def _on_initial_loading(self):
         """
@@ -162,6 +149,25 @@ class LazyLoadingView(View):
 #######################
 # PRIVATE             #
 #######################
+    def __lazy_loading(self):
+        """
+            Load the view in a lazy way
+        """
+        widget = None
+        if self.__priority_queue:
+            widget = self.__priority_queue.pop(0)
+            self.__lazy_queue.remove(widget)
+        elif self.__lazy_queue:
+            widget = self.__lazy_queue.pop(0)
+
+        if widget is not None:
+            widget.connect("populated", self._on_populated)
+            widget.populate()
+        else:
+            self.__loading_state = LoadingState.FINISHED
+            Logger.debug("LazyLoadingView::lazy_loading(): %s",
+                         time() - self.__start_time)
+
     def __add_values(self, values):
         """
             Add widget from values
@@ -176,7 +182,7 @@ class LazyLoadingView(View):
         elif self.__loading_state != LoadingState.RUNNING:
             self.__loading_state = LoadingState.RUNNING
             self._on_initial_loading()
-            self.lazy_loading()
+            self.__lazy_loading()
 
     def __is_visible(self, widget):
         """
