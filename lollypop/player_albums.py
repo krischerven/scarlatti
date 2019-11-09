@@ -254,7 +254,7 @@ class AlbumsPlayer:
             Return albums
             @return albums as [Album]
         """
-        return self._albums
+        return list(self._albums)
 
     @property
     def album_ids(self):
