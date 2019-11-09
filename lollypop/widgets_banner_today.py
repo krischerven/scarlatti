@@ -97,8 +97,6 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         grid.set_margin_end(MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
-        self.set_reveal_child(False)
-        self.connect("map", self.__on_map)
         return [
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed")
@@ -163,18 +161,6 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             cls = "text-xx-large"
         self.__title_label.get_style_context().add_class(cls)
         self.__cover_widget.set_art_size(art_size)
-
-    def __on_map(self, widget):
-        """
-            Show banner
-            @param widget as Gtk.Widget
-        """
-        def show():
-            self.set_transition_duration(500)
-            self.set_reveal_child(True)
-            self.set_transition_duration(250)
-
-        GLib.timeout_add(250, show)
 
     def __on_play_button_clicked(self, button):
         """
