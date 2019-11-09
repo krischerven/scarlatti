@@ -406,7 +406,7 @@ class Application(Gtk.Application, ApplicationActions):
             # Save albums context
             try:
                 with open(LOLLYPOP_DATA_PATH + "/Albums.bin", "wb") as f:
-                    dump(list(self.player.albums), f)
+                    dump(self.player.albums, f)
             except Exception as e:
                 Logger.error("Application::__save_state(): %s" % e)
         dump(track_id, open(LOLLYPOP_DATA_PATH + "/track_id.bin", "wb"))
