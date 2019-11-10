@@ -124,7 +124,7 @@ class SuggestionsView(FilteringHelper, View):
                 return
             else:
                 child.destroy()
-        label = Gtk.Label.new(_("Welcome on Lollypop"))
+        label = Gtk.Label.new(_("Welcome to Lollypop"))
         label.get_style_context().add_class("text-xx-large")
         label.set_property("valign", Gtk.Align.END)
         label.set_ellipsize(Pango.EllipsizeMode.END)
