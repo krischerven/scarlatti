@@ -179,6 +179,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             artist = App().artists.get_name(self.__artist_ids[0])
             if prefix == artist:
                 self.__set_artwork()
+                self.__set_internal_size()
 
     def _on_playback_changed(self, player):
         """
