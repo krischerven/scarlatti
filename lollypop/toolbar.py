@@ -36,6 +36,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         Gtk.HeaderBar.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__width = Size.MINI
+        self.__timeout_id = None
         self.__adaptive_size = AdaptiveSize.PHONE
         self.set_title("Lollypop")
         self.__toolbar_playback = ToolbarPlayback(window)
@@ -133,6 +134,14 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             @param window as Gtk.Window
             @param adaptive_size as AdaptiveSize
         """
+        def show_children():
+            self.__timeout_id = None
+            self.__toolbar_info.show_children()
+
+        if self.__timeout_id is not None:
+            GLib.source_remove(self.__timeout_id)
+            self.__timeout_id = None
+
         self.__adaptive_size = adaptive_size
         if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
             if App().player.current_track.id is not None:
@@ -140,7 +149,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
                     self.__toolbar_title.show()
                 # If user double click headerbar to maximize window
                 # We do not want info bar to receive click signal
-                GLib.timeout_add(200, self.__toolbar_info.show_children)
+                self.__timeout_id = GLib.timeout_add(200, show_children)
             self.__toolbar_playback.player_buttons.show()
         else:
             self.__toolbar_playback.player_buttons.hide()
