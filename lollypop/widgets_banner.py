@@ -21,14 +21,12 @@ class Overlay(Gtk.Overlay):
     """
         Overlay with constraint size
     """
-    def __init__(self, banner):
+    def __init__(self):
         """
             Init overlay
             @param banner as BannerWidget
         """
         Gtk.Overlay.__init__(self)
-        self.__banner = banner
-        banner.connect("destroy", self.__on_destroy)
 
     def do_get_preferred_width(self):
         """
@@ -37,23 +35,6 @@ class Overlay(Gtk.Overlay):
         (min, nat) = Gtk.Bin.do_get_preferred_width(self)
         # Allow resizing
         return (0, 0)
-
-    def do_get_preferred_height(self):
-        """
-           Force preferred height
-        """
-        height = self.__banner.height
-        return (height, height)
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_destroy(self, widget):
-        """
-            Remove ref cycle
-            @param widget as Gtk.Widget
-        """
-        self.__banner = None
 
 
 class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
@@ -81,12 +62,12 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.__width = 1
         self.set_property("valign", Gtk.Align.START)
         if view_type & ViewType.OVERLAY:
-            self._overlay = Overlay(self)
+            self._overlay = Overlay()
             self._overlay.show()
             self._artwork = Gtk.Image()
             self._artwork.show()
+            SizeAllocationHelper.__init__(self)
             if App().animations:
-                SizeAllocationHelper.__init__(self)
                 self._artwork.set_opacity(0.99)
             self.get_style_context().add_class("default-banner")
             self._artwork.get_style_context().add_class("default-banner")
@@ -111,6 +92,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             @param width as int
         """
         self.__width = width
+        self._artwork.set_size_request(-1, self.height)
 
     @property
     def width(self):
@@ -154,7 +136,9 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
             if allocation.width != self.__width:
                 self.__width = allocation.width
-                emit_signal(self, "height-changed", self.height)
+                height = self.height
+                self._artwork.set_size_request(-1, height)
+                emit_signal(self, "height-changed", height)
                 return True
         return False
 
