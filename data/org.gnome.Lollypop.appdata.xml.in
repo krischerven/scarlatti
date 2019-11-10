@@ -17,16 +17,16 @@
     </ul>
   </description>
   <releases>
-    <release version="1.2.7" date="2019-11-06">
+    <release version="1.2.8" date="2019-11-10">
       <description>
       </description>
     </release>
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image type="source" width="1680" height="1023">https://adishatz.org/lollypop1.png</image>
-      <image type="source" width="1680" height="1023">https://adishatz.org/lollypop2.png</image>
-      <image type="source" width="400" height="617">https://adishatz.org/lollypop3.png</image>
+      <image type="source" width="1754" height="1095">https://gitlab.gnome.org/gnumdk/lollypop/raw/master/screenshots/lollypop.jpg</image>
+      <image type="source" width="1920" height="1080">https://gitlab.gnome.org/gnumdk/lollypop/raw/master/screenshots/lollypop2.jpg</image>
+      <image type="source" width="597" height="853">https://gitlab.gnome.org/gnumdk/lollypop/raw/master/screenshots/lollypop3.jpg</image>
     </screenshot>
   </screenshots>
   <translation type="gettext">lollypop</translation>
