@@ -245,7 +245,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             cls = "text-large"
         else:
             art_size = ArtSize.BANNER
-            cls = "text-x-large"
+            cls = "text-xx-large"
         self.__title_label.get_style_context().add_class(cls)
         if art_size is None:
             self.__badge_artwork.hide()

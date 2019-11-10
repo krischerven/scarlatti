@@ -240,8 +240,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             art_size = ArtSize.BANNER
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            cls_title = "text-x-large"
-            cls_others = "text-large"
+            cls_title = "text-xx-large"
+            cls_others = "text-x-large"
         self.__title_label.get_style_context().add_class(cls_title)
         self.__artist_label.get_style_context().add_class(cls_title)
         self.__year_label.get_style_context().add_class(cls_others)
