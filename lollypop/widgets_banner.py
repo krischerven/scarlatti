@@ -34,7 +34,7 @@ class Overlay(Gtk.Overlay):
         """
         (min, nat) = Gtk.Bin.do_get_preferred_width(self)
         # Allow resizing
-        return (0, 0)
+        return (1, 1)
 
 
 class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
