@@ -317,7 +317,7 @@ class ViewsContainer:
         """
         from lollypop.view_album import AlbumView
         view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED |\
-            ViewType.OVERLAY
+            ViewType.OVERLAY | ViewType.ALBUM
         view = AlbumView(album, view_type)
         view.populate()
         return view

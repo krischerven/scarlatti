@@ -31,6 +31,7 @@
       <object class="GtkBox" id="top_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="valign">end</property>
         <property name="margin_left">15</property>
         <child>
           <object class="GtkLabel" id="artist_label">
@@ -179,6 +180,7 @@
       <object class="GtkBox" id="bottom_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="valign">start</property>
         <property name="margin_left">15</property>
         <child>
           <object class="GtkLabel" id="duration_label">
