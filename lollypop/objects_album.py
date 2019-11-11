@@ -237,7 +237,12 @@ class Album(Base):
         self.reset("mtime")
         for artist_id in self.artist_ids:
             emit_signal(App().scanner, "artist-updated", artist_id, save)
-        emit_signal(App().scanner, "album-updated", self.id, ScanUpdate.ADDED)
+        if save:
+            emit_signal(App().scanner, "album-updated", self.id,
+                        ScanUpdate.ADDED)
+        else:
+            emit_signal(App().scanner, "album-updated", self.id,
+                        ScanUpdate.REMOVED)
 
     def set_synced(self, mask):
         """
