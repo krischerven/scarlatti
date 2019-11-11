@@ -76,5 +76,6 @@ class ArtistViewList(LazyLoadingView):
             return None
         widget = AlbumView(Album(album_id), ViewType.DEFAULT)
         widget.show()
+        widget.set_property("valign", Gtk.Align.START)
         self.__list.add(widget)
         return widget

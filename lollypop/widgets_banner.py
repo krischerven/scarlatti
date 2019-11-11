@@ -66,7 +66,6 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             self._overlay.show()
             self._artwork = Gtk.Image()
             self._artwork.show()
-            SizeAllocationHelper.__init__(self)
             if App().animations:
                 self._artwork.set_opacity(0.99)
             self.get_style_context().add_class("default-banner")
@@ -85,6 +84,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         self.set_reveal_child(True)
         self.set_transition_duration(250)
         self.connect("destroy", self.__on_destroy)
+        SizeAllocationHelper.__init__(self)
 
     def update_for_width(self, width):
         """
@@ -92,7 +92,8 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             @param width as int
         """
         self.__width = width
-        self._artwork.set_size_request(-1, self.height)
+        if self._artwork is not None:
+            self._artwork.set_size_request(-1, self.height)
 
     @property
     def width(self):
@@ -137,7 +138,8 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             if allocation.width != self.__width:
                 self.__width = allocation.width
                 height = self.height
-                self._artwork.set_size_request(-1, height)
+                if self._artwork is not None:
+                    self._artwork.set_size_request(-1, height)
                 emit_signal(self, "height-changed", height)
                 return True
         return False
