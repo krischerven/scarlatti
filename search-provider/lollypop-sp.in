@@ -156,8 +156,6 @@ class SearchLollypopService(Server, Gio.Application):
                             application_id='org.gnome.Lollypop.SearchProvider',
                             flags=Gio.ApplicationFlags.IS_SERVICE)
         self.cursors = {}
-        self.fixed_775600 = True
-        self.lastfm = None
         self.task_helper = TaskHelper()
         self.settings = Settings.new()
         self.db = Database()
@@ -165,7 +163,6 @@ class SearchLollypopService(Server, Gio.Application):
         self.artists = ArtistsDatabase()
         self.tracks = TracksDatabase()
         self.art = Art()
-        SqlCursor.add(self.db)
         self.__bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(self.__bus,
                                        self.__SEARCH_BUS,
