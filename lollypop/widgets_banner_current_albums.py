@@ -84,6 +84,14 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__set_internal_size()
+
     @property
     def spinner(self):
         """
@@ -141,19 +149,25 @@ class CurrentAlbumsBannerWidget(BannerWidget):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            title_context = self.__title_label.get_style_context()
-            for c in title_context.list_classes():
-                title_context.remove_class(c)
-            if self.width <= Size.MEDIUM:
-                self.__title_label.get_style_context().add_class(
-                    "text-large")
-            else:
-                self.__title_label.get_style_context().add_class(
-                    "text-x-large")
+            self.__set_internal_size()
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_internal_size(self):
+        """
+            Update font size
+        """
+        title_context = self.__title_label.get_style_context()
+        for c in title_context.list_classes():
+            title_context.remove_class(c)
+        if self.width <= Size.MEDIUM:
+            self.__title_label.get_style_context().add_class(
+                "text-large")
+        else:
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+
     def __on_jump_button_clicked(self, button):
         """
             Scroll to album

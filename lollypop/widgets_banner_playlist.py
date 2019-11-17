@@ -53,23 +53,13 @@ class PlaylistBannerWidget(BannerWidget):
             duration = App().playlists.get_duration(playlist_id)
             self.__duration_label.set_text(get_human_duration(duration))
 
-    def set_view_type(self, view_type):
+    def update_for_width(self, width):
         """
-            Update view type
-            @param view_type as ViewType
+            Update banner internals for width, call this before showing banner
+            @param width as int
         """
-        BannerWidget.set_view_type(self, view_type)
-        duration_context = self.__duration_label.get_style_context()
-        title_context = self.__title_label.get_style_context()
-        for c in title_context.list_classes():
-            title_context.remove_class(c)
-        for c in duration_context.list_classes():
-            duration_context.remove_class(c)
-        if view_type & ViewType.ADAPTIVE:
-            title_context.add_class("text-large")
-        else:
-            title_context.add_class("text-x-large")
-            duration_context.add_class("text-large")
+        BannerWidget.update_for_width(self, width)
+        self.__set_internal_size()
 
     @property
     def spinner(self):
@@ -96,17 +86,7 @@ class PlaylistBannerWidget(BannerWidget):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            duration_context = self.__duration_label.get_style_context()
-            title_context = self.__title_label.get_style_context()
-            for c in title_context.list_classes():
-                title_context.remove_class(c)
-            for c in duration_context.list_classes():
-                duration_context.remove_class(c)
-            if self.width <= Size.MEDIUM:
-                title_context.add_class("text-large")
-            else:
-                title_context.add_class("text-x-large")
-                duration_context.add_class("text-large")
+            self.__set_internal_size()
 
     def _on_play_button_clicked(self, button):
         """
@@ -154,3 +134,22 @@ class PlaylistBannerWidget(BannerWidget):
             menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button)
+
+#######################
+# PRIVATE             #
+#######################
+    def __set_internal_size(self):
+        """
+            Update font size
+        """
+        duration_context = self.__duration_label.get_style_context()
+        title_context = self.__title_label.get_style_context()
+        for c in title_context.list_classes():
+            title_context.remove_class(c)
+        for c in duration_context.list_classes():
+            duration_context.remove_class(c)
+        if self.width <= Size.MEDIUM:
+            title_context.add_class("text-large")
+        else:
+            title_context.add_class("text-x-large")
+            duration_context.add_class("text-large")

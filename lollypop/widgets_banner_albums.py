@@ -82,6 +82,14 @@ class AlbumsBannerWidget(BannerWidget):
         self.__title_label.set_markup("<b>%s</b>" %
                                       GLib.markup_escape_text(title_str))
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__set_internal_size()
+
     @property
     def height(self):
         """
@@ -99,19 +107,25 @@ class AlbumsBannerWidget(BannerWidget):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            title_context = self.__title_label.get_style_context()
-            for c in title_context.list_classes():
-                title_context.remove_class(c)
-            if self.width <= Size.MEDIUM:
-                self.__title_label.get_style_context().add_class(
-                    "text-large")
-            else:
-                self.__title_label.get_style_context().add_class(
-                    "text-x-large")
+            self.__set_internal_size()
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_internal_size(self):
+        """
+            Set content size based on current width
+        """
+        title_context = self.__title_label.get_style_context()
+        for c in title_context.list_classes():
+            title_context.remove_class(c)
+        if self.width <= Size.MEDIUM:
+            self.__title_label.get_style_context().add_class(
+                "text-large")
+        else:
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+
     def __on_play_button_clicked(self, button):
         """
             Play playlist

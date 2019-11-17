@@ -69,19 +69,13 @@ class RadiosBannerWidget(BannerWidget):
         self._overlay.set_overlay_pass_through(grid, True)
         self.connect("unmap", self.__on_unmap)
 
-    def set_view_type(self, view_type):
+    def update_for_width(self, width):
         """
-            Update view type
-            @param view_type as ViewType
+            Update banner internals for width, call this before showing banner
+            @param width as int
         """
-        BannerWidget.set_view_type(self, view_type)
-        title_context = self.__title_label.get_style_context()
-        for c in title_context.list_classes():
-            title_context.remove_class(c)
-        if view_type & ViewType.ADAPTIVE:
-            title_context.add_class("text-large")
-        else:
-            title_context.add_class("text-x-large")
+        BannerWidget.update_for_width(self, width)
+        self.__set_internal_size()
 
     @property
     def height(self):
@@ -100,19 +94,25 @@ class RadiosBannerWidget(BannerWidget):
             @param allocation as Gtk.Allocation
         """
         if BannerWidget._handle_width_allocate(self, allocation):
-            title_context = self.__title_label.get_style_context()
-            for c in title_context.list_classes():
-                title_context.remove_class(c)
-            if self.width <= Size.MEDIUM:
-                self.__title_label.get_style_context().add_class(
-                    "text-large")
-            else:
-                self.__title_label.get_style_context().add_class(
-                    "text-x-large")
+            self.__set_internal_size()
 
 #######################
 # PRIVATE             #
 #######################
+    def __set_internal_size(self):
+        """
+            Update font size
+        """
+        title_context = self.__title_label.get_style_context()
+        for c in title_context.list_classes():
+            title_context.remove_class(c)
+        if self.width <= Size.MEDIUM:
+            self.__title_label.get_style_context().add_class(
+                "text-large")
+        else:
+            self.__title_label.get_style_context().add_class(
+                "text-x-large")
+
     def __on_unmap(self, widget):
         """
             Destroy popover
