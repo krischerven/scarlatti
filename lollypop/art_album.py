@@ -164,6 +164,8 @@ class AlbumArt:
             @return cairo surface
             @thread safe
         """
+        if album.id is None:
+            return None
         width *= scale_factor
         height *= scale_factor
         filename = self.get_album_cache_name(album)
@@ -276,7 +278,8 @@ class AlbumArt:
             Announce album cover update
             @param album_id as int
         """
-        emit_signal(self, "album-artwork-changed", album_id)
+        if album_id is not None:
+            emit_signal(self, "album-artwork-changed", album_id)
 
     def remove_album_artwork(self, album):
         """
@@ -392,7 +395,7 @@ class AlbumArt:
         else:
             self.save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
-        GLib.idle_add(self.album_artwork_update, album.id)
+        self.album_artwork_update(album.id)
 
     def __save_ro_album_artwork(self, data, album):
         """
@@ -410,7 +413,7 @@ class AlbumArt:
         else:
             self.save_pixbuf_from_data(store_path, data)
         self.clean_album_cache(album)
-        GLib.idle_add(self.album_artwork_update, album.id)
+        self.album_artwork_update(album.id)
 
     def __save_album_artwork(self, data, album):
         """
@@ -451,7 +454,7 @@ class AlbumArt:
         src = Gio.File.new_for_path(store_path)
         src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
         self.clean_album_cache(album)
-        GLib.idle_add(self.album_artwork_update, album.id)
+        self.album_artwork_update(album.id)
 
     def __save_album_artwork_to_tags(self, data, album):
         """
