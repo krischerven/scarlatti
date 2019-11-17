@@ -41,6 +41,14 @@ class SearchBannerWidget(BannerWidget):
         self.connect("map", self.__on_map)
         builder.connect_signals(self)
 
+    def update_for_width(self, width):
+        """
+            Update banner internals for width, call this before showing banner
+            @param width as int
+        """
+        BannerWidget.update_for_width(self, width)
+        self.__entry.set_size_request(self.width / 4, -1)
+
     @property
     def spinner(self):
         """
