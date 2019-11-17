@@ -133,7 +133,7 @@ class SuggestionsView(FilteringHelper, View):
         label.get_style_context().add_class("opacity-transition")
         image = Gtk.Image.new_from_icon_name("org.gnome.Lollypop",
                                              Gtk.IconSize.INVALID)
-        image.set_pixel_size(Size.SMALL)
+        image.set_pixel_size(Size.MINI)
         image.show()
         image.get_style_context().add_class("image-rotate-fast")
         image.get_style_context().add_class("opacity-transition")
