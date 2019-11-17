@@ -38,7 +38,7 @@ class WebSettingsWidget(Gtk.Bin):
                            False),
                           (builder.get_object("google_view"),
                            builder.get_object("google_error_label"),
-                           NetworkAccessACL["GOOGLE"],
+                           None,
                            False)]
 
         # First check lastfm support is available
@@ -189,7 +189,7 @@ class WebSettingsWidget(Gtk.Bin):
         network_access = App().settings.get_value("network-access")
         acls = App().settings.get_value("network-access-acl").get_int32()
         for (view, label, acl, is_goa) in self.__widgets:
-            if not network_access or not acls & acl:
+            if not network_access or (acl is not None and not acls & acl):
                 view.set_sensitive(False)
                 label.set_opacity(1)
                 label.set_text(_("Disabled in network settings"))
