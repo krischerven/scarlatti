@@ -192,8 +192,12 @@ class RatingWidget(Gtk.Bin):
             try:
                 (pid, stdin, stdout, stderr) = GLib.spawn_async(
                     argv, flags=GLib.SpawnFlags.SEARCH_PATH |
-                    GLib.SpawnFlags.STDOUT_TO_DEV_NULL
+                    GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
+                    standard_input=False,
+                    standard_output=False,
+                    standard_error=False
                 )
+                GLib.spawn_close_pid(pid)
                 # Force mtime update to not run a collection update
                 App().tracks.set_mtime(self.__object.id, int(time()) + 10)
                 worked = True

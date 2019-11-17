@@ -85,7 +85,7 @@ class Server:
 
         args = list(parameters.unpack())
         for i, sig in enumerate(self.method_inargs[method_name]):
-            if sig is 'h':
+            if sig == 'h':
                 msg = invocation.get_message()
                 fd_list = msg.get_unix_fd_list()
                 args[i] = fd_list.get(args[i])
@@ -173,11 +173,13 @@ class SearchLollypopService(Server, Gio.Application):
 
     def ActivateResult(self, search_id, array, utime):
         try:
-            argv = ["lollypop", "--play-ids", search_id, None]
-            GLib.spawn_async_with_pipes(
-                                    None, argv, None,
-                                    GLib.SpawnFlags.SEARCH_PATH |
-                                    GLib.SpawnFlags.DO_NOT_REAP_CHILD, None)
+            argv = ["lollypop", "--play-ids", search_id]
+            (pid, stdin, stdout, stderr) = GLib.spawn_async(
+                    argv, flags=GLib.SpawnFlags.SEARCH_PATH,
+                    standard_input=False,
+                    standard_output=False,
+                    standard_error=False)
+            GLib.spawn_close_pid(pid)
         except Exception as e:
             print("SearchLollypopService::ActivateResult():", e)
 
@@ -224,10 +226,13 @@ class SearchLollypopService(Server, Gio.Application):
     def LaunchSearch(self, terms, utime):
         results = self.__search(terms)
         argv = ["lollypop", "--play-ids", ";".join(results), None]
-        GLib.spawn_async_with_pipes(
-                                    None, argv, None,
-                                    GLib.SpawnFlags.SEARCH_PATH |
-                                    GLib.SpawnFlags.DO_NOT_REAP_CHILD, None)
+        (pid, stdin, stdout, stderr) = GLib.spawn_async(
+                    argv, flags=GLib.SpawnFlags.SEARCH_PATH,
+                    standard_input=False,
+                    standard_output=False,
+                    standard_error=False)
+        GLib.spawn_close_pid(pid)
+
     def __search(self, terms):
         ids = []
         search = " ".join(terms)

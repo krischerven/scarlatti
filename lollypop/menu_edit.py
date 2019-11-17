@@ -174,6 +174,7 @@ class EditMenu(Gio.Menu):
                     standard_output=False,
                     standard_error=False
                 )
+                GLib.spawn_close_pid(pid)
                 worked = True
                 break
             except Exception as e:
