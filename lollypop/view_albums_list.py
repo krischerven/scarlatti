@@ -69,7 +69,9 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param index as int
         """
         children = self.children
-        if index < len(children) + 1 and children[index].album.id == album.id:
+        if children and\
+                index < len(children) + 1 and\
+                children[index].album.id == album.id:
             children[index].tracks_view.append_rows(album.tracks)
         else:
             row = AlbumRow(album, self.__height, self._view_type)
