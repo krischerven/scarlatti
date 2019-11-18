@@ -56,6 +56,8 @@ class ShufflePlayer:
             track = self.__history.next.value
         elif self._albums:
             track = self.__get_next()
+        else:
+            track = Track()
         return track
 
     def prev(self):
