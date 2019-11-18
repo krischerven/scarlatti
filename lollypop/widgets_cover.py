@@ -36,6 +36,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         self.__album = album
         self.__view_type = view_type
         self.__image_button = None
+        self.__art_size = 1
         self.__artwork = Gtk.Image.new()
         self.__artwork.show()
         self.add(self.__artwork)
@@ -49,6 +50,8 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             Set cover artwork size
             @param art_size as int
         """
+        if self.__art_size == art_size:
+            return
         self.__art_size = art_size
         App().art_helper.set_frame(self.__artwork,
                                    "small-cover-frame",
