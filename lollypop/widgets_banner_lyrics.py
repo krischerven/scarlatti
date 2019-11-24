@@ -99,7 +99,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
-            self.__update_font_size()
+            self.__set_internal_size()
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -159,7 +159,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
                     ArtBehaviour.DARKER,
                     self._on_artwork)
 
-    def __update_font_size(self):
+    def __set_internal_size(self):
         """
             Set text height
         """
