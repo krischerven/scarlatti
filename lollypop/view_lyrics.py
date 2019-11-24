@@ -18,6 +18,7 @@ from lollypop.view import View
 from lollypop.define import App, ViewType, AdaptiveSize
 from lollypop.define import StorageType
 from lollypop.logger import Logger
+from lollypop.objects_track import Track
 from lollypop.helper_lyrics import LyricsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_lyrics import LyricsBannerWidget
@@ -118,36 +119,37 @@ class LyricsView(View, SignalsHelper):
         if track.id is None:
             return
         self.__lyrics_label.set_text(_("Loading…"))
-        self.__lyrics_helper.load(track)
-        # First check synced lyrics
-        if self.__lyrics_helper.available:
-            if self.__lyrics_timeout_id is None:
-                self.__lyrics_timeout_id = GLib.timeout_add(
-                    500, self.__show_sync_lyrics)
-            return
-        else:
-            lyrics = ""
-            if self.__lyrics_timeout_id is not None:
-                GLib.source_remove(self.__lyrics_timeout_id)
-                self.__lyrics_timeout_id = None
-            if track.storage_type & StorageType.COLLECTION:
-                from lollypop.tagreader import TagReader, Discoverer
-                tagreader = TagReader()
-                discoverer = Discoverer()
-                try:
-                    info = discoverer.get_info(track.uri)
-                except:
-                    info = None
-                if info is not None:
-                    tags = info.get_tags()
-                    lyrics = tagreader.get_lyrics(tags)
-            if lyrics:
-                self.__lyrics_label.set_text(lyrics)
+        lyrics = ""
+        if isinstance(track, Track):
+            self.__lyrics_helper.load(track)
+            # First check synced lyrics
+            if self.__lyrics_helper.available:
+                if self.__lyrics_timeout_id is None:
+                    self.__lyrics_timeout_id = GLib.timeout_add(
+                        500, self.__show_sync_lyrics)
+                return
             else:
-                self.__lyrics_helper.get_lyrics_from_web(track,
-                                                         self.__on_lyrics,
-                                                         False,
-                                                         track)
+                if self.__lyrics_timeout_id is not None:
+                    GLib.source_remove(self.__lyrics_timeout_id)
+                    self.__lyrics_timeout_id = None
+                if track.storage_type & StorageType.COLLECTION:
+                    from lollypop.tagreader import TagReader, Discoverer
+                    tagreader = TagReader()
+                    discoverer = Discoverer()
+                    try:
+                        info = discoverer.get_info(track.uri)
+                    except:
+                        info = None
+                    if info is not None:
+                        tags = info.get_tags()
+                        lyrics = tagreader.get_lyrics(tags)
+        if lyrics:
+            self.__lyrics_label.set_text(lyrics)
+        else:
+            self.__lyrics_helper.get_lyrics_from_web(track,
+                                                     self.__on_lyrics,
+                                                     False,
+                                                     track)
 
     @property
     def args(self):

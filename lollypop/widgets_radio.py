@@ -157,7 +157,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         """
         if self.__artwork is None:
             return
-        selected = isinstance(App().player.current_track.id, Radio) and\
+        selected = isinstance(App().player.current_track, Radio) and\
             self._track.id == App().player.current_track.id
         if selected:
             self.__artwork.set_state_flags(Gtk.StateFlags.SELECTED, True)

@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, MARGIN, ViewType
 from lollypop.define import ArtBehaviour, Size
 from lollypop.widgets_banner import BannerWidget
+from lollypop.objects_radio import Radio
 from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -131,7 +132,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
             markup = "%s\n" % GLib.markup_escape_text(
                 App().player.current_track.name)
             artist_name = GLib.markup_escape_text(
-                ", ".join(App().player.current_track.album.artists))
+                ", ".join(App().player.current_track.artists))
             markup += "<span size='x-small' alpha='40000'>%s</span>" %\
                 artist_name
             self.__title_label.set_markup(markup)
@@ -149,15 +150,26 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         else:
             self._artwork.get_style_context().remove_class(
                 "default-banner")
-            App().art_helper.set_album_artwork(
-                    App().player.current_track.album,
-                    # +100 to prevent resize lag
-                    self.width + 100,
-                    self.height,
-                    self._artwork.get_scale_factor(),
-                    ArtBehaviour.BLUR_HARD |
-                    ArtBehaviour.DARKER,
-                    self._on_artwork)
+            if isinstance(App().player.current_track, Radio):
+                App().art_helper.set_radio_artwork(
+                        App().player.current_track.name,
+                        # +100 to prevent resize lag
+                        self.width + 100,
+                        self.height,
+                        self._artwork.get_scale_factor(),
+                        ArtBehaviour.BLUR_HARD |
+                        ArtBehaviour.DARKER,
+                        self._on_artwork)
+            else:
+                App().art_helper.set_album_artwork(
+                        App().player.current_track.album,
+                        # +100 to prevent resize lag
+                        self.width + 100,
+                        self.height,
+                        self._artwork.get_scale_factor(),
+                        ArtBehaviour.BLUR_HARD |
+                        ArtBehaviour.DARKER,
+                        self._on_artwork)
 
     def __set_internal_size(self):
         """

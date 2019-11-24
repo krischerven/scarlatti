@@ -28,6 +28,7 @@ class RadioAlbum:
         """
         self.id = radio.id
         self.name = radio.name
+        self.storage_type = StorageType.COLLECTION
         self.artists = [_("Radio")]
         self.artist_ids = [Type.RADIOS]
         self.year = None
