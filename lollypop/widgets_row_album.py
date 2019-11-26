@@ -64,6 +64,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         self.__view_type = view_type
         self.__revealer = None
         self.__artwork = None
+        self.__gesture_list = None
         self.__album = album
         self.__cancellable = Gio.Cancellable()
         self.set_sensitive(False)
@@ -293,7 +294,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         """
             Update button state
         """
-        if self.__artwork is not None:
+        if self.__artwork is not None and self.__gesture_list is not None:
             self.__update_list_button(self.__gesture_list.widget)
 
 #######################
