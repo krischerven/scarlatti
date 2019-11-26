@@ -160,6 +160,9 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         """
         if add:
             artist_ids = App().artists.get_ids()
+            # Can happen during scan
+            if artist_id not in artist_ids:
+                return
             position = artist_ids.index(artist_id)
             artist_name = App().artists.get_name(artist_id)
             sortname = App().artists.get_sortname(artist_id)
