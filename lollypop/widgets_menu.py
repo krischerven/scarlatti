@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
+from gi.repository import Gtk, GObject, Gdk, GdkPixbuf, GLib
 
 from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
@@ -66,6 +66,46 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param submenu as bool
             @param scrolled as bool
         """
+        def add_menu_items(indexes):
+            if indexes:
+                i = indexes.pop(0)
+                header = menu.get_item_attribute_value(i, "header")
+                action = menu.get_item_attribute_value(i, "action")
+                label = menu.get_item_attribute_value(i, "label")
+                tooltip = menu.get_item_attribute_value(i, "tooltip")
+                close = menu.get_item_attribute_value(i, "close") is not None
+                if header is not None:
+                    header_type = header[0]
+                    header_label = header[1]
+                    if header_type == HeaderType.ALBUM:
+                        album_id = header[2]
+                        self.__add_album_header(header_label,
+                                                album_id,
+                                                menu_name)
+                    elif header_type == HeaderType.ARTIST:
+                        artist_id = header[2]
+                        self.__add_artist_header(header_label, artist_id,
+                                                 menu_name)
+                    elif header_type == HeaderType.ROUNDED:
+                        artwork_name = header[2]
+                        self.__add_rounded_header(header_label, artwork_name,
+                                                  menu_name)
+                    else:
+                        icon_name = header[2]
+                        self.__add_header(header_label, icon_name, menu_name)
+                elif action is None:
+                    link = menu.get_item_link(i, "section")
+                    submenu = menu.get_item_link(i, "submenu")
+                    if link is not None:
+                        self.__add_section(label, link, menu_name)
+                    elif submenu is not None:
+                        self.__add_submenu(label, submenu, menu_name)
+                else:
+                    target = menu.get_item_attribute_value(i, "target")
+                    self.__add_item(label, action, target,
+                                    tooltip, close, menu_name)
+                GLib.idle_add(add_menu_items, indexes)
+
         box = self.get_child_by_name(menu_name)
         if box is None:
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -91,40 +131,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.show()
                 box.add(button)
         n_items = menu.get_n_items()
-        for i in range(0, n_items):
-            header = menu.get_item_attribute_value(i, "header")
-            action = menu.get_item_attribute_value(i, "action")
-            label = menu.get_item_attribute_value(i, "label")
-            tooltip = menu.get_item_attribute_value(i, "tooltip")
-            close = menu.get_item_attribute_value(i, "close") is not None
-            if header is not None:
-                header_type = header[0]
-                header_label = header[1]
-                if header_type == HeaderType.ALBUM:
-                    album_id = header[2]
-                    self.__add_album_header(header_label, album_id, menu_name)
-                elif header_type == HeaderType.ARTIST:
-                    artist_id = header[2]
-                    self.__add_artist_header(header_label, artist_id,
-                                             menu_name)
-                elif header_type == HeaderType.ROUNDED:
-                    artwork_name = header[2]
-                    self.__add_rounded_header(header_label, artwork_name,
-                                              menu_name)
-                else:
-                    icon_name = header[2]
-                    self.__add_header(header_label, icon_name, menu_name)
-            elif action is None:
-                link = menu.get_item_link(i, "section")
-                submenu = menu.get_item_link(i, "submenu")
-                if link is not None:
-                    self.__add_section(label, link, menu_name)
-                elif submenu is not None:
-                    self.__add_submenu(label, submenu, menu_name)
-            else:
-                target = menu.get_item_attribute_value(i, "target")
-                self.__add_item(label, action, target,
-                                tooltip, close, menu_name)
+        GLib.idle_add(add_menu_items, list(range(0, n_items)))
 
     def __add_item(self, text, action, target, tooltip, close, menu_name):
         """
