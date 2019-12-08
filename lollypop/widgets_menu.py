@@ -39,6 +39,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         Gtk.Stack.__init__(self)
         self.__boxes = {}
         self.__menu_queue = []
+        self.__submenu_queue = []
         self.__add_menu(menu, "main", False, scrolled)
         return [
             (App().window, "adaptive-changed", "_on_adaptive_changed")
@@ -91,8 +92,11 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.set_label(menu_name)
                 button.show()
                 box.add(button)
-        n_items = menu.get_n_items()
-        self.__add_menu_items(menu, menu_name, list(range(0, n_items)))
+        menu_range = list(range(0, menu.get_n_items()))
+        if submenu:
+            self.__submenu_queue.append((menu, menu_name, menu_range))
+        else:
+            self.__add_menu_items(menu, menu_name, menu_range)
 
     def __add_menu_items(self, menu, menu_name, indexes):
         """
@@ -134,8 +138,9 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                     self.__menu_queue.append((menu, menu_name, indexes))
                     self.__add_section(label, link, menu_name)
                 elif submenu is not None:
-                    self.__menu_queue.append((menu, menu_name, indexes))
                     self.__add_submenu(label, submenu, menu_name)
+                    GLib.idle_add(self.__add_menu_items, menu,
+                                  menu_name, indexes)
             else:
                 target = menu.get_item_attribute_value(i, "target")
                 self.__add_item(label, action, target,
@@ -144,6 +149,10 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         # Continue to populate queued menu
         elif self.__menu_queue:
             (menu, menu_name, indexes) = self.__menu_queue.pop(-1)
+            GLib.idle_add(self.__add_menu_items, menu, menu_name, indexes)
+        # Finish with submenus
+        elif self.__submenu_queue:
+            (menu, menu_name, indexes) = self.__submenu_queue.pop(-1)
             GLib.idle_add(self.__add_menu_items, menu, menu_name, indexes)
 
     def __add_item(self, text, action, target, tooltip, close, menu_name):
