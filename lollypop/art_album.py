@@ -486,10 +486,9 @@ class AlbumArt:
         files = []
         for track in album.tracks:
             App().tracks.set_mtime(track.id, int(time()) + 10)
-            filename = GLib.filename_from_uri(track.uri)[0]
-            if filename is not None:
-                files.append(filename)
-
+            f = Gio.File.new_for_uri(track.uri)
+            if f.query_exists():
+                files.append(f.get_path())
         worked = False
         cover = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
         arguments = [["kid3-cli", "-c", "set picture:'%s' ''" % cover],

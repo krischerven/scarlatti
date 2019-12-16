@@ -159,27 +159,27 @@ class EditMenu(Gio.Menu):
             # tag editor
             tag_editor = "kid3-qt"
         worked = False
-        path = GLib.filename_from_uri(self.__object.uri)[0]
-        if path is None:
-            return
-        arguments = [
-            [tag_editor, path],
-            ["flatpak-spawn", "--host", tag_editor, path]]
-        for argv in arguments:
-            try:
-                (pid, stdin, stdout, stderr) = GLib.spawn_async(
-                    argv, flags=GLib.SpawnFlags.SEARCH_PATH |
-                    GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
-                    standard_input=False,
-                    standard_output=False,
-                    standard_error=False
-                )
-                GLib.spawn_close_pid(pid)
-                worked = True
-                break
-            except Exception as e:
-                Logger.error(
-                    "MenuPopover::__on_edit_tag_action_activate(): %s", e)
-        if not worked:
-            App().notify.send("Lollypop",
-                              _("Please install EasyTAG or Kid3"))
+        f = Gio.File.new_for_uri(self.__object.uri)
+        if f.query_exists():
+            path = f.get_path()
+            arguments = [
+                [tag_editor, path],
+                ["flatpak-spawn", "--host", tag_editor, path]]
+            for argv in arguments:
+                try:
+                    (pid, stdin, stdout, stderr) = GLib.spawn_async(
+                        argv, flags=GLib.SpawnFlags.SEARCH_PATH |
+                        GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
+                        standard_input=False,
+                        standard_output=False,
+                        standard_error=False
+                    )
+                    GLib.spawn_close_pid(pid)
+                    worked = True
+                    break
+                except Exception as e:
+                    Logger.error(
+                        "MenuPopover::__on_edit_tag_action_activate(): %s", e)
+            if not worked:
+                App().notify.send("Lollypop",
+                                  _("Please install EasyTAG or Kid3"))

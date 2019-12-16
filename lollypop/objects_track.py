@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gio
+from gi.repository import Gio
 
 import json
 
@@ -224,10 +224,13 @@ class Track(Base):
     def path(self):
         """
             Get track file path
-            Alias to Track.path
             @return str
         """
-        return GLib.filename_from_uri(self.uri)[0]
+        f = Gio.File.new_for_uri(self.uri)
+        path = f.get_path()
+        if path is None:
+            return ""
+        return path
 
     @property
     def album(self):

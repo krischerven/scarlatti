@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Gio
 
 from gettext import gettext as _
 from time import time
@@ -166,7 +166,7 @@ class RatingWidget(Gtk.Bin):
 
     def __set_popularity(self, pop):
         """
-            Set popularity as kid3 is installed
+            Set popularity with kid3-cli
             @param pop as int
         """
         if pop == 0:
@@ -181,29 +181,32 @@ class RatingWidget(Gtk.Bin):
             value = 196
         else:
             value = 255
-        path = GLib.filename_from_uri(self.__object.uri)[0]
-        arguments = [["kid3-cli", "-c", "set POPM %s" % value, path],
-                     ["flatpak-spawn", "--host", "kid3-cli", "-c",
-                      "set POPM %s" % value, path]]
-        if App().scanner.inotify is not None:
-            App().scanner.inotify.disable()
-        worked = False
-        for argv in arguments:
-            try:
-                (pid, stdin, stdout, stderr) = GLib.spawn_async(
-                    argv, flags=GLib.SpawnFlags.SEARCH_PATH |
-                    GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
-                    standard_input=False,
-                    standard_output=False,
-                    standard_error=False
-                )
-                GLib.spawn_close_pid(pid)
-                # Force mtime update to not run a collection update
-                App().tracks.set_mtime(self.__object.id, int(time()) + 10)
-                worked = True
-                break
-            except Exception as e:
-                Logger.error("RatingWidget::__on_can_set_popularity(): %s" % e)
-        if not worked:
-            App().notify.send("Lollypop",
-                              _("You need to install kid3-cli"))
+        f = Gio.File.new_for_uri(self.__object.uri)
+        if f.query_exists():
+            path = f.get_path()
+            arguments = [["kid3-cli", "-c", "set POPM %s" % value, path],
+                         ["flatpak-spawn", "--host", "kid3-cli", "-c",
+                          "set POPM %s" % value, path]]
+            if App().scanner.inotify is not None:
+                App().scanner.inotify.disable()
+            worked = False
+            for argv in arguments:
+                try:
+                    (pid, stdin, stdout, stderr) = GLib.spawn_async(
+                        argv, flags=GLib.SpawnFlags.SEARCH_PATH |
+                        GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
+                        standard_input=False,
+                        standard_output=False,
+                        standard_error=False
+                    )
+                    GLib.spawn_close_pid(pid)
+                    # Force mtime update to not run a collection update
+                    App().tracks.set_mtime(self.__object.id, int(time()) + 10)
+                    worked = True
+                    break
+                except Exception as e:
+                    Logger.error(
+                        "RatingWidget::__on_can_set_popularity(): %s" % e)
+            if not worked:
+                App().notify.send("Lollypop",
+                                  _("You need to install kid3-cli"))
