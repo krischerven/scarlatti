@@ -342,10 +342,10 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             Configure widget based on albums
             @param items as [Album]
         """
-        self._box.set_min_children_per_line(len(albums))
-        FlowBoxView.populate(self, albums)
         if albums:
             self.show()
+        self._box.set_min_children_per_line(len(albums))
+        FlowBoxView.populate(self, albums)
 
     @property
     def args(self):
