@@ -226,17 +226,6 @@ def do_shift_selection(listbox, row):
             listbox.select_row(children[i])
 
 
-def split_list(l, n=1):
-    """
-        Split list in n parts
-        @param l as []
-        @param n as int
-    """
-    length = len(l)
-    split = [l[i * length // n: (i + 1) * length // n] for i in range(n)]
-    return [l for l in split if l]
-
-
 def noaccents(string):
     """
         Return string without accents lowered

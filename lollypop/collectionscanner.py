@@ -23,7 +23,6 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
 from gettext import gettext as _
 from time import time
 import json
-from multiprocessing import cpu_count
 
 from lollypop.inotify import Inotify
 from lollypop.define import App, ScanType, Type, StorageType, ScanUpdate
@@ -32,7 +31,7 @@ from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
 from lollypop.utils import is_audio, is_pls, get_mtime, profile, create_dir
-from lollypop.utils import split_list, emit_signal
+from lollypop.utils import emit_signal
 
 
 SCAN_QUERY_INFO = "{},{},{},{},{},{}".format(
@@ -66,7 +65,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
-        self.__new_tracks = []
         self.__new_non_album_artists = []
         self.__disable_compilations = True
         if App().settings.get_value("auto-update"):
@@ -378,6 +376,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
             Import locally saved web tracks
         """
+        return
         try:
             # Directly add files, walk through directories
             f = Gio.File.new_for_path(self._WEB_COLLECTION)
@@ -493,28 +492,17 @@ class CollectionScanner(GObject.GObject, TagReader):
         db_mtimes = App().tracks.get_mtimes()
         self.__progress_total = len(files)
         self.__progress_count = 0
-        split_files = split_list(files, max(1, cpu_count() // 2))
-        self.__new_tracks = []
-        threads = []
-        for files in split_files:
-            thread = App().task_helper.run(self.__scan_files, files, db_mtimes,
-                                           scan_type)
-            threads.append(thread)
-
-        # Wait for scan to finish
-        for thread in threads:
-            thread.join()
-
+        new_tracks = self.__scan_files(files, db_mtimes, scan_type)
         self.__remove_old_tracks(db_uris, scan_type)
 
         SqlCursor.remove(App().db)
 
         if scan_type != ScanType.EXTERNAL:
             self.__add_monitor(dirs)
-            GLib.idle_add(self.__finish, self.__new_tracks)
+            GLib.idle_add(self.__finish, new_tracks)
 
         if scan_type == ScanType.EXTERNAL:
-            App().player.play_uris(self.__new_tracks)
+            App().player.play_uris(new_tracks)
 
     def __scan_to_handle(self, uri):
         """
@@ -546,6 +534,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @return new track uris as [str]
             @thread safe
         """
+        new_tracks = []
         SqlCursor.add(App().db)
         discoverer = Discoverer()
         try:
@@ -569,7 +558,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                             mtime = int(time())
                         Logger.debug("Adding file: %s" % uri)
                         self.__add2db(discoverer, uri, mtime, storage_type)
-                        self.__new_tracks.append(uri)
+                        new_tracks.append(uri)
                     if db_mtime != 0:
                         del db_mtimes[uri]
                 except Exception as e:
@@ -585,6 +574,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 emit_signal(self, "artist-updated",
                             artist_id, ScanUpdate.ADDED)
         SqlCursor.remove(App().db)
+        return new_tracks
 
     def __remove_old_tracks(self, uris, scan_type):
         """
