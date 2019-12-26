@@ -376,7 +376,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
             Import locally saved web tracks
         """
-        return
         try:
             # Directly add files, walk through directories
             f = Gio.File.new_for_path(self._WEB_COLLECTION)
