@@ -232,7 +232,7 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(action)
         item = Gio.MenuItem.new(_("All genres"), "app.all_party_ids")
         self.__party_submenu.append_item(item)
-        genres = App().artists.get()
+        genres = App().genres.get()
         genres.append((Type.WEB, _("Web"), _("Web")))
         for (genre_id, name, sortname) in genres:
             in_party_ids = not party_ids or genre_id in party_ids
