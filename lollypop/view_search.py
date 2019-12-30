@@ -16,7 +16,7 @@ from gettext import gettext as _
 from urllib.parse import urlparse
 
 from lollypop.define import App, StorageType
-from lollypop.define import Size, ViewType, MARGIN_SMALL
+from lollypop.define import ViewType, MARGIN_SMALL
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.search import Search
 from lollypop.utils import get_network_available, get_youtube_dl
@@ -74,10 +74,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__bottom_buttons.add(self.__local_button)
         self.__bottom_buttons.add(web_button)
         self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self.__view.show()
-        self.__view.set_external_scrolled(self._scrolled)
-        self.__view.set_width(Size.MEDIUM)
-        self.__view.get_style_context().add_class("padding")
         self.__banner = SearchBannerWidget(self.__view)
         self.__banner.show()
         self.add_widget(self.__view, self.__banner)
@@ -102,10 +98,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Populate search
             in db based on text entry current text
         """
+        # FIXME
         self.__search_empty = True
-        self.__view.stop()
-        self.__view.clear()
         self.cancel()
+        return
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             state = self.__get_current_search_state()

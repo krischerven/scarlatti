@@ -18,9 +18,9 @@ from lollypop.view import View
 from lollypop.utils import get_network_available
 from lollypop.define import ViewType, StorageType, Size
 from lollypop.helper_filtering import FilteringHelper
-from lollypop.view_albums_box import AlbumsPopularsBoxView
-from lollypop.view_albums_box import AlbumsRandomGenreBoxView
-from lollypop.view_artists_rounded import RoundedArtistsRandomView
+from lollypop.view_albums_line import AlbumsPopularsLineView
+from lollypop.view_albums_line import AlbumsRandomGenresLineView
+from lollypop.view_artists_rounded_line import RoundedArtistsLineView
 from lollypop.widgets_banner_today import TodayBannerWidget
 
 
@@ -53,21 +53,21 @@ class SuggestionsView(FilteringHelper, View):
         """
             Populate view
         """
-        for _class in [AlbumsPopularsBoxView,
-                       RoundedArtistsRandomView,
-                       AlbumsRandomGenreBoxView]:
+        for _class in [AlbumsPopularsLineView,
+                       RoundedArtistsLineView,
+                       AlbumsRandomGenresLineView]:
             view = _class(self._view_type)
             view.populate()
             self.__grid.add(view)
         if get_network_available("SPOTIFY") and\
                 get_network_available("YOUTUBE"):
-            from lollypop.view_albums_box import AlbumsSpotifyBoxView
-            spotify_view = AlbumsSpotifyBoxView(_("You might like this"),
-                                                self._view_type)
+            from lollypop.view_albums_line import AlbumsSpotifyLineView
+            spotify_view = AlbumsSpotifyLineView(_("You might like this"),
+                                                 self._view_type)
             spotify_view.populate(StorageType.SPOTIFY_SIMILARS)
             self.__grid.add(spotify_view)
-            spotify_view = AlbumsSpotifyBoxView(_("New albums from Spotify"),
-                                                self._view_type)
+            spotify_view = AlbumsSpotifyLineView(_("New albums from Spotify"),
+                                                 self._view_type)
             spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
             self.__grid.add(spotify_view)
         GLib.timeout_add(250, self.__welcome_screen)
