@@ -148,11 +148,9 @@ class ArtistsSearchLineView(ArtistsLineView):
         """
         ArtistsLineView.populate(self, [item_id])
         self._box.set_min_children_per_line(len(self._box.get_children()))
-        self.show()
 
     def clear(self):
         """
             Clear the view
         """
         ArtistsLineView.clear(self)
-        self.hide()

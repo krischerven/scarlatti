@@ -12,7 +12,7 @@
 
 from gi.repository import GObject, GLib
 
-from lollypop.define import App
+from lollypop.define import App, Type
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 
@@ -133,8 +133,11 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         artist_ids = self.__search_artists(items, storage_type, cancellable)
-        for artist_id in artist_ids:
-            GLib.idle_add(self.emit, "match-artist", artist_id)
+        if artist_ids:
+            for artist_id in artist_ids:
+                GLib.idle_add(self.emit, "match-artist", artist_id)
+        else:
+            GLib.idle_add(self.emit, "match-artist", Type.NONE)
         self.__search_count -= 1
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
@@ -147,8 +150,11 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         album_ids = self.__search_albums(items, storage_type, cancellable)
-        for album_id in album_ids:
-            GLib.idle_add(self.emit, "match-album", album_id)
+        if album_ids:
+            for album_id in album_ids:
+                GLib.idle_add(self.emit, "match-album", album_id)
+        else:
+            GLib.idle_add(self.emit, "match-album", Type.NONE)
         self.__search_count -= 1
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")

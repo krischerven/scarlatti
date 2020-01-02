@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Gio
 from gettext import gettext as _
 from urllib.parse import urlparse
 
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, Type
 from lollypop.define import ViewType, MARGIN_SMALL
 from lollypop.search_local import LocalSearch
 from lollypop.utils import get_network_available, get_youtube_dl
@@ -117,6 +117,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         # FIXME
         self.__search_empty = True
+        self.__albums_line_view.clear()
         self.__artists_line_view.clear()
         self.cancel()
         if len(self.__current_search) > 1:
@@ -213,9 +214,13 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param artist_id as int
         """
-        self.__artists_line_view.add_value(artist_id)
-        self.__search_empty = False
-        self.show_placeholder(False)
+        if artist_id == Type.NONE:
+            self.__artists_line_view.hide()
+        else:
+            self.__artists_line_view.show()
+            self.__artists_line_view.add_value(artist_id)
+            self.__search_empty = False
+            self.show_placeholder(False)
 
     def _on_local_match_album(self, local_search, album_id):
         """
@@ -223,9 +228,13 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param artist_id as int
         """
-        self.__albums_line_view.add_album(Album(album_id))
-        self.__search_empty = False
-        self.show_placeholder(False)
+        if album_id == Type.NONE:
+            self.__albums_line_view.hide()
+        else:
+            self.__albums_line_view.show()
+            self.__albums_line_view.add_album(Album(album_id))
+            self.__search_empty = False
+            self.show_placeholder(False)
 
     def _on_new_spotify_album(self, spotify, album):
         """
