@@ -17,11 +17,13 @@ from urllib.parse import urlparse
 
 from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN_SMALL
-from lollypop.view_albums_list import AlbumsListView
-from lollypop.search import Search
+from lollypop.search_local import LocalSearch
 from lollypop.utils import get_network_available, get_youtube_dl
 from lollypop.view import View
+from lollypop.objects_album import Album
 from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.view_artists_line import ArtistsSearchLineView
+from lollypop.view_albums_line import AlbumsSearchLineView
 from lollypop.widgets_banner_search import SearchBannerWidget
 
 
@@ -41,6 +43,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
         self.__current_search = ""
+        self.__local_search = LocalSearch()
         self.__search_empty = True
         self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
@@ -73,10 +76,19 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         web_button.set_size_request(125, -1)
         self.__bottom_buttons.add(self.__local_button)
         self.__bottom_buttons.add(web_button)
-        self.__view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self.__banner = SearchBannerWidget(self.__view)
+        self.__banner = SearchBannerWidget(None)
         self.__banner.show()
-        self.add_widget(self.__view, self.__banner)
+        grid = Gtk.Grid()
+        grid.show()
+        grid.get_style_context().add_class("padding")
+        grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__artists_line_view = ArtistsSearchLineView()
+        self.__artists_line_view.show()
+        self.__albums_line_view = AlbumsSearchLineView()
+        self.__albums_line_view.show()
+        grid.add(self.__artists_line_view)
+        grid.add(self.__albums_line_view)
+        self.add_widget(grid, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
         self.set_search(initial_search)
@@ -85,6 +97,12 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.show_placeholder(True,
                               _("Search for artists, albums and tracks"))
         return [
+                (self.__local_search, "match-artist",
+                 "_on_local_match_artist"),
+                (self.__local_search, "match-album",
+                 "_on_local_match_album"),
+                (self.__local_search, "search-finished",
+                 "_on_search_finished"),
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
                 (App().settings, "changed::network-access",
@@ -100,30 +118,19 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         # FIXME
         self.__search_empty = True
+        self.__artists_line_view.clear()
         self.cancel()
-        return
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             state = self.__get_current_search_state()
             current_search = self.__current_search.lower()
-            search = Search()
             if state == "local":
-                search.get(current_search,
+                self.__local_search.get(
+                           current_search,
                            StorageType.COLLECTION | StorageType.SAVED,
-                           self.__cancellable,
-                           callback=(self.__on_search_get,
-                                     current_search,
-                                     StorageType.COLLECTION |
-                                     StorageType.SAVED))
+                           self.__cancellable)
             elif state == "web":
-                search.get(current_search,
-                           StorageType.EPHEMERAL |
-                           StorageType.SPOTIFY_NEW_RELEASES,
-                           self.__cancellable,
-                           callback=(self.__on_search_get,
-                                     current_search,
-                                     StorageType.EPHEMERAL |
-                                     StorageType.SPOTIFY_NEW_RELEASES,))
+                pass
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))
@@ -201,10 +208,30 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__view.stop()
         self.__banner.spinner.stop()
 
+    def _on_local_match_artist(self, local_search, artist_id):
+        """
+            Add a new artist to view
+            @param local_search as LocalSearch
+            @param artist_id as int
+        """
+        self.__artists_line_view.add_value(artist_id)
+        self.__search_empty = False
+        self.show_placeholder(False)
+
+    def _on_local_match_album(self, local_search, album_id):
+        """
+            Add a new album to view
+            @param local_search as LocalSearch
+            @param artist_id as int
+        """
+        self.__albums_line_view.add_album(Album(album_id))
+        self.__search_empty = False
+        self.show_placeholder(False)
+
     def _on_new_spotify_album(self, spotify, album):
         """
             Add album
-            @param spotify as SpotifyHelper
+            @param spotify as SpotifySearch
             @param album as Album
         """
         self.__search_empty = False

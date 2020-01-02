@@ -110,7 +110,7 @@ class SimilarsPlayer:
             Get similars
             @param artist_id as str
             @param providers as {}
-            @param provider as SpotifyHelper/LastFM
+            @param provider as SpotifySearch/LastFM
             @param cancellable as Gio.Cancellable
         """
         if artist_id is None:

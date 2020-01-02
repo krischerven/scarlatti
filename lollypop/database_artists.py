@@ -346,8 +346,10 @@ class ArtistsDatabase:
                            ("%" + no_accents, storage_type),
                            ("%" + no_accents + "%", storage_type)]:
                 request = "SELECT DISTINCT artists.rowid\
-                       FROM artists\
-                       WHERE noaccents(artists.name) LIKE ? AND\
+                       FROM albums, album_artists, artists\
+                       WHERE album_artists.artist_id=artists.rowid AND\
+                       album_artists.album_id=albums.rowid AND\
+                       noaccents(artists.name) LIKE ? AND\
                        albums.storage_type & ? LIMIT 25"
                 result = sql.execute(request, filter)
                 items += list(itertools.chain(*result))

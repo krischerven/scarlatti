@@ -20,7 +20,7 @@ from lollypop.define import ViewType, StorageType, Size
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_line import AlbumsPopularsLineView
 from lollypop.view_albums_line import AlbumsRandomGenresLineView
-from lollypop.view_artists_rounded_line import RoundedArtistsLineView
+from lollypop.view_artists_line import ArtistsRandomLineView
 from lollypop.widgets_banner_today import TodayBannerWidget
 
 
@@ -54,7 +54,7 @@ class SuggestionsView(FilteringHelper, View):
             Populate view
         """
         for _class in [AlbumsPopularsLineView,
-                       RoundedArtistsLineView,
+                       ArtistsRandomLineView,
                        AlbumsRandomGenresLineView]:
             view = _class(self._view_type)
             view.populate()

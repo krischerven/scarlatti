@@ -44,12 +44,14 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             (App().scanner, "artist-updated", "_on_artist_updated")
         ]
 
-    def populate(self):
+    def populate(self, artist_ids=[]):
         """
-            Populate view
+            Populate view with artist id
+            Show all artists if empty
+            @param artist_ids as [int]
         """
-        def on_load(items):
-            FlowBoxView.populate(self, items)
+        def on_load(artist_ids):
+            FlowBoxView.populate(self, artist_ids)
 
         def load():
             if App().settings.get_value("show-performers"):
@@ -58,17 +60,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
                 ids = App().artists.get()
             return ids
 
-        App().task_helper.run(load, callback=(on_load,))
-
-    def remove_value(self, item_id):
-        """
-            Remove value
-            @param item_id as int
-        """
-        for child in self._box.get_children():
-            if child.data == item_id:
-                child.destroy()
-                break
+        if artist_ids:
+            FlowBoxView.populate(self, artist_ids)
+        else:
+            App().task_helper.run(load, callback=(on_load,))
 
     @property
     def args(self):

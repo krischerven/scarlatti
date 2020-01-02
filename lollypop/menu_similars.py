@@ -222,7 +222,7 @@ class SimilarsMenu(Gtk.Bin):
             Get similars
             @param artist_id as str
             @param providers as []
-            @param provider as SpotifyHelper/LastFM
+            @param provider as SpotifySearch/LastFM
         """
         if artist_id is None:
             if providers:

@@ -27,9 +27,9 @@ from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
 
 
-class SpotifyHelper(GObject.Object):
+class SpotifySearch(GObject.Object):
     """
-        Helper for Spotify
+        Search for Spotify
     """
     __MIN_ITEMS_PER_STORAGE_TYPE = 20
     __MAX_ITEMS_PER_STORAGE_TYPE = 50
@@ -64,7 +64,7 @@ class SpotifyHelper(GObject.Object):
                         int(decode["expires_in"])
                     self.__token = decode["access_token"]
                 except Exception as e:
-                    Logger.error("SpotifyHelper::get_token(): %s", e)
+                    Logger.error("SpotifySearch::get_token(): %s", e)
             token_uri = "https://accounts.spotify.com/api/token"
             credentials = "%s:%s" % (SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
             encoded = b64encode(credentials.encode("utf-8"))
@@ -75,7 +75,7 @@ class SpotifyHelper(GObject.Object):
                                        "Basic %s" % credentials)
             App().task_helper.send_message(msg, cancellable, on_response)
         except Exception as e:
-            Logger.error("SpotifyHelper::get_token(): %s", e)
+            Logger.error("SpotifySearch::get_token(): %s", e)
 
     def wait_for_token(self, cancellable):
         """
@@ -129,7 +129,7 @@ class SpotifyHelper(GObject.Object):
                     artist_id = item["id"]
                     return artist_id
         except Exception as e:
-            Logger.error("SpotifyHelper::get_artist_id(): %s", e)
+            Logger.error("SpotifySearch::get_artist_id(): %s", e)
         return None
 
     def search_similar_albums(self, cancellable):
@@ -171,7 +171,7 @@ class SpotifyHelper(GObject.Object):
                                            StorageType.SPOTIFY_SIMILARS,
                                            cancellable)
         except Exception as e:
-            Logger.warning("SpotifyHelper::search_similar_albums(): %s", e)
+            Logger.warning("SpotifySearch::search_similar_albums(): %s", e)
         del self.__album_ids[cancellable]
 
     def search_new_releases(self, cancellable):
@@ -199,7 +199,7 @@ class SpotifyHelper(GObject.Object):
                                              StorageType.SPOTIFY_NEW_RELEASES,
                                              cancellable)
         except Exception as e:
-            Logger.warning("SpotifyHelper::search_new_releases(): %s", e)
+            Logger.warning("SpotifySearch::search_new_releases(): %s", e)
         del self.__album_ids[cancellable]
 
     def get_similar_artists(self, artist_id, cancellable):
@@ -232,7 +232,7 @@ class SpotifyHelper(GObject.Object):
                                     item["name"],
                                     image_uri))
         except Exception as e:
-            Logger.error("SpotifyHelper::get_similar_artists(): %s", e)
+            Logger.error("SpotifySearch::get_similar_artists(): %s", e)
         return artists
 
     def search(self, search, cancellable):
@@ -265,7 +265,7 @@ class SpotifyHelper(GObject.Object):
                                                  StorageType.EPHEMERAL,
                                                  cancellable)
         except Exception as e:
-            Logger.warning("SpotifyHelper::search(): %s", e)
+            Logger.warning("SpotifySearch::search(): %s", e)
         if not cancellable.is_cancelled():
             emit_signal(self, "search-finished")
         del self.__album_ids[cancellable]
@@ -316,7 +316,7 @@ class SpotifyHelper(GObject.Object):
                 self.clean_old_albums(storage_types)
             Logger.info("Spotify download finished")
         except Exception as e:
-            Logger.error("SpotifyHelper::__populate_db(): %s", e)
+            Logger.error("SpotifySearch::__populate_db(): %s", e)
         self.__is_running = False
 
     def clean_old_albums(self, storage_types):
@@ -365,7 +365,7 @@ class SpotifyHelper(GObject.Object):
                 return decode["items"]
         except Exception as e:
             Logger.warning(
-                "SpotifyHelper::__get_artist_albums_payload(): %s", e)
+                "SpotifySearch::__get_artist_albums_payload(): %s", e)
         return None
 
     def __get_track_payload(self, helper, spotify_id, cancellable):
@@ -382,7 +382,7 @@ class SpotifyHelper(GObject.Object):
             if status:
                 return json.loads(data.decode("utf-8"))
         except Exception as e:
-            Logger.error("SpotifyHelper::__get_track_payload(): %s", e)
+            Logger.error("SpotifySearch::__get_track_payload(): %s", e)
         return {}
 
     def __download_cover(self, album_id, cover_uri, storage_type, cancellable):
@@ -406,7 +406,7 @@ class SpotifyHelper(GObject.Object):
                     emit_signal(self, "new-album", album)
         except Exception as e:
             Logger.error(
-                "SpotifyHelper::__download_cover(): %s", e)
+                "SpotifySearch::__download_cover(): %s", e)
 
     def __create_album_from_tracks_payload(self, payload, storage_type,
                                            cancellable):
@@ -431,7 +431,7 @@ class SpotifyHelper(GObject.Object):
                                              item["name"],
                                              storage_type)
             if exists_in_db:
-                Logger.debug("SpotifyHelper: track exists in DB: %s - %s",
+                Logger.debug("SpotifySearch: track exists in DB: %s - %s",
                              item["name"], artists)
                 continue
             (album_id,
@@ -471,7 +471,7 @@ class SpotifyHelper(GObject.Object):
                                     None,
                                     storage_type)
             if exists_in_db:
-                Logger.debug("SpotifyHelper: album exists in DB: %s - %s",
+                Logger.debug("SpotifySearch: album exists in DB: %s - %s",
                              artists, album_item["name"])
                 continue
             uri = "https://api.spotify.com/v1/albums/%s" % album_item["id"]
@@ -502,7 +502,7 @@ class SpotifyHelper(GObject.Object):
         _album_artists = []
         for artist in payload["album"]["artists"]:
             _album_artists.append(artist["name"])
-        Logger.debug("SpotifyHelper::__save_track(): %s - %s",
+        Logger.debug("SpotifySearch::__save_track(): %s - %s",
                      _artists, title)
         # Translate to tag value
         artists = ";".join(_artists)

@@ -21,7 +21,7 @@ from lollypop.objects_album import Album
 
 class ArtistProvider:
     """
-        Internal lollypop provider API compatible with LastFM/SpotifyHelper
+        Internal lollypop provider API compatible with LastFM/SpotifySearch
     """
     def get_similar_artists(self, artist, cancellable):
         """

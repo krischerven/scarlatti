@@ -14,7 +14,7 @@ from gi.repository import GLib, Gtk, Gio, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type, MARGIN
+from lollypop.define import App, Type, MARGIN, ViewType
 from lollypop.objects_album import Album
 from lollypop.utils import get_network_available
 from lollypop.helper_signals import signals_map
@@ -110,9 +110,9 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             style_context.add_class("text-x-large")
 
 
-class AlbumsArtistBoxView(AlbumsLineView):
+class AlbumsArtistLineView(AlbumsLineView):
     """
-        Artist album box
+        Artist album line
     """
 
     def __init__(self,  album, artist_id, view_type):
@@ -202,6 +202,33 @@ class AlbumsRandomGenresLineView(AlbumsLineView):
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
+
+
+class AlbumsSearchLineView(AlbumsLineView):
+    """
+        Search album line
+    """
+    def __init__(self):
+        """
+            Init view
+        """
+        AlbumsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
+        self._label.set_text(_("Matching albums"))
+
+    def add_album(self, album):
+        """
+            Insert item
+            @param album as Album
+        """
+        AlbumsLineView.insert_album(self, album, -1)
+        self._box.set_min_children_per_line(len(self._box.get_children()))
+
+    def clear(self):
+        """
+            Clear the view
+        """
+        AlbumsLineView.clear(self)
+        self.hide()
 
 
 class AlbumsSpotifyLineView(AlbumsLineView):

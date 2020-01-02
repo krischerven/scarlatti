@@ -77,6 +77,13 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
                 child.destroy()
                 break
 
+    def clear(self):
+        """
+            Clear flowbox
+        """
+        for child in self._box.get_children():
+            child.destroy()
+
     def activate_child(self):
         """
             Activated typeahead row

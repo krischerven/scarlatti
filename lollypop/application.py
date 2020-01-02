@@ -41,7 +41,7 @@ from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
 from lollypop.art import Art
 from lollypop.logger import Logger
-from lollypop.helper_spotify import SpotifyHelper
+from lollypop.search_spotify import SpotifySearch
 from lollypop.sqlcursor import SqlCursor
 from lollypop.settings import Settings
 from lollypop.database_albums import AlbumsDatabase
@@ -200,7 +200,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.art = Art()
         self.art.update_art_size()
         self.art.clean_old_artwork()
-        self.spotify = SpotifyHelper()
+        self.spotify = SpotifySearch()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
             MPRIS(self)

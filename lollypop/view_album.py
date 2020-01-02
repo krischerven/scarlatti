@@ -186,12 +186,12 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             self.emit("populated")
             self.__banner.show()
             if self._view_type & ViewType.OVERLAY:
-                from lollypop.view_albums_box import AlbumsArtistBoxView
+                from lollypop.view_albums_line import AlbumsArtistLineView
                 for artist_id in self.__album.artist_ids:
-                    others_box = AlbumsArtistBoxView(self.__album, artist_id,
-                                                     ViewType.SMALL |
-                                                     ViewType.ALBUM |
-                                                     ViewType.SCROLLED)
+                    others_box = AlbumsArtistLineView(self.__album, artist_id,
+                                                      ViewType.SMALL |
+                                                      ViewType.ALBUM |
+                                                      ViewType.SCROLLED)
                     others_box.set_margin_start(MARGIN)
                     others_box.set_margin_end(MARGIN)
                     others_box.populate()

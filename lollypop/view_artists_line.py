@@ -14,14 +14,14 @@ from gi.repository import Gtk, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN
+from lollypop.define import App, MARGIN, ViewType
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.view_artists_rounded import RoundedArtistsView
 
 
-class RoundedArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
+class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
     """
-        Show 6 random artists in a FlowBox
+        Show artist in an horizontal flowbox
     """
 
     def __init__(self, view_type):
@@ -57,23 +57,6 @@ class RoundedArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
         self._label.set_property("halign", Gtk.Align.START)
         self._box.set_property("halign", Gtk.Align.CENTER)
         self.add_widget(self._box)
-
-    def populate(self):
-        """
-            Populate view
-        """
-        def on_load(items):
-            self._box.set_min_children_per_line(len(items))
-            RoundedArtistsView.populate(self, items)
-            if items:
-                self.show()
-
-        def load():
-            ids = App().artists.get_randoms(15)
-            return ids
-
-        self._label.set_text(_("Why not listen to?"))
-        App().task_helper.run(load, callback=(on_load,))
 
     @property
     def args(self):
@@ -116,3 +99,59 @@ class RoundedArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
             style_context.remove_class("text-x-large")
         else:
             style_context.add_class("text-x-large")
+
+
+class ArtistsRandomLineView(ArtistsLineView):
+    """
+        Line view showing 6 random artists
+    """
+    def __init__(self, view_type):
+        """
+            Init artist view
+            @param view_type as ViewType
+        """
+        ArtistsLineView.__init__(self, view_type)
+        self._label.set_text(_("Why not listen to?"))
+
+    def populate(self):
+        """
+            Populate view
+        """
+        def on_load(items):
+            self._box.set_min_children_per_line(len(items))
+            ArtistsLineView.populate(self, items)
+            if items:
+                self.show()
+
+        def load():
+            ids = App().artists.get_randoms(15)
+            return ids
+
+        App().task_helper.run(load, callback=(on_load,))
+
+
+class ArtistsSearchLineView(ArtistsLineView):
+    """
+        Line view for search
+    """
+    def __init__(self):
+        """
+            Init artist view
+        """
+        ArtistsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
+        self._label.set_text(_("Matching artists"))
+
+    def add_value(self, item_id):
+        """
+            Insert item
+            @param item_id as int
+        """
+        ArtistsLineView.populate(self, [item_id])
+        self._box.set_min_children_per_line(len(self._box.get_children()))
+
+    def clear(self):
+        """
+            Clear the view
+        """
+        ArtistsLineView.clear(self)
+        self.hide()

@@ -33,8 +33,16 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             @param font_height as int
         """
         self.__font_height = font_height
-        RoundedFlowBoxWidget.__init__(self, item[0], item[1],
-                                      item[1], view_type)
+        # Get values from DB
+        if isinstance(item, int):
+            artist_id = item
+            artist_name = artist_sortname = App().artists.get_name(artist_id)
+        else:
+            artist_id = item[0]
+            artist_name = item[1]
+            artist_sortname = item[2]
+        RoundedFlowBoxWidget.__init__(self, artist_id, artist_name,
+                                      artist_sortname, view_type)
 
     def populate(self):
         """

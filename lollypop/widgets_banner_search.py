@@ -27,7 +27,7 @@ class SearchBannerWidget(BannerWidget):
             Init banner
             @param view as AlbumsListView
         """
-        BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
+        BannerWidget.__init__(self, ViewType.OVERLAY)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SearchBannerWidget.ui")
         self.__view = view
