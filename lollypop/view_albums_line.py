@@ -220,6 +220,7 @@ class AlbumsSearchLineView(AlbumsLineView):
             Insert item
             @param album as Album
         """
+        self.show()
         AlbumsLineView.insert_album(self, album, -1)
         self._box.set_min_children_per_line(len(self._box.get_children()))
 
