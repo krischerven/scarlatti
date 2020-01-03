@@ -33,6 +33,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             @param view_type as ViewType
         """
         AlbumsBoxView.__init__(self, [Type.NONE], [], view_type)
+        self.connect("map", self.__on_map)
         self.set_row_spacing(5)
         self.set_property("valign", Gtk.Align.START)
         self._label = Gtk.Label.new()
@@ -88,7 +89,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 
     def _on_populated(self, widget):
         """
-            Update button state
+            Update buttons state
             @param widget as Gtk.Widget
         """
         AlbumsBoxView._on_populated(self, widget)
@@ -108,6 +109,13 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             style_context.remove_class("text-x-large")
         else:
             style_context.add_class("text-x-large")
+
+    def __on_map(self, widget):
+        """
+            Update buttons state
+        """
+        if self.is_populated:
+            self._update_buttons()
 
 
 class AlbumsArtistLineView(AlbumsLineView):

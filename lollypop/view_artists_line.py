@@ -30,6 +30,7 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
             @param view_type as ViewType
         """
         RoundedArtistsView.__init__(self, view_type)
+        self.connect("map", self.__on_map)
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -98,6 +99,13 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
             style_context.remove_class("text-x-large")
         else:
             style_context.add_class("text-x-large")
+
+    def __on_map(self, widget):
+        """
+            Update buttons state
+        """
+        if self.is_populated:
+            self._update_buttons()
 
 
 class ArtistsRandomLineView(ArtistsLineView):
