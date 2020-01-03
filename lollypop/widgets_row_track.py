@@ -111,23 +111,18 @@ class TrackRow(Gtk.ListBoxRow):
                Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
                _("Remove from playlist"))
-        elif not self.__view_type & ViewType.SEARCH:
+        else:
             self.__action_button = Gtk.Button.new_from_icon_name(
                "view-more-symbolic",
                Gtk.IconSize.MENU)
-        else:
-            self.__action_button = None
-        if self.__action_button is not None:
-            self.__action_button.show()
-            self.__action_button.connect("clicked",
-                                         self.__on_action_button_clicked)
-            self.__action_button.set_margin_end(MARGIN_SMALL)
-            self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
-            context = self.__action_button.get_style_context()
-            context.add_class("menu-button")
-            self._grid.add(self.__action_button)
-        else:
-            self.__duration_label.set_margin_end(MARGIN_SMALL)
+        self.__action_button.show()
+        self.__action_button.connect("clicked",
+                                     self.__on_action_button_clicked)
+        self.__action_button.set_margin_end(MARGIN_SMALL)
+        self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
+        context = self.__action_button.get_style_context()
+        context.add_class("menu-button")
+        self._grid.add(self.__action_button)
         self.add(self._grid)
         self.set_indicator(self._get_indicator_type())
         self.update_duration()

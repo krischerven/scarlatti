@@ -221,7 +221,7 @@ class AlbumsSearchLineView(AlbumsLineView):
             Init view
         """
         AlbumsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
-        self._label.set_text(_("Matching albums"))
+        self._label.set_text(_("Albums"))
 
     def add_album(self, album):
         """

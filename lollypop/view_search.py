@@ -15,15 +15,17 @@ from gi.repository import Gtk, GLib, Gio
 from gettext import gettext as _
 from urllib.parse import urlparse
 
-from lollypop.define import App, StorageType, Type
+from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN_SMALL
 from lollypop.search_local import LocalSearch
 from lollypop.utils import get_network_available, get_youtube_dl
 from lollypop.view import View
 from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.view_artists_line import ArtistsSearchLineView
 from lollypop.view_albums_line import AlbumsSearchLineView
+from lollypop.view_tracks_search import SearchTracksView
 from lollypop.widgets_banner_search import SearchBannerWidget
 
 
@@ -78,16 +80,19 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__bottom_buttons.add(web_button)
         self.__banner = SearchBannerWidget(None)
         self.__banner.show()
-        grid = Gtk.Grid()
-        grid.show()
-        grid.get_style_context().add_class("padding")
-        grid.set_orientation(Gtk.Orientation.VERTICAL)
-        grid.set_property("valign", Gtk.Align.START)
+        self.__grid = Gtk.Grid()
+        self.__grid.show()
+        self.__grid.get_style_context().add_class("opacity-transition-fast")
+        self.__grid.get_style_context().add_class("padding")
+        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__grid.set_property("valign", Gtk.Align.START)
         self.__artists_line_view = ArtistsSearchLineView()
         self.__albums_line_view = AlbumsSearchLineView()
-        grid.add(self.__artists_line_view)
-        grid.add(self.__albums_line_view)
-        self.add_widget(grid, self.__banner)
+        self.__search_tracks_view = SearchTracksView()
+        self.__grid.add(self.__artists_line_view)
+        self.__grid.add(self.__albums_line_view)
+        self.__grid.add(self.__search_tracks_view)
+        self.add_widget(self.__grid, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
         self.set_search(initial_search)
@@ -100,6 +105,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                  "_on_local_match_artist"),
                 (self.__local_search, "match-album",
                  "_on_local_match_album"),
+                (self.__local_search, "match-track",
+                 "_on_local_match_track"),
                 (self.__local_search, "search-finished",
                  "_on_search_finished"),
                 (App().spotify, "new-album", "_on_new_spotify_album"),
@@ -119,6 +126,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__search_empty = True
         self.__albums_line_view.clear()
         self.__artists_line_view.clear()
+        self.__search_tracks_view.clear()
         self.cancel()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
@@ -214,13 +222,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param artist_id as int
         """
-        if artist_id == Type.NONE:
-            self.__artists_line_view.hide()
-        else:
-            self.__artists_line_view.show()
-            self.__artists_line_view.add_value(artist_id)
-            self.__search_empty = False
-            self.show_placeholder(False)
+        self.__artists_line_view.show()
+        self.__artists_line_view.add_value(artist_id)
+        self.__search_empty = False
+        self.show_placeholder(False)
 
     def _on_local_match_album(self, local_search, album_id):
         """
@@ -228,13 +233,21 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param artist_id as int
         """
-        if album_id == Type.NONE:
-            self.__albums_line_view.hide()
-        else:
-            self.__albums_line_view.show()
-            self.__albums_line_view.add_album(Album(album_id))
-            self.__search_empty = False
-            self.show_placeholder(False)
+        self.__albums_line_view.show()
+        self.__albums_line_view.add_album(Album(album_id))
+        self.__search_empty = False
+        self.show_placeholder(False)
+
+    def _on_local_match_track(self, local_search, track_id):
+        """
+            Add a new track to view
+            @param local_search as LocalSearch
+            @param track_id as int
+        """
+        self.__search_tracks_view.show()
+        self.__search_tracks_view.append_row(Track(track_id))
+        self.__search_empty = False
+        self.show_placeholder(False)
 
     def _on_new_spotify_album(self, spotify, album):
         """
@@ -255,6 +268,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__banner.spinner.stop()
         if self.__search_empty:
             self.show_placeholder(True, _("No results for this search"))
+        else:
+            self.__grid.set_state_flags(Gtk.StateFlags.VISITED, True)
 
 #######################
 # PRIVATE             #
@@ -316,6 +331,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Timeout filtering
             @param widget as Gtk.TextEntry
         """
+        self.__grid.unset_state_flags(Gtk.StateFlags.VISITED)
         self.__banner.play_button.set_sensitive(False)
         self.__banner.new_button.set_sensitive(False)
         state = self.__get_current_search_state()

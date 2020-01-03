@@ -146,7 +146,7 @@ class ArtistsSearchLineView(ArtistsLineView):
             Init artist view
         """
         ArtistsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
-        self._label.set_text(_("Matching artists"))
+        self._label.set_text(_("Artists"))
 
     def add_value(self, item_id):
         """

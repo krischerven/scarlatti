@@ -152,11 +152,8 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         album_ids = self.__search_albums(items, storage_type, cancellable)
-        if album_ids:
-            for album_id in album_ids:
-                GLib.idle_add(self.emit, "match-album", album_id)
-        else:
-            GLib.idle_add(self.emit, "match-album", Type.NONE)
+        for album_id in album_ids:
+            GLib.idle_add(self.emit, "match-album", album_id)
         self.__search_count -= 1
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
@@ -169,11 +166,8 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         track_ids = self.__search_tracks(items, storage_type, cancellable)
-        if track_ids:
-            for track_id in track_ids:
-                GLib.idle_add(self.emit, "match-track", track_id)
-        else:
-            GLib.idle_add(self.emit, "match-track", Type.NONE)
+        for track_id in track_ids:
+            GLib.idle_add(self.emit, "match-track", track_id)
         self.__search_count -= 1
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
