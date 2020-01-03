@@ -271,6 +271,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.show_placeholder(True, _("No results for this search"))
         else:
             self.__grid.set_state_flags(Gtk.StateFlags.VISITED, True)
+            GLib.idle_add(self.__albums_line_view.update_buttons)
+            GLib.idle_add(self.__artists_line_view.update_buttons)
 
 #######################
 # PRIVATE             #
