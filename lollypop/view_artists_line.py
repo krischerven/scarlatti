@@ -55,7 +55,6 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
         HorizontalScrollingHelper.__init__(self)
         self.add(header)
         self._label.set_property("halign", Gtk.Align.START)
-        self._box.set_property("halign", Gtk.Align.CENTER)
         self.add_widget(self._box)
 
     @property

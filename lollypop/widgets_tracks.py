@@ -20,7 +20,7 @@ from lollypop.helper_gestures import GesturesHelper
 
 class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
     """
-        A list of tracks
+        Widget showing a track list
     """
 
     __gsignals__ = {

@@ -42,11 +42,13 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        self.__search_count = 2
+        self.__search_count = 3
         items = self.__split_string(search)
         App().task_helper.run(self.__get_artists, items, storage_type,
                               cancellable)
         App().task_helper.run(self.__get_albums, items, storage_type,
+                              cancellable)
+        App().task_helper.run(self.__get_tracks, items, storage_type,
                               cancellable)
 
 #######################
@@ -155,6 +157,23 @@ class LocalSearch(GObject.Object):
                 GLib.idle_add(self.emit, "match-album", album_id)
         else:
             GLib.idle_add(self.emit, "match-album", Type.NONE)
+        self.__search_count -= 1
+        if self.__search_count == 0:
+            GLib.idle_add(self.emit, "search-finished")
+
+    def __get_tracks(self, items, storage_type, cancellable):
+        """
+            Get tracks for items
+            @param items as [str]
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        track_ids = self.__search_tracks(items, storage_type, cancellable)
+        if track_ids:
+            for track_id in track_ids:
+                GLib.idle_add(self.emit, "match-track", track_id)
+        else:
+            GLib.idle_add(self.emit, "match-track", Type.NONE)
         self.__search_count -= 1
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
