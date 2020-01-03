@@ -13,7 +13,7 @@
 from gi.repository import Gtk, GLib, GObject
 
 from lollypop.define import App, ViewType, MARGIN, ScanUpdate
-from lollypop.view_tracks import TracksView
+from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view_lazyloading import LazyLoadingView
@@ -60,7 +60,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         """
             Populate the view with album
         """
-        self.__tracks_view = TracksView(self.__album, ViewType.ALBUM)
+        self.__tracks_view = AlbumTracksView(self.__album, ViewType.ALBUM)
         self.__tracks_view.show()
         self.__tracks_view.connect("populated", self.__on_tracks_populated)
         self.__tracks_view.set_margin_start(MARGIN)

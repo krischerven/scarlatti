@@ -14,7 +14,7 @@ from gi.repository import Gtk, Gio, GLib, GObject, Pango
 
 from gettext import gettext as _
 
-from lollypop.view_tracks import TracksView
+from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL
 from lollypop.define import ArtBehaviour, StorageType
 from lollypop.utils import popup_widget, emit_signal
@@ -73,9 +73,9 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         context_style.add_class("albumrow-collapsed")
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
-        self.__tracks_view = TracksView(self.__album,
-                                        self.__view_type |
-                                        ViewType.SINGLE_COLUMN)
+        self.__tracks_view = AlbumTracksView(self.__album,
+                                             self.__view_type |
+                                             ViewType.SINGLE_COLUMN)
         self.__tracks_view.connect("activated",
                                    self.__on_tracks_view_activated)
         self.__tracks_view.connect("populated",
