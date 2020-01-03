@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, GLib
 
 from gettext import gettext as _
 
@@ -158,6 +158,7 @@ class ArtistsSearchLineView(ArtistsLineView):
 
     def clear(self):
         """
-            Clear the view
+            Clear and hide the view
         """
         ArtistsLineView.clear(self)
+        GLib.idle_add(self.hide)

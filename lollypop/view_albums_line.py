@@ -233,9 +233,10 @@ class AlbumsSearchLineView(AlbumsLineView):
 
     def clear(self):
         """
-            Clear the view
+            Clear and hide the view
         """
         AlbumsLineView.clear(self)
+        GLib.idle_add(self.hide)
 
 
 class AlbumsSpotifyLineView(AlbumsLineView):
