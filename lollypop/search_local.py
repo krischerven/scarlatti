@@ -12,9 +12,9 @@
 
 from gi.repository import GObject, GLib
 
+from collections import Counter
+
 from lollypop.define import App
-from lollypop.objects_album import Album
-from lollypop.objects_track import Track
 
 
 class LocalSearch(GObject.Object):
@@ -73,14 +73,23 @@ class LocalSearch(GObject.Object):
     def __split_string(self, search_items):
         """
             Explose search items for all search possiblities
-            @param search_items as [str]
+            @param search_items as str
             @return [str]
         """
-        items = []
-        for item in search_items.split():
-            if len(item) > 3 and item != search_items:
-                items.append(item)
-        return [search_items] + sorted(items, key=len)
+        split = search_items.split()
+        i = len(split)
+        if i > 1:
+            items = [" %s" % split[i - 1]]
+            i -= 1
+        else:
+            items = []
+        while i != 0:
+            if i > 1:
+                items.append(" %s " % split[i - 1])
+            else:
+                items.append("%s " % split[0])
+            i -= 1
+        return [search_items] + items
 
     def __search_tracks(self, search_items, storage_type, cancellable):
         """
@@ -95,7 +104,7 @@ class LocalSearch(GObject.Object):
             track_ids += App().tracks.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
-        return list(set(track_ids))
+        return track_ids
 
     def __search_artists(self, search_items, storage_type, cancellable):
         """
@@ -107,7 +116,7 @@ class LocalSearch(GObject.Object):
         """
         artist_ids = []
         for search_str in search_items:
-            artist_ids = App().artists.search(search_str, storage_type)
+            artist_ids += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
         return artist_ids
@@ -122,7 +131,7 @@ class LocalSearch(GObject.Object):
         """
         album_ids = []
         for search_str in search_items:
-            album_ids = App().albums.search(search_str, storage_type)
+            album_ids += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
         return album_ids
@@ -135,6 +144,11 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         artist_ids = self.__search_artists(items, storage_type, cancellable)
+        counter = Counter(artist_ids)
+        artist_ids = sorted(artist_ids,
+                            key=lambda x: (counter[x], x),
+                            reverse=True)
+        artist_ids = list(dict.fromkeys(artist_ids))
         for artist_id in artist_ids:
             GLib.idle_add(self.emit, "match-artist", artist_id)
         self.__search_count -= 1
@@ -149,6 +163,11 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         album_ids = self.__search_albums(items, storage_type, cancellable)
+        counter = Counter(album_ids)
+        album_ids = sorted(album_ids,
+                           key=lambda x: (counter[x], x),
+                           reverse=True)
+        album_ids = list(dict.fromkeys(album_ids))
         for album_id in album_ids:
             GLib.idle_add(self.emit, "match-album", album_id)
         self.__search_count -= 1
@@ -163,63 +182,13 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         track_ids = self.__search_tracks(items, storage_type, cancellable)
+        counter = Counter(track_ids)
+        track_ids = sorted(track_ids,
+                           key=lambda x: (counter[x], x),
+                           reverse=True)
+        track_ids = list(dict.fromkeys(track_ids))[0:10]
         for track_id in track_ids:
             GLib.idle_add(self.emit, "match-track", track_id)
         self.__search_count -= 1
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
-
-    def __get(self, search_items, storage_type, cancellable):
-        """
-            Get track for name
-            @param search_items as str
-            @param storage_type as StorageType
-            @param cancellable as Gio.Cancellable
-            @return items as [(int, Album, bool)]
-        """
-        split_items = self.__split_string(search_items)
-        album_ids = self.__search_albums(split_items, storage_type,
-                                         cancellable)
-        track_ids = self.__search_tracks(split_items, storage_type,
-                                         cancellable)
-        albums = []
-        all_album_ids = []
-        album_tracks = {}
-
-        # Merge albums for tracks
-        for track_id in track_ids:
-            if cancellable.is_cancelled():
-                return []
-            track = Track(track_id)
-            # Get a new album
-            album = track.album
-            if album.id in album_tracks.keys():
-                (album, tracks) = album_tracks[album.id]
-                tracks.append(track)
-                album_tracks[track.album.id] = (album, tracks)
-            else:
-                album_tracks[track.album.id] = (album, [track])
-
-        # Create albums for album results
-        for album_id in album_ids:
-            if cancellable.is_cancelled():
-                return []
-            if album_id not in all_album_ids:
-                all_album_ids.append(album_id)
-                album = Album(album_id)
-                score = self.__calculate_score(album, search_items)
-                albums.append((score, album, False))
-        # Create albums from track results
-        for key in album_tracks.keys():
-            if cancellable.is_cancelled():
-                return []
-            (album, tracks) = album_tracks[key]
-            if album.id not in all_album_ids:
-                album.set_tracks(tracks)
-                score = self.__calculate_score(album, search_items)
-                for track in album.tracks:
-                    score += self.__calculate_score(track, search_items)
-                all_album_ids.append(album.id)
-                albums.append((score, album, True))
-        albums.sort(key=lambda tup: tup[0], reverse=True)
-        return [(album, in_tracks) for (score, album, in_tracks) in albums]

@@ -16,7 +16,7 @@ from gettext import gettext as _
 from urllib.parse import urlparse
 
 from lollypop.define import App, StorageType
-from lollypop.define import ViewType, MARGIN_SMALL
+from lollypop.define import ViewType, MARGIN_SMALL, MARGIN
 from lollypop.search_local import LocalSearch
 from lollypop.utils import get_network_available, get_youtube_dl
 from lollypop.view import View
@@ -82,6 +82,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__banner.show()
         self.__grid = Gtk.Grid()
         self.__grid.show()
+        self.__grid.set_row_spacing(MARGIN)
         self.__grid.get_style_context().add_class("opacity-transition-fast")
         self.__grid.get_style_context().add_class("padding")
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
@@ -89,9 +90,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__artists_line_view = ArtistsSearchLineView()
         self.__albums_line_view = AlbumsSearchLineView()
         self.__search_tracks_view = SearchTracksView()
+        self.__grid.add(self.__search_tracks_view)
         self.__grid.add(self.__artists_line_view)
         self.__grid.add(self.__albums_line_view)
-        self.__grid.add(self.__search_tracks_view)
         self.add_widget(self.__grid, self.__banner)
         self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
