@@ -40,10 +40,20 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         self.__boxes = {}
         self.__menu_queue = []
         self.__submenu_queue = []
+        self.__widgets_queue = []
         self.__add_menu(menu, "main", False, scrolled)
         return [
             (App().window, "adaptive-changed", "_on_adaptive_changed")
         ]
+
+    def append_widget(self, widget):
+        """
+            Append widget to menu
+            @param widget as Gtk.Widget
+        """
+        self.__widgets_queue.append(widget)
+        if not self.__menu_queue:
+            self.__add_widgets()
 
 #######################
 # PROTECTED           #
@@ -60,6 +70,15 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __add_widgets(self):
+        """
+            Add pending widget to menu
+        """
+        main = self.get_child_by_name("main")
+        while self.__widgets_queue:
+            widget = self.__widgets_queue.pop(0)
+            main.add(widget)
+
     def __add_menu(self, menu, menu_name, submenu, scrolled):
         """
             Build menu
@@ -154,6 +173,8 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         elif self.__submenu_queue:
             (menu, menu_name, indexes) = self.__submenu_queue.pop(-1)
             GLib.idle_add(self.__add_menu_items, menu, menu_name, indexes)
+        else:
+            self.__add_widgets()
 
     def __add_item(self, text, action, target, tooltip, close, menu_name):
         """
