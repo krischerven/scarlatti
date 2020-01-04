@@ -33,6 +33,7 @@ class SearchTracksView(TracksView, SignalsHelper):
             @param view_type as ViewType
         """
         TracksView.__init__(self, ViewType.SEARCH)
+        self.__track_ids = []
         self._add_disc_container(0)
         self._tracks_widget_left[0].show()
         self._tracks_widget_right[0].show()
@@ -48,6 +49,9 @@ class SearchTracksView(TracksView, SignalsHelper):
             @param position as int
         """
         self._init()
+        if track.id in self.__track_ids:
+            return
+        self.__track_ids.append(track.id)
         left_len = len(self._tracks_widget_left[0].get_children())
         right_len = len(self._tracks_widget_right[0].get_children())
         if left_len > right_len:
@@ -59,6 +63,7 @@ class SearchTracksView(TracksView, SignalsHelper):
         """
             Clear and hide the view
         """
+        self.__track_ids = []
         for child in self._tracks_widget_left[0].get_children() +\
                 self._tracks_widget_right[0].get_children():
             child.destroy()
@@ -136,7 +141,7 @@ class SearchTracksView(TracksView, SignalsHelper):
             @param status as bool
             @param track as Track
         """
-        if self.__album.is_web:
+        if track.is_web:
             TracksView._on_loading_changed(self, player, status, track)
 
     def _on_activated(self, widget, track):

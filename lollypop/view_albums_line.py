@@ -204,6 +204,7 @@ class AlbumsSearchLineView(AlbumsLineView):
             Init view
         """
         AlbumsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
+        self.__album_ids = []
         self._label.set_text(_("Albums"))
 
     def add_album(self, album):
@@ -211,6 +212,9 @@ class AlbumsSearchLineView(AlbumsLineView):
             Insert item
             @param album as Album
         """
+        if album.id in self.__album_ids:
+            return
+        self.__album_ids.append(album.id)
         AlbumsLineView.insert_album(self, album, -1)
         self._box.set_min_children_per_line(len(self._box.get_children()))
 

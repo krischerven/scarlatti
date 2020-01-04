@@ -44,7 +44,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__timeout_id = None
         self.__current_search = ""
         self.__local_search = LocalSearch()
-        self.__search_empty = True
+        self.__searches_count = 0
         self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
@@ -78,8 +78,14 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                  "_on_local_match_track"),
                 (self.__local_search, "search-finished",
                  "_on_search_finished"),
-                (App().spotify, "new-album", "_on_new_spotify_album"),
-                (App().spotify, "search-finished", "_on_search_finished"),
+                (App().spotify, "match-artist",
+                 "_on_local_match_artist"),
+                (App().spotify, "match-album",
+                 "_on_local_match_album"),
+                (App().spotify, "match-track",
+                 "_on_local_match_track"),
+                (App().spotify, "search-finished",
+                 "_on_search_finished"),
         ]
 
     def populate(self):
@@ -100,6 +106,17 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                        current_search,
                        StorageType.COLLECTION | StorageType.SAVED,
                        self.__cancellable)
+            self.__searches_count += 1
+            if App().settings.get_value("search-spotify"):
+                self.__searches_count += 2
+                self.__local_search.get(
+                           current_search,
+                           StorageType.EPHEMERAL |
+                           StorageType.SPOTIFY_NEW_RELEASES,
+                           self.__cancellable)
+                App().task_helper.run(App().spotify.search,
+                                      current_search,
+                                      self.__cancellable)
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))
@@ -166,7 +183,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__artists_line_view.show()
         self.__artists_line_view.add_value(artist_id)
-        self.__search_empty = False
         self.show_placeholder(False)
 
     def _on_local_match_album(self, local_search, album_id):
@@ -177,7 +193,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__albums_line_view.show()
         self.__albums_line_view.add_album(Album(album_id))
-        self.__search_empty = False
         self.show_placeholder(False)
 
     def _on_local_match_track(self, local_search, track_id):
@@ -188,27 +203,18 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__search_tracks_view.show()
         self.__search_tracks_view.append_row(Track(track_id))
-        self.__search_empty = False
         self.show_placeholder(False)
-
-    def _on_new_spotify_album(self, spotify, album):
-        """
-            Add album
-            @param spotify as SpotifySearch
-            @param album as Album
-        """
-        self.__search_empty = False
-        self.show_placeholder(False)
-        if len(album.tracks) == 1:
-            self.__view.add_reveal_albums([album])
-        self.__view.insert_album(album, -1)
 
     def _on_search_finished(self, *ignore):
         """
             Stop spinner and show placeholder if not result
         """
         self.__banner.spinner.stop()
-        if self.__search_empty:
+        self.__searches_count -= 1
+        empty = len(self.__albums_line_view.children) == 0 and\
+            len(self.__search_tracks_view.get_children()) == 0 and\
+            len(self.__artists_line_view.children) == 0
+        if self.__searches_count == 0 and empty:
             self.show_placeholder(True, _("No results for this search"))
         else:
             self.__grid.set_state_flags(Gtk.StateFlags.VISITED, True)
@@ -230,7 +236,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param result as [(int, Album, bool)]
         """
         if result:
-            self.__search_empty = False
             albums = []
             reveal_albums = []
             for (album, in_tracks) in result:

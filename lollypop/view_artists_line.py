@@ -129,6 +129,7 @@ class ArtistsSearchLineView(ArtistsLineView):
             Init artist view
         """
         ArtistsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
+        self.__artist_ids = []
         self._label.set_text(_("Artists"))
 
     def add_value(self, item_id):
@@ -136,6 +137,9 @@ class ArtistsSearchLineView(ArtistsLineView):
             Insert item
             @param item_id as int
         """
+        if item_id in self.__artist_ids:
+            return
+        self.__artist_ids.append(item_id)
         ArtistsLineView.populate(self, [item_id])
         self._box.set_min_children_per_line(len(self._box.get_children()))
 

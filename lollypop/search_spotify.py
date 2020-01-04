@@ -34,8 +34,9 @@ class SpotifySearch(GObject.Object):
     __MIN_ITEMS_PER_STORAGE_TYPE = 20
     __MAX_ITEMS_PER_STORAGE_TYPE = 50
     __gsignals__ = {
-        "new-album": (GObject.SignalFlags.RUN_FIRST, None,
-                      (GObject.TYPE_PYOBJECT,)),
+        "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -47,7 +48,6 @@ class SpotifySearch(GObject.Object):
         self.__token_expires = 0
         self.__token = None
         self.__loading_token = False
-        self.__album_ids = {}
         self.__is_running = False
         self.__cancellable = Gio.Cancellable()
 
@@ -137,7 +137,6 @@ class SpotifySearch(GObject.Object):
             Add similar albums to DB
             @param cancellable as Gio.Cancellable
         """
-        self.__album_ids[cancellable] = []
         try:
             while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
@@ -172,14 +171,12 @@ class SpotifySearch(GObject.Object):
                                            cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search_similar_albums(): %s", e)
-        del self.__album_ids[cancellable]
 
     def search_new_releases(self, cancellable):
         """
             Get new released albums from spotify
             @param cancellable as Gio.Cancellable
         """
-        self.__album_ids[cancellable] = []
         locale = getdefaultlocale()[0][0:2]
         try:
             while self.wait_for_token(cancellable):
@@ -200,7 +197,6 @@ class SpotifySearch(GObject.Object):
                                              cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search_new_releases(): %s", e)
-        del self.__album_ids[cancellable]
 
     def get_similar_artists(self, artist_id, cancellable):
         """
@@ -237,12 +233,11 @@ class SpotifySearch(GObject.Object):
 
     def search(self, search, cancellable):
         """
-            Get albums related to search
+            Get tracks/artists/albums related to search
             We need a thread because we are going to populate DB
             @param search as str
             @param cancellable as Gio.Cancellable
         """
-        self.__album_ids[cancellable] = []
         try:
             while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
@@ -256,19 +251,20 @@ class SpotifySearch(GObject.Object):
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                self.__create_albums_from_albums_payload(
-                                                 decode["albums"]["items"],
+                (albums, track_ids) = self.__create_from_tracks_payload(
+                                                 decode["tracks"]["items"],
                                                  StorageType.EPHEMERAL,
                                                  cancellable)
-                self.__create_album_from_tracks_payload(
-                                                 decode["tracks"]["items"],
+                for track_id in track_ids:
+                    emit_signal(self, "match-track", track_id)
+                self.__create_albums_from_albums_payload(
+                                                 decode["albums"]["items"],
                                                  StorageType.EPHEMERAL,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
         if not cancellable.is_cancelled():
             emit_signal(self, "search-finished")
-        del self.__album_ids[cancellable]
 
     def stop(self):
         """
@@ -403,20 +399,22 @@ class SpotifySearch(GObject.Object):
                     if status:
                         App().art.save_album_artwork(data, album)
                 if storage_type & StorageType.EPHEMERAL:
-                    emit_signal(self, "new-album", album)
+                    emit_signal(self, "match-album", album_id)
         except Exception as e:
             Logger.error(
                 "SpotifySearch::__download_cover(): %s", e)
 
-    def __create_album_from_tracks_payload(self, payload, storage_type,
-                                           cancellable):
+    def __create_from_tracks_payload(self, payload, storage_type,
+                                     cancellable, ):
         """
             Create albums from a track payload
             @param payload as {}
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
+            @return albums, track_ids as [({int:str}, int)]
         """
-        new_album_ids = {}
+        new_albums = {}
+        new_track_ids = []
         # Populate tracks
         for item in payload:
             if not storage_type & StorageType.EPHEMERAL:
@@ -437,17 +435,11 @@ class SpotifySearch(GObject.Object):
             (album_id,
              track_id,
              cover_uri) = self.__save_track(item, storage_type)
-            if album_id in self.__album_ids[cancellable]:
-                continue
-            elif album_id not in new_album_ids.keys():
-                new_album_ids[album_id] = cover_uri
-
-        for album_id in new_album_ids.keys():
-            self.__album_ids[cancellable].append(album_id)
-            self.__download_cover(album_id,
-                                  new_album_ids[album_id],
-                                  storage_type,
-                                  cancellable)
+            if track_id not in new_track_ids:
+                new_track_ids.append(track_id)
+            if album_id not in new_albums.keys():
+                new_albums[album_id] = cover_uri
+        return (new_albums, new_track_ids)
 
     def __create_albums_from_albums_payload(self, payload, storage_type,
                                             cancellable):
@@ -484,9 +476,15 @@ class SpotifySearch(GObject.Object):
                 track_payload = decode["tracks"]["items"]
                 for item in track_payload:
                     item["album"] = album_item
-                self.__create_album_from_tracks_payload(track_payload,
+                (albums, track_ids) = self.__create_from_tracks_payload(
+                                                        track_payload,
                                                         storage_type,
                                                         cancellable)
+                for album_id in albums.keys():
+                    self.__download_cover(album_id,
+                                          albums[album_id],
+                                          storage_type,
+                                          cancellable)
 
     def __save_track(self, payload, storage_type):
         """
