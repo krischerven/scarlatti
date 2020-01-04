@@ -13,12 +13,10 @@
 from gi.repository import Gtk, GLib, Gio
 
 from gettext import gettext as _
-from urllib.parse import urlparse
 
 from lollypop.define import App, StorageType
-from lollypop.define import ViewType, MARGIN_SMALL, MARGIN
+from lollypop.define import ViewType, MARGIN
 from lollypop.search_local import LocalSearch
-from lollypop.utils import get_network_available, get_youtube_dl
 from lollypop.view import View
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
@@ -51,34 +49,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
         self.__cancellable = Gio.Cancellable()
-        self.__bottom_buttons = Gtk.Grid()
-        self.__bottom_buttons.show()
-        self.__bottom_buttons.set_property("halign", Gtk.Align.CENTER)
-        self.__bottom_buttons.set_margin_bottom(MARGIN_SMALL)
-        self.__bottom_buttons.get_style_context().add_class("linked")
-        self.__local_button = Gtk.RadioButton.new()
-        self.__local_button.show()
-        self.__local_button.set_property("draw-indicator", False)
-        self.__local_button.set_name("local")
-        self.__local_button.get_style_context().add_class("light-button")
-        image = Gtk.Image.new_from_icon_name("computer-symbolic",
-                                             Gtk.IconSize.BUTTON)
-        image.show()
-        self.__local_button.set_image(image)
-        self.__local_button.set_size_request(125, -1)
-        web_button = Gtk.RadioButton.new_from_widget(self.__local_button)
-        web_button.show()
-        web_button.set_property("draw-indicator", False)
-        web_button.set_name("web")
-        web_button.get_style_context().add_class("light-button")
-        image = Gtk.Image.new_from_icon_name("goa-panel-symbolic",
-                                             Gtk.IconSize.BUTTON)
-        image.show()
-        web_button.set_image(image)
-        web_button.set_size_request(125, -1)
-        self.__bottom_buttons.add(self.__local_button)
-        self.__bottom_buttons.add(web_button)
-        self.__banner = SearchBannerWidget(None)
+        self.__banner = SearchBannerWidget()
         self.__banner.show()
         self.__grid = Gtk.Grid()
         self.__grid.show()
@@ -94,11 +65,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__grid.add(self.__artists_line_view)
         self.__grid.add(self.__albums_line_view)
         self.add_widget(self.__grid, self.__banner)
-        self.add(self.__bottom_buttons)
         self.__banner.entry.connect("changed", self._on_search_changed)
         self.set_search(initial_search)
-        self.__local_button.connect("clicked", self.__on_button_clicked)
-        web_button.connect("clicked", self.__on_button_clicked)
         self.show_placeholder(True,
                               _("Search for artists, albums and tracks"))
         return [
@@ -112,10 +80,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                  "_on_search_finished"),
                 (App().spotify, "new-album", "_on_new_spotify_album"),
                 (App().spotify, "search-finished", "_on_search_finished"),
-                (App().settings, "changed::network-access",
-                 "_update_bottom_buttons"),
-                (App().settings, "changed::network-access-acl",
-                 "_update_bottom_buttons")
         ]
 
     def populate(self):
@@ -131,15 +95,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.cancel()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
-            state = self.__get_current_search_state()
             current_search = self.__current_search.lower()
-            if state == "local":
-                self.__local_search.get(
-                           current_search,
-                           StorageType.COLLECTION | StorageType.SAVED,
-                           self.__cancellable)
-            elif state == "web":
-                pass
+            self.__local_search.get(
+                       current_search,
+                       StorageType.COLLECTION | StorageType.SAVED,
+                       self.__cancellable)
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))
@@ -150,10 +110,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Set search text
             @param search as str
         """
-        parsed = urlparse(search)
-        search = search.replace("%s://" % parsed.scheme, "")
         self.__current_search = search.strip()
-        self.__set_current_search_state(parsed.scheme)
         self.__banner.entry.set_text(search)
         self.__banner.entry.grab_focus()
 
@@ -176,27 +133,12 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Get default args for __class__
             @return {}
         """
-        if self.__get_current_search_state() == "local":
-            search = "local://%s" % self.__banner.entry.get_text()
-        else:
-            search = "web://%s" % self.__banner.entry.get_text()
+        search = self.__banner.entry.get_text().strip()
         return {"view_type": self.view_type, "initial_search": search}
 
 #######################
 # PROTECTED           #
 #######################
-    def _update_bottom_buttons(self, *ignore):
-        """
-            Update bottom buttons based on current state
-        """
-        (path, env) = get_youtube_dl()
-        if path is None or\
-                not get_network_available("SPOTIFY") or\
-                not get_network_available("YOUTUBE"):
-            self.__bottom_buttons.hide()
-        else:
-            self.__bottom_buttons.show()
-
     def _on_map(self, widget):
         """
             Disable shortcuts and update buttons
@@ -204,7 +146,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         View._on_map(self, widget)
         App().enable_special_shortcuts(False)
-        self._update_bottom_buttons()
 
     def __on_unmap(self, widget):
         """
@@ -277,26 +218,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __set_current_search_state(self, state):
-        """
-            Set current search state
-            @param state as str
-        """
-        for button in self.__local_button.get_group():
-            if button.get_name() == state:
-                button.set_active(True)
-                break
-
-    def __get_current_search_state(self):
-        """
-            Get current search state in buttons group
-            @return str
-        """
-        for button in self.__local_button.get_group():
-            if button.get_active():
-                return button.get_name()
-        return "local"
-
     def __set_no_result_placeholder(self):
         """
             Set placeholder for no result
@@ -319,8 +240,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__view.add_reveal_albums(reveal_albums)
             self.__view.populate(albums)
             self.show_placeholder(False)
-            self.__banner.play_button.set_sensitive(True)
-            self.__banner.new_button.set_sensitive(True)
 
         if storage_type & StorageType.EPHEMERAL:
             App().task_helper.run(App().spotify.search,
@@ -335,17 +254,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param widget as Gtk.TextEntry
         """
         self.__grid.unset_state_flags(Gtk.StateFlags.VISITED)
-        self.__banner.play_button.set_sensitive(False)
-        self.__banner.new_button.set_sensitive(False)
-        state = self.__get_current_search_state()
-        if state == "local":
-            timeout = 500
-        else:
-            timeout = 1000
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
         self.__timeout_id = GLib.timeout_add(
-                timeout,
+                500,
                 self.__on_search_changed_timeout)
 
     def __on_search_changed_timeout(self):

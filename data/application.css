@@ -476,6 +476,10 @@ flowboxchild:selected  {
     opacity: 0.5;
 }
 
+.banner-button:checked {
+    background-color: black;
+}
+
 .banner-button:hover {
     color: inherit;
     border-color: alpha(white, 0.1);
