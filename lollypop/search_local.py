@@ -54,22 +54,6 @@ class LocalSearch(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
-    def __calculate_score(self, object, search_items):
-        """
-            Calculate string score for search items
-            @param object as Track/Album
-            @param search_item as str
-        """
-        score = 0
-        for string in [object.name] + object.artists:
-            string = string.lower()
-            initial_score = 10 if string.startswith(search_items) else 0
-            split_search = self.__split_string(search_items)
-            split_string = self.__split_string(string)
-            join = list(set(split_string) & set(split_search))
-            score += initial_score + len(join)
-        return score
-
     def __split_string(self, search_items):
         """
             Explose search items for all search possiblities
