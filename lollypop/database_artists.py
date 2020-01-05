@@ -16,7 +16,7 @@ import itertools
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, StorageType
 from lollypop.utils import get_default_storage_type
-from lollypop.utils import format_artist_name, remove_static, noaccents
+from lollypop.utils import format_artist_name, remove_static
 
 
 class ArtistsDatabase:
@@ -334,30 +334,20 @@ class ArtistsDatabase:
     def search(self, searched, storage_type):
         """
             Search for artists looking like string
-            @param searched as str
+            @param searched as str without accents
             @param storage_type as StorageType
             @return artist ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            starts_with_space = searched.startswith(" ")
-            ends_with_space = searched.startswith(" ")
-            no_accents = noaccents(searched)
-            if starts_with_space and ends_with_space:
-                filters = ("%" + no_accents + "%", storage_type)
-            elif starts_with_space:
-                filters = ("%" + no_accents, storage_type)
-            elif ends_with_space:
-                filters = (no_accents + "%", storage_type)
-            else:
-                filters = ("%" + no_accents + "%", storage_type)
-            request = "SELECT DISTINCT artists.rowid\
+            filters = ("%" + searched + "%", storage_type)
+            request = "SELECT DISTINCT artists.rowid, artists.name\
                    FROM albums, album_artists, artists\
                    WHERE album_artists.artist_id=artists.rowid AND\
                    album_artists.album_id=albums.rowid AND\
                    noaccents(artists.name) LIKE ? AND\
                    albums.storage_type & ? LIMIT 25"
             result = sql.execute(request, filters)
-            return list(itertools.chain(*result))
+            return list(result)
 
     def count(self):
         """

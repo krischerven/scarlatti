@@ -16,7 +16,7 @@ from time import time
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType
 from lollypop.logger import Logger
-from lollypop.utils import noaccents, get_default_storage_type, remove_static
+from lollypop.utils import get_default_storage_type, remove_static
 
 
 class AlbumsDatabase:
@@ -1177,27 +1177,17 @@ class AlbumsDatabase:
     def search(self, searched, storage_type):
         """
             Search for albums looking like string
-            @param searched as str
+            @param searched as str without accents
             @param storage_type as StorageType
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            starts_with_space = searched.startswith(" ")
-            ends_with_space = searched.startswith(" ")
-            no_accents = noaccents(searched)
-            if starts_with_space and ends_with_space:
-                filters = ("%" + no_accents + "%", storage_type)
-            elif starts_with_space:
-                filters = ("%" + no_accents, storage_type)
-            elif ends_with_space:
-                filters = (no_accents + "%", storage_type)
-            else:
-                filters = ("%" + no_accents + "%", storage_type)
-            request = "SELECT albums.rowid FROM albums\
+            filters = ("%" + searched + "%", storage_type)
+            request = "SELECT rowid, name FROM albums\
                        WHERE noaccents(name) LIKE ?\
                        AND albums.storage_type & ? LIMIT 25"
             result = sql.execute(request, filters)
-            return list(itertools.chain(*result))
+            return list(result)
 
     def calculate_artist_ids(self, album_id):
         """

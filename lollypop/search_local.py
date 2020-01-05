@@ -15,6 +15,7 @@ from gi.repository import GObject, GLib
 from collections import Counter
 
 from lollypop.define import App
+from lollypop.utils import noaccents
 
 
 class LocalSearch(GObject.Object):
@@ -38,99 +39,105 @@ class LocalSearch(GObject.Object):
     def get(self, search, storage_type, cancellable):
         """
             Get match for search
-            @param current_search as str
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
         self.__search_count = 3
-        items = self.__split_string(search)
-        App().task_helper.run(self.__get_artists, items, storage_type,
+        search = noaccents(search)
+        App().task_helper.run(self.__get_artists, search, storage_type,
                               cancellable)
-        App().task_helper.run(self.__get_albums, items, storage_type,
+        App().task_helper.run(self.__get_albums, search, storage_type,
                               cancellable)
-        App().task_helper.run(self.__get_tracks, items, storage_type,
+        App().task_helper.run(self.__get_tracks, search, storage_type,
                               cancellable)
 
 #######################
 # PRIVATE             #
 #######################
-    def __split_string(self, search_items):
-        """
-            Explose search items for all search possiblities
-            @param search_items as str
-            @return [str]
-        """
-        split = []
-        for item in search_items.split():
-            if len(item) > 2:
-                split.append(item)
-        i = len(split)
-        if i > 1:
-            items = [" %s" % split[i - 1]]
-            i -= 1
-        else:
-            items = []
-        while i != 0:
-            if i > 1:
-                items.append(" %s " % split[i - 1])
-            else:
-                items.append("%s " % split[0])
-            i -= 1
-        return [search_items] + items
-
-    def __search_tracks(self, search_items, storage_type, cancellable):
+    def __search_tracks(self, search, storage_type, cancellable):
         """
             Get tracks for search items
-            @param search_items as [str]
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
             @return [int]
         """
+        tracks = []
         track_ids = []
-        for search_str in search_items:
-            track_ids += App().tracks.search(search_str, storage_type)
+        split = search.split()
+        for search_str in split:
+            tracks += App().tracks.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
+        for (track_id, track_name) in tracks:
+            valid = True
+            for word in split:
+                if word not in noaccents(track_name):
+                    valid = False
+                    break
+            if valid:
+                track_ids.append(track_id)
         return track_ids
 
-    def __search_artists(self, search_items, storage_type, cancellable):
+    def __search_artists(self, search, storage_type, cancellable):
         """
             Get artists for search items
-            @param search_items as [str]
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
             @return [int]
         """
+        artists = []
         artist_ids = []
-        for search_str in search_items:
-            artist_ids += App().artists.search(search_str, storage_type)
+        split = search.split()
+        for search_str in split:
+            artists += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
+        for (artist_id, artist_name) in artists:
+            valid = True
+            for word in split:
+                if word not in noaccents(artist_name):
+                    valid = False
+                    break
+            if valid:
+                artist_ids.append(artist_id)
         return artist_ids
 
-    def __search_albums(self, search_items, storage_type, cancellable):
+    def __search_albums(self, search, storage_type, cancellable):
         """
             Get albums for search items
-            @param search_items as [str]
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
             @return [int]
         """
+        albums = []
         album_ids = []
-        for search_str in search_items:
-            album_ids += App().albums.search(search_str, storage_type)
+        split = search.split()
+        for search_str in split:
+            albums += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
+        for (album_id, album_name) in albums:
+            valid = True
+            for word in split:
+                if word not in noaccents(album_name):
+                    valid = False
+                    break
+            if valid:
+                album_ids.append(album_id)
         return album_ids
 
-    def __get_artists(self, items, storage_type, cancellable):
+    def __get_artists(self, search, storage_type, cancellable):
         """
-            Get artists for items
-            @param items as [str]
+            Get artists for search
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        artist_ids = self.__search_artists(items, storage_type, cancellable)
+        artist_ids = self.__search_artists(search, storage_type, cancellable)
         counter = Counter(artist_ids)
         artist_ids = sorted(artist_ids,
                             key=lambda x: (counter[x], x),
@@ -142,14 +149,14 @@ class LocalSearch(GObject.Object):
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
 
-    def __get_albums(self, items, storage_type, cancellable):
+    def __get_albums(self, search, storage_type, cancellable):
         """
-            Get albums for items
-            @param items as [str]
+            Get albums for search
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        album_ids = self.__search_albums(items, storage_type, cancellable)
+        album_ids = self.__search_albums(search, storage_type, cancellable)
         counter = Counter(album_ids)
         album_ids = sorted(album_ids,
                            key=lambda x: (counter[x], x),
@@ -161,14 +168,14 @@ class LocalSearch(GObject.Object):
         if self.__search_count == 0:
             GLib.idle_add(self.emit, "search-finished")
 
-    def __get_tracks(self, items, storage_type, cancellable):
+    def __get_tracks(self, search, storage_type, cancellable):
         """
-            Get tracks for items
-            @param items as [str]
+            Get tracks for search
+            @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        track_ids = self.__search_tracks(items, storage_type, cancellable)
+        track_ids = self.__search_tracks(search, storage_type, cancellable)
         counter = Counter(track_ids)
         track_ids = sorted(track_ids,
                            key=lambda x: (counter[x], x),

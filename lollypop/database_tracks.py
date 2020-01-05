@@ -1001,27 +1001,17 @@ class TracksDatabase:
     def search(self, searched, storage_type):
         """
             Search for tracks looking like searched
-            @param searched as str
+            @param searched as str without accents
             @param storage_type as StorageType
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            starts_with_space = searched.startswith(" ")
-            ends_with_space = searched.startswith(" ")
-            no_accents = noaccents(searched)
-            if starts_with_space and ends_with_space:
-                filters = ("%" + no_accents + "%", storage_type)
-            elif starts_with_space:
-                filters = ("%" + no_accents, storage_type)
-            elif ends_with_space:
-                filters = (no_accents + "%", storage_type)
-            else:
-                filters = ("%" + no_accents + "%", storage_type)
-            request = "SELECT tracks.rowid FROM tracks\
+            filters = ("%" + searched + "%", storage_type)
+            request = "SELECT rowid, name FROM tracks\
                        WHERE noaccents(name) LIKE ?\
                        AND tracks.storage_type & ? LIMIT 25"
             result = sql.execute(request, filters)
-            return list(itertools.chain(*result))
+            return list(result)
 
     def search_track(self, artist, title):
         """
