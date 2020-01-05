@@ -281,7 +281,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Stop spinner and show placeholder if not result
         """
-        self.__banner.spinner.stop()
         self.__searches_count -= 1
         tracks_len = len(
             self.__stack.current_child.search_tracks_view.get_children())
@@ -290,14 +289,16 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         artists_len = len(
             self.__stack.current_child.artists_line_view.children)
         empty = albums_len == 0 and tracks_len == 0 and artists_len == 0
-        if self.__searches_count == 0 and empty:
-            self.show_placeholder(True, _("No results for this search"))
-        else:
+        if not empty:
             self.__stack.set_visible_child(self.__stack.current_child)
             GLib.idle_add(
                 self.__stack.current_child.albums_line_view.update_buttons)
             GLib.idle_add(
                 self.__stack.current_child.artists_line_view.update_buttons)
+        if self.__searches_count == 0:
+            self.__banner.spinner.stop()
+            if empty:
+                self.show_placeholder(True, _("No results for this search"))
 
 #######################
 # PRIVATE             #
