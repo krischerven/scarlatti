@@ -277,9 +277,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Track(track_id))
         self.show_placeholder(False)
 
-    def _on_search_finished(self, *ignore):
+    def _on_search_finished(self, search_handler):
         """
             Stop spinner and show placeholder if not result
+            @param search_handler as LocalSearch/SpotifySearch
         """
         self.__searches_count -= 1
         tracks_len = len(
@@ -289,12 +290,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         artists_len = len(
             self.__stack.current_child.artists_line_view.children)
         empty = albums_len == 0 and tracks_len == 0 and artists_len == 0
-        if not empty:
-            self.__stack.set_visible_child(self.__stack.current_child)
-            GLib.idle_add(
-                self.__stack.current_child.albums_line_view.update_buttons)
-            GLib.idle_add(
-                self.__stack.current_child.artists_line_view.update_buttons)
+        self.__stack.set_visible_child(self.__stack.current_child)
         if self.__searches_count == 0:
             self.__banner.spinner.stop()
             if empty:
