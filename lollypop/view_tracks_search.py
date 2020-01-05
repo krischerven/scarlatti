@@ -69,6 +69,15 @@ class SearchTracksView(TracksView, SignalsHelper):
             child.destroy()
         GLib.idle_add(self.hide)
 
+    @property
+    def children(self):
+        """
+            Return all rows
+            @return [Gtk.ListBoxRow]
+        """
+        return self._tracks_widget_left[0].get_children() +\
+            self._tracks_widget_right[0].get_children()
+
 #######################
 # PROTECTED           #
 #######################

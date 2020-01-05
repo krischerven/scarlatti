@@ -283,7 +283,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__searches_count -= 1
         tracks_len = len(
-            self.__stack.current_child.search_tracks_view.get_children())
+            self.__stack.current_child.search_tracks_view.children)
         albums_len = len(
             self.__stack.current_child.albums_line_view.children)
         artists_len = len(
