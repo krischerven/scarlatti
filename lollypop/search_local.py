@@ -60,7 +60,10 @@ class LocalSearch(GObject.Object):
             @param search_items as str
             @return [str]
         """
-        split = search_items.split()
+        split = []
+        for item in search_items.split():
+            if len(item) > 2:
+                split.append(item)
         i = len(split)
         if i > 1:
             items = [" %s" % split[i - 1]]
