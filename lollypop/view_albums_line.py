@@ -222,6 +222,7 @@ class AlbumsSearchLineView(AlbumsLineView):
         """
             Clear and hide the view
         """
+        self.__album_ids = []
         AlbumsLineView.clear(self)
         GLib.idle_add(self.hide)
 

@@ -147,5 +147,6 @@ class ArtistsSearchLineView(ArtistsLineView):
         """
             Clear and hide the view
         """
+        self.__artist_ids = []
         ArtistsLineView.clear(self)
         GLib.idle_add(self.hide)

@@ -27,6 +27,92 @@ from lollypop.view_tracks_search import SearchTracksView
 from lollypop.widgets_banner_search import SearchBannerWidget
 
 
+class SearchGrid(Gtk.Grid):
+    """
+        A grid for search
+    """
+
+    def __init__(self):
+        """
+            Init grid
+        """
+        Gtk.Grid.__init__(self)
+        self.set_row_spacing(MARGIN)
+        self.get_style_context().add_class("padding")
+        self.set_orientation(Gtk.Orientation.VERTICAL)
+        self.set_property("valign", Gtk.Align.START)
+        self.__artists_line_view = ArtistsSearchLineView()
+        self.__albums_line_view = AlbumsSearchLineView()
+        self.__search_tracks_view = SearchTracksView()
+        self.add(self.__search_tracks_view)
+        self.add(self.__artists_line_view)
+        self.add(self.__albums_line_view)
+
+    @property
+    def search_tracks_view(self):
+        """
+            Get SearchTracksView
+            @return SearchTracksView
+        """
+        return self.__search_tracks_view
+
+    @property
+    def artists_line_view(self):
+        """
+            Get ArtistsSearchLineView
+            @return ArtistsSearchLineView
+        """
+        return self.__artists_line_view
+
+    @property
+    def albums_line_view(self):
+        """
+            Get AlbumsSearchLineView
+            @return AlbumsSearchLineView
+        """
+        return self.__albums_line_view
+
+
+class SearchStack(Gtk.Stack):
+    """
+        A stack for search
+    """
+
+    def __init__(self):
+        """
+            Init stack
+        """
+        Gtk.Stack.__init__(self)
+        self.__current_child = None
+        self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.set_transition_duration(100)
+        for i in range(0, 2):
+            grid = SearchGrid()
+            grid.show()
+            self.add(grid)
+
+    def new_current_child(self):
+        """
+            Set a new current child for search
+            This is not visible child
+        """
+        for child in self.get_children():
+            if child != self.get_visible_child():
+                self.__current_child = child
+                break
+        self.__current_child.search_tracks_view.clear()
+        self.__current_child.artists_line_view.clear()
+        self.__current_child.albums_line_view.clear()
+
+    @property
+    def current_child(self):
+        """
+            Get non visible child
+            @return SearchGrid
+        """
+        return self.__current_child
+
+
 class SearchView(View, Gtk.Bin, SignalsHelper):
     """
         View for searching albums/tracks
@@ -51,20 +137,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__cancellable = Gio.Cancellable()
         self.__banner = SearchBannerWidget()
         self.__banner.show()
-        self.__grid = Gtk.Grid()
-        self.__grid.show()
-        self.__grid.set_row_spacing(MARGIN)
-        self.__grid.get_style_context().add_class("opacity-transition-fast")
-        self.__grid.get_style_context().add_class("padding")
-        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__grid.set_property("valign", Gtk.Align.START)
-        self.__artists_line_view = ArtistsSearchLineView()
-        self.__albums_line_view = AlbumsSearchLineView()
-        self.__search_tracks_view = SearchTracksView()
-        self.__grid.add(self.__search_tracks_view)
-        self.__grid.add(self.__artists_line_view)
-        self.__grid.add(self.__albums_line_view)
-        self.add_widget(self.__grid, self.__banner)
+        self.__stack = SearchStack()
+        self.__stack.show()
+        self.add_widget(self.__stack, self.__banner)
         self.__banner.entry.connect("changed", self._on_search_changed)
         self.set_search(initial_search)
         self.show_placeholder(True,
@@ -93,12 +168,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Populate search
             in db based on text entry current text
         """
-        # FIXME
-        self.__search_empty = True
-        self.__albums_line_view.clear()
-        self.__artists_line_view.clear()
-        self.__search_tracks_view.clear()
         self.cancel()
+        self.__stack.new_current_child()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             current_search = self.__current_search.lower()
@@ -181,8 +252,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param artist_id as int
         """
-        self.__artists_line_view.show()
-        self.__artists_line_view.add_value(artist_id)
+        self.__stack.current_child.artists_line_view.show()
+        self.__stack.current_child.artists_line_view.add_value(artist_id)
         self.show_placeholder(False)
 
     def _on_local_match_album(self, local_search, album_id):
@@ -191,8 +262,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param artist_id as int
         """
-        self.__albums_line_view.show()
-        self.__albums_line_view.add_album(Album(album_id))
+        self.__stack.current_child.albums_line_view.show()
+        self.__stack.current_child.albums_line_view.add_album(Album(album_id))
         self.show_placeholder(False)
 
     def _on_local_match_track(self, local_search, track_id):
@@ -201,8 +272,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param local_search as LocalSearch
             @param track_id as int
         """
-        self.__search_tracks_view.show()
-        self.__search_tracks_view.append_row(Track(track_id))
+        self.__stack.current_child.search_tracks_view.show()
+        self.__stack.current_child.search_tracks_view.append_row(
+            Track(track_id))
         self.show_placeholder(False)
 
     def _on_search_finished(self, *ignore):
@@ -211,15 +283,21 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__banner.spinner.stop()
         self.__searches_count -= 1
-        empty = len(self.__albums_line_view.children) == 0 and\
-            len(self.__search_tracks_view.get_children()) == 0 and\
-            len(self.__artists_line_view.children) == 0
+        tracks_len = len(
+            self.__stack.current_child.search_tracks_view.get_children())
+        albums_len = len(
+            self.__stack.current_child.albums_line_view.children)
+        artists_len = len(
+            self.__stack.current_child.artists_line_view.children)
+        empty = albums_len == 0 and tracks_len == 0 and artists_len == 0
         if self.__searches_count == 0 and empty:
             self.show_placeholder(True, _("No results for this search"))
         else:
-            self.__grid.set_state_flags(Gtk.StateFlags.VISITED, True)
-            GLib.idle_add(self.__albums_line_view.update_buttons)
-            GLib.idle_add(self.__artists_line_view.update_buttons)
+            self.__stack.set_visible_child(self.__stack.current_child)
+            GLib.idle_add(
+                self.__stack.current_child.albums_line_view.update_buttons)
+            GLib.idle_add(
+                self.__stack.current_child.artists_line_view.update_buttons)
 
 #######################
 # PRIVATE             #
@@ -258,7 +336,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Timeout filtering
             @param widget as Gtk.TextEntry
         """
-        self.__grid.unset_state_flags(Gtk.StateFlags.VISITED)
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
         self.__timeout_id = GLib.timeout_add(
