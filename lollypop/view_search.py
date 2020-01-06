@@ -174,21 +174,19 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             current_search = self.__current_search.lower()
-            self.__local_search.get(
-                       current_search,
-                       StorageType.COLLECTION | StorageType.SAVED,
-                       self.__cancellable)
-            self.__searches_count += 1
             if App().settings.get_value("search-spotify"):
-                self.__searches_count += 2
-                self.__local_search.get(
-                           current_search,
-                           StorageType.EPHEMERAL |
-                           StorageType.SPOTIFY_NEW_RELEASES,
-                           self.__cancellable)
+                self.__searches_count += 1
+                mask = StorageType.EPHEMERAL |\
+                    StorageType.SPOTIFY_NEW_RELEASES |\
+                    StorageType.COLLECTION |\
+                    StorageType.SAVED
                 App().task_helper.run(App().spotify.search,
                                       current_search,
                                       self.__cancellable)
+            else:
+                mask = StorageType.COLLECTION | StorageType.SAVED
+            self.__searches_count += 1
+            self.__local_search.get(current_search, mask, self.__cancellable)
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))

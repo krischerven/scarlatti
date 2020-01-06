@@ -43,7 +43,7 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        self.__search_count = 3
+        self.__search_count += 3
         search = noaccents(search)
         App().task_helper.run(self.__get_artists, search, storage_type,
                               cancellable)
