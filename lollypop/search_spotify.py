@@ -405,7 +405,7 @@ class SpotifySearch(GObject.Object):
                 "SpotifySearch::__download_cover(): %s", e)
 
     def __create_from_tracks_payload(self, payload, storage_type,
-                                     cancellable, ):
+                                     cancellable):
         """
             Create albums from a track payload
             @param payload as {}
@@ -425,9 +425,7 @@ class SpotifySearch(GObject.Object):
                        for artist in item["album"]["artists"]]
             exists_in_db = App().db.exists_in_db(
                                              item["album"]["name"],
-                                             artists,
-                                             item["name"],
-                                             storage_type)
+                                             artists)
             if exists_in_db:
                 Logger.debug("SpotifySearch: track exists in DB: %s - %s",
                              item["name"], artists)
@@ -459,9 +457,7 @@ class SpotifySearch(GObject.Object):
                        for artist in album_item["artists"]]
             exists_in_db = App().db.exists_in_db(
                                     album_item["name"],
-                                    artists,
-                                    None,
-                                    storage_type)
+                                    artists)
             if exists_in_db:
                 Logger.debug("SpotifySearch: album exists in DB: %s - %s",
                              artists, album_item["name"])

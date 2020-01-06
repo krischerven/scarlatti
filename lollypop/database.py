@@ -17,7 +17,7 @@ from threading import Lock
 from random import shuffle
 import itertools
 
-from lollypop.define import App, StorageType
+from lollypop.define import App
 from lollypop.database_upgrade import DatabaseAlbumsUpgrade
 from lollypop.sqlcursor import SqlCursor
 from lollypop.logger import Logger
@@ -217,38 +217,30 @@ class Database:
         except Exception as e:
             Logger.error("Database::drop_db():", e)
 
-    def exists_in_db(self, album, artists, track,
-                     storage_type=StorageType.NONE):
+    def exists_in_db(self, album, artists):
         """
             Search if item exists in db
             @param album as str
             @param artists as [str]
-            @param track as str/None
-            @param storage_type as int
             @return bool
         """
+        # First check album name
+        album_id = App().albums.get_id_for_escaped_string(
+            sql_escape(album.lower()), [])
+        if album_id is None:
+            return False
+        # Then check for album + artists
         artist_ids = []
         for artist in artists:
             artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist.lower()))
-            artist_ids.append(artist_id)
-        album_id = App().albums.get_id_by(
+            if artist_id is None:
+                return False
+            else:
+                artist_ids.append(artist_id)
+        album_id = App().albums.get_id_for_escaped_string(
             sql_escape(album.lower()), artist_ids)
-        if album_id is None:
-            return False
-        album_storage_type = App().albums.get_storage_type(album_id)
-        # If not same storage type, say True!
-        # Don't want to mix StorageType.COLLECTION with some web tracks
-        if track is None:
-            return True
-        elif album_storage_type & StorageType.COLLECTION and\
-                album_storage_type != storage_type:
-            return True
-        else:
-            track_id = App().tracks.get_id_by(sql_escape(track.lower()),
-                                              album_id,
-                                              artist_ids)
-            return track_id is not None
+        return album_id is not None
 
 #######################
 # PRIVATE             #

@@ -459,7 +459,7 @@ class AlbumsDatabase:
                 return v[0]
             return None
 
-    def get_id_by(self, album_name, artist_ids):
+    def get_id_for_escaped_string(self, album_name, artist_ids):
         """
             Get album for name and artists
             @param album_name as escaped str
@@ -470,11 +470,13 @@ class AlbumsDatabase:
             filters = (album_name,)
             request = "SELECT albums.rowid FROM albums, album_artists\
                        WHERE sql_escape(name)=? COLLATE NOCASE AND\
-                       album_artists.album_id=albums.rowid AND (1=0 "
-            filters += tuple(artist_ids)
-            for artist_id in artist_ids:
-                request += "OR artist_id=? "
-            request += ")"
+                       album_artists.album_id=albums.rowid"
+            if artist_ids:
+                request += " AND (1=0 "
+                filters += tuple(artist_ids)
+                for artist_id in artist_ids:
+                    request += "OR artist_id=? "
+                request += ")"
             result = sql.execute(request, filters)
             v = result.fetchone()
             if v is not None:
