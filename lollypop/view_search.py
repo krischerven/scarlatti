@@ -83,6 +83,7 @@ class SearchStack(Gtk.Stack):
             Init stack
         """
         Gtk.Stack.__init__(self)
+        self.get_style_context().add_class("padding")
         self.__current_child = None
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.set_transition_duration(100)
