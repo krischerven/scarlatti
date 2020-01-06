@@ -1084,7 +1084,11 @@ class AlbumsDatabase:
             @return ([int], bool)
         """
         with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT albums.year FROM albums")
+            storage_type = get_default_storage_type()
+            result = sql.execute("SELECT albums.year\
+                                  FROM albums\
+                                  WHERE storage_type & ?",
+                                 (storage_type,))
             years = []
             unknown = False
             for year in list(itertools.chain(*result)):
