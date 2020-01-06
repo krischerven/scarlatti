@@ -72,10 +72,14 @@ class LocalSearch(GObject.Object):
                 break
         for (track_id, track_name) in tracks:
             valid = True
-            for word in split:
-                if word not in noaccents(track_name):
-                    valid = False
-                    break
+            no_accents = noaccents(track_name)
+            if not no_accents.startswith(search):
+                for word in split:
+                    if word not in no_accents:
+                        valid = False
+                        break
+            else:
+                track_ids.append(track_id)
             if valid:
                 track_ids.append(track_id)
         return track_ids
@@ -97,10 +101,14 @@ class LocalSearch(GObject.Object):
                 break
         for (artist_id, artist_name) in artists:
             valid = True
-            for word in split:
-                if word not in noaccents(artist_name):
-                    valid = False
-                    break
+            no_accents = noaccents(artist_name)
+            if not no_accents.startswith(search):
+                for word in split:
+                    if word not in no_accents:
+                        valid = False
+                        break
+            else:
+                artist_ids.append(artist_id)
             if valid:
                 artist_ids.append(artist_id)
         return artist_ids
@@ -122,10 +130,14 @@ class LocalSearch(GObject.Object):
                 break
         for (album_id, album_name) in albums:
             valid = True
-            for word in split:
-                if word not in noaccents(album_name):
-                    valid = False
-                    break
+            no_accents = noaccents(album_name)
+            if not no_accents.startswith(search):
+                for word in split:
+                    if word not in no_accents:
+                        valid = False
+                        break
+            else:
+                album_ids.append(album_id)
             if valid:
                 album_ids.append(album_id)
         return album_ids
