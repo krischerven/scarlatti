@@ -13,9 +13,10 @@
 from gi.repository import GLib, Gtk
 
 from lollypop.define import ArtSize
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class HorizontalScrollingHelper:
+class HorizontalScrollingHelper(SizeAllocationHelper):
     """
         Manage 2 button and scroll a scrolled window
     """
@@ -24,8 +25,9 @@ class HorizontalScrollingHelper:
         """
             Init helper
         """
+        SizeAllocationHelper.__init__(self)
         self.__adjustment = self._scrolled.get_hadjustment()
-        self.__adjustment.connect("value-changed", self.update_buttons)
+        self.__adjustment.connect("value-changed", self.__update_buttons)
         self._backward_button.connect("clicked",
                                       self.__on_backward_button_clicked)
         self._forward_button.connect("clicked",
@@ -40,7 +42,18 @@ class HorizontalScrollingHelper:
         """
         self.__adjustment = None
 
-    def update_buttons(self, *ignore):
+#######################
+# PRIVATE             #
+#######################
+    def _handle_width_allocate(self, allocation):
+        """
+            @param allocation as Gtk.Allocation
+            @return True if allocation is valid
+        """
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+            self.__update_buttons()
+
+    def __update_buttons(self, *ignore):
         """
             Update buttons state
         """
@@ -51,9 +64,6 @@ class HorizontalScrollingHelper:
                                            self.__adjustment.get_upper() -
                                            value)
 
-#######################
-# PRIVATE             #
-#######################
     def __smooth_scrolling(self, value, direction):
         """
             Emulate smooth scrolling
@@ -70,15 +80,15 @@ class HorizontalScrollingHelper:
             else:
                 GLib.timeout_add(1, self.__smooth_scrolling, value, direction)
         else:
-            self.update_buttons()
-            self.__adjustment.connect("value-changed", self.update_buttons)
+            self.__update_buttons()
+            self.__adjustment.connect("value-changed", self.__update_buttons)
 
     def __on_backward_button_clicked(self, backward_button):
         """
             Scroll left
             @param backward_button as Gtk.Button
         """
-        self.__adjustment.disconnect_by_func(self.update_buttons)
+        self.__adjustment.disconnect_by_func(self.__update_buttons)
         backward_button.set_sensitive(False)
         value = self._scrolled.get_allocated_width() - ArtSize.BIG
         self.__smooth_scrolling(value, Gtk.DirectionType.LEFT)
@@ -88,7 +98,7 @@ class HorizontalScrollingHelper:
             Scroll right
             @param forward_button as Gtk.Button
         """
-        self.__adjustment.disconnect_by_func(self.update_buttons)
+        self.__adjustment.disconnect_by_func(self.__update_buttons)
         forward_button.set_sensitive(False)
         value = self._scrolled.get_allocated_width() - ArtSize.BIG
         self.__smooth_scrolling(value, Gtk.DirectionType.RIGHT)
