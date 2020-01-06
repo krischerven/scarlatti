@@ -126,10 +126,9 @@ class PlaylistBannerWidget(BannerWidget):
         menu_widget = MenuBuilder(menu)
         if self.__playlist_id >= 0:
             menu_widget = MenuBuilder(menu)
-            main = menu_widget.get_child_by_name("main")
             menu_ext = PlaylistMenuExt(self.__playlist_id)
             menu_ext.show()
-            main.add(menu_ext)
+            menu_widget.append_widget(menu_ext)
         else:
             menu_widget = MenuBuilder(menu)
         menu_widget.show()
