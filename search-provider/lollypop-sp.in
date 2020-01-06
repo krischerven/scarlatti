@@ -213,7 +213,7 @@ class SearchLollypopService(Server, Gio.Application):
                     gicon=""
                 d = { 'id': GLib.Variant('s', search_id),
                       'description': GLib.Variant('s', GLib.markup_escape_text(description)),
-                      'name': GLib.Variant('s', GLib.markup_escape_text(name)),
+                      'name': GLib.Variant('s', name),
                       'gicon': GLib.Variant('s', gicon) }
                 results.append(d)
         except Exception as e:
