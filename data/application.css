@@ -490,6 +490,7 @@ flowboxchild:selected  {
 .banner-button-small {
     min-width: 42px;
 	min-height: 36px;
+	box-shadow: none;
 	padding-left: 2px;
 	padding-right: 2px;
 	margin-top: 5px;
