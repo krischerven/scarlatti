@@ -477,8 +477,9 @@ flowboxchild:selected  {
 }
 
 .banner-button:checked {
-    background-color: black;
-    opacity: 1;
+    background-color: alpha(black, 0.8);
+    opacity: 0.9;
+    color: shade(@theme_selected_bg_color, 1.25);
 }
 
 .banner-button:hover {
