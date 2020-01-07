@@ -159,6 +159,7 @@ class SearchTracksView(TracksView, SignalsHelper):
             @param widget as TracksWidget
             @param track as Track
         """
+        track.album.set_tracks([track])
         App().player.add_album(track.album)
         App().player.load(track.album.get_track(track.id))
 
