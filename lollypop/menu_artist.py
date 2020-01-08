@@ -14,8 +14,7 @@ from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, ViewType, Type
-from lollypop.utils import get_network_available, get_youtube_dl
+from lollypop.define import App, ViewType
 
 
 class ArtistMenu(Gio.Menu):
@@ -69,18 +68,8 @@ class ArtistAlbumsMenu(Gio.Menu):
             go_artist_action = Gio.SimpleAction(name="go_artist_action")
             App().add_action(go_artist_action)
             go_artist_action.connect("activate",
-                                     self.__go_to_artists)
+                                     self.__on_go_to_artist_activate)
             self.append(_("Available albums"), "app.go_artist_action")
-        (path, env) = get_youtube_dl()
-        if path is not None and\
-                get_network_available("SPOTIFY") and\
-                get_network_available("YOUTUBE"):
-            search_artist_action = Gio.SimpleAction(
-                name="search_artist_action")
-            App().add_action(search_artist_action)
-            search_artist_action.connect("activate",
-                                         self.__search_artist)
-            self.append(_("Albums on the Web"), "app.search_artist_action")
         if view_type & ViewType.BANNER and not view_type & ViewType.ALBUM:
             show_tracks_action = Gio.SimpleAction.new_stateful(
                 "show_tracks_action",
@@ -92,7 +81,7 @@ class ArtistAlbumsMenu(Gio.Menu):
                                        self.__on_show_tracks_change_state)
             self.append(_("Show tracks"), "app.show_tracks_action")
 
-    def __search_artist(self, action, variant):
+    def __on_go_to_artist_activate(self, action, variant):
         """
             Search albums from artist
             @param Gio.SimpleAction
@@ -100,15 +89,6 @@ class ArtistAlbumsMenu(Gio.Menu):
         """
         artist_name = App().artists.get_name(self.__artist_id)
         App().lookup_action("search").activate(GLib.Variant("s", artist_name))
-
-    def __go_to_artists(self, action, variant):
-        """
-            Show albums from artists
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        App().window.container.show_view([Type.ARTISTS],
-                                         [self.__artist_id])
 
     def __on_show_tracks_change_state(self, action, variant):
         """

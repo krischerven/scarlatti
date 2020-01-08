@@ -75,6 +75,9 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             Add pending widget to menu
         """
         main = self.get_child_by_name("main")
+        if isinstance(main, Gtk.ScrolledWindow):
+            # scrolled -> viewport -> box
+            main = main.get_child().get_child()
         while self.__widgets_queue:
             widget = self.__widgets_queue.pop(0)
             main.add(widget)

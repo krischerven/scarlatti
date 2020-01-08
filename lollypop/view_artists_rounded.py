@@ -99,16 +99,17 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(child.data, self._view_type,
                           App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu, False)
+        menu_widget.show()
         section = Gio.Menu()
         menu.append_section(_("Similar artists"), section)
         menu_widget = MenuBuilder(menu, True)
-        scrolled = menu_widget.get_child_by_name("main")
         menu_widget.show()
         menu_ext = SimilarsMenu()
         menu_ext.show()
         menu_ext.populate(child.data)
-        # scrolled -> viewport -> box
-        scrolled.get_child().get_child().add(menu_ext)
+        menu_widget.append_widget(menu_ext)
+        scrolled = menu_widget.get_child_by_name("main")
         scrolled.set_size_request(300, 400)
         return menu_widget
 
