@@ -255,6 +255,7 @@ class SimilarsMenu(Gtk.Bin):
             popover.hide()
         artist_name = row.artist_name
         if row.storage_type == StorageType.EPHEMERAL:
+            App().settings.set_value("search-spotify", GLib.Variant("b", True))
             App().lookup_action("search").activate(
                 GLib.Variant("s", artist_name))
         else:
