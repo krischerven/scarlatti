@@ -37,6 +37,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param scrolled as bool
         """
         Gtk.Stack.__init__(self)
+        self.__built = False
         self.__boxes = {}
         self.__menu_queue = []
         self.__submenu_queue = []
@@ -52,7 +53,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param widget as Gtk.Widget
         """
         self.__widgets_queue.append(widget)
-        if not self.__menu_queue:
+        if self.__built:
             self.__add_widgets()
 
 #######################
@@ -178,6 +179,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             (menu, menu_name, indexes) = self.__submenu_queue.pop(-1)
             GLib.idle_add(self.__add_menu_items, menu, menu_name, indexes)
         else:
+            self.__built = True
             self.__add_widgets()
 
     def __add_item(self, text, action, target, tooltip, close, menu_name):
