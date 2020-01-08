@@ -457,6 +457,9 @@ class TagReader:
                     - Windows Media Player is located in m.data[40] and
                       we are searching m.data[10:40] for
                       "Windows Media Player 9 Series"
+                    - MusicBee is located in m.data[19] and
+                      we are searching m.data[10:40] for
+                      "MusicBee"
                 """
                 if m.data[10:40].find(b"Windows Media Player 9 Series") >= 0:
                     location = 40
@@ -472,6 +475,11 @@ class TagReader:
                     location = 19
                     Logger.debug(
                         "Rating type: MediaMonkey Location: %s Rating: %s",
+                        location, m.data[location])
+                elif m.data[10:40].find(b"MusicBee") >= 0:
+                    location = 19
+                    Logger.debug(
+                        "Rating type: MusicBee Location: %s Rating: %s",
                         location, m.data[location])
                 else:
                     location = 11
