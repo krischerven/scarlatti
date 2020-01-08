@@ -99,8 +99,7 @@ class ArtistAlbumsMenu(Gio.Menu):
             @param GLib.Variant
         """
         artist_name = App().artists.get_name(self.__artist_id)
-        target = "web://%s" % artist_name
-        App().lookup_action("search").activate(GLib.Variant("s", target))
+        App().lookup_action("search").activate(GLib.Variant("s", artist_name))
 
     def __go_to_artists(self, action, variant):
         """
