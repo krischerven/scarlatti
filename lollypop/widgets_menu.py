@@ -150,6 +150,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 else:
                     icon_name = header[2]
                     self.__add_header(header_label, icon_name, menu_name)
+                GLib.idle_add(self.__add_menu_items, menu, menu_name, indexes)
             elif action is None:
                 link = menu.get_item_link(i, "section")
                 submenu = menu.get_item_link(i, "submenu")
