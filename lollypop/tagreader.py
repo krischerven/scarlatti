@@ -473,6 +473,11 @@ class TagReader:
                     Logger.debug(
                         "Rating type: MediaMonkey Location: %s Rating: %s",
                         location, m.data[location])
+                elif m.data[10:40].find(b"MusicBee") >= 0:
+                    location = 19
+                    Logger.debug(
+                        "Rating type: MusicBee Location: %s Rating: %s",
+                        location, m.data[location])
                 else:
                     location = 11
                     Logger.debug(
