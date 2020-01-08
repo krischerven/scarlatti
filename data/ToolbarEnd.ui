@@ -28,9 +28,14 @@
               <attribute name="target">all</attribute>
             </item>
             <item>
-              <attribute name="label" translatable="yes">Automatic playback</attribute>
+              <attribute name="label" translatable="yes">Automatic playback (similar)</attribute>
               <attribute name="action">app.repeat</attribute>
-              <attribute name="target">auto</attribute>
+              <attribute name="target">auto_similar</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Automatic playback (random)</attribute>
+              <attribute name="action">app.repeat</attribute>
+              <attribute name="target">auto_random</attribute>
             </item>
             <item>
               <attribute name="label" translatable="yes">Repeat track</attribute>

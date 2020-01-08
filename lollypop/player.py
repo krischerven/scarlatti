@@ -15,12 +15,13 @@ from gi.repository import Gst, GLib, GObject
 from pickle import load
 
 from lollypop.player_albums import AlbumsPlayer
+from lollypop.player_auto_random import AutoRandomPlayer
+from lollypop.player_auto_similar import AutoSimilarPlayer
 from lollypop.player_bin import BinPlayer
 from lollypop.player_queue import QueuePlayer
 from lollypop.player_linear import LinearPlayer
 from lollypop.player_shuffle import ShufflePlayer
 from lollypop.player_radio import RadioPlayer
-from lollypop.player_similars import SimilarsPlayer
 from lollypop.radios import Radios
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
@@ -29,8 +30,8 @@ from lollypop.define import App, Type, LOLLYPOP_DATA_PATH
 from lollypop.utils import emit_signal
 
 
-class Player(GObject.GObject, AlbumsPlayer, BinPlayer, QueuePlayer,
-             RadioPlayer, LinearPlayer, ShufflePlayer, SimilarsPlayer):
+class Player(GObject.GObject, AlbumsPlayer, AutoRandomPlayer, AutoSimilarPlayer,
+             BinPlayer, QueuePlayer, RadioPlayer, LinearPlayer, ShufflePlayer):
     """
         Player object used to manage playback and playlists
     """
@@ -56,12 +57,13 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, QueuePlayer,
         """
         GObject.GObject.__init__(self)
         AlbumsPlayer.__init__(self)
+        AutoRandomPlayer.__init__(self)
+        AutoSimilarPlayer.__init__(self)
         BinPlayer.__init__(self)
         QueuePlayer.__init__(self)
         LinearPlayer.__init__(self)
         ShufflePlayer.__init__(self)
         RadioPlayer.__init__(self)
-        SimilarsPlayer.__init__(self)
         self.__stop_after_track_id = None
         self.update_crossfading()
         App().settings.connect("changed::repeat", self.update_next_prev)

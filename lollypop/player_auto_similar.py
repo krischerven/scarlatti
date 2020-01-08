@@ -21,7 +21,7 @@ from lollypop.utils import get_network_available, sql_escape
 from lollypop.utils_artist import ArtistProvider
 
 
-class SimilarsPlayer:
+class AutoSimilarPlayer:
     """
         Manage playback when going to end
     """
@@ -89,7 +89,7 @@ class SimilarsPlayer:
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
         # Check if we need to add a new album
-        if App().settings.get_enum("repeat") == Repeat.AUTO and\
+        if App().settings.get_enum("repeat") == Repeat.AUTO_SIMILAR and\
                 player.next_track.id is None and\
                 player.current_track.id is not None and\
                 player.current_track.id >= 0 and\

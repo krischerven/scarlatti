@@ -37,9 +37,10 @@ TMP_PATH = GLib.get_user_data_dir() + "/lollypop/tmp"
 
 class Repeat:
     NONE = 0
-    AUTO = 1
-    TRACK = 2
-    ALL = 3
+    AUTO_SIMILAR = 1
+    AUTO_RANDOM = 2
+    TRACK = 3
+    ALL = 4
 
 
 class GstPlayFlags:
