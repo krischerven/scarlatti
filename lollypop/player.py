@@ -30,8 +30,9 @@ from lollypop.define import App, Type, LOLLYPOP_DATA_PATH
 from lollypop.utils import emit_signal
 
 
-class Player(GObject.GObject, AlbumsPlayer, AutoRandomPlayer, AutoSimilarPlayer,
-             BinPlayer, QueuePlayer, RadioPlayer, LinearPlayer, ShufflePlayer):
+class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
+             AutoSimilarPlayer, QueuePlayer, RadioPlayer, LinearPlayer,
+             ShufflePlayer):
     """
         Player object used to manage playback and playlists
     """
