@@ -69,9 +69,9 @@ class AutoSimilarPlayer:
 
     def __get_artist_ids(self, artists):
         """
-            Get a valid artist id from list
+            Get valid artist ids from list
             @param artists as [str]
-            @return artist_id as int
+            @return [int]
         """
         similar_artist_ids = []
         for (spotify_id, artist, cover_uri) in artists:
