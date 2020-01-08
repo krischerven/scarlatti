@@ -22,6 +22,7 @@ Yosef Or Boczko
 Manuel Kehl
 Bilal Elmoussaoui
 Jordi Romera
+David Mandelberg
 </property>
     <property name="translator_credits" translatable="yes" context="Translation credits here, put your name here!" comments="Replace me with your names">Cédric Bellegarde &lt;cedric.bellegarde@adishatz.org&gt;</property>
     <property name="artists" translatable="yes">
