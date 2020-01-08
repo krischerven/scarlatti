@@ -17,6 +17,7 @@ from random import choice, shuffle
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
+from lollypop.player_auto_similar import AutoSimilarPlayer
 from lollypop.player_auto_random import AutoRandomPlayer
 from lollypop.define import App, Repeat
 from lollypop.utils import emit_signal
@@ -206,21 +207,18 @@ class AlbumsPlayer:
                 # We send this signal to update next popover
                 emit_signal(self, "queue-changed")
             elif self._current_track.id is not None:
-                index = self.album_ids.index(
-                    App().player._current_playback_track.album.id)
+                index = self._albums.index(
+                    self._current_playback_track.album)
                 if index + 1 >= len(self._albums):
                     repeat = App().settings.get_enum("repeat")
                     if repeat == Repeat.AUTO_SIMILAR:
-                        genre_ids = self._current_track.genre_ids
-                        if genre_ids:
-                            album_ids = App().albums.get_randoms(genre_ids[0],
-                                                                 1)
-                            if album_ids:
-                                next_album = Album(album_ids[0])
-                                self.add_album(next_album)
+                        next_album = AutoSimilarPlayer.next_album(self)
+                        if next_album is not None:
+                            self.add_album(next_album)
                     elif repeat == Repeat.AUTO_RANDOM:
                         next_album = AutoRandomPlayer.next_album(self)
-                        self.add_album(next_album)
+                        if next_album is not None:
+                            self.add_album(next_album)
                     elif repeat == Repeat.ALL:
                         next_album = self._albums[0]
                     else:

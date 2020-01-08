@@ -33,6 +33,19 @@ class AutoSimilarPlayer:
         self.__cancellable = Gio.Cancellable()
         self.connect("next-changed", self.__on_next_changed)
 
+    def next_album(self):
+        """
+            Get next album to add
+            @return Album
+        """
+        provider = ArtistProvider()
+        artists = provider.get_similar_artists(self.current_track.artists[0],
+                                               None)
+        similar_artist_ids = self.__get_artist_ids(artists)
+        if similar_artist_ids:
+            return self.__get_album_from_artists(similar_artist_ids)
+        return None
+
 #######################
 # PRIVATE             #
 #######################
@@ -51,11 +64,11 @@ class AutoSimilarPlayer:
             del providers[provider]
             break
 
-    def __add_a_new_album(self, similar_artist_ids):
+    def __get_album_from_artists(self,  similar_artist_ids):
         """
             Add a new album to playback
             @param similar_artist_ids as [int]
-            @return True if added
+            @return Album
         """
         # Get an album
         album_ids = App().albums.get_ids(similar_artist_ids, [])
@@ -63,9 +76,8 @@ class AutoSimilarPlayer:
         while album_ids:
             album_id = album_ids.pop(0)
             if album_id not in self.album_ids:
-                self.add_album(Album(album_id))
-                return True
-        return False
+                return Album(album_id)
+        return None
 
     def __get_artist_ids(self, artists):
         """
@@ -132,10 +144,12 @@ class AutoSimilarPlayer:
         if cancellable.is_cancelled():
             return
         similar_artist_ids = self.__get_artist_ids(artists)
-        added = False
+        album = None
         if similar_artist_ids:
             Logger.info("Found a similar artist: artists")
             if self.albums:
-                added = self.__add_a_new_album(similar_artist_ids)
-        if not added:
+                album = self.__get_album_from_artists(similar_artist_ids)
+        if album is None:
             self.__populate(providers, cancellable)
+        else:
+            self.add_album(album)

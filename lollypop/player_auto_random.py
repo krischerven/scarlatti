@@ -28,7 +28,8 @@ class AutoRandomPlayer:
 
     def next_album(self):
         """
-            Get next album to add.
+            Get next album to add
+            @return Album
         """
         for album_id in App().albums.get_randoms(limit=2):
             if album_id != self.current_track.album.id:
