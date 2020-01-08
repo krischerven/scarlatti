@@ -255,8 +255,8 @@ class SimilarsMenu(Gtk.Bin):
             popover.hide()
         artist_name = row.artist_name
         if row.storage_type == StorageType.EPHEMERAL:
-            target = "web://%s" % artist_name
-            App().lookup_action("search").activate(GLib.Variant("s", target))
+            App().lookup_action("search").activate(
+                GLib.Variant("s", artist_name))
         else:
             artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist_name))
