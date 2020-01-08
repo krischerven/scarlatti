@@ -137,14 +137,10 @@ class LazyLoadingView(View):
             return
         if not widget.is_populated:
             widget.populate()
-        elif self.__priority_queue or self.__lazy_queue:
+        else:
             # Do not remove this idle_add()
             # RecursionError: maximum recursion depth exceeded
             GLib.idle_add(self.__lazy_loading)
-        else:
-            self.__loading_state = LoadingState.FINISHED
-            Logger.debug("LazyLoadingView::lazy_loading(): %s",
-                         time() - self.__start_time)
 
     def _on_initial_loading(self):
         """
@@ -169,6 +165,10 @@ class LazyLoadingView(View):
         if widget is not None:
             widget.connect("populated", self._on_populated)
             widget.populate()
+        else:
+            self.__loading_state = LoadingState.FINISHED
+            Logger.debug("LazyLoadingView::lazy_loading(): %s",
+                         time() - self.__start_time)
 
     def __add_values(self, values):
         """
