@@ -142,9 +142,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__stack.show()
         self.add_widget(self.__stack, self.__banner)
         self.__banner.entry.connect("changed", self._on_search_changed)
-        self.set_search(initial_search)
         self.show_placeholder(True,
                               _("Search for artists, albums and tracks"))
+        self.set_search(initial_search)
         return [
                 (self.__local_search, "match-artist",
                  "_on_local_match_artist"),
@@ -197,7 +197,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Set search text
             @param search as str
         """
-        self.__current_search = search.strip()
         self.__banner.entry.set_text(search)
         self.__banner.entry.grab_focus()
 
