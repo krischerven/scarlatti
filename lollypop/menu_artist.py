@@ -63,13 +63,6 @@ class ArtistAlbumsMenu(Gio.Menu):
             Set artist actions
             @param view_type as ViewType
         """
-        if not view_type & ViewType.ARTIST and\
-                App().artists.has_albums(self.__artist_id):
-            go_artist_action = Gio.SimpleAction(name="go_artist_action")
-            App().add_action(go_artist_action)
-            go_artist_action.connect("activate",
-                                     self.__on_go_to_artist_activate)
-            self.append(_("Available albums"), "app.go_artist_action")
         if view_type & ViewType.BANNER and not view_type & ViewType.ALBUM:
             show_tracks_action = Gio.SimpleAction.new_stateful(
                 "show_tracks_action",
@@ -80,15 +73,6 @@ class ArtistAlbumsMenu(Gio.Menu):
             show_tracks_action.connect("change-state",
                                        self.__on_show_tracks_change_state)
             self.append(_("Show tracks"), "app.show_tracks_action")
-
-    def __on_go_to_artist_activate(self, action, variant):
-        """
-            Search albums from artist
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        artist_name = App().artists.get_name(self.__artist_id)
-        App().lookup_action("search").activate(GLib.Variant("s", artist_name))
 
     def __on_show_tracks_change_state(self, action, variant):
         """
