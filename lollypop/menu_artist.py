@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, ViewType
+from lollypop.define import App, ViewType, Type
 
 
 class ArtistMenu(Gio.Menu):
@@ -63,6 +63,11 @@ class ArtistAlbumsMenu(Gio.Menu):
             Set artist actions
             @param view_type as ViewType
         """
+        go_artist_action = Gio.SimpleAction(name="go_artist_action")
+        App().add_action(go_artist_action)
+        go_artist_action.connect("activate",
+                                 self.__on_go_to_artist_activate)
+        self.append(_("Available albums"), "app.go_artist_action")
         if view_type & ViewType.BANNER and not view_type & ViewType.ALBUM:
             show_tracks_action = Gio.SimpleAction.new_stateful(
                 "show_tracks_action",
@@ -73,6 +78,15 @@ class ArtistAlbumsMenu(Gio.Menu):
             show_tracks_action.connect("change-state",
                                        self.__on_show_tracks_change_state)
             self.append(_("Show tracks"), "app.show_tracks_action")
+
+    def __on_go_to_artist_activate(self, action, variant):
+        """
+            Show albums from artists
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().window.container.show_view([Type.ARTISTS],
+                                         [self.__artist_id])
 
     def __on_show_tracks_change_state(self, action, variant):
         """
