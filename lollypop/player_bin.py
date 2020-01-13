@@ -415,32 +415,36 @@ class BinPlayer:
             When stream is about to finish, switch to next track without gap
             @param playbin as Gst.Bin
         """
-        Logger.debug("Player::__on_stream_about_to_finish(): %s" % playbin)
-        # Don't do anything if crossfade on, track already changed
-        if self._crossfading:
-            return
-        if isinstance(App().player.current_track, Radio):
-            return
-        self._scrobble(self._current_track, self._start_time)
-        # Increment popularity
-        if self._current_track.id is not None and self._current_track.id >= 0:
-            App().tracks.set_more_popular(self._current_track.id)
-            # In party mode, linear popularity
-            if self.is_party:
-                pop_to_add = 1
-            # In normal mode, based on tracks count
+        try:
+            Logger.debug("Player::__on_stream_about_to_finish(): %s" % playbin)
+            # Don't do anything if crossfade on, track already changed
+            if self._crossfading:
+                return
+            if isinstance(App().player.current_track, Radio):
+                return
+            self._scrobble(self._current_track, self._start_time)
+            # Increment popularity
+            if self._current_track.id is not None and\
+                    self._current_track.id >= 0:
+                App().tracks.set_more_popular(self._current_track.id)
+                # In party mode, linear popularity
+                if self.is_party:
+                    pop_to_add = 1
+                # In normal mode, based on tracks count
+                else:
+                    count = self._current_track.album.tracks_count
+                    pop_to_add = int(App().albums.max_count / count)
+                App().albums.set_more_popular(self._current_track.album_id,
+                                              pop_to_add)
+            if self._next_track.id is None:
+                # We are in gstreamer thread
+                GLib.idle_add(self.stop)
+                # Reenable as it has been disabled by do_crossfading()
+                self.update_crossfading()
             else:
-                count = self._current_track.album.tracks_count
-                pop_to_add = int(App().albums.max_count / count)
-            App().albums.set_more_popular(self._current_track.album_id,
-                                          pop_to_add)
-        if self._next_track.id is None:
-            # We are in gstreamer thread
-            GLib.idle_add(self.stop)
-            # Reenable as it has been disabled by do_crossfading()
-            self.update_crossfading()
-        else:
-            self._load_track(self._next_track)
+                self._load_track(self._next_track)
+        except Exception as e:
+            Logger.error("BinPlayer::_on_stream_about_to_finish(): %s", e)
 
 #######################
 # PRIVATE             #
