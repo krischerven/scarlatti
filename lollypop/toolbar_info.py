@@ -151,7 +151,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             if not track.storage_type & StorageType.EPHEMERAL:
                 menu_ext = TrackMenuExt(track)
                 menu_ext.show()
-                menu_widget.get_child_by_name("main").add(menu_ext)
+                menu_widget.append_widget(menu_ext)
             self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
             popup_widget(menu_widget, self.__eventbox)
 
