@@ -348,7 +348,10 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param value as (int, str, optional str)
         """
         self._box.set_sort_func(self.__sort_func)
-        LazyLoadingView.populate(self, [value])
+        child = self._get_child(value)
+        child.populate()
+        if self.mask & SelectionListMask.ARTISTS:
+            self.__fastscroll.populate()
 
     def update_value(self, object_id, name):
         """
@@ -365,10 +368,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         if not found:
             if self.__base_mask & SelectionListMask.VIEW:
                 self.__fastscroll.clear()
-            row = self._get_child((object_id, name, name))
-            row.populate()
-            if self.mask & SelectionListMask.ARTISTS:
-                self.__fastscroll.populate()
+            self.add_value((object_id, name, name))
 
     def update_values(self, values):
         """
