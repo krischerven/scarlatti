@@ -298,7 +298,7 @@ class Playlists(GObject.GObject):
         elif playlist_id == Type.ALL:
             track_ids = App().tracks.get_ids()
         elif playlist_id == Type.LOVED:
-            track_ids = App().playlists.get_track_ids_sorted(playlist_id)
+            track_ids = App().tracks.get_loved_track_ids()
         else:
             with SqlCursor(self) as sql:
                 result = sql.execute("SELECT music.tracks.rowid\
@@ -336,28 +336,6 @@ class Playlists(GObject.GObject):
             if v is not None and v[0] is not None:
                 return v[0]
             return 0
-
-    def get_track_ids_sorted(self, playlist_id):
-        """
-            Return availables track ids for playlist sorted by artist/album
-            @param playlist_id as int
-            @return array of track id as int
-        """
-        with SqlCursor(self) as sql:
-            result = sql.execute("SELECT music.tracks.rowid\
-                                  FROM tracks, music.tracks,\
-                                  music.track_artists, music.artists\
-                                  WHERE tracks.playlist_id=?\
-                                  AND music.track_artists.track_id=\
-                                  music.tracks.rowid\
-                                  AND music.artists.id=\
-                                  music.track_artists.artist_id\
-                                  AND music.tracks.uri=\
-                                  main.tracks.uri\
-                                  ORDER BY\
-                                  music.artists.sortname, album_id",
-                                 (playlist_id,))
-            return list(itertools.chain(*result))
 
     def get_id(self, playlist_name):
         """

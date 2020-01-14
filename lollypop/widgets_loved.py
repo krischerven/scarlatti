@@ -83,6 +83,9 @@ class LovedWidget(Gtk.Bin):
             loved = Type.NONE
         self.__object.set_loved(loved)
         if isinstance(self.__object, Track):
+            # Clear loved playlist artwork cache
+            name = App().playlists.get_name(Type.LOVED)
+            App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
             # Update state on Last.fm
             if App().lastfm is not None:
                 lastfm_status = True if loved == 1 else False
