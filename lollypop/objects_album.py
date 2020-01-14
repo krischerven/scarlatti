@@ -235,12 +235,16 @@ class Album(Base):
         for track in self.tracks:
             track.save(save)
         self.reset("mtime")
-        for artist_id in self.artist_ids:
-            emit_signal(App().scanner, "artist-updated", artist_id, save)
         if save:
+            for artist_id in self.artist_ids:
+                emit_signal(App().scanner, "artist-updated",
+                            artist_id, ScanUpdate.ADDED)
             emit_signal(App().scanner, "album-updated", self.id,
                         ScanUpdate.ADDED)
         else:
+            for artist_id in self.artist_ids:
+                emit_signal(App().scanner, "artist-updated", artist_id,
+                            ScanUpdate.REMOVED)
             emit_signal(App().scanner, "album-updated", self.id,
                         ScanUpdate.REMOVED)
 
