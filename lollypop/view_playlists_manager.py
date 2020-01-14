@@ -77,6 +77,9 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         if self.destroyed:
             return None
+        # Compatibility with SelectionList
+        if isinstance(value, tuple):
+            value = value[0]
         widget = PlaylistRoundedWidget(value, self._view_type,
                                        self.font_height)
         self._box.insert(widget, -1)
