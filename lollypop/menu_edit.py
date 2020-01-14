@@ -136,11 +136,12 @@ class EditMenu(Gio.Menu):
             @param save as bool
         """
         self.__object.save(save)
-        App().tracks.del_non_persistent()
-        App().tracks.clean()
-        App().albums.clean()
-        App().artists.clean()
-        App().genres.clean()
+        if not save:
+            App().tracks.del_non_persistent()
+            App().tracks.clean()
+            App().albums.clean()
+            App().artists.clean()
+            App().genres.clean()
 
     def __on_edit_tag_action_activate(self, action, variant):
         """
