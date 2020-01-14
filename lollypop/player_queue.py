@@ -84,14 +84,14 @@ class QueuePlayer:
         if notify:
             emit_signal(self, "queue-changed")
 
-    def track_in_queue(self, track):
+    def is_in_queue(self, track_id):
         """
-            True if track exists in queue
-            @param track as Track
+            True if track id exists in queue
+            @param track_id as int
             @return bool
         """
         if self.__queue:
-            return track.id in self.__queue
+            return track_id in self.__queue
         else:
             return False
 

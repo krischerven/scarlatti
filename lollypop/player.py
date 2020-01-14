@@ -274,7 +274,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             On stream start, set next and previous track
         """
-        if self.track_in_queue(self._current_track):
+        if self.is_in_queue(self._current_track.id):
             self.remove_from_queue(self._current_track.id)
         else:
             self._current_playback_track = self._current_track

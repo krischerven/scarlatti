@@ -169,7 +169,7 @@ class TrackRow(Gtk.ListBoxRow):
         """
             Update position label for row
         """
-        if App().player.track_in_queue(self._track):
+        if App().player.is_in_queue(self._track.id):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))

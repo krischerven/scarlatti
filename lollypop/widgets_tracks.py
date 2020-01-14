@@ -99,6 +99,8 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             if self.__view_type & ViewType.DND:
                 self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
                 do_shift_selection(self, row)
+            elif App().player.is_in_queue(row.track.id):
+                App().player.remove_from_queue(row.track.id, True)
             else:
                 App().player.append_to_queue(row.track.id, True)
         elif event.state & Gdk.ModifierType.MOD1_MASK:
