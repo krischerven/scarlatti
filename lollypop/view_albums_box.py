@@ -156,12 +156,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param album_id as int
             @param scan_update as ScanUpdate
         """
-        if scan_update == ScanUpdate.REMOVED:
-            for child in self.children:
-                if child.data.id == album_id:
-                    child.destroy()
-                    break
-
         if scan_update == ScanUpdate.ADDED and self._genre_ids and\
                 Type.NONE not in self._genre_ids:  # AlbumsLineView
             album_ids = App().window.container.get_view_album_ids(
@@ -170,6 +164,17 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             if album_id in album_ids:
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
+        elif scan_update == ScanUpdate.MODIFIED:
+            for child in self.children:
+                if child.data.id == album_id:
+                    print("clear", album_id)
+                    child.data.reset_tracks()
+                    break
+        elif scan_update == ScanUpdate.REMOVED:
+            for child in self.children:
+                if child.data.id == album_id:
+                    child.destroy()
+                    break
 
     def _on_artwork_changed(self, artwork, album_id):
         """

@@ -180,11 +180,12 @@ class Album(Base):
                 self._tracks.remove(_track)
         return len(self._tracks) == 0
 
-    def clear_tracks(self):
+    def reset_tracks(self):
         """
-            Clear album tracks
+            Reset album tracks
         """
         self._tracks = []
+        self._discs = []
 
     def disc_names(self, disc):
         """
