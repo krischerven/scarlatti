@@ -118,7 +118,7 @@ class EqualizerWidget(Gtk.Bin):
         App().settings.set_value("equalizer-enabled",
                                  GLib.Variant("b", active))
         for plugin in App().player.plugins:
-            plugin.init()
+            plugin.build_audiofilter()
         App().player.reload_track()
         self.__combobox.set_sensitive(active)
         for i in range(0, 10):

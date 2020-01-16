@@ -29,56 +29,59 @@ class PluginsPlayer:
         """
         self.__equalizer = None
         self.__playbin = playbin
-        self.init()
+        self.build_audiofilter()
 
-    def init(self):
+    def build_audiofilter(self):
         """
-            Init playbin
+            Build audio filter
         """
         try:
-            bin = Gst.ElementFactory.make("bin", "bin")
-
+            self.__playbin.set_property("audio-filter", None)
+            audiofilter = Gst.ElementFactory.make("bin", None)
             # Internal volume manager
-            self.volume = Gst.ElementFactory.make("volume", "volume")
+            self.volume = Gst.ElementFactory.make("volume", None)
             self.volume.props.volume = 0.0
-            bin.add(self.volume)
-            previous_bin = self.volume
-
+            audiofilter.add(self.volume)
             # Equalizer
+            self.__equalizer = None
             if App().settings.get_value("equalizer-enabled"):
                 self.__equalizer = Gst.ElementFactory.make("equalizer-10bands",
-                                                           "equalizer-10bands")
-                bin.add(self.__equalizer)
-                previous_bin.link(self.__equalizer)
-                previous_bin = self.__equalizer
-
+                                                           None)
+                audiofilter.add(self.__equalizer)
+                self.volume.link(self.__equalizer)
             # Replay gain
             replay_gain = App().settings.get_enum("replay-gain")
             if replay_gain != ReplayGain.NONE:
-                rgvolume = Gst.ElementFactory.make("rgvolume", "rgvolume")
+                rgvolume = Gst.ElementFactory.make("rgvolume", None)
                 if replay_gain == ReplayGain.ALBUM:
                     rgvolume.props.album_mode = 1
                 else:
                     rgvolume.props.album_mode = 0
                 rgvolume.props.pre_amp = App().settings.get_value(
                     "replaygain").get_double()
-                bin.add(rgvolume)
-                previous_bin.link(rgvolume)
-                rglimiter = Gst.ElementFactory.make("rglimiter", "rglimiter")
-                bin.add(rglimiter)
+                audiofilter.add(rgvolume)
+                rglimiter = Gst.ElementFactory.make("rglimiter", None)
+                audiofilter.add(rglimiter)
                 rgvolume.link(rglimiter)
-                previous_bin = rglimiter
-
-            audiosink = Gst.ElementFactory.make("autoaudiosink",
-                                                "autoaudiosink")
-            bin.add(audiosink)
-            previous_bin.link(audiosink)
-
-            bin.add_pad(Gst.GhostPad.new(
-                "sink",
-                self.volume.get_static_pad("sink")))
-            self.__playbin.set_property("audio-sink", bin)
-            self.update_equalizer()
+                pad_src = rglimiter.get_static_pad("src")
+                if self.__equalizer is not None:
+                    self.volume.link(self.__equalizer)
+                    self.__equalizer.link(rgvolume)
+                else:
+                    self.volume.link(rgvolume)
+            elif self.__equalizer is not None:
+                pad_src = self.__equalizer.get_static_pad("src")
+                self.volume.link(self.__equalizer)
+            else:
+                pad_src = self.volume.get_static_pad("src")
+            ghost_src = Gst.GhostPad.new("src", pad_src)
+            audiofilter.add_pad(ghost_src)
+            pad_sink = self.volume.get_static_pad("sink")
+            ghost_sink = Gst.GhostPad.new("sink", pad_sink)
+            audiofilter.add_pad(ghost_sink)
+            self.__playbin.set_property("audio-filter", audiofilter)
+            if self.__equalizer is not None:
+                self.update_equalizer()
         except Exception as e:
             Logger.error("PluginsPlayer::init():", e)
 
