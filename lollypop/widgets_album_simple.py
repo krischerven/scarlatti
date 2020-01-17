@@ -147,9 +147,9 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             return
         selected = self.__album.id == App().player.current_track.album.id
         if selected:
-            self.__artwork.set_state_flags(Gtk.StateFlags.SELECTED, True)
+            self.__artwork.set_state_flags(Gtk.StateFlags.SELECTED, False)
         else:
-            self.__artwork.set_state_flags(Gtk.StateFlags.NORMAL, True)
+            self.__artwork.unset_state_flags(Gtk.StateFlags.SELECTED)
 
     @property
     def data(self):
