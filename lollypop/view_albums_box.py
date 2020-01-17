@@ -167,7 +167,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         elif scan_update == ScanUpdate.MODIFIED:
             for child in self.children:
                 if child.data.id == album_id:
-                    print("clear", album_id)
                     child.data.reset_tracks()
                     break
         elif scan_update == ScanUpdate.REMOVED:
