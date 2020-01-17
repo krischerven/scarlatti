@@ -37,9 +37,12 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
                              ViewType.SCROLLED | ViewType.OVERLAY)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
-        self.__banner = PlaylistsBannerWidget(self)
-        self.__banner.show()
-        self.add_widget(self._box, self.__banner)
+        if self.args is None:
+            self.add_widget(self._box, None)
+        else:
+            self.__banner = PlaylistsBannerWidget(self)
+            self.__banner.show()
+            self.add_widget(self._box, self.__banner)
         return [
             (App().playlists, "playlists-changed", "_on_playlist_changed")
         ]
@@ -214,7 +217,6 @@ class PlaylistsManagerDeviceView(PlaylistsManagerView):
         """
         PlaylistsManagerView.__init__(self, view_type)
         self.__index = index
-        self._new_button.hide()
 
     def populate(self):
         """
