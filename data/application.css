@@ -261,7 +261,7 @@ flowboxchild:selected  {
 }
 
 .cover-frame {
-    margin: 10px;
+    margin: 15px;
     background-color: shade(@theme_bg_color, 1.5);
     padding: 4px;
     box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
@@ -284,7 +284,7 @@ flowboxchild:selected  {
     color: @theme_fg_color;
 }
 
-.artwork-icon {
+.circle-icon {
     border: 1px solid alpha(@theme_fg_color, 0.8);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
@@ -292,19 +292,31 @@ flowboxchild:selected  {
     border-radius: 50%;
 }
 
-.artwork-icon-large {
-    margin: 10px;
+.circle-icon-large {
+    margin: 15px;
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 50%;
     box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
 }
 
-.artwork-icon-large:visited {
+.circle-icon-large:visited {
     opacity: 0.9;
     box-shadow: 1px 1px 10px 4px alpha(@theme_selected_bg_color, 0.5);
 }
 
+.rounded-icon-large {
+    margin: 15px;
+    background-color: shade(@theme_bg_color, 1.5);
+    color: alpha(@theme_fg_color, 0.8);
+    border-radius: 25%;
+    box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
+}
+
+.rounded-icon-large:visited {
+    opacity: 0.9;
+    box-shadow: 1px 1px 10px 4px alpha(@theme_selected_bg_color, 0.5);
+}
 
 .big-padding {
     padding: 10px;

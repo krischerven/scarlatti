@@ -47,7 +47,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             Populate widget content
         """
         RoundedFlowBoxWidget.populate(self)
-        self._artwork.get_style_context().add_class("light-background")
+        self._artwork.get_style_context().add_class("rounded-icon-large")
 
     def set_view_type(self, view_type):
         """

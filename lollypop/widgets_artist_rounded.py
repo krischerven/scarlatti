@@ -50,6 +50,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         """
         if self._artwork is None:
             RoundedFlowBoxWidget.populate(self)
+            self._artwork.get_style_context().add_class("circle-icon-large")
             self.connect("destroy", self.__on_destroy)
         else:
             self.set_artwork()
@@ -123,11 +124,11 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         if self._artwork is None:
             return
         if surface is None:
-            self._artwork.get_style_context().add_class("artwork-icon")
+            self._artwork.get_style_context().add_class("circle-icon")
             self._artwork.set_from_icon_name("avatar-default-symbolic",
                                              Gtk.IconSize.DIALOG)
         else:
-            self._artwork.get_style_context().remove_class("artwork-icon")
+            self._artwork.get_style_context().remove_class("circle-icon")
             self._artwork.set_from_surface(surface)
         emit_signal(self, "populated")
 

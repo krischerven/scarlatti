@@ -232,14 +232,14 @@ class SelectionListRow(Gtk.ListBoxRow):
             @param surface as cairo.Surface
         """
         if surface is None:
-            self.__artwork.get_style_context().add_class("artwork-icon")
+            self.__artwork.get_style_context().add_class("circle-icon")
             self.__artwork.set_size_request(ArtSize.SMALL,
                                             ArtSize.SMALL)
             self.__artwork.set_from_icon_name(
                                               "avatar-default-symbolic",
                                               Gtk.IconSize.DND)
         else:
-            self.__artwork.get_style_context().remove_class("artwork-icon")
+            self.__artwork.get_style_context().remove_class("circle-icon")
             self.__artwork.set_from_surface(surface)
         emit_signal(self, "populated")
 

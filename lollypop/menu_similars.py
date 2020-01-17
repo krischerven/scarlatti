@@ -117,13 +117,13 @@ class ArtistRow(Gtk.ListBoxRow):
                                                    self.__cancellable,
                                                    self.__on_uri_content)
                 self.__cover_uri = None
-            self.__artwork.get_style_context().add_class("artwork-icon")
+            self.__artwork.get_style_context().add_class("circle-icon")
             self.__artwork.set_from_icon_name("avatar-default-symbolic",
                                               Gtk.IconSize.INVALID)
-            # artwork-icon padding is 5px
+            # circle-icon padding is 5px
             self.__artwork.set_pixel_size(ArtSize.SMALL - 20)
         else:
-            self.__artwork.get_style_context().remove_class("artwork-icon")
+            self.__artwork.get_style_context().remove_class("circle-icon")
             self.__artwork.set_from_surface(surface)
 
 

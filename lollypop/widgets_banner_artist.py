@@ -282,12 +282,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         if self.get_allocated_width() >= Size.MEDIUM / 1.5:
             self.__badge_artwork.show()
         if surface is None:
-            self.__badge_artwork.get_style_context().add_class("artwork-icon")
+            self.__badge_artwork.get_style_context().add_class("circle-icon")
             self.__badge_artwork.set_size_request(art_size, art_size)
             self.__badge_artwork.set_from_icon_name(
                                               "avatar-default-symbolic",
                                               Gtk.IconSize.DIALOG)
         else:
             self.__badge_artwork.get_style_context().remove_class(
-                "artwork-icon")
+                "circle-icon")
             self.__badge_artwork.set_from_surface(surface)
