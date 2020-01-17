@@ -261,9 +261,10 @@ flowboxchild:selected  {
 }
 
 .cover-frame {
+    margin: 4px;
     background-color: shade(@theme_bg_color, 1.5);
     padding: 4px;
-    box-shadow: 0px 0px 4px 2px rgba(0,0,0,0.3);
+    box-shadow: 1px 1px 8px 2px rgba(0,0,0,0.3);
 }
 
 .cover-frame:selected {
@@ -273,7 +274,7 @@ flowboxchild:selected  {
 
 .cover-frame:visited {
     opacity: 0.9;
-    box-shadow: 0px 0px 4px 4px alpha(@theme_selected_bg_color, 0.5);
+    box-shadow: 1px 1px 8px 4px alpha(@theme_selected_bg_color, 0.5);
 }
 
 .small-cover-frame {
@@ -292,15 +293,16 @@ flowboxchild:selected  {
 }
 
 .artwork-icon-large {
+    margin: 4px;
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 50%;
-    box-shadow: 0px 0px 4px 2px rgba(0,0,0,0.3);
+    box-shadow: 1px 1px 8px 2px rgba(0,0,0,0.3);
 }
 
 .artwork-icon-large:visited {
     opacity: 0.9;
-    box-shadow: 0px 0px 4px 4px alpha(@theme_selected_bg_color, 0.5);
+    box-shadow: 1px 1px 8px 4px alpha(@theme_selected_bg_color, 0.5);
 }
 
 
