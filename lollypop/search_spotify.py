@@ -423,10 +423,7 @@ class SpotifySearch(GObject.Object):
                 raise Exception("cancelled")
             artists = [artist["name"]
                        for artist in item["album"]["artists"]]
-            exists_in_db = App().db.exists_in_db(
-                                             item["album"]["name"],
-                                             artists)
-            if exists_in_db:
+            if App().tracks.get_mb_track_id(item["id"]) >= 0:
                 Logger.debug("SpotifySearch: track exists in DB: %s - %s",
                              item["name"], artists)
                 continue
@@ -455,10 +452,7 @@ class SpotifySearch(GObject.Object):
                 raise Exception("cancelled")
             artists = [artist["name"]
                        for artist in album_item["artists"]]
-            exists_in_db = App().db.exists_in_db(
-                                    album_item["name"],
-                                    artists)
-            if exists_in_db:
+            if App().albums.get_mb_album_id(album_item["id"]) >= 0:
                 Logger.debug("SpotifySearch: album exists in DB: %s - %s",
                              artists, album_item["name"])
                 continue
@@ -489,6 +483,7 @@ class SpotifySearch(GObject.Object):
             @param storage_type as StorageType
             @return track_id
         """
+        track_id = payload["id"]
         title = payload["name"]
         _artists = []
         for artist in payload["artists"]:
@@ -501,6 +496,7 @@ class SpotifySearch(GObject.Object):
         # Translate to tag value
         artists = ";".join(_artists)
         album_artists = ";".join(_album_artists)
+        album_id = payload["album"]["id"]
         album_name = payload["album"]["name"]
         discnumber = int(payload["disc_number"])
         discname = None
@@ -520,8 +516,8 @@ class SpotifySearch(GObject.Object):
         mtime = int(time())
         (track_id, album_id) = App().scanner.save_track(
                    None, artists, "", "", album_artists, "", "",
-                   album_name, None, uri, 0, 0,
+                   album_name, album_id, uri, 0, 0,
                    0, 0, mtime, title, duration, tracknumber,
                    discnumber, discname, year, timestamp, mtime,
-                   0, 0, 0, 0, "", 0, storage_type)
+                   0, 0, 0, 0, track_id, 0, storage_type)
         return (album_id, track_id, cover_uri)

@@ -217,31 +217,6 @@ class Database:
         except Exception as e:
             Logger.error("Database::drop_db():", e)
 
-    def exists_in_db(self, album, artists):
-        """
-            Search if item exists in db
-            @param album as str
-            @param artists as [str]
-            @return bool
-        """
-        # First check album name
-        album_id = App().albums.get_id_for_escaped_string(
-            sql_escape(album.lower()), [])
-        if album_id is None:
-            return False
-        # Then check for album + artists
-        artist_ids = []
-        for artist in artists:
-            artist_id = App().artists.get_id_for_escaped_string(
-                sql_escape(artist.lower()))
-            if artist_id is None:
-                return False
-            else:
-                artist_ids.append(artist_id)
-        album_id = App().albums.get_id_for_escaped_string(
-            sql_escape(album.lower()), artist_ids)
-        return album_id is not None
-
 #######################
 # PRIVATE             #
 #######################
