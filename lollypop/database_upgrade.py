@@ -154,7 +154,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             38: """CREATE TABLE albums_timed_popularity (
                                                 album_id INT NOT NULL,
                                                 mtime INT NOT NULL,
-                                                popularity INT NOT NULL)"""
+                                                popularity INT NOT NULL)""",
+            39: self.__upgrade_39
         }
 
 #######################
@@ -674,3 +675,36 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                          WHERE genre_id=-22")
             sql.execute("UPDATE album_artists SET artist_id=-10\
                          WHERE artist_id=-2001")
+
+    def __upgrade_39(self, db):
+        """
+            Reset Spotify tracks: we are now using Spotify id as MusicBrainz id
+        """
+        with SqlCursor(db, True) as sql:
+            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
+                                 StorageType.SPOTIFY_SIMILARS]:
+                sql.execute("DELETE FROM tracks WHERE\
+                             storage_type=? AND mb_track_id=''",
+                            (storage_type,))
+            sql.execute("DELETE FROM track_artists\
+                         WHERE track_artists.track_id NOT IN (\
+                            SELECT tracks.rowid FROM tracks)")
+            sql.execute("DELETE FROM track_genres\
+                         WHERE track_genres.track_id NOT IN (\
+                            SELECT tracks.rowid FROM tracks)")
+            sql.execute("DELETE FROM albums WHERE albums.rowid NOT IN (\
+                            SELECT tracks.album_id FROM tracks)")
+            sql.execute("DELETE FROM album_genres\
+                         WHERE album_genres.album_id NOT IN (\
+                            SELECT albums.rowid FROM albums)")
+            sql.execute("DELETE FROM album_artists\
+                         WHERE album_artists.album_id NOT IN (\
+                            SELECT albums.rowid FROM albums)")
+            sql.execute("DELETE FROM albums_timed_popularity\
+                         WHERE albums_timed_popularity.album_id NOT IN (\
+                            SELECT albums.rowid FROM albums)")
+            sql.execute("DELETE FROM artists WHERE artists.rowid NOT IN (\
+                            SELECT album_artists.artist_id\
+                            FROM album_artists) AND artists.rowid NOT IN (\
+                                SELECT track_artists.artist_id\
+                                FROM track_artists)")
