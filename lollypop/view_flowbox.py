@@ -215,8 +215,10 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
             Unselect selected child
         """
-        if self.__hovered_child is not None:
-            self.__hovered_child.set_opacity(1)
+        if self.__hovered_child is not None and\
+                self.__hovered_child.artwork is not None:
+            self.__hovered_child.artwork.unset_state_flags(
+                Gtk.StateFlags.VISITED)
             self.__hovered_child = None
 
     def __on_box_motion(self, event_controller, x, y):
@@ -229,7 +231,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         child = self._box.get_child_at_pos(x, y)
         if child == self.__hovered_child:
             return
-        elif child is not None:
-            child.set_opacity(0.9)
+        elif child is not None and child.artwork is not None:
+            child.artwork.set_state_flags(Gtk.StateFlags.VISITED, False)
             self.__unselect_selected()
             self.__hovered_child = child

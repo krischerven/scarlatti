@@ -80,7 +80,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             icon_name = get_icon_name(self._data) or "avatar-default-symbolic"
             self._artwork.set_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
             emit_signal(self, "populated")
-            self._artwork.get_style_context().add_class("artwork-icon-large")
 
         if self._artwork is None:
             return

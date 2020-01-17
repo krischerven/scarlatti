@@ -62,6 +62,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._artwork.connect("realize", set_cursor_type)
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
+        self._artwork.get_style_context().add_class("artwork-icon-large")
         self.set_artwork()
         self._grid.add(self._artwork)
         self._grid.add(self._label)
