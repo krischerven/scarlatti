@@ -150,7 +150,7 @@ class SpotifySearch(GObject.Object):
             similar_ids = []
             # Get similars spotify ids
             for (artist_id, name, sortname) in artist_ids:
-                cancellable_sleep(5, cancellable)
+                cancellable_sleep(2, cancellable)
                 spotify_id = self.get_artist_id(name, cancellable)
                 if spotify_id is None:
                     continue
@@ -161,7 +161,7 @@ class SpotifySearch(GObject.Object):
             # Add albums
             shuffle(similar_ids)
             for similar_id in similar_ids[:self.__MAX_ITEMS_PER_STORAGE_TYPE]:
-                cancellable_sleep(5, cancellable)
+                cancellable_sleep(2, cancellable)
                 albums_payload = self.__get_artist_albums_payload(similar_id,
                                                                   cancellable)
                 if albums_payload:
@@ -418,7 +418,7 @@ class SpotifySearch(GObject.Object):
         # Populate tracks
         for item in payload:
             if not storage_type & StorageType.EPHEMERAL:
-                cancellable_sleep(5, cancellable)
+                cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             artists = [artist["name"]
@@ -447,7 +447,7 @@ class SpotifySearch(GObject.Object):
         # Populate tracks
         for album_item in payload:
             if not storage_type & StorageType.EPHEMERAL:
-                cancellable_sleep(5, cancellable)
+                cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             artists = [artist["name"]

@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.utils import get_network_available
-from lollypop.define import ViewType, StorageType, Size
+from lollypop.define import ViewType, StorageType, Size, App
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_line import AlbumsPopularsLineView
 from lollypop.view_albums_line import AlbumsRandomGenresLineView
@@ -41,13 +41,16 @@ class SuggestionsView(FilteringHelper, View):
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
-        album = TodayBannerWidget.get_today_album()
-        if album is not None:
-            self.__banner = TodayBannerWidget(album, self._view_type)
-            self.__banner.show()
+        if App().tracks.count == 0:
+            self.__welcome_screen()
         else:
-            self.__banner = None
-        self.add_widget(self.__grid, self.__banner)
+            album = TodayBannerWidget.get_today_album()
+            if album is not None:
+                self.__banner = TodayBannerWidget(album, self._view_type)
+                self.__banner.show()
+            else:
+                self.__banner = None
+            self.add_widget(self.__grid, self.__banner)
 
     def populate(self):
         """
@@ -70,7 +73,6 @@ class SuggestionsView(FilteringHelper, View):
                                                  self._view_type)
             spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
             self.__grid.add(spotify_view)
-        GLib.timeout_add(250, self.__welcome_screen)
 
     def activate_child(self):
         """
@@ -118,12 +120,6 @@ class SuggestionsView(FilteringHelper, View):
         """
             Show welcome screen if view empty
         """
-        # If any child visible, quit
-        for child in self.__grid.get_children():
-            if child.get_visible():
-                return
-            else:
-                child.destroy()
         label = Gtk.Label.new(_("Welcome to Lollypop"))
         label.get_style_context().add_class("text-xx-large")
         label.set_property("valign", Gtk.Align.END)

@@ -225,7 +225,9 @@ class CollectionScanner(GObject.GObject, TagReader):
         # are playing with a compilation or an album
         self.__new_non_album_artists += list(
             set(added_artist_ids) - set(added_album_artist_ids))
-        if storage_type & StorageType.COLLECTION:
+        if storage_type & (StorageType.COLLECTION |
+                           StorageType.SPOTIFY_NEW_RELEASES |
+                           StorageType.SPOTIFY_SIMILARS):
             for artist_id in added_album_artist_ids:
                 if artist_id in self.__new_non_album_artists:
                     self.__new_non_album_artists.remove(artist_id)

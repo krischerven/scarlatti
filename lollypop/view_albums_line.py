@@ -14,10 +14,11 @@ from gi.repository import GLib, Gtk, Gio, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type, MARGIN, ViewType
+from lollypop.define import App, Type, MARGIN, ViewType, StorageType
+from lollypop.define import ScanUpdate
 from lollypop.objects_album import Album
 from lollypop.utils import get_network_available
-from lollypop.helper_signals import signals_map
+from lollypop.helper_signals import signals
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.view_albums_box import AlbumsBoxView
 
@@ -27,12 +28,14 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         Albums on a line
     """
 
+    ITEMS = 20
+
     def __init__(self, view_type):
         """
             Init view
             @param view_type as ViewType
         """
-        AlbumsBoxView.__init__(self, [Type.NONE], [], view_type)
+        AlbumsBoxView.__init__(self, [], [], view_type)
         self.set_row_spacing(5)
         self.set_property("valign", Gtk.Align.START)
         self._label = Gtk.Label.new()
@@ -67,8 +70,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         """
         if albums:
             self.show()
-        self._box.set_min_children_per_line(len(albums))
-        AlbumsBoxView.populate(self, albums)
+            self._box.set_min_children_per_line(len(albums))
+            AlbumsBoxView.populate(self, albums)
 
     @property
     def args(self):
@@ -77,6 +80,9 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _on_album_updated(self, scanner, album_id, scan_update):
+        pass
+
     def _on_adaptive_changed(self, window, status):
         """
             Update label
@@ -160,7 +166,7 @@ class AlbumsPopularsLineView(AlbumsLineView):
             AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = App().albums.get_populars_at_the_moment(20)
+            album_ids = App().albums.get_populars_at_the_moment(self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
         self._label.set_text(_("Popular albums at the moment"))
@@ -189,7 +195,7 @@ class AlbumsRandomGenresLineView(AlbumsLineView):
         def load():
             (genre_id, genre) = App().genres.get_random()
             GLib.idle_add(self._label.set_text, genre)
-            album_ids = App().albums.get_randoms(genre_id, 20)
+            album_ids = App().albums.get_randoms(genre_id, self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
@@ -232,7 +238,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         Spotify album line
     """
 
-    @signals_map
+    @signals
     def __init__(self, text, view_type):
         """
             Init view
@@ -242,7 +248,9 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         AlbumsLineView.__init__(self, view_type)
         self._label.set_text(text)
         self.__cancellable = Gio.Cancellable()
+        self.__storage_type = StorageType.NONE
         return [
+                (App().scanner, "album-updated", "_on_album_updated"),
                 (App().settings, "changed::network-access",
                  "_on_network_access_changed"),
                 (App().settings, "changed::network-access-acl",
@@ -262,6 +270,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
+        self.__storage_type |= storage_type
 
 #######################
 # PROTECTED           #
@@ -273,6 +282,23 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         """
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
+
+    def _on_album_updated(self, scanner, album_id, scan_update):
+        """
+            Handles changes in collection
+            @param scanner as CollectionScanner
+            @param album_id as int
+            @param scan_update as ScanUpdate
+        """
+        count = len(self.children)
+        if count == self.ITEMS:
+            return
+        if scan_update == ScanUpdate.ADDED:
+            storage_type = App().albums.get_storage_type(album_id)
+            if self.__storage_type & storage_type:
+                self.insert_album(Album(album_id), -1)
+                self._box.set_min_children_per_line(count)
+                self.show()
 
     def _on_network_access_changed(self, *ignore):
         """

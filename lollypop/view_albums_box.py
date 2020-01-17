@@ -156,8 +156,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param album_id as int
             @param scan_update as ScanUpdate
         """
-        if scan_update == ScanUpdate.ADDED and self._genre_ids and\
-                Type.NONE not in self._genre_ids:  # AlbumsLineView
+        if scan_update == ScanUpdate.ADDED:
             album_ids = App().window.container.get_view_album_ids(
                                             self._genre_ids,
                                             self._artist_ids)
