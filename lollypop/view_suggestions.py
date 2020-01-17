@@ -41,8 +41,9 @@ class SuggestionsView(FilteringHelper, View):
         self.__grid.set_row_spacing(5)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.show()
-        if App().tracks.count == 0:
+        if App().tracks.count() == 0:
             self.__welcome_screen()
+            self.add_widget(self.__grid, None)
         else:
             album = TodayBannerWidget.get_today_album()
             if album is not None:
