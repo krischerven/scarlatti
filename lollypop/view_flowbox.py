@@ -17,7 +17,7 @@ from locale import strcoll
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, MARGIN
+from lollypop.define import ViewType, MARGIN_SMALL
 from lollypop.utils import get_font_height, popup_widget
 
 
@@ -42,8 +42,8 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         self._box.set_homogeneous(True)
         self._box.set_vexpand(True)
         self._box.set_max_children_per_line(1000)
-        self._box.set_row_spacing(MARGIN)
-        self._box.set_column_spacing(MARGIN)
+        self._box.set_row_spacing(MARGIN_SMALL)
+        self._box.set_column_spacing(MARGIN_SMALL)
         self._box.set_property("valign", Gtk.Align.START)
         self._box.connect("child-activated", self._on_child_activated)
         self._box.show()

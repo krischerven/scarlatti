@@ -13,7 +13,6 @@
 from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
-from lollypop.define import MARGIN_SMALL
 from lollypop.utils import on_query_tooltip, set_cursor_type, emit_signal
 
 
@@ -51,7 +50,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         """
         if self.__artwork is None:
             grid = Gtk.Grid()
-            grid.set_row_spacing(MARGIN_SMALL)
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)

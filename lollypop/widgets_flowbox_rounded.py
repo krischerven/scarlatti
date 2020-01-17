@@ -12,7 +12,7 @@
 
 from gi.repository import GLib, Gtk, Pango, GObject
 
-from lollypop.define import ArtSize, ViewType, MARGIN
+from lollypop.define import ArtSize, ViewType
 from lollypop.utils import on_query_tooltip, set_cursor_type
 
 
@@ -47,7 +47,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             Populate widget content
         """
         self._grid = Gtk.Grid()
-        self._grid.set_row_spacing(MARGIN)
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
         self._grid.show()
         self._label = Gtk.Label.new()
