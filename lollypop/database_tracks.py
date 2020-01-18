@@ -385,11 +385,25 @@ class TracksDatabase:
         """
             Get MusicBrainz recording id for track id
             @param track_id as int
-            @return recording id as int
+            @return recording id as str
         """
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT mb_track_id FROM tracks\
                                   WHERE rowid=?", (track_id,))
+            v = result.fetchone()
+            if v is not None:
+                return v[0]
+            return ""
+
+    def get_id_for_mb_track_id(self, mb_track_id):
+        """
+            Get track id for MusicBrainz recording id
+            @param MusicBrainz id as str
+            @return track id as int
+        """
+        with SqlCursor(App().db) as sql:
+            result = sql.execute("SELECT rowid FROM tracks\
+                                  WHERE mb_track_id=?", (mb_track_id,))
             v = result.fetchone()
             if v is not None:
                 return v[0]

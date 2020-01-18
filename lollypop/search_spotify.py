@@ -423,7 +423,7 @@ class SpotifySearch(GObject.Object):
                 raise Exception("cancelled")
             artists = [artist["name"]
                        for artist in item["album"]["artists"]]
-            if App().tracks.get_mb_track_id(item["id"]) >= 0:
+            if App().tracks.get_id_for_mb_track_id(item["id"]) >= 0:
                 Logger.debug("SpotifySearch: track exists in DB: %s - %s",
                              item["name"], artists)
                 continue
@@ -452,7 +452,7 @@ class SpotifySearch(GObject.Object):
                 raise Exception("cancelled")
             artists = [artist["name"]
                        for artist in album_item["artists"]]
-            if App().albums.get_mb_album_id(album_item["id"]) >= 0:
+            if App().albums.get_id_for_mb_album_id(album_item["id"]) >= 0:
                 Logger.debug("SpotifySearch: album exists in DB: %s - %s",
                              artists, album_item["name"])
                 continue

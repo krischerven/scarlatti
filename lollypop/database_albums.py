@@ -562,6 +562,20 @@ class AlbumsDatabase:
             v = result.fetchone()
             if v is not None:
                 return v[0]
+            return ""
+
+    def get_id_for_mb_album_id(self, mb_album_id):
+        """
+            Get album id for MusicBrainz recording id
+            @param MusicBrainz id as str
+            @return album id as int
+        """
+        with SqlCursor(App().db) as sql:
+            result = sql.execute("SELECT rowid FROM albums\
+                                  WHERE mb_album_id=?", (mb_album_id,))
+            v = result.fetchone()
+            if v is not None:
+                return v[0]
             return -1
 
     def get_mtime(self, album_id):
