@@ -261,12 +261,10 @@ flowboxchild:selected  {
 }
 
 .cover-frame {
-    margin: 15px;
     border-radius: 2px;
     border: 1px solid alpha(@theme_fg_color, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     padding: 4px;
-    box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
 }
 
 .cover-frame:selected {
@@ -281,11 +279,9 @@ flowboxchild:selected  {
 
 .small-cover-frame {
     border-radius: 1px;
-    margin: 10px;
     border: 1px solid alpha(@theme_fg_color, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: @theme_fg_color;
-    box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
 }
 
 .small-cover-frame:visited {
@@ -297,17 +293,14 @@ flowboxchild:selected  {
     border: 1px solid alpha(@theme_fg_color, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
-    padding: 5px;
     border-radius: 50%;
 }
 
 .circle-icon-large {
-    margin: 15px;
     border: 1px solid alpha(@theme_fg_color, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 50%;
-    box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
 }
 
 .circle-icon-large:visited {
@@ -316,12 +309,10 @@ flowboxchild:selected  {
 }
 
 .rounded-icon-large {
-    margin: 15px;
     border: 1px solid alpha(@theme_fg_color, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 25%;
-    box-shadow: 1px 1px 10px 2px rgba(0,0,0,0.3);
 }
 
 .rounded-icon-large:visited {

@@ -15,7 +15,7 @@ from gi.repository import Gtk
 from random import shuffle
 
 from lollypop.define import App, ArtBehaviour
-from lollypop.utils import get_icon_name, emit_signal
+from lollypop.utils import emit_signal
 from lollypop.objects_album import Album
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 
@@ -77,17 +77,10 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         """
             Set artist artwork
         """
-        def set_icon_name():
-            icon_name = get_icon_name(self._data) or "avatar-default-symbolic"
-            self._artwork.set_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
-            emit_signal(self, "populated")
-
         if self._artwork is None:
             return
         RoundedFlowBoxWidget.set_artwork(self)
-        if self._data < 0:
-            set_icon_name()
-        elif App().settings.get_value("artist-artwork"):
+        if App().settings.get_value("artist-artwork"):
             App().art_helper.set_artist_artwork(
                                             self.name,
                                             self._art_size,
@@ -111,7 +104,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
                                             ArtBehaviour.CACHE,
                                             self.__on_artist_artwork)
             else:
-                set_icon_name()
+                self.__on_artist_artwork(None)
 
 #######################
 # PRIVATE             #
@@ -124,11 +117,9 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
         if self._artwork is None:
             return
         if surface is None:
-            self._artwork.get_style_context().add_class("circle-icon")
             self._artwork.set_from_icon_name("avatar-default-symbolic",
                                              Gtk.IconSize.DIALOG)
         else:
-            self._artwork.get_style_context().remove_class("circle-icon")
             self._artwork.set_from_surface(surface)
         emit_signal(self, "populated")
 

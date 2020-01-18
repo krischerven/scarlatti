@@ -13,6 +13,7 @@
 from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
+from lollypop.define import MARGIN, MARGIN_MEDIUM
 from lollypop.utils import on_query_tooltip, set_cursor_type, emit_signal
 
 
@@ -43,6 +44,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         self.set_view_type(view_type)
         self.set_property("halign", Gtk.Align.START)
         self.set_property("valign", Gtk.Align.START)
+        self.set_property("margin", MARGIN)
 
     def populate(self):
         """
@@ -51,6 +53,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         if self.__artwork is None:
             grid = Gtk.Grid()
             grid.set_orientation(Gtk.Orientation.VERTICAL)
+            grid.set_row_spacing(MARGIN_MEDIUM)
             self.__label = Gtk.Label.new()
             self.__label.set_justify(Gtk.Justification.CENTER)
             self.__label.set_ellipsize(Pango.EllipsizeMode.END)
