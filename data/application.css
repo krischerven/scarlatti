@@ -264,7 +264,7 @@ flowboxchild:selected  {
     border-radius: 2px;
     border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
-    padding: 4px;
+    padding: 3px;
 }
 
 .cover-frame:selected {
