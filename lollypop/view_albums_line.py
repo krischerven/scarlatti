@@ -296,7 +296,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
             storage_type = App().albums.get_storage_type(album_id)
             if self.__storage_type & storage_type:
                 self.insert_album(Album(album_id), -1)
-                self._box.set_min_children_per_line(count)
+                self._box.set_min_children_per_line(count + 1)
                 self.show()
 
     def _on_network_access_changed(self, *ignore):
