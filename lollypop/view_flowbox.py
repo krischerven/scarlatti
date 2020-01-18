@@ -17,7 +17,7 @@ from locale import strcoll
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
-from lollypop.define import ViewType, MARGIN_SMALL
+from lollypop.define import ViewType, MARGIN_SMALL, App
 from lollypop.utils import get_font_height, popup_widget
 
 
@@ -47,8 +47,9 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         self._box.set_property("valign", Gtk.Align.START)
         self._box.connect("child-activated", self._on_child_activated)
         self._box.show()
-        self.__event_controller = Gtk.EventControllerMotion.new(self._box)
-        self.__event_controller.connect("motion", self.__on_box_motion)
+        if App().animations:
+            self.__event_controller = Gtk.EventControllerMotion.new(self._box)
+            self.__event_controller.connect("motion", self.__on_box_motion)
         GesturesHelper.__init__(self, self._box)
 
     def populate(self, items):
