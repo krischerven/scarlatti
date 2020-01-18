@@ -66,8 +66,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             style_context = self.__label.get_style_context()
             if self.__view_type & ViewType.SMALL:
                 style_context.add_class("text-small")
-            else:
-                style_context.add_class("padding")
             album_name = GLib.markup_escape_text(self.__album.name)
             if self.__view_type & ViewType.ALBUM:
                 self.__label.set_markup(album_name)
