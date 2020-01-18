@@ -234,3 +234,5 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             child.artwork.set_state_flags(Gtk.StateFlags.VISITED, False)
             self.__unselect_selected()
             self.__hovered_child = child
+        else:
+            self.__unselect_selected()
