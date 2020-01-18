@@ -20,7 +20,6 @@ from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
-from lollypop.objects_album import Album
 
 
 class AlbumView(FilteringHelper, LazyLoadingView,
@@ -155,9 +154,6 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             return
         if scan_update == ScanUpdate.REMOVED:
             App().window.container.go_back()
-        elif scan_update == ScanUpdate.MODIFIED:
-            self.set_sensitive(False)
-            self.__album = Album(self.__album.id)
 
     def _on_current_changed(self, player):
         """
