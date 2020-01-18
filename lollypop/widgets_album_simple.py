@@ -44,7 +44,10 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         self.set_view_type(view_type)
         self.set_property("halign", Gtk.Align.START)
         self.set_property("valign", Gtk.Align.START)
-        self.set_property("margin", MARGIN)
+        if view_type & ViewType.ALBUM:
+            self.set_property("margin", MARGIN_MEDIUM)
+        else:
+            self.set_property("margin", MARGIN)
 
     def populate(self):
         """
