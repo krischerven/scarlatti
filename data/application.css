@@ -262,7 +262,7 @@ flowboxchild:selected  {
 
 .cover-frame {
     border-radius: 2px;
-    border: 1px solid alpha(@theme_fg_color, 0.2);
+    border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     padding: 4px;
 }
@@ -279,7 +279,7 @@ flowboxchild:selected  {
 
 .small-cover-frame {
     border-radius: 1px;
-    border: 1px solid alpha(@theme_fg_color, 0.2);
+    border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: @theme_fg_color;
 }
@@ -290,14 +290,14 @@ flowboxchild:selected  {
 }
 
 .circle-icon {
-    border: 1px solid alpha(@theme_fg_color, 0.2);
+    border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 50%;
 }
 
 .circle-icon-large {
-    border: 1px solid alpha(@theme_fg_color, 0.2);
+    border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 50%;
@@ -309,7 +309,7 @@ flowboxchild:selected  {
 }
 
 .rounded-icon-large {
-    border: 1px solid alpha(@theme_fg_color, 0.2);
+    border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 25%;
