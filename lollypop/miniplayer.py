@@ -92,6 +92,13 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         revealer_box.pack_start(self.__progress_widget, False, True, 0)
         self.add(self.__background)
         self.add_overlay(self.__box)
+        App().art_helper.set_album_artwork(
+                App().player.current_track.album,
+                ArtSize.SMALL,
+                ArtSize.SMALL,
+                self.__artwork_button.get_scale_factor(),
+                ArtBehaviour.NONE,
+                self.__on_button_artwork)
         return [
             (App().player, "current-changed", "_on_current_changed")
         ]
