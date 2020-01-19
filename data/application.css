@@ -265,6 +265,7 @@ flowboxchild:selected  {
     border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     padding: 3px;
+    transition: box-shadow 250ms linear;
 }
 
 .cover-frame:selected {
@@ -282,6 +283,7 @@ flowboxchild:selected  {
     border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);
     color: @theme_fg_color;
+    transition: box-shadow 250ms linear;
 }
 
 .small-cover-frame:visited {
@@ -301,6 +303,7 @@ flowboxchild:selected  {
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 50%;
+    transition: box-shadow 250ms linear;
 }
 
 .circle-icon-large:visited {
@@ -313,6 +316,7 @@ flowboxchild:selected  {
     background-color: shade(@theme_bg_color, 1.5);
     color: alpha(@theme_fg_color, 0.8);
     border-radius: 25%;
+    transition: box-shadow 250ms linear;
 }
 
 .rounded-icon-large:visited {
