@@ -181,8 +181,8 @@ class CurrentAlbumsBannerWidget(BannerWidget):
             @param button as Gtk.Button
         """
         from lollypop.widgets_menu import MenuBuilder
-        from lollypop.menu_playback import PlaybackMenu
-        menu = PlaybackMenu()
+        from lollypop.menu_current_albums import CurrentAlbumsMenu
+        menu = CurrentAlbumsMenu(App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button)

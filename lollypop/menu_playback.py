@@ -22,62 +22,6 @@ from lollypop.objects_album import Album
 
 class PlaybackMenu(Gio.Menu):
     """
-        Menu for playback section (current albums)
-    """
-
-    def __init__(self):
-        """
-            Init menu
-        """
-        Gio.Menu.__init__(self)
-        menu = Gio.Menu()
-        save_playback_action = Gio.SimpleAction.new(name="save_playback")
-        save_playback_action.connect(
-            "activate", self.__on_save_playback_action_activate)
-        App().add_action(save_playback_action)
-        menu.append(_("Create a new playlist"), "app.save_playback")
-        show_track_number_action = Gio.SimpleAction.new_stateful(
-                "show_track_number",
-                None,
-                GLib.Variant.new_boolean(
-                    App().settings.get_value("show-tag-tracknumber")))
-        App().add_action(show_track_number_action)
-        show_track_number_action.connect(
-            "change-state", self.__on_show_track_number_change_state)
-        menu.append(_("Show tracks number"), "app.show_track_number")
-        self.append_section(_("Playing albums"), menu)
-
-    def __on_show_track_number_change_state(self, action, variant):
-        """
-            Update settings and reload view
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        action.set_state(variant)
-        App().settings.set_value("show-tag-tracknumber", variant)
-        App().window.container.reload_view()
-
-    def __on_save_playback_action_activate(self, action, variant):
-        """
-            Create a new playlist based on current playback
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        def albums_to_playlist():
-            tracks = []
-            for album in App().player.albums:
-                tracks += album.tracks
-            if tracks:
-                import datetime
-                now = datetime.datetime.now()
-                date_string = now.strftime("%Y-%m-%d-%H:%M:%S")
-                playlist_id = App().playlists.add(date_string)
-                App().playlists.add_tracks(playlist_id, tracks)
-        App().task_helper.run(albums_to_playlist)
-
-
-class BasePlaybackMenu(Gio.Menu):
-    """
         Base class for playback menu
     """
 
@@ -161,7 +105,7 @@ class PlaylistPlaybackMenu(Gio.Menu):
         App().player.play_albums(albums)
 
 
-class ArtistPlaybackMenu(BasePlaybackMenu):
+class ArtistPlaybackMenu(PlaybackMenu):
     """
         Contextual menu for an artist
     """
@@ -171,7 +115,7 @@ class ArtistPlaybackMenu(BasePlaybackMenu):
             Init menu
             @param artist id as int
         """
-        BasePlaybackMenu.__init__(self)
+        PlaybackMenu.__init__(self)
         self.__artist_id = artist_id
         play_action = Gio.SimpleAction(name="artist_play_action")
         App().add_action(play_action)
@@ -225,7 +169,7 @@ class ArtistPlaybackMenu(BasePlaybackMenu):
         play_artists([self.__artist_id], [])
 
 
-class GenrePlaybackMenu(BasePlaybackMenu):
+class GenrePlaybackMenu(PlaybackMenu):
     """
         Contextual menu for a genre
     """
@@ -235,7 +179,7 @@ class GenrePlaybackMenu(BasePlaybackMenu):
             Init decade menu
             @param genre_id as int
         """
-        BasePlaybackMenu.__init__(self)
+        PlaybackMenu.__init__(self)
         self.__genre_id = genre_id
         play_action = Gio.SimpleAction(name="genre_play_action")
         App().add_action(play_action)
@@ -299,7 +243,7 @@ class GenrePlaybackMenu(BasePlaybackMenu):
         App().player.play_albums(albums)
 
 
-class DecadePlaybackMenu(BasePlaybackMenu):
+class DecadePlaybackMenu(PlaybackMenu):
     """
         Contextual menu for a decade
     """
@@ -309,7 +253,7 @@ class DecadePlaybackMenu(BasePlaybackMenu):
             Init decade menu
             @param years as [int]
         """
-        BasePlaybackMenu.__init__(self)
+        PlaybackMenu.__init__(self)
         self.__years = years
         play_action = Gio.SimpleAction(name="decade_play_action")
         App().add_action(play_action)
@@ -375,7 +319,7 @@ class DecadePlaybackMenu(BasePlaybackMenu):
         App().player.play_albums(albums)
 
 
-class AlbumPlaybackMenu(BasePlaybackMenu):
+class AlbumPlaybackMenu(PlaybackMenu):
     """
         Contextual menu for an album
     """
@@ -385,7 +329,7 @@ class AlbumPlaybackMenu(BasePlaybackMenu):
             Init album menu
             @param album as Album
         """
-        BasePlaybackMenu.__init__(self)
+        PlaybackMenu.__init__(self)
         self.__album = album
         play_action = Gio.SimpleAction(name="album_play_action")
         App().add_action(play_action)
@@ -435,7 +379,7 @@ class AlbumPlaybackMenu(BasePlaybackMenu):
         App().player.play_album(self.__album)
 
 
-class TrackPlaybackMenu(BasePlaybackMenu):
+class TrackPlaybackMenu(PlaybackMenu):
     """
         Contextual menu for tracks
     """
@@ -445,7 +389,7 @@ class TrackPlaybackMenu(BasePlaybackMenu):
             Init track menu
             @param track as Track
         """
-        BasePlaybackMenu.__init__(self)
+        PlaybackMenu.__init__(self)
         self.__track = track
         self._set_playback_actions()
         self.__set_queue_actions()
