@@ -197,11 +197,11 @@ class ToolbarEnd(Gtk.Bin):
         def on_change_state(action, value, genre_id):
             action.set_state(value)
             ids = list(App().settings.get_value("party-ids"))
-            genre_ids = App().genres.get_ids() + [Type.WEB]
+            all_ids = App().genres.get_ids() + [Type.WEB]
             # Select all
             if genre_id is None:
                 # Update others
-                for genre_id in genre_ids:
+                for genre_id in all_ids:
                     action = App().lookup_action("genre_%s" % genre_id)
                     if action.get_state() != value:
                         action.set_state(value)
@@ -214,14 +214,18 @@ class ToolbarEnd(Gtk.Bin):
                 ids.remove(genre_id)
             # Initial value
             else:
-                ids = list(genre_ids)
+                ids = list(all_ids)
                 ids.remove(genre_id)
+            all_selected = len(set(all_ids) & set(ids)) == len(all_ids) or\
+                not ids
+            App().lookup_action("all_party_ids").set_state(
+                GLib.Variant("b", all_selected))
             App().settings.set_value("party-ids", GLib.Variant("ai", ids))
             App().player.set_party_ids()
             App().player.set_next()
 
         party_ids = App().settings.get_value("party-ids")
-        all_ids = App().genres.get_ids()
+        all_ids = App().genres.get_ids() + [Type.WEB]
         all_selected = len(set(all_ids) & set(party_ids)) == len(all_ids) or\
             not party_ids
         action = Gio.SimpleAction.new_stateful(
