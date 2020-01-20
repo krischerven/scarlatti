@@ -491,15 +491,10 @@ flowboxchild:selected  {
 	padding-top: 0px;
 	padding-bottom: 0px;
 	background-image: none;
-	border-style: solid;
 	border-image-source: none;
-    border-bottom-width: 1px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-color: transparent;
     background-color: alpha(black, 0.5);
     color: white;
+    border: 0px solid transparent;
 }
 
 .banner-button:disabled {
@@ -514,7 +509,7 @@ flowboxchild:selected  {
 
 .banner-button:hover {
     color: inherit;
-    border-color: alpha(white, 0.2);
+    background-color: alpha(black, 0.9);
   	opacity: 1;
 }
 
@@ -527,15 +522,10 @@ flowboxchild:selected  {
 	margin-top: 5px;
 	margin-bottom: 5px;
 	background-image: none;
-	border-style: solid;
 	border-image-source: none;
-    border-bottom-width: 1px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-color: transparent;
     background-color: alpha(black, 0.5);
     color: white;
+    border: 0px solid transparent;
 }
 
 .banner-button-small:disabled {
@@ -544,7 +534,7 @@ flowboxchild:selected  {
 
 .banner-button-small:hover {
     color: inherit;
-    border-color: alpha(white, 0.1);
+    background-color: alpha(black, 0.8);
   	opacity: 1;
 }
 
@@ -557,13 +547,8 @@ flowboxchild:selected  {
 	padding-top: 0px;
 	padding-bottom: 0px;
 	background-image: none;
-	border-style: solid;
 	border-image-source: none;
-    border-bottom-width: 1px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-color: transparent;
+    border: 1px solid transparent;
     color: inherit;
 }
 
@@ -591,13 +576,8 @@ flowboxchild:selected  {
 	padding-top: 0px;
 	padding-bottom: 0px;
 	background-image: none;
-	border-style: solid;
 	border-image-source: none;
-    border-bottom-width: 1px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-color: alpha(@theme_fg_color, 0.1);
+    border: 1px solid alpha(@theme_fg_color, 0.1);
     color: inherit;
 }
 
@@ -621,13 +601,8 @@ flowboxchild:selected  {
 	padding: 1px;
 	border-radius: 2px;
 	background-image: none;
-	border-style: solid;
 	border-image-source: none;
-    border-bottom-width: 1px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-color: transparent;
+    border: 1px solid transparent;
     color: inherit;
 }
 
