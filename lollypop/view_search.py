@@ -18,6 +18,7 @@ from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
 from lollypop.search_local import LocalSearch
 from lollypop.view import View
+from lollypop.utils import get_network_available
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -174,7 +175,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             current_search = self.__current_search.lower()
-            if App().settings.get_value("search-spotify"):
+            if App().settings.get_value("search-spotify") and\
+                    get_network_available("SPOTIFY") and\
+                    get_network_available("YOUTUBE"):
                 self.__searches_count += 1
                 mask = StorageType.EPHEMERAL |\
                     StorageType.SPOTIFY_NEW_RELEASES |\
