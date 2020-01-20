@@ -514,7 +514,7 @@ flowboxchild:selected  {
 
 .banner-button:hover {
     color: inherit;
-    border-color: alpha(white, 0.1);
+    border-color: alpha(white, 0.2);
   	opacity: 1;
 }
 
