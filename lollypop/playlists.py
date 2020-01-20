@@ -501,6 +501,9 @@ class Playlists(GObject.GObject):
             @param playlist_id as int
             @param request as str
         """
+        name = self.get_name(playlist_id)
+        # Clear cache
+        App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
         with SqlCursor(self, True) as sql:
             sql.execute("UPDATE playlists\
                         SET smart_sql=?\
