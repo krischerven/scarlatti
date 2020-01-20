@@ -242,11 +242,6 @@ flowboxchild:selected  {
     border-radius: 50%;
 }
 
-.black-transparent {
-    background-color: alpha(black, 0.5);
-    color: white;
-}
-
 .up-btn {
     border: 1px solid shade(@theme_bg_color, 0.7);
     border-radius: 4px;
@@ -502,14 +497,14 @@ flowboxchild:selected  {
 }
 
 .banner-button:checked {
-    background-color: alpha(black, 0.8);
+    background-color: alpha(black, 0.7);
     opacity: 0.9;
     color: shade(@theme_selected_bg_color, 1.25);
 }
 
 .banner-button:hover {
     color: inherit;
-    background-color: alpha(black, 0.9);
+    background-color: alpha(black, 0.8);
   	opacity: 1;
 }
 

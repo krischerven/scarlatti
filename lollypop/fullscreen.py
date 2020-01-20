@@ -75,8 +75,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__progress_widget.show()
         self.__progress_widget.set_property("halign", Gtk.Align.CENTER)
         self.__progress_widget.set_size_request(500, -1)
-        self.__buttons_widget = ButtonsPlayerWidget(["menu-button",
-                                                     "black-transparent"])
+        self.__buttons_widget = ButtonsPlayerWidget(["banner-button"])
         self.__buttons_widget.show()
         self.__buttons_widget.set_size_request(500, -1)
         self.__buttons_widget.set_property("valign", Gtk.Align.CENTER)
