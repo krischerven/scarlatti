@@ -14,6 +14,7 @@ from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.widgets_banner import BannerWidget
+from lollypop.utils import get_network_available
 
 
 class SearchBannerWidget(BannerWidget):
@@ -29,8 +30,6 @@ class SearchBannerWidget(BannerWidget):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SearchBannerWidget.ui")
         self.__spotify_button = builder.get_object("spotify_button")
-        self.__spotify_button.set_active(
-            App().settings.get_value("search-spotify"))
         self.__spinner = builder.get_object("spinner")
         self.__entry = builder.get_object("entry")
         widget = builder.get_object("widget")
@@ -38,6 +37,14 @@ class SearchBannerWidget(BannerWidget):
         self._overlay.set_overlay_pass_through(widget, True)
         self.connect("map", self.__on_map)
         builder.connect_signals(self)
+        if not get_network_available("SPOTIFY") or\
+                not get_network_available("YOUTUBE"):
+            self.__spotify_button.set_sensitive(False)
+            App().settings.set_value("search-spotify",
+                                     GLib.Variant("b", False))
+        else:
+            self.__spotify_button.set_active(
+                App().settings.get_value("search-spotify"))
 
     def update_for_width(self, width):
         """
