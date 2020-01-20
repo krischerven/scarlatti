@@ -58,9 +58,11 @@ class PluginsPlayer:
                 else:
                     rgvolume.props.album_mode = 0
                 rgvolume.props.pre_amp = App().settings.get_value(
-                    "replaygain").get_double()
+                    "replay-gain-db").get_double()
                 audiofilter.add(rgvolume)
                 rglimiter = Gst.ElementFactory.make("rglimiter", None)
+                rglimiter.props.enabled = App().settings.get_value(
+                    "replay-gain-limiter")
                 audiofilter.add(rglimiter)
                 rgvolume.link(rglimiter)
                 pad_src = rglimiter.get_static_pad("src")

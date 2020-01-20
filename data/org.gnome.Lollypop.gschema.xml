@@ -155,11 +155,6 @@
             <summary>Albums cover size</summary>
             <description></description>
         </key>
-        <key type="d" name="replaygain">
-            <default>3.0</default>
-            <summary>ReplayGain value in dB</summary>
-            <description>Between -15 and 15</description>
-        </key>
         <key type="i" name="convert-bitrate">
             <default>192</default>
             <summary>Encoding quality</summary>
@@ -328,6 +323,16 @@
             <default>'album'</default>
             <summary>ReplayGain state</summary>
             <description></description>
+        </key>
+        <key type="d" name="replay-gain-db">
+            <default>3.0</default>
+            <summary>ReplayGain value in dB</summary>
+            <description>Between -15 and 15</description>
+        </key>
+        <key type="b" name="replay-gain-limiter">
+            <default>true</default>
+            <summary>Applies signal compression/limiting to raw audio data</summary>
+            <description>It performs strict hard limiting with soft-knee characteristics, using a threshold of -6 dB</description>
         </key>
         <key enum="org.gnome.Lollypop.PowerManagement" name="power-management">
             <default>'both'</default>
