@@ -22,7 +22,7 @@ from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
 from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH, App, StorageType
-from lollypop.utils import create_dir
+from lollypop.utils import create_dir, emit_signal
 
 from time import sleep
 from shutil import rmtree
@@ -85,6 +85,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             for path in pathes:
                 f = Gio.File.new_for_path(path)
                 f.delete(None)
+            emit_signal(self, "artwork-cleared", name, prefix)
         except Exception as e:
             Logger.error("Art::remove_artwork_from_cache(): %s" % e)
 

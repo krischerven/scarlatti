@@ -24,6 +24,7 @@ class BaseArt(GObject.GObject):
         Base art manager
     """
     __gsignals__ = {
+        "artwork-cleared": (GObject.SignalFlags.RUN_FIRST, None, (str, str)),
         "album-artwork-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "artist-artwork-changed": (GObject.SignalFlags.RUN_FIRST,
                                    None, (str,)),

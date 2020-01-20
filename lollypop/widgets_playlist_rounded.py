@@ -12,16 +12,18 @@
 
 from random import sample
 
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.define import App, Type
 from lollypop.objects_track import Track
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
 
 
-class PlaylistRoundedWidget(RoundedAlbumsWidget):
+class PlaylistRoundedWidget(RoundedAlbumsWidget, SignalsHelper):
     """
         Playlist widget showing cover for 4 albums
     """
 
+    @signals_map
     def __init__(self, playlist_id, view_type, font_height):
         """
             Init widget
@@ -35,6 +37,9 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
                                      sortname, view_type)
         self._track_ids = []
         self._genre = Type.PLAYLISTS
+        return [
+            (App().art, "artwork-cleared", "_on_artwork_cleared")
+        ]
 
     def populate(self):
         """
@@ -93,6 +98,16 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget):
             if len(album_ids) == self._ALBUMS_COUNT:
                 break
         return album_ids
+
+    def _on_artwork_cleared(self, art, name, prefix):
+        """
+            Update artwork
+            @param art as Art
+            @param name as str
+            @param prefix as str
+        """
+        if self._artwork is not None:
+            self.set_artwork()
 
 #######################
 # PRIVATE             #
