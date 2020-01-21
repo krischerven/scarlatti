@@ -147,20 +147,13 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                               _("Search for artists, albums and tracks"))
         self.set_search(initial_search)
         return [
-                (self.__local_search, "match-artist",
-                 "_on_local_match_artist"),
-                (self.__local_search, "match-album",
-                 "_on_local_match_album"),
-                (self.__local_search, "match-track",
-                 "_on_local_match_track"),
+                (self.__local_search, "match-artist", "_on_match_artist"),
+                (self.__local_search, "match-album", "_on_match_album"),
+                (self.__local_search, "match-track", "_on_match_track"),
                 (self.__local_search, "search-finished",
                  "_on_search_finished"),
-                (App().spotify, "match-artist",
-                 "_on_local_match_artist"),
-                (App().spotify, "match-album",
-                 "_on_local_match_album"),
-                (App().spotify, "match-track",
-                 "_on_local_match_track"),
+                (App().spotify, "match-album", "_on_match_album"),
+                (App().spotify, "match-track", "_on_match_track"),
                 (App().spotify, "search-finished",
                  "_on_search_finished"),
         ]
@@ -179,15 +172,21 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                     get_network_available("SPOTIFY") and\
                     get_network_available("YOUTUBE"):
                 self.__searches_count += 1
+                # We want all items in DB
                 mask = StorageType.EPHEMERAL |\
                     StorageType.SPOTIFY_NEW_RELEASES |\
+                    StorageType.SPOTIFY_SIMILARS |\
                     StorageType.COLLECTION |\
-                    StorageType.SAVED
+                    StorageType.SAVED |\
+                    StorageType.SEARCH
                 App().task_helper.run(App().spotify.search,
                                       current_search,
                                       self.__cancellable)
             else:
-                mask = StorageType.COLLECTION | StorageType.SAVED
+                # Only local items
+                mask = StorageType.COLLECTION |\
+                    StorageType.SAVED |\
+                    StorageType.SEARCH
             self.__searches_count += 1
             self.__local_search.get(current_search, mask, self.__cancellable)
         else:
@@ -247,36 +246,43 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__view.stop()
         self.__banner.spinner.stop()
 
-    def _on_local_match_artist(self, local_search, artist_id):
+    def _on_match_artist(self, local_search, artist_id, storage_type):
         """
             Add a new artist to view
             @param local_search as LocalSearch
             @param artist_id as int
+            @param storage_type as StorageType
         """
-        self.__stack.current_child.artists_line_view.show()
-        self.__stack.current_child.artists_line_view.add_value(artist_id)
-        self.show_placeholder(False)
+        if storage_type & StorageType.SEARCH:
+            self.__stack.current_child.artists_line_view.show()
+            self.__stack.current_child.artists_line_view.add_value(artist_id)
+            self.show_placeholder(False)
 
-    def _on_local_match_album(self, local_search, album_id):
+    def _on_match_album(self, local_search, album_id, storage_type):
         """
             Add a new album to view
             @param local_search as LocalSearch
             @param artist_id as int
+            @param storage_type as StorageType
         """
-        self.__stack.current_child.albums_line_view.show()
-        self.__stack.current_child.albums_line_view.add_album(Album(album_id))
-        self.show_placeholder(False)
+        if storage_type & StorageType.SEARCH:
+            album = Album(album_id)
+            self.__stack.current_child.albums_line_view.show()
+            self.__stack.current_child.albums_line_view.add_album(album)
+            self.show_placeholder(False)
 
-    def _on_local_match_track(self, local_search, track_id):
+    def _on_match_track(self, local_search, track_id, storage_type):
         """
             Add a new track to view
             @param local_search as LocalSearch
             @param track_id as int
+            @param storage_type as StorageType
         """
-        self.__stack.current_child.search_tracks_view.show()
-        self.__stack.current_child.search_tracks_view.append_row(
-            Track(track_id))
-        self.show_placeholder(False)
+        if storage_type & StorageType.SEARCH:
+            track = Track(track_id)
+            self.__stack.current_child.search_tracks_view.show()
+            self.__stack.current_child.search_tracks_view.append_row(track)
+            self.show_placeholder(False)
 
     def _on_search_finished(self, search_handler):
         """

@@ -15,7 +15,6 @@ from gi.repository import GLib, Gtk, Gio, Pango
 from gettext import gettext as _
 
 from lollypop.define import App, Type, MARGIN, ViewType, StorageType
-from lollypop.define import ScanUpdate
 from lollypop.objects_album import Album
 from lollypop.utils import get_network_available
 from lollypop.helper_signals import signals
@@ -249,7 +248,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         self.__cancellable = Gio.Cancellable()
         self.__storage_type = StorageType.NONE
         return [
-                (App().scanner, "album-updated", "_on_album_updated"),
+                (App().spotify, "match-album", "_on_album_match"),
                 (App().settings, "changed::network-access",
                  "_on_network_access_changed"),
                 (App().settings, "changed::network-access-acl",
@@ -282,22 +281,20 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         self.__cancellable.cancel()
         self.__cancellable = Gio.Cancellable()
 
-    def _on_album_updated(self, scanner, album_id, scan_update):
+    def _on_album_match(self, spotify_helper, album_id, storage_type):
         """
             Handles changes in collection
             @param scanner as CollectionScanner
             @param album_id as int
-            @param scan_update as ScanUpdate
+            @param storage_type as StorageType
         """
         count = len(self.children)
         if count == self.ITEMS:
             return
-        if scan_update == ScanUpdate.ADDED:
-            storage_type = App().albums.get_storage_type(album_id)
-            if self.__storage_type & storage_type:
-                self.insert_album(Album(album_id), -1)
-                self._box.set_min_children_per_line(count + 1)
-                self.show()
+        if self.__storage_type & storage_type:
+            self.insert_album(Album(album_id), -1)
+            self._box.set_min_children_per_line(count + 1)
+            self.show()
 
     def _on_network_access_changed(self, *ignore):
         """

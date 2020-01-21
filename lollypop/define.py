@@ -58,6 +58,7 @@ class StorageType:
     SPOTIFY_NEW_RELEASES = 1 << 4
     SPOTIFY_SIMILARS = 1 << 5
     EXTERNAL = 1 << 6
+    SEARCH = 1 << 7
 
 
 class ArtBehaviour:

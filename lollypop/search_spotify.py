@@ -34,9 +34,8 @@ class SpotifySearch(GObject.Object):
     __MIN_ITEMS_PER_STORAGE_TYPE = 20
     __MAX_ITEMS_PER_STORAGE_TYPE = 50
     __gsignals__ = {
-        "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -239,6 +238,7 @@ class SpotifySearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         try:
+            storage_type = StorageType.SEARCH | StorageType.EPHEMERAL
             while self.wait_for_token(cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
@@ -253,13 +253,13 @@ class SpotifySearch(GObject.Object):
                 decode = json.loads(data.decode("utf-8"))
                 (albums, track_ids) = self.__create_from_tracks_payload(
                                                  decode["tracks"]["items"],
-                                                 StorageType.EPHEMERAL,
+                                                 storage_type,
                                                  cancellable)
                 for track_id in track_ids:
-                    emit_signal(self, "match-track", track_id)
+                    emit_signal(self, "match-track", track_id, storage_type)
                 self.__create_albums_from_albums_payload(
                                                  decode["albums"]["items"],
-                                                 StorageType.EPHEMERAL,
+                                                 storage_type,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
@@ -398,8 +398,7 @@ class SpotifySearch(GObject.Object):
                                                             cancellable)
                     if status:
                         App().art.save_album_artwork(data, album)
-                if storage_type & StorageType.EPHEMERAL:
-                    emit_signal(self, "match-album", album_id)
+                emit_signal(self, "match-album", album_id, storage_type)
         except Exception as e:
             Logger.error(
                 "SpotifySearch::__download_cover(): %s", e)
