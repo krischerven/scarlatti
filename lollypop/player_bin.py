@@ -549,8 +549,9 @@ class BinPlayer:
             @param fadein_position as sint
             @param track as Track
         """
-        if track is None:
-            self._scrobble(self._current_track, self._start_time)
+        self._scrobble(self._current_track, self._start_time)
+        # Track is about to finish
+        if self.position > (self._current_track.duration - 10) * 1000:
             # Increment popularity
             App().tracks.set_more_popular(self._current_track.id)
             # In party mode, linear popularity
