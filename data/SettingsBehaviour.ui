@@ -955,31 +955,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScale" id="scale_transition_duration">
+          <object class="GtkLabel" id="label8">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Transition duration in milliseconds</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="spin_transition_duration">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
+            <property name="halign">start</property>
+            <property name="width_chars">4</property>
             <property name="adjustment">adjustment1</property>
-            <property name="show_fill_level">True</property>
-            <property name="digits">0</property>
-            <property name="value_pos">left</property>
-            <signal name="value-changed" handler="_on_scale_transition_duration_value_changed" swapped="no"/>
+            <signal name="value-changed" handler="_on_spin_transition_duration_value_changed" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">1</property>
             <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label8">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Transition duration in seconds</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>

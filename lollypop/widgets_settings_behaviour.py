@@ -58,9 +58,9 @@ class BehaviourSettingsWidget(Gtk.Bin):
         switch_artwork_tags.set_state(App().settings.get_value("save-to-tags"))
 
         self.__popover_transitions = builder.get_object("popover-transitions")
-        self.__scale_transition_duration = builder.get_object(
-            "scale_transition_duration")
-        self.__scale_transition_duration.set_value(
+        self.__spin_transition_duration = builder.get_object(
+            "spin_transition_duration")
+        self.__spin_transition_duration.set_value(
             App().settings.get_value("transition-duration").get_int32())
 
         self.__popover_network = builder.get_object("popover-network")
@@ -185,7 +185,7 @@ class BehaviourSettingsWidget(Gtk.Bin):
         App().settings.set_value("party-mix", GLib.Variant("b", state))
         App().player.update_crossfading()
 
-    def _on_scale_transition_duration_value_changed(self, widget):
+    def _on_spin_transition_duration_value_changed(self, widget):
         """
             Update mix duration setting
             @param widget as Gtk.Range
