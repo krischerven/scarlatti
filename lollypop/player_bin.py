@@ -269,15 +269,12 @@ class BinPlayer:
 #######################
 # PROTECTED           #
 #######################
-    def _load_track(self, track, init_volume=True):
+    def _load_track(self, track):
         """
             Load track
             @param track as Track
-            @param init volume as bool
             @return False if track not loaded
         """
-        if init_volume:
-            self._plugins.volume.props.volume = 1.0
         Logger.debug("BinPlayer::_load_track(): %s" % track.uri)
         try:
             self.__cancellable.cancel()
@@ -477,14 +474,13 @@ class BinPlayer:
         """
         return playbin.query_position(Gst.Format.TIME)[1] / 1000000
 
-    def __load(self, track, init_volume=True):
+    def __load(self, track):
         """
             Stop current track, load track id and play it
             @param track as Track
-            @param init volume as bool
         """
         self._playbin.set_state(Gst.State.NULL)
-        if self._load_track(track, init_volume):
+        if self._load_track(track):
             self.play()
 
     def __check_for_crossfading(self):
@@ -553,7 +549,7 @@ class BinPlayer:
         # If some crossfade already running, just switch to track
         for plugins in [self._plugins1, self._plugins2]:
             if plugins.volume.props.volume not in [0.0, 1.0]:
-                self.__load(track, False)
+                self.__load(track)
                 return
 
         App().task_helper.run(self.__volume_down, self._playbin,
@@ -568,7 +564,7 @@ class BinPlayer:
         if track is not None and track.id is not None:
             self._plugins.volume.props.volume = 0
             self._playbin.set_state(Gst.State.NULL)
-            if self._load_track(track, False):
+            if self._load_track(track):
                 self._playbin.set_state(Gst.State.PLAYING)
             App().task_helper.run(self.__volume_up, self._playbin,
                                   self._plugins, duration)

@@ -43,7 +43,7 @@ class PluginsPlayer:
             audiobin.add(audiosink)
             # Internal volume manager
             self.volume = Gst.ElementFactory.make("volume", None)
-            self.volume.props.volume = 0.0
+            self.volume.props.volume = 1.0
             audiobin.add(self.volume)
             # Equalizer
             self.__equalizer = None

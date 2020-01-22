@@ -148,7 +148,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                     name = radios.get_name(self._current_playback_track.id)
                     uri = radios.get_uri(self._current_playback_track.id)
                     track.set_radio(name, uri)
-                    self.load(track, is_playing)
+                    self.load(track)
                 elif self._current_playback_track.uri:
                     if albums:
                         if was_party:
