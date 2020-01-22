@@ -60,6 +60,7 @@ class BehaviourSettingsWidget(Gtk.Bin):
         self.__popover_transitions = builder.get_object("popover-transitions")
         self.__spin_transition_duration = builder.get_object(
             "spin_transition_duration")
+        self.__spin_transition_duration.set_range(250, 9000)
         self.__spin_transition_duration.set_value(
             App().settings.get_value("transition-duration").get_int32())
 
