@@ -510,9 +510,6 @@ class BinPlayer:
         """
         duration = position - self.__get_bin_position(playbin)
         while duration > 0:
-            # We are not the active playbin, stop all
-            if self._playbin != playbin:
-                return
             vol = plugins.volume.props.volume
             steps = duration / 0.25
             vol_up = (1.0 - vol) / steps
@@ -533,9 +530,6 @@ class BinPlayer:
         """
         duration = position - self.__get_bin_position(playbin)
         while duration > 0:
-            # We are again the active playbin, stop all
-            if self._playbin == playbin:
-                return
             vol = plugins.volume.props.volume
             steps = duration / 0.25
             vol_down = vol / steps
@@ -568,6 +562,12 @@ class BinPlayer:
                 pop_to_add = int(App().albums.max_count / count)
             App().albums.set_more_popular(self._current_track.album_id,
                                           pop_to_add)
+
+        # If some crossfade already running, just switch to track
+        for plugins in [self._plugins1, self._plugins2]:
+            if plugins.volume.props.volume not in [0.0, 1.0]:
+                self.__load(track, False)
+                return
 
         App().task_helper.run(self.__volume_down, self._playbin,
                               self._plugins, fadout_position)
