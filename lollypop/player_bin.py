@@ -40,7 +40,7 @@ class BinPlayer:
         self._current_playback_track = Track()
         self._next_track = Track()
         self._prev_track = Track()
-        self._crossfading = False
+        self.__crossfading_id = None
         self._playbin = self.__playbin1 = Gst.ElementFactory.make(
             "playbin", "player")
         self.__playbin2 = Gst.ElementFactory.make("playbin", "player")
@@ -81,13 +81,15 @@ class BinPlayer:
             Stop current track, load track id and play it
             @param track as Track
         """
-        if self._crossfading and\
+        if self.__crossfading_id is not None and\
            self._current_track.id is not None and\
            self.is_playing and\
            not isinstance(track, Radio):
-            duration = App().settings.get_value(
-                "transition-duration").get_int32()
-            self.__do_crossfade(duration, track)
+            transition_duration = App().settings.get_value(
+                    "transition-duration").get_int32()
+            self.__do_crossfade(self.position + transition_duration,
+                                transition_duration,
+                                track)
         else:
             self.__load(track)
 
@@ -155,25 +157,39 @@ class BinPlayer:
             return
         position = self.position
         self.__load(self.current_track)
-        GLib.timeout_add(100, self.seek, position / Gst.SECOND)
+        GLib.timeout_add(100, self.seek, position)
 
     def seek(self, position):
         """
             Seek current track to position
-            @param position as seconds
+            @param position as int (ms)
         """
         if self._current_track.id is None:
             return
         # Seems gstreamer doesn't like seeking to end, sometimes
         # doesn't go to next track
-        if position >= self._current_track.duration:
+        if position // 1000 >= self._current_track.duration:
             self.next()
         else:
             self._playbin.seek_simple(Gst.Format.TIME,
                                       Gst.SeekFlags.FLUSH |
                                       Gst.SeekFlags.KEY_UNIT,
-                                      position * Gst.SECOND)
+                                      position * 1000000)
             emit_signal(self, "seeked", position)
+
+    def set_crossfading(self, status):
+        """
+            Set crossfading on/off
+            @param status as bool
+        """
+        if status and self.__crossfading_id is None:
+            transition_duration = App().settings.get_value(
+                "transition-duration").get_int32()
+            self.__crossfading_id = GLib.timeout_add(
+                transition_duration, self.__check_for_crossfading)
+        elif not status and self.__crossfading_id is None:
+            GLib.source_remove(self.__crossfading_id)
+            self.__crossfading_id = None
 
     @property
     def plugins(self):
@@ -203,15 +219,19 @@ class BinPlayer:
             Return bin playback position
             @HACK handle crossefade here, as we know we're going to be
             called every seconds
-            @return position in Gst.SECOND
+            @return position as int (ms)
         """
-        position = self._playbin.query_position(Gst.Format.TIME)[1]
-        if self._crossfading and self._current_track.duration > 0:
-            duration = self._current_track.duration - position / Gst.SECOND
-            if duration < App().settings.get_value(
-                    "transition-duration").get_int32():
-                self.__do_crossfade(duration)
-        return position
+        return self.__get_bin_position(self._playbin)
+
+    @property
+    def remaining(self):
+        """
+            Return remaining duration
+            @return duration as int (ms)
+        """
+        position = self._playbin.query_position(Gst.Format.TIME)[1] / 1000000
+        duration = self._current_track.duration * 1000
+        return int(duration - position)
 
     @property
     def current_track(self):
@@ -396,7 +416,7 @@ class BinPlayer:
             go next otherwise
         """
         # Don't do anything if crossfade on, track already changed
-        if self._crossfading:
+        if self.__crossfading_id is not None:
             return
         if isinstance(App().player.current_track, Radio):
             return
@@ -418,7 +438,7 @@ class BinPlayer:
         try:
             Logger.debug("Player::__on_stream_about_to_finish(): %s" % playbin)
             # Don't do anything if crossfade on, track already changed
-            if self._crossfading:
+            if self.__crossfading_id is not None:
                 return
             if isinstance(App().player.current_track, Radio):
                 return
@@ -449,75 +469,90 @@ class BinPlayer:
 #######################
 # PRIVATE             #
 #######################
+    def __get_bin_position(self, playbin):
+        """
+            Get position for playbin
+            @param playbin as Gst.Bin
+            @return position as int (ms)
+        """
+        return playbin.query_position(Gst.Format.TIME)[1] / 1000000
+
     def __load(self, track, init_volume=True):
         """
             Stop current track, load track id and play it
-            If was playing, do not use play as status doesn"t changed
             @param track as Track
             @param init volume as bool
         """
-        was_playing = self.is_playing
         self._playbin.set_state(Gst.State.NULL)
         if self._load_track(track, init_volume):
-            if was_playing:
-                self._playbin.set_state(Gst.State.PLAYING)
-            else:
-                self.play()
+            self.play()
 
-    def __volume_up(self, playbin, plugins, duration):
+    def __check_for_crossfading(self):
+        """
+            Check if we need to do crossfading
+        """
+        if self._current_track.duration > 0:
+            remaining = self.remaining
+            transition_duration = App().settings.get_value(
+                    "transition-duration").get_int32()
+            if remaining < transition_duration:
+                self.__do_crossfade(self.position + remaining,
+                                    transition_duration,
+                                    self.__next_track)
+        return True
+
+    def __volume_up(self, playbin, plugins, position):
         """
             Make volume going up smoothly
             @param playbin as Gst.Bin
             @param plugins as PluginsPlayer
-            @param duration as int
+            @param position as int
         """
-        # We are not the active playbin, stop all
-        if self._playbin != playbin:
-            return
-        if duration > 0:
+        duration = position - self.__get_bin_position(playbin)
+        while duration > 0:
+            # We are not the active playbin, stop all
+            if self._playbin != playbin:
+                return
             vol = plugins.volume.props.volume
             steps = duration / 0.25
             vol_up = (1.0 - vol) / steps
             rate = vol + vol_up
             if rate < 1.0:
                 plugins.volume.props.volume = rate
-                GLib.timeout_add(250, self.__volume_up,
-                                 playbin, plugins, duration - 0.25)
+                duration = position - self.__get_bin_position(playbin)
             else:
-                plugins.volume.props.volume = 1.0
-        else:
-            plugins.volume.props.volume = 1.0
+                duration = 0
+        plugins.volume.props.volume = 1.0
 
-    def __volume_down(self, playbin, plugins, duration):
+    def __volume_down(self, playbin, plugins, position):
         """
             Make volume going down smoothly
             @param playbin as Gst.Bin
             @param plugins as PluginsPlayer
-            @param duration as int
+            @param position as int
         """
-        # We are again the active playbin, stop all
-        if self._playbin == playbin:
-            return
-        if duration > 0:
+        duration = position - self.__get_bin_position(playbin)
+        while duration > 0:
+            # We are again the active playbin, stop all
+            if self._playbin == playbin:
+                return
             vol = plugins.volume.props.volume
             steps = duration / 0.25
             vol_down = vol / steps
             rate = vol - vol_down
             if rate > 0:
                 plugins.volume.props.volume = rate
-                GLib.timeout_add(250, self.__volume_down,
-                                 playbin, plugins, duration - 0.25)
+                duration = position - self.__get_bin_position(playbin)
             else:
-                plugins.volume.props.volume = 0.0
-                playbin.set_state(Gst.State.NULL)
-        else:
-            plugins.volume.props.volume = 0.0
-            playbin.set_state(Gst.State.NULL)
+                duration = 0
+        plugins.volume.props.volume = 0.0
+        playbin.set_state(Gst.State.NULL)
 
-    def __do_crossfade(self, duration, track=None):
+    def __do_crossfade(self, fadout_position, fadein_position, track):
         """
             Crossfade tracks
-            @param duration as int
+            @param fadeout_position as int
+            @param fadein_position as sint
             @param track as Track
         """
         if track is None:
@@ -534,8 +569,8 @@ class BinPlayer:
             App().albums.set_more_popular(self._current_track.album_id,
                                           pop_to_add)
 
-        GLib.idle_add(self.__volume_down, self._playbin,
-                      self._plugins, duration)
+        App().task_helper.run(self.__volume_down, self._playbin,
+                              self._plugins, fadout_position)
         if self._playbin == self.__playbin2:
             self._playbin = self.__playbin1
             self._plugins = self._plugins1
@@ -544,15 +579,12 @@ class BinPlayer:
             self._plugins = self._plugins2
 
         if track is not None and track.id is not None:
-            self.__load(track, False)
+            self._playbin.set_state(Gst.State.NULL)
+            if self._load_track(track, False):
+                self._playbin.set_state(Gst.State.PLAYING)
             self._plugins.volume.props.volume = 0
-            GLib.idle_add(self.__volume_up, self._playbin,
-                          self._plugins, duration)
-        elif self._next_track.id is not None:
-            self.__load(self._next_track, False)
-            self._plugins.volume.props.volume = 0
-            GLib.idle_add(self.__volume_up, self._playbin,
-                          self._plugins, duration)
+            App().task_helper.run(self.__volume_up, self._playbin,
+                                  self._plugins, fadein_position)
 
     def __update_current_duration(self, track, uri):
         """

@@ -226,7 +226,7 @@ class MPRIS(Server):
             App().player.play()
 
     def SetPosition(self, track_id, position):
-        App().player.seek(position / (1000 * 1000))
+        App().player.seek(position)
 
     def OpenUri(self, uri):
         track_id = App().tracks.get_id_by_uri(uri)
@@ -234,9 +234,8 @@ class MPRIS(Server):
             App().player.load(Track(track_id))
 
     def Seek(self, offset):
-        # Convert position in seconds
-        position = App().player.position / Gst.SECOND
-        App().player.seek(position + offset / (1000 * 1000))
+        position = App().player.position
+        App().player.seek(position + offset)
 
     def Seeked(self, position):
         self.__bus.emit_signal(

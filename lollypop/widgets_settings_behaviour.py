@@ -60,7 +60,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
         self.__popover_transitions = builder.get_object("popover-transitions")
         self.__scale_transition_duration = builder.get_object(
             "scale_transition_duration")
-        self.__scale_transition_duration.set_range(1, 20)
         self.__scale_transition_duration.set_value(
             App().settings.get_value("transition-duration").get_int32())
 
@@ -159,8 +158,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
             @param widget as Gtk.Button
         """
         self.__popover_transitions.popup()
-        # https://gitlab.gnome.org/GNOME/pango/issues/309
-        self.__scale_transition_duration.set_draw_value(True)
 
     def _on_network_button_clicked(self, widget):
         """

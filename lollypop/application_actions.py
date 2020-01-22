@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib, Gtk, Gst
+from gi.repository import Gio, GLib, Gtk
 
 from lollypop.define import App, ScanType, Type, MARGIN
 
@@ -102,8 +102,8 @@ class ApplicationActions:
             App().set_accels_for_action("app.shortcut::next", ["n"])
             App().set_accels_for_action("app.shortcut::prev", ["p"])
         else:
-            App().set_accels_for_action("app.seek(10)", [])
-            App().set_accels_for_action("app.seek(-10)", [])
+            App().set_accels_for_action("app.seek(10000)", [])
+            App().set_accels_for_action("app.seek(-10000)", [])
             App().set_accels_for_action("app.shortcut::play_pause", [])
             App().set_accels_for_action("app.shortcut::play", [])
             App().set_accels_for_action("app.shortcut::stop", [])
@@ -258,9 +258,9 @@ class ApplicationActions:
             @param action as Gio.SimpleAction
             @param param as GLib.Variant
         """
-        seconds = param.get_int32()
+        ms = param.get_int32()
         position = App().player.position
-        seek = position / Gst.SECOND + seconds
+        seek = position + ms
         if seek < 0:
             seek = 0
         if seek > App().player.current_track.duration:

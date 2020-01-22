@@ -172,7 +172,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                         self.pause()
                     position = load(open(LOLLYPOP_DATA_PATH + "/position.bin",
                                     "rb"))
-                    self.seek(position / Gst.SECOND)
+                    self.seek(position)
                 else:
                     Logger.info("Player::restore_state(): track missing")
         except Exception as e:
@@ -242,8 +242,8 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
         mix = App().settings.get_value("smooth-transitions")
         party_mix = App().settings.get_value("party-mix")
-        self._crossfading = (mix and not party_mix) or\
-                            (mix and party_mix and self.is_party)
+        self.set_crossfading((mix and not party_mix) or
+                             (mix and party_mix and self.is_party))
 
     @property
     def next_track(self):
