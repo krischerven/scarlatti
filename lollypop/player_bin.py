@@ -12,7 +12,7 @@
 
 from gi.repository import Gst, GstAudio, GstPbutils, GLib, Gio
 
-from time import time
+from time import time, sleep
 from gettext import gettext as _
 
 from lollypop.tagreader import TagReader, Discoverer
@@ -87,9 +87,7 @@ class BinPlayer:
            not isinstance(track, Radio):
             transition_duration = App().settings.get_value(
                     "transition-duration").get_int32()
-            self.__do_crossfade(self.position + transition_duration,
-                                transition_duration,
-                                track)
+            self.__do_crossfade(transition_duration, track)
         else:
             self.__load(track)
 
@@ -496,57 +494,41 @@ class BinPlayer:
             transition_duration = App().settings.get_value(
                     "transition-duration").get_int32()
             if remaining < transition_duration:
-                self.__do_crossfade(self.position + remaining,
-                                    transition_duration,
+                self.__do_crossfade(transition_duration,
                                     self.__next_track)
         return True
 
-    def __volume_up(self, playbin, plugins, position):
+    def __volume_up(self, playbin, plugins, duration):
         """
             Make volume going up smoothly
             @param playbin as Gst.Bin
             @param plugins as PluginsPlayer
-            @param position as int
+            @param duration as int
         """
-        duration = position - self.__get_bin_position(playbin)
-        while duration > 0:
-            vol = plugins.volume.props.volume
-            steps = duration / 0.1
-            vol_up = (1.0 - vol) / steps
-            rate = vol + vol_up
-            if rate < 1.0:
-                plugins.volume.props.volume = rate
-                duration = position - self.__get_bin_position(playbin)
-            else:
-                duration = 0
-        plugins.volume.props.volume = 1.0
+        sleep_ms = duration / 10
+        while plugins.volume.props.volume < 1.0:
+            vol = round(plugins.volume.props.volume + 0.1, 1)
+            plugins.volume.props.volume = vol
+            sleep(sleep_ms / 1000)
 
-    def __volume_down(self, playbin, plugins, position):
+    def __volume_down(self, playbin, plugins, duration):
         """
             Make volume going down smoothly
             @param playbin as Gst.Bin
             @param plugins as PluginsPlayer
-            @param position as int
+            @param duration as int
         """
-        duration = position - self.__get_bin_position(playbin)
-        while duration > 0:
-            vol = plugins.volume.props.volume
-            steps = duration / 0.1
-            vol_down = vol / steps
-            rate = vol - vol_down
-            if rate > 0:
-                plugins.volume.props.volume = rate
-                duration = position - self.__get_bin_position(playbin)
-            else:
-                duration = 0
-        plugins.volume.props.volume = 0.0
+        sleep_ms = duration / 10
+        while plugins.volume.props.volume > 0:
+            vol = round(plugins.volume.props.volume - 0.1, 1)
+            plugins.volume.props.volume = vol
+            sleep(sleep_ms / 1000)
         playbin.set_state(Gst.State.NULL)
 
-    def __do_crossfade(self, fadout_position, fadein_position, track):
+    def __do_crossfade(self, duration, track):
         """
             Crossfade tracks
-            @param fadeout_position as int
-            @param fadein_position as sint
+            @param duration as int
             @param track as Track
         """
         self._scrobble(self._current_track, self._start_time)
@@ -571,7 +553,7 @@ class BinPlayer:
                 return
 
         App().task_helper.run(self.__volume_down, self._playbin,
-                              self._plugins, fadout_position)
+                              self._plugins, duration)
         if self._playbin == self.__playbin2:
             self._playbin = self.__playbin1
             self._plugins = self._plugins1
@@ -585,7 +567,7 @@ class BinPlayer:
             if self._load_track(track, False):
                 self._playbin.set_state(Gst.State.PLAYING)
             App().task_helper.run(self.__volume_up, self._playbin,
-                                  self._plugins, fadein_position)
+                                  self._plugins, duration)
 
     def __update_current_duration(self, track, uri):
         """
