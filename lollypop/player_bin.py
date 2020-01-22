@@ -505,7 +505,8 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
-        sleep_ms = duration / 100
+        # We add 250 because user will not hear track around 0.2
+        sleep_ms = (duration + 250) / 100
         while plugins.volume.props.volume < 1.0:
             vol = round(plugins.volume.props.volume + 0.01, 2)
             plugins.volume.props.volume = vol
@@ -518,7 +519,8 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
-        sleep_ms = duration / 100
+        # We add 250 because user will not hear track around 0.2
+        sleep_ms = (duration + 250) / 100
         while plugins.volume.props.volume > 0:
             vol = round(plugins.volume.props.volume - 0.01, 2)
             plugins.volume.props.volume = vol
