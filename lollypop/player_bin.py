@@ -184,8 +184,9 @@ class BinPlayer:
         if status and self.__crossfading_id is None:
             transition_duration = App().settings.get_value(
                 "transition-duration").get_int32()
+            timemout = min(transition_duration, 500)
             self.__crossfading_id = GLib.timeout_add(
-                transition_duration, self.__check_for_crossfading)
+                timemout, self.__check_for_crossfading)
         elif not status and self.__crossfading_id is not None:
             GLib.source_remove(self.__crossfading_id)
             self.__crossfading_id = None
