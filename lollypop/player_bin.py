@@ -505,9 +505,9 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
-        sleep_ms = duration / 10
+        sleep_ms = duration / 100
         while plugins.volume.props.volume < 1.0:
-            vol = round(plugins.volume.props.volume + 0.1, 1)
+            vol = round(plugins.volume.props.volume + 0.01, 2)
             plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
 
@@ -518,9 +518,9 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
-        sleep_ms = duration / 10
+        sleep_ms = duration / 100
         while plugins.volume.props.volume > 0:
-            vol = round(plugins.volume.props.volume - 0.1, 1)
+            vol = round(plugins.volume.props.volume - 0.01, 2)
             plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
         playbin.set_state(Gst.State.NULL)
