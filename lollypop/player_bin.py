@@ -580,10 +580,10 @@ class BinPlayer:
             self._plugins = self._plugins2
 
         if track is not None and track.id is not None:
+            self._plugins.volume.props.volume = 0
             self._playbin.set_state(Gst.State.NULL)
             if self._load_track(track, False):
                 self._playbin.set_state(Gst.State.PLAYING)
-            self._plugins.volume.props.volume = 0
             App().task_helper.run(self.__volume_up, self._playbin,
                                   self._plugins, fadein_position)
 
