@@ -511,7 +511,7 @@ class BinPlayer:
         duration = position - self.__get_bin_position(playbin)
         while duration > 0:
             vol = plugins.volume.props.volume
-            steps = duration / 0.25
+            steps = duration / 0.1
             vol_up = (1.0 - vol) / steps
             rate = vol + vol_up
             if rate < 1.0:
@@ -531,7 +531,7 @@ class BinPlayer:
         duration = position - self.__get_bin_position(playbin)
         while duration > 0:
             vol = plugins.volume.props.volume
-            steps = duration / 0.25
+            steps = duration / 0.1
             vol_down = vol / steps
             rate = vol - vol_down
             if rate > 0:
