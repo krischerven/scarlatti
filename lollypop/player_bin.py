@@ -29,6 +29,7 @@ class BinPlayer:
     """
         Gstreamer bin player
     """
+    __PADDING = 250
 
     def __init__(self):
         """
@@ -493,9 +494,9 @@ class BinPlayer:
             remaining = self.remaining
             transition_duration = App().settings.get_value(
                     "transition-duration").get_int32()
-            if remaining < transition_duration:
+            if remaining < transition_duration + self.__PADDING:
                 self.__do_crossfade(transition_duration,
-                                    self.__next_track)
+                                    self._next_track)
         return True
 
     def __volume_up(self, playbin, plugins, duration):
@@ -505,8 +506,8 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
-        # We add 250 because user will not hear track around 0.2
-        sleep_ms = (duration + 250) / 100
+        # We add padding because user will not hear track around 0.2
+        sleep_ms = (duration + self.__PADDING) / 100
         while plugins.volume.props.volume < 1.0:
             vol = round(plugins.volume.props.volume + 0.01, 2)
             plugins.volume.props.volume = vol
@@ -519,8 +520,8 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
-        # We add 250 because user will not hear track around 0.2
-        sleep_ms = (duration + 250) / 100
+        # We add padding because user will not hear track around 0.2
+        sleep_ms = (duration + self.__PADDING) / 100
         while plugins.volume.props.volume > 0:
             vol = round(plugins.volume.props.volume - 0.01, 2)
             plugins.volume.props.volume = vol
