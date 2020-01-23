@@ -109,7 +109,7 @@ class TransitionsPlayer:
         """
             True if fade in/fade out is enabled
         """
-        self.__fade_duration != 0
+        return self.__fade_duration > 0
 
 #######################
 # PRIVATE             #
