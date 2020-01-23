@@ -28,11 +28,10 @@ class RadioPlayer:
         """
         pass
 
-    def load(self, track, play=True):
+    def load(self, track):
         """
             Load radio at uri
             @param track as Track
-            @param play as bool
         """
         if Gio.NetworkMonitor.get_default().get_network_available():
             try:
@@ -47,10 +46,10 @@ class RadioPlayer:
                 else:
                     parser = TotemPlParser.Parser.new()
                     parser.connect("entry-parsed", self.__on_entry_parsed,
-                                   track, play)
+                                   track)
                     parser.parse_async(track.uri, True,
                                        None, self.__on_parse_finished,
-                                       track, play)
+                                       track)
             except Exception as e:
                 Logger.error("RadioPlayer::load(): %s" % e)
             if self.is_party:
@@ -77,44 +76,38 @@ class RadioPlayer:
         else:
             self.stop()
 
-    def __start_playback(self, track, play):
+    def __start_playback(self, track):
         """
             Start playing track
             @param track as Track
-            @param play as bool
         """
         self._playbin.set_state(Gst.State.NULL)
         self._playbin.set_property("uri", track.uri)
         App().radios.set_more_popular(track.id)
         self._current_track = track
-        if play:
-            self._playbin.set_state(Gst.State.PLAYING)
-            emit_signal(self, "status-changed")
-        else:
-            emit_signal(self, "current-changed")
+        self._playbin.set_state(Gst.State.PLAYING)
+        emit_signal(self, "status-changed")
 
-    def __on_parse_finished(self, parser, result, track, play):
+    def __on_parse_finished(self, parser, result, track):
         """
             Play stream
             @param parser as TotemPlParser.Parser
             @param result as Gio.AsyncResult
             @param track as Track
-            @param play as bool
         """
         # Only start playing if context always True
         if self._current_track == track:
-            self.__start_playback(track, play)
+            self.__start_playback(track)
         else:
             emit_signal(self, "loading-changed", False, track.album)
 
-    def __on_entry_parsed(self, parser, uri, metadata, track, play):
+    def __on_entry_parsed(self, parser, uri, metadata, track):
         """
             Play stream
             @param parser as TotemPlParser.Parser
             @param track uri as str
             @param metadata as GLib.HastTable
             @param track as Track
-            @param play as bool
         """
         # Only start playing if context always True
         if self._current_track == track:

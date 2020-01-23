@@ -22,6 +22,7 @@ from lollypop.player_queue import QueuePlayer
 from lollypop.player_linear import LinearPlayer
 from lollypop.player_shuffle import ShufflePlayer
 from lollypop.player_radio import RadioPlayer
+from lollypop.player_transitions import TransitionsPlayer
 from lollypop.radios import Radios
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
@@ -32,7 +33,7 @@ from lollypop.utils import emit_signal
 
 class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
              AutoSimilarPlayer, QueuePlayer, RadioPlayer, LinearPlayer,
-             ShufflePlayer):
+             ShufflePlayer, TransitionsPlayer):
     """
         Player object used to manage playback and playlists
     """
@@ -65,9 +66,21 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         LinearPlayer.__init__(self)
         ShufflePlayer.__init__(self)
         RadioPlayer.__init__(self)
+        TransitionsPlayer.__init__(self)
         self.__stop_after_track_id = None
-        self.update_crossfading()
         App().settings.connect("changed::repeat", self.update_next_prev)
+
+    def load(self, track):
+        """
+            Stop current track, load track id and play it
+            @param track as Track
+        """
+        if isinstance(track, Radio):
+            RadioPlayer.load(self, track)
+        elif TransitionsPlayer.load(self, track):
+            pass
+        else:
+            BinPlayer.load(self, track)
 
     def prev(self):
         """
@@ -92,21 +105,6 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             self.load(self._next_track)
         else:
             self.stop()
-
-    def load(self, track, play=True):
-        """
-            Stop current track, load track id and play it
-            @param track as Track
-            @param play as bool, ignored for radios
-        """
-        if isinstance(track, Radio):
-            RadioPlayer.load(self, track, play)
-        else:
-            if play:
-                BinPlayer.load(self, track)
-            else:
-                BinPlayer._load_track(self, track)
-                emit_signal(self, "current-changed")
 
     def stop_after(self, track_id):
         """
@@ -235,15 +233,6 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             if not self.is_party:
                 self.set_next()
             self.set_prev()
-
-    def update_crossfading(self):
-        """
-            Calculate if crossfading is needed
-        """
-        transitions = App().settings.get_value("transitions")
-        party_only = App().settings.get_value("transitions-party-only")
-        self.set_crossfading((transitions and not party_only) or
-                             (transitions and party_only and self.is_party))
 
     @property
     def next_track(self):
