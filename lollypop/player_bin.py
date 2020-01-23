@@ -89,7 +89,7 @@ class BinPlayer:
            self.is_playing and\
            not isinstance(track, Radio):
             transition_duration = App().settings.get_value(
-                    "transition-duration").get_int32()
+                    "transitions-duration").get_int32()
             self.__do_crossfade(transition_duration, track)
         else:
             self.__load(track)
@@ -185,13 +185,25 @@ class BinPlayer:
         """
         if status and self.__crossfading_id is None:
             transition_duration = App().settings.get_value(
-                "transition-duration").get_int32()
+                "transitions-duration").get_int32()
             timemout = min(transition_duration, 500)
             self.__crossfading_id = GLib.timeout_add(
                 timemout, self.__check_for_crossfading)
         elif not status and self.__crossfading_id is not None:
             GLib.source_remove(self.__crossfading_id)
             self.__crossfading_id = None
+
+    def set_volume(self, rate):
+        """
+            Set player volume rate
+            @param rate as double
+        """
+        if rate < 0.0:
+            rate = 0.0
+        elif rate > 1.0:
+            rate = 1.0
+        self.__playbin1.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
+        self.__playbin2.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
 
     @property
     def plugins(self):
@@ -249,24 +261,6 @@ class BinPlayer:
             @return rate as double
         """
         return self._playbin.get_volume(GstAudio.StreamVolumeFormat.CUBIC)
-
-    def set_volume(self, rate):
-        """
-            Set player volume rate
-            @param rate as double
-        """
-        if rate < 0.0:
-            rate = 0.0
-        elif rate > 1.0:
-            rate = 1.0
-        self.__playbin1.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
-        self.__playbin2.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
-
-    def next(self):
-        """
-            Go next track
-        """
-        pass
 
 #######################
 # PROTECTED           #
@@ -492,7 +486,7 @@ class BinPlayer:
         if self._current_track.duration > 0:
             remaining = self.remaining
             transition_duration = App().settings.get_value(
-                    "transition-duration").get_int32()
+                    "transitions-duration").get_int32()
             if remaining < transition_duration + self.__PADDING:
                 self.__do_crossfade(transition_duration,
                                     self._next_track)

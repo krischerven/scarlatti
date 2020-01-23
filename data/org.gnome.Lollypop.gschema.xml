@@ -289,24 +289,29 @@
             <summary>INTERNAL</summary>
             <description></description>
         </key>
-        <key type="b" name="smooth-transitions">
-            <default>false</default>
-            <summary>Smooth track transitions</summary>
-            <description></description>
-        </key>
         <key type="b" name="show-sidebar-labels">
             <default>true</default>
             <summary>Show labels in sidebar</summary>
             <description></description>
         </key>
-        <key type="b" name="party-mix">
-            <default>false</default>
-            <summary>Only mix songs in party mode</summary>
+        <key type="b" name="transitions">
+            <default>true</default>
+            <summary>Smooth track transitions</summary>
             <description></description>
         </key>
-        <key type="i" name="transition-duration">
+        <key type="b" name="transitions-party-only">
+            <default>true</default>
+            <summary>Smooth track transitions only in party mode</summary>
+            <description></description>
+        </key>
+        <key type="i" name="transitions-duration">
             <default>3000</default>
-            <summary>Smoothing duration in ms</summary>
+            <summary>Transition duration in ms</summary>
+            <description></description>
+        </key>
+        <key type="i" name="transitions-fade-duration">
+            <default>1000</default>
+            <summary>Fade duration in ms</summary>
             <description></description>
         </key>
         <key type="b" name="shuffle">

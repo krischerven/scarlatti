@@ -240,10 +240,10 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Calculate if crossfading is needed
         """
-        mix = App().settings.get_value("smooth-transitions")
-        party_mix = App().settings.get_value("party-mix")
-        self.set_crossfading((mix and not party_mix) or
-                             (mix and party_mix and self.is_party))
+        transitions = App().settings.get_value("transitions")
+        party_only = App().settings.get_value("transitions-party-only")
+        self.set_crossfading((transitions and not party_only) or
+                             (transitions and party_only and self.is_party))
 
     @property
     def next_track(self):

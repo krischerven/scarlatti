@@ -46,13 +46,13 @@ class BehaviourSettingsWidget(Gtk.Bin):
         switch_network_access.set_state(network_access)
 
         switch_transitions = builder.get_object("switch_transitions")
-        smooth_transitions = App().settings.get_value("smooth-transitions")
-        switch_transitions.set_state(smooth_transitions)
-        builder.get_object("transitions_button").set_sensitive(
-            smooth_transitions)
+        transitions = App().settings.get_value("transitions")
+        switch_transitions.set_state(transitions)
+        builder.get_object("transitions_button").set_sensitive(transitions)
 
         switch_mix_party = builder.get_object("switch_mix_party")
-        switch_mix_party.set_state(App().settings.get_value("party-mix"))
+        switch_mix_party.set_state(
+            App().settings.get_value("transitions-party-only"))
 
         switch_artwork_tags = builder.get_object("switch_artwork_tags")
         switch_artwork_tags.set_state(App().settings.get_value("save-to-tags"))
@@ -62,7 +62,7 @@ class BehaviourSettingsWidget(Gtk.Bin):
             "spin_transition_duration")
         self.__spin_transition_duration.set_range(250, 9000)
         self.__spin_transition_duration.set_value(
-            App().settings.get_value("transition-duration").get_int32())
+            App().settings.get_value("transitions-duration").get_int32())
 
         self.__popover_network = builder.get_object("popover-network")
         switch_network_access = builder.get_object("switch_network_access")
@@ -174,8 +174,7 @@ class BehaviourSettingsWidget(Gtk.Bin):
             @param state as bool
         """
         widget.set_sensitive(state)
-        App().settings.set_value("smooth-transitions",
-                                 GLib.Variant("b", state))
+        App().settings.set_value("transitions", GLib.Variant("b", state))
         App().player.update_crossfading()
 
     def _on_switch_mix_party_state_set(self, widget, state):
@@ -183,7 +182,8 @@ class BehaviourSettingsWidget(Gtk.Bin):
             Update party mix setting
             @param widget as Gtk.Range
         """
-        App().settings.set_value("party-mix", GLib.Variant("b", state))
+        App().settings.set_value("transitions-party-only",
+                                 GLib.Variant("b", state))
         App().player.update_crossfading()
 
     def _on_spin_transition_duration_value_changed(self, widget):
@@ -192,7 +192,7 @@ class BehaviourSettingsWidget(Gtk.Bin):
             @param widget as Gtk.Range
         """
         value = widget.get_value()
-        App().settings.set_value("transition-duration",
+        App().settings.set_value("transitions-duration",
                                  GLib.Variant("i", value))
 
     def _on_switch_artwork_tags_state_set(self, widget, state):
