@@ -505,6 +505,7 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
+        plugins.volume.props.volume = 0.0
         self.__crossfade_up = True
         # We add padding because user will not hear track around 0.2
         sleep_ms = (duration + self.__PADDING) / 100
@@ -521,6 +522,7 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
+        plugins.volume.props.volume = 1.0
         self.__crossfade_down = True
         # We add padding because user will not hear track around 0.2
         sleep_ms = (duration + self.__PADDING) / 100
@@ -567,7 +569,6 @@ class BinPlayer:
             self._plugins = self._plugins2
 
         if track is not None and track.id is not None:
-            self._plugins.volume.props.volume = 0
             self._playbin.set_state(Gst.State.NULL)
             if self._load_track(track):
                 self._playbin.set_state(Gst.State.PLAYING)

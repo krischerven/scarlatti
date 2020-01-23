@@ -39,9 +39,7 @@ class PluginsPlayer:
         """
         try:
             audiobin = Gst.ElementFactory.make("bin", None)
-            audiosink = Gst.ElementFactory.make("autoaudiosink", None)
             audioconvert_in = Gst.ElementFactory.make("audioconvert", None)
-            audiobin.add(audiosink)
             audiobin.add(audioconvert_in)
             # Replay gain
             replay_gain = App().settings.get_enum(
@@ -75,6 +73,7 @@ class PluginsPlayer:
                     audioconvert_rg.link(self.__equalizer)
                 else:
                     audioconvert_in.link(self.__equalizer)
+
             # Internal volume manager
             self.volume = Gst.ElementFactory.make("volume", None)
             self.volume.props.volume = 1.0
@@ -86,10 +85,9 @@ class PluginsPlayer:
             else:
                 audioconvert_in.link(self.volume)
 
-            audioconvert_out = Gst.ElementFactory.make("audioconvert", None)
-            audiobin.add(audioconvert_out)
-            self.volume.link(audioconvert_out)
-            audioconvert_out.link(audiosink)
+            audiosink = Gst.ElementFactory.make("autoaudiosink", None)
+            audiobin.add(audiosink)
+            self.volume.link(audiosink)
             audiobin.add_pad(Gst.GhostPad.new(
                 "sink",
                 audioconvert_in.get_static_pad("sink")))
