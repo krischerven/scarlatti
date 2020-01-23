@@ -49,7 +49,7 @@ It provides:
 ```bash
 $ git clone https://gitlab.gnome.org/World/lollypop.git
 $ cd lollypop
-$ meson builddir --prefix=/usr
+$ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
@@ -66,7 +66,7 @@ Installation of `pylast` is required for integration with [Last.fm](http://last.
 $ git clone https://gitlab.gnome.org/World/lollypop.git
 $ cd lollypop
 # apt-get install meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
-$ meson builddir --prefix=/usr
+$ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
@@ -76,6 +76,6 @@ $ meson builddir --prefix=/usr
 $ git clone https://gitlab.gnome.org/World/lollypop.git
 $ cd lollypop
 # sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel
-$ meson builddir --prefix=/usr
+$ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
