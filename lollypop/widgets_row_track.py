@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ViewType, MARGIN_SMALL, IndicatorType
 from lollypop.define import StorageType
 from lollypop.widgets_indicator import IndicatorWidget
-from lollypop.utils import seconds_to_string, on_query_tooltip, popup_widget
+from lollypop.utils import ms_to_string, on_query_tooltip, popup_widget
 from lollypop.utils import emit_signal
 
 
@@ -100,7 +100,7 @@ class TrackRow(Gtk.ListBoxRow):
             artists_label.set_margin_end(5)
             artists_label.show()
             self._grid.add(artists_label)
-        duration = seconds_to_string(self._track.duration)
+        duration = ms_to_string(self._track.duration)
         self.__duration_label = Gtk.Label.new(duration)
         self.__duration_label.get_style_context().add_class("dim-label")
         self.__duration_label.show()
@@ -133,7 +133,7 @@ class TrackRow(Gtk.ListBoxRow):
             Update track duration
         """
         self._track.reset("duration")
-        duration = seconds_to_string(self._track.duration)
+        duration = ms_to_string(self._track.duration)
         self.__duration_label.set_label(duration)
 
     def set_indicator(self, indicator_type=None):

@@ -509,7 +509,7 @@ class SpotifySearch(GObject.Object):
         except:
             timestamp = None
             year = None
-        duration = payload["duration_ms"] // 1000
+        duration = payload["duration_ms"]
         cover_uri = payload["album"]["images"][0]["url"]
         uri = "web://%s" % payload["id"]
         mtime = int(time())

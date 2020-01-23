@@ -155,7 +155,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                                                 album_id INT NOT NULL,
                                                 mtime INT NOT NULL,
                                                 popularity INT NOT NULL)""",
-            39: self.__upgrade_39
+            39: self.__upgrade_39,
+            40: """UPDATE tracks SET duration = duration * 1000"""
         }
 
 #######################

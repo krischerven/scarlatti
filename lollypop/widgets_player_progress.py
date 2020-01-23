@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gst, Gtk
 
 from lollypop.define import App, MARGIN_SMALL
-from lollypop.utils import seconds_to_string
+from lollypop.utils import ms_to_string
 from lollypop.helper_signals import SignalsHelper, signals
 
 
@@ -82,7 +82,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
                 value = App().player.position
             if value is not None and value >= 0:
                 self.__progress.set_value(value)
-                time_string = seconds_to_string(value // 1000)
+                time_string = ms_to_string(value)
                 self.__time_label.set_markup(
                     "<span font_features='tnum'>%s</span>" % time_string)
         return True
@@ -107,8 +107,8 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         if App().player.current_track.is_web:
             style_context.add_class("youtube-scale")
         self.__progress.set_range(0.0,
-                                  App().player.current_track.duration * 1000)
-        time_string = seconds_to_string(App().player.current_track.duration)
+                                  App().player.current_track.duration)
+        time_string = ms_to_string(App().player.current_track.duration)
         self.__total_time_label.set_markup(
             "<span font_features='tnum'>%s</span>" % time_string)
 
@@ -121,7 +121,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         if track_id == player.current_track.id:
             duration = player.current_track.duration
             self.__progress.set_range(0.0, duration)
-            time_string = seconds_to_string(duration)
+            time_string = ms_to_string(duration)
             self.__total_time_label.set_markup(
                 "<span font_features='tnum'>%s</span>" % time_string)
 
@@ -156,7 +156,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             @param scroll_type as Gtk.ScrollType
             @param value as float
         """
-        time_string = seconds_to_string(value // 1000)
+        time_string = ms_to_string(value)
         self.__time_label.set_markup(
             "<span font_features='tnum'>%s</span>" % time_string)
 
@@ -198,8 +198,9 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             diff = -x
         if App().player.is_playing:
             position = App().player.position
-            seek = position + diff * 5
-            seek = max(min(App().player.current_track.duration - 2, seek), 0)
+            seek = position + diff * 5000
+            seek = max(min(App().player.current_track.duration - 2000, seek),
+                       0)
             App().player.seek(seek)
             self.update_position(seek)
 

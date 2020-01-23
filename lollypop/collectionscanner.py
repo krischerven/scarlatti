@@ -649,7 +649,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         (year, timestamp) = self.get_original_year(tags)
         if year is None:
             (year, timestamp) = self.get_year(tags)
-        duration = int(info.get_duration() / 1000000000)
+        duration = int(info.get_duration() / 1000000)
 
         if version != "":
             title += " (%s)" % version

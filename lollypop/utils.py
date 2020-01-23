@@ -35,34 +35,34 @@ def cancellable_sleep(seconds, cancellable):
                 raise Exception("cancelled")
 
 
-def seconds_to_string(duration):
+def ms_to_string(duration):
     """
-        Convert seconds to a pretty string
+        Convert milliseconds to a pretty string
         @param duration as int
     """
-    hours = duration // 3600
+    hours = duration // 3600000
     if hours == 0:
-        minutes = duration // 60
-        seconds = duration % 60
+        minutes = duration // 60000
+        seconds = (duration % 60000) // 1000
         return "%i:%02i" % (minutes, seconds)
     else:
-        seconds = duration % 3600
-        minutes = seconds // 60
-        seconds %= 60
+        seconds = duration % 3600000
+        minutes = seconds // 60000
+        seconds = (duration % 60000) // 1000
         return "%i:%02i:%02i" % (hours, minutes, seconds)
 
 
 def get_human_duration(duration):
     """
         Get human readable duration
-        @param duration in seconds
+        @param duration in milliseconds
         @return str
     """
-    hours = duration // 3600
-    minutes = duration // 60
+    hours = duration // 3600000
+    minutes = duration // 60000
     if hours > 0:
-        seconds = duration % 3600
-        minutes = seconds // 60
+        seconds = duration % 3600000
+        minutes = seconds // 60000
         if minutes > 0:
             return _("%s h  %s m") % (hours, minutes)
         else:

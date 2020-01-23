@@ -169,7 +169,7 @@ class BinPlayer:
             return
         # Seems gstreamer doesn't like seeking to end, sometimes
         # doesn't go to next track
-        if position // 1000 >= self._current_track.duration:
+        if position >= self._current_track.duration:
             self.next()
         else:
             self._playbin.seek_simple(Gst.Format.TIME,
@@ -232,7 +232,7 @@ class BinPlayer:
             @return duration as int (ms)
         """
         position = self._playbin.query_position(Gst.Format.TIME)[1] / 1000000
-        duration = self._current_track.duration * 1000
+        duration = self._current_track.duration
         return int(duration - position)
 
     @property
