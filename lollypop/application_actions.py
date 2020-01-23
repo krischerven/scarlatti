@@ -90,11 +90,11 @@ class ApplicationActions:
         """
         if enable:
             if Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL:
-                App().set_accels_for_action("app.seek(10)", ["Left"])
-                App().set_accels_for_action("app.seek(-10)", ["Right"])
+                App().set_accels_for_action("app.seek(10000)", ["Left"])
+                App().set_accels_for_action("app.seek(-10000)", ["Right"])
             else:
-                App().set_accels_for_action("app.seek(10)", ["Right"])
-                App().set_accels_for_action("app.seek(-10)", ["Left"])
+                App().set_accels_for_action("app.seek(10000)", ["Right"])
+                App().set_accels_for_action("app.seek(-10000)", ["Left"])
             App().set_accels_for_action("app.shortcut::play_pause",
                                         ["c", "space"])
             App().set_accels_for_action("app.shortcut::play", ["x"])
