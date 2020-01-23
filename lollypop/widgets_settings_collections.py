@@ -179,7 +179,8 @@ class CollectionsSettingsWidget(Gtk.Bin):
             @param button as Gtk.Button
         """
         try:
-            App().player.stop(True)
+            App().player.stop()
+            App().player.clear_albums()
             App().cursors = {}
             uris = App().tracks.get_uris()
             self.__progress.show()

@@ -101,24 +101,22 @@ class BinPlayer:
                 self._playbin.set_state(Gst.State.PAUSED)
                 emit_signal(self, "status-changed")
 
-    def stop(self, force=False):
+    def stop(self):
         """
             Change player state to STOPPED
             @param force as bool
         """
         self._current_track = Track()
+        self._prev_track = Track()
+        self._next_track = Track()
+        emit_signal(self, "current-changed")
+        emit_signal(self, "prev-changed")
+        emit_signal(self, "next-changed")
         if self.fading:
             self.fade(FadeDirection.OUT, Gst.State.NULL)
         else:
             self._playbin.set_state(Gst.State.NULL)
             emit_signal(self, "status-changed")
-        if force:
-            self._prev_track = Track()
-            self._next_track = Track()
-            emit_signal(self, "prev-changed")
-            emit_signal(self, "next-changed")
-            emit_signal(self, "current-changed")
-            self.clear_albums()
 
     def stop_all(self):
         """
