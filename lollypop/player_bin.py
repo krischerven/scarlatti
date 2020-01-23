@@ -42,6 +42,8 @@ class BinPlayer:
         self._next_track = Track()
         self._prev_track = Track()
         self.__crossfading_id = None
+        self.__crossfade_up = False
+        self.__crossfade_down = False
         self._playbin = self.__playbin1 = Gst.ElementFactory.make(
             "playbin", "player")
         self.__playbin2 = Gst.ElementFactory.make("playbin", "player")
@@ -503,12 +505,14 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
+        self.__crossfade_up = True
         # We add padding because user will not hear track around 0.2
         sleep_ms = (duration + self.__PADDING) / 100
         while plugins.volume.props.volume < 1.0:
             vol = round(plugins.volume.props.volume + 0.01, 2)
             plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
+        self.__crossfade_up = False
 
     def __volume_down(self, playbin, plugins, duration):
         """
@@ -517,6 +521,7 @@ class BinPlayer:
             @param plugins as PluginsPlayer
             @param duration as int
         """
+        self.__crossfade_down = True
         # We add padding because user will not hear track around 0.2
         sleep_ms = (duration + self.__PADDING) / 100
         while plugins.volume.props.volume > 0:
@@ -524,6 +529,7 @@ class BinPlayer:
             plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
         playbin.set_state(Gst.State.NULL)
+        self.__crossfade_down = False
 
     def __do_crossfade(self, duration, track):
         """
@@ -547,10 +553,9 @@ class BinPlayer:
                                           pop_to_add)
 
         # If some crossfade already running, just switch to track
-        for plugins in [self._plugins1, self._plugins2]:
-            if plugins.volume.props.volume not in [0.0, 1.0]:
-                self.__load(track)
-                return
+        if self.__crossfade_up or self.__crossfade_down:
+            self.__load(track)
+            return
 
         App().task_helper.run(self.__volume_down, self._playbin,
                               self._plugins, duration)

@@ -83,7 +83,6 @@ class RadioPlayer:
             @param track as Track
             @param play as bool
         """
-        self._plugins.volume.props.volume = 1.0
         self._playbin.set_state(Gst.State.NULL)
         self._playbin.set_property("uri", track.uri)
         App().radios.set_more_popular(track.id)
