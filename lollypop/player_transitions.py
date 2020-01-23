@@ -14,8 +14,9 @@ from gi.repository import Gst, GLib
 
 from time import sleep
 
-from lollypop.define import App
+from lollypop.define import App, FadeDirection
 from lollypop.objects_radio import Radio
+from lollypop.utils import emit_signal
 
 
 class TransitionsPlayer:
@@ -31,6 +32,7 @@ class TransitionsPlayer:
         self.__crossfading_id = None
         self.__crossfade_up = False
         self.__crossfade_down = False
+        self.__fade_direction = FadeDirection.NONE
         self.update_crossfading()
 
     def load(self, track):
@@ -73,6 +75,25 @@ class TransitionsPlayer:
         self.set_crossfading((transitions and not party_only) or
                              (transitions and party_only and self.is_party))
 
+    def fade(self, direction, state):
+        """
+            Fade volume in direction
+            @param direction as FadeDirection
+            @param state as Gst.State
+        """
+        if self.__fade_direction in [FadeDirection.IN, FadeDirection.OUT]:
+            self.__fade_direction = direction
+            return
+        if direction == FadeDirection.IN:
+            self._plugins.volume.props.volume = 0.0
+        else:
+            self._plugins.volume.props.volume = 1.0
+        if state == Gst.State.PLAYING:
+            self._playbin.set_state(state)
+            emit_signal(self, "status-changed")
+        self.__fade_direction = direction
+        App().task_helper.run(self.__do_fade, 750, state)
+
     @property
     def crossfading(self):
         """
@@ -107,9 +128,9 @@ class TransitionsPlayer:
         plugins.volume.props.volume = 0.0
         self.__crossfade_up = True
         # We add padding because user will not hear track around 0.2
-        sleep_ms = (duration + self.__PADDING) / 100
+        sleep_ms = (duration + self.__PADDING) / 10
         while plugins.volume.props.volume < 1.0:
-            vol = round(plugins.volume.props.volume + 0.01, 2)
+            vol = round(plugins.volume.props.volume + 0.1, 1)
             plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
         self.__crossfade_up = False
@@ -124,9 +145,9 @@ class TransitionsPlayer:
         plugins.volume.props.volume = 1.0
         self.__crossfade_down = True
         # We add padding because user will not hear track around 0.2
-        sleep_ms = (duration + self.__PADDING) / 100
+        sleep_ms = (duration + self.__PADDING) / 10
         while plugins.volume.props.volume > 0:
-            vol = round(plugins.volume.props.volume - 0.01, 2)
+            vol = round(plugins.volume.props.volume - 0.1, 1)
             plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
         playbin.set_state(Gst.State.NULL)
@@ -175,3 +196,26 @@ class TransitionsPlayer:
                 self._playbin.set_state(Gst.State.PLAYING)
             App().task_helper.run(self.__volume_up, self._playbin,
                                   self._plugins, duration)
+
+    def __do_fade(self, duration, state):
+        """
+            Do fade transition
+            @param duration as int (ms)
+            @param state as Gst.State
+        """
+        sleep_ms = duration / 10
+        while (self.__fade_direction == FadeDirection.IN and
+               self._plugins.volume.props.volume < 1.0) or\
+              (self.__fade_direction == FadeDirection.OUT and
+               self._plugins.volume.props.volume > 0.0):
+            if self.__fade_direction == FadeDirection.OUT:
+                vol = round(self._plugins.volume.props.volume - 0.1, 1)
+            else:
+                vol = round(self._plugins.volume.props.volume + 0.1, 1)
+            print(vol)
+            self._plugins.volume.props.volume = vol
+            sleep(sleep_ms / 1000)
+        if self.__fade_direction == FadeDirection.OUT:
+            self._playbin.set_state(state)
+            emit_signal(self, "status-changed")
+        self.__fade_direction = FadeDirection.NONE

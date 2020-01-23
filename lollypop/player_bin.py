@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.player_plugins import PluginsPlayer
-from lollypop.define import GstPlayFlags, App
+from lollypop.define import GstPlayFlags, App, FadeDirection
 from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
@@ -81,8 +81,11 @@ class BinPlayer:
             if self._next_track.id is not None:
                 self.load(self._next_track)
         else:
-            self._playbin.set_state(Gst.State.PLAYING)
-            emit_signal(self, "status-changed")
+            if App().settings.get_value("transitions"):
+                self.fade(FadeDirection.IN, Gst.State.PLAYING)
+            else:
+                self._playbin.set_state(Gst.State.PLAYING)
+                emit_signal(self, "status-changed")
 
     def pause(self):
         """
@@ -90,9 +93,13 @@ class BinPlayer:
         """
         if isinstance(App().player.current_track, Radio):
             self._playbin.set_state(Gst.State.NULL)
+            emit_signal(self, "status-changed")
         else:
-            self._playbin.set_state(Gst.State.PAUSED)
-        emit_signal(self, "status-changed")
+            if App().settings.get_value("transitions"):
+                self.fade(FadeDirection.OUT, Gst.State.PAUSED)
+            else:
+                self._playbin.set_state(Gst.State.PAUSED)
+                emit_signal(self, "status-changed")
 
     def stop(self, force=False):
         """
@@ -100,14 +107,17 @@ class BinPlayer:
             @param force as bool
         """
         self._current_track = Track()
-        self._playbin.set_state(Gst.State.NULL)
-        emit_signal(self, "status-changed")
-        emit_signal(self, "current-changed")
+        if App().settings.get_value("transitions"):
+            self.fade(FadeDirection.OUT, Gst.State.NULL)
+        else:
+            self._playbin.set_state(Gst.State.NULL)
+            emit_signal(self, "status-changed")
         if force:
             self._prev_track = Track()
             self._next_track = Track()
             emit_signal(self, "prev-changed")
             emit_signal(self, "next-changed")
+            emit_signal(self, "current-changed")
             self.clear_albums()
 
     def stop_all(self):

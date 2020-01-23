@@ -309,11 +309,6 @@
             <summary>Transition duration in ms</summary>
             <description></description>
         </key>
-        <key type="i" name="transitions-fade-duration">
-            <default>1000</default>
-            <summary>Fade duration in ms</summary>
-            <description></description>
-        </key>
         <key type="b" name="shuffle">
             <default>false</default>
             <summary>Shuffle tracks</summary>
