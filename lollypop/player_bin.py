@@ -414,7 +414,7 @@ class BinPlayer:
         try:
             Logger.debug("Player::__on_stream_about_to_finish(): %s" % playbin)
             # Don't do anything if crossfade on, track already changed
-            if self.__crossfading:
+            if self.crossfading:
                 return
             if isinstance(App().player.current_track, Radio):
                 return
