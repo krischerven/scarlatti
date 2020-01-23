@@ -226,7 +226,7 @@ class MPRIS(Server):
             App().player.play()
 
     def SetPosition(self, track_id, position):
-        App().player.seek(position)
+        App().player.seek(position / 1000)
 
     def OpenUri(self, uri):
         track_id = App().tracks.get_id_by_uri(uri)
@@ -235,7 +235,7 @@ class MPRIS(Server):
 
     def Seek(self, offset):
         position = App().player.position
-        App().player.seek(position + offset)
+        App().player.seek(position + offset / 1000)
 
     def Seeked(self, position):
         self.__bus.emit_signal(
@@ -289,7 +289,7 @@ class MPRIS(Server):
         elif property_name == "Position":
             return GLib.Variant(
                 "x",
-                App().player.position / Gst.SECOND * 1000 * 1000)
+                App().player.position * 1000)
         elif property_name in ["CanGoNext", "CanGoPrevious",
                                "CanPlay", "CanPause"]:
             return GLib.Variant("b", App().player.current_track.id is not None)
@@ -428,7 +428,7 @@ class MPRIS(Server):
                     "file://" + cover_path)
 
     def __on_seeked(self, player, position):
-        self.Seeked(position * (1000 * 1000))
+        self.Seeked(position * 1000)
 
     def __on_volume_changed(self, player, data=None):
         self.PropertiesChanged(self.__MPRIS_PLAYER_IFACE,
