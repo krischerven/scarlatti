@@ -81,7 +81,7 @@ class BinPlayer:
             if self._next_track.id is not None:
                 self.load(self._next_track)
         else:
-            if App().settings.get_value("transitions"):
+            if self.fading:
                 self.fade(FadeDirection.IN, Gst.State.PLAYING)
             else:
                 self._playbin.set_state(Gst.State.PLAYING)
@@ -95,7 +95,7 @@ class BinPlayer:
             self._playbin.set_state(Gst.State.NULL)
             emit_signal(self, "status-changed")
         else:
-            if App().settings.get_value("transitions"):
+            if self.fading:
                 self.fade(FadeDirection.OUT, Gst.State.PAUSED)
             else:
                 self._playbin.set_state(Gst.State.PAUSED)
@@ -107,7 +107,7 @@ class BinPlayer:
             @param force as bool
         """
         self._current_track = Track()
-        if App().settings.get_value("transitions"):
+        if self.fading:
             self.fade(FadeDirection.OUT, Gst.State.NULL)
         else:
             self._playbin.set_state(Gst.State.NULL)
