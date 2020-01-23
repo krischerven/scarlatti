@@ -34,56 +34,65 @@ class PluginsPlayer:
     def build_audiofilter(self):
         """
             Build audio filter
+            audioconvert ! (rgvolume ! rglimiter ! audioconvert) !
+            (equalizer) ! volume ! audioconvert ! audiosink
         """
         try:
             audiobin = Gst.ElementFactory.make("bin", None)
             audiosink = Gst.ElementFactory.make("autoaudiosink", None)
-            converter = Gst.ElementFactory.make("audioconvert", None)
-            audiobin.add(converter)
+            audioconvert_in = Gst.ElementFactory.make("audioconvert", None)
             audiobin.add(audiosink)
-            # Internal volume manager
-            self.volume = Gst.ElementFactory.make("volume", None)
-            self.volume.props.volume = 1.0
-            audiobin.add(self.volume)
-            # Equalizer
-            self.__equalizer = None
-            if App().settings.get_value("equalizer-enabled"):
-                self.__equalizer = Gst.ElementFactory.make("equalizer-10bands",
-                                                           None)
-                audiobin.add(self.__equalizer)
-                self.volume.link(self.__equalizer)
+            audiobin.add(audioconvert_in)
             # Replay gain
-            replay_gain = App().settings.get_enum("replay-gain")
-            if replay_gain != ReplayGain.NONE:
+            replay_gain = App().settings.get_enum(
+                "replay-gain") != ReplayGain.NONE
+            if replay_gain:
                 rgvolume = Gst.ElementFactory.make("rgvolume", None)
+                rglimiter = Gst.ElementFactory.make("rglimiter", None)
+                audioconvert_rg = Gst.ElementFactory.make("audioconvert", None)
+                audiobin.add(rgvolume)
+                audiobin.add(rglimiter)
+                audiobin.add(audioconvert_rg)
+                audioconvert_in.link(rgvolume)
+                rgvolume.link(rglimiter)
+                rglimiter.link(audioconvert_rg)
                 if replay_gain == ReplayGain.ALBUM:
                     rgvolume.props.album_mode = 1
                 else:
                     rgvolume.props.album_mode = 0
                 rgvolume.props.pre_amp = App().settings.get_value(
                     "replay-gain-db").get_double()
-                audiobin.add(rgvolume)
-                rglimiter = Gst.ElementFactory.make("rglimiter", None)
                 rglimiter.props.enabled = App().settings.get_value(
                     "replay-gain-limiter")
-                audiobin.add(rglimiter)
-                rgvolume.link(rglimiter)
-                if self.__equalizer is not None:
-                    self.volume.link(self.__equalizer)
-                    self.__equalizer.link(rgvolume)
-                else:
-                    self.volume.link(rgvolume)
-                rglimiter.link(converter)
-            elif self.__equalizer is not None:
-                self.volume.link(self.__equalizer)
-                self.__equalizer.link(converter)
-            else:
-                self.volume.link(converter)
 
-            converter.link(audiosink)
+            # Equalizer
+            self.__equalizer = None
+            if App().settings.get_value("equalizer-enabled"):
+                self.__equalizer = Gst.ElementFactory.make("equalizer-10bands",
+                                                           None)
+                audiobin.add(self.__equalizer)
+                if replay_gain:
+                    audioconvert_rg.link(self.__equalizer)
+                else:
+                    audioconvert_in.link(self.__equalizer)
+            # Internal volume manager
+            self.volume = Gst.ElementFactory.make("volume", None)
+            self.volume.props.volume = 1.0
+            audiobin.add(self.volume)
+            if self.__equalizer is not None:
+                self.__equalizer.link(self.volume)
+            elif replay_gain:
+                audioconvert_rg.link(self.volume)
+            else:
+                audioconvert_in.link(self.volume)
+
+            audioconvert_out = Gst.ElementFactory.make("audioconvert", None)
+            audiobin.add(audioconvert_out)
+            self.volume.link(audioconvert_out)
+            audioconvert_out.link(audiosink)
             audiobin.add_pad(Gst.GhostPad.new(
                 "sink",
-                self.volume.get_static_pad("sink")))
+                audioconvert_in.get_static_pad("sink")))
             self.__playbin.set_property("audio-sink", audiobin)
             if self.__equalizer is not None:
                 self.update_equalizer()
