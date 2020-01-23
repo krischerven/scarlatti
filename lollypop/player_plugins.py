@@ -29,9 +29,9 @@ class PluginsPlayer:
         """
         self.__equalizer = None
         self.__playbin = playbin
-        self.build_audiobin()
+        self.build_audiofilter()
 
-    def build_audiobin(self):
+    def build_audiofilter(self):
         """
             Build audio filter
         """
