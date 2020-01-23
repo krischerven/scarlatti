@@ -212,7 +212,6 @@ class TransitionsPlayer:
                 vol = round(self._plugins.volume.props.volume - 0.1, 1)
             else:
                 vol = round(self._plugins.volume.props.volume + 0.1, 1)
-            print(vol)
             self._plugins.volume.props.volume = vol
             sleep(sleep_ms / 1000)
         if self.__fade_direction == FadeDirection.OUT:
