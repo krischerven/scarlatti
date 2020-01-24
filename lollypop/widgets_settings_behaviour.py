@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, NetworkAccessACL, StorageType
+from lollypop.define import App
 
 
 class BehaviourSettingsWidget(Gtk.Bin):
@@ -41,10 +41,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
         switch_import = builder.get_object("switch_import")
         switch_import.set_state(App().settings.get_value("import-playlists"))
 
-        switch_network_access = builder.get_object("switch_network_access")
-        network_access = App().settings.get_value("network-access")
-        switch_network_access.set_state(network_access)
-
         switch_transitions = builder.get_object("switch_transitions")
         transitions = App().settings.get_value("transitions")
         switch_transitions.set_state(transitions)
@@ -64,20 +60,8 @@ class BehaviourSettingsWidget(Gtk.Bin):
         self.__spin_transition_duration.set_value(
             App().settings.get_value("transitions-duration").get_int32())
 
-        self.__popover_network = builder.get_object("popover-network")
-        switch_network_access = builder.get_object("switch_network_access")
-        network_access = App().settings.get_value("network-access")
-        switch_network_access.set_state(network_access)
-        builder.get_object("network_button").set_sensitive(
-            network_access)
-
         replaygain_combo = builder.get_object("replaygain_combo")
         replaygain_combo.set_active(App().settings.get_enum(("replay-gain")))
-
-        acl = App().settings.get_value("network-access-acl").get_int32()
-        for key in NetworkAccessACL.keys():
-            if acl & NetworkAccessACL[key]:
-                builder.get_object(key).set_state(True)
 
         self.add(builder.get_object("widget"))
         builder.connect_signals(self)
@@ -85,38 +69,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
 #######################
 # PROTECTED           #
 #######################
-    def _on_enable_network_access_state_set(self, widget, state):
-        """
-            Save network access state
-            @param widget as Gtk.Button
-            @param state as bool
-        """
-        widget.set_sensitive(state)
-        App().settings.set_value("network-access",
-                                 GLib.Variant("b", state))
-
-    def _on_enable_switch_state_set(self, widget, state):
-        """
-            Save network acl state
-            @param widget as Gtk.Switch
-            @param state as bool
-        """
-        key = widget.get_name()
-        acl = App().settings.get_value("network-access-acl").get_int32()
-        if state:
-            acl |= NetworkAccessACL[key]
-        else:
-            acl &= ~NetworkAccessACL[key]
-        acl = App().settings.set_value("network-access-acl",
-                                       GLib.Variant("i", acl))
-        if key == "SPOTIFY" and not state:
-            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
-                                 StorageType.SPOTIFY_SIMILARS]:
-                App().tracks.del_old_for_storage_type(storage_type, 0)
-            App().tracks.clean()
-            App().albums.clean()
-            App().artists.clean()
-
     def _on_switch_scan_state_set(self, widget, state):
         """
             Update scan setting
@@ -159,13 +111,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
             @param widget as Gtk.Button
         """
         self.__popover_transitions.popup()
-
-    def _on_network_button_clicked(self, widget):
-        """
-            Show popover
-            @param widget as Gtk.Button
-        """
-        self.__popover_network.popup()
 
     def _on_switch_transitions_state_set(self, widget, state):
         """

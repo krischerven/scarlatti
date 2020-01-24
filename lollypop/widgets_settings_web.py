@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Gio
 
 from gettext import gettext as _
 
-from lollypop.define import App, NetworkAccessACL
+from lollypop.define import App, NetworkAccessACL, StorageType
 from lollypop.utils import get_network_available
 from lollypop.logger import Logger
 
@@ -61,6 +61,17 @@ class WebSettingsWidget(Gtk.Bin):
                                 builder.get_object("librefm_error_label"),
                                 NetworkAccessACL["LASTFM"],
                                 False)]
+
+        # Web services access
+        self.__acl_grid = builder.get_object("acl_grid")
+        switch_network_access = builder.get_object("switch_network_access")
+        network_access = App().settings.get_value("network-access")
+        switch_network_access.set_state(network_access)
+        self.__acl_grid.set_sensitive(network_access)
+        acl = App().settings.get_value("network-access-acl").get_int32()
+        for key in NetworkAccessACL.keys():
+            if acl & NetworkAccessACL[key]:
+                builder.get_object(key).set_state(True)
 
         # Check web services access
         self.__check_acls()
@@ -178,6 +189,38 @@ class WebSettingsWidget(Gtk.Bin):
         uri = entry.get_text()
         App().settings.set_value("invidious-server", GLib.Variant("s", uri))
         self.__switch_youtube.set_sensitive(uri == "")
+
+    def _on_enable_network_access_state_set(self, widget, state):
+        """
+            Save network access state
+            @param widget as Gtk.Button
+            @param state as bool
+        """
+        self.__acl_grid.set_sensitive(state)
+        App().settings.set_value("network-access",
+                                 GLib.Variant("b", state))
+
+    def _on_enable_switch_state_set(self, widget, state):
+        """
+            Save network acl state
+            @param widget as Gtk.Switch
+            @param state as bool
+        """
+        key = widget.get_name()
+        acl = App().settings.get_value("network-access-acl").get_int32()
+        if state:
+            acl |= NetworkAccessACL[key]
+        else:
+            acl &= ~NetworkAccessACL[key]
+        acl = App().settings.set_value("network-access-acl",
+                                       GLib.Variant("i", acl))
+        if key == "SPOTIFY" and not state:
+            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
+                                 StorageType.SPOTIFY_SIMILARS]:
+                App().tracks.del_old_for_storage_type(storage_type, 0)
+            App().tracks.clean()
+            App().albums.clean()
+            App().artists.clean()
 
 #######################
 # PRIVATE             #
