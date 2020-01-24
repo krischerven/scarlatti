@@ -86,10 +86,6 @@ class TransitionsPlayer:
         if self.__fade_direction in [FadeDirection.IN, FadeDirection.OUT]:
             self.__fade_direction = direction
             return
-        if direction == FadeDirection.IN:
-            self._plugins.volume.props.volume = 0.0
-        else:
-            self._plugins.volume.props.volume = 1.0
         if state == Gst.State.PLAYING:
             self._playbin.set_state(state)
             emit_signal(self, "status-changed")
@@ -214,14 +210,14 @@ class TransitionsPlayer:
         """
         sleep_ms = duration / 10
         while (self.__fade_direction == FadeDirection.IN and
-               self._plugins.volume.props.volume < 1.0) or\
+               self.volume < 1.0) or\
               (self.__fade_direction == FadeDirection.OUT and
-               self._plugins.volume.props.volume > 0.0):
+               self.volume > 0.0):
             if self.__fade_direction == FadeDirection.OUT:
-                vol = round(self._plugins.volume.props.volume - 0.1, 1)
+                vol = round(self.volume - 0.1, 1)
             else:
-                vol = round(self._plugins.volume.props.volume + 0.1, 1)
-            self._plugins.volume.props.volume = vol
+                vol = round(self.volume + 0.1, 1)
+            self.set_volume(vol)
             sleep(sleep_ms / 1000)
         if self.__fade_direction == FadeDirection.OUT:
             self._playbin.set_state(state)
