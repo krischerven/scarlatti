@@ -33,8 +33,6 @@ class TransitionsPlayer:
         self.__crossfade_up = False
         self.__crossfade_down = False
         self.__fade_direction = FadeDirection.NONE
-        self.__fade_duration = App().settings.get_value(
-            "transitions-fade-duration").get_int32()
         self.update_crossfading()
 
     def load(self, track):
@@ -90,7 +88,9 @@ class TransitionsPlayer:
             self._playbin.set_state(state)
             emit_signal(self, "status-changed")
         self.__fade_direction = direction
-        App().task_helper.run(self.__do_fade, self.__fade_duration, state)
+        fade_duration = App().settings.get_value(
+            "fade-duration").get_int32()
+        App().task_helper.run(self.__do_fade, fade_duration, state)
 
     @property
     def crossfading(self):
@@ -105,7 +105,10 @@ class TransitionsPlayer:
         """
             True if fade in/fade out is enabled
         """
-        return self.__fade_duration > 0
+        fade = App().settings.get_value("fade")
+        party_only = App().settings.get_value("fade-party-only")
+        return ((fade and not party_only) or
+                (fade and party_only and self.is_party))
 
 #######################
 # PRIVATE             #

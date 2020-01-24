@@ -44,22 +44,34 @@ class BehaviourSettingsWidget(Gtk.Bin):
         switch_transitions = builder.get_object("switch_transitions")
         transitions = App().settings.get_value("transitions")
         switch_transitions.set_state(transitions)
-        builder.get_object("transitions_button").set_sensitive(transitions)
+        builder.get_object("button_transitions").set_sensitive(transitions)
 
-        switch_mix_party = builder.get_object("switch_mix_party")
-        switch_mix_party.set_state(
+        switch_fade = builder.get_object("switch_fade")
+        fade = App().settings.get_value("fade")
+        switch_fade.set_state(fade)
+        builder.get_object("button_fade").set_sensitive(fade)
+
+        switch_transitions_party = builder.get_object(
+            "switch_transitions_party")
+        switch_transitions_party.set_state(
             App().settings.get_value("transitions-party-only"))
+        switch_fade_party = builder.get_object("switch_fade_party")
+        switch_fade_party.set_state(
+            App().settings.get_value("fade-party-only"))
 
         switch_artwork_tags = builder.get_object("switch_artwork_tags")
         switch_artwork_tags.set_state(App().settings.get_value("save-to-tags"))
 
-        self.__popover_transitions = builder.get_object("popover-transitions")
-        self.__spin_transition_duration = builder.get_object(
-            "spin_transition_duration")
-        self.__spin_transition_duration.set_range(250, 9000)
-        self.__spin_transition_duration.set_value(
+        self.__spin_transitions_duration = builder.get_object(
+            "spin_transitions_duration")
+        self.__spin_transitions_duration.set_range(250, 9000)
+        self.__spin_transitions_duration.set_value(
             App().settings.get_value("transitions-duration").get_int32())
 
+        self.__spin_fade_duration = builder.get_object("spin_fade_duration")
+        self.__spin_fade_duration.set_range(250, 1000)
+        self.__spin_fade_duration.set_value(
+            App().settings.get_value("fade-duration").get_int32())
         replaygain_combo = builder.get_object("replaygain_combo")
         replaygain_combo.set_active(App().settings.get_enum(("replay-gain")))
 
@@ -105,12 +117,12 @@ class BehaviourSettingsWidget(Gtk.Bin):
         App().settings.set_value("import-playlists",
                                  GLib.Variant("b", state))
 
-    def _on_transitions_button_clicked(self, widget):
+    def _on_button_clicked(self, popover):
         """
             Show popover
-            @param widget as Gtk.Button
+            @param popover as Gtk.Popover
         """
-        self.__popover_transitions.popup()
+        popover.popup()
 
     def _on_switch_transitions_state_set(self, widget, state):
         """
@@ -122,22 +134,50 @@ class BehaviourSettingsWidget(Gtk.Bin):
         App().settings.set_value("transitions", GLib.Variant("b", state))
         App().player.update_crossfading()
 
-    def _on_switch_mix_party_state_set(self, widget, state):
+    def _on_switch_fade_state_set(self, widget, state):
         """
-            Update party mix setting
+            Update smooth transitions setting
+            @param widget as Gtk.Button
+            @param state as bool
+        """
+        widget.set_sensitive(state)
+        App().settings.set_value("fade", GLib.Variant("b", state))
+
+    def _on_switch_transitions_party_state_set(self, widget, state):
+        """
+            Update transitions party only setting
             @param widget as Gtk.Range
         """
+        widget.set_sensitive(state)
         App().settings.set_value("transitions-party-only",
                                  GLib.Variant("b", state))
         App().player.update_crossfading()
 
-    def _on_spin_transition_duration_value_changed(self, widget):
+    def _on_switch_fade_party_state_set(self, widget, state):
+        """
+            Update fade party only setting
+            @param widget as Gtk.Range
+        """
+        widget.set_sensitive(state)
+        App().settings.set_value("fade-party-only",
+                                 GLib.Variant("b", state))
+
+    def _on_spin_transitions_duration_value_changed(self, widget):
         """
             Update mix duration setting
             @param widget as Gtk.Range
         """
         value = widget.get_value()
         App().settings.set_value("transitions-duration",
+                                 GLib.Variant("i", value))
+
+    def _on_spin_fade_duration_value_changed(self, widget):
+        """
+            Update mix duration setting
+            @param widget as Gtk.Range
+        """
+        value = widget.get_value()
+        App().settings.set_value("fade-duration",
                                  GLib.Variant("i", value))
 
     def _on_switch_artwork_tags_state_set(self, widget, state):

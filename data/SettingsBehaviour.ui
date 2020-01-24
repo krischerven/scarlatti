@@ -8,7 +8,18 @@
     <property name="step_increment">50</property>
     <property name="page_increment">100</property>
   </object>
+  <object class="GtkAdjustment" id="adjustment2">
+    <property name="lower">100</property>
+    <property name="upper">9000</property>
+    <property name="step_increment">50</property>
+    <property name="page_increment">100</property>
+  </object>
   <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">preferences-system-symbolic</property>
+  </object>
+  <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">preferences-system-symbolic</property>
@@ -248,7 +259,7 @@
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="hexpand">True</property>
-            <property name="label" translatable="yes">Smooth transitions</property>
+            <property name="label" translatable="yes">Track transitions</property>
             <property name="wrap">True</property>
             <property name="xalign">0</property>
           </object>
@@ -259,14 +270,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="transitions_button">
+          <object class="GtkButton" id="button_transitions">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="valign">center</property>
             <property name="image">image1</property>
             <property name="relief">none</property>
-            <signal name="clicked" handler="_on_transitions_button_clicked" swapped="no"/>
+            <signal name="clicked" handler="_on_button_clicked" object="popover-transitions" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -281,7 +292,7 @@
             <property name="tooltip_text" translatable="yes">Smooth transitions</property>
             <property name="halign">end</property>
             <property name="valign">center</property>
-            <signal name="state-set" handler="_on_switch_transitions_state_set" object="transitions_button" swapped="no"/>
+            <signal name="state-set" handler="_on_switch_transitions_state_set" object="button_transitions" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -294,6 +305,65 @@
         <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="position">5</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkLabel" id="transition1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="hexpand">True</property>
+            <property name="label" translatable="yes">Playback fade</property>
+            <property name="wrap">True</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_fade">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="valign">center</property>
+            <property name="image">image2</property>
+            <property name="relief">none</property>
+            <signal name="clicked" handler="_on_button_clicked" object="popover-fade" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSwitch" id="switch_fade">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">Smooth transitions</property>
+            <property name="halign">end</property>
+            <property name="valign">center</property>
+            <signal name="state-set" handler="_on_switch_fade_state_set" object="button_fade" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">6</property>
       </packing>
     </child>
     <child>
@@ -344,13 +414,13 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">6</property>
+        <property name="position">7</property>
       </packing>
     </child>
   </object>
-  <object class="GtkPopover" id="popover-transitions">
+  <object class="GtkPopover" id="popover-fade">
     <property name="can_focus">False</property>
-    <property name="relative_to">transitions_button</property>
+    <property name="relative_to">button_fade</property>
     <property name="constrain_to">none</property>
     <child>
       <object class="GtkGrid">
@@ -364,7 +434,94 @@
         <property name="margin_top">5</property>
         <property name="margin_bottom">5</property>
         <property name="row_spacing">5</property>
-        <property name="column_spacing">14</property>
+        <property name="column_spacing">15</property>
+        <child>
+          <object class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Only in party mode</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSwitch" id="switch_fade_party">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="halign">end</property>
+            <signal name="state-set" handler="_on_switch_fade_party_state_set" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="separator2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+            <property name="width">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Fade duration in milliseconds</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="spin_fade_duration">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="halign">start</property>
+            <property name="width_chars">4</property>
+            <property name="text" translatable="yes">100</property>
+            <property name="adjustment">adjustment1</property>
+            <property name="value">100</property>
+            <signal name="value-changed" handler="_on_spin_fade_duration_value_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+            <property name="width">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkPopover" id="popover-transitions">
+    <property name="can_focus">False</property>
+    <property name="relative_to">button_transitions</property>
+    <property name="constrain_to">none</property>
+    <child>
+      <object class="GtkGrid">
+        <property name="width_request">300</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_start">5</property>
+        <property name="margin_end">5</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="row_spacing">5</property>
+        <property name="column_spacing">15</property>
         <child>
           <object class="GtkLabel" id="label9">
             <property name="visible">True</property>
@@ -378,11 +535,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSwitch" id="switch_mix_party">
+          <object class="GtkSwitch" id="switch_transitions_party">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="halign">end</property>
-            <signal name="state-set" handler="_on_switch_mix_party_state_set" swapped="no"/>
+            <signal name="state-set" handler="_on_switch_transitions_party_state_set" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -393,6 +550,7 @@
           <object class="GtkSeparator" id="separator1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -404,7 +562,7 @@
           <object class="GtkLabel" id="label8">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Transition duration in milliseconds</property>
+            <property name="label" translatable="yes">Transitions duration in milliseconds</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -412,13 +570,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSpinButton" id="spin_transition_duration">
+          <object class="GtkSpinButton" id="spin_transitions_duration">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="halign">start</property>
             <property name="width_chars">4</property>
-            <property name="adjustment">adjustment1</property>
-            <signal name="value-changed" handler="_on_spin_transition_duration_value_changed" swapped="no"/>
+            <property name="adjustment">adjustment2</property>
+            <signal name="value-changed" handler="_on_spin_transitions_duration_value_changed" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">0</property>
