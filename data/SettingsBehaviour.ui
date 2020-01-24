@@ -259,7 +259,7 @@
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="hexpand">True</property>
-            <property name="label" translatable="yes">Track transitions</property>
+            <property name="label" translatable="yes">Transitions between tracks</property>
             <property name="wrap">True</property>
             <property name="xalign">0</property>
           </object>
@@ -488,7 +488,6 @@
             <property name="can_focus">True</property>
             <property name="halign">start</property>
             <property name="width_chars">4</property>
-            <property name="text" translatable="yes">100</property>
             <property name="adjustment">adjustment1</property>
             <property name="value">100</property>
             <signal name="value-changed" handler="_on_spin_fade_duration_value_changed" swapped="no"/>
