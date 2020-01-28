@@ -341,26 +341,21 @@ class TagReader:
             @return year and timestamp (int, int)
         """
         try:
-            (exists, date) = tags.get_date_index("date", 0)
-            dt = year = timestamp = None
-            if exists:
-                year = date.get_year()
-                d = Gst.DateTime.new_local_time(year, 1, 1, 0, 0, 0)
-                dt = d.to_g_date_time()
-                timestamp = dt.to_unix()
-            else:
-                (exists, date) = tags.get_date_time_index("datetime", 0)
+            date_index = tags.get_date_index("date", 0)
+            datetime_index = tags.get_date_time_index("datetime", 0)
+            year = timestamp = None
+            for (exists, date) in [date_index, datetime_index]:
                 if exists:
-                    dt = date.to_g_date_time()
-                    if dt is None:
-                        year = date.get_year()
-                        d = Gst.DateTime.new_local_time(year, 1, 1, 0, 0, 0)
-                        dt = d.to_g_date_time()
-                    timestamp = dt.to_unix()
+                    year = date.get_year()
+                    month = date.get_month()
+                    day = date.get_day()
+                    gst_datetime = Gst.DateTime.new_local_time(
+                        year, month, day, 0, 0, 0)
+                    glib_datetime = gst_datetime.to_g_date_time()
+                    timestamp = glib_datetime.to_unix()
             return (year, timestamp)
         except Exception as e:
-            error = "" if tags is None else tags.to_string()
-            Logger.error("TagReader::get_year(): %s, %s", e, error)
+            Logger.error("TagReader::get_year(): %s", e)
         return (None, None)
 
     def get_original_year(self, tags):
