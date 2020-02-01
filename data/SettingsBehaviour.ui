@@ -348,7 +348,7 @@
           <object class="GtkSwitch" id="switch_fade">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">Smooth transitions</property>
+            <property name="tooltip_text" translatable="yes">Playback fade</property>
             <property name="halign">end</property>
             <property name="valign">center</property>
             <signal name="state-set" handler="_on_switch_fade_state_set" object="button_fade" swapped="no"/>
