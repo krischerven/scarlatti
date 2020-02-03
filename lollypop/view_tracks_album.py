@@ -291,12 +291,13 @@ class AlbumTracksView(TracksView):
         if self._view_type & ViewType.ALBUM:
             tracks = []
             for child in self.children:
-                tracks.append(child.track)
+                if child.track.loved != -1:
+                    tracks.append(child.track)
                 child.set_state_flags(Gtk.StateFlags.NORMAL, True)
             # Do not update album list if in party or album already available
             if not App().player.is_party and\
                     not App().player.track_in_playback(track):
-                album = Album(track.album.id, [], [], True)
+                album = Album(track.album.id, [], [])
                 album.set_tracks(tracks)
                 if not App().settings.get_value("append-albums"):
                     App().player.clear_albums()
