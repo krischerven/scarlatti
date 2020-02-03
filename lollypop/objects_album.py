@@ -108,20 +108,18 @@ class Album(Base):
                 "storage_type": 0,
                 "mb_album_id": None}
 
-    def __init__(self, album_id=None, genre_ids=[], artist_ids=[],
-                 allow_track_skipping=False):
+    def __init__(self, album_id=None, genre_ids=[], artist_ids=[]):
         """
             Init album
             @param album_id as int
             @param genre_ids as [int]
-            @param allow_track_skipping as bool
         """
         Base.__init__(self, App().albums)
         self.id = album_id
         self.genre_ids = genre_ids
         self._tracks = []
         self._discs = []
-        self.__allow_track_skipping = allow_track_skipping
+        self.__allow_track_skipping = False
         self.__one_disc = None
         # Use artist ids from db else
         if artist_ids:
@@ -256,6 +254,13 @@ class Album(Base):
         """
         self.db.set_synced(self.id, mask)
         self.synced = mask
+
+    def set_skipping_allowed(self):
+        """
+            Mark album as allowing skiiping
+            Calling reset_tracks() needed if already populated
+        """
+        self.__allow_track_skipping = True
 
     def get_with_skipping_allowed(self):
         """

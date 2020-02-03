@@ -108,11 +108,13 @@ class ShufflePlayer:
         """
         party_ids = App().settings.get_value("party-ids")
         album_ids = App().albums.get_ids([], party_ids, True)
+        # All albums are blacklisted, WTF?
         if not album_ids:
             album_ids = App().albums.get_ids([], party_ids, False)
         self._albums = []
         for album_id in album_ids:
-            album = Album(album_id, [], [], True)
+            album = Album(album_id, [], [])
+            album.set_skipping_allowed()
             self._albums.append(album)
         emit_signal(self, "playback-changed")
 
