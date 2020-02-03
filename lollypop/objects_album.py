@@ -22,12 +22,12 @@ class Disc:
         Represent an album disc
     """
 
-    def __init__(self, album, disc_number, disallow_ignored_tracks):
+    def __init__(self, album, disc_number, allow_track_skipping):
         self.db = App().albums
         self.__tracks = []
         self.__album = album
         self.__number = disc_number
-        self.__disallow_ignored_tracks = disallow_ignored_tracks
+        self.__allow_track_skipping = allow_track_skipping
 
     def __del__(self):
         """
@@ -86,7 +86,7 @@ class Disc:
                 self.album.genre_ids,
                 self.album.artist_ids,
                 self.number,
-                self.__disallow_ignored_tracks)]
+                self.__allow_track_skipping)]
         return self.__tracks
 
 
@@ -109,19 +109,19 @@ class Album(Base):
                 "mb_album_id": None}
 
     def __init__(self, album_id=None, genre_ids=[], artist_ids=[],
-                 disallow_ignored_tracks=False):
+                 allow_track_skipping=False):
         """
             Init album
             @param album_id as int
             @param genre_ids as [int]
-            @param disallow_ignored_tracks as bool
+            @param allow_track_skipping as bool
         """
         Base.__init__(self, App().albums)
         self.id = album_id
         self.genre_ids = genre_ids
         self._tracks = []
         self._discs = []
-        self.__disallow_ignored_tracks = disallow_ignored_tracks
+        self.__allow_track_skipping = allow_track_skipping
         self.__one_disc = None
         # Use artist ids from db else
         if artist_ids:
@@ -257,6 +257,19 @@ class Album(Base):
         self.db.set_synced(self.id, mask)
         self.synced = mask
 
+    def get_with_skipping_allowed(self):
+        """
+            Get an album clone with skipping activated
+            @return album
+        """
+        new_album = Album(self.id)
+        tracks = []
+        for track in self.tracks:
+            if track.loved != -1:
+                tracks.append(track)
+        new_album.set_tracks(tracks)
+        return new_album
+
     @property
     def is_web(self):
         """
@@ -315,7 +328,7 @@ class Album(Base):
         """
         if self.__one_disc is None:
             tracks = self.tracks
-            self.__one_disc = Disc(self, 0, self.__disallow_ignored_tracks)
+            self.__one_disc = Disc(self, 0, self.__allow_track_skipping)
             self.__one_disc.set_tracks(tracks)
         return self.__one_disc
 
@@ -328,7 +341,7 @@ class Album(Base):
         if not self._discs:
             disc_numbers = self.db.get_discs(self.id)
             for disc_number in disc_numbers:
-                disc = Disc(self, disc_number, self.__disallow_ignored_tracks)
+                disc = Disc(self, disc_number, self.__allow_track_skipping)
                 if disc.tracks:
                     self._discs.append(disc)
         return self._discs

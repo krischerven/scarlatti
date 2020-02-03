@@ -202,7 +202,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        App().player.play_album(child.data)
+        App().player.play_album(child.data.get_with_skipping_allowed())
 
 
 class AlbumsGenresBoxView(AlbumsBoxView):
