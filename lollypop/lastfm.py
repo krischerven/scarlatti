@@ -241,6 +241,24 @@ class LastFMBase:
         return self.__name
 
 #######################
+# PROTECTED           #
+#######################
+    def _connect(self, full_sync=False):
+        """
+            Connect service
+            @param full_sync as bool
+            @thread safe
+        """
+        try:
+            self.session_key = ""
+            skg = SessionKeyGenerator(self)
+            self.session_key = skg.get_session_key(
+                username=self.__login,
+                password_hash=md5(self.__password))
+        except Exception as e:
+            Logger.debug("LastFM::_connect(): %s" % e)
+
+#######################
 # PRIVATE             #
 #######################
     def __clean_queue(self):
@@ -256,21 +274,6 @@ class LastFMBase:
 
         if self.__queue_id is None:
             self.__queue_id = GLib.timeout_add(1000, queue)
-
-    def _connect(self, full_sync=False):
-        """
-            Connect service
-            @param full_sync as bool
-            @thread safe
-        """
-        try:
-            self.session_key = ""
-            skg = SessionKeyGenerator(self)
-            self.session_key = skg.get_session_key(
-                username=self.__login,
-                password_hash=md5(self.__password))
-        except Exception as e:
-            Logger.debug("LastFM::_connect(): %s" % e)
 
     def __listen(self, artist, album, title, timestamp, mb_track_id):
         """
@@ -321,27 +324,6 @@ class LastFMBase:
             pass
         except Exception as e:
             Logger.error("LastFM::__playing_now(): %s" % e)
-
-    def __populate_loved_tracks(self):
-        """
-            Populate loved tracks playlist
-        """
-        if not self.available:
-            return
-        try:
-            user = self.get_user(self.__login)
-            for loved in user.get_loved_tracks(limit=None):
-                artist = str(loved.track.artist)
-                title = str(loved.track.title)
-                track_id = App().tracks.search_track(artist, title)
-                if track_id is None:
-                    Logger.warning(
-                        "LastFM::__populate_loved_tracks(): %s, %s" % (
-                            artist, title))
-                else:
-                    Track(track_id).set_loved(1)
-        except Exception as e:
-            Logger.error("LastFM::__populate_loved_tracks: %s" % e)
 
     def __on_get_password(self, attributes, password,
                           name, full_sync, callback, *args):
@@ -394,7 +376,7 @@ class LibreFM(LastFMBase, LibreFMNetwork):
         return self.session_key != ""
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
     def _connect(self, full_sync=False):
         """
@@ -486,7 +468,7 @@ class LastFM(LastFMBase, LastFMNetwork):
         return True
 
 #######################
-# PRIVATE             #
+# PROTECTED           #
 #######################
     def _connect(self, full_sync=False):
         """
@@ -510,6 +492,30 @@ class LastFM(LastFMBase, LastFMNetwork):
             self.playing_now(App().player.current_track)
         except Exception as e:
             Logger.debug("LastFM::_connect(): %s" % e)
+
+#######################
+# PRIVATE             #
+#######################
+    def __populate_loved_tracks(self):
+        """
+            Populate loved tracks playlist
+        """
+        if not self.available:
+            return
+        try:
+            user = self.get_user(self.__login)
+            for loved in user.get_loved_tracks(limit=None):
+                artist = str(loved.track.artist)
+                title = str(loved.track.title)
+                track_id = App().tracks.search_track(artist, title)
+                if track_id is None:
+                    Logger.warning(
+                        "LastFM::__populate_loved_tracks(): %s, %s" % (
+                            artist, title))
+                else:
+                    Track(track_id).set_loved(1)
+        except Exception as e:
+            Logger.error("LastFM::__populate_loved_tracks: %s" % e)
 
     def __on_goa_account_switched(self, obj):
         """
