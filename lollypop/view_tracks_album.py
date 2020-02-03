@@ -296,7 +296,7 @@ class AlbumTracksView(TracksView):
             # Do not update album list if in party or album already available
             if not App().player.is_party and\
                     not App().player.track_in_playback(track):
-                album = Album(track.album.id)
+                album = Album(track.album.id, [], [], True)
                 album.set_tracks(tracks)
                 if not App().settings.get_value("append-albums"):
                     App().player.clear_albums()
