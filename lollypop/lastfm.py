@@ -217,6 +217,14 @@ class LastFMBase:
                 self.unlove(",".join(track.artists), track.name)
 
     @property
+    def login(self):
+        """
+            Get current login
+            @return str
+        """
+        return self.__login
+
+    @property
     def is_goa(self):
         """
             True if service is using GOA
@@ -503,7 +511,7 @@ class LastFM(LastFMBase, LastFMNetwork):
         if not self.available:
             return
         try:
-            user = self.get_user(self.__login)
+            user = self.get_user(self.login)
             for loved in user.get_loved_tracks(limit=None):
                 artist = str(loved.track.artist)
                 title = str(loved.track.title)
