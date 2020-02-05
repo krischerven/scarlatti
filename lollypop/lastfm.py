@@ -364,6 +364,8 @@ class LibreFM(LastFMBase, LibreFMNetwork):
             Init LibreFM
         """
         LibreFMNetwork.__init__(self)
+        if App().proxy_host is not None:
+            self.enable_proxy(host=App().proxy_host, port=App().proxy_port)
         LastFMBase.__init__(self, "librefm")
         Logger.debug("LibreFMNetwork.__init__()")
 
@@ -395,7 +397,7 @@ class LibreFM(LastFMBase, LibreFMNetwork):
 
 class LastFM(LastFMBase, LastFMNetwork):
     """
-        LastFM
+       LastFM
        We recommend you don"t distribute the API key and secret with your app,
        and that you ask users who want to build it to apply for a key of
        their own. We don"t believe that this would violate the terms of most
@@ -423,6 +425,8 @@ class LastFM(LastFMBase, LastFMNetwork):
         LastFMNetwork.__init__(self,
                                api_key=self.__API_KEY,
                                api_secret=self.__API_SECRET)
+        if App().proxy_host is not None:
+            self.enable_proxy(host=App().proxy_host, port=App().proxy_port)
         LastFMBase.__init__(self, "lastfm")
 
     def connect_service(self, full_sync=False, callback=None, *args):

@@ -32,7 +32,7 @@ except Exception as e:
     print("$ sudo pip3 install pylast")
     LastFM = None
 
-from lollypop.utils import set_proxy_from_gnome, install_youtube_dl
+from lollypop.utils import init_proxy_from_gnome, install_youtube_dl
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils import is_audio, is_pls, emit_signal
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
@@ -86,17 +86,10 @@ class Application(Gtk.Application, ApplicationActions):
         # We force it to current python 3.6 name, to be sure in case of
         # change in python
         current_thread().setName("MainThread")
-        set_proxy_from_gnome()
+        (self.__proxy_host, self.__proxy_port) = init_proxy_from_gnome()
         GLib.setenv("PULSE_PROP_media.role", "music", True)
         GLib.setenv("PULSE_PROP_application.icon_name",
                     "org.gnome.Lollypop", True)
-        # Fix proxy for python
-        proxy = GLib.environ_getenv(GLib.get_environ(), "all_proxy")
-        if proxy is not None and proxy.startswith("socks://"):
-            proxy = proxy.replace("socks://", "socks4://")
-            from os import environ
-            environ["all_proxy"] = proxy
-            environ["ALL_PROXY"] = proxy
         # Ideally, we will be able to delete this once Flatpak has a solution
         # for SSL certificate management inside of applications.
         if GLib.file_test("/app", GLib.FileTest.EXISTS):
@@ -308,6 +301,22 @@ class Application(Gtk.Application, ApplicationActions):
             self.__fs_window.delayed_init()
             self.__fs_window.show()
             self.__fs_window.connect("destroy", on_destroy)
+
+    @property
+    def proxy_host(self):
+        """
+            Get proxy host
+            @return str
+        """
+        return self.__proxy_host
+
+    @property
+    def proxy_port(self):
+        """
+            Get proxy port
+            @return int
+        """
+        return self.__proxy_port
 
     @property
     def devices(self):
