@@ -264,7 +264,7 @@ class LastFMBase:
                 username=self.__login,
                 password_hash=md5(self.__password))
         except Exception as e:
-            Logger.debug("LastFM::_connect(): %s" % e)
+            Logger.error("LastFMBase::_connect(): %s" % e)
 
 #######################
 # PRIVATE             #
@@ -400,7 +400,7 @@ class LibreFM(LastFMBase, LibreFMNetwork):
             LastFMBase._connect(self, full_sync)
             self.playing_now(App().player.current_track)
         except Exception as e:
-            Logger.debug("LastFM::_connect(): %s" % e)
+            Logger.error("LastFM::_connect(): %s" % e)
 
 
 class LastFM(LastFMBase, LastFMNetwork):
