@@ -34,13 +34,19 @@
         <property name="valign">end</property>
         <property name="margin_left">15</property>
         <child>
-          <object class="GtkLabel" id="artist_label">
+          <object class="GtkEventBox" id="artist_eventbox">
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="ellipsize">end</property>
-            <property name="xalign">0</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
+            <child>
+              <object class="GtkLabel" id="artist_label">
+                <property name="can_focus">False</property>
+                <property name="ellipsize">end</property>
+                <property name="xalign">0</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -49,7 +55,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEventBox" id="info_eventbox">
+          <object class="GtkEventBox" id="year_eventbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>

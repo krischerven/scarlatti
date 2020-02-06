@@ -71,10 +71,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                                              self.__album.genre_ids)
         human_duration = get_human_duration(duration)
         self.__duration_label.set_text(human_duration)
-        info_eventbox = builder.get_object("info_eventbox")
-        info_eventbox.connect("realize", set_cursor_type)
-        self.__gesture = GesturesHelper(
-            info_eventbox, primary_press_callback=self._on_year_press)
+        artist_eventbox = builder.get_object("artist_eventbox")
+        artist_eventbox.connect("realize", set_cursor_type)
+        self.__gesture1 = GesturesHelper(
+            artist_eventbox, primary_press_callback=self._on_artist_press)
+        year_eventbox = builder.get_object("year_eventbox")
+        year_eventbox.connect("realize", set_cursor_type)
+        self.__gesture2 = GesturesHelper(
+            year_eventbox, primary_press_callback=self._on_year_press)
         self.__widget = builder.get_object("widget")
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__bottom_box = builder.get_object("bottom_box")
@@ -176,12 +180,22 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 
     def _on_year_press(self, x, y, event):
         """
-            Show years view
+            Show year view
             @param x as int
             @param y as int
             @param event as Gdk.EventButton
         """
         App().window.container.show_view([Type.YEARS], [self.__album.year])
+
+    def _on_artist_press(self, x, y, event):
+        """
+            Show artist view
+            @param x as int
+            @param y as int
+            @param event as Gdk.EventButton
+        """
+        App().window.container.show_view([Type.ARTISTS],
+                                         self.__album.artist_ids)
 
 #######################
 # PRIVATE             #
