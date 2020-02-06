@@ -42,8 +42,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         self.__artwork = None
         self.__font_height = font_height
         self.set_view_type(view_type)
-        self.set_property("halign", Gtk.Align.START)
-        self.set_property("valign", Gtk.Align.START)
+        self.set_property("halign", Gtk.Align.CENTER)
         if view_type & ViewType.ALBUM:
             self.set_property("margin", MARGIN_MEDIUM)
         else:
