@@ -482,7 +482,7 @@ class SpotifySearch(GObject.Object):
             @param storage_type as StorageType
             @return track_id
         """
-        track_id = payload["id"]
+        spotify_id = payload["id"]
         title = payload["name"]
         _artists = []
         for artist in payload["artists"]:
@@ -518,5 +518,5 @@ class SpotifySearch(GObject.Object):
                    album_name, album_id, uri, 0, 0,
                    0, 0, mtime, title, duration, tracknumber,
                    discnumber, discname, year, timestamp, mtime,
-                   0, 0, 0, 0, track_id, 0, storage_type)
+                   0, 0, 0, 0, spotify_id, 0, storage_type)
         return (album_id, track_id, cover_uri)
