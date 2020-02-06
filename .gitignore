@@ -21,6 +21,8 @@
 /Makefile
 /Makefile.in
 /TAGS
+/build
+/po
 /_libs
 /aclocal.m4
 /autom4te.cache
