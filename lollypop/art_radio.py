@@ -207,4 +207,5 @@ class RadioArt:
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()
             pixbuf.savev(cache_path_png, "png", [None], [None])
+            del pixbuf
             emit_signal(self, "radio-artwork-changed", name)
