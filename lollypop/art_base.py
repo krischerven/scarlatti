@@ -56,24 +56,31 @@ class BaseArt(GObject.GObject):
 
         # Handle blur
         if behaviour & ArtBehaviour.BLUR:
-            pixbuf = pixbuf.scale_simple(width,
-                                         height,
-                                         GdkPixbuf.InterpType.NEAREST)
+            _pixbuf = pixbuf
+            pixbuf = _pixbuf.scale_simple(width,
+                                          height,
+                                          GdkPixbuf.InterpType.NEAREST)
+            del _pixbuf
             pixbuf = self._get_blur(pixbuf, 25)
         elif behaviour & ArtBehaviour.BLUR_HARD:
-            pixbuf = pixbuf.scale_simple(width,
-                                         height,
-                                         GdkPixbuf.InterpType.NEAREST)
+            _pixbuf = pixbuf
+            pixbuf = _pixbuf.scale_simple(width,
+                                          height,
+                                          GdkPixbuf.InterpType.NEAREST)
             pixbuf = self._get_blur(pixbuf, 50)
         elif behaviour & ArtBehaviour.BLUR_MAX:
-            pixbuf = pixbuf.scale_simple(width,
-                                         height,
-                                         GdkPixbuf.InterpType.NEAREST)
+            _pixbuf = pixbuf
+            pixbuf = _pixbuf.scale_simple(width,
+                                          height,
+                                          GdkPixbuf.InterpType.NEAREST)
+            del _pixbuf
             pixbuf = self._get_blur(pixbuf, 100)
         else:
-            pixbuf = pixbuf.scale_simple(width,
-                                         height,
-                                         GdkPixbuf.InterpType.BILINEAR)
+            _pixbuf = pixbuf
+            pixbuf = _pixbuf.scale_simple(width,
+                                          height,
+                                          GdkPixbuf.InterpType.BILINEAR)
+            del _pixbuf
         if behaviour & ArtBehaviour.CACHE and cache_path is not None:
             if cache_path.endswith(".jpg"):
                 pixbuf.savev(cache_path, "jpeg", ["quality"],

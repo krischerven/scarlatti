@@ -81,15 +81,15 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                                                 ArtSize.BANNER * scale_factor,
                                                 ArtBehaviour.CROP)
                 stream.close()
-            self.__bytes = bytes
-            surface = Gdk.cairo_surface_create_from_pixbuf(
-                                                   pixbuf,
-                                                   scale_factor,
-                                                   None)
-            del pixbuf
-            self.__image.set_from_surface(surface)
-            del surface
-            return True
+                self.__bytes = bytes
+                surface = Gdk.cairo_surface_create_from_pixbuf(
+                                                       pixbuf,
+                                                       scale_factor,
+                                                       None)
+                del pixbuf
+                self.__image.set_from_surface(surface)
+                del surface
+                return True
         except Exception as e:
             Logger.error("ArtworkSearch::__get_image: %s" % e)
         return False
