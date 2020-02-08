@@ -152,20 +152,24 @@ class BaseArt(GObject.GObject):
         height = pixbuf.get_height()
         aspect = width / height
         wanted_aspect = wanted_width / wanted_height
-        if aspect > wanted_aspect:
+        if width == height:
+            new_pixbuf = pixbuf
+        elif aspect > wanted_aspect:
             new_width = height * wanted_aspect
             offset = (width - new_width)
-            return pixbuf.new_subpixbuf(offset / 2,
-                                        0,
-                                        width - offset,
-                                        height)
+            new_pixbuf = pixbuf.new_subpixbuf(offset / 2,
+                                              0,
+                                              width - offset,
+                                              height)
         else:
             new_height = width / wanted_aspect
             offset = (height - new_height)
-            return pixbuf.new_subpixbuf(0,
-                                        offset / 2,
-                                        width,
-                                        height - offset)
+            new_pixbuf = pixbuf.new_subpixbuf(0,
+                                              offset / 2,
+                                              width,
+                                              height - offset)
+        del pixbuf
+        return new_pixbuf
 
     def _crop_pixbuf_square(self, pixbuf):
         """
@@ -176,19 +180,21 @@ class BaseArt(GObject.GObject):
         width = pixbuf.get_width()
         height = pixbuf.get_height()
         if width == height:
-            return pixbuf
+            new_pixbuf = pixbuf
         elif width > height:
             diff = (width - height)
-            return pixbuf.new_subpixbuf(diff / 2,
-                                        0,
-                                        width - diff,
-                                        height)
+            new_pixbuf = pixbuf.new_subpixbuf(diff / 2,
+                                              0,
+                                              width - diff,
+                                              height)
         else:
             diff = (height - width)
-            return pixbuf.new_subpixbuf(0,
-                                        diff / 2,
-                                        width,
-                                        height - diff)
+            new_pixbuf = pixbuf.new_subpixbuf(0,
+                                              diff / 2,
+                                              width,
+                                              height - diff)
+        del pixbuf
+        return new_pixbuf
 
     def _get_blur(self, pixbuf, gaussian):
         """
@@ -214,6 +220,7 @@ class BaseArt(GObject.GObject):
                               data, "raw", mode, stride)
         tmp = tmp.filter(ImageFilter.GaussianBlur(gaussian))
         bytes = GLib.Bytes.new(tmp.tobytes())
+        del pixbuf
         pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(bytes,
                                                  GdkPixbuf.Colorspace.RGB,
                                                  has_alpha,
