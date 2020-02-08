@@ -92,7 +92,7 @@ def get_round_surface(surface, scale_factor, radius):
             pixbuf, scale_factor, None)
         del pixbuf
     rounded = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-    ctx = cairo.Context(surface)
+    ctx = cairo.Context(rounded)
     degrees = pi / 180
     ctx.arc(width - radius, radius, radius, -90 * degrees, 0 * degrees)
     ctx.arc(width - radius, height - radius,
