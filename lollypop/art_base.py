@@ -135,6 +135,7 @@ class BaseArt(GObject.GObject):
             pixbuf.savev(path, "jpeg", ["quality"],
                          [str(App().settings.get_value(
                              "cover-quality").get_int32())])
+            del pixbuf
 
 #######################
 # PROTECTED           #
