@@ -203,3 +203,4 @@ class RadioMenu(Gtk.Grid):
                                              Gtk.IconSize.BUTTON)
         else:
             self.__artwork.set_from_surface(surface)
+            del surface

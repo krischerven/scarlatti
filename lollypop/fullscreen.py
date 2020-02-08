@@ -392,6 +392,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             self.__update_background(True)
         else:
             self.__background_artwork.set_from_surface(surface)
+            del surface
 
     def __on_key_release_event(self, widget, event):
         """

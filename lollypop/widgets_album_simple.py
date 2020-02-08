@@ -201,6 +201,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
                                               icon_size)
         else:
             self.__artwork.set_from_surface(surface)
+            del surface
         self.show_all()
         emit_signal(self, "populated")
 

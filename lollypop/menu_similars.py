@@ -125,6 +125,7 @@ class ArtistRow(Gtk.ListBoxRow):
         else:
             self.__artwork.get_style_context().remove_class("circle-icon")
             self.__artwork.set_from_surface(surface)
+            del surface
 
 
 class SimilarsMenu(Gtk.Bin):

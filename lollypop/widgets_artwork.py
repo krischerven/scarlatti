@@ -86,7 +86,9 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                                                    pixbuf,
                                                    scale_factor,
                                                    None)
+            del pixbuf
             self.__image.set_from_surface(surface)
+            del surface
             return True
         except Exception as e:
             Logger.error("ArtworkSearch::__get_image: %s" % e)

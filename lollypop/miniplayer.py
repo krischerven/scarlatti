@@ -203,6 +203,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
            @param surface as cairo.Surface
         """
         self.__artwork_button.set_from_surface(surface)
+        del surface
 
     def __on_artwork(self, surface):
         """
@@ -214,3 +215,4 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         else:
             self.__background.get_style_context().remove_class("black")
             self.__background.set_from_surface(surface)
+            del surface

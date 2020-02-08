@@ -146,6 +146,7 @@ class ArtHelper(GObject.Object):
             else:
                 surface = Gdk.cairo_surface_create_from_pixbuf(
                         pixbuf, scale_factor, None)
+            del pixbuf
         App().task_helper.run(self.__surface_effects, surface, width, height,
                               scale_factor, effect, callback, *args)
 

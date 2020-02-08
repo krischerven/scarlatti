@@ -157,6 +157,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             banner_context.remove_class("black")
             artwork_context.add_class("default-banner")
         else:
+            del surface
             banner_context.remove_class("default-banner")
             banner_context.add_class("black")
             artwork_context.remove_class("default-banner")

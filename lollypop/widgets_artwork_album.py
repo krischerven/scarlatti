@@ -174,3 +174,4 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
                                               Gtk.IconSize.BUTTON)
         else:
             self.__artwork.set_from_surface(surface)
+            del surface

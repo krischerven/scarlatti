@@ -304,7 +304,9 @@ class TuneinPopover(Gtk.Popover):
                 surface = Gdk.cairo_surface_create_from_pixbuf(pixbuf,
                                                                0,
                                                                None)
+                del pixbuf
                 image.set_from_surface(surface)
+                del surface
         self.__download_images()
 
     def __on_activate_link(self, link, item):

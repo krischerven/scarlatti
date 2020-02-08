@@ -353,9 +353,11 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                     pixbuf.scale_simple(ArtSize.MEDIUM, ArtSize.MEDIUM,
                                         GdkPixbuf.InterpType.BILINEAR),
                     scale_factor, None)
-                artwork.set_from_surface(
-                        get_round_surface(surface, scale_factor,
-                                          ArtSize.MEDIUM / 4))
+                del pixbuf
+                rounded = get_round_surface(surface, scale_factor,
+                                            ArtSize.MEDIUM / 4)
+                artwork.set_from_surface(rounded)
+                del rounded
                 artwork.show()
         button = Gtk.ModelButton.new()
         button.set_alignment(0, 0.5)

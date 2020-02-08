@@ -276,6 +276,7 @@ class InformationView(View):
             self.__artist_artwork.hide()
         else:
             self.__artist_artwork.set_from_surface(surface)
+            del surface
 
     def __on_artist_info_changed(self, information_store, artist):
         """

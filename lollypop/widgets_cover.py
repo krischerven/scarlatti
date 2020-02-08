@@ -120,3 +120,4 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
                                               icon_size)
         else:
             self.__artwork.set_from_surface(surface)
+            del surface

@@ -238,4 +238,5 @@ class RadioWidget(Gtk.FlowBoxChild):
                                              Gtk.IconSize.DIALOG)
         else:
             self.__artwork.set_from_surface(surface)
+            del surface
         emit_signal(self, "populated")
