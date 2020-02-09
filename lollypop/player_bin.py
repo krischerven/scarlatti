@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.player_plugins import PluginsPlayer
-from lollypop.define import GstPlayFlags, App, FadeDirection
+from lollypop.define import GstPlayFlags, App
 from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
@@ -81,11 +81,8 @@ class BinPlayer:
             if self._next_track.id is not None:
                 self.load(self._next_track)
         else:
-            if self.fading:
-                self.fade(FadeDirection.IN, Gst.State.PLAYING)
-            else:
-                self._playbin.set_state(Gst.State.PLAYING)
-                emit_signal(self, "status-changed")
+            self._playbin.set_state(Gst.State.PLAYING)
+            emit_signal(self, "status-changed")
 
     def pause(self):
         """
@@ -95,11 +92,8 @@ class BinPlayer:
             self._playbin.set_state(Gst.State.NULL)
             emit_signal(self, "status-changed")
         else:
-            if self.fading:
-                self.fade(FadeDirection.OUT, Gst.State.PAUSED)
-            else:
-                self._playbin.set_state(Gst.State.PAUSED)
-                emit_signal(self, "status-changed")
+            self._playbin.set_state(Gst.State.PAUSED)
+            emit_signal(self, "status-changed")
 
     def stop(self):
         """
@@ -112,11 +106,8 @@ class BinPlayer:
         emit_signal(self, "current-changed")
         emit_signal(self, "prev-changed")
         emit_signal(self, "next-changed")
-        if self.fading:
-            self.fade(FadeDirection.OUT, Gst.State.NULL)
-        else:
-            self._playbin.set_state(Gst.State.NULL)
-            emit_signal(self, "status-changed")
+        self._playbin.set_state(Gst.State.NULL)
+        emit_signal(self, "status-changed")
 
     def stop_all(self):
         """
@@ -186,7 +177,6 @@ class BinPlayer:
         elif rate > 1.0:
             rate = 1.0
         self._playbin.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
-        App().settings.set_value("volume-rate", GLib.Variant("d", rate))
 
     @property
     def plugins(self):
@@ -471,4 +461,5 @@ class BinPlayer:
             @param playbin as Gst.Bin
             @param sink as Gst.Sink
         """
+        App().settings.set_value("volume-rate", GLib.Variant("d", self.volume))
         emit_signal(self, "volume-changed")

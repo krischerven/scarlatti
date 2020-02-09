@@ -46,18 +46,10 @@ class BehaviourSettingsWidget(Gtk.Bin):
         switch_transitions.set_state(transitions)
         builder.get_object("button_transitions").set_sensitive(transitions)
 
-        switch_fade = builder.get_object("switch_fade")
-        fade = App().settings.get_value("fade")
-        switch_fade.set_state(fade)
-        builder.get_object("button_fade").set_sensitive(fade)
-
         switch_transitions_party = builder.get_object(
             "switch_transitions_party")
         switch_transitions_party.set_state(
             App().settings.get_value("transitions-party-only"))
-        switch_fade_party = builder.get_object("switch_fade_party")
-        switch_fade_party.set_state(
-            App().settings.get_value("fade-party-only"))
 
         switch_artwork_tags = builder.get_object("switch_artwork_tags")
         switch_artwork_tags.set_state(App().settings.get_value("save-to-tags"))
@@ -68,10 +60,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
         self.__spin_transitions_duration.set_value(
             App().settings.get_value("transitions-duration").get_int32())
 
-        self.__spin_fade_duration = builder.get_object("spin_fade_duration")
-        self.__spin_fade_duration.set_range(250, 1000)
-        self.__spin_fade_duration.set_value(
-            App().settings.get_value("fade-duration").get_int32())
         replaygain_combo = builder.get_object("replaygain_combo")
         replaygain_combo.set_active(App().settings.get_enum(("replay-gain")))
 
@@ -153,15 +141,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
                                  GLib.Variant("b", state))
         App().player.update_crossfading()
 
-    def _on_switch_fade_party_state_set(self, widget, state):
-        """
-            Update fade party only setting
-            @param widget as Gtk.Range
-        """
-        widget.set_sensitive(state)
-        App().settings.set_value("fade-party-only",
-                                 GLib.Variant("b", state))
-
     def _on_spin_transitions_duration_value_changed(self, widget):
         """
             Update mix duration setting
@@ -169,15 +148,6 @@ class BehaviourSettingsWidget(Gtk.Bin):
         """
         value = widget.get_value()
         App().settings.set_value("transitions-duration",
-                                 GLib.Variant("i", value))
-
-    def _on_spin_fade_duration_value_changed(self, widget):
-        """
-            Update mix duration setting
-            @param widget as Gtk.Range
-        """
-        value = widget.get_value()
-        App().settings.set_value("fade-duration",
                                  GLib.Variant("i", value))
 
     def _on_switch_artwork_tags_state_set(self, widget, state):

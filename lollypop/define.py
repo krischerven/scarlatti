@@ -61,12 +61,6 @@ class StorageType:
     SEARCH = 1 << 7
 
 
-class FadeDirection:
-    NONE = 0
-    IN = 1
-    OUT = 2
-
-
 class ArtBehaviour:
     NONE = 1 << 0
     ROUNDED = 1 << 1
