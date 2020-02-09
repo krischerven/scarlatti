@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gst, GLib
+from gi.repository import Gst, GLib, GstAudio
 
 from time import sleep
 
@@ -197,7 +197,8 @@ class TransitionsPlayer:
         else:
             self._playbin = self._playbin2
             self._plugins = self._plugins2
-
+        rate = App().settings.get_value("volume-rate").get_double()
+        self._playbin.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
         if track is not None and track.id is not None:
             self._playbin.set_state(Gst.State.NULL)
             if self._load_track(track):
@@ -212,15 +213,16 @@ class TransitionsPlayer:
             @param state as Gst.State
         """
         sleep_ms = duration / 10
+        volume_rate = App().settings.get_value("volume-rate").get_double()
         while (self.__fade_direction == FadeDirection.IN and
-               self.volume < 1.0) or\
+               self.volume < volume_rate) or\
               (self.__fade_direction == FadeDirection.OUT and
                self.volume > 0.0):
             if self.__fade_direction == FadeDirection.OUT:
                 vol = round(self.volume - 0.1, 1)
             else:
                 vol = round(self.volume + 0.1, 1)
-            self.set_volume(vol)
+            self._playbin.set_volume(GstAudio.StreamVolumeFormat.CUBIC, vol)
             sleep(sleep_ms / 1000)
         if self.__fade_direction == FadeDirection.OUT:
             self._playbin.set_state(state)

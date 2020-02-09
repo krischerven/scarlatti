@@ -45,13 +45,13 @@ class BinPlayer:
         self._playbin2 = Gst.ElementFactory.make("playbin", "player")
         self._plugins = self._plugins1 = PluginsPlayer(self._playbin1)
         self._plugins2 = PluginsPlayer(self._playbin2)
-        self._playbin.connect("notify::volume", self.__on_volume_changed)
         for playbin in [self._playbin1, self._playbin2]:
             flags = playbin.get_property("flags")
             flags &= ~GstPlayFlags.GST_PLAY_FLAG_VIDEO
             playbin.set_property("flags", flags)
             playbin.set_property("buffer-size", 5 << 20)
             playbin.set_property("buffer-duration", 10 * Gst.SECOND)
+            playbin.connect("notify::volume", self.__on_volume_changed)
             playbin.connect("about-to-finish",
                             self._on_stream_about_to_finish)
             bus = playbin.get_bus()
@@ -185,8 +185,8 @@ class BinPlayer:
             rate = 0.0
         elif rate > 1.0:
             rate = 1.0
-        self._playbin1.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
-        self._playbin2.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
+        self._playbin.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
+        App().settings.set_value("volume-rate", GLib.Variant("d", rate))
 
     @property
     def plugins(self):
@@ -467,14 +467,8 @@ class BinPlayer:
 
     def __on_volume_changed(self, playbin, sink):
         """
-            Update volume
+            Emit volume-changed signal
             @param playbin as Gst.Bin
             @param sink as Gst.Sink
         """
-        if playbin == self._playbin1:
-            vol = self._playbin1.get_volume(GstAudio.StreamVolumeFormat.CUBIC)
-            self._playbin2.set_volume(GstAudio.StreamVolumeFormat.CUBIC, vol)
-        else:
-            vol = self._playbin2.get_volume(GstAudio.StreamVolumeFormat.CUBIC)
-            self._playbin1.set_volume(GstAudio.StreamVolumeFormat.CUBIC, vol)
         emit_signal(self, "volume-changed")
