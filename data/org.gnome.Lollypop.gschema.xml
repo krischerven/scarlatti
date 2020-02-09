@@ -269,6 +269,11 @@
             <summary>Force single column mode</summary>
             <description></description>
         </key>
+        <key type="d" name="volume-rate">
+            <default>1.0</default>
+            <summary>Volume rate</summary>
+            <description>0.0-1.0</description>
+        </key>
         <key type="b" name="equalizer-enabled">
             <default>false</default>
             <summary>Equalizer enabled</summary>
