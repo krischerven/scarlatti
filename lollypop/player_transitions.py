@@ -14,9 +14,8 @@ from gi.repository import Gst, GLib, GstAudio
 
 from time import sleep
 
-from lollypop.define import App, FadeDirection
+from lollypop.define import App
 from lollypop.objects_radio import Radio
-from lollypop.utils import emit_signal
 
 
 class TransitionsPlayer:
@@ -32,7 +31,6 @@ class TransitionsPlayer:
         self.__crossfading_id = None
         self.__crossfade_up = False
         self.__crossfade_down = False
-        self.__fade_direction = FadeDirection.NONE
         self.update_crossfading()
 
     def load(self, track):
@@ -75,23 +73,6 @@ class TransitionsPlayer:
         self.set_crossfading((transitions and not party_only) or
                              (transitions and party_only and self.is_party))
 
-    def fade(self, direction, state):
-        """
-            Fade volume in direction
-            @param direction as FadeDirection
-            @param state as Gst.State
-        """
-        if self.__fade_direction in [FadeDirection.IN, FadeDirection.OUT]:
-            self.__fade_direction = direction
-            return
-        if state == Gst.State.PLAYING:
-            self._playbin.set_state(state)
-            emit_signal(self, "status-changed")
-        self.__fade_direction = direction
-        fade_duration = App().settings.get_value(
-            "fade-duration").get_int32()
-        App().task_helper.run(self.__do_fade, fade_duration, state)
-
     @property
     def crossfading(self):
         """
@@ -99,16 +80,6 @@ class TransitionsPlayer:
             @return bool
         """
         return self.__crossfading_id is not None
-
-    @property
-    def fading(self):
-        """
-            True if fade in/fade out is enabled
-        """
-        fade = App().settings.get_value("fade")
-        party_only = App().settings.get_value("fade-party-only")
-        return ((fade and not party_only) or
-                (fade and party_only and self.is_party))
 
 #######################
 # PRIVATE             #
@@ -205,26 +176,3 @@ class TransitionsPlayer:
                 self._playbin.set_state(Gst.State.PLAYING)
             App().task_helper.run(self.__volume_up, self._playbin,
                                   self._plugins, duration)
-
-    def __do_fade(self, duration, state):
-        """
-            Do fade transition
-            @param duration as int (ms)
-            @param state as Gst.State
-        """
-        sleep_ms = duration / 10
-        volume_rate = App().settings.get_value("volume-rate").get_double()
-        while (self.__fade_direction == FadeDirection.IN and
-               self.volume < volume_rate) or\
-              (self.__fade_direction == FadeDirection.OUT and
-               self.volume > 0.0):
-            if self.__fade_direction == FadeDirection.OUT:
-                vol = round(self.volume - 0.1, 1)
-            else:
-                vol = round(self.volume + 0.1, 1)
-            self._playbin.set_volume(GstAudio.StreamVolumeFormat.CUBIC, vol)
-            sleep(sleep_ms / 1000)
-        if self.__fade_direction == FadeDirection.OUT:
-            self._playbin.set_state(state)
-            emit_signal(self, "status-changed")
-        self.__fade_direction = FadeDirection.NONE
