@@ -3,6 +3,10 @@ project('lollypop',
   meson_version: '>= 0.40.0'
 )
 revision = run_command('bin/revision.sh').stdout().strip()
+if revision == ''
+  revision=meson.project_version()
+endif
+
 i18n = import('i18n')
 python = import('python3')
 project_id = 'org.gnome.Lollypop'
