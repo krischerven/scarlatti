@@ -22,7 +22,6 @@ GstPbutils.pb_utils_init()
 from threading import current_thread
 from pickle import dump
 from signal import signal, SIGINT, SIGTERM
-import gc
 
 
 try:
@@ -148,6 +147,7 @@ class Application(Gtk.Application, ApplicationActions):
         if self.get_is_remote():
             Gdk.notify_startup_complete()
         if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
+            import gc
             gc.set_debug(gc.DEBUG_LEAK)
 
     def init(self):
@@ -267,6 +267,7 @@ class Application(Gtk.Application, ApplicationActions):
             scrobbler.save()
         Gio.Application.quit(self)
         if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
+            import gc
             gc.collect()
             for x in gc.garbage:
                 s = str(x)

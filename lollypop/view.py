@@ -13,7 +13,6 @@
 from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
-import gc
 
 from lollypop.define import ViewType, App, MARGIN_SMALL, Type
 from lollypop.adaptive import AdaptiveView
@@ -299,7 +298,6 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
         self.__destroyed = True
         self.__event_controller = None
-        gc.collect()
 
 #######################
 # PRIVATE             #
