@@ -2,6 +2,7 @@ project('lollypop',
   version: '1.2.20',
   meson_version: '>= 0.40.0'
 )
+revision = run_command('bin/revision.sh').stdout().strip()
 i18n = import('i18n')
 python = import('python3')
 project_id = 'org.gnome.Lollypop'
@@ -34,6 +35,7 @@ conf.set('PYTHON_DIR', python_dir)
 #conf.set('PYTHON_EXEC_DIR', join_paths(get_option('prefix'), python.sysconfig_path('stdlib')))
 conf.set('libexecdir', LIBEXEC_DIR)
 conf.set('VERSION', meson.project_version())
+conf.set('REVISION', revision)
 conf.set('PYTHON', python_bin.path())
 
 subdir('data')
