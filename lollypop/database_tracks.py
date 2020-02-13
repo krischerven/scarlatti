@@ -823,7 +823,7 @@ class TracksDatabase:
                                         ORDER BY POPULARITY DESC LIMIT 100)",
                                  (storage_type,))
             v = result.fetchone()
-            if v and v[0] > 5:
+            if v and v[0] is not None and v[0] > 5:
                 return v[0]
             return 5
 

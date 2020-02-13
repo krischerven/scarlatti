@@ -421,7 +421,7 @@ class AlbumsDatabase:
                                         FROM albums\
                                         ORDER BY POPULARITY DESC LIMIT 1000)")
             v = result.fetchone()
-            if v and v[0] > 5:
+            if v and v[0] is not None and v[0] > 5:
                 return v[0]
             return 5
 
