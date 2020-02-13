@@ -343,18 +343,20 @@ class TagReader:
         try:
             date_index = tags.get_date_index("date", 0)
             datetime_index = tags.get_date_time_index("datetime", 0)
-            year = month = day = timestamp = None
+            year = timestamp = None
             for (exists, date) in [date_index, datetime_index]:
                 if exists:
                     if date.has_year():
                         year = date.get_year()
                     if date.has_month():
                         month = date.get_month()
+                    else:
+                        month = 1
                     if date.has_day():
                         day = date.get_day()
-                    if year is not None and\
-                            month is not None and\
-                            day is not None:
+                    else:
+                        day = 1
+                    if year is not None:
                         gst_datetime = Gst.DateTime.new_local_time(
                             year, month, day, 0, 0, 0)
                         glib_datetime = gst_datetime.to_g_date_time()
