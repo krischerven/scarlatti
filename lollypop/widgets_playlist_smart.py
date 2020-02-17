@@ -175,8 +175,13 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
         else:
             self.__operand_combobox.set_active_id(self.__operand)
 
-        if combobox.get_active_id() in ["year", "bpm"]:
+        active_id = combobox.get_active_id()
+        if active_id in ["year", "bpm"]:
             self.__stack.set_visible_child_name("int")
+            if active_id == "year":
+                self.__spin_button.set_value(1960)
+            else:
+                self.__spin_button.set_value(130)
         elif combobox.get_active_id() in ["rating", "popularity"]:
             self.__stack.set_visible_child_name("rating")
         else:
