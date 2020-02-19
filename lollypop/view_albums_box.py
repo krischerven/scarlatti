@@ -21,6 +21,7 @@ from lollypop.define import App, Type, ViewType, ScanUpdate
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height, get_youtube_dl
+from lollypop.utils_album import get_album_ids_for
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -80,8 +81,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 self.show_placeholder(True)
 
         def load():
-            album_ids = App().window.container.get_view_album_ids(
-                self._genre_ids, self._artist_ids)
+            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids)
             return [Album(album_id, self._genre_ids, self._artist_ids)
                     for album_id in album_ids]
 
@@ -157,9 +157,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param scan_update as ScanUpdate
         """
         if scan_update == ScanUpdate.ADDED:
-            album_ids = App().window.container.get_view_album_ids(
-                                            self._genre_ids,
-                                            self._artist_ids)
+            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids)
             if album_id in album_ids:
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
