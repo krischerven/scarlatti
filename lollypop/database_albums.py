@@ -760,7 +760,7 @@ class AlbumsDatabase:
         with SqlCursor(App().db) as sql:
             storage_type = get_default_storage_type()
             if genre_id is not None:
-                filter = (storage_type, genre_id, limit)
+                filter = (storage_type, genre_id, limit * 2, limit)
                 request = "SELECT rowid, artist_id FROM (\
                                SELECT albums.rowid, album_artists.artist_id\
                                FROM albums, album_genres, album_artists\
@@ -769,18 +769,18 @@ class AlbumsDatabase:
                                      albums.storage_type & ? AND\
                                      album_genres.album_id = albums.rowid AND\
                                      album_genres.genre_id = ?\
-                                     ORDER BY random())\
-                           GROUP BY artist_id LIMIT ?"
+                                     ORDER BY random() LIMIT ?)\
+                           GROUP BY artist_id ORDER BY random() LIMIT ?"
             else:
-                filter = (storage_type, limit)
+                filter = (storage_type, limit * 2, limit)
                 request = "SELECT rowid, artist_id FROM (\
                                SELECT albums.rowid, album_artists.artist_id\
                                FROM albums, album_artists\
                                WHERE loved != -1 AND\
                                      albums.rowid = album_artists.album_id AND\
                                      albums.storage_type & ?\
-                                     ORDER BY random())\
-                           GROUP BY artist_id  LIMIT ?"
+                                     ORDER BY random() LIMIT ?)\
+                           GROUP BY artist_id ORDER BY random() LIMIT ?"
             album_ids = []
             for (album_id, artist_id) in sql.execute(request, filter):
                 album_ids.append(album_id)
