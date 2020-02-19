@@ -187,7 +187,7 @@ class ViewsContainer:
 
     def get_view_album_ids(self, genre_ids, artist_ids):
         """
-            Get albums view for genres/artists
+            Get album ids view for genres/artists
             @param genre_ids as [int]
             @param artist_ids as [int]
             @return [int]
