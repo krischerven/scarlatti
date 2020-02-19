@@ -794,9 +794,10 @@ class AlbumsDatabase:
             @return [int]
         """
         album_ids = self.get_randoms_by_artists(genre_id, limit)
-        if len(album_ids) < limit:
-            album_ids = self.get_randoms_by_albums(genre_id, limit)
-        return album_ids
+        diff = limit - len(album_ids)
+        if diff > 0:
+            album_ids += self.get_randoms_by_albums(genre_id, diff)
+        return list(set(album_ids))
 
     def get_disc_names(self, album_id, disc):
         """
