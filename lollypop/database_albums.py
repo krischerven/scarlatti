@@ -723,7 +723,7 @@ class AlbumsDatabase:
             result = sql.execute(request, (storage_type,))
             return list(itertools.chain(*result))
 
-    def get_randoms(self, genre_id=None, limit=100):
+    def get_randoms_by_albums(self, genre_id=None, limit=100):
         """
             Return random albums
             @param genre_id as int
@@ -731,7 +731,6 @@ class AlbumsDatabase:
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            albums = []
             storage_type = get_default_storage_type()
             if genre_id is not None:
                 filter = (storage_type, genre_id, limit)
@@ -750,6 +749,54 @@ class AlbumsDatabase:
             result = sql.execute(request, filter)
             albums = list(itertools.chain(*result))
             return albums
+
+    def get_randoms_by_artists(self, genre_id=None, limit=100):
+        """
+            Return random albums
+            @param genre_id as int
+            @param limit as int
+            @return [int]
+        """
+        with SqlCursor(App().db) as sql:
+            storage_type = get_default_storage_type()
+            if genre_id is not None:
+                filter = (storage_type, genre_id, limit)
+                request = "SELECT rowid, artist_id FROM (\
+                               SELECT albums.rowid, album_artists.artist_id\
+                               FROM albums, album_genres, album_artists\
+                               WHERE loved != -1 AND\
+                                     albums.rowid = album_artists.album_id AND\
+                                     albums.storage_type & ? AND\
+                                     album_genres.album_id = albums.rowid AND\
+                                     album_genres.genre_id = ?\
+                                     ORDER BY random())\
+                           GROUP BY artist_id LIMIT ?"
+            else:
+                filter = (storage_type, limit)
+                request = "SELECT rowid, artist_id FROM (\
+                               SELECT albums.rowid, album_artists.artist_id\
+                               FROM albums, album_artists\
+                               WHERE loved != -1 AND\
+                                     albums.rowid = album_artists.album_id AND\
+                                     albums.storage_type & ?\
+                                     ORDER BY random())\
+                           GROUP BY artist_id  LIMIT ?"
+            album_ids = []
+            for (album_id, artist_id) in sql.execute(request, filter):
+                album_ids.append(album_id)
+            return album_ids
+
+    def get_randoms(self, genre_id=None, limit=100):
+        """
+            Return random albums
+            @param genre_id as int
+            @param limit as int
+            @return [int]
+        """
+        album_ids = self.get_randoms_by_artists(genre_id, limit)
+        if len(album_ids) < limit:
+            album_ids = self.get_randoms_by_albums(genre_id, limit)
+        return album_ids
 
     def get_disc_names(self, album_id, disc):
         """
