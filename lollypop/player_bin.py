@@ -306,7 +306,7 @@ class BinPlayer:
             return
         # We can listen if the track has been played
         # for at least half its duration, or for 4 minutes
-        if played >= finished.duration / 2 or played >= 240:
+        if played >= finished.duration / 2000 or played >= 240:
             for scrobbler in App().scrobblers:
                 if scrobbler.available:
                     scrobbler.listen(finished, int(finished_start_time))
