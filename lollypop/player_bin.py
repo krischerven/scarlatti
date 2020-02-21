@@ -302,7 +302,7 @@ class BinPlayer:
         """
         played = time() - finished_start_time
         # Last.fm policy, force it for ListenBrainz too
-        if finished.duration < 30:
+        if finished.duration < 30000:
             return
         # We can listen if the track has been played
         # for at least half its duration, or for 4 minutes
