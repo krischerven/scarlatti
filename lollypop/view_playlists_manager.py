@@ -89,6 +89,25 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         widget.show()
         return widget
 
+    def _sort_func(self, widget1, widget2):
+        """
+            Sort function
+            @param widget1 as PlaylistRoundedWidget
+            @param widget2 as PlaylistRoundedWidget
+        """
+        # Static vs static
+        if widget1.data < 0 and widget2.data < 0:
+            return widget1.data < widget2.data
+        # Static entries always on top
+        elif widget2.data < 0:
+            return True
+        # Static entries always on top
+        if widget1.data < 0:
+            return False
+        # String comparaison for non static
+        else:
+            return strcoll(widget1.name, widget2.name)
+
     def _on_child_activated(self, flowbox, child):
         """
             Navigate into child
@@ -183,25 +202,6 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, child)
-
-    def __sort_func(self, widget1, widget2):
-        """
-            Sort function
-            @param widget1 as PlaylistRoundedWidget
-            @param widget2 as PlaylistRoundedWidget
-        """
-        # Static vs static
-        if widget1.data < 0 and widget2.data < 0:
-            return widget1.data < widget2.data
-        # Static entries always on top
-        elif widget2.data < 0:
-            return True
-        # Static entries always on top
-        if widget1.data < 0:
-            return False
-        # String comparaison for non static
-        else:
-            return strcoll(widget1.name, widget2.name)
 
 
 class PlaylistsManagerDeviceView(PlaylistsManagerView):

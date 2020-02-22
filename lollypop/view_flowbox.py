@@ -63,7 +63,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param item_id as int
         """
         # Setup sort on insert
-        self._box.set_sort_func(self.__sort_func)
+        self._box.set_sort_func(self._sort_func)
         LazyLoadingView.populate(self, [item_id])
 
     def remove_value(self, item_id):
@@ -127,6 +127,14 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             @return int
         """
         return 0
+
+    def _sort_func(self, widget1, widget2):
+        """
+            Sort function
+            @param widget1 as RoundedArtistWidget
+            @param widget2 as RoundedArtistWidget
+        """
+        return strcoll(widget1.sortname, widget2.sortname)
 
     def _on_current_changed(self, player):
         """
@@ -192,13 +200,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __sort_func(self, widget1, widget2):
-        """
-            Sort function
-            @param widget1 as RoundedArtistWidget
-            @param widget2 as RoundedArtistWidget
-        """
-        return strcoll(widget1.sortname, widget2.sortname)
 
     def __popup_menu(self, child):
         """
