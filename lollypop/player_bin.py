@@ -447,7 +447,7 @@ class BinPlayer:
         """
         try:
             discoverer = Discoverer()
-            duration = discoverer.get_info(uri).get_duration() / 1000000000
+            duration = discoverer.get_info(uri).get_duration() / 1000000
             if duration != track.duration and duration > 0:
                 App().tracks.set_duration(track.id, int(duration))
                 track.reset("duration")
