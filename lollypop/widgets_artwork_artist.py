@@ -16,7 +16,7 @@ from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
 from lollypop.define import App, ViewType, ArtSize, ArtBehaviour, MARGIN
-from lollypop.define import MARGIN_SMALL
+from lollypop.define import MARGIN_SMALL, StorageType
 
 
 class ArtistArtworkSearchWidget(ArtworkSearchWidget):
@@ -83,7 +83,8 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             f = Gio.File.new_for_path(filename)
             (status, data, tag) = f.load_contents()
             if status:
-                App().art.add_artist_artwork(self.__artist, data)
+                App().art.add_artist_artwork(self.__artist, data,
+                                             StorageType.COLLECTION)
         except Exception as e:
             Logger.error(
                 "ArtistArtworkSearchWidget::_save_from_filename(): %s" % e)
@@ -118,10 +119,12 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         try:
             if isinstance(child, ArtworkSearchChild):
                 App().task_helper.run(App().art.add_artist_artwork,
-                                      self.__artist, child.bytes)
+                                      self.__artist, child.bytes,
+                                      StorageType.COLLECTION)
             else:
                 App().task_helper.run(App().art.add_artist_artwork,
-                                      self.__artist, None)
+                                      self.__artist, None,
+                                      StorageType.COLLECTION)
             emit_signal(self, "hidden", True)
         except Exception as e:
             Logger.error("ArtistArtworkSearchWidget::_on_activate(): %s", e)

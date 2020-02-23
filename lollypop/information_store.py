@@ -40,7 +40,7 @@ class InformationStore(GObject.Object, InfoDownloader):
             @param artist as str
             @return content as bytes
         """
-        filepath = "%s/%s.txt" % (App().art._INFO_PATH,
+        filepath = "%s/%s.txt" % (App().art._ARTISTS_PATH,
                                   escape(artist))
         content = None
         f = Gio.File.new_for_path(filepath)
@@ -56,7 +56,7 @@ class InformationStore(GObject.Object, InfoDownloader):
         """
         try:
             if content is not None:
-                filepath = "%s/%s.txt" % (App().art._INFO_PATH,
+                filepath = "%s/%s.txt" % (App().art._ARTISTS_PATH,
                                           escape(artist))
                 f = Gio.File.new_for_path(filepath)
                 fstream = f.replace(None, False,

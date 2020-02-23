@@ -93,7 +93,8 @@ class ArtistRow(Gtk.ListBoxRow):
                 return
             self.__cover_data = data
             scale_factor = self.get_scale_factor()
-            App().art.add_artist_artwork(self.__artist_name, data, True)
+            App().art.add_artist_artwork(self.__artist_name, data,
+                                         StorageType.EPHEMERAL)
             App().art_helper.set_artist_artwork(self.__artist_name,
                                                 ArtSize.SMALL,
                                                 ArtSize.SMALL,

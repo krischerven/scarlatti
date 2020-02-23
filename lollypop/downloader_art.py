@@ -17,6 +17,7 @@ from base64 import b64encode
 
 from lollypop.define import App, GOOGLE_API_ID, Type, AUDIODB_CLIENT_ID
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, FANARTTV_ID
+from lollypop.define import StorageType
 from lollypop.utils import get_network_available, noaccents, emit_signal
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
@@ -526,14 +527,16 @@ class ArtDownloader(Downloader):
                             uri, None)
                         if status:
                             found = True
-                            App().art.add_artist_artwork(artist, data)
+                            App().art.add_artist_artwork(
+                                artist, data, StorageType.COLLECTION)
                             break
                     # Found, do not search in another helper
                     if found:
                         break
                 # Not found, save empty artwork
                 if not found:
-                    App().art.add_artist_artwork(artist, None)
+                    App().art.add_artist_artwork(artist, None,
+                                                 StorageType.COLLECTION)
         except Exception as e:
             Logger.error("ArtDownloader::__cache_artists_artwork(): %s" % e)
         self.__in_artists_download = False

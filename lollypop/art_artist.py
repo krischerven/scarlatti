@@ -15,7 +15,7 @@ from gi.repository import GLib, GdkPixbuf, Gio
 from hashlib import md5
 
 from lollypop.define import ArtBehaviour, ArtSize
-from lollypop.define import CACHE_PATH
+from lollypop.define import CACHE_PATH, StorageType
 from lollypop.logger import Logger
 from lollypop.utils import escape, emit_signal
 
@@ -26,18 +26,22 @@ class ArtistArt:
          Should be inherited by a BaseArt
     """
 
-    _INFO_PATH = GLib.get_user_data_dir() + "/lollypop/info"
+    _ARTISTS_PATH = GLib.get_user_data_dir() + "/lollypop/artists"
 
     def __init__(self):
         """
             Init album art
         """
         try:
-            d = Gio.File.new_for_path(self._INFO_PATH)
+            old_path = GLib.get_user_data_dir() + "/lollypop/info"
+            old = Gio.File.new_for_path(old_path)
+            d = Gio.File.new_for_path(self._ARTISTS_PATH)
+            if old.query_exists():
+                old.move(d, Gio.FileCopyFlags.OVERWRITE, None, None)
             if not d.query_exists():
                 d.make_directory_with_parents()
         except:
-            Logger.info("Can't create %s" % self._INFO_PATH)
+            Logger.info("Can't create %s" % self._ARTISTS_PATH)
 
     def artist_artwork_exists(self, artist):
         """
@@ -48,31 +52,31 @@ class ArtistArt:
         escaped_artist = escape(artist)
         # Search in store
         paths = ["%s/%s.jpg" % (
-                 self._INFO_PATH,
+                 self._ARTISTS_PATH,
                  escaped_artist),
                  "%s/web_%s.jpg" % (
-                 self._INFO_PATH,
+                 self._ARTISTS_PATH,
                  escaped_artist)]
         for path in paths:
             if GLib.file_test(path, GLib.FileTest.EXISTS):
                 return (True, path)
         return (False, None)
 
-    def add_artist_artwork(self, artist, data, is_web=False):
+    def add_artist_artwork(self, artist, data, storage_type):
         """
             Add artist artwork to store
             @param artist as str
             @param data as bytes
-            @param is_web as bool
+            @param storage_type as StorageType
             @thread safe
         """
         self.uncache_artist_artwork(artist)
-        if is_web:
-            filepath = "%s/web_%s.jpg" % (self._INFO_PATH,
-                                          escape(artist))
-        else:
-            filepath = "%s/%s.jpg" % (self._INFO_PATH,
+        if storage_type & StorageType.COLLECTION:
+            filepath = "%s/%s.jpg" % (self._ARTISTS_PATH,
                                       escape(artist))
+        else:
+            filepath = "%s/web_%s.jpg" % (self._ARTISTS_PATH,
+                                          escape(artist))
         if data is None:
             f = Gio.File.new_for_path(filepath)
             fstream = f.replace(None, False,
