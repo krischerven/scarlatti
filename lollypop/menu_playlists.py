@@ -25,13 +25,13 @@ class PlaylistsMenu(Gio.Menu):
         Contextual menu for playlists
     """
 
-    def __init__(self, object):
+    def __init__(self, objects):
         """
             Init playlist menu
-            @param object as Album/Track
+            @param objects as [Track/Album]
         """
         Gio.Menu.__init__(self)
-        self.__object = object
+        self.__objects = objects
         self.__set_playlist_actions()
 
 #######################
@@ -46,13 +46,15 @@ class PlaylistsMenu(Gio.Menu):
         add_action.connect("activate", self.__on_add_action_activate)
         self.append(_("New playlist"), "app.add_to_new")
         i = 1
+        exists = True
         for (playlist_id, name) in App().playlists.get():
-            if isinstance(self.__object, Album):
-                exists = App().playlists.exists_album(playlist_id,
-                                                      self.__object)
-            else:
-                exists = App().playlists.exists_track(playlist_id,
-                                                      self.__object.uri)
+            for obj in self.__objects:
+                if isinstance(obj, Album):
+                    exists = App().playlists.exists_album(playlist_id, obj)
+                else:
+                    exists = App().playlists.exists_track(playlist_id, obj.uri)
+                if not exists:
+                    break
             encoded = sha256(name.encode("utf-8")).hexdigest()
             playlist_action = Gio.SimpleAction.new_stateful(
                                           encoded,
@@ -72,12 +74,13 @@ class PlaylistsMenu(Gio.Menu):
         """
         def add(playlist_id):
             tracks = []
-            if isinstance(self.__object, Album):
-                for track_id in self.__object.track_ids:
-                    tracks.append(Track(track_id))
-            else:
-                tracks = [Track(self.__object.id)]
-            App().playlists.add_tracks(playlist_id, tracks, True)
+            for obj in self.__objects:
+                if isinstance(obj, Album):
+                    for track_id in obj.track_ids:
+                        tracks.append(Track(track_id))
+                else:
+                    tracks = [Track(obj.id)]
+                App().playlists.add_tracks(playlist_id, tracks, True)
         App().task_helper.run(add, playlist_id)
 
     def __remove_from_playlist(self, playlist_id):
@@ -87,31 +90,14 @@ class PlaylistsMenu(Gio.Menu):
         """
         def remove(playlist_id):
             tracks = []
-            if isinstance(self.__object, Album):
-                for track_id in self.__object.track_ids:
-                    tracks.append(Track(track_id))
-            else:
-                tracks = [Track(self.__object.id)]
-            App().playlists.remove_tracks(playlist_id, tracks, True)
+            for obj in self.__objects:
+                if isinstance(obj, Album):
+                    for track_id in obj.track_ids:
+                        tracks.append(Track(track_id))
+                else:
+                    tracks = [Track(obj.id)]
+                App().playlists.remove_tracks(playlist_id, tracks, True)
         App().task_helper.run(remove, playlist_id)
-
-    def __add_to_loved(self, action, variant):
-        """
-            Add to loved
-            @param Gio.SimpleAction
-            @param GLib.Variant
-            @param playlist name as str
-        """
-        self.__object.set_loved(True)
-
-    def __del_from_loved(self, action, variant):
-        """
-            Remove from loved
-            @param Gio.SimpleAction
-            @param GLib.Variant
-            @param playlist name as str
-        """
-        self.__object.set_loved(False)
 
     def __on_playlist_action_change_state(self, action, variant, playlist_id):
         """

@@ -49,7 +49,7 @@ class AlbumMenu(Gio.Menu):
             self.append_section(_("Artist"), menu)
         section = Gio.Menu()
         if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
-            section.append_submenu(_("Playlists"), PlaylistsMenu(album))
+            section.append_submenu(_("Playlists"), PlaylistsMenu([album]))
         if album.storage_type & StorageType.COLLECTION:
             section.append_submenu(_("Devices"), SyncAlbumsMenu([album]))
         if section.get_n_items() != 0:
@@ -73,7 +73,7 @@ class MinTrackMenu(Gio.Menu):
         self.append_section(_("Artist"), menu)
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
-            section.append_submenu(_("Playlists"), PlaylistsMenu(track))
+            section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
             self.append_section(_("Add to"), section)
         self.append_section(_("Edit"), EditMenu(track))
 
@@ -96,7 +96,7 @@ class TrackMenu(Gio.Menu):
         self.append_section(_("Playback"), TrackPlaybackMenu(track))
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
-            section.append_submenu(_("Playlists"), PlaylistsMenu(track))
+            section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
             self.append_section(_("Add to"), section)
         self.append_section(_("Edit"), EditMenu(track))
 

@@ -10,11 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib
+from gi.repository import Gio
 
 from gettext import gettext as _
 
+from lollypop.menu_sync import SyncAlbumsMenu
+from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.define import App, ViewType, Type
+from lollypop.objects_album import Album
 
 
 class ArtistMenu(Gio.Menu):
@@ -36,8 +39,11 @@ class ArtistMenu(Gio.Menu):
             from lollypop.menu_playback import ArtistPlaybackMenu
             self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
         menu = ArtistAlbumsMenu(artist_id, view_type)
-        if menu.get_n_items() != 0:
-            self.append_section(_("Albums"), menu)
+        self.append_section(_("Artist"), menu)
+        album_ids = App().albums.get_ids([artist_id], [], True)
+        albums = [Album(album_id) for album_id in album_ids]
+        self.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
+        self.append_submenu(_("Playlists"), PlaylistsMenu(albums))
 
 
 class ArtistAlbumsMenu(Gio.Menu):
@@ -68,16 +74,6 @@ class ArtistAlbumsMenu(Gio.Menu):
         go_artist_action.connect("activate",
                                  self.__on_go_to_artist_activate)
         self.append(_("Available albums"), "app.go_artist_action")
-        if view_type & ViewType.BANNER and not view_type & ViewType.ALBUM:
-            show_tracks_action = Gio.SimpleAction.new_stateful(
-                "show_tracks_action",
-                None,
-                GLib.Variant.new_boolean(
-                    App().settings.get_value("show-artist-tracks")))
-            App().add_action(show_tracks_action)
-            show_tracks_action.connect("change-state",
-                                       self.__on_show_tracks_change_state)
-            self.append(_("Show tracks"), "app.show_tracks_action")
 
     def __on_go_to_artist_activate(self, action, variant):
         """
@@ -87,13 +83,3 @@ class ArtistAlbumsMenu(Gio.Menu):
         """
         App().window.container.show_view([Type.ARTISTS],
                                          [self.__artist_id])
-
-    def __on_show_tracks_change_state(self, action, variant):
-        """
-            Save option and reload view
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        action.set_state(variant)
-        App().settings.set_value("show-artist-tracks", variant)
-        App().window.container.reload_view()
