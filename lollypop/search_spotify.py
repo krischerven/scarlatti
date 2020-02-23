@@ -390,15 +390,17 @@ class SpotifySearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         try:
-            if not cancellable.is_cancelled():
-                album = Album(album_id)
-                if cover_uri is not None:
-                    (status, data) = App().task_helper.load_uri_content_sync(
-                                                            cover_uri,
-                                                            cancellable)
-                    if status:
-                        App().art.save_album_artwork(data, album)
-                emit_signal(self, "match-album", album_id, storage_type)
+            if cancellable.is_cancelled():
+                return
+            album = Album(album_id)
+            if App().art.get_album_artwork_uri(album) is None and\
+                    cover_uri is not None:
+                (status, data) = App().task_helper.load_uri_content_sync(
+                                                        cover_uri,
+                                                        cancellable)
+                if status:
+                    App().art.save_album_artwork(data, album)
+            emit_signal(self, "match-album", album_id, storage_type)
         except Exception as e:
             Logger.error(
                 "SpotifySearch::__download_cover(): %s", e)
