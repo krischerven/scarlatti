@@ -18,7 +18,7 @@ from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
 from lollypop.search_local import LocalSearch
 from lollypop.view import View
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, escape
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -246,10 +246,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__view.stop()
         self.__banner.spinner.stop()
 
-    def _on_match_artist(self, local_search, artist_id, storage_type):
+    def _on_match_artist(self, search, artist_id, storage_type):
         """
             Add a new artist to view
-            @param local_search as LocalSearch
+            @param search as *Search
             @param artist_id as int
             @param storage_type as StorageType
         """
@@ -258,10 +258,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.artists_line_view.add_value(artist_id)
             self.show_placeholder(False)
 
-    def _on_match_album(self, local_search, album_id, storage_type):
+    def _on_match_album(self, search, album_id, storage_type):
         """
             Add a new album to view
-            @param local_search as LocalSearch
+            @param search as *Search
             @param artist_id as int
             @param storage_type as StorageType
         """
@@ -270,11 +270,19 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.albums_line_view.show()
             self.__stack.current_child.albums_line_view.add_album(album)
             self.show_placeholder(False)
+            # If artist name matchs, add it to artists line
+            if album.artist_ids:
+                artist = escape(album.artists[0].lower())
+                search = escape(self.__current_search.lower())
+                if artist.find(search) != -1:
+                    self._on_match_artist(search,
+                                          album.artist_ids[0],
+                                          storage_type)
 
-    def _on_match_track(self, local_search, track_id, storage_type):
+    def _on_match_track(self, search, track_id, storage_type):
         """
             Add a new track to view
-            @param local_search as LocalSearch
+            @param search as *Search
             @param track_id as int
             @param storage_type as StorageType
         """

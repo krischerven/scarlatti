@@ -30,6 +30,7 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
             @param view_type as ViewType
         """
         RoundedArtistsView.__init__(self, view_type)
+        self.__artist_ids = []
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -56,6 +57,22 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
         self.add(header)
         self._label.set_property("halign", Gtk.Align.START)
         self.add_widget(self._box)
+
+    def add_value(self, artist_id):
+        """
+            Insert item if not exists
+            @param artist_id as int
+        """
+        if artist_id not in self.__artist_ids:
+            self.__artist_ids.append(artist_id)
+            RoundedArtistsView.add_value(self, artist_id)
+
+    def clear(self):
+        """
+            Clear children
+        """
+        self.__artist_ids = []
+        RoundedArtistsView.clear(self)
 
     @property
     def args(self):
