@@ -311,7 +311,8 @@ class ArtDownloader(Downloader):
                     uris.append(cover["url"])
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_fanarttv_album_artwork_uri: %s" % e)
+                "ArtDownloader::_get_fanarttv_album_artwork_uri: %s, %s: %s" %
+                (e, artist, album))
         return uris
 
     def _get_spotify_album_artwork_uri(self, artist, album, cancellable=None):
@@ -353,7 +354,9 @@ class ArtDownloader(Downloader):
                                 noaccents(album.lower()):
                             return [item["images"][0]["url"]]
         except Exception as e:
-            Logger.warning("ArtDownloader::_get_album_art_spotify_uri: %s" % e)
+            Logger.warning(
+                "ArtDownloader::_get_album_art_spotify_uri: %s, %s: %s" %
+                (e, artist, album))
         return []
 
     def _get_itunes_album_artwork_uri(self, artist, album, cancellable=None):
@@ -383,8 +386,9 @@ class ArtDownloader(Downloader):
                                                            "1024x1024")
                         return [uri]
         except Exception as e:
-            Logger.warning("ArtDownloader::_get_album_art_itunes_uri: %s"
-                           % e)
+            Logger.warning(
+                "ArtDownloader::_get_album_art_itunes_uri: %s, %s: %s" %
+                (e, artist, album))
         return []
 
     def _get_audiodb_album_artwork_uri(self, artist, album, cancellable=None):
@@ -414,8 +418,9 @@ class ArtDownloader(Downloader):
                         uri = item["strAlbumThumb"]
                         return [uri]
         except Exception as e:
-            Logger.warning("ArtDownloader::_get_audiodb_album_artwork_uri: %s"
-                           % e)
+            Logger.warning(
+                "ArtDownloader::_get_audiodb_album_artwork_uri: %s, %s: %s" %
+                (e, artist, album))
         return []
 
     def _get_lastfm_album_artwork_uri(self, artist, album, cancellable=None):
@@ -435,8 +440,9 @@ class ArtDownloader(Downloader):
                 uri = last_album.get_cover_image(4)
                 return [uri]
             except Exception as e:
-                Logger.warning("ArtDownloader::_get_album_art_lastfm_uri: %s"
-                               % e)
+                Logger.warning(
+                    "ArtDownloader::_get_album_art_lastfm_uri: %s, %s: %s" %
+                    (e, artist, album))
         return []
 
 #######################
