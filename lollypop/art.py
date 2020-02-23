@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GdkPixbuf, Gdk
+from gi.repository import Gio, GdkPixbuf, Gdk, GLib
 
 from hashlib import md5
 
@@ -44,6 +44,12 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         ArtistArt.__init__(self)
         RadioArt.__init__(self)
         ArtDownloader.__init__(self)
+        # Move old store
+        store = Gio.File.new_for_path(
+            GLib.get_user_data_dir() + "/lollypop/store")
+        if store.query_exists():
+            new_store = Gio.File.new_for_path(ALBUMS_PATH)
+            store.move(new_store, Gio.FileCopyFlags.OVERWRITE, None, None)
         create_dir(CACHE_PATH)
         create_dir(ALBUMS_PATH)
         create_dir(ALBUMS_WEB_PATH)
