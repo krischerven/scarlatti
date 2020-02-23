@@ -20,7 +20,8 @@ from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, ScanUpdate
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
-from lollypop.utils import get_font_height, get_youtube_dl
+from lollypop.utils import get_font_height
+from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map

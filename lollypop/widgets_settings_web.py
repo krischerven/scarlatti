@@ -178,7 +178,7 @@ class WebSettingsWidget(Gtk.Bin):
         App().settings.set_value("recent-youtube-dl",
                                  GLib.Variant("b", state))
         if Gio.NetworkMonitor.get_default().get_network_available() and state:
-            from lollypop.utils import install_youtube_dl
+            from lollypop.utils_file import install_youtube_dl
             App().task_helper.run(install_youtube_dl)
 
     def _on_entry_invidious_changed(self, entry):

@@ -17,7 +17,7 @@ from re import sub
 
 from lollypop.define import App, GOOGLE_API_ID
 from lollypop.utils import get_network_available, get_page_score
-from lollypop.utils import get_youtube_dl
+from lollypop.utils_file import get_youtube_dl
 from lollypop.logger import Logger
 
 

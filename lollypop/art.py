@@ -24,7 +24,8 @@ from lollypop.downloader_art import ArtDownloader
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.define import ARTISTS_PATH, ARTISTS_WEB_PATH
 from lollypop.define import App, StorageType
-from lollypop.utils import create_dir, emit_signal
+from lollypop.utils import emit_signal
+from lollypop.utils_file import create_dir
 
 from time import sleep
 from shutil import rmtree
@@ -180,6 +181,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         """
             Remove all covers from cache
         """
+        # FIXME
         try:
             rmtree(ALBUMS_WEB_PATH)
         except Exception as e:

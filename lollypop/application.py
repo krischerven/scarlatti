@@ -31,9 +31,9 @@ except Exception as e:
     print("$ sudo pip3 install pylast")
     LastFM = None
 
-from lollypop.utils import init_proxy_from_gnome, install_youtube_dl
+from lollypop.utils import init_proxy_from_gnome, emit_signal
 from lollypop.application_actions import ApplicationActions
-from lollypop.utils import is_audio, is_pls, emit_signal
+from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
 from lollypop.database import Database
 from lollypop.player import Player

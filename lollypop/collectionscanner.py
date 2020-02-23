@@ -30,8 +30,8 @@ from lollypop.sqlcursor import SqlCursor
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
-from lollypop.utils import is_audio, is_pls, get_mtime, profile, create_dir
-from lollypop.utils import emit_signal
+from lollypop.utils_file import is_audio, is_pls, get_mtime, create_dir
+from lollypop.utils import emit_signal, profile
 
 
 SCAN_QUERY_INFO = "{},{},{},{},{},{}".format(

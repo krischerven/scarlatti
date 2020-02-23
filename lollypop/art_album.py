@@ -22,7 +22,8 @@ from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
-from lollypop.utils import is_readonly, emit_signal
+from lollypop.utils_file import is_readonly
+from lollypop.utils import emit_signal
 from lollypop.helper_task import TaskHelper
 
 

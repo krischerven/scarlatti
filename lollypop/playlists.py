@@ -25,7 +25,8 @@ from lollypop.objects_track import Track
 from lollypop.sqlcursor import SqlCursor
 from lollypop.localized import LocalizedCollation
 from lollypop.shown import ShownPlaylists
-from lollypop.utils import get_mtime, emit_signal
+from lollypop.utils import emit_signal
+from lollypop.utils_file import get_mtime
 from lollypop.logger import Logger
 from lollypop.database_upgrade import DatabasePlaylistsUpgrade
 

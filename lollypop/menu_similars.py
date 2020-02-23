@@ -16,8 +16,9 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
 from lollypop.logger import Logger
-from lollypop.utils import get_network_available, sql_escape, get_youtube_dl
+from lollypop.utils import get_network_available, sql_escape
 from lollypop.utils_artist import ArtistProvider
+from lollypop.utils_file import get_youtube_dl
 
 
 class ArtistRow(Gtk.ListBoxRow):

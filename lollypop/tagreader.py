@@ -515,7 +515,7 @@ class TagReader:
             @return lyrics as str
         """
         def decode_lyrics(bytes):
-            from lollypop.utils import decodeUnicode, splitUnicode
+            from lollypop.utils_file import decodeUnicode, splitUnicode
             try:
                 prefix = bytes[0:4]
                 if prefix in [b"USLT"]:
@@ -586,7 +586,7 @@ class TagReader:
         """
         def decode_lyrics(bytes_list, encoding):
             lyrics = []
-            from lollypop.utils import decodeUnicode, splitUnicode
+            from lollypop.utils_file import decodeUnicode, splitUnicode
             try:
                 for frame in bytes_list:
                     (l, t) = splitUnicode(frame, encoding)

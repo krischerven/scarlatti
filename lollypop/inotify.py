@@ -13,7 +13,7 @@
 from gi.repository import Gio, GLib
 
 from lollypop.define import App, ScanType
-from lollypop.utils import is_audio
+from lollypop.utils_file import is_audio
 from lollypop.logger import Logger
 
 
