@@ -19,7 +19,7 @@ from time import time
 
 from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
-from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH
+from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import is_readonly, emit_signal
@@ -85,9 +85,9 @@ class AlbumArt:
             filename = self.get_album_cache_name(album) + ".jpg"
             self.__update_album_uri(album)
             if album.storage_type & StorageType.EPHEMERAL:
-                store_path = TMP_PATH + "/" + filename
+                store_path = ALBUMS_WEB_PATH + "/" + filename
             else:
-                store_path = STORE_PATH + "/" + filename
+                store_path = ALBUMS_PATH + "/" + filename
             uris = [
                 # Used when album.uri is readonly or for Web
                 GLib.filename_to_uri(store_path),
@@ -248,8 +248,8 @@ class AlbumArt:
         try:
             album = Album(album_id)
             filename = self.get_album_cache_name(album) + ".jpg"
-            web_path = TMP_PATH + "/" + filename
-            store_path = STORE_PATH + "/" + filename
+            web_path = ALBUMS_WEB_PATH + "/" + filename
+            store_path = ALBUMS_PATH + "/" + filename
             web_file = Gio.File.new_for_path(web_path)
             store_file = Gio.File.new_for_path(store_path)
             web_file.copy(store_file, Gio.FileCopyFlags.OVERWRITE,
@@ -386,7 +386,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = TMP_PATH + "/" + filename
+        store_path = ALBUMS_WEB_PATH + "/" + filename
         if data is None:
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
@@ -404,7 +404,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = STORE_PATH + "/" + filename
+        store_path = ALBUMS_PATH + "/" + filename
         if data is None:
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
@@ -422,7 +422,7 @@ class AlbumArt:
             @param album as Album
         """
         filename = self.get_album_cache_name(album) + ".jpg"
-        store_path = STORE_PATH + "/" + filename
+        store_path = ALBUMS_PATH + "/" + filename
         save_to_tags = App().settings.get_value("save-to-tags")
         # Multiple albums at same path
         uri_count = App().albums.get_uri_count(album.uri)

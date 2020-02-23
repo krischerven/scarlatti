@@ -12,8 +12,9 @@
 
 from gi.repository import Gio, GObject
 
-from lollypop.utils import escape
-from lollypop.define import App
+from hashlib import md5
+
+from lollypop.define import ARTISTS_PATH
 from lollypop.logger import Logger
 from lollypop.downloader_info import InfoDownloader
 
@@ -40,8 +41,8 @@ class InformationStore(GObject.Object, InfoDownloader):
             @param artist as str
             @return content as bytes
         """
-        filepath = "%s/%s.txt" % (App().art._ARTISTS_PATH,
-                                  escape(artist))
+        encoded = md5(artist.encode("utf-8")).hexdigest()
+        filepath = "%s/%s.txt" % (ARTISTS_PATH, encoded)
         content = None
         f = Gio.File.new_for_path(filepath)
         if f.query_exists():
@@ -56,8 +57,8 @@ class InformationStore(GObject.Object, InfoDownloader):
         """
         try:
             if content is not None:
-                filepath = "%s/%s.txt" % (App().art._ARTISTS_PATH,
-                                          escape(artist))
+                encoded = md5(artist.encode("utf-8")).hexdigest()
+                filepath = "%s/%s.txt" % (ARTISTS_PATH, encoded)
                 f = Gio.File.new_for_path(filepath)
                 fstream = f.replace(None, False,
                                     Gio.FileCreateFlags.REPLACE_DESTINATION,

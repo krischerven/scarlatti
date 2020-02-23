@@ -15,7 +15,7 @@ from gi.repository import GObject, Gio, GLib, GdkPixbuf
 from PIL import Image, ImageFilter
 
 from lollypop.define import ArtSize, App, ArtBehaviour
-from lollypop.define import STORE_PATH
+from lollypop.define import ALBUMS_PATH
 from lollypop.logger import Logger
 
 
@@ -108,7 +108,7 @@ class BaseArt(GObject.GObject):
             @param filename as str
         """
         try:
-            filepath = STORE_PATH + "/" + filename + ".jpg"
+            filepath = ALBUMS_PATH + "/" + filename + ".jpg"
             f = Gio.File.new_for_path(filepath)
             if f.query_exists():
                 f.delete()

@@ -21,7 +21,9 @@ from lollypop.art_radio import RadioArt
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
-from lollypop.define import CACHE_PATH, TMP_PATH, STORE_PATH, App, StorageType
+from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
+from lollypop.define import ARTISTS_PATH, ARTISTS_WEB_PATH
+from lollypop.define import App, StorageType
 from lollypop.utils import create_dir, emit_signal
 
 from time import sleep
@@ -43,8 +45,10 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         RadioArt.__init__(self)
         ArtDownloader.__init__(self)
         create_dir(CACHE_PATH)
-        create_dir(STORE_PATH)
-        create_dir(TMP_PATH)
+        create_dir(ALBUMS_PATH)
+        create_dir(ALBUMS_WEB_PATH)
+        create_dir(ARTISTS_PATH)
+        create_dir(ARTISTS_WEB_PATH)
 
     def add_artwork_to_cache(self, name, surface, prefix):
         """
@@ -134,7 +138,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         """
         def cleaner():
             sleep(10)
-            f = Gio.File.new_for_path(STORE_PATH)
+            f = Gio.File.new_for_path(ALBUMS_PATH)
             infos = f.enumerate_children(
                                     "standard::name",
                                     Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
@@ -160,7 +164,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             # Delete remaining files
             for filename in files:
                 sleep(1)
-                store_path = STORE_PATH + "/" + filename
+                store_path = ALBUMS_PATH + "/" + filename
                 f = Gio.File.new_for_path(store_path)
                 f.delete()
 
@@ -171,7 +175,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
             Remove all covers from cache
         """
         try:
-            rmtree(TMP_PATH)
+            rmtree(ALBUMS_WEB_PATH)
         except Exception as e:
             Logger.error("Art::clean_web(): %s", e)
 

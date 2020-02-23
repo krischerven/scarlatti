@@ -30,10 +30,12 @@ MARGIN_SMALL = 5
 
 # All cache goes here
 CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
-# Fallback when album dir is readonly
-STORE_PATH = GLib.get_user_data_dir() + "/lollypop/store"
-# Store for Web
-TMP_PATH = GLib.get_user_data_dir() + "/lollypop/tmp"
+# Stores for albums
+ALBUMS_PATH = GLib.get_user_data_dir() + "/lollypop/albums"
+ALBUMS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/albums_web"
+# Stores for artists
+ARTISTS_PATH = GLib.get_user_data_dir() + "/lollypop/artists"
+ARTISTS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/artists_web"
 
 
 class Repeat:

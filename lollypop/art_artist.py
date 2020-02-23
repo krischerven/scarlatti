@@ -14,8 +14,8 @@ from gi.repository import GLib, GdkPixbuf, Gio
 
 from hashlib import md5
 
-from lollypop.define import ArtBehaviour, ArtSize, App
-from lollypop.define import CACHE_PATH, StorageType
+from lollypop.define import ArtBehaviour, ArtSize, App, StorageType
+from lollypop.define import CACHE_PATH, ARTISTS_PATH, ARTISTS_WEB_PATH
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, escape
 
@@ -26,20 +26,11 @@ class ArtistArt:
          Should be inherited by a BaseArt
     """
 
-    _ARTISTS_PATH = GLib.get_user_data_dir() + "/lollypop/artists"
-    _ARTISTS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/artists_web"
-
     def __init__(self):
         """
             Init artist artwork
         """
         try:
-            d = Gio.File.new_for_path(self._ARTISTS_PATH)
-            if not d.query_exists():
-                d.make_directory_with_parents()
-            d = Gio.File.new_for_path(self._ARTISTS_WEB_PATH)
-            if not d.query_exists():
-                d.make_directory_with_parents()
             self.__migrate_old_dir()
         except Exception as e:
             Logger.error("ArtistArt::__init__(): %s", e)
@@ -52,12 +43,8 @@ class ArtistArt:
         """
         encoded = self.encode_artist_name(artist)
         # Search in store
-        paths = ["%s/%s.jpg" % (
-                 self._ARTISTS_PATH,
-                 encoded),
-                 "%s/%s.jpg" % (
-                 self._ARTISTS_WEB_PATH,
-                 encoded)]
+        paths = ["%s/%s.jpg" % (ARTISTS_PATH, encoded),
+                 "%s/%s.jpg" % (ARTISTS_WEB_PATH, encoded)]
         for path in paths:
             if GLib.file_test(path, GLib.FileTest.EXISTS):
                 return (True, path)
@@ -74,9 +61,9 @@ class ArtistArt:
         self.uncache_artist_artwork(artist)
         encoded = self.encode_artist_name(artist)
         if storage_type & StorageType.COLLECTION:
-            filepath = "%s/%s.jpg" % (self._ARTISTS_PATH, encoded)
+            filepath = "%s/%s.jpg" % (ARTISTS_PATH, encoded)
         else:
-            filepath = "%s/%s.jpg" % (self._ARTISTS_WEB_PATH, encoded)
+            filepath = "%s/%s.jpg" % (ARTISTS_WEB_PATH, encoded)
         if data is None:
             f = Gio.File.new_for_path(filepath)
             fstream = f.replace(None, False,
@@ -184,6 +171,6 @@ class ArtistArt:
                 if not src.query_exists():
                     continue
                 encoded = self.encode_artist_name(artist)
-                dst_path = "%s/%s.%s" % (self._ARTISTS_PATH, encoded, ext)
+                dst_path = "%s/%s.%s" % (ARTISTS_PATH, encoded, ext)
                 dst = Gio.File.new_for_path(dst_path)
                 src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
