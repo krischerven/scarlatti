@@ -11,6 +11,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from gi.repository import Gio, GLib
+from gi.repository.Gio import FILE_ATTRIBUTE_TIME_ACCESS
+
+from time import time
 
 from lollypop.logger import Logger
 from lollypop.define import App
@@ -79,6 +82,30 @@ def get_mtime(info):
     # except:
     #    pass
     return int(info.get_attribute_as_string("time::modified"))
+
+
+def remove_oldest(path, timestamp):
+    """
+        Remove oldest files at path
+        @param path as str
+        @param timestamp as int
+    """
+    SCAN_QUERY_INFO = "%s" % FILE_ATTRIBUTE_TIME_ACCESS
+    try:
+        d = Gio.File.new_for_path(path)
+        infos = d.enumerate_children(SCAN_QUERY_INFO,
+                                     Gio.FileQueryInfoFlags.NONE,
+                                     None)
+        for info in infos:
+            f = infos.get_child(info)
+            if info.get_file_type() == Gio.FileType.REGULAR:
+                atime = int(info.get_attribute_as_string(
+                    FILE_ATTRIBUTE_TIME_ACCESS))
+                # File not used since one year
+                if time() - atime > timestamp:
+                    f.delete(None)
+    except Exception as e:
+        Logger.error("remove_oldest(): %s", e)
 
 
 def is_readonly(uri):

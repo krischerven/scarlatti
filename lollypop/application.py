@@ -192,7 +192,6 @@ class Application(Gtk.Application, ApplicationActions):
         self.art_helper = ArtHelper()
         self.art = Art()
         self.art.update_art_size()
-        self.art.clean_old_artwork()
         self.spotify = SpotifySearch()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
@@ -262,7 +261,7 @@ class Application(Gtk.Application, ApplicationActions):
         # Then vacuum db
         if vacuum:
             self.__vacuum()
-            self.art.clean_web()
+            self.art.clean_artwork()
         for scrobbler in self.scrobblers:
             scrobbler.save()
         Gio.Application.quit(self)

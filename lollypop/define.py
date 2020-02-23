@@ -38,6 +38,12 @@ ARTISTS_PATH = GLib.get_user_data_dir() + "/lollypop/artists"
 ARTISTS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/artists_web"
 
 
+class TimeStamp:
+    ONE_YEAR = 31536000
+    TWO_YEAR = 63072000
+    THREE_YEAR = 94608000
+
+
 class Repeat:
     NONE = 0
     AUTO_SIMILAR = 1

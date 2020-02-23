@@ -18,17 +18,13 @@ from lollypop.art_base import BaseArt
 from lollypop.art_album import AlbumArt
 from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
-from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
-from lollypop.define import ARTISTS_PATH, ARTISTS_WEB_PATH
-from lollypop.define import App, StorageType
+from lollypop.define import ARTISTS_PATH, ARTISTS_WEB_PATH, TimeStamp
+from lollypop.define import App
 from lollypop.utils import emit_signal
-from lollypop.utils_file import create_dir
-
-from time import sleep
-from shutil import rmtree
+from lollypop.utils_file import create_dir, remove_oldest
 
 
 class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
@@ -140,54 +136,18 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         f = Gio.File.new_for_path(cache_path_jpg)
         return f.query_exists()
 
-    def clean_old_artwork(self):
+    def clean_artwork(self):
         """
-            Slow silent cleaner: web albums are removed from SQL queries
-            so we may have unwanted artwork on disk
+            Remove old artwork from disk
         """
-        def cleaner():
-            sleep(10)
-            f = Gio.File.new_for_path(ALBUMS_PATH)
-            infos = f.enumerate_children(
-                                    "standard::name",
-                                    Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
-                                    None)
-            # Get all files in store
-            files = []
-            for info in infos:
-                sleep(0.1)
-                f = infos.get_child(info)
-                files.append(f.get_basename())
-            infos.close(None)
-            # Remove wanted files
-            for storage_type in [StorageType.SAVED,
-                                 StorageType.SPOTIFY_NEW_RELEASES,
-                                 StorageType.SPOTIFY_SIMILARS]:
-                for album_id in App().albums.get_for_storage_type(
-                        storage_type):
-                    sleep(0.1)
-                    album = Album(album_id)
-                    filename = self.get_album_cache_name(album) + ".jpg"
-                    if filename in files:
-                        files.remove(filename)
-            # Delete remaining files
-            for filename in files:
-                sleep(1)
-                store_path = ALBUMS_PATH + "/" + filename
-                f = Gio.File.new_for_path(store_path)
-                f.delete()
-
-        App().task_helper.run(cleaner)
-
-    def clean_web(self):
-        """
-            Remove all covers from cache
-        """
-        # FIXME
         try:
-            rmtree(ALBUMS_WEB_PATH)
+            remove_oldest(CACHE_PATH, TimeStamp.ONE_YEAR)
+            remove_oldest(ARTISTS_PATH, TimeStamp.THREE_YEAR)
+            remove_oldest(ARTISTS_WEB_PATH, TimeStamp.ONE_YEAR)
+            remove_oldest(ALBUMS_PATH, TimeStamp.THREE_YEAR)
+            remove_oldest(ALBUMS_WEB_PATH, TimeStamp.ONE_YEAR)
         except Exception as e:
-            Logger.error("Art::clean_web(): %s", e)
+            Logger.error("Art::clean_artwork(): %s", e)
 
     def clean_rounded(self):
         """
