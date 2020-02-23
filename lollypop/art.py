@@ -46,11 +46,13 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         RadioArt.__init__(self)
         ArtDownloader.__init__(self)
         # Move old store
+        # FIXME: Remove this later
         store = Gio.File.new_for_path(
             GLib.get_user_data_dir() + "/lollypop/store")
         if store.query_exists():
             new_store = Gio.File.new_for_path(ALBUMS_PATH)
-            store.move(new_store, Gio.FileCopyFlags.OVERWRITE, None, None)
+            if not new_store.query_exists():
+                store.move(new_store, Gio.FileCopyFlags.OVERWRITE, None, None)
         create_dir(CACHE_PATH)
         create_dir(ALBUMS_PATH)
         create_dir(ALBUMS_WEB_PATH)
