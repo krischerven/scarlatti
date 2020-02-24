@@ -406,10 +406,10 @@ class SpotifySearch(GObject.Object):
             Logger.error("SpotifySearch::__get_track_payload(): %s", e)
         return {}
 
-    def __download_cover(self, album_id, cover_uri, storage_type, cancellable):
+    def __download_cover(self, album, cover_uri, storage_type, cancellable):
         """
             Create album and download cover
-            @param album_id as int
+            @param album as Album
             @param cover_uri as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
@@ -417,7 +417,6 @@ class SpotifySearch(GObject.Object):
         try:
             if cancellable.is_cancelled():
                 return
-            album = Album(album_id)
             if App().art.get_album_artwork_uri(album) is None and\
                     cover_uri is not None:
                 (status, data) = App().task_helper.load_uri_content_sync(
@@ -425,7 +424,7 @@ class SpotifySearch(GObject.Object):
                                                         cancellable)
                 if status:
                     App().art.save_album_artwork(data, album)
-            emit_signal(self, "match-album", album_id, storage_type)
+            emit_signal(self, "match-album", album.id, storage_type)
         except Exception as e:
             Logger.error(
                 "SpotifySearch::__download_cover(): %s", e)
@@ -466,19 +465,27 @@ class SpotifySearch(GObject.Object):
                 raise Exception("cancelled")
             album_id = App().albums.get_id_for_mb_album_id(album_item["id"])
             if album_id >= 0:
+                album = Album(album_id)
+                if App().art.get_album_artwork_uri(album) is None:
+                    self.__download_cover(album,
+                                          album_item["images"][0]["url"],
+                                          storage_type,
+                                          cancellable)
                 emit_signal(self, "match-album", album_id, storage_type)
                 continue
             (album_saved, album_id,
              album_artist_ids,
              added_album_artist_ids) = self.__save_album(album_item,
                                                          storage_type)
+            album = Album(album_id)
             if load_tracks:
                 album = Album(album_id)
                 album.load_tracks(cancellable)
-            self.__download_cover(album_id,
-                                  album_item["images"][0]["url"],
-                                  storage_type,
-                                  cancellable)
+            if App().art.get_album_artwork_uri(album) is None:
+                self.__download_cover(album,
+                                      album_item["images"][0]["url"],
+                                      storage_type,
+                                      cancellable)
 
     def __save_album(self, payload, storage_type):
         """
