@@ -13,12 +13,8 @@
 
 from gi.repository import Gio
 
-import json
-
 from urllib.parse import urlparse
 from lollypop.define import App, StorageType
-from lollypop.logger import Logger
-from lollypop.utils import escape
 from lollypop.objects import Base
 
 
@@ -105,45 +101,11 @@ class Track(Base):
             Cache it to Web Collection (for restore on reset)
             @param save as bool
         """
-        try:
-            filename = "%s_%s_%s" % (self.album.name, self.artists, self.name)
-            filepath = "%s/%s.txt" % (App().scanner._WEB_COLLECTION,
-                                      escape(filename))
-            f = Gio.File.new_for_path(filepath)
-            if save:
-                App().tracks.set_storage_type(self.id, StorageType.SAVED)
-                data = {
-                    "title": self.name,
-                    "album_name": self.album.name,
-                    "artists": self.artists,
-                    "album_artists": self.album.artists,
-                    "album_loved": self.album.loved,
-                    "album_popularity": self.album.popularity,
-                    "album_rate": self.album.get_rate(),
-                    "discnumber": self.discnumber,
-                    "discname": self.discname,
-                    "duration": self.duration,
-                    "tracknumber": App().tracks.get_number(self.id),
-                    "track_popularity": self.popularity,
-                    "track_loved": self.loved,
-                    "track_rate": self.get_rate(),
-                    "year": self.year,
-                    "timestamp": self.timestamp,
-                    "uri": self.uri
-                }
-                content = json.dumps(data).encode("utf-8")
-                fstream = f.replace(None, False,
-                                    Gio.FileCreateFlags.REPLACE_DESTINATION,
-                                    None)
-                if fstream is not None:
-                    fstream.write(content, None)
-                    fstream.close()
-            else:
-                App().tracks.set_storage_type(self.id, StorageType.EPHEMERAL)
-                f.delete()
-            self.reset("mtime")
-        except Exception as e:
-            Logger.error("Track::save(): %s", e)
+        if save:
+            App().tracks.set_storage_type(self.id, StorageType.SAVED)
+        else:
+            App().tracks.set_storage_type(self.id, StorageType.EPHEMERAL)
+        self.reset("mtime")
 
     def get_featuring_artist_ids(self, album_artist_ids):
         """

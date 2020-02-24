@@ -458,32 +458,46 @@ class SpotifySearch(GObject.Object):
                 Logger.debug("SpotifySearch: album exists in DB: %s - %s",
                              artists, album_item["name"])
                 continue
-            uri = "https://api.spotify.com/v1/albums/%s" % album_item["id"]
-            token = "Bearer %s" % self.__token
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                track_payload = decode["tracks"]["items"]
-                for item in track_payload:
-                    item["album"] = album_item
-                (albums, track_ids) = self.__create_from_tracks_payload(
-                                                        track_payload,
-                                                        storage_type,
-                                                        cancellable)
-                for album_id in albums.keys():
-                    self.__download_cover(album_id,
-                                          albums[album_id],
-                                          storage_type,
-                                          cancellable)
+            (album_saved, album_id,
+             album_artist_ids,
+             added_album_artist_ids) = self.__save_album(album_item,
+                                                         storage_type)
+            self.__download_cover(album_id,
+                                  album_item["images"][0]["url"],
+                                  storage_type,
+                                  cancellable)
+
+    def __save_album(self, payload, storage_type):
+        """
+            Save album payload to DB
+            @param payload as {}
+            @param storage_type as StorageType
+            @return track_id as int
+        """
+        spotify_id = payload["id"]
+        uri = "web://%s" % spotify_id
+        total_tracks = payload["total_tracks"]
+        album_artists = []
+        for artist in payload["artists"]:
+            album_artists.append(artist["name"])
+        album_artists = ";".join(album_artists)
+        album_name = payload["name"]
+        mtime = int(time())
+        Logger.debug("SpotifySearch::__save_album(): %s - %s",
+                     album_artists, album_name)
+        return App().scanner.save_album(
+                        album_artists,
+                        "", "", album_name,
+                        spotify_id, uri, 0, 0, 0,
+                        # HACK: Keep total tracks in sync int field
+                        total_tracks, mtime, storage_type)
 
     def __save_track(self, payload, storage_type):
         """
-            Save track to DB as non persistent
+            Save track payload to DB
             @param payload as {}
             @param storage_type as StorageType
-            @return track_id
+            @return track_id as int
         """
         spotify_id = payload["id"]
         title = payload["name"]
@@ -498,7 +512,8 @@ class SpotifySearch(GObject.Object):
         # Translate to tag value
         artists = ";".join(_artists)
         album_artists = ";".join(_album_artists)
-        album_id = payload["album"]["id"]
+        spotify_album_id = payload["album"]["id"]
+        total_tracks = payload["album"]["total_tracks"]
         album_name = payload["album"]["name"]
         discnumber = int(payload["disc_number"])
         discname = None
@@ -514,12 +529,20 @@ class SpotifySearch(GObject.Object):
             year = None
         duration = payload["duration_ms"]
         cover_uri = payload["album"]["images"][0]["url"]
-        uri = "web://%s" % payload["id"]
+        uri = "web://%s" % spotify_id
         mtime = int(time())
+        (album_saved, album_id,
+         album_artist_ids, added_album_artist_ids) = App().scanner.save_album(
+                        album_artists,
+                        "", "", album_name,
+                        spotify_album_id, uri, 0, 0, 0,
+                        # HACK: Keep total tracks in sync int field
+                        total_tracks, mtime, storage_type)
         (track_id, album_id) = App().scanner.save_track(
-                   None, artists, "", "", album_artists, "", "",
-                   album_name, album_id, uri, 0, 0,
-                   0, 0, mtime, title, duration, tracknumber,
-                   discnumber, discname, year, timestamp, mtime,
-                   0, 0, 0, 0, spotify_id, 0, storage_type)
+                   None, artists, "", "",
+                   uri, title, duration, tracknumber, discnumber,
+                   discname, year, timestamp, mtime, 0,
+                   0, 0, 0, spotify_id,
+                   0, album_saved, album_id, album_artist_ids,
+                   added_album_artist_ids, storage_type)
         return (album_id, track_id, cover_uri)
