@@ -14,7 +14,7 @@ from lollypop.utils import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.define import App, ViewType, Size
+from lollypop.define import App, ViewType, Size, StorageType
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
 
@@ -30,7 +30,15 @@ class CurrentAlbumsView(View, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
+        storage_type = StorageType.COLLECTION |\
+            StorageType.SAVED |\
+            StorageType.SEARCH |\
+            StorageType.EPHEMERAL |\
+            StorageType.EXTERNAL |\
+            StorageType.SPOTIFY_NEW_RELEASES |\
+            StorageType.SPOTIFY_SIMILARS
+        View.__init__(self, storage_type,
+                      view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         view_type |= ViewType.PLAYBACK
         self.__view = AlbumsListView([], [], view_type)
         self.__view.show()
