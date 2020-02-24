@@ -254,12 +254,9 @@ class SpotifySearch(GObject.Object):
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                (albums, track_ids) = self.__create_from_tracks_payload(
-                                                 decode["tracks"]["items"],
-                                                 storage_type,
-                                                 cancellable)
-                for track_id in track_ids:
-                    emit_signal(self, "match-track", track_id, storage_type)
+                self.__create_from_tracks_payload(decode["tracks"]["items"],
+                                                  storage_type,
+                                                  cancellable)
                 self.__create_albums_from_albums_payload(
                                                  decode["albums"]["items"],
                                                  storage_type,
@@ -440,30 +437,17 @@ class SpotifySearch(GObject.Object):
             @param payload as {}
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
-            @return albums, track_ids as [({int:str}, int)]
         """
-        new_albums = {}
-        new_track_ids = []
         # Populate tracks
         for item in payload:
             if not storage_type & StorageType.EPHEMERAL:
                 cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
-            artists = [artist["name"]
-                       for artist in item["album"]["artists"]]
-            if App().tracks.get_id_for_mb_track_id(item["id"]) >= 0:
-                Logger.debug("SpotifySearch: track exists in DB: %s - %s",
-                             item["name"], artists)
-                continue
-            (album_id,
-             track_id,
-             cover_uri) = self.__save_track(item, storage_type)
-            if track_id not in new_track_ids:
-                new_track_ids.append(track_id)
-            if album_id not in new_albums.keys():
-                new_albums[album_id] = cover_uri
-        return (new_albums, new_track_ids)
+            track_id = App().tracks.get_id_for_mb_track_id(item["id"])
+            if track_id < 0:
+                track_id = self.__save_track(item, storage_type)
+            emit_signal(self, "match-track", track_id, storage_type)
 
     def __create_albums_from_albums_payload(self, payload, storage_type,
                                             load_tracks, cancellable):
@@ -480,11 +464,9 @@ class SpotifySearch(GObject.Object):
                 cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
-            artists = [artist["name"]
-                       for artist in album_item["artists"]]
-            if App().albums.get_id_for_mb_album_id(album_item["id"]) >= 0:
-                Logger.debug("SpotifySearch: album exists in DB: %s - %s",
-                             artists, album_item["name"])
+            album_id = App().albums.get_id_for_mb_album_id(album_item["id"])
+            if album_id >= 0:
+                emit_signal(self, "match-album", album_id, storage_type)
                 continue
             (album_saved, album_id,
              album_artist_ids,
@@ -559,7 +541,6 @@ class SpotifySearch(GObject.Object):
             timestamp = None
             year = None
         duration = payload["duration_ms"]
-        cover_uri = payload["album"]["images"][0]["url"]
         uri = "web://%s" % spotify_id
         mtime = int(time())
         (album_saved, album_id,
@@ -576,4 +557,4 @@ class SpotifySearch(GObject.Object):
                    0, 0, 0, spotify_id,
                    0, album_saved, album_id, album_artist_ids,
                    added_album_artist_ids, storage_type)
-        return (album_id, track_id, cover_uri)
+        return track_id

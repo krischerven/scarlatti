@@ -180,21 +180,13 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                     get_network_available("SPOTIFY") and\
                     get_network_available("YOUTUBE"):
                 self.__searches_count += 1
-                # We want all items in DB
-                mask = StorageType.EPHEMERAL |\
-                    StorageType.SPOTIFY_NEW_RELEASES |\
-                    StorageType.SPOTIFY_SIMILARS |\
-                    StorageType.COLLECTION |\
-                    StorageType.SAVED |\
-                    StorageType.SEARCH
                 App().task_helper.run(App().spotify.search,
                                       current_search,
                                       self.__cancellable)
-            else:
-                # Only local items
-                mask = StorageType.COLLECTION |\
-                    StorageType.SAVED |\
-                    StorageType.SEARCH
+            # Only local items
+            mask = StorageType.COLLECTION |\
+                StorageType.SAVED |\
+                StorageType.SEARCH
             self.__searches_count += 1
             self.__local_search.get(current_search, mask, self.__cancellable)
         else:
