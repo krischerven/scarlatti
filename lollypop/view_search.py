@@ -45,9 +45,9 @@ class SearchGrid(Gtk.Grid):
         self.__artists_line_view = ArtistsSearchLineView()
         self.__albums_line_view = AlbumsSearchLineView()
         self.__search_tracks_view = SearchTracksView()
-        self.add(self.__search_tracks_view)
-        self.add(self.__artists_line_view)
         self.add(self.__albums_line_view)
+        self.add(self.__artists_line_view)
+        self.add(self.__search_tracks_view)
 
     @property
     def search_tracks_view(self):
@@ -121,13 +121,21 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type, initial_search=""):
+    def __init__(self, initial_search=""):
         """
             Init Popover
-            @param view_type as ViewType
             @param initial_search as str
         """
-        View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
+        View.__init__(self,
+                      StorageType.COLLECTION |
+                      StorageType.SAVED |
+                      StorageType.SEARCH |
+                      StorageType.EPHEMERAL |
+                      StorageType.SPOTIFY_NEW_RELEASES |
+                      StorageType.SPOTIFY_SIMILARS,
+                      ViewType.SEARCH |
+                      ViewType.SCROLLED |
+                      ViewType.OVERLAY)
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
         self.__current_search = ""
@@ -222,7 +230,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @return {}
         """
         search = self.__banner.entry.get_text().strip()
-        return {"view_type": self.view_type, "initial_search": search}
+        return {"initial_search": search}
 
 #######################
 # PROTECTED           #

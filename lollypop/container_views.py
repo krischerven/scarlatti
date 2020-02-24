@@ -177,7 +177,7 @@ class ViewsContainer:
                     view = _view
                     break
         if view is None:
-            view = SearchView(ViewType.SEARCH | ViewType.SCROLLED)
+            view = SearchView()
             view.show()
         if search:
             view.set_search(search)
