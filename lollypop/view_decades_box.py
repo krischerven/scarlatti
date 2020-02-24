@@ -120,8 +120,10 @@ class DecadesBoxView(FlowBoxView):
             return
         album_ids = []
         for year in child.data:
-            album_ids += App().albums.get_albums_for_year(year)
-            album_ids += App().albums.get_compilations_for_year(year)
+            album_ids += App().albums.get_albums_for_year(
+                year, self.storage_type)
+            album_ids += App().albums.get_compilations_for_year(
+                year, self.storage_type)
         albums = [Album(album_id) for album_id in album_ids]
         if albums:
             App().player.play_album_for_albums(albums[0], albums)

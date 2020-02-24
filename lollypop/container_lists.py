@@ -286,13 +286,14 @@ class ListsContainer:
         Logger.debug("Container::__on_left_list_activated()")
         selected_ids = self.left_list.selected_ids
         view = None
+        storage_type = get_default_storage_type()
         if self.left_list.mask & SelectionListMask.GENRES:
             if not App().window.is_adaptive:
-                view = self._get_view_albums(selected_ids, [])
+                view = self._get_view_albums(selected_ids, [], storage_type)
             self._show_artists_list(self.right_list, selected_ids)
             self._show_right_list()
         else:
-            view = self._get_view_artists([], selected_ids)
+            view = self._get_view_artists([], selected_ids, storage_type)
             self.set_focused_view(view)
         if view is not None:
             view.show()
@@ -305,9 +306,10 @@ class ListsContainer:
             @param listbox as Gtk.ListBox
             @param row as Gtk.ListBoxRow
         """
+        storage_type = get_default_storage_type()
         genre_ids = self.left_list.selected_ids
         artist_ids = self.right_list.selected_ids
-        view = self._get_view_artists(genre_ids, artist_ids)
+        view = self._get_view_artists(genre_ids, artist_ids, storage_type)
         view.show()
         self._stack.add(view)
         self._stack.set_visible_child(view)

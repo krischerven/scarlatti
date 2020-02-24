@@ -287,8 +287,10 @@ class AlbumsYearsBoxView(AlbumsGenresBoxView):
         def load():
             items = []
             for year in self._artist_ids:
-                items += App().albums.get_compilations_for_year(year)
-                items += App().albums.get_albums_for_year(year)
+                items += App().albums.get_compilations_for_year(
+                    year, self.storage_type)
+                items += App().albums.get_albums_for_year(
+                    year, self.storage_type)
             return [Album(album_id, [Type.YEARS], []) for album_id in items]
 
         App().task_helper.run(load, callback=(on_load,))

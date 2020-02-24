@@ -112,7 +112,7 @@ class ViewsContainer:
                 if data is None:
                     view = self._get_view_albums_decades(storage_type)
                 else:
-                    view = self._get_view_albums_years(data)
+                    view = self._get_view_albums_years(data, storage_type)
             elif item_ids[0] == Type.PLAYLISTS:
                 view = self._get_view_playlists(data)
             elif item_ids[0] == Type.RADIOS:

@@ -314,8 +314,10 @@ class DecadePlaybackMenu(PlaybackMenu):
         """
         album_ids = []
         for year in self.__years:
-            album_ids += App().albums.get_compilations_for_year(year)
-            album_ids += App().albums.get_albums_for_year(year)
+            album_ids += App().albums.get_compilations_for_year(
+                year, self.storage_type)
+            album_ids += App().albums.get_albums_for_year(
+                year, self.storage_type)
         return album_ids
 
     def __play(self, action, variant):
