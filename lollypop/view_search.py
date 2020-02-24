@@ -18,7 +18,7 @@ from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
 from lollypop.search_local import LocalSearch
 from lollypop.view import View
-from lollypop.utils import get_network_available, escape
+from lollypop.utils import get_network_available, escape, noaccents
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -280,8 +280,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.show_placeholder(False)
             # If artist name matchs, add it to artists line
             if album.artist_ids:
-                artist = escape(album.artists[0].lower())
-                search = escape(self.__current_search.lower())
+                artist = escape(noaccents(album.artists[0]))
+                search = escape(noaccents(self.__current_search))
                 if artist.find(search) != -1:
                     self._on_match_artist(search,
                                           album.artist_ids[0],
