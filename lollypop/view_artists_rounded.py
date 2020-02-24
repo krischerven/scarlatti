@@ -20,6 +20,7 @@ from lollypop.define import App, Type, ViewType, OrderBy
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_font_height
+from lollypop.utils import get_default_storage_type
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -54,10 +55,11 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             FlowBoxView.populate(self, artist_ids)
 
         def load():
+            storage_type = get_default_storage_type()
             if App().settings.get_value("show-performers"):
-                ids = App().artists.get_performers()
+                ids = App().artists.get_performers([], storage_type)
             else:
-                ids = App().artists.get()
+                ids = App().artists.get([], storage_type)
             return ids
 
         if artist_ids:
@@ -156,7 +158,8 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param add as bool
         """
         if add:
-            artist_ids = App().artists.get_ids()
+            storage_type = get_default_storage_type()
+            artist_ids = App().artists.get_ids([], storage_type)
             # Can happen during scan
             if artist_id not in artist_ids:
                 return

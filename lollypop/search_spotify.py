@@ -20,7 +20,7 @@ from locale import getdefaultlocale
 
 from lollypop.logger import Logger
 from lollypop.utils import cancellable_sleep, get_network_available
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_default_storage_type
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
@@ -144,8 +144,9 @@ class SpotifySearch(GObject.Object):
             token = "Bearer %s" % self.__token
             helper = TaskHelper()
             helper.add_header("Authorization", token)
+            storage_type = get_default_storage_type()
             artist_ids = App().artists.get_randoms(
-                self.__MAX_ITEMS_PER_STORAGE_TYPE)
+                self.__MAX_ITEMS_PER_STORAGE_TYPE, storage_type)
             similar_ids = []
             # Get similars spotify ids
             for (artist_id, name, sortname) in artist_ids:

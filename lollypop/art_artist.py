@@ -17,7 +17,7 @@ from hashlib import md5
 from lollypop.define import ArtBehaviour, ArtSize, App, StorageType
 from lollypop.define import CACHE_PATH, ARTISTS_PATH, ARTISTS_WEB_PATH
 from lollypop.logger import Logger
-from lollypop.utils import emit_signal, escape
+from lollypop.utils import emit_signal, escape, get_default_storage_type
 
 
 class ArtistArt:
@@ -164,7 +164,9 @@ class ArtistArt:
         old = Gio.File.new_for_path(old_path)
         if not old.query_exists():
             return
-        for (artist_id, artist, *ignore) in App().artists.get():
+        storage_type = get_default_storage_type()
+        for (artist_id, artist, *ignore) in App().artists.get(
+                [], storage_type):
             for ext in ["jpg", "txt"]:
                 src_path = "%s/%s.%s" % (old_path, escape(artist), ext)
                 src = Gio.File.new_for_path(src_path)

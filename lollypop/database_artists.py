@@ -181,10 +181,11 @@ class ArtistsDatabase:
             result = sql.execute(request, (artist_id, storage_type))
             return len(list(itertools.chain(*result))) != 0
 
-    def get(self, genre_ids=[]):
+    def get(self, genre_ids, storage_type):
         """
             Get all available artists
             @param genre_ids as [int]
+            @param storage_type as StorageType
             @return [int, str, str]
         """
         genre_ids = remove_static(genre_ids)
@@ -194,7 +195,6 @@ class ArtistsDatabase:
             select = "artists.rowid, artists.name, artists.sortname"
         with SqlCursor(App().db) as sql:
             result = []
-            storage_type = get_default_storage_type()
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
                 result = sql.execute(
@@ -221,10 +221,11 @@ class ArtistsDatabase:
                 result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
 
-    def get_performers(self, genre_ids=[]):
+    def get_performers(self, genre_ids, storage_type):
         """
             Get all available performers
             @param genre_ids as [int]
+            @param storage_type as StorageType
             @return [int, str, str]
         """
         genre_ids = remove_static(genre_ids)
@@ -234,7 +235,6 @@ class ArtistsDatabase:
             select = "artists.rowid, artists.name, artists.sortname"
         with SqlCursor(App().db) as sql:
             result = []
-            storage_type = get_default_storage_type()
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
                 result = sql.execute(
@@ -261,14 +261,13 @@ class ArtistsDatabase:
                 result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
 
-    def get_randoms(self, limit):
+    def get_randoms(self, limit, storage_type):
         """
             Return random artists
             @param limit as int
             @return [int, str, str]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT artists.rowid,\
                                        artists.name,\
                                        artists.sortname\
@@ -282,15 +281,15 @@ class ArtistsDatabase:
             result = sql.execute(request, (storage_type, limit))
             return [(row[0], row[1], row[2]) for row in result]
 
-    def get_ids(self, genre_ids=[]):
+    def get_ids(self, genre_ids, storage_type):
         """
             Get all available album artists
             @param genre_ids as [int]
+            @param storage_type as StorageType
             @return artist ids as [int]
         """
         with SqlCursor(App().db) as sql:
             result = []
-            storage_type = get_default_storage_type()
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
                 result = sql.execute(

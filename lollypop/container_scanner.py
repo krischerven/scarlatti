@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.define import App, SelectionListMask, Type, ScanUpdate
+from lollypop.utils import get_default_storage_type
 
 
 class ScannerContainer:
@@ -36,10 +37,11 @@ class ScannerContainer:
             @param scan_update as ScanUpdate
         """
         if Type.GENRES_LIST in self.sidebar.selected_ids:
+            storage_type = get_default_storage_type()
             if scan_update == ScanUpdate.ADDED:
                 genre_name = App().genres.get_name(genre_id)
                 self.left_list.add_value((genre_id, genre_name, genre_name))
-            elif not App().artists.get_ids([genre_id]):
+            elif not App().artists.get_ids([genre_id], storage_type):
                 self.left_list.remove_value(genre_id)
 
     def __on_artist_updated(self, scanner, artist_id, scan_update):
@@ -58,7 +60,8 @@ class ScannerContainer:
             genre_ids = []
         else:
             return
-        artist_ids = App().artists.get_ids(genre_ids)
+        storage_type = get_default_storage_type()
+        artist_ids = App().artists.get_ids(genre_ids, storage_type)
         # We only test add, remove and absent is safe
         if artist_id not in artist_ids and scan_update == ScanUpdate.ADDED:
             return

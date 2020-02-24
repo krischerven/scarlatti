@@ -17,6 +17,7 @@ from random import shuffle
 from lollypop.logger import Logger
 from lollypop.define import App
 from lollypop.objects_album import Album
+from lollypop.utils import get_default_storage_type
 
 
 class ArtistProvider:
@@ -34,8 +35,9 @@ class ArtistProvider:
         (artist_id, db_name) = App().artists.get_id(artist)
         album_ids = App().albums.get_ids([artist_id], [])
         if album_ids:
+            storage_type = get_default_storage_type()
             genre_ids = App().albums.get_genre_ids(album_ids[0])
-            artist_ids = App().artists.get(genre_ids)
+            artist_ids = App().artists.get(genre_ids, storage_type)
             for (artist_id, name, sortname) in artist_ids:
                 artists.append((name, name, None))
         shuffle(artists)

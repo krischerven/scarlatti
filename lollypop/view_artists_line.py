@@ -134,7 +134,8 @@ class ArtistsRandomLineView(ArtistsLineView):
                 self.show()
 
         def load():
-            ids = App().artists.get_randoms(15)
+            storage_type = get_default_storage_type()
+            ids = App().artists.get_randoms(15, storage_type)
             return ids
 
         App().task_helper.run(load, callback=(on_load,))

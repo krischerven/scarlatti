@@ -18,7 +18,7 @@ from lollypop.define import App, Type, SelectionListMask, StorageType
 from lollypop.shown import ShownLists
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.view import View
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_default_storage_type
 
 
 class NoneView(View):
@@ -150,10 +150,11 @@ class ListsContainer:
             @param genre_ids as [int]
         """
         def load():
+            storage_type = get_default_storage_type()
             if App().settings.get_value("show-performers"):
-                artists = App().artists.get_performers(genre_ids)
+                artists = App().artists.get_performers(genre_ids, storage_type)
             else:
-                artists = App().artists.get(genre_ids)
+                artists = App().artists.get(genre_ids, storage_type)
             return artists
         selection_list.set_mask(SelectionListMask.ARTISTS)
         App().task_helper.run(load, callback=(selection_list.populate,))
