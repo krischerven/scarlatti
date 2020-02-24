@@ -260,6 +260,7 @@ class Album(Base):
         elif self.synced != len(self.tracks):
             App().spotify.load_tracks(self.mb_album_id, self.storage_type,
                                       cancellable)
+            self.reset_tracks()
         return True
 
     def set_synced(self, mask):
