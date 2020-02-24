@@ -55,7 +55,7 @@ class AlbumArt:
         """
         filename = ""
         try:
-            filename = self.get_album_cache_name(album)
+            filename = self.get_album_artwork_name(album)
             cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
                                                   filename,
                                                   width,
@@ -83,7 +83,7 @@ class AlbumArt:
         if album.id is None:
             return None
         try:
-            filename = self.get_album_cache_name(album) + ".jpg"
+            filename = self.get_album_artwork_name(album) + ".jpg"
             self.__update_album_uri(album)
             if album.storage_type & StorageType.EPHEMERAL:
                 store_path = ALBUMS_WEB_PATH + "/" + filename
@@ -169,7 +169,7 @@ class AlbumArt:
             return None
         width *= scale_factor
         height *= scale_factor
-        filename = self.get_album_cache_name(album)
+        filename = self.get_album_artwork_name(album)
         # Blur when reading from tags can be slow, so prefer cached version
         # Blur allows us to ignore width/height until we want CROP/CACHE
         optimized_blur = behaviour & (ArtBehaviour.BLUR |
@@ -248,7 +248,7 @@ class AlbumArt:
         """
         try:
             album = Album(album_id)
-            filename = self.get_album_cache_name(album) + ".jpg"
+            filename = self.get_album_artwork_name(album) + ".jpg"
             web_path = ALBUMS_WEB_PATH + "/" + filename
             store_path = ALBUMS_PATH + "/" + filename
             web_file = Gio.File.new_for_path(web_path)
@@ -265,7 +265,7 @@ class AlbumArt:
             @param album as Album
         """
         try:
-            if album.storage_type & StorageType.EPHEMERAL:
+            if not album.storage_type & StorageType.COLLECTION:
                 self.__save_web_album_artwork(data, album)
             elif album.uri == "" or is_readonly(album.uri):
                 self.__save_ro_album_artwork(data, album)
@@ -308,7 +308,7 @@ class AlbumArt:
         """
         try:
             from pathlib import Path
-            name = self.get_album_cache_name(album)
+            name = self.get_album_artwork_name(album)
             if width == -1 or height == -1:
                 for p in Path(CACHE_PATH).glob("%s*.jpg" % name):
                     p.unlink()
@@ -351,14 +351,18 @@ class AlbumArt:
             Logger.error("AlbumArt::pixbuf_from_tags(): %s" % e)
         return pixbuf
 
-    def get_album_cache_name(self, album):
+    def get_album_artwork_name(self, album):
         """
             Get a uniq string for album
             @param album as Album
         """
-        name = "%s_%s_%s" % (" ".join(album.artists),
-                             album.name,
-                             album.year)
+        if album.storage_type & (StorageType.COLLECTION |
+                                 StorageType.EXTERNAL):
+            name = "%s_%s_%s" % (" ".join(album.artists),
+                                 album.name,
+                                 album.year)
+        else:
+            name = album.mb_album_id
         return md5(name.encode("utf-8")).hexdigest()
 
 #######################
@@ -386,7 +390,7 @@ class AlbumArt:
             @param data as bytes
             @param album as Album
         """
-        filename = self.get_album_cache_name(album) + ".jpg"
+        filename = self.get_album_artwork_name(album) + ".jpg"
         store_path = ALBUMS_WEB_PATH + "/" + filename
         if data is None:
             f = Gio.File.new_for_path(store_path)
@@ -404,7 +408,7 @@ class AlbumArt:
             @param data as bytes
             @param album as Album
         """
-        filename = self.get_album_cache_name(album) + ".jpg"
+        filename = self.get_album_artwork_name(album) + ".jpg"
         store_path = ALBUMS_PATH + "/" + filename
         if data is None:
             f = Gio.File.new_for_path(store_path)
@@ -422,7 +426,7 @@ class AlbumArt:
             @param data as bytes
             @param album as Album
         """
-        filename = self.get_album_cache_name(album) + ".jpg"
+        filename = self.get_album_artwork_name(album) + ".jpg"
         store_path = ALBUMS_PATH + "/" + filename
         save_to_tags = App().settings.get_value("save-to-tags")
         # Multiple albums at same path
