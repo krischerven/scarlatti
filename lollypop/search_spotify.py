@@ -168,6 +168,7 @@ class SpotifySearch(GObject.Object):
                     self.__create_albums_from_albums_payload(
                                            [choice(albums_payload)],
                                            StorageType.SPOTIFY_SIMILARS,
+                                           True,
                                            cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search_similar_albums(): %s", e)
@@ -194,6 +195,7 @@ class SpotifySearch(GObject.Object):
                 self.__create_albums_from_albums_payload(
                                              decode["albums"]["items"],
                                              StorageType.SPOTIFY_NEW_RELEASES,
+                                             True,
                                              cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search_new_releases(): %s", e)
@@ -261,11 +263,36 @@ class SpotifySearch(GObject.Object):
                 self.__create_albums_from_albums_payload(
                                                  decode["albums"]["items"],
                                                  storage_type,
+                                                 False,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
         if not cancellable.is_cancelled():
             emit_signal(self, "search-finished")
+
+    def load_tracks(self, album_id, storage_type, cancellable):
+        """
+            Load tracks for album
+            @param album_id as str
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            uri = "https://api.spotify.com/v1/albums/%s" % album_id
+            token = "Bearer %s" % self.__token
+            helper = TaskHelper()
+            helper.add_header("Authorization", token)
+            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                tracks_payload = decode["tracks"]["items"]
+                for item in tracks_payload:
+                    item["album"] = decode
+                self.__create_from_tracks_payload(tracks_payload,
+                                                  storage_type,
+                                                  cancellable)
+        except Exception as e:
+            Logger.warning("SpotifySearch::load_tracks(): %s", e)
 
     def stop(self):
         """
@@ -439,11 +466,12 @@ class SpotifySearch(GObject.Object):
         return (new_albums, new_track_ids)
 
     def __create_albums_from_albums_payload(self, payload, storage_type,
-                                            cancellable):
+                                            load_tracks, cancellable):
         """
             Create albums from albums payload
             @param payload as {}
             @param storage_type as StorageType
+            @param load_tracks as bool
             @param cancellable as Gio.Cancellable
         """
         # Populate tracks
@@ -462,6 +490,9 @@ class SpotifySearch(GObject.Object):
              album_artist_ids,
              added_album_artist_ids) = self.__save_album(album_item,
                                                          storage_type)
+            if load_tracks:
+                album = Album(album_id)
+                album.load_tracks(cancellable)
             self.__download_cover(album_id,
                                   album_item["images"][0]["url"],
                                   storage_type,

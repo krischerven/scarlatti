@@ -247,6 +247,16 @@ class Album(Base):
             emit_signal(App().scanner, "album-updated", self.id,
                         ScanUpdate.REMOVED)
 
+    def load_tracks(self, cancellable):
+        """
+            Load album tracks from Spotify,
+            do not call this for Storage.COLLECTION
+            @param cancellable as Gio.Cancellable
+        """
+        if self.synced != len(self.tracks):
+            App().spotify.load_tracks(self.mb_album_id, self.storage_type,
+                                      cancellable)
+
     def set_synced(self, mask):
         """
             Set synced mask
