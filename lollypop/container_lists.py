@@ -216,6 +216,7 @@ class ListsContainer:
             self.left_list.hide()
             self.left_list.clear()
 
+        storage_type = get_default_storage_type()
         if selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST] and not\
                 App().window.is_adaptive:
             view = NoneView()
@@ -229,26 +230,26 @@ class ListsContainer:
         elif selected_id == Type.SEARCH:
             view = self.get_view_search()
         elif selected_id == Type.SUGGESTIONS:
-            view = self._get_view_suggestions()
+            view = self._get_view_suggestions(storage_type)
         elif selected_id in [Type.POPULARS,
                              Type.LOVED,
                              Type.RECENTS,
                              Type.LITTLE,
                              Type.RANDOMS,
                              Type.WEB]:
-            view = self._get_view_albums([selected_id], [])
+            view = self._get_view_albums([selected_id], [], storage_type)
         elif selected_id == Type.RADIOS:
             view = self._get_view_radios()
         elif selected_id == Type.YEARS:
-            view = self._get_view_albums_decades()
+            view = self._get_view_albums_decades(storage_type)
         elif selected_id == Type.GENRES:
-            view = self._get_view_genres()
+            view = self._get_view_genres(storage_type)
         elif selected_id == Type.ARTISTS:
-            view = self._get_view_artists_rounded()
+            view = self._get_view_artists_rounded(storage_type)
         elif selected_id == Type.ALL:
-            view = self._get_view_albums([selected_id], [])
+            view = self._get_view_albums([selected_id], [], storage_type)
         elif selected_id == Type.COMPILATIONS:
-            view = self._get_view_albums([selected_id], [])
+            view = self._get_view_albums([selected_id], [], storage_type)
         if view is not None and view not in self._stack.get_children():
             view.show()
             self._stack.add(view)

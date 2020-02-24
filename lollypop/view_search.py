@@ -33,17 +33,18 @@ class SearchGrid(Gtk.Grid):
         A grid for search
     """
 
-    def __init__(self):
+    def __init__(self, storage_type):
         """
             Init grid
+            @param storage_type as StorageType
         """
         Gtk.Grid.__init__(self)
         self.set_row_spacing(MARGIN)
         self.get_style_context().add_class("padding")
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_property("valign", Gtk.Align.START)
-        self.__artists_line_view = ArtistsSearchLineView()
-        self.__albums_line_view = AlbumsSearchLineView()
+        self.__artists_line_view = ArtistsSearchLineView(storage_type)
+        self.__albums_line_view = AlbumsSearchLineView(storage_type)
         self.__search_tracks_view = SearchTracksView()
         self.add(self.__albums_line_view)
         self.add(self.__artists_line_view)
@@ -79,9 +80,10 @@ class SearchStack(Gtk.Stack):
         A stack for search
     """
 
-    def __init__(self):
+    def __init__(self, storage_type):
         """
             Init stack
+            @param storage_type as StorageType
         """
         Gtk.Stack.__init__(self)
         self.get_style_context().add_class("padding")
@@ -89,7 +91,7 @@ class SearchStack(Gtk.Stack):
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.set_transition_duration(100)
         for i in range(0, 2):
-            grid = SearchGrid()
+            grid = SearchGrid(storage_type)
             grid.show()
             self.add(grid)
 
@@ -147,7 +149,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__cancellable = Gio.Cancellable()
         self.__banner = SearchBannerWidget()
         self.__banner.show()
-        self.__stack = SearchStack()
+        self.__stack = SearchStack(self.storage_type)
         self.__stack.show()
         self.add_widget(self.__stack, self.__banner)
         self.__banner.entry.connect("changed", self._on_search_changed)

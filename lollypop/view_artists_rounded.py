@@ -55,11 +55,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             FlowBoxView.populate(self, artist_ids)
 
         def load():
-            storage_type = get_default_storage_type()
             if App().settings.get_value("show-performers"):
-                ids = App().artists.get_performers([], storage_type)
+                ids = App().artists.get_performers([], self.storage_type)
             else:
-                ids = App().artists.get([], storage_type)
+                ids = App().artists.get([], self.storage_type)
             return ids
 
         if artist_ids:
@@ -123,7 +122,8 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param flowbox as Gtk.FlowBox
             @param child as Gtk.FlowBoxChild
         """
-        App().window.container.show_view([Type.ARTISTS], [child.data])
+        App().window.container.show_view([Type.ARTISTS], [child.data],
+                                         self.storage_type)
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """

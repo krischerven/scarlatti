@@ -69,13 +69,16 @@ class ViewsContainer:
         emit_signal(self, "can-go-back-changed", False)
         App().enable_special_shortcuts(False)
 
-    def show_view(self, item_ids, data=None):
+    def show_view(self, item_ids, data=None, storage_type=None):
         """
             Show view for item id
             @param item_ids as [int]
             @param data as object
+            @param storage_type as StorageType
         """
         view = None
+        if storage_type is None:
+            storage_type = get_default_storage_type()
         hide_selection_list = True
         if item_ids:
             if item_ids[0] in [Type.POPULARS,
@@ -86,7 +89,7 @@ class ViewsContainer:
                                Type.WEB]:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.SUGGESTIONS:
-                view = self._get_view_suggestions()
+                view = self._get_view_suggestions(storage_type)
             elif item_ids[0] == Type.SEARCH:
                 view = self.get_view_search(data)
             elif item_ids[0] == Type.INFO:
@@ -99,15 +102,15 @@ class ViewsContainer:
                 view = self._get_view_lyrics()
             elif item_ids[0] == Type.GENRES:
                 if data is None:
-                    view = self._get_view_genres()
+                    view = self._get_view_genres(storage_type)
                 else:
                     view = self._get_view_albums([data], [])
             elif item_ids[0] == Type.ALBUM:
                 hide_selection_list = False
-                view = self._get_view_album(data)
+                view = self._get_view_album(data, storage_type)
             elif item_ids[0] == Type.YEARS:
                 if data is None:
-                    view = self._get_view_albums_decades()
+                    view = self._get_view_albums_decades(storage_type)
                 else:
                     view = self._get_view_albums_years(data)
             elif item_ids[0] == Type.PLAYLISTS:
@@ -129,7 +132,7 @@ class ViewsContainer:
             elif item_ids[0] == Type.COMPILATIONS:
                 view = self._get_view_albums(item_ids, [])
             elif item_ids[0] == Type.ARTISTS:
-                view = self._get_view_artists([], data)
+                view = self._get_view_artists([], data, storage_type)
         self._sidebar.select_ids(item_ids, False)
         if hide_selection_list:
             self._hide_right_list()
@@ -230,12 +233,12 @@ class ViewsContainer:
         view.show()
         return view
 
-    def _get_view_artists_rounded(self):
+    def _get_view_artists_rounded(self, storage_type):
         """
             Get rounded artists view
-            @return view
+            @param storage_type as StorageType
+            @return RoundedArtistsViewWithBanner
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_artists_rounded import RoundedArtistsViewWithBanner
         view = RoundedArtistsViewWithBanner(storage_type)
         self._stack.add(view)
@@ -243,13 +246,14 @@ class ViewsContainer:
         view.show()
         return view
 
-    def _get_view_artists(self, genre_ids, artist_ids):
+    def _get_view_artists(self, genre_ids, artist_ids, storage_type):
         """
             Get artists view for genres/artists
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
+            @return ArtistViewBox/ArtistViewList
         """
-        storage_type = get_default_storage_type()
         if App().settings.get_value("show-artist-tracks"):
             from lollypop.view_artist_list import ArtistViewList
             view = ArtistViewList(genre_ids, artist_ids, storage_type)
@@ -260,34 +264,37 @@ class ViewsContainer:
         view.show()
         return view
 
-    def _get_view_suggestions(self):
+    def _get_view_suggestions(self, storage_type):
         """
             Get home view
+            @param storage_type as StorageType
+            @return SuggestionsView
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_suggestions import SuggestionsView
         view = SuggestionsView(storage_type)
         view.populate()
         view.show()
         return view
 
-    def _get_view_albums_decades(self):
+    def _get_view_albums_decades(self, storage_type):
         """
             Get album view for decades
+            @param storage_type as StorageType
+            @return DecadesBoxView
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_decades_box import DecadesBoxView
         view = DecadesBoxView(storage_type)
         view.populate()
         view.show()
         return view
 
-    def _get_view_album(self, album):
+    def _get_view_album(self, album, storage_type):
         """
             Show album
             @param album as Album
+            @param storage_type as StorageType
+            @return AlbumView
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_album import AlbumView
         view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED |\
             ViewType.OVERLAY | ViewType.ALBUM
@@ -295,36 +302,39 @@ class ViewsContainer:
         view.populate()
         return view
 
-    def _get_view_genres(self):
+    def _get_view_genres(self, storage_type):
         """
             Get view for genres
+            @param storage_type as StorageType
+            @return GenresBoxView
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_genres_box import GenresBoxView
         view = GenresBoxView(storage_type)
         view.populate()
         view.show()
         return view
 
-    def _get_view_albums_years(self, years):
+    def _get_view_albums_years(self, years, storage_type):
         """
             Get album view for years
             @param years as [int]
+            @param storage_type as StorageType
+            @return AlbumsYearsBoxView
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_albums_box import AlbumsYearsBoxView
         view_type = ViewType.SCROLLED
         view = AlbumsYearsBoxView([Type.YEARS], years, storage_type, view_type)
         view.populate()
         return view
 
-    def _get_view_albums(self, genre_ids, artist_ids):
+    def _get_view_albums(self, genre_ids, artist_ids, storage_type):
         """
             Get albums view for genres/artists
             @param genre_ids as [int]
-            @param is compilation as bool
+            @param artist_ids as [int]
+            @param storage_type as StorageType
+            @return AlbumsGenresBoxView
         """
-        storage_type = get_default_storage_type()
         from lollypop.view_albums_box import AlbumsGenresBoxView
         view_type = ViewType.SCROLLED
         view = AlbumsGenresBoxView(genre_ids, artist_ids,
@@ -336,6 +346,7 @@ class ViewsContainer:
         """
             Show albums for device at index
             @param index as int
+            @return AlbumsDeviceBoxView
         """
         from lollypop.view_albums_box import AlbumsDeviceBoxView
         view_type = ViewType.SCROLLED
@@ -369,6 +380,7 @@ class ViewsContainer:
         """
             Show settings views
             @param item_id as int
+            @return SettingsView/SettingsChildView
         """
         if item_id == Type.SETTINGS:
             from lollypop.view_settings import SettingsView
@@ -377,7 +389,3 @@ class ViewsContainer:
             from lollypop.view_settings import SettingsChildView
             view = SettingsChildView(item_id, ViewType.SCROLLED)
         return view
-
-############
-# PRIVATE  #
-############

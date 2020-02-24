@@ -145,11 +145,11 @@ class ArtistsSearchLineView(ArtistsLineView):
     """
         Line view for search
     """
-    def __init__(self):
+    def __init__(self, storage_type):
         """
             Init artist view
+            @param storage_type as StorageType
         """
-        storage_type = get_default_storage_type()
         ArtistsLineView.__init__(self, storage_type,
                                  ViewType.SEARCH | ViewType.SCROLLED)
         self.__artist_ids = []
