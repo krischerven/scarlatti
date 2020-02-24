@@ -28,11 +28,13 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
+    def __init__(self, genre_ids, artist_ids, storage_type,
+                 view_type=ViewType.DEFAULT):
         """
             Init artist banner
             @parma genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
             @param view_type as ViewType (Unused)
         """
         BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
@@ -266,7 +268,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
             Set image as +/-
         """
-        album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids)
+        album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids,
+                                         self.__storage_type)
         add = set(App().player.album_ids) & set(album_ids) != set(album_ids)
         if add:
             # Translators: artist context

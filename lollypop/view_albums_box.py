@@ -17,7 +17,7 @@ from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
-from lollypop.define import App, Type, ViewType, ScanUpdate
+from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available
 from lollypop.utils import get_font_height
@@ -33,17 +33,20 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, genre_ids, artist_ids, view_type=ViewType.DEFAULT):
+    def __init__(self, genre_ids, artist_ids, storage_type,
+                 view_type=ViewType.DEFAULT):
         """
             Init album view
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type)
+        FlowBoxView.__init__(self, storage_type, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
+        self._storage_type = storage_type
         self.__populate_wanted = True
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
@@ -82,7 +85,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 self.show_placeholder(True)
 
         def load():
-            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids)
+            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
+                                          self.storage_type)
             return [Album(album_id, self._genre_ids, self._artist_ids)
                     for album_id in album_ids]
 
@@ -99,7 +103,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param cover_uri as int
         """
         widget = AlbumSimpleWidget(album, self._genre_ids,
-                                   self._artist_ids, self._view_type,
+                                   self._artist_ids, self.view_type,
                                    get_font_height())
         self._box.insert(widget, position)
         widget.show()
@@ -120,6 +124,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         return {"genre_ids": self._genre_ids,
                 "artist_ids": self._artist_ids,
+                "storage_type": self._storage_type,
                 "view_type": self.view_type}
 
 #######################
@@ -134,7 +139,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         if self.destroyed:
             return None
         widget = AlbumSimpleWidget(value,  self._genre_ids, self._artist_ids,
-                                   self._view_type, self.font_height)
+                                   self.view_type, self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -147,7 +152,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(child.data, self._view_type, App().window.is_adaptive)
+        menu = AlbumMenu(child.data, self.view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
     def _on_album_updated(self, scanner, album_id, scan_update):
@@ -158,7 +163,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param scan_update as ScanUpdate
         """
         if scan_update == ScanUpdate.ADDED:
-            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids)
+            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
+                                          self.storage_type)
             if album_id in album_ids:
                 index = album_ids.index(album_id)
                 self.insert_album(Album(album_id), index)
@@ -209,14 +215,15 @@ class AlbumsGenresBoxView(AlbumsBoxView):
         Show albums in a box for genres (static or not)
     """
 
-    def __init__(self, genre_ids, artist_ids, view_type):
+    def __init__(self, genre_ids, artist_ids, storage_type, view_type):
         """
             Init album view
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsBoxView.__init__(self, genre_ids, artist_ids,
+        AlbumsBoxView.__init__(self, genre_ids, artist_ids, storage_type,
                                view_type |
                                ViewType.OVERLAY |
                                ViewType.SCROLLED)
@@ -250,14 +257,16 @@ class AlbumsYearsBoxView(AlbumsGenresBoxView):
         Years album box
     """
 
-    def __init__(self, genre_ids, artist_ids, view_type):
+    def __init__(self, genre_ids, artist_ids, storage_type, view_type):
         """
             Init view
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsGenresBoxView.__init__(self, genre_ids, artist_ids, view_type)
+        AlbumsGenresBoxView.__init__(self, genre_ids, artist_ids,
+                                     storage_type, view_type)
 
     def populate(self):
         """
@@ -288,7 +297,7 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
             @param view_type as ViewType
             @param index as int
         """
-        AlbumsBoxView.__init__(self, [], [], view_type)
+        AlbumsBoxView.__init__(self, [], [], StorageType.COLLECTION, view_type)
         self.add_widget(self._box)
         self.__index = index
 

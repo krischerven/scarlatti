@@ -14,34 +14,35 @@
 from lollypop.define import App, Type
 
 
-def get_album_ids_for(genre_ids, artist_ids):
+def get_album_ids_for(genre_ids, artist_ids, storage_type):
     """
         Get album ids view for genres/artists
         @param genre_ids as [int]
         @param artist_ids as [int]
+        @param storage_type as StorageType
         @return [int]
     """
     items = []
     if genre_ids and genre_ids[0] == Type.POPULARS:
-        items = App().albums.get_rated()
+        items = App().albums.get_rated(storage_type)
         count = 100 - len(items)
-        for album in App().albums.get_populars(count):
+        for album in App().albums.get_populars(storage_type, count):
             if album not in items:
                 items.append(album)
     elif genre_ids and genre_ids[0] == Type.LOVED:
-        items = App().albums.get_loved_albums()
+        items = App().albums.get_loved_albums(storage_type)
     elif genre_ids and genre_ids[0] == Type.RECENTS:
-        items = App().albums.get_recents()
+        items = App().albums.get_recents(storage_type)
     elif genre_ids and genre_ids[0] == Type.LITTLE:
-        items = App().albums.get_little_played()
+        items = App().albums.get_little_played(storage_type)
     elif genre_ids and genre_ids[0] == Type.RANDOMS:
-        items = App().albums.get_randoms()
+        items = App().albums.get_randoms(storage_type)
     elif genre_ids and genre_ids[0] == Type.COMPILATIONS:
-        items = App().albums.get_compilation_ids([])
+        items = App().albums.get_compilation_ids([], storage_type)
     elif genre_ids and not artist_ids:
         if App().settings.get_value("show-compilations-in-album-view"):
-            items = App().albums.get_compilation_ids(genre_ids)
-        items += App().albums.get_ids([], genre_ids)
+            items = App().albums.get_compilation_ids(genre_ids, storage_type)
+        items += App().albums.get_ids([], genre_ids, storage_type)
     else:
-        items = App().albums.get_ids(artist_ids, genre_ids)
+        items = App().albums.get_ids(artist_ids, genre_ids, storage_type)
     return items

@@ -24,16 +24,20 @@ class ArtistViewList(LazyLoadingView):
         Show artist albums in a list with tracks
     """
 
-    def __init__(self, genre_ids, artist_ids):
+    def __init__(self, genre_ids, artist_ids, storage_type):
         """
             Init ArtistView
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
         """
-        LazyLoadingView.__init__(self, ViewType.SCROLLED |
-                                 ViewType.OVERLAY | ViewType.ARTIST)
+        LazyLoadingView.__init__(self, storage_type,
+                                 ViewType.SCROLLED |
+                                 ViewType.OVERLAY |
+                                 ViewType.ARTIST)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
+        self.__storage_type = storage_type
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
         self.__banner.show()
         self.__list = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN * 4)
@@ -44,7 +48,9 @@ class ArtistViewList(LazyLoadingView):
         """
             Populate list
         """
-        album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids)
+        album_ids = App().albums.get_ids(self.__artist_ids,
+                                         self.__genre_ids,
+                                         self.storage_type)
         LazyLoadingView.populate(self, album_ids)
 
     @property
@@ -53,7 +59,9 @@ class ArtistViewList(LazyLoadingView):
             Get default args for __class__
             @return {}
         """
-        return {"genre_ids": self.__genre_ids, "artist_ids": self.__artist_ids}
+        return {"genre_ids": self.__genre_ids,
+                "artist_ids": self.__artist_ids,
+                "storage_type": self.storage_type}
 
     @property
     def scroll_shift(self):

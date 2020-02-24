@@ -13,6 +13,7 @@
 
 from lollypop.define import App, Repeat
 from lollypop.objects_album import Album
+from lollypop.utils import get_default_storage_type
 
 
 class AutoRandomPlayer:
@@ -31,7 +32,8 @@ class AutoRandomPlayer:
             Get next album to add
             @return Album
         """
-        for album_id in App().albums.get_randoms(limit=2):
+        storage_type = get_default_storage_type()
+        for album_id in App().albums.get_randoms(storage_type, limit=2):
             if album_id != self.current_track.album.id:
                 return Album(album_id)
         return None

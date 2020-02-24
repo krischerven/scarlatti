@@ -88,7 +88,8 @@ class LyricsView(View, SignalsHelper):
         """
             Init view
         """
-        View.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        View.__init__(self, StorageType.COLLECTION,
+                      ViewType.SCROLLED | ViewType.OVERLAY)
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
         self.__lyrics_text = ""

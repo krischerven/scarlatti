@@ -24,12 +24,14 @@ class DecadesBoxView(FlowBoxView):
         Show decades in a FlowBox
     """
 
-    def __init__(self):
+    def __init__(self, storage_type):
         """
             Init decade view
+            @param storage_type as StorageType
         """
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
-        FlowBoxView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        FlowBoxView.__init__(self, storage_type,
+                             ViewType.SCROLLED | ViewType.OVERLAY)
         self._empty_icon_name = get_icon_name(Type.YEARS)
         self.__banner = AlbumsBannerWidget([Type.YEARS], [], self._view_type)
         self.__banner.show()
@@ -44,7 +46,7 @@ class DecadesBoxView(FlowBoxView):
             FlowBoxView.populate(self, items)
 
         def load():
-            (years, unknown) = App().albums.get_years()
+            (years, unknown) = App().albums.get_years(self.storage_type)
             decades = []
             decade = []
             current_d = None

@@ -29,12 +29,13 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type):
+    def __init__(self, storage_type, view_type):
         """
             Init artist view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type)
+        FlowBoxView.__init__(self, storage_type, view_type)
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return [
@@ -70,7 +71,8 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             Get default args for __class__
             @return {}
         """
-        return {"view_type": self.view_type}
+        return {"view_type": self.view_type,
+                "storage_type": self.storage_type}
 
 #######################
 # PROTECTED           #
@@ -189,12 +191,14 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
         Show rounded artist view with a banner
     """
 
-    def __init__(self):
+    def __init__(self, storage_type):
         """
             Init artist view
+            @param storage_type as StorageType
         """
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
-        RoundedArtistsView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        RoundedArtistsView.__init__(self, storage_type,
+                                    ViewType.SCROLLED | ViewType.OVERLAY)
         self.__banner = AlbumsBannerWidget([Type.ARTISTS], [], self._view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)

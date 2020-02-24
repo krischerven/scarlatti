@@ -16,7 +16,7 @@ from time import time
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType
 from lollypop.logger import Logger
-from lollypop.utils import get_default_storage_type, remove_static
+from lollypop.utils import remove_static
 
 
 class AlbumsDatabase:
@@ -644,14 +644,14 @@ class AlbumsDatabase:
             result = sql.execute("SELECT uri FROM albums")
             return list(itertools.chain(*result))
 
-    def get_rated(self, limit=100):
+    def get_rated(self, storage_type, limit=100):
         """
             Get albums with user rating >= 4
             @param limit as int
+            @param storage_type as StorageType
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid\
                        FROM albums\
                        WHERE rate>=4 AND loved != -1 AND storage_type & ?\
@@ -659,14 +659,14 @@ class AlbumsDatabase:
             result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_populars(self, limit=100):
+    def get_populars(self, storage_type, limit=100):
         """
             Get popular albums
+            @param storage_type as StorageType
             @param limit as int
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid FROM albums\
                        WHERE popularity!=0 AND loved != -1 AND\
                        storage_type & ?\
@@ -675,14 +675,14 @@ class AlbumsDatabase:
                                  (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_populars_at_the_moment(self, limit=100):
+    def get_populars_at_the_moment(self, storage_type, limit=100):
         """
             Get popular albums at the moment
+            @param storage_type as StorageType
             @param limit as int
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid\
                        FROM albums, albums_timed_popularity\
                        WHERE albums.storage_type & ? AND\
@@ -695,27 +695,27 @@ class AlbumsDatabase:
                 return album_ids
         return []
 
-    def get_loved_albums(self):
+    def get_loved_albums(self, storage_type):
         """
             Get loved albums
+            @param storage_type as StorageType
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
-            request = "SELECT DISTINCT albums.rowid\
+            request = "SELECT albums.rowid\
                        FROM albums\
                        WHERE loved=1 AND\
                        storage_type & ? ORDER BY popularity DESC"
             result = sql.execute(request, (storage_type,))
             return list(itertools.chain(*result))
 
-    def get_recents(self):
+    def get_recents(self, storage_type):
         """
             Return recent albums
+            @param storage_type as StorageType
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid FROM albums\
                        WHERE albums.loved != -1 AND\
                        albums.storage_type & ?\
@@ -723,15 +723,15 @@ class AlbumsDatabase:
             result = sql.execute(request, (storage_type,))
             return list(itertools.chain(*result))
 
-    def get_randoms_by_albums(self, genre_id=None, limit=100):
+    def get_randoms_by_albums(self, storage_type, genre_id=None, limit=100):
         """
             Return random albums
+            @param storage_type as StorageType
             @param genre_id as int
             @param limit as int
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             if genre_id is not None:
                 filter = (storage_type, genre_id, limit)
                 request = "SELECT DISTINCT albums.rowid\
@@ -750,15 +750,15 @@ class AlbumsDatabase:
             albums = list(itertools.chain(*result))
             return albums
 
-    def get_randoms_by_artists(self, genre_id=None, limit=100):
+    def get_randoms_by_artists(self, storage_type, genre_id=None, limit=100):
         """
             Return random albums
+            @param storage_type as StorageType
             @param genre_id as int
             @param limit as int
             @return [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             if genre_id is not None:
                 filter = (storage_type, genre_id, limit * 2, limit)
                 request = "SELECT rowid, artist_id FROM (\
@@ -786,17 +786,20 @@ class AlbumsDatabase:
                 album_ids.append(album_id)
             return album_ids
 
-    def get_randoms(self, genre_id=None, limit=100):
+    def get_randoms(self, storage_type, genre_id=None, limit=100):
         """
             Return random albums
+            @param storage_type as StorageType
             @param genre_id as int
             @param limit as int
             @return [int]
         """
-        album_ids = self.get_randoms_by_artists(genre_id, limit)
+        album_ids = self.get_randoms_by_artists(storage_type, genre_id, limit)
         diff = limit - len(album_ids)
         if diff > 0:
-            album_ids += self.get_randoms_by_albums(genre_id, diff)
+            album_ids += self.get_randoms_by_albums(storage_type,
+                                                    genre_id,
+                                                    diff)
         return list(set(album_ids))
 
     def get_disc_names(self, album_id, disc):
@@ -936,11 +939,13 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def get_ids(self, artist_ids, genre_ids, ignore=False, orderby=None):
+    def get_ids(self, artist_ids, genre_ids, storage_type,
+                ignore=False, orderby=None):
         """
             Get albums ids
             @param artist_ids as [int]
             @param genre_ids as [int]
+            @param storage_type as StorageType
             @param ignore as bool => ignore albums with loved == 1
             @param orderby as OrderBy
             @return albums ids as [int]
@@ -973,7 +978,6 @@ class AlbumsDatabase:
 
         with SqlCursor(App().db) as sql:
             result = []
-            storage_type = get_default_storage_type()
             # Get albums for all artists
             if not artist_ids and not genre_ids:
                 request = "SELECT DISTINCT albums.rowid\
@@ -1041,10 +1045,11 @@ class AlbumsDatabase:
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
-    def get_compilation_ids(self, genre_ids, ignore=False):
+    def get_compilation_ids(self, genre_ids, storage_type, ignore=False):
         """
             Get all compilations
             @param genre_ids as [int]
+            @param storage_type as StorageType
             @param ignore as bool => ignore albums with loved == 1
             @return [int]
         """
@@ -1052,7 +1057,6 @@ class AlbumsDatabase:
         with SqlCursor(App().db) as sql:
             order = " ORDER BY albums.name, albums.timestamp"
             result = []
-            storage_type = get_default_storage_type()
             # Get all compilations
             if not genre_ids or genre_ids[0] == Type.ALL:
                 filters = (storage_type, Type.COMPILATIONS)
@@ -1126,13 +1130,13 @@ class AlbumsDatabase:
                                  (album_id,))
             return list(itertools.chain(*result))
 
-    def get_little_played(self):
+    def get_little_played(self, storage_type):
         """
             Return random albums little played
+            @param storage_type as StorageType
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             result = sql.execute("SELECT album_id\
                                   FROM tracks\
                                   WHERE storage_type & ?\
@@ -1142,13 +1146,13 @@ class AlbumsDatabase:
                                  (storage_type,))
             return list(itertools.chain(*result))
 
-    def get_years(self):
+    def get_years(self, storage_type):
         """
             Return all albums years and if unknown album exists
+            @param storage_type as StorageType
             @return ([int], bool)
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             result = sql.execute("SELECT albums.year\
                                   FROM albums\
                                   WHERE storage_type & ?",
@@ -1162,15 +1166,15 @@ class AlbumsDatabase:
                     years.append(year)
             return (years, unknown)
 
-    def get_albums_for_year(self, year, limit=-1):
+    def get_albums_for_year(self, year, storage_type, limit=-1):
         """
             Return albums for year
             @param year as int
+            @param storage_type as StorageType
             @param limit as int
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             if limit != -1:
                 result = sql.execute("SELECT albums.rowid\
                                       FROM albums\
@@ -1201,15 +1205,15 @@ class AlbumsDatabase:
                 result = sql.execute(request, filter)
             return list(itertools.chain(*result))
 
-    def get_compilations_for_year(self, year, limit=-1):
+    def get_compilations_for_year(self, year, storage_type, limit=-1):
         """
             Return compilations for year
             @param year as int
+            @param storage_type as StorageType
             @param limit as int
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            storage_type = get_default_storage_type()
             if limit != -1:
                 result = sql.execute("SELECT albums.rowid\
                                       FROM albums, album_artists\

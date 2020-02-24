@@ -26,12 +26,13 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         Lazy loading FlowBox
     """
 
-    def __init__(self, view_type=ViewType.SCROLLED):
+    def __init__(self, storage_type, view_type=ViewType.SCROLLED):
         """
             Init flowbox view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type)
+        LazyLoadingView.__init__(self, storage_type, view_type)
         FilteringHelper.__init__(self)
         self._items = []
         self.__hovered_child = None

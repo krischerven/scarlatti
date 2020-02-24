@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, Type, MARGIN, ViewType, StorageType
 from lollypop.objects_album import Album
-from lollypop.utils import get_network_available
+from lollypop.utils import get_network_available, get_default_storage_type
 from lollypop.helper_signals import signals
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.view_albums_box import AlbumsBoxView
@@ -29,12 +29,13 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 
     ITEMS = 20
 
-    def __init__(self, view_type):
+    def __init__(self, storage_type, view_type):
         """
             Init view
             @param view_type as ViewType
+            @param storage_type as StorageType
         """
-        AlbumsBoxView.__init__(self, [], [], view_type)
+        AlbumsBoxView.__init__(self, [], [], storage_type, view_type)
         self.set_property("valign", Gtk.Align.START)
         self._label = Gtk.Label.new()
         self._label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -110,12 +111,13 @@ class AlbumsArtistLineView(AlbumsLineView):
         Artist album line
     """
 
-    def __init__(self,  album, artist_id, view_type):
+    def __init__(self,  album, artist_id, storage_type, view_type):
         """
             Init view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsLineView.__init__(self, view_type)
+        AlbumsLineView.__init__(self, storage_type, view_type)
         self.__album = album
         self.__artist_id = artist_id
 
@@ -149,12 +151,13 @@ class AlbumsPopularsLineView(AlbumsLineView):
         Populars albums line
     """
 
-    def __init__(self, view_type):
+    def __init__(self, storage_type, view_type):
         """
             Init view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsLineView.__init__(self, view_type)
+        AlbumsLineView.__init__(self, storage_type, view_type)
 
     def populate(self):
         """
@@ -164,7 +167,9 @@ class AlbumsPopularsLineView(AlbumsLineView):
             AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = App().albums.get_populars_at_the_moment(self.ITEMS)
+            storage_type = get_default_storage_type()
+            album_ids = App().albums.get_populars_at_the_moment(storage_type,
+                                                                self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
         self._label.set_text(_("Popular albums at the moment"))
@@ -176,12 +181,13 @@ class AlbumsRandomGenresLineView(AlbumsLineView):
         Populars albums line
     """
 
-    def __init__(self, view_type):
+    def __init__(self, storage_type, view_type):
         """
             Init view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsLineView.__init__(self, view_type)
+        AlbumsLineView.__init__(self, storage_type, view_type)
 
     def populate(self):
         """
@@ -193,7 +199,10 @@ class AlbumsRandomGenresLineView(AlbumsLineView):
         def load():
             (genre_id, genre) = App().genres.get_random()
             GLib.idle_add(self._label.set_text, genre)
-            album_ids = App().albums.get_randoms(genre_id, self.ITEMS)
+            storage_type = get_default_storage_type()
+            album_ids = App().albums.get_randoms(storage_type,
+                                                 genre_id,
+                                                 self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
         App().task_helper.run(load, callback=(on_load,))
@@ -207,7 +216,9 @@ class AlbumsSearchLineView(AlbumsLineView):
         """
             Init view
         """
-        AlbumsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
+        storage_type = get_default_storage_type()
+        AlbumsLineView.__init__(self, storage_type, ViewType.SEARCH |
+                                ViewType.SCROLLED)
         self.__album_ids = []
         self._label.set_text(_("Albums"))
 
@@ -237,13 +248,14 @@ class AlbumsSpotifyLineView(AlbumsLineView):
     """
 
     @signals
-    def __init__(self, text, view_type):
+    def __init__(self, text, storage_type, view_type):
         """
             Init view
             @param text as str
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsLineView.__init__(self, view_type)
+        AlbumsLineView.__init__(self, storage_type, view_type)
         self._label.set_text(text)
         self.__cancellable = Gio.Cancellable()
         self.__storage_type = StorageType.NONE

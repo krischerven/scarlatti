@@ -29,12 +29,14 @@ class SuggestionsView(FilteringHelper, View):
         View showing suggestions to user
     """
 
-    def __init__(self, view_type=ViewType.DEFAULT):
+    def __init__(self, storage_type, view_type=ViewType.DEFAULT):
         """
             Init view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        View.__init__(self, view_type | ViewType.SCROLLED | ViewType.OVERLAY)
+        View.__init__(self, storage_type,
+                      view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         FilteringHelper.__init__(self)
         self.__grid = Gtk.Grid()
         self.__grid.get_style_context().add_class("padding")
@@ -47,7 +49,7 @@ class SuggestionsView(FilteringHelper, View):
         else:
             album = TodayBannerWidget.get_today_album()
             if album is not None:
-                self.__banner = TodayBannerWidget(album, self._view_type)
+                self.__banner = TodayBannerWidget(album, self.view_type)
                 self.__banner.show()
             else:
                 self.__banner = None
@@ -57,21 +59,23 @@ class SuggestionsView(FilteringHelper, View):
         """
             Populate view
         """
-        for _class in [AlbumsPopularsLineView,
-                       ArtistsRandomLineView,
-                       AlbumsRandomGenresLineView]:
-            view = _class(self._view_type)
+        for cls in [AlbumsPopularsLineView,
+                    ArtistsRandomLineView,
+                    AlbumsRandomGenresLineView]:
+            view = cls(self.storage_type, self.view_type)
             view.populate()
             self.__grid.add(view)
         if get_network_available("SPOTIFY") and\
                 get_network_available("YOUTUBE"):
             from lollypop.view_albums_line import AlbumsSpotifyLineView
             spotify_view = AlbumsSpotifyLineView(_("You might like this"),
-                                                 self._view_type)
+                                                 self.storage_type,
+                                                 self.view_type)
             spotify_view.populate(StorageType.SPOTIFY_SIMILARS)
             self.__grid.add(spotify_view)
             spotify_view = AlbumsSpotifyLineView(_("New albums from Spotify"),
-                                                 self._view_type)
+                                                 self.storage_type,
+                                                 self.view_type)
             spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
             self.__grid.add(spotify_view)
 

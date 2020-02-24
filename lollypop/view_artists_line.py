@@ -14,6 +14,7 @@ from gi.repository import Gtk, Pango, GLib
 
 from gettext import gettext as _
 
+from lollypop.utils import get_default_storage_type
 from lollypop.define import App, MARGIN, ViewType
 from lollypop.helper_horizontal_scrolling import HorizontalScrollingHelper
 from lollypop.view_artists_rounded import RoundedArtistsView
@@ -24,12 +25,13 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
         Show artist in an horizontal flowbox
     """
 
-    def __init__(self, view_type):
+    def __init__(self, storage_type, view_type):
         """
             Init artist view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        RoundedArtistsView.__init__(self, view_type)
+        RoundedArtistsView.__init__(self, storage_type, view_type)
         self.__artist_ids = []
         self.set_row_spacing(5)
         self._label = Gtk.Label.new()
@@ -112,12 +114,13 @@ class ArtistsRandomLineView(ArtistsLineView):
     """
         Line view showing 6 random artists
     """
-    def __init__(self, view_type):
+    def __init__(self, storage_type, view_type):
         """
             Init artist view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        ArtistsLineView.__init__(self, view_type)
+        ArtistsLineView.__init__(self, storage_type, view_type)
         self._label.set_text(_("Why not listen to?"))
 
     def populate(self):
@@ -145,7 +148,9 @@ class ArtistsSearchLineView(ArtistsLineView):
         """
             Init artist view
         """
-        ArtistsLineView.__init__(self, ViewType.SEARCH | ViewType.SCROLLED)
+        storage_type = get_default_storage_type()
+        ArtistsLineView.__init__(self, storage_type,
+                                 ViewType.SEARCH | ViewType.SCROLLED)
         self.__artist_ids = []
         self._label.set_text(_("Artists"))
 

@@ -21,6 +21,7 @@ from lollypop.widgets_banner import BannerWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
+from lollypop.utils import get_default_storage_type
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -45,7 +46,8 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             Logger.warning("TodayBannerWidget::__get_today_album(): %s", e)
         try:
             if date != current_date:
-                album_id = App().albums.get_randoms(None, 1)[0]
+                storage_type = get_default_storage_type()
+                album_id = App().albums.get_randoms(storage_type, None, 1)[0]
                 dump((current_date, album_id),
                      open(LOLLYPOP_DATA_PATH + "/today.bin", "wb"))
             return Album(album_id)

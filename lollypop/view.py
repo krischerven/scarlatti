@@ -25,13 +25,15 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type=ViewType.DEFAULT):
+    def __init__(self, storage_type, view_type=ViewType.DEFAULT):
         """
             Init view
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
         AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
+        self.__storage_type = storage_type
         self._view_type = view_type
         self.__scrolled_position = None
         self.__destroyed = False
@@ -182,11 +184,20 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             self.__scrolled_position = position
 
     @property
+    def storage_type(self):
+        """
+            Get storage type
+            @return StorageType
+        """
+        return self.__storage_type
+
+    @property
     def view_type(self):
         """
             View type less sizing
             @return ViewType
         """
+        # FIXME Supprimer ici et ajouter dans *args
         return self._view_type & ~(ViewType.ADAPTIVE | ViewType.SMALL)
 
     @property

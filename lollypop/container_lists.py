@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 
 from lollypop.logger import Logger
 from lollypop.selectionlist import SelectionList
-from lollypop.define import App, Type, SelectionListMask
+from lollypop.define import App, Type, SelectionListMask, StorageType
 from lollypop.shown import ShownLists
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.view import View
@@ -25,6 +25,9 @@ class NoneView(View):
     """
         A view that do nothing
     """
+
+    def __init__(self):
+        View.__init__(self, StorageType.COLLECTION)
 
     @property
     def args(self):
