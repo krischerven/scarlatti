@@ -207,16 +207,6 @@ class Database:
         except:
             exit(-1)
 
-    def drop_db(self):
-        """
-            Drop database
-        """
-        try:
-            f = Gio.File.new_for_path(self.DB_PATH)
-            f.trash()
-        except Exception as e:
-            Logger.error("Database::drop_db():", e)
-
 #######################
 # PRIVATE             #
 #######################

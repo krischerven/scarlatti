@@ -15,8 +15,8 @@ from gi.repository import Gtk, GLib
 from gettext import ngettext as ngettext
 
 from lollypop.define import App, ScanType
+from lollypop.sqlcursor import SqlCursor
 from lollypop.database_history import History
-from lollypop.database import Database
 from lollypop.logger import Logger
 
 
@@ -234,8 +234,14 @@ class CollectionsSettingsWidget(Gtk.Bin):
         else:
             self.__progress.hide()
             App().player.stop()
-            App().db.drop_db()
-            App().db = Database()
+            SqlCursor.add(App().db)
+            App().tracks.del_persistent(False)
+            App().tracks.clean(False)
+            App().albums.clean(False)
+            App().artists.clean(False)
+            App().genres.clean(False)
+            SqlCursor.commit(App().db)
+            SqlCursor.remove(App().db)
             App().window.container.go_home()
             App().scanner.update(ScanType.FULL)
             self.__progress.get_toplevel().set_deletable(True)
