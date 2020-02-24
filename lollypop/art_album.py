@@ -20,7 +20,6 @@ from time import time
 from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
-from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils_file import is_readonly
 from lollypop.utils import emit_signal
@@ -85,7 +84,7 @@ class AlbumArt:
         try:
             filename = self.get_album_artwork_name(album) + ".jpg"
             self.__update_album_uri(album)
-            if album.storage_type & StorageType.EPHEMERAL:
+            if not album.storage_type & StorageType.COLLECTION:
                 store_path = ALBUMS_WEB_PATH + "/" + filename
             else:
                 store_path = ALBUMS_PATH + "/" + filename
@@ -240,23 +239,6 @@ class AlbumArt:
         except Exception as e:
             Logger.error("AlbumArt::get_album_artwork(): %s" % e)
             return None
-
-    def copy_from_web_to_store(self, album_id):
-        """
-            Copy artwork from web path to store path
-            @param album_id as int
-        """
-        try:
-            album = Album(album_id)
-            filename = self.get_album_artwork_name(album) + ".jpg"
-            web_path = ALBUMS_WEB_PATH + "/" + filename
-            store_path = ALBUMS_PATH + "/" + filename
-            web_file = Gio.File.new_for_path(web_path)
-            store_file = Gio.File.new_for_path(store_path)
-            web_file.copy(store_file, Gio.FileCopyFlags.OVERWRITE,
-                          None, None, None)
-        except Exception as e:
-            Logger.error("AlbumArt::copy_from_web_to_store(): %s", e)
 
     def save_album_artwork(self, data, album):
         """

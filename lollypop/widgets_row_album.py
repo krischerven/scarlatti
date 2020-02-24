@@ -457,7 +457,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
         if self.__album.storage_type & StorageType.EPHEMERAL:
-            App().art.copy_from_web_to_store(self.__album.id)
             for artist in self.__album.artists:
                 App().art.cache_artist_artwork(artist)
             self.__album.save(True)
