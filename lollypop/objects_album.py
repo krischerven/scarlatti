@@ -252,10 +252,15 @@ class Album(Base):
             Load album tracks from Spotify,
             do not call this for Storage.COLLECTION
             @param cancellable as Gio.Cancellable
+            @return status as bool
         """
-        if self.synced != len(self.tracks):
+        if self.storage_type & (StorageType.COLLECTION |
+                                StorageType.EXTERNAL):
+            return False
+        elif self.synced != len(self.tracks):
             App().spotify.load_tracks(self.mb_album_id, self.storage_type,
                                       cancellable)
+        return True
 
     def set_synced(self, mask):
         """
