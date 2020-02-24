@@ -14,8 +14,8 @@ from gi.repository import GLib, GdkPixbuf, Gio
 
 from hashlib import md5
 
-from lollypop.define import ArtBehaviour, ArtSize, App, StorageType
-from lollypop.define import CACHE_PATH, ARTISTS_PATH, ARTISTS_WEB_PATH
+from lollypop.define import ArtBehaviour, ArtSize, App
+from lollypop.define import CACHE_PATH, ARTISTS_PATH
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, escape, get_default_storage_type
 
@@ -39,16 +39,13 @@ class ArtistArt:
         """
             True if artist artwork exists
             @param artist as str
-            @return (bool, path)
+            @return str/None
         """
         encoded = self.encode_artist_name(artist)
-        # Search in store
-        paths = ["%s/%s.jpg" % (ARTISTS_PATH, encoded),
-                 "%s/%s.jpg" % (ARTISTS_WEB_PATH, encoded)]
-        for path in paths:
-            if GLib.file_test(path, GLib.FileTest.EXISTS):
-                return (True, path)
-        return (False, None)
+        filepath = "%s/%s.jpg" % (ARTISTS_PATH, encoded)
+        if GLib.file_test(filepath, GLib.FileTest.EXISTS):
+            return filepath
+        return None
 
     def add_artist_artwork(self, artist, data, storage_type):
         """
@@ -60,10 +57,7 @@ class ArtistArt:
         """
         self.uncache_artist_artwork(artist)
         encoded = self.encode_artist_name(artist)
-        if storage_type & StorageType.COLLECTION:
-            filepath = "%s/%s.jpg" % (ARTISTS_PATH, encoded)
-        else:
-            filepath = "%s/%s.jpg" % (ARTISTS_WEB_PATH, encoded)
+        filepath = "%s/%s.jpg" % (ARTISTS_PATH, encoded)
         if data is None:
             f = Gio.File.new_for_path(filepath)
             fstream = f.replace(None, False,
@@ -117,10 +111,10 @@ class ArtistArt:
                                                  width, height, behaviour)
                 return pixbuf
             else:
-                (exists, path) = self.artist_artwork_exists(artist)
-                if exists:
+                filepath = self.artist_artwork_exists(artist)
+                if filepath is not None:
                     try:
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(path)
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filepath)
                     except:
                         return None
                 else:

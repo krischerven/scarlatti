@@ -21,7 +21,7 @@ from lollypop.art_radio import RadioArt
 from lollypop.logger import Logger
 from lollypop.downloader_art import ArtDownloader
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
-from lollypop.define import ARTISTS_PATH, ARTISTS_WEB_PATH, TimeStamp
+from lollypop.define import ARTISTS_PATH, TimeStamp
 from lollypop.define import App
 from lollypop.utils import emit_signal
 from lollypop.utils_file import create_dir, remove_oldest
@@ -53,7 +53,6 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         create_dir(ALBUMS_PATH)
         create_dir(ALBUMS_WEB_PATH)
         create_dir(ARTISTS_PATH)
-        create_dir(ARTISTS_WEB_PATH)
 
     def add_artwork_to_cache(self, name, surface, prefix):
         """
@@ -143,7 +142,6 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         try:
             remove_oldest(CACHE_PATH, TimeStamp.ONE_YEAR)
             remove_oldest(ARTISTS_PATH, TimeStamp.THREE_YEAR)
-            remove_oldest(ARTISTS_WEB_PATH, TimeStamp.ONE_YEAR)
             remove_oldest(ALBUMS_PATH, TimeStamp.THREE_YEAR)
             remove_oldest(ALBUMS_WEB_PATH, TimeStamp.ONE_YEAR)
         except Exception as e:

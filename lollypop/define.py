@@ -35,7 +35,6 @@ ALBUMS_PATH = GLib.get_user_data_dir() + "/lollypop/albums"
 ALBUMS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/albums_web"
 # Stores for artists
 ARTISTS_PATH = GLib.get_user_data_dir() + "/lollypop/artists"
-ARTISTS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/artists_web"
 
 
 class TimeStamp:
