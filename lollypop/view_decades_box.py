@@ -135,7 +135,8 @@ class DecadesBoxView(FlowBoxView):
             @param banner as AlbumsBannerWidget
             @param random as bool
         """
-        album_ids = App().albums.get_ids([], [], True, OrderBy.YEAR_ASC)
+        album_ids = App().albums.get_ids([], [], self.storage_type,
+                                         True, OrderBy.YEAR_ASC)
         if not album_ids:
             return
         albums = [Album(album_id) for album_id in album_ids]

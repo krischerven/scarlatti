@@ -17,7 +17,7 @@ from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
 from lollypop.objects_album import Album
 from lollypop.list import LinkedList
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_default_storage_type
 from lollypop.logger import Logger
 
 
@@ -107,10 +107,12 @@ class ShufflePlayer:
             Set party mode ids
         """
         party_ids = App().settings.get_value("party-ids")
-        album_ids = App().albums.get_ids([], party_ids, True)
+        storage_type = get_default_storage_type()
+        album_ids = App().albums.get_ids([], storage_type, party_ids, True)
         # All albums are blacklisted, WTF?
         if not album_ids:
-            album_ids = App().albums.get_ids([], party_ids, False)
+            album_ids = App().albums.get_ids([], storage_type,
+                                             party_ids, False)
         self._albums = []
         for album_id in album_ids:
             album = Album(album_id, [], [])

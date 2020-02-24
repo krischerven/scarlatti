@@ -570,7 +570,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         except Exception as e:
             Logger.warning("CollectionScanner::__scan_files(): % s" % e)
         for artist_id in self.__new_non_album_artists:
-            album_ids = App().albums.get_ids([artist_id], [])
+            album_ids = App().albums.get_ids([artist_id], [],
+                                             StorageType.COLLECTION)
             if album_ids:
                 emit_signal(self, "artist-updated",
                             artist_id, ScanUpdate.ADDED)

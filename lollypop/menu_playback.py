@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App
 from lollypop.utils import tracks_to_albums, emit_signal
+from lollypop.utils import get_default_storage_type
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 
@@ -110,13 +111,15 @@ class ArtistPlaybackMenu(PlaybackMenu):
         Contextual menu for an artist
     """
 
-    def __init__(self, artist_id):
+    def __init__(self, artist_id, storage_type):
         """
             Init menu
             @param artist id as int
+            @param storage_type as StorageType
         """
         PlaybackMenu.__init__(self)
         self.__artist_id = artist_id
+        self.__storage_type = storage_type
         play_action = Gio.SimpleAction(name="artist_play_action")
         App().add_action(play_action)
         play_action.connect("activate", self.__play)
@@ -132,7 +135,8 @@ class ArtistPlaybackMenu(PlaybackMenu):
             True if current object in player
             return bool
         """
-        album_ids = App().albums.get_ids([self.__artist_id], [])
+        album_ids = App().albums.get_ids([self.__artist_id], [],
+                                         self.__storage_type)
         return set(App().player.album_ids) & set(album_ids) == set(album_ids)
 
 #######################
@@ -228,8 +232,14 @@ class GenrePlaybackMenu(PlaybackMenu):
             Get album ids for genre
             @return [int]
         """
-        album_ids = App().albums.get_compilation_ids([self.__genre_id], True)
-        album_ids += App().albums.get_ids([], [self.__genre_id], True)
+        storage_type = get_default_storage_type()
+        album_ids = App().albums.get_compilation_ids([self.__genre_id],
+                                                     storage_type,
+                                                     True)
+        album_ids += App().albums.get_ids([],
+                                          [self.__genre_id],
+                                          storage_type,
+                                          True)
         return album_ids
 
     def __play(self, action, variant):

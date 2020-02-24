@@ -19,7 +19,7 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
         Genre widget showing cover for 4 albums
     """
 
-    def __init__(self, genre_id, view_type, font_height):
+    def __init__(self, genre_id, storage_type, view_type, font_height):
         """
             Init widget
             @param Genre as [int]
@@ -27,6 +27,7 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
             @param font_height as int
         """
         self.__font_height = font_height
+        self.__storage_type = storage_type
         name = sortname = App().genres.get_name(genre_id)
         RoundedAlbumsWidget.__init__(self, genre_id, name, sortname, view_type)
         self._genre = Type.GENRES
@@ -65,4 +66,4 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
             Get album ids
             @return [int]
         """
-        return App().albums.get_ids([], [self._data])
+        return App().albums.get_ids([], [self._data], self.__storage_type)

@@ -69,7 +69,8 @@ class GenresBoxView(FlowBoxView):
         """
         if self.destroyed:
             return None
-        widget = AlbumsGenreWidget(value, self.view_type, self.font_height)
+        widget = AlbumsGenreWidget(value, self.storage_type, self.view_type,
+                                   self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -103,7 +104,7 @@ class GenresBoxView(FlowBoxView):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        album_ids = App().albums.get_ids([], [child.data])
+        album_ids = App().albums.get_ids([], [child.data], self.storage_type)
         albums = [Album(album_id) for album_id in album_ids]
         if albums:
             App().player.play_album_for_albums(albums[0], albums)

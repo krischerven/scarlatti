@@ -18,6 +18,7 @@ from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.define import App, Repeat
 from lollypop.utils import get_network_available, sql_escape
+from lollypop.utils import get_default_storage_type
 from lollypop.utils_artist import ArtistProvider
 
 
@@ -71,7 +72,8 @@ class AutoSimilarPlayer:
             @return Album
         """
         # Get an album
-        album_ids = App().albums.get_ids(similar_artist_ids, [])
+        storage_type = get_default_storage_type()
+        album_ids = App().albums.get_ids(similar_artist_ids, [], storage_type)
         shuffle(album_ids)
         while album_ids:
             album_id = album_ids.pop(0)

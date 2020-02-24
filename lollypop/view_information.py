@@ -21,6 +21,7 @@ from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
 from lollypop.utils import set_cursor_type, get_network_available
+from lollypop.utils import get_default_storage_type
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -144,7 +145,10 @@ class InformationView(View):
             albums_view.set_margin_start(5)
             widget.attach(albums_view, 2, 1, 1, 2)
             albums = []
-            for album_id in App().albums.get_ids([artist_id], []):
+            storage_type = get_default_storage_type()
+            for album_id in App().albums.get_ids([artist_id],
+                                                 [],
+                                                 storage_type):
                 albums.append(Album(album_id))
             if not albums:
                 albums = [App().player.current_track.album]

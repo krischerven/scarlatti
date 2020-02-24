@@ -18,16 +18,18 @@ from lollypop.menu_sync import SyncAlbumsMenu
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.define import App, ViewType, Type
 from lollypop.objects_album import Album
+from lollypop.utils import get_default_storage_type
 
 
 class ArtistMenu(Gio.Menu):
     """
         Contextual menu for artist
     """
-    def __init__(self, artist_id, view_type, header=False):
+    def __init__(self, artist_id, storage_type, view_type, header=False):
         """
             Init artist menu
             @param artist_id as int
+            @param storage_type as StorageType
             @param view_type as ViewType
             @param header as bool
         """
@@ -37,10 +39,12 @@ class ArtistMenu(Gio.Menu):
             self.append_item(ArtistMenuHeader(artist_id))
         if not view_type & ViewType.BANNER:
             from lollypop.menu_playback import ArtistPlaybackMenu
-            self.append_section(_("Playback"), ArtistPlaybackMenu(artist_id))
+            self.append_section(_("Playback"),
+                                ArtistPlaybackMenu(artist_id, storage_type))
         menu = ArtistAlbumsMenu(artist_id, view_type)
         self.append_section(_("Artist"), menu)
-        album_ids = App().albums.get_ids([artist_id], [], True)
+        storage_type = get_default_storage_type()
+        album_ids = App().albums.get_ids([artist_id], [], storage_type, True)
         albums = [Album(album_id) for album_id in album_ids]
         self.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
         self.append_submenu(_("Playlists"), PlaylistsMenu(albums))

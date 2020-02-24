@@ -135,7 +135,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        album_ids = App().albums.get_ids([child.data], [])
+        album_ids = App().albums.get_ids([child.data], [], self.storage_type)
         albums = [Album(album_id) for album_id in album_ids]
         if albums:
             App().player.play_album_for_albums(albums[0], albums)
@@ -224,7 +224,8 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
             @param banner as AlbumsBannerWidget
             @param random as bool
         """
-        album_ids = App().albums.get_ids([], [], True, OrderBy.ARTIST)
+        album_ids = App().albums.get_ids([], [], self.storage_type,
+                                         True, OrderBy.ARTIST)
         if not album_ids:
             return
         albums = [Album(album_id) for album_id in album_ids]
