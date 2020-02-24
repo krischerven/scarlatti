@@ -40,6 +40,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
+        self.__storage_type = storage_type
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/ArtistBannerWidget.ui")
         builder.connect_signals(self)

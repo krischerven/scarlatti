@@ -33,13 +33,14 @@ class AlbumView(FilteringHelper, LazyLoadingView,
     }
 
     @signals_map
-    def __init__(self, album, view_type):
+    def __init__(self, album, storage_type, view_type):
         """
             Init ArtistView
             @param album as Album
+            @param storage_type as StorageType
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type)
+        LazyLoadingView.__init__(self, storage_type, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
         self.__album = album
@@ -185,6 +186,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
                 from lollypop.view_albums_line import AlbumsArtistLineView
                 for artist_id in self.__album.artist_ids:
                     others_box = AlbumsArtistLineView(self.__album, artist_id,
+                                                      self.storage_type,
                                                       ViewType.SMALL |
                                                       ViewType.ALBUM |
                                                       ViewType.SCROLLED)
