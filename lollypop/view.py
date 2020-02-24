@@ -34,7 +34,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
         self.__storage_type = storage_type
-        self._view_type = view_type
+        self.__view_type = view_type
         self.__scrolled_position = None
         self.__destroyed = False
         self.__banner = None
@@ -81,10 +81,10 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param widget as Gtk.Widget
         """
         self.__stack.add_named(widget, "main")
-        if self._view_type & ViewType.OVERLAY:
+        if self.view_type & ViewType.OVERLAY:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
-            if self._view_type & ViewType.SCROLLED:
+            if self.view_type & ViewType.SCROLLED:
                 self.__overlay.add(self._scrolled)
                 self.__viewport.add(self.__stack)
             else:
@@ -94,7 +94,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 self.__banner = banner
                 self.__banner.connect("scroll", self.__on_banner_scroll)
             self.add(self.__overlay)
-        elif self._view_type & ViewType.SCROLLED:
+        elif self.view_type & ViewType.SCROLLED:
             self.__viewport.add(self.__stack)
             if banner is not None:
                 self.__banner = banner
@@ -180,7 +180,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             Set scrolled position on populated
             @param position as int
         """
-        if self._view_type & ViewType.SCROLLED:
+        if self.view_type & ViewType.SCROLLED:
             self.__scrolled_position = position
 
     @property
@@ -197,8 +197,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             View type less sizing
             @return ViewType
         """
-        # FIXME Supprimer ici et ajouter dans *args
-        return self._view_type & ~(ViewType.ADAPTIVE | ViewType.SMALL)
+        return self.__view_type
 
     @property
     def position(self):
@@ -206,7 +205,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             Get scrolled position
             @return float
         """
-        if self._view_type & ViewType.SCROLLED:
+        if self.view_type & ViewType.SCROLLED:
             position = self._scrolled.get_vadjustment().get_value()
         else:
             position = 0
@@ -233,14 +232,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param status as bool
             @return bool
         """
-        view_type = self._view_type
+        view_type = self.view_type
         if self.__placeholder is not None and self.__placeholder.is_visible():
             self.__placeholder.set_adaptive(status)
         if status:
-            self._view_type |= ViewType.ADAPTIVE
+            self.__view_type |= ViewType.ADAPTIVE
         else:
-            self._view_type &= ~ViewType.ADAPTIVE
-        return view_type != self._view_type
+            self.__view_type &= ~ViewType.ADAPTIVE
+        return view_type != self.view_type
 
     def _on_value_changed(self, adj):
         """
@@ -254,10 +253,10 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
                 if main_widget is not None:
                     main_widget.set_margin_top(self.__banner.height +
                                                MARGIN_SMALL)
-                if self._view_type & ViewType.SCROLLED:
+                if self.view_type & ViewType.SCROLLED:
                     self._scrolled.get_vscrollbar().set_margin_top(
                         self.__banner.height)
-            elif self._view_type & ViewType.SCROLLED:
+            elif self.view_type & ViewType.SCROLLED:
                 self._scrolled.get_vscrollbar().set_margin_top(0)
 
     def _on_album_updated(self, scanner, album_id, added):
@@ -319,10 +318,10 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param banner as BannerWidget
             @param height as int
         """
-        if self._view_type & ViewType.OVERLAY:
+        if self.view_type & ViewType.OVERLAY:
             main_widget = self.__stack.get_child_by_name("main")
             main_widget.set_margin_top(height + MARGIN_SMALL)
-            if self._view_type & ViewType.SCROLLED:
+            if self.view_type & ViewType.SCROLLED:
                 self._scrolled.get_vscrollbar().set_margin_top(height)
 
     def __on_banner_scroll(self, banner, x, y):

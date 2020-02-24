@@ -51,7 +51,7 @@ class AlbumTracksView(TracksView):
             disc_number = disc.number
             tracks = disc.tracks
             items = []
-            if self._view_type & ViewType.SINGLE_COLUMN:
+            if self.view_type & ViewType.SINGLE_COLUMN:
                 items.append((self._tracks_widget_left[0], tracks))
             else:
                 mid_tracks = int(0.5 + len(tracks) / 2)
@@ -150,7 +150,7 @@ class AlbumTracksView(TracksView):
             Init main widget
         """
         if TracksView._init(self):
-            if self._view_type & ViewType.SINGLE_COLUMN:
+            if self.view_type & ViewType.SINGLE_COLUMN:
                 self.__discs = [self.__album.one_disc]
             else:
                 self.__discs = self.__album.discs
@@ -166,9 +166,9 @@ class AlbumTracksView(TracksView):
         """
         for track in tracks:
             if not self.__show_tag_tracknumber and\
-                    self._view_type & ViewType.ALBUM:
+                    self.view_type & ViewType.ALBUM:
                 track.set_number(position + 1)
-            row = TrackRow(track, self.__album.artist_ids, self._view_type)
+            row = TrackRow(track, self.__album.artist_ids, self.view_type)
             row.show()
             row.connect("removed", self.__on_track_row_removed)
             widget.add(row)
@@ -231,7 +231,7 @@ class AlbumTracksView(TracksView):
                 self._responsive_widget.attach(
                           self._tracks_widget_left[disc.number],
                           0, idx, 1, 1)
-            if not self._view_type & ViewType.SINGLE_COLUMN:
+            if not self.view_type & ViewType.SINGLE_COLUMN:
                 if orientation == Gtk.Orientation.VERTICAL:
                     self._responsive_widget.attach(
                                self._tracks_widget_right[disc.number],
@@ -288,7 +288,7 @@ class AlbumTracksView(TracksView):
             @param widget as TracksWidget
             @param track as Track
         """
-        if self._view_type & ViewType.ALBUM:
+        if self.view_type & ViewType.ALBUM:
             tracks = []
             for child in self.children:
                 if child.track.loved != -1:

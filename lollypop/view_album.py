@@ -49,7 +49,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         self.__grid.show()
         self.__grid.set_row_spacing(10)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__banner = AlbumBannerWidget(self.__album, self._view_type)
+        self.__banner = AlbumBannerWidget(self.__album, self.view_type)
         self.add_widget(self.__grid, self.__banner)
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),
@@ -94,7 +94,10 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             Get default args for __class__
             @return {}
         """
-        return {"album": self.__album, "view_type": self.view_type}
+        return {"album": self.__album,
+                "storage_type": self.storage_type,
+                "view_type": self.view_type & ~(ViewType.ADAPTIVE |
+                                                ViewType.SMALL)}
 
     @property
     def filtered(self):
@@ -182,7 +185,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         if self.__tracks_view.is_populated:
             self.emit("populated")
             self.__banner.show()
-            if self._view_type & ViewType.OVERLAY:
+            if self.view_type & ViewType.OVERLAY:
                 from lollypop.view_albums_line import AlbumsArtistLineView
                 for artist_id in self.__album.artist_ids:
                     others_box = AlbumsArtistLineView(self.__album, artist_id,

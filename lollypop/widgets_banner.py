@@ -58,7 +58,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         """
         Gtk.Revealer.__init__(self)
         self._artwork = None
-        self._view_type = view_type
+        self.__view_type = view_type
         self.__width = 1
         self.set_property("valign", Gtk.Align.START)
         if view_type & ViewType.OVERLAY:
@@ -124,6 +124,14 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         else:
             height = ArtSize.BANNER + MARGIN * 2
         return height
+
+    @property
+    def view_type(self):
+        """
+            Get view type
+            @return ViewType
+        """
+        return self.__view_type
 
 #######################
 # PROTECTED           #

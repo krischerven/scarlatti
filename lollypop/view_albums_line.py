@@ -131,10 +131,10 @@ class AlbumsArtistLineView(AlbumsLineView):
         def load():
             if self.__artist_id == Type.COMPILATIONS:
                 album_ids = App().albums.get_compilation_ids(
-                    self.__album.genre_ids)
+                    self.__album.genre_ids, self.storage_type)
             else:
                 album_ids = App().albums.get_ids(
-                    [self.__artist_id], [])
+                    [self.__artist_id], [], self.storage_type)
             if self.__album.id in album_ids:
                 album_ids.remove(self.__album.id)
             return [Album(album_id) for album_id in album_ids]

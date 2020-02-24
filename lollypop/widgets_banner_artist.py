@@ -143,7 +143,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(self.__artist_ids[0],
-                          self._view_type | ViewType.BANNER,
+                          self.view_type | ViewType.BANNER,
                           App().window.is_adaptive)
         show_tracks_action = Gio.SimpleAction.new_stateful(
             "show_tracks_action",
@@ -174,7 +174,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_artwork_artist import ArtistArtworkSearchWidget
         artwork_search = ArtistArtworkSearchWidget(self.__artist_ids[0],
-                                                   self._view_type)
+                                                   self.view_type)
         artwork_search.show()
         # Let current animation run
         GLib.timeout_add(250, artwork_search.populate)

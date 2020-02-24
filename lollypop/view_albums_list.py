@@ -74,7 +74,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                 children[index].album.id == album.id:
             children[index].tracks_view.append_rows(album.tracks)
         else:
-            row = AlbumRow(album, self.__height, self._view_type)
+            row = AlbumRow(album, self.__height, self.view_type)
             row.populate()
             self.insert_row(row, index)
 
@@ -136,7 +136,8 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         return {"genre_ids": self.__genre_ids,
                 "artist_ids": self.__artist_ids,
-                "view_type": self.view_type}
+                "view_type": self.view_type & ~(ViewType.ADAPTIVE |
+                                                ViewType.SMALL)}
 
     @property
     def dnd_helper(self):
@@ -173,7 +174,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         if self.destroyed:
             return None
-        row = AlbumRow(album, self.__height, self._view_type)
+        row = AlbumRow(album, self.__height, self.view_type)
         row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.add(row)
@@ -309,9 +310,9 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param track_id as int
         """
         # In party mode, just play track_id and continue party mode
-        if App().player.is_party or self._view_type & ViewType.PLAYBACK:
+        if App().player.is_party or self.view_type & ViewType.PLAYBACK:
             App().player.load(track)
-        elif self._view_type & ViewType.PLAYLISTS:
+        elif self.view_type & ViewType.PLAYLISTS:
             albums = []
             for album_row in self.children:
                 albums.append(album_row.album)

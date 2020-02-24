@@ -120,7 +120,7 @@ class FilteringHelper():
         if child == self.__last_scrolled:
             return
         self.__last_scrolled = child
-        if self._view_type & ViewType.SCROLLED:
+        if self.view_type & ViewType.SCROLLED:
             coordinates = child.translate_coordinates(
                 self.scroll_relative_to, 0, -self.scroll_shift)
             if coordinates:

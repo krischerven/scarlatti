@@ -105,7 +105,7 @@ class SettingsView(View):
             scrolled position
             @return ({}, {}, int, int) or None
         """
-        return ({"view_type": self._view_type}, 0, 0)
+        return ({"view_type": self.view_type}, 0, 0)
 
     @property
     def type(self):
@@ -192,7 +192,7 @@ class SettingsChildView(View):
             scrolled position
             @return ({}, {}, int, int) or None
         """
-        return ({"view_id": self.__view_id, "view_type": self._view_type},
+        return ({"view_id": self.__view_id, "view_type": self.view_type},
                 0, 0)
 
     @property

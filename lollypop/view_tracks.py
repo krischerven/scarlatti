@@ -41,7 +41,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             @param view_type as ViewType
         """
         Gtk.Bin.__init__(self)
-        self._view_type = view_type
+        self.__view_type = view_type
         self._tracks_widget_left = {}
         self._tracks_widget_right = {}
         self._responsive_widget = None
@@ -123,6 +123,14 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
         return []
 
+    @property
+    def view_type(self):
+        """
+            Get view type
+            @return ViewType
+        """
+        return self.__view_type
+
 #######################
 # PROTECTED           #
 #######################
@@ -158,8 +166,8 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             Add disc container to box
             @param disc_number as int
         """
-        self._tracks_widget_left[disc_number] = TracksWidget(self._view_type)
-        self._tracks_widget_right[disc_number] = TracksWidget(self._view_type)
+        self._tracks_widget_left[disc_number] = TracksWidget(self.__view_type)
+        self._tracks_widget_right[disc_number] = TracksWidget(self.__view_type)
         self._tracks_widget_left[disc_number].connect("activated",
                                                       self._on_activated)
         self._tracks_widget_right[disc_number].connect("activated",
@@ -216,10 +224,10 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             @param window as AdaptiveWindow
             @param orientation as Gtk.Orientation
         """
-        if self._view_type & ViewType.SINGLE_COLUMN or\
+        if self.__view_type & ViewType.SINGLE_COLUMN or\
                 App().settings.get_value("force-single-column"):
             self._set_orientation(Gtk.Orientation.VERTICAL)
-        elif self._view_type & ViewType.TWO_COLUMNS:
+        elif self.__view_type & ViewType.TWO_COLUMNS:
             self._set_orientation(Gtk.Orientation.HORIZONTAL)
         else:
             # We need to listen to parent allocation as currently, we have

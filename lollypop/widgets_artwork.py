@@ -115,7 +115,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             @param view_type as ViewType
         """
         Gtk.Grid.__init__(self)
-        self._view_type = view_type
+        self.__view_type = view_type
         self.__timeout_id = None
         self.__uri_artwork_id = None
         self.__uris = []
@@ -142,7 +142,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self.__label = builder.get_object("label")
         self.__label.set_text(_("Select artwork"))
 
-        if self._view_type & ViewType.ADAPTIVE:
+        if self.__view_type & ViewType.ADAPTIVE:
             widget.add(self._flowbox)
         else:
             scrolled = Gtk.ScrolledWindow.new()
@@ -197,6 +197,14 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             Stop loading
         """
         self._cancellable.cancel()
+
+    @property
+    def view_type(self):
+        """
+            Get view type
+            @return ViewType
+        """
+        return self.__view_type
 
 #######################
 # PROTECTED           #
@@ -296,7 +304,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             @param content as bytes
             @param api as str
         """
-        child = ArtworkSearchChild(api, self._view_type)
+        child = ArtworkSearchChild(api, self.__view_type)
         child.show()
         status = child.populate(content)
         if status:

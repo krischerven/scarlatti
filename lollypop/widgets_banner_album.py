@@ -139,7 +139,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self.__album, self._view_type | ViewType.BANNER,
+        menu = AlbumMenu(self.__album, self.view_type | ViewType.BANNER,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
@@ -205,7 +205,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Set artwork on banner
         """
         if self._artwork is not None and\
-                self._view_type & ViewType.ALBUM and\
+                self.view_type & ViewType.ALBUM and\
                 App().animations:
             App().art_helper.set_album_artwork(
                             self.__album,

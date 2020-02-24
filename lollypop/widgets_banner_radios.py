@@ -128,7 +128,7 @@ class RadiosBannerWidget(BannerWidget):
             @param button as Gtk.Button
         """
         from lollypop.menu_radio import RadioMenu
-        menu_widget = RadioMenu(None, self._view_type)
+        menu_widget = RadioMenu(None, self.view_type)
         menu_widget.show()
         popup_widget(menu_widget, button)
 

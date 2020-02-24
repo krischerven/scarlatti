@@ -24,14 +24,16 @@ class GenresBoxView(FlowBoxView):
         Show genres in a FlowBox
     """
 
-    def __init__(self):
+    def __init__(self, storage_type):
         """
             Init decade view
+            @param storage_type as StorageType
         """
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
-        FlowBoxView.__init__(self, ViewType.SCROLLED | ViewType.OVERLAY)
+        FlowBoxView.__init__(self, storage_type,
+                             ViewType.SCROLLED | ViewType.OVERLAY)
         self._empty_icon_name = get_icon_name(Type.GENRES)
-        self.__banner = AlbumsBannerWidget([Type.GENRES], [], self._view_type)
+        self.__banner = AlbumsBannerWidget([Type.GENRES], [], self.view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.add_widget(self._box, self.__banner)
@@ -48,6 +50,14 @@ class GenresBoxView(FlowBoxView):
 
         App().task_helper.run(load, callback=(on_load,))
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__
+            @return {}
+        """
+        return {"storage_type": self.storage_type}
+
 #######################
 # PROTECTED           #
 #######################
@@ -59,7 +69,7 @@ class GenresBoxView(FlowBoxView):
         """
         if self.destroyed:
             return None
-        widget = AlbumsGenreWidget(value, self._view_type, self.font_height)
+        widget = AlbumsGenreWidget(value, self.view_type, self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -72,7 +82,7 @@ class GenresBoxView(FlowBoxView):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_genre import GenreMenu
-        menu = GenreMenu(child.data, self._view_type, App().window.is_adaptive)
+        menu = GenreMenu(child.data, self.view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
     def _on_child_activated(self, flowbox, child):

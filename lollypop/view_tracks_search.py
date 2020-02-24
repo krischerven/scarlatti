@@ -89,7 +89,7 @@ class SearchTracksView(TracksView, SignalsHelper):
         """
         for track in tracks:
             track.set_number(position + 1)
-            row = TrackRow(track, [], self._view_type)
+            row = TrackRow(track, [], self.view_type)
             row.show()
             widget.add(row)
             position += 1
@@ -132,7 +132,7 @@ class SearchTracksView(TracksView, SignalsHelper):
             self._responsive_widget.attach(
                       self._tracks_widget_left[0],
                       0, idx, 1, 1)
-        if not self._view_type & ViewType.SINGLE_COLUMN:
+        if not self.view_type & ViewType.SINGLE_COLUMN:
             if orientation == Gtk.Orientation.VERTICAL:
                 self._responsive_widget.attach(
                            self._tracks_widget_right[0],

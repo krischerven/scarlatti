@@ -70,7 +70,9 @@ class CurrentAlbumsView(View, SignalsHelper):
             Get default args for __class__
             @return {}
         """
-        return {"view_type": self.view_type & ~ViewType.SCROLLED}
+        return {"view_type": self.view_type & ~(ViewType.ADAPTIVE |
+                                                ViewType.SCROLLED |
+                                                ViewType.SMALL)}
 
 #######################
 # PROTECTED           #

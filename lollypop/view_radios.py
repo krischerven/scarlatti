@@ -35,7 +35,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
                              ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._empty_icon_name = get_icon_name(Type.RADIOS)
-        self.__banner = RadiosBannerWidget(self._view_type)
+        self.__banner = RadiosBannerWidget(self.view_type)
         self.__banner.show()
         self.add_widget(self._box, self.__banner)
         return [
@@ -62,7 +62,8 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             Get default args for __class__
             @return {}
         """
-        return {"view_type": self.view_type}
+        return {"view_type": self.view_type & ~(ViewType.ADAPTIVE |
+                                                ViewType.SMALL)}
 
 #######################
 # PROTECTED           #
@@ -75,7 +76,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
         """
         if self.destroyed:
             return None
-        widget = RadioWidget(value, self._view_type, self.font_height)
+        widget = RadioWidget(value, self.view_type, self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -87,7 +88,7 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
             @return Gtk.Widget
         """
         from lollypop.menu_radio import RadioMenu
-        return RadioMenu(child.data, self._view_type)
+        return RadioMenu(child.data, self.view_type)
 
     def _on_child_activated(self, flowbox, child):
         """

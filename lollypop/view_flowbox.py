@@ -158,7 +158,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             self.pause()
             children = self._box.get_children()
             for child in children:
-                child.set_view_type(self._view_type)
+                child.set_view_type(self.view_type)
                 child.disable_artwork()
                 self.queue_lazy_loading(child)
             self.lazy_loading()

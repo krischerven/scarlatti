@@ -83,7 +83,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         # Compatibility with SelectionList
         if isinstance(value, tuple):
             value = value[0]
-        widget = PlaylistRoundedWidget(value, self._view_type,
+        widget = PlaylistRoundedWidget(value, self.view_type,
                                        self.font_height)
         self._box.insert(widget, -1)
         widget.show()

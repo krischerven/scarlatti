@@ -98,7 +98,7 @@ class LyricsView(View, SignalsHelper):
         self.__lyrics_label = LyricsLabel()
         self.__lyrics_label.show()
         self.__lyrics_label.set_property("halign", Gtk.Align.CENTER)
-        self.__banner = LyricsBannerWidget(self._view_type)
+        self.__banner = LyricsBannerWidget(self.view_type)
         self.__banner.show()
         self.__banner.connect("translate", self.__on_translate)
         self.add_widget(self.__lyrics_label, self.__banner)

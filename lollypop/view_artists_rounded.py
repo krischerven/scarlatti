@@ -85,7 +85,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         """
         if self.destroyed:
             return None
-        widget = RoundedArtistWidget(value, self._view_type, self.font_height)
+        widget = RoundedArtistWidget(value, self.view_type, self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -99,7 +99,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
-        menu = ArtistMenu(child.data, self._view_type,
+        menu = ArtistMenu(child.data, self.view_type,
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
@@ -164,7 +164,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             artist_name = App().artists.get_name(artist_id)
             sortname = App().artists.get_sortname(artist_id)
             widget = RoundedArtistWidget((artist_id, artist_name, sortname),
-                                         self._view_type,
+                                         self.view_type,
                                          get_font_height())
             self._box.insert(widget, position)
             widget.show()
@@ -199,7 +199,7 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
         from lollypop.widgets_banner_albums import AlbumsBannerWidget
         RoundedArtistsView.__init__(self, storage_type,
                                     ViewType.SCROLLED | ViewType.OVERLAY)
-        self.__banner = AlbumsBannerWidget([Type.ARTISTS], [], self._view_type)
+        self.__banner = AlbumsBannerWidget([Type.ARTISTS], [], self.view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.add_widget(self._box, self.__banner)

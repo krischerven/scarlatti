@@ -82,7 +82,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             uris = App().art.get_album_artworks(self.__album)
             # Direct load, not using loopback because not many items
             for uri in uris:
-                child = ArtworkSearchChild(_("Local"), self._view_type)
+                child = ArtworkSearchChild(_("Local"), self.view_type)
                 child.show()
                 f = Gio.File.new_for_uri(uri)
                 (status, content, tag) = f.load_contents()

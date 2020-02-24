@@ -33,7 +33,7 @@ class DecadesBoxView(FlowBoxView):
         FlowBoxView.__init__(self, storage_type,
                              ViewType.SCROLLED | ViewType.OVERLAY)
         self._empty_icon_name = get_icon_name(Type.YEARS)
-        self.__banner = AlbumsBannerWidget([Type.YEARS], [], self._view_type)
+        self.__banner = AlbumsBannerWidget([Type.YEARS], [], self.view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.add_widget(self._box, self.__banner)
@@ -64,6 +64,14 @@ class DecadesBoxView(FlowBoxView):
 
         App().task_helper.run(load, callback=(on_load,))
 
+    @property
+    def args(self):
+        """
+            Get default args for __class__
+            @return {}
+        """
+        return {"storage_type": self.storage_type}
+
 #######################
 # PROTECTED           #
 #######################
@@ -75,7 +83,7 @@ class DecadesBoxView(FlowBoxView):
         """
         if self.destroyed:
             return None
-        widget = AlbumsDecadeWidget(value, self._view_type, self.font_height)
+        widget = AlbumsDecadeWidget(value, self.view_type, self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -88,7 +96,7 @@ class DecadesBoxView(FlowBoxView):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_decade import DecadeMenu
-        menu = DecadeMenu(child.data, self._view_type,
+        menu = DecadeMenu(child.data, self.view_type,
                           App().window.is_adaptive)
         return MenuBuilder(menu)
 
