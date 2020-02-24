@@ -286,7 +286,8 @@ class SpotifySearch(GObject.Object):
                 for item in tracks_payload:
                     item["album"] = decode
                 self.__create_from_tracks_payload(tracks_payload,
-                                                  storage_type,
+                                                  storage_type |
+                                                  StorageType.SEARCH,
                                                   cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::load_tracks(): %s", e)
@@ -439,7 +440,7 @@ class SpotifySearch(GObject.Object):
         """
         # Populate tracks
         for item in payload:
-            if not storage_type & StorageType.EPHEMERAL:
+            if not storage_type & StorageType.SEARCH:
                 cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
@@ -459,7 +460,7 @@ class SpotifySearch(GObject.Object):
         """
         # Populate tracks
         for album_item in payload:
-            if not storage_type & StorageType.EPHEMERAL:
+            if not storage_type & StorageType.SEARCH:
                 cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
