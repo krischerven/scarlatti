@@ -143,6 +143,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(self.__artist_ids[0],
+                          self.__storage_type,
                           self.view_type | ViewType.BANNER,
                           App().window.is_adaptive)
         show_tracks_action = Gio.SimpleAction.new_stateful(
