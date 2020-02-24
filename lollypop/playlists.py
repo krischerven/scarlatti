@@ -25,7 +25,7 @@ from lollypop.objects_track import Track
 from lollypop.sqlcursor import SqlCursor
 from lollypop.localized import LocalizedCollation
 from lollypop.shown import ShownPlaylists
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_default_storage_type
 from lollypop.utils_file import get_mtime
 from lollypop.logger import Logger
 from lollypop.database_upgrade import DatabasePlaylistsUpgrade
@@ -286,20 +286,22 @@ class Playlists(GObject.GObject):
             @return [int]
         """
         track_ids = []
+        storage_type = get_default_storage_type()
         if playlist_id == Type.POPULARS:
             track_ids = App().tracks.get_rated()
-            for track in App().tracks.get_populars():
+            for track in App().tracks.get_populars(100, storage_type):
                 track_ids.append(track)
         elif playlist_id == Type.RECENTS:
-            track_ids = App().tracks.get_recently_listened_to()
+            track_ids = App().tracks.get_recently_listened_to(100,
+                                                              storage_type)
         elif playlist_id == Type.LITTLE:
-            track_ids = App().tracks.get_little_played()
+            track_ids = App().tracks.get_little_played(100, storage_type)
         elif playlist_id == Type.RANDOMS:
-            track_ids = App().tracks.get_randoms()
+            track_ids = App().tracks.get_randoms(100, storage_type)
         elif playlist_id == Type.ALL:
-            track_ids = App().tracks.get_ids()
+            track_ids = App().tracks.get_ids(storage_type)
         elif playlist_id == Type.LOVED:
-            track_ids = App().tracks.get_loved_track_ids()
+            track_ids = App().tracks.get_loved_track_ids(storage_type)
         else:
             with SqlCursor(self) as sql:
                 result = sql.execute("SELECT music.tracks.rowid\
