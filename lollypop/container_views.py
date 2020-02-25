@@ -87,7 +87,7 @@ class ViewsContainer:
                                Type.LITTLE,
                                Type.RANDOMS,
                                Type.WEB]:
-                view = self._get_view_albums(item_ids, [])
+                view = self._get_view_albums(item_ids, [], storage_type)
             elif item_ids[0] == Type.SUGGESTIONS:
                 view = self._get_view_suggestions(storage_type)
             elif item_ids[0] == Type.SEARCH:
@@ -104,7 +104,7 @@ class ViewsContainer:
                 if data is None:
                     view = self._get_view_genres(storage_type)
                 else:
-                    view = self._get_view_albums([data], [])
+                    view = self._get_view_albums([data], [], storage_type)
             elif item_ids[0] == Type.ALBUM:
                 hide_selection_list = False
                 view = self._get_view_album(data, storage_type)
@@ -128,9 +128,9 @@ class ViewsContainer:
                                  Type.SETTINGS_DEVICES]:
                 view = self._get_view_settings(item_ids[0])
             elif item_ids[0] == Type.ALL:
-                view = self._get_view_albums(item_ids, [])
+                view = self._get_view_albums(item_ids, [], storage_type)
             elif item_ids[0] == Type.COMPILATIONS:
-                view = self._get_view_albums(item_ids, [])
+                view = self._get_view_albums(item_ids, [], storage_type)
             elif item_ids[0] == Type.ARTISTS:
                 view = self._get_view_artists([], data, storage_type)
         self._sidebar.select_ids(item_ids, False)
