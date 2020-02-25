@@ -24,6 +24,7 @@ from functools import wraps
 from lollypop.logger import Logger
 from lollypop.define import App, Type, NetworkAccessACL
 from lollypop.define import StorageType
+from lollypop.shown import ShownLists
 
 
 def cancellable_sleep(seconds, cancellable):
@@ -427,6 +428,28 @@ def get_icon_name(object_id):
     elif object_id == Type.WEB:
         icon = "goa-panel-symbolic"
     return icon
+
+
+def get_title_for_genres_artists(genre_ids, artist_ids):
+    """
+        Return title for genres/artists
+        @param genre_ids as [int]
+        @param artist_ids as [int]
+        @return str
+    """
+    if genre_ids and genre_ids[0] == Type.YEARS and artist_ids:
+        title_str = "%s - %s" % (artist_ids[0], artist_ids[-1])
+    else:
+        genres = []
+        for genre_id in genre_ids:
+            if genre_id < 0:
+                genres.append(ShownLists.IDS[genre_id])
+            else:
+                genre = App().genres.get_name(genre_id)
+                if genre is not None:
+                    genres.append(genre)
+        title_str = ",".join(genres)
+    return title_str
 
 
 def popup_widget(widget, parent, x=None, y=None):

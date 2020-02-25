@@ -20,7 +20,7 @@ from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available, popup_widget
-from lollypop.utils import get_font_height
+from lollypop.utils import get_font_height, get_title_for_genres_artists
 from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -280,7 +280,8 @@ class AlbumsGenresBoxView(AlbumsBoxView):
         for child in self._box.get_children():
             if child.data.storage_type & StorageType.COLLECTION:
                 albums.append(child.data)
-        menu = AlbumsMenu(albums)
+        title = get_title_for_genres_artists(self._genre_ids, self._artist_ids)
+        menu = AlbumsMenu(title, albums, App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button)

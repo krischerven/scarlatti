@@ -12,10 +12,9 @@
 
 from gi.repository import Gtk, GLib, GObject
 
-from lollypop.define import App, ArtSize, ViewType, Type, MARGIN, Size
+from lollypop.define import ArtSize, ViewType, MARGIN, Size
 from lollypop.widgets_banner import BannerWidget
-from lollypop.shown import ShownLists
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_title_for_genres_artists
 
 
 class FlowboxBannerWidget(BannerWidget):
@@ -76,18 +75,7 @@ class FlowboxBannerWidget(BannerWidget):
         grid.add(linked)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
-        if genre_ids and genre_ids[0] == Type.YEARS and artist_ids:
-            title_str = "%s - %s" % (artist_ids[0], artist_ids[-1])
-        else:
-            genres = []
-            for genre_id in genre_ids:
-                if genre_id < 0:
-                    genres.append(ShownLists.IDS[genre_id])
-                else:
-                    genre = App().genres.get_name(genre_id)
-                    if genre is not None:
-                        genres.append(genre)
-            title_str = ",".join(genres)
+        title_str = get_title_for_genres_artists(genre_ids, artist_ids)
         self.__title_label.set_markup("<b>%s</b>" %
                                       GLib.markup_escape_text(title_str))
 

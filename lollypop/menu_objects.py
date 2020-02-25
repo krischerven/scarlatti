@@ -65,16 +65,18 @@ class AlbumsMenu(Gio.Menu):
         Contextual menu for albums
     """
 
-    def __init__(self, albums, header=False):
+    def __init__(self, title, albums, header=False):
         """
             Init menu model
+            @param title as str
             @param albums as [Album]
             @param header as bool
         """
         Gio.Menu.__init__(self)
         if header:
             from lollypop.menu_header import MenuHeader
-            self.append_item(MenuHeader(_("Albums")))
+            self.append_item(MenuHeader(title,
+                                        "media-optical-cd-audio-symbolic"))
         self.append_section(_("Devices"), SyncAlbumsMenu(albums))
 
 
