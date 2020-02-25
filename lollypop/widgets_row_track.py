@@ -262,8 +262,6 @@ class TrackRow(Gtk.ListBoxRow):
         """
         if self.__view_type & ViewType.PLAYBACK:
             self._track.album.remove_track(self._track)
-            App().player.set_next()
-            App().player.set_prev()
             emit_signal(self, "removed")
         elif self.__view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
