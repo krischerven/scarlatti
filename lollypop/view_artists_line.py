@@ -68,6 +68,7 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
         if artist_id not in self.__artist_ids:
             self.__artist_ids.append(artist_id)
             RoundedArtistsView.add_value(self, artist_id)
+            self.update_buttons()
 
     def clear(self):
         """
@@ -94,6 +95,14 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
 
     def _on_artist_updated(self, scanner, artist_id, add):
         pass
+
+    def _on_populated(self, widget):
+        """
+            Update buttons
+            @param widget as Gtk.Widget
+        """
+        self.update_buttons()
+        RoundedArtistsView._on_populated(self, widget)
 
 #######################
 # PRIVATE             #

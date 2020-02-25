@@ -201,7 +201,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
-
     def __popup_menu(self, child):
         """
             Popup album menu at position

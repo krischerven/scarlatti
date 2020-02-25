@@ -72,6 +72,16 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             self._box.set_min_children_per_line(len(albums))
             AlbumsBoxView.populate(self, albums)
 
+    def insert_album(self, album, position):
+        """
+            Add a new album
+            @param album as Album
+            @param position as int
+            @param cover_uri as int
+        """
+        AlbumsBoxView.insert_album(self, album, position)
+        self.update_buttons()
+
     @property
     def args(self):
         return None
@@ -90,6 +100,14 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         """
         AlbumsBoxView._on_adaptive_changed(self, window, status)
         self.__update_label(status)
+
+    def _on_populated(self, widget):
+        """
+            Update buttons
+            @param widget as Gtk.Widget
+        """
+        self.update_buttons()
+        AlbumsBoxView._on_populated(self, widget)
 
 #######################
 # PRIVATE             #
