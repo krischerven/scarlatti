@@ -124,7 +124,8 @@ class EditMenu(Gio.Menu):
             for track in self.__object.tracks:
                 escaped = GLib.uri_escape_string(track.uri, None, True)
                 f = Gio.File.new_for_path("%s/web_%s" % (CACHE_PATH, escaped))
-                f.delete(None)
+                if f.query_exists():
+                    f.delete(None)
         except Exception as e:
             Logger.error("EditMenu::__on_clean_action_activate():", e)
 
