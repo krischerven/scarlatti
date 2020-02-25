@@ -197,14 +197,15 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param child as Gtk.FlowBoxChild
         """
         def show_album(status, child):
-            child.get_style_context().remove_class("pulse-animation")
             App().window.container.show_view([Type.ALBUM], child.data)
 
-        child.get_style_context().add_class("pulse-animation")
-        cancellable = Gio.Cancellable.new()
-        App().task_helper.run(child.data.load_tracks,
-                              cancellable,
-                              callback=(show_album, child))
+        if child.data.storage_type & StorageType.COLLECTION:
+            App().window.container.show_view([Type.ALBUM], child.data)
+        else:
+            cancellable = Gio.Cancellable.new()
+            App().task_helper.run(child.data.load_tracks,
+                                  cancellable,
+                                  callback=(show_album, child))
 
     def _on_tertiary_press_gesture(self, x, y, event):
         """
