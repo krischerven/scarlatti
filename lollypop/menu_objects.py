@@ -30,10 +30,11 @@ class AlbumMenu(Gio.Menu):
         Contextual menu for album
     """
 
-    def __init__(self, album, view_type, header=False):
+    def __init__(self, album, storage_type, view_type, header=False):
         """
             Init menu model
             @param album as Album
+            @param storage_type as StorageType
             @param view_type as ViewType
             @param header as bool
         """
@@ -44,7 +45,9 @@ class AlbumMenu(Gio.Menu):
         if not view_type & ViewType.BANNER:
             self.append_section(_("Playback"), AlbumPlaybackMenu(album))
         from lollypop.menu_artist import ArtistAlbumsMenu
-        menu = ArtistAlbumsMenu(album.artist_ids[0], view_type)
+        menu = ArtistAlbumsMenu(album.artist_ids[0],
+                                album.storage_type,
+                                view_type)
         if menu.get_n_items() != 0:
             self.append_section(_("Artist"), menu)
         section = Gio.Menu()

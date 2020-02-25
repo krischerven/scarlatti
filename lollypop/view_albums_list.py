@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 
 from lollypop.utils import popup_widget
 from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType, MARGIN, StorageType
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
@@ -32,7 +32,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param artist_ids as int
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type)
+        LazyLoadingView.__init__(self, StorageType.COLLECTION, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__width = 0
         self.__genre_ids = genre_ids

@@ -41,7 +41,7 @@ class ArtistMenu(Gio.Menu):
             from lollypop.menu_playback import ArtistPlaybackMenu
             self.append_section(_("Playback"),
                                 ArtistPlaybackMenu(artist_id, storage_type))
-        menu = ArtistAlbumsMenu(artist_id, view_type)
+        menu = ArtistAlbumsMenu(artist_id, storage_type, view_type)
         self.append_section(_("Artist"), menu)
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_ids([artist_id], [], storage_type, True)
@@ -55,13 +55,14 @@ class ArtistAlbumsMenu(Gio.Menu):
         Contextual menu for artist albums
     """
 
-    def __init__(self, artist_id, view_type):
+    def __init__(self, artist_id, storage_type, view_type):
         """
             Init artist albums menu
             @param artist id as int
             @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
+        self.__storage_type = storage_type
         self.__artist_id = artist_id
         self.__set_actions(view_type)
 
@@ -86,4 +87,5 @@ class ArtistAlbumsMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().window.container.show_view([Type.ARTISTS],
-                                         [self.__artist_id])
+                                         [self.__artist_id],
+                                         self.__storage_type)
