@@ -141,8 +141,11 @@ class SyncAlbumsMenu(SyncMenu):
             Init menu
             @param albums as [Album]
         """
-        self.__albums = albums
-        SyncMenu.__init__(self)
+        if albums:
+            self.__albums = albums
+            SyncMenu.__init__(self)
+        else:
+            Gio.Menu.__init__(self)
 
 #######################
 # PROTECTED           #
