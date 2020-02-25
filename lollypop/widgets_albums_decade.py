@@ -12,6 +12,7 @@
 
 
 from lollypop.define import App, Type
+from lollypop.utils import get_default_storage_type
 from lollypop.widgets_albums_rounded import RoundedAlbumsWidget
 
 
@@ -67,16 +68,17 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget):
             Get album ids
             @return [int]
         """
+        storage_type = get_default_storage_type()
         album_ids = []
         for year in self._data:
             album_ids += App().albums.get_albums_for_year(year,
-                                                          self.storage_type,
+                                                          storage_type,
                                                           self._ALBUMS_COUNT)
             l = len(album_ids)
             if l < self._ALBUMS_COUNT:
                 album_ids += App().albums.get_compilations_for_year(
                                                        year,
-                                                       self.storage_type,
+                                                       storage_type,
                                                        self._ALBUMS_COUNT)
         return album_ids
 
