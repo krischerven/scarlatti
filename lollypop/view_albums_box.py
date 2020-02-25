@@ -19,7 +19,7 @@ from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
 from lollypop.objects_album import Album
-from lollypop.utils import get_icon_name, get_network_available
+from lollypop.utils import get_icon_name, get_network_available, popup_widget
 from lollypop.utils import get_font_height
 from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
@@ -242,10 +242,12 @@ class AlbumsGenresBoxView(AlbumsBoxView):
                                view_type |
                                ViewType.OVERLAY |
                                ViewType.SCROLLED)
-        from lollypop.widgets_banner_albums import AlbumsBannerWidget
-        self.__banner = AlbumsBannerWidget(genre_ids, artist_ids, view_type)
+        from lollypop.widgets_banner_flowbox import FlowboxBannerWidget
+        self.__banner = FlowboxBannerWidget(genre_ids, artist_ids,
+                                            view_type, True)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
+        self.__banner.connect("show-menu", self.__on_banner_show_menu)
         self.add_widget(self._box, self.__banner)
 
 #######################
@@ -265,6 +267,23 @@ class AlbumsGenresBoxView(AlbumsBoxView):
             App().player.play_album_for_albums(albums[0], albums)
         else:
             App().player.play_album_for_albums(albums[0], albums)
+
+    def __on_banner_show_menu(self, banner, button):
+        """
+            Show contextual menu
+            @param banner as AlbumsBannerWidget
+            @param button as Gtk.Button
+        """
+        from lollypop.menu_objects import AlbumsMenu
+        from lollypop.widgets_menu import MenuBuilder
+        albums = []
+        for child in self._box.get_children():
+            if child.data.storage_type & StorageType.COLLECTION:
+                albums.append(child.data)
+        menu = AlbumsMenu(albums)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
 
 class AlbumsYearsBoxView(AlbumsGenresBoxView):

@@ -199,10 +199,10 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
             Init artist view
             @param storage_type as StorageType
         """
-        from lollypop.widgets_banner_albums import AlbumsBannerWidget
+        from lollypop.widgets_banner_flowbox import FlowboxBannerWidget
         RoundedArtistsView.__init__(self, storage_type,
                                     ViewType.SCROLLED | ViewType.OVERLAY)
-        self.__banner = AlbumsBannerWidget([Type.ARTISTS], [], self.view_type)
+        self.__banner = FlowboxBannerWidget([Type.ARTISTS], [], self.view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.add_widget(self._box, self.__banner)

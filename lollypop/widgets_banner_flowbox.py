@@ -18,25 +18,26 @@ from lollypop.shown import ShownLists
 from lollypop.utils import emit_signal
 
 
-class AlbumsBannerWidget(BannerWidget):
+class FlowboxBannerWidget(BannerWidget):
     """
-        Banner for albums
+        Banner for flowbox
     """
 
     __gsignals__ = {
-        "play-all": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
+        "play-all": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
+        "show-menu": (GObject.SignalFlags.RUN_FIRST, None,
+                      (GObject.TYPE_PYOBJECT,))
     }
 
-    def __init__(self, genre_ids, artist_ids, view_type):
+    def __init__(self, genre_ids, artist_ids, view_type, show_menu=False):
         """
             Init banner
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param view_type as ViewType
+            @param show_menu as bool
         """
         BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
-        self.__genre_ids = genre_ids
-        self.__artist_ids = artist_ids
         grid = Gtk.Grid.new()
         grid.show()
         grid.set_property("valign", Gtk.Align.CENTER)
@@ -63,6 +64,14 @@ class AlbumsBannerWidget(BannerWidget):
                                       self.__on_shuffle_button_clicked)
         linked.add(self.__play_button)
         linked.add(self.__shuffle_button)
+        if show_menu:
+            self.__menu_button = Gtk.Button.new_from_icon_name(
+                "view-more-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            self.__menu_button.show()
+            self.__menu_button.get_style_context().add_class("banner-button")
+            self.__menu_button.connect("clicked",
+                                       self.__on_menu_button_clicked)
+            linked.add(self.__menu_button)
         grid.add(self.__title_label)
         grid.add(linked)
         self._overlay.add_overlay(grid)
@@ -139,3 +148,10 @@ class AlbumsBannerWidget(BannerWidget):
             @param button as Gtk.Button
         """
         emit_signal(self, "play-all", True)
+
+    def __on_menu_button_clicked(self, button):
+        """
+            Show sync menu
+            @param button as Gtk.Button
+        """
+        self.emit("show-menu", button)

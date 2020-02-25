@@ -57,6 +57,24 @@ class AlbumMenu(Gio.Menu):
         self.append_section(_("Edit"), EditMenu(album))
 
 
+class AlbumsMenu(Gio.Menu):
+    """
+        Contextual menu for albums
+    """
+
+    def __init__(self, albums, header=False):
+        """
+            Init menu model
+            @param albums as [Album]
+            @param header as bool
+        """
+        Gio.Menu.__init__(self)
+        if header:
+            from lollypop.menu_header import MenuHeader
+            self.append_item(MenuHeader(_("Albums")))
+        self.append_section(_("Devices"), SyncAlbumsMenu(albums))
+
+
 class MinTrackMenu(Gio.Menu):
     """
         Contextual menu for a track
