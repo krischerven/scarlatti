@@ -156,7 +156,10 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                                                 mtime INT NOT NULL,
                                                 popularity INT NOT NULL)""",
             39: self.__upgrade_39,
-            40: """UPDATE tracks SET duration = duration * 1000"""
+            40: """UPDATE tracks SET duration = duration * 1000""",
+            # Here we force an mb_album_id if empty, needed by artwork
+            41: """UPDATE albums SET mb_album_id=rowid
+                   WHERE mb_album_id is null"""
         }
 
 #######################
