@@ -288,7 +288,7 @@ class Playlists(GObject.GObject):
         track_ids = []
         storage_type = get_default_storage_type()
         if playlist_id == Type.POPULARS:
-            track_ids = App().tracks.get_rated()
+            track_ids = App().tracks.get_rated(100, storage_type)
             for track in App().tracks.get_populars(100, storage_type):
                 track_ids.append(track)
         elif playlist_id == Type.RECENTS:
