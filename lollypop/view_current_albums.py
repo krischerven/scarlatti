@@ -30,14 +30,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        storage_type = StorageType.COLLECTION |\
-            StorageType.SAVED |\
-            StorageType.SEARCH |\
-            StorageType.EPHEMERAL |\
-            StorageType.EXTERNAL |\
-            StorageType.SPOTIFY_NEW_RELEASES |\
-            StorageType.SPOTIFY_SIMILARS
-        View.__init__(self, storage_type,
+        View.__init__(self, StorageType.ALL,
                       view_type | ViewType.SCROLLED | ViewType.OVERLAY)
         view_type |= ViewType.PLAYBACK
         self.__view = AlbumsListView([], [], view_type)

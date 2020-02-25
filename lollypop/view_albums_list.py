@@ -32,7 +32,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param artist_ids as int
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, StorageType.COLLECTION, view_type)
+        LazyLoadingView.__init__(self, StorageType.ALL, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__width = 0
         self.__genre_ids = genre_ids
