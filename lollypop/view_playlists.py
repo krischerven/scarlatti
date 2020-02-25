@@ -14,7 +14,7 @@ from gi.repository import GLib
 
 from lollypop.utils import tracks_to_albums
 from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN, Type, Size
+from lollypop.define import App, ViewType, MARGIN, Type, Size, StorageType
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -39,7 +39,8 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             @parma playlist_id as int
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, view_type |
+        LazyLoadingView.__init__(self, StorageType.ALL,
+                                 view_type |
                                  ViewType.SCROLLED |
                                  ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.ALBUM)
