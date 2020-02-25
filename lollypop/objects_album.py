@@ -257,7 +257,7 @@ class Album(Base):
         if self.storage_type & (StorageType.COLLECTION |
                                 StorageType.EXTERNAL):
             return False
-        elif self.synced != len(self.tracks):
+        elif self.synced != 0 and self.synced != len(self.tracks):
             App().spotify.load_tracks(self.mb_album_id, self.storage_type,
                                       cancellable)
             self.reset_tracks()
