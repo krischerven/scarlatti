@@ -72,7 +72,7 @@ class InformationView(View):
             Init artist infos
             @param follow_player as bool
         """
-        View.__init__(self)
+        View.__init__(self, get_default_storage_type())
         self.__information_store = InformationStore()
         self.__information_store.connect("artist-info-changed",
                                          self.__on_artist_info_changed)
