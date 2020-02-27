@@ -54,9 +54,7 @@ class NotificationManager:
                 App().is_fullscreen:
             return
 
-        if self.__is_gnome:
-            cover_path = None
-        elif isinstance(track, Radio):
+        if isinstance(track, Radio):
             cover_path = App().art.get_radio_cache_path(track.name,
                                                         ArtSize.BIG,
                                                         ArtSize.BIG)
