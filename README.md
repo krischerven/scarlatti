@@ -1,8 +1,8 @@
 # Lollypop music player
 
-![Lollypop logo](https://gitlab.gnome.org/gnumdk/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
+![Lollypop logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
 
-![Support Lollypop](https://www.patreon.com/gnumdk)
+Support Lollypop: https://www.patreon.com/gnumdk
 
 Lollypop is a new GNOME music playing application.
 
@@ -79,3 +79,5 @@ $ cd lollypop
 $ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/lollypop.svg)](https://repology.org/project/lollypop/versions)
