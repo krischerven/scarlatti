@@ -18,7 +18,7 @@ from gettext import gettext as _
 from lollypop.define import StorageType, MARGIN_SMALL, App, CACHE_PATH
 from lollypop.define import ViewType
 from lollypop.menu_playlists import PlaylistsMenu
-from lollypop.menu_edit import EditMenu
+from lollypop.menu_actions import ActionsMenu
 from lollypop.menu_playback import TrackPlaybackMenu, AlbumPlaybackMenu
 from lollypop.menu_sync import SyncAlbumsMenu
 from lollypop.widgets_rating import RatingWidget
@@ -57,7 +57,7 @@ class AlbumMenu(Gio.Menu):
             section.append_submenu(_("Devices"), SyncAlbumsMenu([album]))
         if section.get_n_items() != 0:
             self.append_section(_("Add to"), section)
-        self.append_section(_("Edit"), EditMenu(album))
+        self.append_section(_("Others"), ActionsMenu(album))
 
 
 class AlbumsMenu(Gio.Menu):
@@ -98,7 +98,7 @@ class MinTrackMenu(Gio.Menu):
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
             self.append_section(_("Add to"), section)
-        self.append_section(_("Edit"), EditMenu(track))
+        self.append_section(_("Others"), ActionsMenu(track))
 
 
 class TrackMenu(Gio.Menu):
@@ -121,7 +121,7 @@ class TrackMenu(Gio.Menu):
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
             self.append_section(_("Add to"), section)
-        self.append_section(_("Edit"), EditMenu(track))
+        self.append_section(_("Others"), ActionsMenu(track))
 
 
 class TrackMenuExt(Gtk.Grid):

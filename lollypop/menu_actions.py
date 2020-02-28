@@ -14,15 +14,16 @@ from gi.repository import Gio, GLib, Gtk, Gdk
 
 from gettext import gettext as _
 
-from lollypop.define import App, StorageType, CACHE_PATH, TAG_EDITORS
+from lollypop.define import App, StorageType, CACHE_PATH
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
+from lollypop.dialog_apps import AppsDialog
 
 
-class EditMenu(Gio.Menu):
+class ActionsMenu(Gio.Menu):
     """
-        Edition menu for album
+        ActionsMenu menu for album
     """
 
     def __init__(self, object):
@@ -39,7 +40,7 @@ class EditMenu(Gio.Menu):
         if isinstance(self.__object, Album):
             self.__set_save_action()
         if self.__object.storage_type & StorageType.COLLECTION:
-            self.__set_edit_action()
+            self.__set_open_action()
 
 #######################
 # PRIVATE             #
@@ -88,15 +89,15 @@ class EditMenu(Gio.Menu):
             menu_item.set_attribute_value("close", GLib.Variant("b", True))
             self.append_item(menu_item)
 
-    def __set_edit_action(self):
+    def __set_open_action(self):
         """
             Set edit action
         """
-        edit_tag_action = Gio.SimpleAction(name="edit_tag_action")
-        App().add_action(edit_tag_action)
-        edit_tag_action.connect("activate", self.__on_edit_tag_action_activate)
-        menu_item = Gio.MenuItem.new(_("Modify information"),
-                                     "app.edit_tag_action")
+        open_tag_action = Gio.SimpleAction(name="open_tag_action")
+        App().add_action(open_tag_action)
+        open_tag_action.connect("activate", self.__on_open_tag_action_activate)
+        menu_item = Gio.MenuItem.new(_("Open with…"),
+                                     "app.open_tag_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
 
@@ -127,7 +128,7 @@ class EditMenu(Gio.Menu):
                 if f.query_exists():
                     f.delete(None)
         except Exception as e:
-            Logger.error("EditMenu::__on_clean_action_activate():", e)
+            Logger.error("ActionsMenu::__on_clean_action_activate():", e)
 
     def __on_save_action_activate(self, action, variant, save):
         """
@@ -144,44 +145,42 @@ class EditMenu(Gio.Menu):
             App().artists.clean()
             App().genres.clean()
 
-    def __on_edit_tag_action_activate(self, action, variant):
+    def __on_open_tag_action_activate(self, action, variant):
         """
             Run tag editor
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        tag_editor = App().settings.get_value("tag-editor").get_string()
-        if not tag_editor:
-            for editor in TAG_EDITORS:
-                if GLib.find_program_in_path(editor):
-                    tag_editor = editor
-                    break
-        if not tag_editor:
-            # Lollypop advertising a Qt software but it is the best
-            # tag editor
-            tag_editor = "kid3-qt"
-        worked = False
-        f = Gio.File.new_for_uri(self.__object.uri)
-        if f.query_exists():
-            path = f.get_path()
-            arguments = [
-                [tag_editor, path],
-                ["flatpak-spawn", "--host", tag_editor, path]]
-            for argv in arguments:
-                try:
-                    (pid, stdin, stdout, stderr) = GLib.spawn_async(
-                        argv, flags=GLib.SpawnFlags.SEARCH_PATH |
-                        GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
-                        standard_input=False,
-                        standard_output=False,
-                        standard_error=False
-                    )
-                    GLib.spawn_close_pid(pid)
-                    worked = True
-                    break
-                except Exception as e:
-                    Logger.error(
-                        "MenuPopover::__on_edit_tag_action_activate(): %s", e)
-            if not worked:
-                App().notify.send("Lollypop",
-                                  _("Please install EasyTAG or Kid3"))
+        try:
+            def launch_app(executable, f):
+                if f.query_exists():
+                    path = f.get_path()
+                    arguments = [
+                        [executable, path],
+                        ["flatpak-spawn", "--host", executable, path]]
+                    for argv in arguments:
+                        try:
+                            (pid, stdin, stdout, stderr) = GLib.spawn_async(
+                                argv, flags=GLib.SpawnFlags.SEARCH_PATH |
+                                GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
+                                standard_input=False,
+                                standard_output=False,
+                                standard_error=False
+                            )
+                            GLib.spawn_close_pid(pid)
+                            break
+                        except Exception as e:
+                            Logger.error("ActionsMenu::launch_app(): %s", e)
+
+            def on_response(dialog, response_id, f):
+                if response_id == Gtk.ResponseType.OK:
+                    if dialog.executable is not None:
+                        launch_app(dialog.executable, f)
+                dialog.destroy()
+
+            f = Gio.File.new_for_uri(self.__object.uri)
+            dialog = AppsDialog(f)
+            dialog.connect("response", on_response, f)
+            dialog.run()
+        except Exception as e:
+            Logger.error("ActionsMenu::__on_open_tag_action_activate(): %s", e)
