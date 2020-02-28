@@ -100,13 +100,14 @@ class SearchStack(Gtk.Stack):
             Set a new current child for search
             This is not visible child
         """
+        if self.__current_child is not None:
+            self.__current_child.search_tracks_view.clear()
+            self.__current_child.artists_line_view.clear()
+            self.__current_child.albums_line_view.clear()
         for child in self.get_children():
             if child != self.get_visible_child():
                 self.__current_child = child
                 break
-        self.__current_child.search_tracks_view.clear()
-        self.__current_child.artists_line_view.clear()
-        self.__current_child.albums_line_view.clear()
 
     @property
     def current_child(self):
