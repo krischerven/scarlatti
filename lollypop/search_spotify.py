@@ -188,15 +188,24 @@ class SpotifySearch(GObject.Object):
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/browse/new-releases"
-            uri += "?country=%s" % locale
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                self.__create_albums_from_albums_payload(
+            uris = ["%s?country=%s" % (uri, locale), uri]
+            for uri in uris:
+                (status, data) = helper.load_uri_content_sync(uri, cancellable)
+                if status:
+                    decode = json.loads(data.decode("utf-8"))
+                    self.__create_albums_from_albums_payload(
                                              decode["albums"]["items"],
                                              StorageType.SPOTIFY_NEW_RELEASES,
                                              True,
                                              cancellable)
+                    # Check if storage type needs to be updated
+                    # Check if albums newer than a week are enough
+                    timestamp = time() - 604800
+                    newer_albums = App().albums.get_newer_for_storage_type(
+                                             StorageType.SPOTIFY_NEW_RELEASES,
+                                             timestamp)
+                    if len(newer_albums) >= self.__MIN_ITEMS_PER_STORAGE_TYPE:
+                        break
         except Exception as e:
             Logger.warning("SpotifySearch::search_new_releases(): %s", e)
 
