@@ -339,6 +339,11 @@
             <summary>Ignore internal symlinks</summary>
             <description></description>
         </key>
+        <key type="s" name="open-with">
+            <default>""</default>
+            <summary>INTERNAL</summary>
+            <description></description>
+        </key>
         <key enum="org.gnome.Lollypop.ReplayGain" name="replay-gain">
             <default>'album'</default>
             <summary>ReplayGain state</summary>

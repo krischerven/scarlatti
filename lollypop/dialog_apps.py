@@ -10,9 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gio, GLib
 from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE
 
+import json
 from gettext import gettext as _
 
 from lollypop.define import App, MARGIN_MEDIUM, MARGIN
@@ -63,6 +64,7 @@ class AppsDialog(Gtk.Dialog):
         """
         Gtk.Dialog.__init__(self)
         self.__executable = None
+        self.__open_with = {}
         self.set_size_request(300, 300)
         self.set_transient_for(App().window)
         cancel_button = Gtk.Button.new_with_label(_("Cancel"))
@@ -82,6 +84,7 @@ class AppsDialog(Gtk.Dialog):
         self.__listbox.show()
         self.__listbox.set_activate_on_single_click(False)
         self.__listbox.connect("row-selected", self.__on_row_selected)
+        self.__listbox.set_sort_func(self.__sort)
         scrolled = Gtk.ScrolledWindow.new()
         scrolled.show()
         scrolled.add(self.__listbox)
@@ -95,11 +98,14 @@ class AppsDialog(Gtk.Dialog):
                               lambda x: self.response(Gtk.ResponseType.OK))
         self.__listbox.connect("row-activated",
                                lambda x, y: self.response(Gtk.ResponseType.OK))
+
         try:
             info = f.query_info("%s" % FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
                                 Gio.FileQueryInfoFlags.NONE,
                                 None)
             content_type = info.get_content_type()
+            self.__last_app = self.__get_last_app(content_type)
+            self.connect("response", self.__on_response, content_type)
             # Set apps
             for app in Gio.AppInfo.get_all_for_type(content_type):
                 if not app.get_commandline().startswith("lollypop"):
@@ -120,6 +126,47 @@ class AppsDialog(Gtk.Dialog):
 #######################
 # PRIVATE             #
 #######################
+    def __get_last_app(self, content_type):
+        """
+            Get last application for content_type
+            @param content_type as str
+            @return str/None
+        """
+        try:
+            json_data = App().settings.get_value("open-with").get_string()
+            if json_data:
+                self.__open_with = json.loads(json_data)
+                return self.__open_with[content_type]
+        except Exception as e:
+            Logger.error("AppsDialog::__get_last_app(): %s", e)
+            App().settings.set_value("open-with", GLib.Variant("s", ""))
+        return None
+
+    def __sort(self, row_a, row_b):
+        """
+            Sort function to always show last selected item
+            @param row_a as AppListBoxRow
+            @param row_b as AppListBoxRow
+            @return bool
+        """
+        if row_b.app.get_executable() == self.__last_app:
+            return True
+        return False
+
+    def __on_response(self, dialog, response_id, content_type):
+        """
+            Save currently selected item
+            @param dialog as Gtk.Dialog
+            @param response_id as Gtk.ResponseType
+            @param content_type as str
+        """
+        if response_id == Gtk.ResponseType.OK:
+            if dialog.executable is not None:
+                self.__open_with[content_type] = dialog.executable
+                data = json.dumps(self.__open_with)
+                App().settings.set_value("open-with",
+                                         GLib.Variant("s", data))
+
     def __on_row_selected(self, listbox, row):
         """
             Set current executable
