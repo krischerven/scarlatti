@@ -154,19 +154,25 @@ class ArtistArt:
         """
             Migrate old data dir
         """
-        old_path = GLib.get_user_data_dir() + "/lollypop/info"
-        old = Gio.File.new_for_path(old_path)
-        if not old.query_exists():
-            return
-        storage_type = get_default_storage_type()
-        for (artist_id, artist, *ignore) in App().artists.get(
-                [], storage_type):
-            for ext in ["jpg", "txt"]:
-                src_path = "%s/%s.%s" % (old_path, escape(artist), ext)
-                src = Gio.File.new_for_path(src_path)
-                if not src.query_exists():
-                    continue
-                encoded = self.encode_artist_name(artist)
-                dst_path = "%s/%s.%s" % (ARTISTS_PATH, encoded, ext)
-                dst = Gio.File.new_for_path(dst_path)
-                src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
+        try:
+            old_path = GLib.get_user_data_dir() + "/lollypop/info"
+            old_src = Gio.File.new_for_path(old_path)
+            if not old_src.query_exists():
+                return
+            storage_type = get_default_storage_type()
+            for (artist_id, artist, *ignore) in App().artists.get(
+                    [], storage_type):
+                for ext in ["jpg", "txt"]:
+                    src_path = "%s/%s.%s" % (old_path, escape(artist), ext)
+                    src = Gio.File.new_for_path(src_path)
+                    if not src.query_exists():
+                        continue
+                    encoded = self.encode_artist_name(artist)
+                    dst_path = "%s/%s.%s" % (ARTISTS_PATH, encoded, ext)
+                    dst = Gio.File.new_for_path(dst_path)
+                    src.copy(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
+            old_dst = Gio.File.new_for_path(
+                GLib.get_user_data_dir() + "/lollypop/info-backup")
+            old_src.move(old_dst, Gio.FileCopyFlags.OVERWRITE, None, None)
+        except Exception as e:
+            Logger.error("ArtistArt::__migrate_old_dir(): %s", e)
