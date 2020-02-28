@@ -403,7 +403,7 @@ class MPRIS(Server):
                 App().player.current_track.album_artists)
             self.__metadata["mpris:length"] = GLib.Variant(
                 "x",
-                App().player.current_track.duration * 1000 * 1000)
+                App().player.current_track.duration * 1000)
             self.__metadata["xesam:genre"] = GLib.Variant(
                 "as",
                 App().player.current_track.genres)
