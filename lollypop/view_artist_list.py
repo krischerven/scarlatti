@@ -38,7 +38,7 @@ class ArtistViewList(LazyLoadingView):
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__storage_type = storage_type
-        self.__banner = ArtistBannerWidget(genre_ids, artist_ids)
+        self.__banner = ArtistBannerWidget(genre_ids, artist_ids, storage_type)
         self.__banner.show()
         self.__list = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN * 4)
         self.__list.show()
@@ -82,7 +82,9 @@ class ArtistViewList(LazyLoadingView):
         """
         if self.destroyed:
             return None
-        widget = AlbumView(Album(album_id), ViewType.DEFAULT)
+        widget = AlbumView(Album(album_id),
+                           self.storage_type,
+                           ViewType.DEFAULT)
         widget.show()
         widget.set_property("valign", Gtk.Align.START)
         self.__list.add(widget)

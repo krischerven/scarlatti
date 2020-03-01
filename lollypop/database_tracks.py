@@ -120,7 +120,7 @@ class TracksDatabase:
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT rowid FROM tracks\
                                   WHERE storage_type & ?\
-                                  ORDER BY album_id", (storage_type))
+                                  ORDER BY album_id", (storage_type,))
             return list(itertools.chain(*result))
 
     def get_ids_for_name(self, name):
