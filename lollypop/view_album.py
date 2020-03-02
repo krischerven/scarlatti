@@ -49,7 +49,8 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         self.__grid.show()
         self.__grid.set_row_spacing(10)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__banner = AlbumBannerWidget(self.__album, self.view_type)
+        self.__banner = AlbumBannerWidget(self.__album, self.storage_type,
+                                          self.view_type)
         self.add_widget(self.__grid, self.__banner)
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),

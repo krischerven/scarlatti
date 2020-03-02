@@ -30,15 +30,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, album, view_type=ViewType.DEFAULT):
+    def __init__(self, album, storage_type, view_type=ViewType.DEFAULT):
         """
             Init cover widget
             @param album
+            @param storage_type as int
             @param view_type as ViewType
         """
         BannerWidget.__init__(self, view_type)
-        self.__cloud_image = None
         self.__album = album
+        self.__storage_type = storage_type
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/AlbumBannerWidget.ui")
         builder.connect_signals(self)
@@ -138,7 +139,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(self.__album, self.view_type | ViewType.BANNER,
+        menu = AlbumMenu(self.__album,
+                         self.__storage_type,
+                         self.view_type | ViewType.BANNER,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
