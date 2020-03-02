@@ -204,7 +204,7 @@ class LyricsView(View, SignalsHelper):
         """
             Show sync lyrics for track
         """
-        timestamp = App().player.position / 1000000
+        timestamp = App().player.position
         (previous, current, next) =\
             self.__lyrics_helper.get_lyrics_for_timestamp(timestamp)
         lyrics = ""
