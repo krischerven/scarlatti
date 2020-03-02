@@ -158,7 +158,7 @@ class ArtistsDatabase:
             @return MusicBrainz artist id as str
         """
         with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT mb_artist_id FROM albums\
+            result = sql.execute("SELECT mb_artist_id FROM artists\
                                   WHERE rowid=?", (artist_id,))
             v = result.fetchone()
             if v is not None:
