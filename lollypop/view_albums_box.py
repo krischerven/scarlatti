@@ -153,7 +153,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(child.data, self.view_type, App().window.is_adaptive)
+        menu = AlbumMenu(child.data, self.storage_type,
+                         self.view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
     def _on_album_updated(self, scanner, album_id, scan_update):
