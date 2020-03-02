@@ -95,7 +95,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         grid.add(self.__cover_widget)
         grid.add(self.__title_label)
         grid.add(self.__play_button)
-        grid.set_margin("margin", MARGIN)
+        grid.set_property("margin", MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         return [
