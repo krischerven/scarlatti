@@ -160,7 +160,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         for c in title_context.list_classes():
             title_context.remove_class(c)
         if self.width <= Size.SMALL:
-            art_size = ArtSize.SMALL
+            art_size = None
             cls = "text-large"
         elif self.width <= Size.MEDIUM:
             art_size = ArtSize.MEDIUM
@@ -169,7 +169,11 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             art_size = ArtSize.BANNER
             cls = "text-xx-large"
         self.__title_label.get_style_context().add_class(cls)
-        self.__cover_widget.set_art_size(art_size)
+        if art_size is None:
+            self.__cover_widget.hide()
+        else:
+            self.__cover_widget.show()
+            self.__cover_widget.set_art_size(art_size)
 
     def __on_play_button_clicked(self, button):
         """
