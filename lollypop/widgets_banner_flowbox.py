@@ -51,12 +51,12 @@ class FlowboxBannerWidget(BannerWidget):
         linked.set_margin_end(MARGIN)
         linked.set_property("halign", Gtk.Align.END)
         self.__play_button = Gtk.Button.new_from_icon_name(
-            "media-playback-start-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
         self.__play_button.show()
         self.__play_button.get_style_context().add_class("banner-button")
         self.__play_button.connect("clicked", self.__on_play_button_clicked)
         self.__shuffle_button = Gtk.Button.new_from_icon_name(
-            "media-playlist-shuffle-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "media-playlist-shuffle-symbolic", Gtk.IconSize.BUTTON)
         self.__shuffle_button.show()
         self.__shuffle_button.get_style_context().add_class("banner-button")
         self.__shuffle_button.connect("clicked",
@@ -65,7 +65,7 @@ class FlowboxBannerWidget(BannerWidget):
         linked.add(self.__shuffle_button)
         if show_menu:
             self.__menu_button = Gtk.Button.new_from_icon_name(
-                "view-more-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+                "view-more-symbolic", Gtk.IconSize.BUTTON)
             self.__menu_button.show()
             self.__menu_button.get_style_context().add_class("banner-button")
             self.__menu_button.connect("clicked",

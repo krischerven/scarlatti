@@ -1,52 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkImage" id="add_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_size">3</property>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">view-more-symbolic</property>
-    <property name="icon_size">3</property>
   </object>
   <object class="GtkImage" id="play_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">media-playback-start-symbolic</property>
-    <property name="icon_size">3</property>
   </object>
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="valign">center</property>
+    <property name="margin_left">15</property>
     <property name="margin_right">15</property>
     <property name="margin_top">15</property>
     <property name="margin_bottom">15</property>
-    <property name="row_homogeneous">True</property>
+    <property name="row_spacing">10</property>
+    <property name="column_spacing">15</property>
     <child>
-      <object class="GtkBox" id="top_box">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="valign">end</property>
-        <property name="margin_left">15</property>
+        <property name="halign">end</property>
+        <property name="valign">center</property>
+        <property name="hexpand">True</property>
         <child>
-          <object class="GtkEventBox" id="artist_eventbox">
+          <object class="GtkButton" id="play_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkLabel" id="artist_label">
-                <property name="can_focus">False</property>
-                <property name="ellipsize">end</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="dim-label"/>
-                </style>
-              </object>
-            </child>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">play_image</property>
+            <signal name="clicked" handler="_on_play_button_clicked" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -55,44 +48,48 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEventBox" id="year_eventbox">
+          <object class="GtkButton" id="add_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="hexpand">True</property>
-            <child>
-              <object class="GtkLabel" id="year_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-                <style>
-                  <class name="dim-label"/>
-                </style>
-              </object>
-            </child>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">add_image</property>
+            <signal name="clicked" handler="_on_add_button_clicked" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkButton" id="menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="image">image1</property>
+            <signal name="clicked" handler="_on_menu_button_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
         </child>
+        <style>
+          <class name="linked"/>
+        </style>
       </object>
       <packing>
-        <property name="left_attach">1</property>
-        <property name="top_attach">0</property>
+        <property name="left_attach">2</property>
+        <property name="top_attach">1</property>
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="middle_box">
+      <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">15</property>
+        <property name="valign">start</property>
         <child>
           <object class="GtkLabel" id="title_label">
             <property name="visible">True</property>
@@ -111,100 +108,80 @@
             </attributes>
           </object>
           <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkEventBox" id="artist_eventbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="valign">center</property>
-            <property name="hexpand">True</property>
             <child>
-              <object class="GtkButton" id="play_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="image">play_image</property>
-                <signal name="clicked" handler="_on_play_button_clicked" swapped="no"/>
+              <object class="GtkLabel" id="artist_label">
+                <property name="can_focus">False</property>
+                <property name="ellipsize">end</property>
+                <property name="xalign">0</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
-            <child>
-              <object class="GtkButton" id="add_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="image">add_image</property>
-                <signal name="clicked" handler="_on_add_button_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="menu_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="halign">start</property>
-                <property name="image">image1</property>
-                <signal name="clicked" handler="_on_menu_button_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <style>
-              <class name="linked"/>
-            </style>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
           </packing>
         </child>
       </object>
       <packing>
         <property name="left_attach">1</property>
-        <property name="top_attach">1</property>
+        <property name="top_attach">0</property>
+        <property name="height">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="duration_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="hexpand">True</property>
+        <style>
+          <class name="dim-label"/>
+        </style>
+      </object>
+      <packing>
+        <property name="left_attach">2</property>
+        <property name="top_attach">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEventBox" id="year_eventbox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="hexpand">True</property>
+        <child>
+          <object class="GtkLabel" id="year_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+            <style>
+              <class name="dim-label"/>
+            </style>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">2</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
       <object class="GtkBox" id="bottom_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="valign">start</property>
-        <property name="margin_left">15</property>
-        <child>
-          <object class="GtkLabel" id="duration_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="hexpand">True</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <placeholder/>
         </child>

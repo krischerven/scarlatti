@@ -88,15 +88,14 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button.set_property("halign", Gtk.Align.END)
         self.__play_button.set_hexpand(True)
         self.__play_button.get_image().set_from_icon_name(
-            "media-playback-start-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
         grid = Gtk.Grid()
         grid.show()
         grid.set_column_spacing(MARGIN)
         grid.add(self.__cover_widget)
         grid.add(self.__title_label)
         grid.add(self.__play_button)
-        grid.set_margin_start(MARGIN)
-        grid.set_margin_end(MARGIN)
+        grid.set_margin("margin", MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         return [

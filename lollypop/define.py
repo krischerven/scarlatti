@@ -138,6 +138,7 @@ class IndicatorType:
 class ArtSize:
     SMALL = 50     # Depends on cover-size in gsettings
     MEDIUM = 100
+    BANNER_SMALL = 125
     BANNER = 150   # Depends on cover-size in gsettings
     BIG = 200      # Depends on cover-size in gsettings
     MINIPLAYER = 300

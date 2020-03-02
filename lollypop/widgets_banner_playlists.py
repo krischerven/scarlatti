@@ -45,13 +45,13 @@ class PlaylistsBannerWidget(BannerWidget):
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__new_button = Gtk.Button.new_from_icon_name(
-            "document-new-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "document-new-symbolic", Gtk.IconSize.BUTTON)
         self.__new_button.connect("clicked", self.__on_new_button_clicked)
         self.__new_button.set_property("halign", Gtk.Align.CENTER)
         self.__new_button.get_style_context().add_class("banner-button")
         self.__new_button.show()
         self.__menu_button = Gtk.Button.new_from_icon_name(
-            "view-more-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "view-more-symbolic", Gtk.IconSize.BUTTON)
         self.__menu_button.show()
         self.__menu_button.get_style_context().add_class("banner-button")
         self.__menu_button.set_property("halign", Gtk.Align.END)

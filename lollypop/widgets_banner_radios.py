@@ -43,13 +43,13 @@ class RadiosBannerWidget(BannerWidget):
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__new_button = Gtk.Button.new_from_icon_name(
-            "document-new-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "document-new-symbolic", Gtk.IconSize.BUTTON)
         self.__new_button.connect("clicked", self.__on_new_button_clicked)
         self.__new_button.set_property("halign", Gtk.Align.CENTER)
         self.__new_button.get_style_context().add_class("banner-button")
         self.__new_button.show()
         self.__tunein_button = Gtk.Button.new_from_icon_name(
-            "edit-find-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "edit-find-symbolic", Gtk.IconSize.BUTTON)
         self.__tunein_button.show()
         self.__tunein_button.get_style_context().add_class("banner-button")
         self.__tunein_button.connect("clicked",

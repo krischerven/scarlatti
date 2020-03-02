@@ -34,7 +34,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__view = view
         self.__clear_button = Gtk.Button.new_from_icon_name(
             "edit-clear-all-symbolic",
-            Gtk.IconSize.LARGE_TOOLBAR)
+            Gtk.IconSize.BUTTON)
         self.__clear_button.set_relief(Gtk.ReliefStyle.NONE)
         self.__clear_button.set_tooltip_text(_("Clear albums"))
         self.__clear_button.set_sensitive(App().player.albums)
@@ -43,7 +43,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__clear_button.show()
         self.__menu_button = Gtk.Button.new_from_icon_name(
             "view-more-symbolic",
-            Gtk.IconSize.LARGE_TOOLBAR)
+            Gtk.IconSize.BUTTON)
         self.__menu_button.set_relief(Gtk.ReliefStyle.NONE)
         self.__menu_button.set_sensitive(App().player.albums)
         self.__menu_button.connect("clicked", self.__on_menu_button_clicked)
@@ -51,7 +51,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__menu_button.show()
         self.__jump_button = Gtk.Button.new_from_icon_name(
             "go-jump-symbolic",
-            Gtk.IconSize.LARGE_TOOLBAR)
+            Gtk.IconSize.BUTTON)
         self.__jump_button.set_relief(Gtk.ReliefStyle.NONE)
         self.__jump_button.connect("clicked", self.__on_jump_button_clicked)
         self.__jump_button.set_tooltip_text(_("Go to current track"))

@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, ArtSize, MARGIN, Type, ViewType, Size
+from lollypop.define import App, ArtSize, Type, ViewType, Size
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
@@ -88,7 +88,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget = RatingWidget(album, Gtk.IconSize.INVALID)
         self.__rating_widget.show()
         self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
-        self.__cover_widget.set_margin_start(MARGIN)
         if view_type & ViewType.OVERLAY:
             self._overlay.add_overlay(self.__widget)
             self._overlay.set_overlay_pass_through(self.__widget, True)
@@ -223,10 +222,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         if self.__album.id in App().player.album_ids:
             self.__add_button.get_image().set_from_icon_name(
-                "list-remove-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+                "list-remove-symbolic", Gtk.IconSize.BUTTON)
         else:
             self.__add_button.get_image().set_from_icon_name(
-                "list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+                "list-add-symbolic", Gtk.IconSize.BUTTON)
 
     def __set_internal_size(self):
         """

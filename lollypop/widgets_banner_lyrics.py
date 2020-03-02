@@ -45,7 +45,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_vexpand(True)
         self.__translate_button = Gtk.ToggleButton.new()
         image = Gtk.Image.new_from_icon_name(
-            "accessories-dictionary-symbolic", Gtk.IconSize.LARGE_TOOLBAR)
+            "accessories-dictionary-symbolic", Gtk.IconSize.BUTTON)
         image.show()
         self.__translate_button.set_image(image)
         self.__translate_button.show()
@@ -62,7 +62,7 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         grid.set_column_spacing(MARGIN)
         grid.add(self.__title_label)
         grid.add(self.__translate_button)
-        grid.set_margin_start(MARGIN)
+        grid.set_property("margin", MARGIN)
         grid.set_margin_end(MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
