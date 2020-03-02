@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
+from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
@@ -37,7 +37,17 @@ class ArtistMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import ArtistMenuHeader
             self.append_item(ArtistMenuHeader(artist_id))
-        if not view_type & ViewType.BANNER:
+        if view_type & ViewType.BANNER:
+            show_tracks_action = Gio.SimpleAction.new_stateful(
+                "show_tracks_action",
+                None,
+                GLib.Variant.new_boolean(
+                    App().settings.get_value("show-artist-tracks")))
+            App().add_action(show_tracks_action)
+            show_tracks_action.connect("change-state",
+                                       self.__on_show_tracks_change_state)
+            self.append(_("Show tracks"), "app.show_tracks_action")
+        else:
             from lollypop.menu_playback import ArtistPlaybackMenu
             self.append_section(_("Playback"),
                                 ArtistPlaybackMenu(artist_id, storage_type))
@@ -48,6 +58,19 @@ class ArtistMenu(Gio.Menu):
         albums = [Album(album_id) for album_id in album_ids]
         self.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
         self.append_submenu(_("Playlists"), PlaylistsMenu(albums))
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_show_tracks_change_state(self, action, variant):
+        """
+            Save option and reload view
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        action.set_state(variant)
+        App().settings.set_value("show-artist-tracks", variant)
+        App().window.container.reload_view()
 
 
 class ArtistAlbumsMenu(Gio.Menu):

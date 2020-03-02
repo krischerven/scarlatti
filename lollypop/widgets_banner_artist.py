@@ -146,15 +146,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                           self.__storage_type,
                           self.view_type | ViewType.BANNER,
                           App().window.is_adaptive)
-        show_tracks_action = Gio.SimpleAction.new_stateful(
-            "show_tracks_action",
-            None,
-            GLib.Variant.new_boolean(
-                App().settings.get_value("show-artist-tracks")))
-        App().add_action(show_tracks_action)
-        show_tracks_action.connect("change-state",
-                                   self.__on_show_tracks_change_state)
-        menu.insert(0, _("Show tracks"), "app.show_tracks_action")
         section = Gio.Menu()
         menu.append_section(_("Similar artists"), section)
         menu_widget = MenuBuilder(menu, True)
@@ -306,13 +297,3 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 "circle-icon")
             self.__badge_artwork.set_from_surface(surface)
             del surface
-
-    def __on_show_tracks_change_state(self, action, variant):
-        """
-            Save option and reload view
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        action.set_state(variant)
-        App().settings.set_value("show-artist-tracks", variant)
-        App().window.container.reload_view()
