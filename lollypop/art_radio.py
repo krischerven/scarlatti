@@ -18,6 +18,7 @@ from lollypop.helper_task import TaskHelper
 from lollypop.logger import Logger
 from lollypop.define import ArtBehaviour, CACHE_PATH
 from lollypop.utils import escape, emit_signal
+from lollypop.utils_file import create_dir
 
 
 class RadioArt:
@@ -31,12 +32,7 @@ class RadioArt:
             Init radio art
             Should be inherited by a BaseArt
         """
-        d = Gio.File.new_for_path(self._RADIOS_PATH)
-        if not d.query_exists():
-            try:
-                d.make_directory_with_parents()
-            except Exception as e:
-                Logger.error("RadioArt.__init__(): %s" % e)
+        create_dir(self._RADIOS_PATH)
 
     def get_radio_cache_path(self, name, width, height):
         """
