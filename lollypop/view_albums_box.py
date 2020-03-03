@@ -240,9 +240,7 @@ class AlbumsGenresBoxView(AlbumsBoxView):
             @param view_type as ViewType
         """
         AlbumsBoxView.__init__(self, genre_ids, artist_ids, storage_type,
-                               view_type |
-                               ViewType.OVERLAY |
-                               ViewType.SCROLLED)
+                               view_type | ViewType.OVERLAY)
         from lollypop.widgets_banner_flowbox import FlowboxBannerWidget
         self.__banner = FlowboxBannerWidget(genre_ids, artist_ids,
                                             view_type, True)
