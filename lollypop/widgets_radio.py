@@ -13,6 +13,7 @@
 from gi.repository import Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, MARGIN_SMALL
+from lollypop.define import MARGIN
 from lollypop.utils import on_query_tooltip, set_cursor_type, emit_signal
 from lollypop.objects_radio import Radio
 
@@ -39,6 +40,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         self.__view_type = view_type
         self.set_view_type(view_type)
         self.set_property("halign", Gtk.Align.CENTER)
+        self.set_property("margin", MARGIN)
 
     def populate(self):
         """
