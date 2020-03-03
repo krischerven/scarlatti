@@ -24,14 +24,15 @@ class GenresBoxView(FlowBoxView):
         Show genres in a FlowBox
     """
 
-    def __init__(self, storage_type):
+    def __init__(self, storage_type, view_type):
         """
             Init decade view
             @param storage_type as StorageType
+            @param view_type as ViewType
         """
         from lollypop.widgets_banner_flowbox import FlowboxBannerWidget
         FlowBoxView.__init__(self, storage_type,
-                             ViewType.SCROLLED | ViewType.OVERLAY)
+                             view_type | ViewType.OVERLAY)
         self._empty_icon_name = get_icon_name(Type.GENRES)
         self.__banner = FlowboxBannerWidget([Type.GENRES], [], self.view_type)
         self.__banner.show()

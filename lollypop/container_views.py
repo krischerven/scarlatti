@@ -309,7 +309,8 @@ class ViewsContainer:
             @return GenresBoxView
         """
         from lollypop.view_genres_box import GenresBoxView
-        view = GenresBoxView(storage_type)
+        view_type = ViewType.SCROLLED
+        view = GenresBoxView(storage_type, view_type)
         view.populate()
         view.show()
         return view
