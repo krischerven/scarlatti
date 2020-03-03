@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from random import shuffle
 
-from lollypop.define import App, ArtBehaviour
+from lollypop.define import App, ArtBehaviour, StorageType
 from lollypop.utils import emit_signal
 from lollypop.objects_album import Album
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
@@ -92,7 +92,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
                                             self.__on_artist_artwork)
         else:
             album_ids = App().albums.get_ids([self._data], [],
-                                             self.storage_type)
+                                             StorageType.ALL)
             if album_ids:
                 shuffle(album_ids)
                 App().art_helper.set_album_artwork(
