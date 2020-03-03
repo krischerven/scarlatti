@@ -247,7 +247,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             art_size = None
             icon_size = Gtk.IconSize.BUTTON
             cls_title = "text-medium"
-            cls_others = "text-small"
+            cls_others = "text-medium"
         elif self.width <= Size.MEDIUM:
             art_size = ArtSize.MEDIUM
             icon_size = Gtk.IconSize.BUTTON
