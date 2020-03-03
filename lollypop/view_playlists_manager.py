@@ -13,7 +13,7 @@
 from locale import strcoll
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, StorageType
 from lollypop.utils import popup_widget, tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
@@ -33,8 +33,8 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             Init decade view
             @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type |
-                             ViewType.SCROLLED | ViewType.OVERLAY)
+        FlowBoxView.__init__(self, StorageType.ALL,
+                             view_type | ViewType.OVERLAY)
         self.__signal_id = None
         self._empty_icon_name = "emblem-documents-symbolic"
         if self.args is None:

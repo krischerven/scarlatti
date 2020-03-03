@@ -360,7 +360,8 @@ class ViewsContainer:
             @return RadiosView
         """
         from lollypop.view_radios import RadiosView
-        view = RadiosView()
+        view_type = ViewType.SCROLLED
+        view = RadiosView(view_type)
         view.populate()
         return view
 

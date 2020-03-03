@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, Type, ViewType, StorageType
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_radio import RadioWidget
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -25,11 +25,13 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init view
+            @param view_type as ViewType
         """
-        FlowBoxView.__init__(self,  ViewType.SCROLLED | ViewType.OVERLAY)
+        FlowBoxView.__init__(self, StorageType.ALL,
+                             view_type | ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._empty_icon_name = get_icon_name(Type.RADIOS)
         self.__banner = RadiosBannerWidget(self.view_type)
