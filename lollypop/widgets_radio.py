@@ -38,8 +38,7 @@ class RadioWidget(Gtk.FlowBoxChild):
         self._track = Radio(radio_id)
         self.__view_type = view_type
         self.set_view_type(view_type)
-        self.set_property("halign", Gtk.Align.START)
-        self.set_property("valign", Gtk.Align.START)
+        self.set_property("halign", Gtk.Align.CENTER)
 
     def populate(self):
         """
