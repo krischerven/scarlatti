@@ -25,14 +25,11 @@ class RadiosView(FlowBoxView, ViewController, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view_type=ViewType.SCROLLED):
+    def __init__(self):
         """
             Init view
-            @param view_type as ViewType
         """
-        FlowBoxView.__init__(self, view_type |
-                             ViewType.SCROLLED |
-                             ViewType.OVERLAY)
+        FlowBoxView.__init__(self,  ViewType.SCROLLED | ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.RADIO)
         self._empty_icon_name = get_icon_name(Type.RADIOS)
         self.__banner = RadiosBannerWidget(self.view_type)
