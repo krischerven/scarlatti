@@ -192,7 +192,7 @@ class LocalSearch(GObject.Object):
         track_ids = sorted(track_ids,
                            key=lambda x: (counter[x], x),
                            reverse=True)
-        track_ids = list(dict.fromkeys(track_ids))[0:10]
+        track_ids = list(dict.fromkeys(track_ids))
         for track_id in track_ids:
             GLib.idle_add(self.emit, "match-track", track_id, storage_type)
         self.__search_count -= 1

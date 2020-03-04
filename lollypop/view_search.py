@@ -274,7 +274,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.albums_line_view.add_album(album)
             self.show_placeholder(False)
             # If artist name matchs, add it to artists line
-            if album.artist_ids:
+            if album.artists:
                 artist = escape(noaccents(album.artists[0]))
                 search = escape(noaccents(self.__current_search))
                 if artist.find(search) != -1:
