@@ -76,7 +76,8 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
         def load():
             track_ids = []
             if self._playlist_id == Type.LOVED:
-                for track_id in App().tracks.get_loved_track_ids():
+                for track_id in App().tracks.get_loved_track_ids(
+                        self.storage_type):
                     if track_id not in track_ids:
                         track_ids.append(track_id)
             else:
