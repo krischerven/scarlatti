@@ -145,6 +145,7 @@ class SimilarsMenu(Gtk.Bin):
         self.__added = []
         self.__artist = ""
         self.__cancellable = Gio.Cancellable()
+        self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
         self.__stack = Gtk.Stack.new()
         self.__stack.show()
@@ -175,16 +176,7 @@ class SimilarsMenu(Gtk.Bin):
             Populate view for artist id
             @param artist_id as int
         """
-        self.__added = []
         self.__artist = App().artists.get_name(artist_id)
-        providers = []
-        if get_network_available("SPOTIFY"):
-            providers.append(App().spotify)
-        if App().lastfm is not None and get_network_available("LASTFM"):
-            providers.append(App().lastfm)
-        if not providers:
-            providers = [ArtistProvider()]
-        self.__populate(providers)
 
     @property
     def submenu_height(self):
@@ -254,6 +246,22 @@ class SimilarsMenu(Gtk.Bin):
                                   artist_id, self.__cancellable,
                                   callback=(self.__on_similar_artists,
                                             providers))
+
+    def __on_map(self, widget):
+        """
+            Populate widget
+            @param widget as Gtk.Widget
+        """
+        if self.__added:
+            return
+        providers = []
+        if get_network_available("SPOTIFY"):
+            providers.append(App().spotify)
+        if App().lastfm is not None and get_network_available("LASTFM"):
+            providers.append(App().lastfm)
+        if not providers:
+            providers = [ArtistProvider()]
+        self.__populate(providers)
 
     def __on_unmap(self, widget):
         """
