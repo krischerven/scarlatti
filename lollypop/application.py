@@ -516,16 +516,19 @@ class Application(Gtk.Application, ApplicationActions):
                 try:
                     value = options.lookup_value("play-ids").get_string()
                     ids = value.split(";")
+                    albums = []
                     for id in ids:
                         if id[0:2] == "a:":
                             album = Album(int(id[2:]))
                             self.player.add_album(album)
+                            albums.append(album)
                         else:
                             track = Track(int(id[2:]))
                             track.album.set_tracks([track])
                             self.player.add_album(track.album)
-                    if self.player.albums and self.player.albums[0].tracks:
-                        self.player.load(self.player.albums[0].tracks[0])
+                            albums.append(track.album)
+                    if albums and albums[0].tracks:
+                        self.player.load(albums[0].tracks[0])
                 except Exception as e:
                     Logger.error("Application::__on_command_line(): %s", e)
                     pass
