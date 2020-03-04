@@ -89,7 +89,7 @@ class SearchTracksView(TracksView, SignalsHelper):
         """
         for track in tracks:
             track.set_number(position + 1)
-            row = TrackRow(track, [], self.view_type)
+            row = TrackRow(track, [], self.view_type, False)
             row.show()
             widget.add(row)
             position += 1

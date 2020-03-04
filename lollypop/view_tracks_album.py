@@ -165,10 +165,13 @@ class AlbumTracksView(TracksView):
             @param tracks as [Track]
         """
         for track in tracks:
+            # If user does not want to show real tracknumber and we are
+            # in album view, calculate a fake tracknumber
             if not self.__show_tag_tracknumber and\
                     self.view_type & ViewType.ALBUM:
                 track.set_number(position + 1)
-            row = TrackRow(track, self.__album.artist_ids, self.view_type)
+            row = TrackRow(track, self.__album.artist_ids, self.view_type,
+                           self.__show_tag_tracknumber)
             row.show()
             row.connect("removed", self.__on_track_row_removed)
             widget.add(row)

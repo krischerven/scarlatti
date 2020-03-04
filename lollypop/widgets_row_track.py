@@ -47,16 +47,18 @@ class TrackRow(Gtk.ListBoxRow):
             height = min_height
         return height
 
-    def __init__(self, track, album_artist_ids, view_type):
+    def __init__(self, track, album_artist_ids, view_type, show_track_number):
         """
             Init row widgets
             @param track as Track
             @param album_artist_ids as [int]
             @param view_type as ViewType
+            @param show_track_number as bool
         """
         # We do not use Gtk.Builder for speed reasons
         Gtk.ListBoxRow.__init__(self)
         self.__view_type = view_type
+        self.__show_track_number = show_track_number
         self._track = track
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
@@ -174,8 +176,7 @@ class TrackRow(Gtk.ListBoxRow):
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
             self._num_label.show()
-        elif (self.__view_type & ViewType.ALBUM and self._track.number > 0) or\
-                App().settings.get_value("show-tag-tracknumber"):
+        elif self.__show_track_number:
             self._num_label.get_style_context().remove_class("queued")
             # Just track number for albums or playlists if only one album
             if self.__view_type & ViewType.ALBUM or\
