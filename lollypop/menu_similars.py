@@ -292,6 +292,7 @@ class SimilarsMenu(Gtk.Bin):
             (spotify_id, artist, cover_uri) = artists.pop(0)
             if artist in self.__added:
                 GLib.idle_add(self.__on_similar_artists, artists, providers)
+                return
             self.__added.append(artist)
             artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist))
