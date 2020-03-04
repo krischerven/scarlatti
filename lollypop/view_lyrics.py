@@ -26,7 +26,7 @@ from lollypop.widgets_banner_lyrics import LyricsBannerWidget
 
 class LyricsLabel(Gtk.Stack):
     """
-        Lyrics label with effect on change
+        Lyrics label with crossfade on change
     """
 
     def __init__(self):
@@ -49,20 +49,24 @@ class LyricsLabel(Gtk.Stack):
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.set_transition_duration(200)
 
-    def set_text(self, text):
+    def set_text(self, text, crossfade=False):
         """
             Set label text
             @param text as str
+            @param crossfade as bool
         """
-        self.next()
+        if crossfade:
+            self.next()
         self.get_visible_child().set_text(text)
 
-    def set_markup(self, markup):
+    def set_markup(self, markup, crossfade=False):
         """
             Set label markup
             @param markup as str
+            @param crossfade as bool
         """
-        self.next()
+        if crossfade:
+            self.next()
         self.get_visible_child().set_markup(markup)
 
     def next(self):
@@ -220,7 +224,7 @@ class LyricsView(View, SignalsHelper):
             if line:
                 escaped = GLib.markup_escape_text(line)
                 lyrics += "<span alpha='20000'>%s</span>" % escaped + "\n"
-        self.__lyrics_label.set_markup(lyrics)
+        self.__lyrics_label.set_markup(lyrics, True)
         return True
 
     def __get_blob(self, text):
