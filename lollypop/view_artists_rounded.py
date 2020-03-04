@@ -185,26 +185,19 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
         Show rounded artist view with a banner
     """
 
-    def __init__(self, storage_type):
+    def __init__(self, storage_type, view_type):
         """
             Init artist view
             @param storage_type as StorageType
+            @param view_type as ViewType
         """
         from lollypop.widgets_banner_flowbox import FlowboxBannerWidget
         RoundedArtistsView.__init__(self, storage_type,
-                                    ViewType.SCROLLED | ViewType.OVERLAY)
+                                    view_type | ViewType.OVERLAY)
         self.__banner = FlowboxBannerWidget([Type.ARTISTS], [], self.view_type)
         self.__banner.show()
         self.__banner.connect("play-all", self.__on_banner_play_all)
         self.add_widget(self._box, self.__banner)
-
-    @property
-    def args(self):
-        """
-            Get default args for __class__
-            @return {}
-        """
-        return {}
 
 #######################
 # PRIVATE             #

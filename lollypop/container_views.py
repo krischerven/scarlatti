@@ -227,8 +227,9 @@ class ViewsContainer:
             Show lyrics for track
             @pram track as Track
         """
+        view_type = ViewType.SCROLLED
         from lollypop.view_lyrics import LyricsView
-        view = LyricsView()
+        view = LyricsView(view_type)
         view.populate(App().player.current_track)
         view.show()
         return view
@@ -239,8 +240,9 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return RoundedArtistsViewWithBanner
         """
+        view_type = ViewType.SCROLLED
         from lollypop.view_artists_rounded import RoundedArtistsViewWithBanner
-        view = RoundedArtistsViewWithBanner(storage_type)
+        view = RoundedArtistsViewWithBanner(storage_type, view_type)
         self._stack.add(view)
         view.populate()
         view.show()
@@ -254,12 +256,15 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return ArtistViewBox/ArtistViewList
         """
+        view_type = ViewType.SCROLLED
         if App().settings.get_value("show-artist-tracks"):
             from lollypop.view_artist_list import ArtistViewList
-            view = ArtistViewList(genre_ids, artist_ids, storage_type)
+            view = ArtistViewList(genre_ids, artist_ids,
+                                  storage_type, view_type)
         else:
             from lollypop.view_artist_box import ArtistViewBox
-            view = ArtistViewBox(genre_ids, artist_ids, storage_type)
+            view = ArtistViewBox(genre_ids, artist_ids,
+                                 storage_type, view_type)
         view.populate()
         view.show()
         return view
@@ -270,8 +275,9 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return SuggestionsView
         """
+        view_type = ViewType.SCROLLED
         from lollypop.view_suggestions import SuggestionsView
-        view = SuggestionsView(storage_type)
+        view = SuggestionsView(storage_type, view_type)
         view.populate()
         view.show()
         return view
@@ -282,8 +288,9 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return DecadesBoxView
         """
+        view_type = ViewType.SCROLLED
         from lollypop.view_decades_box import DecadesBoxView
-        view = DecadesBoxView(storage_type)
+        view = DecadesBoxView(storage_type, view_type)
         view.populate()
         view.show()
         return view
@@ -295,9 +302,9 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return AlbumView
         """
-        from lollypop.view_album import AlbumView
         view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED |\
             ViewType.OVERLAY | ViewType.ALBUM
+        from lollypop.view_album import AlbumView
         view = AlbumView(album, storage_type, view_type)
         view.populate()
         return view
@@ -308,8 +315,8 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return GenresBoxView
         """
-        from lollypop.view_genres_box import GenresBoxView
         view_type = ViewType.SCROLLED
+        from lollypop.view_genres_box import GenresBoxView
         view = GenresBoxView(storage_type, view_type)
         view.populate()
         view.show()
@@ -322,8 +329,8 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return AlbumsYearsBoxView
         """
-        from lollypop.view_albums_box import AlbumsYearsBoxView
         view_type = ViewType.SCROLLED
+        from lollypop.view_albums_box import AlbumsYearsBoxView
         view = AlbumsYearsBoxView([Type.YEARS], years, storage_type, view_type)
         view.populate()
         return view
@@ -336,8 +343,8 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return AlbumsGenresBoxView
         """
-        from lollypop.view_albums_box import AlbumsGenresBoxView
         view_type = ViewType.SCROLLED
+        from lollypop.view_albums_box import AlbumsGenresBoxView
         view = AlbumsGenresBoxView(genre_ids, artist_ids,
                                    storage_type, view_type)
         view.populate()
@@ -349,8 +356,8 @@ class ViewsContainer:
             @param index as int
             @return AlbumsDeviceBoxView
         """
-        from lollypop.view_albums_box import AlbumsDeviceBoxView
         view_type = ViewType.SCROLLED
+        from lollypop.view_albums_box import AlbumsDeviceBoxView
         view = AlbumsDeviceBoxView(index, view_type)
         view.populate()
         return view
@@ -360,8 +367,8 @@ class ViewsContainer:
             Get radios view
             @return RadiosView
         """
-        from lollypop.view_radios import RadiosView
         view_type = ViewType.SCROLLED
+        from lollypop.view_radios import RadiosView
         view = RadiosView(view_type)
         view.populate()
         return view
@@ -371,8 +378,9 @@ class ViewsContainer:
             Get view for information
             @return InformationView
         """
+        view_type = ViewType.SCROLLED
         from lollypop.view_information import InformationView
-        view = InformationView(True)
+        view = InformationView(view_type, True)
         view.populate()
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)

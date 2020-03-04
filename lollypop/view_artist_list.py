@@ -24,15 +24,16 @@ class ArtistViewList(LazyLoadingView):
         Show artist albums in a list with tracks
     """
 
-    def __init__(self, genre_ids, artist_ids, storage_type):
+    def __init__(self, genre_ids, artist_ids, storage_type, view_type):
         """
             Init ArtistView
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param storage_type as StorageType
+            @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, storage_type,
-                                 ViewType.SCROLLED |
+                                 view_type |
                                  ViewType.OVERLAY |
                                  ViewType.ARTIST)
         self.__genre_ids = genre_ids
@@ -61,7 +62,8 @@ class ArtistViewList(LazyLoadingView):
         """
         return {"genre_ids": self.__genre_ids,
                 "artist_ids": self.__artist_ids,
-                "storage_type": self.storage_type}
+                "storage_type": self.storage_type,
+                "view_type": self.view_type}
 
     @property
     def scroll_shift(self):

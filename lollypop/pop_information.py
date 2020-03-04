@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import App, Size
+from lollypop.define import App, Size, ViewType
 from lollypop.view_information import InformationView
 from lollypop.widgets_utils import Popover
 
@@ -28,7 +28,7 @@ class InformationPopover(Popover):
         Popover.__init__(self)
         self.__minimal = minimal
         self.__width = 10
-        self.__view = InformationView(minimal)
+        self.__view = InformationView(ViewType.SCROLLED, minimal)
         self.__view.show()
         self.connect("map", self.__on_map)
         self.get_style_context().add_class("padding")

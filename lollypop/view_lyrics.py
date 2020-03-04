@@ -88,12 +88,13 @@ class LyricsView(View, SignalsHelper):
 
     # TODO add https://www.musixmatch.com support
     @signals_map
-    def __init__(self):
+    def __init__(self, view_type):
         """
             Init view
+            @param view_type as ViewType
         """
         View.__init__(self, StorageType.COLLECTION,
-                      ViewType.SCROLLED | ViewType.OVERLAY)
+                      view_type | ViewType.OVERLAY)
         self.__lyrics_timeout_id = None
         self.__downloads_running = 0
         self.__lyrics_text = ""

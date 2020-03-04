@@ -20,17 +20,19 @@ class ArtistViewBox(AlbumsBoxView):
         Show artist albums in a box
     """
 
-    def __init__(self, genre_ids, artist_ids, storage_type):
+    def __init__(self, genre_ids, artist_ids, storage_type, view_type):
         """
             Init ArtistView
             @param genre_ids as [int]
             @param artist_ids as [int]
+            @param storage_type as StorageType
+            @param view_type as ViewType
         """
         AlbumsBoxView.__init__(self,
                                genre_ids,
                                artist_ids,
                                storage_type,
-                               ViewType.SCROLLED |
+                               view_type |
                                ViewType.OVERLAY |
                                ViewType.ARTIST)
         self.__banner = ArtistBannerWidget(genre_ids,
@@ -48,7 +50,8 @@ class ArtistViewBox(AlbumsBoxView):
         """
         return {"genre_ids": self._genre_ids,
                 "artist_ids": self._artist_ids,
-                "storage_type": self.storage_type}
+                "storage_type": self.storage_type,
+                "view_type": self.view_type}
 
     @property
     def scroll_shift(self):

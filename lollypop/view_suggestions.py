@@ -29,14 +29,13 @@ class SuggestionsView(FilteringHelper, View):
         View showing suggestions to user
     """
 
-    def __init__(self, storage_type, view_type=ViewType.DEFAULT):
+    def __init__(self, storage_type, view_type):
         """
             Init view
             @param storage_type as StorageType
             @param view_type as ViewType
         """
-        View.__init__(self, storage_type,
-                      view_type | ViewType.SCROLLED | ViewType.OVERLAY)
+        View.__init__(self, storage_type, view_type | ViewType.OVERLAY)
         FilteringHelper.__init__(self)
         self.__grid = Gtk.Grid()
         self.__grid.get_style_context().add_class("padding")
