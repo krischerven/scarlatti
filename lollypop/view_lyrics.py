@@ -146,6 +146,7 @@ class LyricsView(View, SignalsHelper):
                         lyrics = tagreader.get_lyrics(tags)
         if lyrics:
             self.__lyrics_label.set_text(lyrics)
+            self.__lyrics_text = lyrics
         else:
             self.__lyrics_helper.get_lyrics_from_web(track,
                                                      self.__on_lyrics,
@@ -291,4 +292,5 @@ class LyricsView(View, SignalsHelper):
                                                          track)
         else:
             self.__lyrics_label.set_text(lyrics)
+            self.__lyrics_text = lyrics
             self.__banner.translate_button.set_sensitive(True)
