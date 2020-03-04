@@ -10,9 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio
-
-from gettext import gettext as _
 from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
@@ -104,16 +101,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
-        section = Gio.Menu()
-        menu.append_section(_("Similar artists"), section)
-        menu_widget = MenuBuilder(menu, True)
-        menu_widget.show()
         menu_ext = SimilarsMenu()
         menu_ext.show()
         menu_ext.populate(child.data)
         menu_widget.append_widget(menu_ext)
-        scrolled = menu_widget.get_child_by_name("main")
-        scrolled.set_size_request(300, 400)
         return menu_widget
 
     def _on_child_activated(self, flowbox, child):

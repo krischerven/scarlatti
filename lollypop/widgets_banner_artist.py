@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gio
+from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 from random import choice
@@ -146,16 +146,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                           self.__storage_type,
                           self.view_type | ViewType.BANNER,
                           App().window.is_adaptive)
-        section = Gio.Menu()
-        menu.append_section(_("Similar artists"), section)
-        menu_widget = MenuBuilder(menu, True)
+        menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
         menu_ext = SimilarsMenu()
         menu_ext.show()
         menu_ext.populate(self.__artist_ids[0])
         menu_widget.append_widget(menu_ext)
-        scrolled = menu_widget.get_child_by_name("main")
-        scrolled.set_size_request(300, 400)
         popup_widget(menu_widget, button)
 
     def _on_badge_button_release(self, eventbox, event):

@@ -192,6 +192,10 @@ class TrackMenuExt(Gtk.Grid):
         self.add(separator)
         self.add(hgrid)
 
+    @property
+    def submenu_name(self):
+        return None
+
 #######################
 # PRIVATE             #
 #######################

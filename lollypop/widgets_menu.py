@@ -75,18 +75,27 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
             Add pending widget to menu
         """
-        main = self.get_child_by_name("main")
-        if isinstance(main, Gtk.ScrolledWindow):
-            # scrolled -> viewport -> box
-            main = main.get_child().get_child()
         while self.__widgets_queue:
             widget = self.__widgets_queue.pop(0)
-            main.add(widget)
+            if widget.submenu_name is not None:
+                self.__add_menu_container(widget.submenu_name, True, True)
+                self.__boxes[widget.submenu_name].add(widget)
+                button = Gtk.ModelButton.new()
+                button.set_label(widget.submenu_name)
+                button.set_alignment(0, 0.5)
+                button.set_property("menu-name", widget.submenu_name)
+                button.show()
+                self.__boxes["main"].add(button)
+            else:
+                main = self.get_child_by_name("main")
+                if isinstance(main, Gtk.ScrolledWindow):
+                    # scrolled -> viewport -> box
+                    main = main.get_child().get_child()
+                main.add(widget)
 
-    def __add_menu(self, menu, menu_name, submenu, scrolled):
+    def __add_menu_container(self, menu_name, submenu, scrolled):
         """
-            Build menu
-            @param menu as Gio.Menu
+            Add menu container
             @param menu_name as str
             @param submenu as bool
             @param scrolled as bool
@@ -115,6 +124,16 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.set_label(menu_name)
                 button.show()
                 box.add(button)
+
+    def __add_menu(self, menu, menu_name, submenu, scrolled):
+        """
+            Create container and add menu
+            @param menu as Gio.Menu
+            @param menu_name as str
+            @param submenu as bool
+            @param scrolled as bool
+        """
+        self.__add_menu_container(menu_name, submenu, scrolled)
         menu_range = list(range(0, menu.get_n_items()))
         if submenu:
             self.__submenu_queue.append((menu, menu_name, menu_range))

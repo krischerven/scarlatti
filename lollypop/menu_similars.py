@@ -186,6 +186,22 @@ class SimilarsMenu(Gtk.Bin):
             providers = [ArtistProvider()]
         self.__populate(providers)
 
+    @property
+    def submenu_height(self):
+        """
+            Get submenu height
+            @return int
+        """
+        return 300
+
+    @property
+    def submenu_name(self):
+        """
+            Get submenu name
+            @return str
+        """
+        return _("Similar artists")
+
 #######################
 # PRIVATE             #
 #######################
