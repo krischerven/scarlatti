@@ -151,9 +151,10 @@ class SimilarsMenu(Gtk.Bin):
         self.__stack.show()
         self.__stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.__stack.set_transition_duration(200)
-        self.__spinner = Gtk.Spinner.new()
-        self.__spinner.show()
-        self.__spinner.start()
+        self.__label = Gtk.Label.new(_("Loading…"))
+        self.__label.get_style_context().add_class("bold")
+        self.__label.get_style_context().add_class("dim-label")
+        self.__label.show()
         self.__listbox = Gtk.ListBox()
         self.__listbox.get_style_context().add_class("trackswidget")
         self.__listbox.set_vexpand(True)
@@ -162,13 +163,8 @@ class SimilarsMenu(Gtk.Bin):
         self.__listbox.connect("row-activated", self.__on_row_activated)
         self.__listbox.set_sort_func(self.__sort_func)
         self.__listbox.show()
-        self.__stack.add(self.__spinner)
+        self.__stack.add(self.__label)
         self.__stack.add(self.__listbox)
-        label = Gtk.Label.new(_("No results"))
-        label.get_style_context().add_class("bold")
-        label.get_style_context().add_class("dim-label")
-        label.show()
-        self.__stack.add_named(label, "no-results")
         self.add(self.__stack)
 
     def populate(self, artist_id):
@@ -210,8 +206,7 @@ class SimilarsMenu(Gtk.Bin):
                                             providers, provider))
         elif not self.__listbox.get_children() and\
                 not self.__cancellable.is_cancelled():
-            self.__stack.set_visible_child_name("no-results")
-            self.__spinner.stop()
+            self.__label.set_text(_("No results"))
 
     def __sort_func(self, row_a, row_b):
         """
@@ -239,8 +234,7 @@ class SimilarsMenu(Gtk.Bin):
             if providers:
                 self.__populate(providers)
             elif not self.__cancellable.is_cancelled():
-                self.__stack.set_visible_child_name("no-results")
-                self.__spinner.stop()
+                self.__label.set_text(_("No results"))
         else:
             App().task_helper.run(provider.get_similar_artists,
                                   artist_id, self.__cancellable,
@@ -320,5 +314,5 @@ class SimilarsMenu(Gtk.Bin):
         elif not self.__cancellable.is_cancelled():
             if self.__listbox.get_children():
                 self.__stack.set_visible_child(self.__listbox)
-                self.__spinner.stop()
+                self.__label.hide()
             self.__populate(providers)
