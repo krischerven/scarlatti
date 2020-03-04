@@ -78,10 +78,18 @@ class LocalSearch(GObject.Object):
                     if word not in no_accents:
                         valid = False
                         break
+            # Start with same word, adding to result
             else:
                 track_ids.append(track_id)
+            # All words are valid, adding to result
             if valid:
                 track_ids.append(track_id)
+            # Detect an artist match, adding to result
+            for artist in App().tracks.get_artists(track_id):
+                no_accents = noaccents(artist)
+                for word in split:
+                    if word in no_accents:
+                        track_ids.append(track_id)
         return track_ids
 
     def __search_artists(self, search, storage_type, cancellable):
