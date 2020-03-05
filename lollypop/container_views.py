@@ -328,11 +328,12 @@ class ViewsContainer:
             Get album view for years
             @param years as [int]
             @param storage_type as StorageType
-            @return AlbumsYearsBoxView
+            @return AlbumsForYearsBoxView
         """
         view_type = ViewType.SCROLLED
-        from lollypop.view_albums_box import AlbumsYearsBoxView
-        view = AlbumsYearsBoxView([Type.YEARS], years, storage_type, view_type)
+        from lollypop.view_albums_box import AlbumsForYearsBoxView
+        view = AlbumsForYearsBoxView([Type.YEARS], years,
+                                     storage_type, view_type)
         view.populate()
         return view
 
@@ -342,12 +343,12 @@ class ViewsContainer:
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param storage_type as StorageType
-            @return AlbumsGenresBoxView
+            @return AlbumsForGenresBoxView
         """
         view_type = ViewType.SCROLLED
-        from lollypop.view_albums_box import AlbumsGenresBoxView
-        view = AlbumsGenresBoxView(genre_ids, artist_ids,
-                                   storage_type, view_type)
+        from lollypop.view_albums_box import AlbumsForGenresBoxView
+        view = AlbumsForGenresBoxView(genre_ids, artist_ids,
+                                      storage_type, view_type)
         view.populate()
         return view
 

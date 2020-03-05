@@ -225,7 +225,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         App().player.play_album(child.data.get_with_skipping_allowed())
 
 
-class AlbumsGenresBoxView(AlbumsBoxView):
+class AlbumsForGenresBoxView(AlbumsBoxView):
     """
         Show albums in a box for genres (static or not)
     """
@@ -285,7 +285,7 @@ class AlbumsGenresBoxView(AlbumsBoxView):
         popup_widget(menu_widget, button)
 
 
-class AlbumsYearsBoxView(AlbumsGenresBoxView):
+class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
     """
         Years album box
     """
@@ -298,8 +298,8 @@ class AlbumsYearsBoxView(AlbumsGenresBoxView):
             @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AlbumsGenresBoxView.__init__(self, genre_ids, artist_ids,
-                                     storage_type, view_type)
+        AlbumsForGenresBoxView.__init__(self, genre_ids, artist_ids,
+                                        storage_type, view_type)
 
     def populate(self):
         """
