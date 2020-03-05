@@ -16,7 +16,7 @@ from gi.repository import Gtk
 from lollypop.widgets_playlist_smart import SmartPlaylistRow
 from lollypop.view import View
 from lollypop.logger import Logger
-from lollypop.define import App, ViewType
+from lollypop.define import App, StorageType
 
 
 class SmartPlaylistView(View):
@@ -24,12 +24,13 @@ class SmartPlaylistView(View):
         Show a view allowing user to create a smart playlist
     """
 
-    def __init__(self, playlist_id):
+    def __init__(self, playlist_id, view_type):
         """
             Init PlaylistView
             @param playlist_id as int
+            @param view_type as ViewType
         """
-        View.__init__(self, ViewType.SCROLLED)
+        View.__init__(self, StorageType.ALL, view_type)
         self.__playlist_id = playlist_id
         self.__size_group = Gtk.SizeGroup()
         self.__size_group.set_mode(Gtk.SizeGroupMode.BOTH)
@@ -100,7 +101,8 @@ class SmartPlaylistView(View):
             Get default args for __class__
             @return {}
         """
-        return {"playlist_id": self.__playlist_id}
+        return {"playlist_id": self.__playlist_id,
+                "view_type": self.view_type}
 
 #######################
 # PROTECTED           #

@@ -124,7 +124,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, initial_search=""):
+    def __init__(self, initial_search, view_type):
         """
             Init Popover
             @param initial_search as str
@@ -225,7 +225,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @return {}
         """
         search = self.__banner.entry.get_text().strip()
-        return {"initial_search": search}
+        return {"initial_search": search,
+                "view_type": self.view_type}
 
 #######################
 # PROTECTED           #

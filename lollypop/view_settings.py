@@ -103,9 +103,9 @@ class SettingsView(View):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int) or None
+            @return {}
         """
-        return ({"view_type": self.view_type}, 0, 0)
+        return {"view_type": self.view_type}
 
     @property
     def type(self):
@@ -190,10 +190,10 @@ class SettingsChildView(View):
         """
             Get default args for __class__, populate() plus sidebar_id and
             scrolled position
-            @return ({}, {}, int, int) or None
+            @return {}
         """
-        return ({"view_id": self.__view_id, "view_type": self.view_type},
-                0, 0)
+        return {"view_id": self.__view_id,
+                "view_type": self.view_type},
 
     @property
     def type(self):

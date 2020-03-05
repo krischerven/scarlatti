@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from lollypop.define import ViewType
+
 
 class PlaylistsContainer:
     """
@@ -27,8 +29,9 @@ class PlaylistsContainer:
             Show a view allowing user to edit smart view
             @param playlist_id as int
         """
+        view_type = ViewType.SCROLLED
         from lollypop.view_playlist_smart import SmartPlaylistView
-        view = SmartPlaylistView(playlist_id)
+        view = SmartPlaylistView(playlist_id, view_type)
         view.populate()
         view.show()
         self._stack.add(view)

@@ -57,7 +57,8 @@ class GenresBoxView(FlowBoxView):
             Get default args for __class__
             @return {}
         """
-        return {"storage_type": self.storage_type}
+        return {"storage_type": self.storage_type,
+                "view_type": self.view_type}
 
 #######################
 # PROTECTED           #

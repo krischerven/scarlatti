@@ -134,7 +134,8 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             Get default args for __class__
             @return {}
         """
-        return {"playlist_id": self._playlist_id, "view_type": self.view_type}
+        return {"playlist_id": self._playlist_id,
+                "view_type": self.view_type}
 
     @property
     def filtered(self):
