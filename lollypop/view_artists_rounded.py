@@ -69,8 +69,8 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             Get default args for __class__
             @return {}
         """
-        return {"view_type": self.view_type,
-                "storage_type": self.storage_type}
+        return {"storage_type": self.storage_type,
+                "view_type": self.view_type}
 
 #######################
 # PROTECTED           #
