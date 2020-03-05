@@ -99,6 +99,7 @@ class ViewType:
     PLAYBACK = 1 << 12
     BANNER = 1 << 13
     ARTIST = 1 << 14
+    TOOLBAR = 1 << 15
 
 
 NetworkAccessACL = {

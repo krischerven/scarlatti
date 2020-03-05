@@ -28,8 +28,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, genre_ids, artist_ids, storage_type,
-                 view_type=ViewType.DEFAULT):
+    def __init__(self, genre_ids, artist_ids, storage_type, view_type):
         """
             Init artist banner
             @parma genre_ids as [int]

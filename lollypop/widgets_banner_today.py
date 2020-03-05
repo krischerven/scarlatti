@@ -56,7 +56,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         return None
 
     @signals_map
-    def __init__(self, album, view_type=ViewType.DEFAULT):
+    def __init__(self, album, view_type):
         """
             Init cover widget
             @param album

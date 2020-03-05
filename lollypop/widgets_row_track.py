@@ -206,7 +206,8 @@ class TrackRow(Gtk.ListBoxRow):
 
         from lollypop.menu_objects import TrackMenu, TrackMenuExt
         from lollypop.widgets_menu import MenuBuilder
-        menu = TrackMenu(self._track, App().window.is_adaptive)
+        menu = TrackMenu(self._track, self.__view_type,
+                         App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         if not self._track.storage_type & StorageType.EPHEMERAL:

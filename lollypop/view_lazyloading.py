@@ -14,7 +14,7 @@ from gi.repository import GLib
 
 from time import time
 
-from lollypop.define import ViewType, LoadingState
+from lollypop.define import LoadingState
 from lollypop.logger import Logger
 from lollypop.view import View
 
@@ -24,7 +24,7 @@ class LazyLoadingView(View):
         Lazy loading for view
     """
 
-    def __init__(self, storage_type, view_type=ViewType.DEFAULT):
+    def __init__(self, storage_type, view_type):
         """
             Init lazy loading
             @param storage_type as StorageType

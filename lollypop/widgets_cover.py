@@ -24,7 +24,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
     """
 
     @signals_map
-    def __init__(self, album, view_type=ViewType.DEFAULT):
+    def __init__(self, album, view_type):
         """
             Init cover widget
             @param view_type as ViewType

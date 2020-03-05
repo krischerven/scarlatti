@@ -30,7 +30,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, album, storage_type, view_type=ViewType.DEFAULT):
+    def __init__(self, album, storage_type, view_type):
         """
             Init cover widget
             @param album

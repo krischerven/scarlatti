@@ -18,6 +18,7 @@ from lollypop.objects_radio import Radio
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.define import App, ArtBehaviour, StorageType, MARGIN_SMALL
+from lollypop.define import ViewType
 from lollypop.helper_gestures import GesturesHelper
 
 
@@ -143,9 +144,9 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             return
         track = App().player.current_track
         if track.id >= 0:
-            from lollypop.menu_objects import MinTrackMenu, TrackMenuExt
+            from lollypop.menu_objects import TrackMenu, TrackMenuExt
             from lollypop.widgets_menu import MenuBuilder
-            menu = MinTrackMenu(track)
+            menu = TrackMenu(track, ViewType.TOOLBAR, False)
             menu_widget = MenuBuilder(menu)
             menu_widget.show()
             if not track.storage_type & StorageType.EPHEMERAL:

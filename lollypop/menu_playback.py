@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App
+from lollypop.define import App, ViewType
 from lollypop.utils import tracks_to_albums, emit_signal
 from lollypop.utils import get_default_storage_type
 from lollypop.objects_track import Track
@@ -397,15 +397,17 @@ class TrackPlaybackMenu(PlaybackMenu):
         Contextual menu for tracks
     """
 
-    def __init__(self, track):
+    def __init__(self, track, view_type):
         """
             Init track menu
             @param track as Track
+            @param view_type as ViewType
         """
         PlaybackMenu.__init__(self)
         self.__track = track
-        self._set_playback_actions()
-        self.__set_queue_actions()
+        if not view_type & ViewType.TOOLBAR:
+            self._set_playback_actions()
+            self.__set_queue_actions()
         self.__set_stop_after_action()
 
     @property

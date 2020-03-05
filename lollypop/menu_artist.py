@@ -51,13 +51,13 @@ class ArtistMenu(Gio.Menu):
             from lollypop.menu_playback import ArtistPlaybackMenu
             self.append_section(_("Playback"),
                                 ArtistPlaybackMenu(artist_id, storage_type))
-        menu = ArtistAlbumsMenu(artist_id, storage_type, view_type)
+        menu = Gio.Menu()
         self.append_section(_("Artist"), menu)
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_ids([artist_id], [], storage_type, True)
         albums = [Album(album_id) for album_id in album_ids]
-        self.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
-        self.append_submenu(_("Playlists"), PlaylistsMenu(albums))
+        menu.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
+        menu.append_submenu(_("Playlists"), PlaylistsMenu(albums))
 
 #######################
 # PRIVATE             #
@@ -78,24 +78,22 @@ class ArtistAlbumsMenu(Gio.Menu):
         Contextual menu for artist albums
     """
 
-    def __init__(self, artist_id, storage_type, view_type):
+    def __init__(self, artist_id, storage_type):
         """
             Init artist albums menu
             @param artist id as int
-            @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
         self.__storage_type = storage_type
         self.__artist_id = artist_id
-        self.__set_actions(view_type)
+        self.__set_actions()
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_actions(self, view_type):
+    def __set_actions(self):
         """
             Set artist actions
-            @param view_type as ViewType
         """
         go_artist_action = Gio.SimpleAction(name="go_artist_action")
         App().add_action(go_artist_action)

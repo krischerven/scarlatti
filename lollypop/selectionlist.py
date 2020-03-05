@@ -19,7 +19,7 @@ from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.fastscroll import FastScroll
 from lollypop.define import Type, App, ArtSize, SelectionListMask
-from lollypop.define import ArtBehaviour, ViewType
+from lollypop.define import ArtBehaviour, ViewType, StorageType
 from lollypop.logger import Logger
 from lollypop.utils import get_icon_name, on_query_tooltip, popup_widget
 from lollypop.utils import emit_signal
@@ -259,7 +259,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             Init Selection list ui
             @param base_mask as SelectionListMask
         """
-        LazyLoadingView.__init__(self, ViewType.DEFAULT)
+        LazyLoadingView.__init__(self, StorageType.ALL, ViewType.DEFAULT)
         FilteringHelper.__init__(self)
         self.__selection_pending_ids = []
         self.__base_mask = base_mask

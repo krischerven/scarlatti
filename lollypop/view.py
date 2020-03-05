@@ -25,7 +25,7 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, storage_type, view_type=ViewType.DEFAULT):
+    def __init__(self, storage_type, view_type):
         """
             Init view
             @param storage_type as StorageType

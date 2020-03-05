@@ -45,9 +45,7 @@ class AlbumMenu(Gio.Menu):
         if not view_type & ViewType.BANNER:
             self.append_section(_("Playback"), AlbumPlaybackMenu(album))
         from lollypop.menu_artist import ArtistAlbumsMenu
-        menu = ArtistAlbumsMenu(album.artist_ids[0],
-                                album.storage_type,
-                                view_type)
+        menu = ArtistAlbumsMenu(album.artist_ids[0], album.storage_type)
         if menu.get_n_items() != 0:
             self.append_section(_("Artist"), menu)
         section = Gio.Menu()
@@ -80,44 +78,28 @@ class AlbumsMenu(Gio.Menu):
         self.append_section(_("Devices"), SyncAlbumsMenu(albums))
 
 
-class MinTrackMenu(Gio.Menu):
-    """
-        Contextual menu for a track
-    """
-
-    def __init__(self, track):
-        """
-            Init menu model
-            @param track as Track
-        """
-        Gio.Menu.__init__(self)
-        from lollypop.menu_artist import ArtistAlbumsMenu
-        menu = ArtistAlbumsMenu(track.artist_ids[0], track.storage_type,
-                                ViewType.DEFAULT)
-        self.append_section(_("Artist"), menu)
-        if not track.storage_type & StorageType.EPHEMERAL:
-            section = Gio.Menu()
-            section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
-            self.append_section(_("Add to"), section)
-        self.append_section(_("Others"), ActionsMenu(track))
-
-
 class TrackMenu(Gio.Menu):
     """
         Full Contextual menu for a track
     """
 
-    def __init__(self, track, header):
+    def __init__(self, track, view_type, header):
         """
             Init menu model
             @param track as Track
+            @param view_type as ViewType
             @param header as bool
         """
         Gio.Menu.__init__(self)
         if header:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(track))
-        self.append_section(_("Playback"), TrackPlaybackMenu(track))
+        self.append_section(_("Playback"), TrackPlaybackMenu(track, view_type))
+        if view_type & ViewType.SEARCH:
+            from lollypop.menu_artist import ArtistAlbumsMenu
+            menu = ArtistAlbumsMenu(track.artist_ids[0], track.storage_type)
+            if menu.get_n_items() != 0:
+                self.append_section(_("Artist"), menu)
         if not track.storage_type & StorageType.EPHEMERAL:
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
