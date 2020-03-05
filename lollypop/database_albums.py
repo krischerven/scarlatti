@@ -12,6 +12,7 @@
 
 import itertools
 from time import time
+from random import shuffle
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType
@@ -800,7 +801,10 @@ class AlbumsDatabase:
             album_ids += self.get_randoms_by_albums(storage_type,
                                                     genre_id,
                                                     diff)
-        return list(set(album_ids))
+        album_ids = list(set(album_ids))
+        # We need to shuffle again as set() sort has sorted ids
+        shuffle(album_ids)
+        return album_ids
 
     def get_disc_names(self, album_id, disc):
         """
