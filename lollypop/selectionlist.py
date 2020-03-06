@@ -665,33 +665,33 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
                 b = row_b.name
             return strcoll(a, b)
 
-    def __popup_menu(self, y=None, row=None):
+    def __popup_menu(self, y=None, relative=None):
         """
             Show menu at y or row
             @param y as int
             @param relative as Gtk.Widget
         """
         if self.__base_mask & SelectionListMask.SIDEBAR:
-            from lollypop.widgets_menu import MenuBuilder
-            if row is None:
-                row = self._box.get_row_at_y(y)
-                if row is None:
-                    return
-                row_id = row.id
-            else:
-                row_id = None
+            menu = None
+            row_id = None
+            if relative is None:
+                relative = self._box.get_row_at_y(y)
+                if relative is not None:
+                    row_id = relative.id
             if row_id is None:
                 from lollypop.menu_selectionlist import SelectionListMenu
                 menu = SelectionListMenu(self,
                                          self.mask,
                                          App().window.is_adaptive)
-            else:
+            elif not App().settings.get_value("save-state"):
                 from lollypop.menu_selectionlist import SelectionListRowMenu
                 menu = SelectionListRowMenu(row_id,
                                             App().window.is_adaptive)
-            menu_widget = MenuBuilder(menu)
-            menu_widget.show()
-            popup_widget(menu_widget, row)
+            if menu is not None:
+                from lollypop.widgets_menu import MenuBuilder
+                menu_widget = MenuBuilder(menu)
+                menu_widget.show()
+                popup_widget(menu_widget, relative)
 
     def __on_artist_artwork_changed(self, object, value):
         """
