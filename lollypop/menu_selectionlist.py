@@ -20,56 +20,81 @@ from lollypop.shown import ShownLists, ShownPlaylists
 from lollypop.utils import get_icon_name
 
 
+class SelectionListRowMenu(Gio.Menu):
+    """
+        A menu related to a selection list row
+    """
+    def __init__(self, rowid, header=False):
+        """
+            Init menu
+            @param rowid as int
+            @param header as bool
+        """
+        Gio.Menu.__init__(self)
+        if header:
+            from lollypop.menu_header import MenuHeader
+            label = ShownLists.IDS[rowid]
+            icon_name = get_icon_name(rowid)
+            self.append_item(MenuHeader(label, icon_name))
+        startup_menu = Gio.Menu()
+        selected = rowid == App().settings.get_value(
+            "startup-id").get_int32()
+        action = Gio.SimpleAction.new_stateful(
+                                   "default_selection_id",
+                                   None,
+                                   GLib.Variant.new_boolean(selected))
+        App().add_action(action)
+        action.connect("change-state",
+                       self.__on_default_change_state,
+                       rowid)
+        item = Gio.MenuItem.new(_("Default on startup"),
+                                "app.default_selection_id")
+        startup_menu.append_item(item)
+        self.append_section(_("Startup"), startup_menu)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_default_change_state(self, action, variant, rowid):
+        """
+            Add to playlists
+            @param action as Gio.SimpleAction
+            @param variant as GVariant
+            @param rowid as int
+        """
+        action.set_state(variant)
+        if variant:
+            App().settings.set_value("startup-id",
+                                     GLib.Variant("i", rowid))
+        else:
+            App().settings.set_value("startup-id",
+                                     GLib.Variant("i", -1))
+
+
 class SelectionListMenu(Gio.Menu):
     """
         A menu for configuring SelectionList
     """
 
-    def __init__(self, widget, rowid, mask, header=False):
+    def __init__(self, widget, mask, header=False):
         """
             Init menu
             @param widget as Gtk.Widget
-            @param rowid as int
             @param mask as SelectionListMask
             @param header as bool
         """
         Gio.Menu.__init__(self)
         self.__widget = widget
-        self.__rowid = rowid
         self.__mask = mask
 
         if header:
             from lollypop.menu_header import MenuHeader
-            if rowid is None:
-                label = _("Sidebar")
-                icon_name = "org.gnome.Lollypop-sidebar-symbolic"
-            else:
-                label = ShownLists.IDS[rowid]
-                icon_name = get_icon_name(rowid)
+            label = _("Sidebar")
+            icon_name = "org.gnome.Lollypop-sidebar-symbolic"
             self.append_item(MenuHeader(label, icon_name))
 
-        # Startup menu
-        if rowid is not None and mask & SelectionListMask.SIDEBAR:
-            startup_menu = Gio.Menu()
-            selected = rowid == App().settings.get_value(
-                "startup-id").get_int32()
-            action = Gio.SimpleAction.new_stateful(
-                                       "default_selection_id",
-                                       None,
-                                       GLib.Variant.new_boolean(selected))
-            App().add_action(action)
-            action.connect("change-state",
-                           self.__on_default_change_state,
-                           rowid)
-            item = Gio.MenuItem.new(_("Default on startup"),
-                                    "app.default_selection_id")
-            startup_menu.append_item(item)
-            self.append_section(_("Startup"), startup_menu)
-
         # Options
-        if rowid is None and\
-                mask & SelectionListMask.SIDEBAR and\
-                not App().window.is_adaptive:
+        if not App().window.is_adaptive:
             options_menu = Gio.Menu()
             action = Gio.SimpleAction.new_stateful(
                     "show_label",
@@ -81,31 +106,30 @@ class SelectionListMenu(Gio.Menu):
             options_menu.append(_("Show text"), "app.show_label")
             self.append_section(_("Options"), options_menu)
         # Shown menu
-        if mask & SelectionListMask.PLAYLISTS or rowid is None:
-            shown_menu = Gio.Menu()
-            if mask & SelectionListMask.PLAYLISTS:
-                lists = ShownPlaylists.get(True)
-                wanted = App().settings.get_value("shown-playlists")
-            else:
-                mask |= SelectionListMask.COMPILATIONS
-                lists = ShownLists.get(mask, True)
-                wanted = App().settings.get_value("shown-album-lists")
-            for item in lists:
-                if item[0] == Type.SEPARATOR:
-                    continue
-                exists = item[0] in wanted
-                encoded = sha256(item[1].encode("utf-8")).hexdigest()
-                action = Gio.SimpleAction.new_stateful(
-                    encoded,
-                    None,
-                    GLib.Variant.new_boolean(exists))
-                action.connect("change-state",
-                               self.__on_shown_change_state,
-                               item[0])
-                App().add_action(action)
-                shown_menu.append(item[1], "app.%s" % encoded)
-            # Translators: shown => items
-            self.append_section(_("Sections"), shown_menu)
+        shown_menu = Gio.Menu()
+        if mask & SelectionListMask.PLAYLISTS:
+            lists = ShownPlaylists.get(True)
+            wanted = App().settings.get_value("shown-playlists")
+        else:
+            mask |= SelectionListMask.COMPILATIONS
+            lists = ShownLists.get(mask, True)
+            wanted = App().settings.get_value("shown-album-lists")
+        for item in lists:
+            if item[0] == Type.SEPARATOR:
+                continue
+            exists = item[0] in wanted
+            encoded = sha256(item[1].encode("utf-8")).hexdigest()
+            action = Gio.SimpleAction.new_stateful(
+                encoded,
+                None,
+                GLib.Variant.new_boolean(exists))
+            action.connect("change-state",
+                           self.__on_shown_change_state,
+                           item[0])
+            App().add_action(action)
+            shown_menu.append(item[1], "app.%s" % encoded)
+        # Translators: shown => items
+        self.append_section(_("Sections"), shown_menu)
 
 #######################
 # PRIVATE             #
@@ -144,21 +168,6 @@ class SelectionListMenu(Gio.Menu):
                 if startup_id == rowid:
                     App().settings.set_value("startup-id",
                                              GLib.Variant("i", -1))
-
-    def __on_default_change_state(self, action, variant, rowid):
-        """
-            Add to playlists
-            @param action as Gio.SimpleAction
-            @param variant as GVariant
-            @param rowid as int
-        """
-        action.set_state(variant)
-        if variant:
-            App().settings.set_value("startup-id",
-                                     GLib.Variant("i", rowid))
-        else:
-            App().settings.set_value("startup-id",
-                                     GLib.Variant("i", -1))
 
     def __on_show_label_change_state(self, action, variant):
         """

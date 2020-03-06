@@ -672,7 +672,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param relative as Gtk.Widget
         """
         if self.__base_mask & SelectionListMask.SIDEBAR:
-            from lollypop.menu_selectionlist import SelectionListMenu
             from lollypop.widgets_menu import MenuBuilder
             if row is None:
                 row = self._box.get_row_at_y(y)
@@ -681,10 +680,15 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
                 row_id = row.id
             else:
                 row_id = None
-            menu = SelectionListMenu(self,
-                                     row_id,
-                                     self.mask,
-                                     App().window.is_adaptive)
+            if row_id is None:
+                from lollypop.menu_selectionlist import SelectionListMenu
+                menu = SelectionListMenu(self,
+                                         self.mask,
+                                         App().window.is_adaptive)
+            else:
+                from lollypop.menu_selectionlist import SelectionListRowMenu
+                menu = SelectionListRowMenu(row_id,
+                                            App().window.is_adaptive)
             menu_widget = MenuBuilder(menu)
             menu_widget.show()
             popup_widget(menu_widget, row)
