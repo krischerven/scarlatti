@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, GObject
+from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ViewType, MARGIN, ScanUpdate
 from lollypop.view_tracks_album import AlbumTracksView
@@ -27,10 +27,6 @@ class AlbumView(FilteringHelper, LazyLoadingView,
     """
         Show artist albums and tracks
     """
-
-    __gsignals__ = {
-        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
 
     @signals_map
     def __init__(self, album, storage_type, view_type):
@@ -127,14 +123,6 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             @return Gtk.Widget
         """
         return self.__tracks_view
-
-    @property
-    def is_populated(self):
-        """
-            True if populated
-            @return bool
-        """
-        return True
 
 #######################
 # PROTECTED           #
