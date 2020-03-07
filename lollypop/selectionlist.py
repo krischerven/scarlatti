@@ -197,7 +197,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             Return True if populated
             @return bool
         """
-        return True
+        return self.get_child() is not None
 
     @property
     def name(self):
