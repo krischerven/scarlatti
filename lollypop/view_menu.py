@@ -11,7 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.view import View
-from lollypop.define import ViewType
+from lollypop.define import ViewType, StorageType
 
 
 class MenuView(View):
@@ -24,7 +24,7 @@ class MenuView(View):
             Init view
             @param menu as Gtk.Widget
         """
-        View.__init__(self, ViewType.SCROLLED)
+        View.__init__(self, StorageType.ALL, ViewType.SCROLLED)
         menu.get_style_context().add_class("adaptive-menu")
         menu.set_vexpand(True)
         self.add_widget(menu)
