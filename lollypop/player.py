@@ -13,6 +13,7 @@
 from gi.repository import Gst, GLib, GObject
 
 from pickle import load
+from time import time
 
 from lollypop.player_albums import AlbumsPlayer
 from lollypop.player_auto_random import AutoRandomPlayer
@@ -101,7 +102,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             Play next track
         """
         if self._next_track.id is not None:
-            self._scrobble(self._current_track, self._start_time)
+            self.__scrobble(self._current_track, self._start_time)
             self.load(self._next_track)
         else:
             self.stop()
@@ -258,6 +259,24 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
 #######################
 # PROTECTED           #
 #######################
+    def _on_track_finished(self, track):
+        """
+            Increment popularity and scrobble track
+            @param track as Track
+        """
+        self.__scrobble(track, self._start_time)
+        # Increment popularity
+        if track.id is not None and track.id >= 0:
+            App().tracks.set_more_popular(track.id)
+            # In party mode, linear popularity
+            if self.is_party:
+                pop_to_add = 1
+            # In normal mode, based on tracks count
+            else:
+                count = track.album.tracks_count
+                pop_to_add = int(App().albums.max_count / count)
+            App().albums.set_more_popular(track.album_id, pop_to_add)
+
     def _on_stream_start(self, bus, message):
         """
             On stream start, set next and previous track
@@ -275,3 +294,19 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
 #######################
 # PRIVATE             #
 #######################
+    def __scrobble(self, track, finished_start_time):
+        """
+            Scrobble on lastfm
+            @param track as Track
+            @param finished_start_time as int
+        """
+        played = time() - finished_start_time
+        # Last.fm policy, force it for ListenBrainz too
+        if track.duration < 30000:
+            return
+        # We can listen if the track has been played
+        # for at least half its duration, or for 4 minutes
+        if played >= track.duration / 2000 or played >= 240:
+            for scrobbler in App().scrobblers:
+                if scrobbler.available:
+                    scrobbler.listen(track, int(finished_start_time))

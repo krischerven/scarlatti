@@ -294,23 +294,6 @@ class BinPlayer:
         elif play:
             self.skip_album()
 
-    def _scrobble(self, finished, finished_start_time):
-        """
-            Scrobble on lastfm
-            @param finished as Track
-            @param finished_start_time as int
-        """
-        played = time() - finished_start_time
-        # Last.fm policy, force it for ListenBrainz too
-        if finished.duration < 30000:
-            return
-        # We can listen if the track has been played
-        # for at least half its duration, or for 4 minutes
-        if played >= finished.duration / 2000 or played >= 240:
-            for scrobbler in App().scrobblers:
-                if scrobbler.available:
-                    scrobbler.listen(finished, int(finished_start_time))
-
     def _on_stream_start(self, bus, message):
         """
             On stream start
@@ -401,29 +384,16 @@ class BinPlayer:
         """
         try:
             Logger.debug("Player::__on_stream_about_to_finish(): %s" % playbin)
-            # Don't do anything if crossfade on, track already changed
-            if self.crossfading:
-                return
             if isinstance(App().player.current_track, Radio):
                 return
-            self._scrobble(self._current_track, self._start_time)
-            # Increment popularity
-            if self._current_track.id is not None and\
-                    self._current_track.id >= 0:
-                App().tracks.set_more_popular(self._current_track.id)
-                # In party mode, linear popularity
-                if self.is_party:
-                    pop_to_add = 1
-                # In normal mode, based on tracks count
-                else:
-                    count = self._current_track.album.tracks_count
-                    pop_to_add = int(App().albums.max_count / count)
-                App().albums.set_more_popular(self._current_track.album_id,
-                                              pop_to_add)
+            # Don't do anything if crossfade on, track already scrobbled
+            # See TransitionsPlayer
+            if not self.crossfading:
+                self._on_track_finished(App().player.current_track)
             if self._next_track.id is None:
                 # We are in gstreamer thread
                 GLib.idle_add(self.stop)
-            else:
+            elif not self.crossfading:
                 self._load_track(self._next_track)
         except Exception as e:
             Logger.error("BinPlayer::_on_stream_about_to_finish(): %s", e)

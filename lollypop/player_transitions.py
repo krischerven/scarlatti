@@ -138,20 +138,10 @@ class TransitionsPlayer:
             @param duration as int
             @param track as Track
         """
-        self._scrobble(self._current_track, self._start_time)
-        # Track is about to finish
-        if self.position > (self._current_track.duration - 10) * 1000:
-            # Increment popularity
-            App().tracks.set_more_popular(self._current_track.id)
-            # In party mode, linear popularity
-            if self.is_party:
-                pop_to_add = 1
-            # In normal mode, based on tracks count
-            else:
-                count = self._current_track.album.tracks_count
-                pop_to_add = int(App().albums.max_count / count)
-            App().albums.set_more_popular(self._current_track.album_id,
-                                          pop_to_add)
+        self._on_track_finished(self._current_track)
+
+        if track.id is None:
+            return
 
         # If some crossfade already running, just switch to track
         if self.__crossfade_up or self.__crossfade_down:
@@ -170,7 +160,7 @@ class TransitionsPlayer:
             self._plugins = self._plugins2
         rate = App().settings.get_value("volume-rate").get_double()
         self._playbin.set_volume(GstAudio.StreamVolumeFormat.CUBIC, rate)
-        if track is not None and track.id is not None:
+        if track.id is not None:
             self._playbin.set_state(Gst.State.NULL)
             if self._load_track(track):
                 self._playbin.set_state(Gst.State.PLAYING)
