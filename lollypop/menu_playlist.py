@@ -163,6 +163,10 @@ class PlaylistMenuExt(Gtk.Grid):
         entry.show()
         self.add(entry)
 
+    @property
+    def submenu_name(self):
+        return None
+
 #######################
 # PRIVATE             #
 #######################
