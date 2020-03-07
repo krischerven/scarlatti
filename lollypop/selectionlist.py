@@ -561,12 +561,12 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         self.__base_mask &= ~(SelectionListMask.LABEL |
                               SelectionListMask.ELLIPSIZE)
-        if status or self.mask & SelectionListMask.VIEW:
+        if status or self.__base_mask & SelectionListMask.VIEW:
             self.__base_mask |= (SelectionListMask.LABEL |
                                  SelectionListMask.ELLIPSIZE)
         elif App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
-        self.__set_rows_mask(self.__base_mask)
+        self.__set_rows_mask(self.__base_mask | self.__mask)
 
     def _on_map(self, widget):
         """
