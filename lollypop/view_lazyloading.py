@@ -10,19 +10,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 
 from time import time
 
 from lollypop.define import LoadingState
 from lollypop.logger import Logger
 from lollypop.view import View
+from lollypop.utils import emit_signal
 
 
 class LazyLoadingView(View):
     """
         Lazy loading for view
     """
+
+    __gsignals__ = {
+        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
 
     def __init__(self, storage_type, view_type):
         """
@@ -168,6 +173,7 @@ class LazyLoadingView(View):
             widget.populate()
         else:
             self.__loading_state = LoadingState.FINISHED
+            emit_signal(self, "populated")
             Logger.debug("LazyLoadingView::lazy_loading(): %s",
                          time() - self.__start_time)
 

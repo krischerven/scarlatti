@@ -197,7 +197,7 @@ class SelectionListRow(Gtk.ListBoxRow):
             Return True if populated
             @return bool
         """
-        return True
+        return self.get_child() is not None
 
     @property
     def name(self):
@@ -250,7 +250,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         A list for artists/genres
     """
     __gsignals__ = {
-        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "expanded": (GObject.SignalFlags.RUN_FIRST, None, (bool,))
     }
 
@@ -616,7 +615,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         if self.mask & SelectionListMask.ARTISTS:
             self.__fastscroll.populate()
-        emit_signal(self, "populated")
         # Scroll to first selected item
         for row in self._box.get_selected_rows():
             GLib.idle_add(self._scroll_to_child, row)
