@@ -26,6 +26,7 @@ class LazyLoadingView(View):
     """
 
     __gsignals__ = {
+        "initialized": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -148,12 +149,6 @@ class LazyLoadingView(View):
             # RecursionError: maximum recursion depth exceeded
             GLib.idle_add(self.__lazy_loading)
 
-    def _on_initial_loading(self):
-        """
-            Initial loading is finished
-        """
-        pass
-
 #######################
 # PRIVATE             #
 #######################
@@ -190,7 +185,7 @@ class LazyLoadingView(View):
             GLib.idle_add(self.__add_values, values)
         elif self.__loading_state != LoadingState.RUNNING:
             self.__loading_state = LoadingState.RUNNING
-            self._on_initial_loading()
+            emit_signal(self, "initialized")
             self.__lazy_loading()
 
     def __is_visible(self, widget):

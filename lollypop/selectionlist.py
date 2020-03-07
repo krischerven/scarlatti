@@ -276,6 +276,7 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         self.__scrolled.add(self.__viewport)
         self.__viewport.show()
         self.__viewport.add(self._box)
+        self.connect("initialized", self.__on_initialized)
         if self.__base_mask & SelectionListMask.VIEW:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.set_hexpand(True)
@@ -609,17 +610,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         self.__popup_menu(y)
 
-    def _on_initial_loading(self):
-        """
-            Update fastscroll and scroll to first item
-        """
-        if self.mask & SelectionListMask.ARTISTS:
-            self.__fastscroll.populate()
-        # Scroll to first selected item
-        for row in self._box.get_selected_rows():
-            GLib.idle_add(self._scroll_to_child, row)
-            break
-
 #######################
 # PRIVATE             #
 #######################
@@ -710,3 +700,15 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param value as str
         """
         self._on_adaptive_changed(App().window, App().window.is_adaptive)
+
+    def __on_initialized(self, selectionlist):
+        """
+            Update fastscroll
+            @param selectionlist as SelectionList
+        """
+        if self.mask & SelectionListMask.ARTISTS:
+            self.__fastscroll.populate()
+        # Scroll to first selected item
+        for row in self._box.get_selected_rows():
+            GLib.idle_add(self._scroll_to_child, row)
+            break
