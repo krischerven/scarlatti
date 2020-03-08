@@ -35,7 +35,7 @@ class InformationStore(GObject.Object, InfoDownloader):
         GObject.Object.__init__(self)
         InfoDownloader.__init__(self)
 
-    def get_information(self, artist):
+    def get_artist_information(self, artist):
         """
             Get artist information
             @param artist as str

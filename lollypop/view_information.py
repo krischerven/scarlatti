@@ -155,7 +155,7 @@ class InformationView(View):
                 albums = [App().player.current_track.album]
             # Allows view to be shown without lag
             GLib.idle_add(albums_view.populate, albums)
-        App().task_helper.run(self.__information_store.get_information,
+        App().task_helper.run(self.__information_store.get_artist_information,
                               self.__artist_name,
                               callback=(self.__set_information_content, True))
 
@@ -290,7 +290,7 @@ class InformationView(View):
             @param artist as str
         """
         if artist == self.__artist_name:
-            App().task_helper.run(self.__information_store.get_information,
-                                  self.__artist_name,
-                                  callback=(self.__set_information_content,
-                                            False))
+            App().task_helper.run(
+                self.__information_store.get_artist_information,
+                self.__artist_name,
+                callback=(self.__set_information_content, False))
