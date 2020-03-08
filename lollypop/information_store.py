@@ -14,7 +14,6 @@ from gi.repository import Gio, GObject
 
 from hashlib import md5
 
-from lollypop.define import ARTISTS_PATH
 from lollypop.logger import Logger
 from lollypop.downloader_info import InfoDownloader
 
@@ -35,30 +34,35 @@ class InformationStore(GObject.Object, InfoDownloader):
         GObject.Object.__init__(self)
         InfoDownloader.__init__(self)
 
-    def get_artist_information(self, artist):
+    def get_information(self, name, path):
         """
-            Get artist information
-            @param artist as str
+            Get information for name and path
+            @param name as str
+            @param path as str
             @return content as bytes
         """
-        encoded = md5(artist.encode("utf-8")).hexdigest()
-        filepath = "%s/%s.txt" % (ARTISTS_PATH, encoded)
         content = None
-        f = Gio.File.new_for_path(filepath)
-        if f.query_exists():
-            (status, content, tag) = f.load_contents()
+        try:
+            encoded = md5(name.encode("utf-8")).hexdigest()
+            filepath = "%s/%s.txt" % (path, encoded)
+            f = Gio.File.new_for_path(filepath)
+            if f.query_exists():
+                (status, content, tag) = f.load_contents()
+        except Exception as e:
+            Logger.error("InformationStore::get_information(): %s", e)
         return content
 
-    def save_artist_information(self, artist, content):
+    def save_information(self, name, path, content):
         """
-            Save artist information
-            @param artist as str
+            Save information for name and path
+            @param name as str
+            @param path as str
             @param content as bytes
         """
         try:
             if content is not None:
-                encoded = md5(artist.encode("utf-8")).hexdigest()
-                filepath = "%s/%s.txt" % (ARTISTS_PATH, encoded)
+                encoded = md5(name.encode("utf-8")).hexdigest()
+                filepath = "%s/%s.txt" % (path, encoded)
                 f = Gio.File.new_for_path(filepath)
                 fstream = f.replace(None, False,
                                     Gio.FileCreateFlags.REPLACE_DESTINATION,
@@ -67,4 +71,4 @@ class InformationStore(GObject.Object, InfoDownloader):
                     fstream.write(content, None)
                     fstream.close()
         except Exception as e:
-            Logger.error("InformationStore::save_artist_information(): %s", e)
+            Logger.error("InformationStore::save_information(): %s", e)

@@ -26,13 +26,16 @@ MARGIN = 15
 MARGIN_MEDIUM = 10
 MARGIN_SMALL = 5
 
+data_dir = GLib.get_user_cache_dir()
 # All cache goes here
-CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
-# Stores for albums
-ALBUMS_PATH = GLib.get_user_data_dir() + "/lollypop/albums"
-ALBUMS_WEB_PATH = GLib.get_user_data_dir() + "/lollypop/albums_web"
-# Stores for artists
-ARTISTS_PATH = GLib.get_user_data_dir() + "/lollypop/artists"
+CACHE_PATH = data_dir + "/lollypop"
+# Store for albums
+ALBUMS_PATH = data_dir + "/lollypop/albums"
+ALBUMS_WEB_PATH = data_dir + "/lollypop/albums_web"
+# Store for artists
+ARTISTS_PATH = data_dir + "/lollypop/artists"
+# Store for lyrics
+LYRICS_PATH = data_dir + "/lollypop/lyrics"
 
 
 class TimeStamp:

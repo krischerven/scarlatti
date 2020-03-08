@@ -15,6 +15,7 @@ from gi.repository import Gtk, GLib, Gio, Pango
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL, Type
+from lollypop.define import ARTISTS_PATH
 from lollypop.objects_album import Album
 from lollypop.helper_art import ArtBehaviour
 from lollypop.information_store import InformationStore
@@ -155,8 +156,9 @@ class InformationView(View):
                 albums = [App().player.current_track.album]
             # Allows view to be shown without lag
             GLib.idle_add(albums_view.populate, albums)
-        App().task_helper.run(self.__information_store.get_artist_information,
+        App().task_helper.run(self.__information_store.get_information,
                               self.__artist_name,
+                              ARTISTS_PATH,
                               callback=(self.__set_information_content, True))
 
 #######################
@@ -269,8 +271,8 @@ class InformationView(View):
         """
         if content is not None:
             self.__bio_label.set_text(content.decode("utf-8"))
-            self.__information_store.save_artist_information(
-                self.__artist_name, content)
+            self.__information_store.save_information(
+                self.__artist_name, ARTISTS_PATH, content)
 
     def __on_artist_artwork(self, surface):
         """
@@ -290,7 +292,8 @@ class InformationView(View):
             @param artist as str
         """
         if artist == self.__artist_name:
-            App().task_helper.run(
-                self.__information_store.get_artist_information,
-                self.__artist_name,
-                callback=(self.__set_information_content, False))
+            App().task_helper.run(self.__information_store.get_information,
+                                  self.__artist_name,
+                                  ARTISTS_PATH,
+                                  callback=(self.__set_information_content,
+                                            False))

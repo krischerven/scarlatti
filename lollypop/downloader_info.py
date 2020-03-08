@@ -15,7 +15,7 @@ from gi.repository import GLib
 import json
 from locale import getdefaultlocale
 
-from lollypop.define import App, AUDIODB_CLIENT_ID
+from lollypop.define import App, AUDIODB_CLIENT_ID, ARTISTS_PATH
 from lollypop.utils import get_network_available, emit_signal
 from lollypop.logger import Logger
 from lollypop.downloader import Downloader
@@ -113,7 +113,7 @@ class InfoDownloader(Downloader):
                         Logger.error(
                             "InfoDownloader::__cache_artists_artwork(): %s"
                             % e)
-            self.save_artist_information(artist, content)
+            self.save_information(artist, ARTISTS_PATH, content)
         except Exception as e:
             Logger.info("InfoDownloader::__cache_artist_info(): %s" % e)
         emit_signal(self, "artist-info-changed", artist)
