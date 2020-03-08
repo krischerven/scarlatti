@@ -240,7 +240,7 @@ class AlbumArt:
             Logger.error("AlbumArt::get_album_artwork(): %s" % e)
             return None
 
-    def save_album_artwork(self, data, album):
+    def save_album_artwork(self, album, data):
         """
             Save artwork for album
             @param data as bytes
@@ -248,11 +248,11 @@ class AlbumArt:
         """
         try:
             if not album.storage_type & StorageType.COLLECTION:
-                self.__save_web_album_artwork(data, album)
+                self.__save_web_album_artwork(album, data)
             elif album.uri == "" or is_readonly(album.uri):
-                self.__save_ro_album_artwork(data, album)
+                self.__save_ro_album_artwork(album, data)
             else:
-                self.__save_album_artwork(data, album)
+                self.__save_album_artwork(album, data)
         except Exception as e:
             Logger.error("AlbumArt::save_album_artwork(): %s" % e)
 
@@ -366,11 +366,11 @@ class AlbumArt:
                 parent_uri = "" if p is None else p.get_uri()
                 album.set_uri(parent_uri)
 
-    def __save_web_album_artwork(self, data, album):
+    def __save_web_album_artwork(self, album, data):
         """
             Save artwork for a web album
-            @param data as bytes
             @param album as Album
+            @param data as bytes
         """
         filename = self.get_album_artwork_name(album) + ".jpg"
         store_path = ALBUMS_WEB_PATH + "/" + filename
@@ -384,11 +384,11 @@ class AlbumArt:
         self.clean_album_cache(album)
         self.album_artwork_update(album.id)
 
-    def __save_ro_album_artwork(self, data, album):
+    def __save_ro_album_artwork(self, album, data):
         """
             Save artwork for a read only album
-            @param data as bytes
             @param album as Album
+            @param data as bytes
         """
         filename = self.get_album_artwork_name(album) + ".jpg"
         store_path = ALBUMS_PATH + "/" + filename
@@ -402,11 +402,11 @@ class AlbumArt:
         self.clean_album_cache(album)
         self.album_artwork_update(album.id)
 
-    def __save_album_artwork(self, data, album):
+    def __save_album_artwork(self, album, data):
         """
             Save artwork for an album
-            @param data as bytes
             @param album as Album
+            @param data as bytes
         """
         filename = self.get_album_artwork_name(album) + ".jpg"
         store_path = ALBUMS_PATH + "/" + filename
@@ -418,7 +418,7 @@ class AlbumArt:
         # Save cover to tags
         if save_to_tags:
             helper = TaskHelper()
-            helper.run(self.__save_album_artwork_to_tags, data, album)
+            helper.run(self.__save_album_artwork_to_tags, album, data)
 
         # We need to remove favorite if exists
         if uri_count > 1 or save_to_tags:
@@ -443,11 +443,11 @@ class AlbumArt:
         self.clean_album_cache(album)
         self.album_artwork_update(album.id)
 
-    def __save_album_artwork_to_tags(self, data, album):
+    def __save_album_artwork_to_tags(self, album, data):
         """
             Save artwork to tags
-            @param data as bytes
             @param album as Album
+            @param data as bytes
         """
         # https://bugzilla.gnome.org/show_bug.cgi?id=747431
         bytes = GLib.Bytes.new(data)

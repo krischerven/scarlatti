@@ -106,7 +106,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             (status, data, tag) = f.load_contents()
             if status:
                 App().task_helper.run(App().art.save_album_artwork,
-                                      data, self.__album)
+                                      self.__album, data)
         except Exception as e:
             Logger.error(
                 "AlbumArtworkSearchWidget::_save_from_filename(): %s" % e)
@@ -153,10 +153,10 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         try:
             if isinstance(child, ArtworkSearchChild):
                 App().task_helper.run(App().art.save_album_artwork,
-                                      child.bytes, self.__album)
+                                      self.__album, child.bytes)
             else:
                 App().art.remove_album_artwork(self.__album)
-                App().art.save_album_artwork(None, self.__album)
+                App().art.save_album_artwork(self.__album, None)
                 App().art.clean_album_cache(self.__album)
                 emit_signal(App().art, "album-artwork-changed",
                             self.__album.id)

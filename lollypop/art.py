@@ -18,8 +18,8 @@ from lollypop.art_base import BaseArt
 from lollypop.art_album import AlbumArt
 from lollypop.art_artist import ArtistArt
 from lollypop.art_radio import RadioArt
+from lollypop.art_downloader import DownloaderArt
 from lollypop.logger import Logger
-from lollypop.downloader_art import ArtDownloader
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.define import ARTISTS_PATH, TimeStamp
 from lollypop.define import App
@@ -27,7 +27,7 @@ from lollypop.utils import emit_signal
 from lollypop.utils_file import create_dir, remove_oldest
 
 
-class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
+class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, DownloaderArt):
     """
         Global artwork manager
     """
@@ -40,7 +40,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, RadioArt, ArtDownloader):
         AlbumArt.__init__(self)
         ArtistArt.__init__(self)
         RadioArt.__init__(self)
-        ArtDownloader.__init__(self)
+        DownloaderArt.__init__(self)
         # Move old store
         # FIXME: Remove this later
         store = Gio.File.new_for_path(

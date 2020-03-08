@@ -21,11 +21,10 @@ from lollypop.define import StorageType
 from lollypop.utils import get_network_available, noaccents, emit_signal
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
-from lollypop.downloader import Downloader
 from lollypop.helper_task import TaskHelper
 
 
-class ArtDownloader(Downloader):
+class DownloaderArt:
     """
         Download art from the web
     """
@@ -34,7 +33,20 @@ class ArtDownloader(Downloader):
         """
             Init art downloader
         """
-        Downloader.__init__(self)
+        self.__album_methods = {
+            "AudioDB": self._get_audiodb_album_artwork_uri,
+            "FanartTV": self._get_fanarttv_album_artwork_uri,
+            "Spotify": self._get_spotify_album_artwork_uri,
+            "Itunes": self._get_itunes_album_artwork_uri,
+            "Deezer": self._get_deezer_album_artwork_uri,
+            "Last.fm": self._get_lastfm_album_artwork_uri
+        }
+        self.__artist_methods = {
+            "AudioDB": self._get_audiodb_artist_artwork_uri,
+            "FanartTV": self._get_fanarttv_artist_artwork_uri,
+            "Spotify": self._get_spotify_artist_artwork_uri,
+            "Deezer": self._get_deezer_artist_artwork_uri
+        }
         self.__albums_queue = []
         self.__artists_queue = []
         self.__in_albums_download = False
@@ -49,11 +61,8 @@ class ArtDownloader(Downloader):
             @thread safe
         """
         results = []
-        for (api, a_helper, helper, b_helper) in self._WEBSERVICES:
-            if helper is None:
-                continue
-            method = getattr(self, helper)
-            uris = method(artist, album, cancellable)
+        for api in self.__album_methods.keys():
+            uris = self.__album_methods[api](artist, album, cancellable)
             for uri in uris:
                 results.append((uri, api))
         emit_signal(self, "uri-artwork-found", results)
@@ -66,11 +75,8 @@ class ArtDownloader(Downloader):
             @thread safe
         """
         results = []
-        for (api, helper, a_helper, b_helper) in self._WEBSERVICES:
-            if helper is None:
-                continue
-            method = getattr(self, helper)
-            uris = method(artist, cancellable)
+        for api in self.__artist_methods.keys():
+            uris = self.__artist_methods[api](artist, cancellable)
             for uri in uris:
                 results.append((uri, api))
         emit_signal(self, "uri-artwork-found", results)
@@ -80,7 +86,6 @@ class ArtDownloader(Downloader):
             Download album artwork
             @param album_id as int
         """
-        return
         if not get_network_available("DATA"):
             return
         self.__albums_queue.append(album_id)
@@ -92,7 +97,6 @@ class ArtDownloader(Downloader):
             Cache artist artwork
             @param artist as str
         """
-        return
         if not get_network_available("DATA"):
             return
         self.__artists_queue.append(artist)
@@ -164,7 +168,7 @@ class ArtDownloader(Downloader):
                             return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_audiodb_artist_artwork_uri: %s : %s"
+                "DownloaderArt::_get_audiodb_artist_artwork_uri: %s : %s"
                 % (e, artist))
         return []
 
@@ -192,7 +196,7 @@ class ArtDownloader(Downloader):
                 return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_deezer_artist_artwork_uri(): %s : %s"
+                "DownloaderArt::_get_deezer_artist_artwork_uri(): %s : %s"
                 % (e, artist))
         return []
 
@@ -220,7 +224,7 @@ class ArtDownloader(Downloader):
                     uris.append(item["url"])
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_fanarttv_artist_artwork_uri: %s : %s"
+                "DownloaderArt::_get_fanarttv_artist_artwork_uri: %s : %s"
                 % (e, artist))
         return uris
 
@@ -253,7 +257,7 @@ class ArtDownloader(Downloader):
                         return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_spotify_artist_artwork_uri(): %s : %s"
+                "DownloaderArt::_get_spotify_artist_artwork_uri(): %s : %s"
                 % (e, artist))
         return []
 
@@ -283,7 +287,7 @@ class ArtDownloader(Downloader):
                         uri = item["cover_xl"]
                         return [uri]
         except Exception as e:
-            Logger.warning("ArtDownloader::__get_deezer_album_artwork_uri: %s"
+            Logger.warning("DownloaderArt::__get_deezer_album_artwork_uri: %s"
                            % e)
         return []
 
@@ -313,7 +317,7 @@ class ArtDownloader(Downloader):
                     uris.append(cover["url"])
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_fanarttv_album_artwork_uri: %s, %s: %s" %
+                "DownloaderArt::_get_fanarttv_album_artwork_uri: %s, %s: %s" %
                 (e, artist, album))
         return uris
 
@@ -357,7 +361,7 @@ class ArtDownloader(Downloader):
                             return [item["images"][0]["url"]]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_album_art_spotify_uri: %s, %s: %s" %
+                "DownloaderArt::_get_album_art_spotify_uri: %s, %s: %s" %
                 (e, artist, album))
         return []
 
@@ -389,7 +393,7 @@ class ArtDownloader(Downloader):
                         return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_album_art_itunes_uri: %s, %s: %s" %
+                "DownloaderArt::_get_album_art_itunes_uri: %s, %s: %s" %
                 (e, artist, album))
         return []
 
@@ -421,7 +425,7 @@ class ArtDownloader(Downloader):
                         return [uri]
         except Exception as e:
             Logger.warning(
-                "ArtDownloader::_get_audiodb_album_artwork_uri: %s, %s: %s" %
+                "DownloaderArt::_get_audiodb_album_artwork_uri: %s, %s: %s" %
                 (e, artist, album))
         return []
 
@@ -443,7 +447,7 @@ class ArtDownloader(Downloader):
                 return [uri]
             except Exception as e:
                 Logger.warning(
-                    "ArtDownloader::_get_album_art_lastfm_uri: %s, %s: %s" %
+                    "DownloaderArt::_get_album_art_lastfm_uri: %s, %s: %s" %
                     (e, artist, album))
         return []
 
@@ -486,7 +490,7 @@ class ArtDownloader(Downloader):
                             mbid = item["id"]
                 return mbid
         except Exception as e:
-            Logger.warning("ArtDownloader::__get_musicbrainz_mbid: %s"
+            Logger.warning("DownloaderArt::__get_musicbrainz_mbid: %s"
                            % e)
         return None
 
@@ -524,11 +528,8 @@ class ArtDownloader(Downloader):
             while self.__artists_queue:
                 artist = self.__artists_queue.pop()
                 found = False
-                for (api, helper, a_helper, b_helper) in self._WEBSERVICES:
-                    if helper is None:
-                        continue
-                    method = getattr(self, helper)
-                    result = method(artist)
+                for api in self.__artist_methods.keys():
+                    result = self.__artist_methods[api](artist)
                     for uri in result:
                         (status,
                          data) = App().task_helper.load_uri_content_sync(
@@ -546,7 +547,7 @@ class ArtDownloader(Downloader):
                     App().art.add_artist_artwork(artist, None,
                                                  StorageType.COLLECTION)
         except Exception as e:
-            Logger.error("ArtDownloader::__cache_artists_artwork(): %s" % e)
+            Logger.error("DownloaderArt::__cache_artists_artwork(): %s" % e)
         self.__in_artists_download = False
 
     def __cache_albums_artwork(self):
@@ -567,28 +568,24 @@ class ArtDownloader(Downloader):
                 else:
                     artist = ", ".join(App().albums.get_artists(album_id))
                 found = False
-                for (api, a_helper, helper, b_helper) in self._WEBSERVICES:
-                    if helper is None:
-                        continue
-                    method = getattr(self, helper)
-                    result = method(artist, album)
+                for api in self.__album_methods.keys():
+                    result = self.__album_methods[api](artist, album)
                     for uri in result:
                         (status,
                          data) = App().task_helper.load_uri_content_sync(uri,
                                                                          None)
                         if status:
                             found = True
-                            App().art.save_album_artwork(data, Album(album_id))
+                            App().art.save_album_artwork(Album(album_id), data)
                             break
                     # Found, do not search in another helper
                     if found:
                         break
                 # Not found, save empty artwork
-                # FIXME move album as first arg
                 if not found:
-                    App().art.save_album_artwork(None, Album(album_id))
+                    App().art.save_album_artwork(Album(album_id), None)
         except Exception as e:
-            Logger.error("ArtDownloader::__cache_albums_artwork: %s" % e)
+            Logger.error("DownloaderArt::__cache_albums_artwork: %s" % e)
         self.__in_albums_download = False
 
     def __on_load_google_content(self, uri, loaded, content):
@@ -610,7 +607,7 @@ class ArtDownloader(Downloader):
             emit_signal(self, "uri-artwork-found", results)
         except Exception as e:
             emit_signal(self, "uri-artwork-found", [])
-            Logger.error("ArtDownloader::__on_load_google_content(): %s: %s"
+            Logger.error("DownloaderArt::__on_load_google_content(): %s: %s"
                          % (e, content))
 
     def __on_load_startpage_content(self, uri, loaded, content):
@@ -646,5 +643,5 @@ class ArtDownloader(Downloader):
             search_in_data(lines)
         except Exception as e:
             emit_signal(self, "uri-artwork-found", [])
-            Logger.error("ArtDownloader::__on_load_startpage_content(): %s"
+            Logger.error("DownloaderArt::__on_load_startpage_content(): %s"
                          % e)

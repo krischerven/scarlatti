@@ -433,7 +433,7 @@ class SpotifySearch(GObject.Object):
                                                         cover_uri,
                                                         cancellable)
                 if status:
-                    App().art.save_album_artwork(data, album)
+                    App().art.save_album_artwork(album, data)
             emit_signal(self, "match-album", album.id, storage_type)
         except Exception as e:
             Logger.error(
