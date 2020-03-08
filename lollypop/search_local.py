@@ -55,6 +55,18 @@ class LocalSearch(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
+    def __split_string(self, string):
+        """
+            Split string for search
+            @param string as str
+            @return str
+        """
+        split = []
+        for word in string.split():
+            if len(word) > 2:
+                split.append(word)
+        return split
+
     def __search_tracks(self, search, storage_type, cancellable):
         """
             Get tracks for search items
@@ -65,8 +77,8 @@ class LocalSearch(GObject.Object):
         """
         tracks = []
         track_ids = []
-        split = search.split()
-        for search_str in split:
+        split = self.__split_string(search)
+        for search_str in [search] + split:
             tracks += App().tracks.search_performed(search_str, storage_type)
             tracks += App().tracks.search(search_str, storage_type)
             if cancellable.is_cancelled():
@@ -103,8 +115,8 @@ class LocalSearch(GObject.Object):
         """
         artists = []
         artist_ids = []
-        split = search.split()
-        for search_str in split:
+        split = self.__split_string(search)
+        for search_str in [search] + split:
             artists += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -132,8 +144,8 @@ class LocalSearch(GObject.Object):
         """
         albums = []
         album_ids = []
-        split = search.split()
-        for search_str in split:
+        split = self.__split_string(search)
+        for search_str in [search] + split:
             albums += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
