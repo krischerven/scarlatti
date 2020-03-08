@@ -597,7 +597,7 @@ class DownloaderArt:
         """
         try:
             if not loaded:
-                emit_signal(self, "uri-artwork-found", [])
+                emit_signal(self, "uri-artwork-found", None)
                 return
             decode = json.loads(content.decode("utf-8"))
             results = []
@@ -606,7 +606,7 @@ class DownloaderArt:
                     results.append((item["link"], "Google"))
             emit_signal(self, "uri-artwork-found", results)
         except Exception as e:
-            emit_signal(self, "uri-artwork-found", [])
+            emit_signal(self, "uri-artwork-found", None)
             Logger.error("DownloaderArt::__on_load_google_content(): %s: %s"
                          % (e, content))
 
@@ -637,11 +637,11 @@ class DownloaderArt:
 
         try:
             if not loaded:
-                emit_signal(self, "uri-artwork-found", [])
+                emit_signal(self, "uri-artwork-found", None)
                 return
             lines = content.decode("utf-8").splitlines()
             search_in_data(lines)
         except Exception as e:
-            emit_signal(self, "uri-artwork-found", [])
+            emit_signal(self, "uri-artwork-found", None)
             Logger.error("DownloaderArt::__on_load_startpage_content(): %s"
                          % e)

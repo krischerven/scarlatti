@@ -264,7 +264,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         """
             Load content in view
             @param art as Art
-            @param uris as (str, str)
+            @param uris as (str, str)/None
         """
         if uris:
             (uri, api) = uris.pop(0)
