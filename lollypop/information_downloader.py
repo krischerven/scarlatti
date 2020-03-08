@@ -15,14 +15,13 @@ from gi.repository import GLib
 import json
 from locale import getdefaultlocale
 
-from lollypop.define import App, AUDIODB_CLIENT_ID, ARTISTS_PATH
-from lollypop.utils import get_network_available, emit_signal
+from lollypop.define import App, AUDIODB_CLIENT_ID
+from lollypop.utils import get_network_available
 from lollypop.logger import Logger
-from lollypop.downloader import Downloader
 from lollypop.wikipedia import Wikipedia
 
 
-class InfoDownloader(Downloader):
+class InformationDownloader:
     """
         Download info from the web
     """
@@ -31,17 +30,18 @@ class InfoDownloader(Downloader):
         """
             Init info downloader
         """
-        Downloader.__init__(self)
+        pass
 
-    def cache_artist_info(self, artist):
+    def get_information(self, artist, callback, *args):
         """
-            Cache info for artist
+            Get artist information
             @param artist as str
+            @param callback as function
         """
         if not get_network_available("DATA"):
-            emit_signal(self, "artist-info-changed", artist)
+            callback(None, *args)
             return
-        App().task_helper.run(self.__cache_artist_info, artist)
+        App().task_helper.run(self.__get_information, artist, callback, *args)
 
 #######################
 # PROTECTED           #
@@ -90,30 +90,24 @@ class InfoDownloader(Downloader):
 #######################
 # PRIVATE             #
 #######################
-    def __cache_artist_info(self, artist):
+    def __get_information(self, artist, callback, *args):
         """
-            Cache artist information
+            Get information for artist
             @param artist as str
+            @param callback as function
         """
         content = None
         try:
+            # Try from Wikipedia first
             if get_network_available("WIKIPEDIA"):
                 wikipedia = Wikipedia()
                 content = wikipedia.get_content_for_term(artist)
             if content is None:
-                for (api, a_helper, ar_helper, helper) in self._WEBSERVICES:
-                    if helper is None:
-                        continue
-                    try:
-                        method = getattr(self, helper)
-                        content = method(artist)
-                        if content is not None:
-                            break
-                    except Exception as e:
-                        Logger.error(
-                            "InfoDownloader::__cache_artists_artwork(): %s"
-                            % e)
-            self.save_information(artist, ARTISTS_PATH, content)
+                for method in [self._get_audiodb_artist_info,
+                               self._get_lastfm_artist_info]:
+                    content = method(artist)
+                    if content is not None:
+                        break
+            callback(content, *args)
         except Exception as e:
-            Logger.info("InfoDownloader::__cache_artist_info(): %s" % e)
-        emit_signal(self, "artist-info-changed", artist)
+            Logger.info("InfoDownloader::__get_information(): %s" % e)

@@ -80,6 +80,7 @@ class ArtDownloader(Downloader):
             Download album artwork
             @param album_id as int
         """
+        return
         if not get_network_available("DATA"):
             return
         self.__albums_queue.append(album_id)
@@ -91,6 +92,7 @@ class ArtDownloader(Downloader):
             Cache artist artwork
             @param artist as str
         """
+        return
         if not get_network_available("DATA"):
             return
         self.__artists_queue.append(artist)

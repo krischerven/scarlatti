@@ -76,8 +76,6 @@ class InformationView(View):
         """
         View.__init__(self, get_default_storage_type(), view_type)
         self.__information_store = InformationStore()
-        self.__information_store.connect("artist-info-changed",
-                                         self.__on_artist_info_changed)
         self.__cancellable = Gio.Cancellable()
         self.__minimal = minimal
         self.__artist_name = ""
@@ -156,10 +154,18 @@ class InformationView(View):
                 albums = [App().player.current_track.album]
             # Allows view to be shown without lag
             GLib.idle_add(albums_view.populate, albums)
-        App().task_helper.run(self.__information_store.get_information,
-                              self.__artist_name,
-                              ARTISTS_PATH,
-                              callback=(self.__set_information_content, True))
+        content = self.__information_store.get_information(self.__artist_name,
+                                                           ARTISTS_PATH)
+        if content is None:
+            self.__bio_label.set_text(_("Loading information"))
+            from lollypop.information_downloader import InformationDownloader
+            downloader = InformationDownloader()
+            downloader.get_information(self.__artist_name,
+                                       self.__on_artist_information,
+                                       self.__artist_name)
+        else:
+            self.__bio_label.set_markup(
+                GLib.markup_escape_text(content.decode("utf-8")))
 
 #######################
 # PROTECTED           #
@@ -225,35 +231,6 @@ class InformationView(View):
 #######################
 # PRIVATE             #
 #######################
-    def __set_information_content(self, content, initial):
-        """
-            Set information
-            @param content as bytes
-            @param initial as bool => initial loading
-        """
-        if content:
-            self.__bio_label.set_markup(
-                GLib.markup_escape_text(content.decode("utf-8")))
-        elif initial:
-            self.__bio_label.set_text(_("Loading information"))
-            self.__information_store.cache_artist_info(self.__artist_name)
-        else:
-            self.__bio_label.set_text(
-                _("No information for %s") % self.__artist_name)
-
-    def __get_artist_artwork_path_from_cache(self, artist, size):
-        """
-            Get artist artwork path
-            @param artist as str
-            @param size as int
-            @return str
-        """
-        path = InformationStore.get_artwork_path(
-            artist, size, self.get_scale_factor())
-        if path is not None:
-            return path
-        return None
-
     def __on_wikipedia_search_list(self, items):
         """
             Populate view with items
@@ -285,15 +262,20 @@ class InformationView(View):
             self.__artist_artwork.set_from_surface(surface)
             del surface
 
-    def __on_artist_info_changed(self, information_store, artist):
+    def __on_artist_information(self, content, artist_name):
         """
-            Update information
-            @param information_store as InformationStore
-            @param artist as str
+            Set label
+            @param content as bytes
+            @param artist_name as str
         """
-        if artist == self.__artist_name:
-            App().task_helper.run(self.__information_store.get_information,
-                                  self.__artist_name,
-                                  ARTISTS_PATH,
-                                  callback=(self.__set_information_content,
-                                            False))
+        if artist_name != self.__artist_name:
+            return
+        if content is None:
+            self.__bio_label.set_text(
+                _("No information for %s") % self.__artist_name)
+        else:
+            self.__bio_label.set_markup(
+                GLib.markup_escape_text(content.decode("utf-8")))
+            self.__information_store.save_information(self.__artist_name,
+                                                      ARTISTS_PATH,
+                                                      content)

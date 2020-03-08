@@ -23,10 +23,6 @@ class InformationStore(GObject.Object, InfoDownloader):
         Generic class to cache information
     """
 
-    __gsignals__ = {
-        "artist-info-changed": (GObject.SignalFlags.RUN_FIRST, None, (str,)),
-    }
-
     def __init__(self):
         """
             Init store
