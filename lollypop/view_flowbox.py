@@ -18,7 +18,7 @@ from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.define import ViewType, App
-from lollypop.utils import get_font_height, popup_widget
+from lollypop.utils import get_font_height, popup_widget, set_cursor_type
 
 
 class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
@@ -219,6 +219,7 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
                 self.__hovered_child.artwork is not None:
             self.__hovered_child.artwork.unset_state_flags(
                 Gtk.StateFlags.VISITED)
+            set_cursor_type(self.__hovered_child, "left_ptr")
             self.__hovered_child = None
 
     def __on_box_motion(self, event_controller, x, y):
@@ -235,5 +236,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             child.artwork.set_state_flags(Gtk.StateFlags.VISITED, False)
             self.__unselect_selected()
             self.__hovered_child = child
+            set_cursor_type(child)
         else:
             self.__unselect_selected()

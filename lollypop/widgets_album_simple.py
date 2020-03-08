@@ -14,7 +14,7 @@ from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.define import App, ArtSize, ViewType, ArtBehaviour
 from lollypop.define import MARGIN, MARGIN_MEDIUM
-from lollypop.utils import on_query_tooltip, set_cursor_type, emit_signal
+from lollypop.utils import on_query_tooltip, emit_signal
 
 
 class AlbumSimpleWidget(Gtk.FlowBoxChild):
@@ -75,7 +75,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
                     "<b>%s</b>\n<span alpha='50000'>%s</span>" % (album_name,
                                                                   artist_name))
             self.__artwork = Gtk.Image.new()
-            self.__artwork.connect("realize", set_cursor_type)
             grid.add(self.__artwork)
             grid.add(self.__label)
             self.set_artwork()

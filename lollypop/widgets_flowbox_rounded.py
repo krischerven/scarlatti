@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gtk, Pango, GObject
 
 from lollypop.define import ArtSize, ViewType, MARGIN, MARGIN_MEDIUM
-from lollypop.utils import on_query_tooltip, set_cursor_type
+from lollypop.utils import on_query_tooltip
 
 
 class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
@@ -61,13 +61,11 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             "<b>" + GLib.markup_escape_text(self.__name) + "</b>")
         self._label.show()
         self._artwork = Gtk.Image.new()
-        self._artwork.connect("realize", set_cursor_type)
         self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
         self.set_artwork()
         self._grid.add(self._artwork)
         self._grid.add(self._label)
-        self._artwork.connect("realize", set_cursor_type)
         self.add(self._grid)
 
     def set_view_type(self, view_type):
