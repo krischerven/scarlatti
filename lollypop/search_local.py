@@ -67,6 +67,7 @@ class LocalSearch(GObject.Object):
         track_ids = []
         split = search.split()
         for search_str in split:
+            tracks += App().tracks.search_performed(search_str, storage_type)
             tracks += App().tracks.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break

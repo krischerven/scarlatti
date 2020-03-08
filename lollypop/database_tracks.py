@@ -911,13 +911,35 @@ class TracksDatabase:
             Search for tracks looking like searched
             @param searched as str without accents
             @param storage_type as StorageType
-            @return [int]
+            @return [(int, name)]
         """
         with SqlCursor(App().db) as sql:
             filters = ("%" + searched + "%", storage_type)
             request = "SELECT rowid, name FROM tracks\
                        WHERE noaccents(name) LIKE ?\
                        AND tracks.storage_type & ? LIMIT 25"
+            result = sql.execute(request, filters)
+            return list(result)
+
+    def search_performed(self, searched, storage_type):
+        """
+            Search tracks looking like searched with performers
+            @param searched as str without accents
+            @param storage_type as StorageType
+            @return [(int, name)]
+        """
+        with SqlCursor(App().db) as sql:
+            filters = ("%" + searched + "%", storage_type)
+            request = "SELECT DISTINCT tracks.rowid, artists.name\
+                   FROM track_artists, tracks, artists\
+                   WHERE track_artists.artist_id=artists.rowid AND\
+                   track_artists.track_id=tracks.rowid AND\
+                   noaccents(artists.name) LIKE ? AND\
+                   tracks.storage_type & ? AND NOT EXISTS (\
+                        SELECT album_artists.artist_id\
+                        FROM album_artists\
+                        WHERE album_artists.artist_id=artists.rowid)\
+                    LIMIT 25"
             result = sql.execute(request, filters)
             return list(result)
 
