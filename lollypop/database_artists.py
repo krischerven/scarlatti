@@ -221,46 +221,6 @@ class ArtistsDatabase:
                 result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
 
-    def get_performers(self, genre_ids, storage_type):
-        """
-            Get all available performers
-            @param genre_ids as [int]
-            @param storage_type as StorageType
-            @return [int, str, str]
-        """
-        genre_ids = remove_static(genre_ids)
-        if App().settings.get_value("show-artist-sort"):
-            select = "artists.rowid, artists.sortname, artists.sortname"
-        else:
-            select = "artists.rowid, artists.name, artists.sortname"
-        with SqlCursor(App().db) as sql:
-            result = []
-            if not genre_ids or genre_ids[0] == Type.ALL:
-                # Only artist that really have an album
-                result = sql.execute(
-                    "SELECT DISTINCT %s FROM artists, track_artists, tracks\
-                                  WHERE artists.rowid=track_artists.artist_id\
-                                  AND tracks.rowid=track_artists.track_id\
-                                  AND tracks.storage_type & ?\
-                                  ORDER BY artists.sortname\
-                                  COLLATE NOCASE COLLATE LOCALIZED" % select,
-                    (storage_type,))
-            else:
-                filters = (storage_type,)
-                filters += tuple(genre_ids)
-                request = "SELECT DISTINCT %s\
-                           FROM artists, tracks, track_genres, track_artists\
-                           WHERE artists.rowid=track_artists.artist_id\
-                           AND tracks.rowid=track_artists.track_id\
-                           AND tracks.storage_type & ?\
-                           AND track_genres.track_id=tracks.rowid AND ("
-                for genre_id in genre_ids:
-                    request += "track_genres.genre_id=? OR "
-                request += "1=0) ORDER BY artists.sortname\
-                            COLLATE NOCASE COLLATE LOCALIZED"
-                result = sql.execute(request % select, filters)
-            return [(row[0], row[1], row[2]) for row in result]
-
     def get_randoms(self, limit, storage_type):
         """
             Return random artists

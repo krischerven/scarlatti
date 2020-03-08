@@ -165,11 +165,6 @@
             <summary>Auto update music</summary>
             <description></description>
         </key>
-         <key type="b" name="show-performers">
-            <default>false</default>
-            <summary>Show performers</summary>
-            <description></description>
-        </key>
         <key type="b" name="show-artist-tracks">
             <default>false</default>
             <summary>Show tracks in artist view</summary>

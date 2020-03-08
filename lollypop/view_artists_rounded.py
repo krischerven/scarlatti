@@ -52,11 +52,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             FlowBoxView.populate(self, artist_ids)
 
         def load():
-            if App().settings.get_value("show-performers"):
-                ids = App().artists.get_performers([], self.storage_type)
-            else:
-                ids = App().artists.get([], self.storage_type)
-            return ids
+            return App().artists.get([], self.storage_type)
 
         if artist_ids:
             FlowBoxView.populate(self, artist_ids)

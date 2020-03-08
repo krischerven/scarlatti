@@ -151,10 +151,7 @@ class ListsContainer:
         """
         def load():
             storage_type = get_default_storage_type()
-            if App().settings.get_value("show-performers"):
-                artists = App().artists.get_performers(genre_ids, storage_type)
-            else:
-                artists = App().artists.get(genre_ids, storage_type)
+            artists = App().artists.get(genre_ids, storage_type)
             return artists
         selection_list.set_mask(SelectionListMask.ARTISTS)
         App().task_helper.run(load, callback=(selection_list.populate,))
