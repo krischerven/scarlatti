@@ -18,6 +18,7 @@ from lollypop.view import View
 from lollypop.define import App, ViewType, AdaptiveSize
 from lollypop.define import StorageType
 from lollypop.logger import Logger
+from lollypop.utils import get_network_available
 from lollypop.objects_track import Track
 from lollypop.helper_lyrics import LyricsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -121,8 +122,12 @@ class LyricsView(View, SignalsHelper):
             @param track as Track
         """
         self.__banner.translate_button.set_sensitive(False)
-        self.__lyrics_label.set_text("")
+        if not get_network_available():
+            self.__lyrics_label.set_text(
+                    _("Network not available"))
+            return
         if track.id is None:
+            self.__lyrics_label.set_text("")
             return
         self.__lyrics_label.set_text(_("Loading…"))
         lyrics = ""
@@ -282,7 +287,7 @@ class LyricsView(View, SignalsHelper):
         """
         if lyrics is None:
             self.__lyrics_label.set_text(
-                    _("Network not available"))
+                    _("Disabled in network settings"))
         elif lyrics == "":
             if filtered:
                 self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
