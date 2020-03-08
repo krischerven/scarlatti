@@ -16,13 +16,14 @@ from gettext import gettext as _
 
 from lollypop.view import View
 from lollypop.define import App, ViewType, AdaptiveSize
-from lollypop.define import StorageType
+from lollypop.define import StorageType, LYRICS_PATH
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
 from lollypop.objects_track import Track
 from lollypop.helper_lyrics import LyricsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_lyrics import LyricsBannerWidget
+from lollypop.information_store import InformationStore
 
 
 class LyricsLabel(Gtk.Stack):
@@ -110,6 +111,7 @@ class LyricsView(View, SignalsHelper):
         self.add_widget(self.__lyrics_label, self.__banner)
         self.__lyrics_helper = LyricsHelper()
         self.__update_lyrics_style()
+        self.__information_store = InformationStore()
         return [
                 (App().window, "adaptive-size-changed",
                  "_on_adaptive_size_changed"),
@@ -122,10 +124,6 @@ class LyricsView(View, SignalsHelper):
             @param track as Track
         """
         self.__banner.translate_button.set_sensitive(False)
-        if not get_network_available():
-            self.__lyrics_label.set_text(
-                    _("Network not available"))
-            return
         if track.id is None:
             self.__lyrics_label.set_text("")
             return
@@ -158,10 +156,18 @@ class LyricsView(View, SignalsHelper):
             self.__lyrics_label.set_text(lyrics)
             self.__lyrics_text = lyrics
         else:
-            self.__lyrics_helper.get_lyrics_from_web(track,
-                                                     self.__on_lyrics,
-                                                     False,
-                                                     track)
+            name = track.name + track.album.name + ",".join(track.artists)
+            content = self.__information_store.get_information(name,
+                                                               LYRICS_PATH)
+            if content:
+                self.__lyrics_label.set_text(content.decode("utf-8"))
+            elif not get_network_available():
+                self.__lyrics_label.set_text(_("Network not available"))
+            else:
+                self.__lyrics_helper.get_lyrics_from_web(track,
+                                                         self.__on_lyrics,
+                                                         False,
+                                                         track)
 
     @property
     def args(self):
@@ -303,4 +309,8 @@ class LyricsView(View, SignalsHelper):
         else:
             self.__lyrics_label.set_text(lyrics)
             self.__lyrics_text = lyrics
+            name = track.name + track.album.name + ",".join(track.artists)
+            self.__information_store.save_information(name,
+                                                      LYRICS_PATH,
+                                                      lyrics.encode("utf-8"))
             self.__banner.translate_button.set_sensitive(True)

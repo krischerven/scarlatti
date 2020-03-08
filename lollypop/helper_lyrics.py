@@ -16,6 +16,8 @@ from lollypop.logger import Logger
 from lollypop.objects_radio import Radio
 from lollypop.helper_task import TaskHelper
 from lollypop.utils import escape, get_network_available
+from lollypop.utils_file import create_dir
+from lollypop.define import LYRICS_PATH
 
 
 class LyricsHelper:
@@ -29,6 +31,7 @@ class LyricsHelper:
         """
         self.__timestamps = {}
         self.__cancellable = Gio.Cancellable.new()
+        create_dir(LYRICS_PATH)
 
     def load(self, track):
         """
