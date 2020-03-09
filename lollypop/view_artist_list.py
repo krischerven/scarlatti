@@ -39,7 +39,8 @@ class ArtistViewList(LazyLoadingView):
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__storage_type = storage_type
-        self.__banner = ArtistBannerWidget(genre_ids, artist_ids, storage_type)
+        self.__banner = ArtistBannerWidget(genre_ids, artist_ids,
+                                           storage_type, self.view_type)
         self.__banner.show()
         self.__list = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN * 4)
         self.__list.show()
