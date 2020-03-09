@@ -39,6 +39,7 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         LazyLoadingView.__init__(self, storage_type, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         FilteringHelper.__init__(self)
+        self.__tracks_view = None
         self.__album = album
         self.__others_boxes = []
         self.__grid = Gtk.Grid()
@@ -86,6 +87,14 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             Logger.error("AlbumView::activate_child: %s" % e)
 
     @property
+    def is_populated(self):
+        """
+            True if populated
+            @return bool
+        """
+        return self.__tracks_view is not None
+
+    @property
     def args(self):
         """
             Get default args for __class__
@@ -102,6 +111,8 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             Get filtered children
             @return [Gtk.Widget]
         """
+        if self.__tracks_view is None:
+            return []
         filtered = self.__tracks_view.children
         for box in self.__others_boxes:
             for child in box.children:
@@ -153,7 +164,8 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             Update children state
             @param player as Player
         """
-        self.__tracks_view.set_playing_indicator()
+        if self.__tracks_view is not None:
+            self.__tracks_view.set_playing_indicator()
 
     def _on_duration_changed(self, player, track_id):
         """
@@ -161,7 +173,8 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             @param player as Player
             @param track_id as int
         """
-        self.__tracks_view.update_duration(track_id)
+        if self.__tracks_view is not None:
+            self.__tracks_view.update_duration(track_id)
 
 #######################
 # PRIVATE             #

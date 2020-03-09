@@ -117,7 +117,7 @@ class FilteringHelper():
             Scroll to child
             @param child as Gtk.Widget
         """
-        if child == self.__last_scrolled:
+        if child == self.__last_scrolled or self.scroll_relative_to is None:
             return
         self.__last_scrolled = child
         if self.view_type & ViewType.SCROLLED:
