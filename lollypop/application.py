@@ -524,7 +524,6 @@ class Application(Gtk.Application, ApplicationActions):
                             albums.append(album)
                         else:
                             track = Track(int(id[2:]))
-                            track.album.set_tracks([track])
                             self.player.add_album(track.album)
                             albums.append(track.album)
                     if albums and albums[0].tracks:
