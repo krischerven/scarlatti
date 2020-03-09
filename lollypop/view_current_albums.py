@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.utils import tracks_to_albums
+from lollypop.utils_album import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView

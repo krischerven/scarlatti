@@ -15,8 +15,8 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.define import App, ViewType
-from lollypop.utils import tracks_to_albums, emit_signal
-from lollypop.utils import get_default_storage_type
+from lollypop.utils_album import tracks_to_albums
+from lollypop.utils import get_default_storage_type, emit_signal
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 

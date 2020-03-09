@@ -321,21 +321,6 @@ def translate_artist_name(name):
     return name
 
 
-def tracks_to_albums(tracks):
-    """
-        Convert tracks list to albums list
-    """
-    albums = []
-    for track in tracks:
-        if albums and albums[-1].id == track.album.id:
-            albums[-1].append_track(track, False)
-        else:
-            album = track.album
-            album.set_tracks([track], False)
-            albums.append(album)
-    return albums
-
-
 def get_page_score(page_title, title, artist, album):
     """
         Calculate web page score

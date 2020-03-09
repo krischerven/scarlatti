@@ -14,7 +14,8 @@ from locale import strcoll
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, StorageType
-from lollypop.utils import popup_widget, tracks_to_albums
+from lollypop.utils import popup_widget
+from lollypop.utils_album import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.widgets_playlist_rounded import PlaylistRoundedWidget
 from lollypop.widgets_banner_playlists import PlaylistsBannerWidget

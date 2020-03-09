@@ -14,7 +14,8 @@ from gi.repository import Gtk
 
 from random import shuffle
 
-from lollypop.utils import get_human_duration, tracks_to_albums, popup_widget
+from lollypop.utils import get_human_duration, popup_widget
+from lollypop.utils_album import tracks_to_albums
 from lollypop.define import App, ArtSize, ViewType, Size
 from lollypop.widgets_banner import BannerWidget
 
