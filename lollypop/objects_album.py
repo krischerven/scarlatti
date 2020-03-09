@@ -144,6 +144,14 @@ class Album(Base):
                 new_track = Track(track.id, self)
                 self._tracks.append(new_track)
         else:
+            # Create a new album for current tracks
+            new_album = Album(self.id, self.genre_ids, self.artist_ids)
+            new_tracks = []
+            for track in self._tracks:
+                if track not in tracks:
+                    track.set_album(new_album)
+                    new_tracks.append(track)
+            new_album._tracks = new_tracks
             self._tracks = tracks
 
     def append_track(self, track, clone=True):
