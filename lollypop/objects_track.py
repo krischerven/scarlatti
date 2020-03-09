@@ -59,6 +59,12 @@ class Track(Base):
         else:
             self.__album = album
 
+    def __del__(self):
+        """
+            Remove ref cycles
+        """
+        self.__album = None
+
     def set_album(self, album):
         """
             Set track album

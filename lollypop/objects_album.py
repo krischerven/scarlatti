@@ -134,7 +134,8 @@ class Album(Base):
 
     def set_tracks(self, tracks, clone=True):
         """
-            Set album tracks
+            Set album tracks, do not disable clone if you know self is already
+            used
             @param tracks as [Track]
             @param clone as bool
         """
@@ -156,7 +157,8 @@ class Album(Base):
 
     def append_track(self, track, clone=True):
         """
-            Append track to album
+            Append track to album, do not disable clone if you know self is
+            already used
             @param track as Track
             @param clone as bool
         """
@@ -168,7 +170,8 @@ class Album(Base):
 
     def append_tracks(self, tracks, clone=True):
         """
-            Append tracks to album
+            Append tracks to album, do not disable clone if you know self is
+            already used
             @param tracks as [Track]
             @param clone as bool
         """
