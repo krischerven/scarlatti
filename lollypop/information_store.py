@@ -15,10 +15,10 @@ from gi.repository import Gio, GObject
 from hashlib import md5
 
 from lollypop.logger import Logger
-from lollypop.downloader_info import InfoDownloader
+from lollypop.information_downloader import InformationDownloader
 
 
-class InformationStore(GObject.Object, InfoDownloader):
+class InformationStore(GObject.Object, InformationDownloader):
     """
         Generic class to cache information
     """
@@ -28,7 +28,7 @@ class InformationStore(GObject.Object, InfoDownloader):
             Init store
         """
         GObject.Object.__init__(self)
-        InfoDownloader.__init__(self)
+        InformationDownloader.__init__(self)
 
     def get_information(self, name, path):
         """
