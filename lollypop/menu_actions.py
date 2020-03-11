@@ -152,16 +152,22 @@ class ActionsMenu(Gio.Menu):
             @param GLib.Variant
         """
         try:
-            def launch_app(executable, f):
+            def launch_app(commandline, f):
                 if f.query_exists():
-                    path = f.get_path()
-                    arguments = [
-                        [executable, path],
-                        ["flatpak-spawn", "--host", executable, path]]
-                    for argv in arguments:
+                    if commandline.find("%U"):
+                        commandline = commandline.replace("%U", f.get_uri())
+                    elif commandline.find("%F"):
+                        commandline = commandline.replace("%F", f.get_path())
+                    else:
+                        Logger.error("Can't launch: %s", f.get_uri())
+                        return
+                    split = commandline.split()
+                    commands = [split,
+                                ["flatpak-spawn", "--host"] + split]
+                    for cmd in commands:
                         try:
                             (pid, stdin, stdout, stderr) = GLib.spawn_async(
-                                argv, flags=GLib.SpawnFlags.SEARCH_PATH |
+                                cmd, flags=GLib.SpawnFlags.SEARCH_PATH |
                                 GLib.SpawnFlags.STDOUT_TO_DEV_NULL,
                                 standard_input=False,
                                 standard_output=False,
@@ -174,8 +180,8 @@ class ActionsMenu(Gio.Menu):
 
             def on_response(dialog, response_id, f):
                 if response_id == Gtk.ResponseType.OK:
-                    if dialog.executable is not None:
-                        launch_app(dialog.executable, f)
+                    if dialog.commandline is not None:
+                        launch_app(dialog.commandline, f)
                 dialog.destroy()
 
             f = Gio.File.new_for_uri(self.__object.uri)

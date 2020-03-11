@@ -63,7 +63,7 @@ class AppsDialog(Gtk.Dialog):
             @param f as Gio.File
         """
         Gtk.Dialog.__init__(self)
-        self.__executable = None
+        self.__commandline = None
         self.__open_with = {}
         self.set_size_request(300, 300)
         self.set_transient_for(App().window)
@@ -116,12 +116,12 @@ class AppsDialog(Gtk.Dialog):
             Logger.error("AppsDialog::__init__(): %s", e)
 
     @property
-    def executable(self):
+    def commandline(self):
         """
-            Get current executable for dialog
+            Get current commandline for dialog
             @return str/None
         """
-        return self.__executable
+        return self.__commandline
 
 #######################
 # PRIVATE             #
@@ -149,7 +149,7 @@ class AppsDialog(Gtk.Dialog):
             @param row_b as AppListBoxRow
             @return bool
         """
-        if row_b.app.get_executable() == self.__last_app:
+        if row_b.app.get_commandline() == self.__last_app:
             return True
         return False
 
@@ -161,19 +161,19 @@ class AppsDialog(Gtk.Dialog):
             @param content_type as str
         """
         if response_id == Gtk.ResponseType.OK:
-            if dialog.executable is not None:
-                self.__open_with[content_type] = dialog.executable
+            if dialog.commandline is not None:
+                self.__open_with[content_type] = dialog.commandline
                 data = json.dumps(self.__open_with)
                 App().settings.set_value("open-with",
                                          GLib.Variant("s", data))
 
     def __on_row_selected(self, listbox, row):
         """
-            Set current executable
+            Set current commandline
             @param listbox as Gtk.ListBox
             @param row as AppListBoxRow
         """
         if row is None:
-            self.__executable = None
+            self.__commandline = None
         else:
-            self.__executable = row.app.get_executable()
+            self.__commandline = row.app.get_commandline()
