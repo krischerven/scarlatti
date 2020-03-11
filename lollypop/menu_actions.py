@@ -154,16 +154,16 @@ class ActionsMenu(Gio.Menu):
         try:
             def launch_app(commandline, f):
                 if f.query_exists():
-                    if commandline.find("%U"):
-                        commandline = commandline.replace("%U", f.get_uri())
-                    elif commandline.find("%F"):
-                        commandline = commandline.replace("%F", f.get_path())
-                    else:
-                        Logger.error("Can't launch: %s", f.get_uri())
-                        return
-                    split = commandline.split()
-                    commands = [split,
-                                ["flatpak-spawn", "--host"] + split]
+                    args = []
+                    for item in commandline.split():
+                        if item == "%U":
+                            args.append(f.get_uri())
+                        elif item == "%F":
+                            args.append(f.get_path())
+                        else:
+                            args.append(item)
+                    commands = [args,
+                                ["flatpak-spawn", "--host"] + args]
                     for cmd in commands:
                         try:
                             (pid, stdin, stdout, stderr) = GLib.spawn_async(
