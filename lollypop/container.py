@@ -81,7 +81,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         FilterContainer.__init__(self)
         self._grid.add(self._main_widget)
 
-    def stop_all(self):
+    def stop(self):
         """
             Stop current view from processing
         """

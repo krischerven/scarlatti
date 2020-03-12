@@ -251,6 +251,7 @@ class Application(Gtk.Application, ApplicationActions):
             Quit Lollypop
             @param vacuum as bool
         """
+        self.__window.container.stop()
         self.__window.hide()
         if self.spotify.is_running:
             self.spotify.stop()
@@ -402,41 +403,39 @@ class Application(Gtk.Application, ApplicationActions):
 #######################
     def __save_state(self):
         """
-            Save window position and view
+            Save player state
         """
-        if not self.settings.get_value("save-state"):
-            return
-
-        if self.player.current_track.id is None or\
-                self.player.current_track.storage_type & StorageType.EPHEMERAL:
-            track_id = None
-        else:
-            track_id = self.player.current_track.id
-            # Save albums context
-            try:
-                with open(LOLLYPOP_DATA_PATH + "/Albums.bin", "wb") as f:
-                    dump(self.player.albums, f)
-            except Exception as e:
-                Logger.error("Application::__save_state(): %s" % e)
-        dump(track_id, open(LOLLYPOP_DATA_PATH + "/track_id.bin", "wb"))
-        dump([self.player.is_playing, self.player.is_party],
-             open(LOLLYPOP_DATA_PATH + "/player.bin", "wb"))
-        dump(self.player.queue,
-             open(LOLLYPOP_DATA_PATH + "/queue.bin", "wb"))
-        # Save current playlist
-        if isinstance(self.player.current_track, Radio):
-            playlist_ids = [Type.RADIOS]
-        else:
-            playlist_ids = []
-        dump(playlist_ids,
-             open(LOLLYPOP_DATA_PATH + "/playlist_ids.bin", "wb"))
-        if self.player.current_track.id is not None:
-            position = self.player.position
-        else:
-            position = 0
-        dump(position, open(LOLLYPOP_DATA_PATH + "/position.bin", "wb"))
+        if self.settings.get_value("save-state"):
+            if self.player.current_track.id is None or\
+                    self.player.current_track.storage_type &\
+                    StorageType.EPHEMERAL:
+                track_id = None
+            else:
+                track_id = self.player.current_track.id
+                # Save albums context
+                try:
+                    with open(LOLLYPOP_DATA_PATH + "/Albums.bin", "wb") as f:
+                        dump(self.player.albums, f)
+                except Exception as e:
+                    Logger.error("Application::__save_state(): %s" % e)
+            dump(track_id, open(LOLLYPOP_DATA_PATH + "/track_id.bin", "wb"))
+            dump([self.player.is_playing, self.player.is_party],
+                 open(LOLLYPOP_DATA_PATH + "/player.bin", "wb"))
+            dump(self.player.queue,
+                 open(LOLLYPOP_DATA_PATH + "/queue.bin", "wb"))
+            # Save current playlist
+            if isinstance(self.player.current_track, Radio):
+                playlist_ids = [Type.RADIOS]
+            else:
+                playlist_ids = []
+            dump(playlist_ids,
+                 open(LOLLYPOP_DATA_PATH + "/playlist_ids.bin", "wb"))
+            if self.player.current_track.id is not None:
+                position = self.player.position
+            else:
+                position = 0
+            dump(position, open(LOLLYPOP_DATA_PATH + "/position.bin", "wb"))
         self.player.stop_all()
-        self.__window.container.stop_all()
 
     def __vacuum(self):
         """
