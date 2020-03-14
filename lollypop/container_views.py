@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Type, ViewType, MARGIN_SMALL
+from lollypop.define import App, Type, ViewType, MARGIN_SMALL, StorageType
 from lollypop.utils import emit_signal, get_default_storage_type
 
 
@@ -33,7 +33,7 @@ class ViewsContainer:
             @param widget as Gtk.Widget
         """
         from lollypop.view import View
-        view = View()
+        view = View(StorageType.ALL, ViewType.DEFAULT)
         view.show()
         view.add(widget)
         widget.set_vexpand(True)
