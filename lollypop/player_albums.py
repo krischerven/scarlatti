@@ -15,7 +15,6 @@ from gi.repository import GLib
 from random import choice, shuffle
 
 from lollypop.logger import Logger
-from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 from lollypop.player_auto_similar import AutoSimilarPlayer
 from lollypop.player_auto_random import AutoRandomPlayer
@@ -151,35 +150,6 @@ class AlbumsPlayer:
         else:
             album = albums[0]
         self.play_album_for_albums(album, albums)
-
-    def play_album_uris(self, uris):
-        """
-            Play album uris
-            @param uris as [str]
-        """
-        # First get tracks
-        tracks = []
-        for uri in uris:
-            track_id = App().tracks.get_id_by_uri(uri)
-            if track_id is not None:
-                tracks.append(Track(track_id))
-        # Then get album ids
-        album_ids = {}
-        for track in tracks:
-            if track.album.id in album_ids.keys():
-                album_ids[track.album.id].append(track)
-            else:
-                album_ids[track.album.id] = [track]
-        # Create albums with tracks
-        play = True
-        for album_id in album_ids.keys():
-            album = Album(album_id)
-            album.set_tracks(album_ids[album_id])
-            if play:
-                self.play_album(album)
-            else:
-                self.add_album(album)
-        emit_signal(self, "playback-changed")
 
     def set_albums(self, albums):
         """

@@ -29,7 +29,9 @@ from lollypop.sqlcursor import SqlCursor
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
+from lollypop.objects_track import Track
 from lollypop.utils_file import is_audio, is_pls, get_mtime
+from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import emit_signal, profile
 
 
@@ -197,6 +199,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param album_artist_ids as [int]
             @param added_album_artist_ids as [int]
             @param storage_type as int
+            @return (track_id as int, album_id as int)
         """
         Logger.debug(
             "CollectionScanner::save_track(): Add artists %s" % artists)
@@ -357,17 +360,17 @@ class CollectionScanner(GObject.GObject, TagReader):
                       current / total,
                       self)
 
-    def __finish(self, modifications):
+    def __finish(self, new_track_ids):
         """
             Notify from main thread when scan finished
-            @param modifications as bool
+            @param new_track_ids as int
         """
         self.__thread = None
         Logger.info("Scan finished")
         App().lookup_action("update_db").set_enabled(True)
         App().window.container.progress.set_fraction(1.0, self)
         self.stop()
-        emit_signal(self, "scan-finished", modifications)
+        emit_signal(self, "scan-finished", new_track_ids)
         # Update max count value
         App().albums.update_max_count()
         App().start_spotify()
@@ -468,17 +471,21 @@ class CollectionScanner(GObject.GObject, TagReader):
         db_mtimes = App().tracks.get_mtimes()
         self.__progress_total = len(files)
         self.__progress_count = 0
-        new_tracks = self.__scan_files(files, db_mtimes, scan_type)
+        (current_track_ids,
+         new_track_ids) = self.__scan_files(files, db_mtimes, scan_type)
         self.__remove_old_tracks(db_uris, scan_type)
 
         SqlCursor.remove(App().db)
 
         if scan_type != ScanType.EXTERNAL:
             self.__add_monitor(dirs)
-            GLib.idle_add(self.__finish, new_tracks)
+            GLib.idle_add(self.__finish, new_track_ids)
 
         if scan_type == ScanType.EXTERNAL:
-            App().player.play_uris(new_tracks)
+            track_ids = current_track_ids + new_track_ids
+            albums = tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
+            App().player.play_albums(albums)
 
     def __scan_to_handle(self, uri):
         """
@@ -507,10 +514,10 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param files as [str]
             @param db_mtimes as {}
             @param scan_type as ScanType
-            @return new track uris as [str]
+            @return (track_ids as [int], new_track_ids as [int])
             @thread safe
         """
-        new_tracks = []
+        track_ids = new_track_ids = []
         SqlCursor.add(App().db)
         discoverer = Discoverer()
         try:
@@ -533,10 +540,12 @@ class CollectionScanner(GObject.GObject, TagReader):
                         if db_mtimes:
                             mtime = int(time())
                         Logger.debug("Adding file: %s" % uri)
-                        self.__add2db(discoverer, uri, mtime, storage_type)
-                        new_tracks.append(uri)
-                    if db_mtime != 0:
-                        del db_mtimes[uri]
+                        track_id = self.__add2db(
+                            discoverer, uri, mtime, storage_type)
+                        new_track_ids.append(track_id)
+                    else:
+                        track_id = App().tracks.get_id_by_uri(uri)
+                        track_ids.append(track_id)
                 except Exception as e:
                     Logger.error("Adding file: %s, %s" % (uri, e))
                 self.__progress_count += 1
@@ -551,7 +560,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 emit_signal(self, "artist-updated",
                             artist_id, ScanUpdate.ADDED)
         SqlCursor.remove(App().db)
-        return new_tracks
+        return (track_ids, new_track_ids)
 
     def __remove_old_tracks(self, uris, scan_type):
         """
@@ -593,6 +602,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uri as string
             @param track_mtime as int
             @param storage_type as StorageType
+            @return track_id as int
         """
         f = Gio.File.new_for_uri(uri)
         Logger.debug("CollectionScanner::add2db(): Read tags")
@@ -672,9 +682,11 @@ class CollectionScanner(GObject.GObject, TagReader):
                         album_artists, aa_sortnames, mb_album_artist_id,
                         album_name, mb_album_id, uri, album_loved, album_pop,
                         album_rate, album_synced, album_mtime, storage_type)
-        self.save_track(genres, artists, a_sortnames, mb_artist_id,
+        (track_id, album_id) = self.save_track(
+                        genres, artists, a_sortnames, mb_artist_id,
                         uri, title, duration, tracknumber, discnumber,
                         discname, year, timestamp, track_mtime, track_pop,
                         track_rate, track_loved, track_ltime, mb_track_id,
                         bpm, album_saved, album_id, album_artist_ids,
                         added_album_artist_ids, storage_type)
+        return track_id

@@ -106,9 +106,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.shown_sidebar_tooltip = False
         self.__window = None
         self.__fs_window = None
-        self.__scanner_timeout_id = None
         self.__spotify_timeout_id = None
-        self.__scanner_uris = []
         settings = Gio.Settings.new("org.gnome.desktop.interface")
         self.animations = settings.get_value("enable-animations").get_boolean()
         GLib.set_application_name("Lollypop")
@@ -472,6 +470,22 @@ class Application(Gtk.Application, ApplicationActions):
         except Exception as e:
             Logger.error("Application::__vacuum(): %s" % e)
 
+    def __parse_uris(self, playlist_uris, audio_uris):
+        """
+            Parse playlist uris
+            @param playlist_uris as [str]
+            @param audio_uris as [str]
+        """
+        from gi.repository import TotemPlParser
+        playlist_uri = playlist_uris.pop(0)
+        parser = TotemPlParser.Parser.new()
+        parser.connect("entry-parsed",
+                       self.__on_entry_parsed,
+                       audio_uris)
+        parser.parse_async(playlist_uri, True, None,
+                           self.__on_parse_finished,
+                           playlist_uris, audio_uris)
+
     def __on_handle_local_options(self, app, options):
         """
             Handle local options
@@ -538,8 +552,8 @@ class Application(Gtk.Application, ApplicationActions):
             elif options.contains("emulate-phone"):
                 self.__window.toolbar.end.devices_popover.add_fake_phone()
             elif len(args) > 1:
-                uris = []
-                pls = []
+                audio_uris = []
+                playlist_uris = []
                 for uri in args[1:]:
                     try:
                         uri = GLib.filename_to_uri(uri)
@@ -551,24 +565,19 @@ class Application(Gtk.Application, ApplicationActions):
                             "%s/%s" % (GLib.get_current_dir(), uri))
                         f = Gio.File.new_for_uri(uri)
                     if is_audio(f):
-                        uris.append(uri)
+                        audio_uris.append(uri)
                     elif is_pls(f):
-                        pls.append(uri)
+                        playlist_uris.append(uri)
                     else:
                         info = f.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
                                             Gio.FileQueryInfoFlags.NONE,
                                             None)
                         if info.get_file_type() == Gio.FileType.DIRECTORY:
-                            uris.append(uri)
-                if pls:
-                    from gi.repository import TotemPlParser
-                    parser = TotemPlParser.Parser.new()
-                    parser.connect("entry-parsed",
-                                   self.__on_entry_parsed, uris)
-                    parser.parse_async(uri, True, None,
-                                       self.__on_parse_finished, uris)
+                            audio_uris.append(uri)
+                if playlist_uris:
+                    self.__parse_uris(playlist_uris, audio_uris)
                 else:
-                    self.__on_parse_finished(None, None, uris)
+                    self.__on_parse_finished(None, None, [], audio_uris)
             elif self.__window is not None:
                 if not self.__window.is_visible():
                     self.__window.present()
@@ -579,44 +588,40 @@ class Application(Gtk.Application, ApplicationActions):
             Logger.error("Application::__on_command_line(): %s", e)
         return 0
 
-    def __on_parse_finished(self, parser, result, uris):
+    def __on_parse_finished(self, source, result, playlist_uris, audio_uris):
         """
             Play stream
-            @param parser as TotemPlParser.Parser
+            @param source as None
             @param result as Gio.AsyncResult
-            @param uris as [str]
+            @param uris as ([str], [str])
         """
-        def scanner_update():
-            self.__scanner_timeout_id = None
-            self.player.play_album_uris(self.__scanner_uris)
-            self.scanner.update(ScanType.EXTERNAL, self.__scanner_uris)
-            self.__scanner_uris = []
+        if playlist_uris:
+            self.__parse_uri(playlist_uris, audio_uris)
+        else:
+            to_scan_uris = []
+            for uri in audio_uris:
+                parsed = urlparse(uri)
+                if parsed.scheme in ["http", "https"]:
+                    from lollypop.objects_radio import Radio
+                    radio = Radio(Type.RADIOS)
+                    radio.set_name(uri)
+                    radio.set_uri(uri)
+                    self.player.load(radio)
+                    break
+                    # Lollypop does not support radio playlists
+                else:
+                    to_scan_uris.append(uri)
+            self.scanner.update(ScanType.EXTERNAL, to_scan_uris)
 
-        if self.__scanner_timeout_id is not None:
-            GLib.source_remove(self.__scanner_timeout_id)
-        for uri in uris:
-            parsed = urlparse(uri)
-            if parsed.scheme in ["http", "https"]:
-                from lollypop.objects_radio import Radio
-                radio = Radio(Type.RADIOS)
-                radio.set_name(uri)
-                radio.set_uri(uri)
-                self.player.load(radio)
-            else:
-                self.__scanner.append(uri)
-        if self.__scanner_uris:
-            self.__scanner_timeout_id = GLib.timeout_add(500,
-                                                         scanner_update)
-
-    def __on_entry_parsed(self, parser, uri, metadata, uris):
+    def __on_entry_parsed(self, parser, uri, metadata, audio_uris):
         """
             Add playlist entry to external files
             @param parser as TotemPlParser.Parser
             @param uri as str
             @param metadata as GLib.HastTable
-            @param uris as str
+            @param audio_uris as str
         """
-        uris.append(uri)
+        audio_uris.append(uri)
 
     def __hide_on_delete(self, widget, event):
         """

@@ -138,11 +138,11 @@ class AlbumView(FilteringHelper, LazyLoadingView,
 #######################
 # PROTECTED           #
 #######################
-    def _on_scan_finished(self, scanner, modifications):
+    def _on_scan_finished(self, scanner, track_ids):
         """
             Reload album if needed
             @param scanner as CollectionScanner
-            @param modifications as bool
+            @param track_ids as int
         """
         if not self.get_sensitive():
             App().window.container.reload_view()
