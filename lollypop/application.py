@@ -22,6 +22,7 @@ GstPbutils.pb_utils_init()
 from threading import current_thread
 from pickle import dump
 from signal import signal, SIGINT, SIGTERM
+from urllib.parse import urlparse
 
 
 try:
@@ -587,15 +588,25 @@ class Application(Gtk.Application, ApplicationActions):
         """
         def scanner_update():
             self.__scanner_timeout_id = None
-            self.player.play_uris(self.__scanner_uris)
+            self.player.play_album_uris(self.__scanner_uris)
             self.scanner.update(ScanType.EXTERNAL, self.__scanner_uris)
             self.__scanner_uris = []
 
         if self.__scanner_timeout_id is not None:
             GLib.source_remove(self.__scanner_timeout_id)
-        self.__scanner_uris += uris
-        self.__scanner_timeout_id = GLib.timeout_add(500,
-                                                     scanner_update)
+        for uri in uris:
+            parsed = urlparse(uri)
+            if parsed.scheme in ["http", "https"]:
+                from lollypop.objects_radio import Radio
+                radio = Radio(Type.RADIOS)
+                radio.set_name(uri)
+                radio.set_uri(uri)
+                self.player.load(radio)
+            else:
+                self.__scanner.append(uri)
+        if self.__scanner_uris:
+            self.__scanner_timeout_id = GLib.timeout_add(500,
+                                                         scanner_update)
 
     def __on_entry_parsed(self, parser, uri, metadata, uris):
         """

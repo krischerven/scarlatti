@@ -35,6 +35,8 @@ class RadioPlayer:
         """
         if Gio.NetworkMonitor.get_default().get_network_available():
             try:
+                # If a web track is loading, indicate lollypop to stop loading
+                # indicator
                 if self._current_track.is_web:
                     emit_signal(self, "loading-changed", False,
                                 self._current_track.album)

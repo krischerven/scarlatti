@@ -50,7 +50,7 @@ class Radio(Base):
                 "popularity": 0,
                 "uri": ""}
 
-    def __init__(self, radio_id=None):
+    def __init__(self, radio_id):
         """
             Init track
             @param radio_id as int
@@ -68,7 +68,7 @@ class Radio(Base):
             self.timestamp = self.mtime = self.mb_track_id = self.position = 0
         self.loved = self.last = False
         self.mb_artist_ids = []
-        self.is_web = self.is_http = self.first = True
+        self.is_web = self.is_http = True
 
     def set_name(self, name):
         """

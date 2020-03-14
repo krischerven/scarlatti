@@ -152,9 +152,9 @@ class AlbumsPlayer:
             album = albums[0]
         self.play_album_for_albums(album, albums)
 
-    def play_uris(self, uris):
+    def play_album_uris(self, uris):
         """
-            Play uris
+            Play album uris
             @param uris as [str]
         """
         # First get tracks
