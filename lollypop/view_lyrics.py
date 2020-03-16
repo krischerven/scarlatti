@@ -49,7 +49,7 @@ class LyricsLabel(Gtk.Stack):
         self.add(self.__label1)
         self.add(self.__label2)
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.set_transition_duration(200)
+        self.set_transition_duration(250)
 
     def set_text(self, text, crossfade=False):
         """
@@ -67,6 +67,8 @@ class LyricsLabel(Gtk.Stack):
             @param markup as str
             @param crossfade as bool
         """
+        if self.get_visible_child().get_label() == markup:
+            return
         if crossfade:
             self.next()
         self.get_visible_child().set_markup(markup)
@@ -135,7 +137,7 @@ class LyricsView(View, SignalsHelper):
             if self.__lyrics_helper.available:
                 if self.__lyrics_timeout_id is None:
                     self.__lyrics_timeout_id = GLib.timeout_add(
-                        500, self.__show_sync_lyrics)
+                        200, self.__show_sync_lyrics)
                 return
             else:
                 if self.__lyrics_timeout_id is not None:
@@ -223,19 +225,25 @@ class LyricsView(View, SignalsHelper):
         """
         timestamp = App().player.position
         (previous, current, next) =\
-            self.__lyrics_helper.get_lyrics_for_timestamp(timestamp)
+            self.__lyrics_helper.get_lyrics_for_timestamp(timestamp + 200)
         lyrics = ""
-        for line in previous:
-            if line:
+        for line in previous[:-1]:
+            if line.strip():
                 escaped = GLib.markup_escape_text(line)
                 lyrics += "<span alpha='20000'>%s</span>" % escaped + "\n"
+        lyrics += "\n"
+        for line in previous[-1:]:
+            if line.strip():
+                escaped = GLib.markup_escape_text(line)
+                lyrics += "<span alpha='35000'>%s</span>" % escaped + "\n"
         for line in current:
-            escaped = GLib.markup_escape_text(line)
-            lyrics += "<span>%s</span>" % escaped + "\n"
-        for line in next:
-            if line:
+            if line.strip():
                 escaped = GLib.markup_escape_text(line)
-                lyrics += "<span alpha='20000'>%s</span>" % escaped + "\n"
+                lyrics += "<span>%s</span>" % escaped + "\n"
+        for line in next:
+            if line.strip():
+                escaped = GLib.markup_escape_text(line)
+                lyrics += "<span alpha='35000'>%s</span>" % escaped + "\n"
         self.__lyrics_label.set_markup(lyrics, True)
         return True
 
