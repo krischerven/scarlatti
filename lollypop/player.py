@@ -261,12 +261,13 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
 #######################
     def _on_track_finished(self, track):
         """
-            Increment popularity and scrobble track
+            Scrobble track, update last played time and increment popularity
             @param track as Track
         """
         self.__scrobble(track, self._start_time)
-        # Increment popularity
         if track.id is not None and track.id >= 0:
+            App().tracks.set_listened_at(track.id, int(time()))
+            # Increment popularity
             App().tracks.set_more_popular(track.id)
             # In party mode, linear popularity
             if self.is_party:

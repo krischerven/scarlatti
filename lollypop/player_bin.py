@@ -311,7 +311,6 @@ class BinPlayer:
         for scrobbler in App().scrobblers:
             if scrobbler.available:
                 scrobbler.playing_now(self._current_track)
-        App().tracks.set_listened_at(self._current_track.id, int(time()))
 
     def _on_bus_message_tag(self, bus, message):
         """
