@@ -52,31 +52,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             (App().player, "loading-changed", "_on_loading_changed")
         ]
 
-    def append_row(self, track):
-        """
-            Append a track
-            ONE COLUMN ONLY
-            @param track as Track
-            @param position as int
-        """
-        self._init()
-        self.__album.append_track(track)
-        for key in self._tracks_widget_left.keys():
-            self._add_tracks(self._tracks_widget_left[key], [track])
-            return
-
-    def append_rows(self, tracks):
-        """
-            Add track rows
-            ONE COLUMN ONLY
-            @param tracks as [Track]
-        """
-        self._init()
-        self.__album.append_tracks(tracks)
-        for key in self._tracks_widget_left.keys():
-            self._add_tracks(self._tracks_widget_left[key], tracks)
-            return
-
     def get_current_ordinate(self, parent):
         """
             If current track in widget, return it ordinate,
