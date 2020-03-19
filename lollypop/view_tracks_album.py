@@ -73,6 +73,31 @@ class AlbumTracksView(TracksView):
                 self._responsive_widget.insert_row(0)
                 self._responsive_widget.attach(label, 0, 0, 2, 1)
 
+    def append_row(self, track):
+        """
+            Append a track
+            ONE COLUMN ONLY
+            @param track as Track
+            @param position as int
+        """
+        self._init()
+        self.__album.append_track(track)
+        for key in self._tracks_widget_left.keys():
+            self._add_tracks(self._tracks_widget_left[key], [track])
+            return
+
+    def append_rows(self, tracks):
+        """
+            Add track rows
+            ONE COLUMN ONLY
+            @param tracks as [Track]
+        """
+        self._init()
+        self.__album.append_tracks(tracks)
+        for key in self._tracks_widget_left.keys():
+            self._add_tracks(self._tracks_widget_left[key], tracks)
+            return
+
     def set_playing_indicator(self):
         """
             Set playing indicator
