@@ -36,6 +36,22 @@ def cancellable_sleep(seconds, cancellable):
                 raise Exception("cancelled")
 
 
+def make_subrequest(value, operand, count):
+    """
+        Make a subrequest for value and operand
+        @param value as str   => SQL
+        @param operand as str => OR/AND
+        @param count as int => iteration count
+    """
+    subrequest = "("
+    while count != 0:
+        if subrequest != "(":
+            subrequest += " %s " % operand
+        subrequest += value
+        count -= 1
+    return subrequest + ")"
+
+
 def ms_to_string(duration):
     """
         Convert milliseconds to a pretty string
