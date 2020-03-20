@@ -33,7 +33,7 @@ class AutoRandomPlayer:
             @return Album
         """
         storage_type = get_default_storage_type()
-        for album_id in App().albums.get_randoms(storage_type, limit=2):
+        for album_id in App().albums.get_randoms(storage_type, None, 2):
             if album_id != self.current_track.album.id:
                 return Album(album_id)
         return None

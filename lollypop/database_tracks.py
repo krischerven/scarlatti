@@ -759,11 +759,11 @@ class TracksDatabase:
                 return v[0] == 0
             return True
 
-    def get_rated(self, limit, storage_type):
+    def get_rated(self, storage_type, limit):
         """
             Return tracks with rate >= 4
-            @param limit as int
             @param storage_type as StorageType
+            @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:
@@ -774,11 +774,11 @@ class TracksDatabase:
                                  (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_populars(self, limit, storage_type):
+    def get_populars(self, storage_type, limit):
         """
             Return populars tracks
-            @param limit as int
             @param storage_type as StorageType
+            @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:
@@ -847,11 +847,11 @@ class TracksDatabase:
             sql.execute("UPDATE tracks set ltime=? WHERE rowid=?",
                         (time, track_id))
 
-    def get_little_played(self, limit, storage_type):
+    def get_little_played(self, storage_type, limit):
         """
             Return random tracks little played
-            @param limit as int
             @param storage_type as StorageType
+            @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:
@@ -862,11 +862,11 @@ class TracksDatabase:
                                  (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_recently_listened_to(self, limit, storage_type):
+    def get_recently_listened_to(self, storage_type, limit):
         """
             Return tracks listened recently
-            @param limit as int
             @param storage_type as StorageType
+            @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(App().db) as sql:

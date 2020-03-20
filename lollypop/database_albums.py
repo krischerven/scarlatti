@@ -710,21 +710,22 @@ class AlbumsDatabase:
             result = sql.execute(request, (storage_type,))
             return list(itertools.chain(*result))
 
-    def get_recents(self, storage_type):
+    def get_recents(self, storage_type, limit):
         """
             Return recent albums
             @param storage_type as StorageType
+            @param limit as int
             @return [int]
         """
         with SqlCursor(App().db) as sql:
             request = "SELECT DISTINCT albums.rowid FROM albums\
                        WHERE albums.loved != -1 AND\
                        albums.storage_type & ?\
-                       ORDER BY mtime DESC LIMIT 100"
-            result = sql.execute(request, (storage_type,))
+                       ORDER BY mtime DESC LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_randoms_by_albums(self, storage_type, genre_id=None, limit=100):
+    def get_randoms_by_albums(self, storage_type, genre_id, limit):
         """
             Return random albums
             @param storage_type as StorageType
@@ -751,7 +752,7 @@ class AlbumsDatabase:
             albums = list(itertools.chain(*result))
             return albums
 
-    def get_randoms_by_artists(self, storage_type, genre_id=None, limit=100):
+    def get_randoms_by_artists(self, storage_type, genre_id, limit):
         """
             Return random albums
             @param storage_type as StorageType
@@ -787,7 +788,7 @@ class AlbumsDatabase:
                 album_ids.append(album_id)
             return album_ids
 
-    def get_randoms(self, storage_type, genre_id=None, limit=100):
+    def get_randoms(self, storage_type, genre_id, limit):
         """
             Return random albums
             @param storage_type as StorageType
@@ -1135,10 +1136,11 @@ class AlbumsDatabase:
                                  (album_id,))
             return list(itertools.chain(*result))
 
-    def get_little_played(self, storage_type):
+    def get_little_played(self, storage_type, limit):
         """
             Return random albums little played
             @param storage_type as StorageType
+            @param limit as int
             @return album ids as [int]
         """
         with SqlCursor(App().db) as sql:
@@ -1147,8 +1149,8 @@ class AlbumsDatabase:
                                   WHERE storage_type & ?\
                                   GROUP BY album_id\
                                   ORDER BY SUM(ltime)/COUNT(ltime), \
-                                  random() LIMIT 100",
-                                 (storage_type,))
+                                  random() LIMIT ?",
+                                 (storage_type, limit))
             return list(itertools.chain(*result))
 
     def get_years(self, storage_type):
