@@ -287,7 +287,9 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             if allocation.width <= 1 or allocation.height <= 1:
                 return
             behaviour = App().settings.get_value("fullscreen-type").get_int32()
-            behaviour |= (ArtBehaviour.CROP | ArtBehaviour.DARKER)
+            behaviour |= (ArtBehaviour.CROP |
+                          ArtBehaviour.CACHE |
+                          ArtBehaviour.DARKER)
             # We don't want this for background, stored for album cover
             behaviour &= ~ArtBehaviour.ROUNDED
             if isinstance(App().player.current_track, Radio):

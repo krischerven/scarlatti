@@ -159,9 +159,7 @@ class BaseArt(GObject.GObject):
         height = pixbuf.get_height()
         aspect = width / height
         wanted_aspect = wanted_width / wanted_height
-        if width == height:
-            new_pixbuf = pixbuf
-        elif aspect > wanted_aspect:
+        if aspect > wanted_aspect:
             new_width = height * wanted_aspect
             offset = (width - new_width)
             new_pixbuf = pixbuf.new_subpixbuf(offset / 2,
