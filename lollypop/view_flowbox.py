@@ -86,13 +86,13 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
 
     def activate_child(self):
         """
-            Activated typeahead row
+            Activated typeahead child
         """
         self._box.unselect_all()
-        for row in self._box.get_children():
-            style_context = row.get_style_context()
+        for child in self.filtered:
+            style_context = child.get_style_context()
             if style_context.has_class("typeahead"):
-                row.activate()
+                child.activate()
             style_context.remove_class("typeahead")
 
     @property
