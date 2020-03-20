@@ -93,6 +93,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__label_widget.set_justify(Gtk.Justification.CENTER)
         eventbox = Gtk.EventBox.new()
         eventbox.show()
+        eventbox.set_property("valign", Gtk.Align.END)
+        eventbox.set_property("halign", Gtk.Align.END)
         eventbox.connect("button-release-event",
                          self.__on_image_button_release_event)
         eventbox.connect("realize", self.__on_image_realize)
