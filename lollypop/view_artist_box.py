@@ -47,6 +47,7 @@ class ArtistViewBox(AlbumsBoxView):
         self.connect("populated", self.__on_populated)
         self.__grid = Gtk.Grid()
         self.__grid.show()
+        self.__grid.set_property("valign", Gtk.Align.START)
         self.__grid.set_row_spacing(10)
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__grid.add(self._box)
