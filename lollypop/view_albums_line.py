@@ -129,19 +129,22 @@ class AlbumsArtistLineView(AlbumsLineView):
         Artist album line
     """
 
-    def __init__(self,  album, artist_id, storage_type, view_type):
+    def __init__(self,  artist_id, genre_ids, storage_type, view_type):
         """
             Init view
+            @param artist_id as artist_id
+            @param genre_ids as [int]
             @param storage_type as StorageType
             @param view_type as ViewType
         """
         AlbumsLineView.__init__(self, storage_type, view_type)
-        self.__album = album
         self.__artist_id = artist_id
+        self.__genre_ids = genre_ids
 
-    def populate(self):
+    def populate(self, excluded_album_id):
         """
-            Populate view
+            Populate view less excluded_album_id
+            @param excluded_album_id as int
         """
         def on_load(items):
             AlbumsLineView.populate(self, items)
@@ -149,18 +152,54 @@ class AlbumsArtistLineView(AlbumsLineView):
         def load():
             if self.__artist_id == Type.COMPILATIONS:
                 album_ids = App().albums.get_compilation_ids(
-                    self.__album.genre_ids, self.storage_type)
+                    self.__genre_ids, self.storage_type)
             else:
                 album_ids = App().albums.get_ids(
-                    [self.__artist_id], [], self.storage_type)
-            if self.__album.id in album_ids:
-                album_ids.remove(self.__album.id)
+                    [self.__artist_id], self.__genre_ids, self.storage_type)
+            if excluded_album_id in album_ids:
+                album_ids.remove(excluded_album_id)
             return [Album(album_id) for album_id in album_ids]
 
         if self.__artist_id == Type.COMPILATIONS:
             self._label.set_text(_("Others compilations"))
         else:
             self._label.set_text(App().artists.get_name(self.__artist_id))
+        App().task_helper.run(load, callback=(on_load,))
+
+
+class AlbumsArtistAppearsOnLineView(AlbumsLineView):
+    """
+        Show albums where artist is in featuring
+    """
+
+    def __init__(self,  artist_ids, genre_ids, storage_type, view_type):
+        """
+            Init view
+            @param storage_type as StorageType
+            @param view_type as ViewType
+        """
+        AlbumsLineView.__init__(self, storage_type, view_type)
+        self.__artist_ids = artist_ids
+        self.__genre_ids = genre_ids
+
+    def populate(self, excluded_album_ids):
+        """
+            Populate view
+            @param excluded_album_ids as [int]
+        """
+        def on_load(items):
+            AlbumsLineView.populate(self, items)
+
+        def load():
+            album_ids = []
+            for album_id in App().tracks.get_album_ids(self.__artist_ids,
+                                                       self.__genre_ids,
+                                                       self.storage_type):
+                if album_id not in excluded_album_ids:
+                    album_ids.append(album_id)
+            return [Album(album_id) for album_id in album_ids]
+
+        self._label.set_text(_("Appears on"))
         App().task_helper.run(load, callback=(on_load,))
 
 

@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import Gtk
+
 from lollypop.define import ViewType, MARGIN
 from lollypop.view_albums_box import AlbumsBoxView
 from lollypop.widgets_banner_artist import ArtistBannerWidget
@@ -35,13 +37,32 @@ class ArtistViewBox(AlbumsBoxView):
                                view_type |
                                ViewType.OVERLAY |
                                ViewType.ARTIST)
+        self.__others_boxes = []
         self.__banner = ArtistBannerWidget(genre_ids,
                                            artist_ids,
                                            self._storage_type,
                                            view_type)
         self.__banner.show()
         self._box.get_style_context().add_class("padding")
-        self.add_widget(self._box, self.__banner)
+        self.connect("populated", self.__on_populated)
+        self.__grid = Gtk.Grid()
+        self.__grid.show()
+        self.__grid.set_row_spacing(10)
+        self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__grid.add(self._box)
+        self.add_widget(self.__grid, self.__banner)
+
+    @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = self.children
+        for box in self.__others_boxes:
+            for child in box.children:
+                filtered.append(child)
+        return filtered
 
     @property
     def args(self):
@@ -61,3 +82,26 @@ class ArtistViewBox(AlbumsBoxView):
             @return int
         """
         return self.__banner.height + MARGIN
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_populated(self, view):
+        """
+            Add appears on albums
+            @param view as ArtistViewBox
+        """
+        album_ids = []
+        for child in self.children:
+            album_ids.append(child.data.id)
+        from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
+        others_box = AlbumsArtistAppearsOnLineView(self._artist_ids,
+                                                   self._genre_ids,
+                                                   self.storage_type,
+                                                   ViewType.SMALL |
+                                                   ViewType.SCROLLED)
+        others_box.set_margin_start(MARGIN)
+        others_box.set_margin_end(MARGIN)
+        others_box.populate(album_ids)
+        self.__grid.add(others_box)
+        self.__others_boxes.append(others_box)

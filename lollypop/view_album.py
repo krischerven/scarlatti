@@ -58,13 +58,14 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         """
             Populate the view with album
         """
-        self.__tracks_view = AlbumTracksView(self.__album, ViewType.ALBUM)
-        self.__tracks_view.show()
-        self.__tracks_view.connect("populated", self.__on_tracks_populated)
-        self.__tracks_view.set_margin_start(MARGIN)
-        self.__tracks_view.set_margin_end(MARGIN)
-        self.__tracks_view.populate()
-        self.__grid.add(self.__tracks_view)
+        if self.__tracks_view is None:
+            self.__tracks_view = AlbumTracksView(self.__album, ViewType.ALBUM)
+            self.__tracks_view.show()
+            self.__tracks_view.connect("populated", self.__on_tracks_populated)
+            self.__tracks_view.set_margin_start(MARGIN)
+            self.__tracks_view.set_margin_end(MARGIN)
+            self.__tracks_view.populate()
+            self.__grid.add(self.__tracks_view)
 
     def activate_child(self):
         """
@@ -190,14 +191,15 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             if self.view_type & ViewType.OVERLAY:
                 from lollypop.view_albums_line import AlbumsArtistLineView
                 for artist_id in self.__album.artist_ids:
-                    others_box = AlbumsArtistLineView(self.__album, artist_id,
+                    others_box = AlbumsArtistLineView(artist_id,
+                                                      self.__album.genre_ids,
                                                       self.storage_type,
                                                       ViewType.SMALL |
                                                       ViewType.ALBUM |
                                                       ViewType.SCROLLED)
                     others_box.set_margin_start(MARGIN)
                     others_box.set_margin_end(MARGIN)
-                    others_box.populate()
+                    others_box.populate(self.__album.id)
                     self.__grid.add(others_box)
                     self.__others_boxes.append(others_box)
         else:
