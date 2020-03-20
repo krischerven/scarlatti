@@ -79,7 +79,7 @@ class ArtistViewBox(AlbumsBoxView):
     @property
     def scroll_shift(self):
         """
-            Add scroll shift on y axes
+            Get scroll shift for y axes
             @return int
         """
         return self.__banner.height + MARGIN
