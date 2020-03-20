@@ -88,6 +88,15 @@ class EqualizerWidget(Gtk.Bin):
 #######################
 # PROTECTED           #
 #######################
+    def _on_format_value(self, scale, value):
+        """
+            Format scale value
+            @param scale as Gtk.Scale
+            @param value as float
+            @return str
+        """
+        return "%s dB" % value
+
     def _on_combobox_changed(self, combobox):
         """
             Update check combobox
