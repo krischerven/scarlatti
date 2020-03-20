@@ -156,9 +156,9 @@ class ActionsMenu(Gio.Menu):
                 if f.query_exists():
                     args = []
                     for item in commandline.split():
-                        if item == "%U":
+                        if item in ["%U", "%u"]:
                             args.append(f.get_uri())
-                        elif item == "%F":
+                        elif item in ["%F", "%f"]:
                             args.append(f.get_path())
                         else:
                             args.append(item)
