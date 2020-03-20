@@ -239,7 +239,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         View._on_map(self, widget)
         App().enable_special_shortcuts(False)
 
-    def __on_unmap(self, widget):
+    def _on_unmap(self, widget):
         """
             Cancel current loading and enable shortcuts
             @param widget as Gtk.Widget
@@ -247,7 +247,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         View._on_unmap(self, widget)
         App().enable_special_shortcuts(True)
         self.cancel()
-        self.__view.stop()
         self.__banner.spinner.stop()
 
     def _on_match_artist(self, search, artist_id, storage_type):
