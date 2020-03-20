@@ -17,7 +17,7 @@ from random import shuffle
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType
 from lollypop.logger import Logger
-from lollypop.utils import remove_static
+from lollypop.utils import remove_static, make_subrequest
 
 
 class AlbumsDatabase:
@@ -876,15 +876,15 @@ class AlbumsDatabase:
             request += " WHERE album_id=?\
                        AND discnumber=?"
             if genre_ids:
-                request += " AND track_genres.track_id = tracks.rowid AND ("
-                for genre_id in genre_ids:
-                    request += "track_genres.genre_id=? OR "
-                request += "1=0)"
+                request += " AND track_genres.track_id = tracks.rowid AND"
+                request += make_subrequest("track_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
             if artist_ids:
-                request += " AND track_artists.track_id=tracks.rowid AND ("
-                for artist_id in artist_ids:
-                    request += "track_artists.artist_id=? OR "
-                request += "1=0)"
+                request += " AND track_artists.track_id=tracks.rowid AND"
+                request += make_subrequest("track_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
             if disallow_ignored_tracks:
                 request += " AND tracks.loved != -1"
             request += " ORDER BY discnumber, tracknumber, tracks.name"
@@ -912,15 +912,15 @@ class AlbumsDatabase:
                 filters += tuple(artist_ids)
             request += " WHERE album_id=?"
             if genre_ids:
-                request += " AND track_genres.track_id = tracks.rowid AND ("
-                for genre_id in genre_ids:
-                    request += "track_genres.genre_id=? OR "
-                request += "1=0)"
+                request += " AND track_genres.track_id = tracks.rowid AND"
+                request += make_subrequest("track_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
             if artist_ids:
-                request += " AND track_artists.track_id=tracks.rowid AND ("
-                for artist_id in artist_ids:
-                    request += "track_artists.artist_id=? OR "
-                request += "1=0)"
+                request += " AND track_artists.track_id=tracks.rowid AND"
+                request += make_subrequest("track_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
             result = sql.execute(request, filters)
             v = result.fetchone()
             if v is not None and v[0] > 0:
@@ -1002,10 +1002,10 @@ class AlbumsDatabase:
                            WHERE albums.rowid = album_artists.album_id AND\
                            artists.rowid = album_artists.artist_id AND\
                            albums.storage_type & ? AND\
-                           album_genres.album_id=albums.rowid AND ( "
-                for genre_id in genre_ids:
-                    request += "album_genres.genre_id=? OR "
-                request += "1=0)"
+                           album_genres.album_id=albums.rowid AND"
+                request += make_subrequest("album_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
                 if ignore:
                     request += " AND albums.loved != -1"
                 request += order
@@ -1018,10 +1018,10 @@ class AlbumsDatabase:
                            FROM albums, album_artists, artists\
                            WHERE album_artists.album_id=albums.rowid AND\
                            albums.storage_type & ? AND\
-                           artists.rowid = album_artists.artist_id AND ("
-                for artist_id in artist_ids:
-                    request += "artists.rowid=? OR "
-                request += "1=0)"
+                           artists.rowid = album_artists.artist_id AND"
+                request += make_subrequest("artists.rowid=?",
+                                           "OR",
+                                           len(artist_ids))
                 if ignore:
                     request += " AND albums.loved != -1"
                 request += order
@@ -1036,13 +1036,14 @@ class AlbumsDatabase:
                            WHERE album_genres.album_id=albums.rowid AND\
                            artists.rowid = album_artists.artist_id AND\
                            albums.storage_type & ? AND\
-                           album_artists.album_id=albums.rowid AND ("
-                for artist_id in artist_ids:
-                    request += "artists.rowid=? OR "
-                request += "1=0) AND ("
-                for genre_id in genre_ids:
-                    request += "album_genres.genre_id=? OR "
-                request += "1=0)"
+                           album_artists.album_id=albums.rowid AND"
+                request += make_subrequest("artists.rowid=?",
+                                           "OR",
+                                           len(artist_ids))
+                request += " AND "
+                request += make_subrequest("album_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
                 if ignore:
                     request += " AND albums.loved != -1"
                 request += order
@@ -1083,10 +1084,10 @@ class AlbumsDatabase:
                            AND albums.storage_type & ?\
                            AND albums.loved != -1\
                            AND album_artists.album_id=albums.rowid\
-                           AND album_artists.artist_id=? AND ( "
-                for genre_id in genre_ids:
-                    request += "album_genres.genre_id=? OR "
-                request += "1=0)"
+                           AND album_artists.artist_id=? AND"
+                request += make_subrequest("album_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
                 if ignore:
                     request += " AND albums.loved != -1"
                 request += order
@@ -1108,10 +1109,10 @@ class AlbumsDatabase:
                 request = "SELECT SUM(duration)\
                            FROM tracks, track_genres\
                            WHERE tracks.album_id=?\
-                           AND track_genres.track_id = tracks.rowid AND ("
-                for genre_id in genre_ids:
-                    request += "track_genres.genre_id=? OR "
-                request += "1=0)"
+                           AND track_genres.track_id = tracks.rowid AND"
+                request += make_subrequest("track_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
                 result = sql.execute(request, filters)
             else:
                 result = sql.execute("SELECT SUM(duration) FROM tracks\

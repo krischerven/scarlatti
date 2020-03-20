@@ -15,7 +15,7 @@ import itertools
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, StorageType
-from lollypop.utils import get_default_storage_type
+from lollypop.utils import get_default_storage_type, make_subrequest
 from lollypop.utils import format_artist_name, remove_static
 
 
@@ -213,10 +213,11 @@ class ArtistsDatabase:
                            WHERE artists.rowid=album_artists.artist_id\
                            AND albums.rowid=album_artists.album_id\
                            AND albums.storage_type & ?\
-                           AND album_genres.album_id=albums.rowid AND ("
-                for genre_id in genre_ids:
-                    request += "album_genres.genre_id=? OR "
-                request += "1=0) ORDER BY artists.sortname\
+                           AND album_genres.album_id=albums.rowid AND"
+                request += make_subrequest("album_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
+                request += " ORDER BY artists.sortname\
                             COLLATE NOCASE COLLATE LOCALIZED"
                 result = sql.execute(request % select, filters)
             return [(row[0], row[1], row[2]) for row in result]
@@ -269,10 +270,11 @@ class ArtistsDatabase:
                            WHERE artists.rowid=album_artists.artist_id\
                            AND albums.storage_type & ?\
                            AND albums.rowid=album_artists.album_id\
-                           AND album_genres.album_id=albums.rowid AND ("
-                for genre_id in genre_ids:
-                    request += "album_genres.genre_id=? OR "
-                request += "1=0) ORDER BY artists.sortname\
+                           AND album_genres.album_id=albums.rowid AND"
+                request += make_subrequest("album_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
+                request += " ORDER BY artists.sortname\
                             COLLATE NOCASE COLLATE LOCALIZED"
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
