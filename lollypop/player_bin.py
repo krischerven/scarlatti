@@ -389,10 +389,6 @@ class BinPlayer:
             # See TransitionsPlayer
             if not self.crossfading:
                 self._on_track_finished(App().player.current_track)
-            if self._next_track.id is None:
-                # We are in gstreamer thread
-                GLib.idle_add(self.stop)
-            elif not self.crossfading:
                 self._load_track(self._next_track)
         except Exception as e:
             Logger.error("BinPlayer::_on_stream_about_to_finish(): %s", e)
