@@ -1,5 +1,5 @@
 project('lollypop',
-  version: '1.2.26',
+  version: '1.2.27',
   meson_version: '>= 0.40.0'
 )
 revision = run_command('bin/revision.sh').stdout().strip()
