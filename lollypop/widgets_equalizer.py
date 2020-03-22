@@ -22,6 +22,7 @@ from lollypop.widgets_combobox import ComboBox
 PRESETS = {
            _("Default"): (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
            _("Custom"): (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+           "Separator": (),
            _("Classical"): (0, 0, 0, 0, 0, 0, -4, -4, -4, -6),
            _("Club"): (0, 0, 2, 3, 3, 3, 2, 0, 0, 0),
            _("Dance"): (6, 4, 1, 0, 0, -3, -4, -4, 0, 0),

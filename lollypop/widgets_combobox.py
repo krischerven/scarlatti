@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, GLib
 
 from lollypop.utils import emit_signal
 from lollypop.define import App
@@ -27,11 +27,18 @@ class ComboRow(Gtk.ListBoxRow):
             @param title as str
         """
         Gtk.ListBoxRow.__init__(self)
-        self.get_style_context().add_class("big-padding")
-        self.__label = Gtk.Label.new(title)
-        self.__label.show()
-        self.__label.set_property("halign", Gtk.Align.START)
-        self.add(self.__label)
+        if title == "Separator":
+            self.__label = None
+            separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+            separator.show()
+            self.add(separator)
+            self.set_sensitive(False)
+        else:
+            self.get_style_context().add_class("big-padding")
+            self.__label = Gtk.Label.new(title)
+            self.__label.show()
+            self.__label.set_property("halign", Gtk.Align.START)
+            self.add(self.__label)
 
     @property
     def title(self):
@@ -39,7 +46,7 @@ class ComboRow(Gtk.ListBoxRow):
             Get row title
             @return str
         """
-        return self.__label.get_text()
+        return self.__label.get_text() if self.__label is not None else None
 
 
 class ComboBox(Gtk.MenuButton):
@@ -71,15 +78,15 @@ class ComboBox(Gtk.MenuButton):
         self.__popover.set_relative_to(self)
         height = max(300, App().window.get_allocated_height() / 2)
         self.__popover.set_size_request(-1, height)
-        scrolled = Gtk.ScrolledWindow.new()
-        scrolled.show()
-        scrolled.set_policy(Gtk.PolicyType.NEVER,
-                            Gtk.PolicyType.AUTOMATIC)
+        self.__scrolled = Gtk.ScrolledWindow.new()
+        self.__scrolled.show()
+        self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                   Gtk.PolicyType.AUTOMATIC)
         self.__listbox = Gtk.ListBox.new()
         self.__listbox.show()
         self.__listbox.connect("row-activated", self.__on_row_activated)
-        scrolled.add(self.__listbox)
-        self.__popover.add(scrolled)
+        self.__scrolled.add(self.__listbox)
+        self.__popover.add(self.__scrolled)
         self.set_popover(self.__popover)
         size_group = Gtk.SizeGroup.new(Gtk.SizeGroupMode.HORIZONTAL)
         size_group.add_widget(self.__label)
@@ -111,7 +118,31 @@ class ComboBox(Gtk.MenuButton):
             if row.title == text:
                 self.__listbox.select_row(row)
                 self.__label.set_text(text)
+                row.hide()
                 break
+        GLib.idle_add(self.__hide_row, row)
+
+#######################
+# PRIVATE             #
+#######################
+    def __hide_row(self, row):
+        """
+            Hide row, show others
+            @param row as ComboRow
+        """
+        for _row in self.__listbox.get_children():
+            if row != _row:
+                _row.show()
+        row.hide()
+        self.__scrolled.get_vadjustment().set_value(0)
+
+    def __sort_listbox(self, rowa, rowb):
+        """
+            Sort listbox
+            @param rowa as ComboRow
+            @param rowb as ComboRow
+        """
+        return rowa.index > rowb.index
 
     def __on_row_activated(self, listbox, row):
         """
@@ -122,3 +153,5 @@ class ComboBox(Gtk.MenuButton):
         self.__label.set_text(row.title)
         self.__popover.popdown()
         emit_signal(self, "changed")
+        # Delay to let popover popdown
+        GLib.timeout_add(500, self.__hide_row, row)
