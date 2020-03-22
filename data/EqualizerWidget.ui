@@ -278,12 +278,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="header_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">center</property>
-        <property name="hexpand">True</property>
-        <property name="spacing">5</property>
+        <property name="spacing">15</property>
         <child>
           <object class="GtkCheckButton" id="equalizer_checkbox">
             <property name="visible">True</property>
@@ -299,17 +298,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText" id="combobox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-            <signal name="changed" handler="_on_combobox_changed" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
       <packing>

@@ -16,6 +16,7 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 
 from lollypop.define import App
+from lollypop.widgets_combobox import ComboBox
 
 
 PRESETS = {
@@ -60,7 +61,11 @@ class EqualizerWidget(Gtk.Bin):
         self.__timeout_id = None
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/EqualizerWidget.ui")
-        self.__combobox = builder.get_object("combobox")
+        self.__combobox = ComboBox()
+        self.__combobox.show()
+        self.__combobox.connect("changed", self.__on_combobox_changed)
+        builder.get_object("header_box").pack_end(self.__combobox,
+                                                  False, False, 0)
         equalizer = App().settings.get_value("equalizer")
         enabled_equalizer = App().settings.get_value("equalizer-enabled")
         if enabled_equalizer:
@@ -78,7 +83,7 @@ class EqualizerWidget(Gtk.Bin):
         for i in App().settings.get_value("equalizer"):
             preset += (i,)
         for key in PRESETS.keys():
-            self.__combobox.append(key, key)
+            self.__combobox.append(key)
         self.__set_combobox_value()
         builder.connect_signals(self)
 
@@ -96,27 +101,6 @@ class EqualizerWidget(Gtk.Bin):
             @return str
         """
         return "%s dB" % value
-
-    def _on_combobox_changed(self, combobox):
-        """
-            Update check combobox
-            @param combobox as Gtk.ComboBoxText
-        """
-        key = combobox.get_active_id()
-        if key == _("Custom"):
-            preset = App().settings.get_value("equalizer-custom")
-            App().settings.set_value("equalizer", preset)
-            for plugin in App().player.plugins:
-                plugin.update_equalizer()
-            PRESETS[key] = preset
-        keys = PRESETS.keys()
-        if key in keys:
-            values = PRESETS[key]
-            i = 0
-            for value in values:
-                attr = getattr(self, "__scale%s" % i)
-                attr.set_value(value)
-                i += 1
 
     def _on_equalizer_checkbox_toggled(self, button):
         """
@@ -178,3 +162,24 @@ class EqualizerWidget(Gtk.Bin):
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
         self.__timeout_id = GLib.timeout_add(250, self.__save_equalizer)
+
+    def __on_combobox_changed(self, combobox):
+        """
+            Update check combobox
+            @param combobox as Gtk.ComboBoxText
+        """
+        key = combobox.get_active_id()
+        if key == _("Custom"):
+            preset = App().settings.get_value("equalizer-custom")
+            App().settings.set_value("equalizer", preset)
+            for plugin in App().player.plugins:
+                plugin.update_equalizer()
+            PRESETS[key] = preset
+        keys = PRESETS.keys()
+        if key in keys:
+            values = PRESETS[key]
+            i = 0
+            for value in values:
+                attr = getattr(self, "__scale%s" % i)
+                attr.set_value(value)
+                i += 1
