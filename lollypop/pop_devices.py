@@ -14,7 +14,7 @@ from gi.repository import Gtk, Gio, GObject, GLib
 
 from lollypop.define import App
 from lollypop.utils import is_device, emit_signal
-from lollypop.widgets_utils import Popover
+from lollypop.widgets_popover import Popover
 
 
 class DevicesPopover(Popover):

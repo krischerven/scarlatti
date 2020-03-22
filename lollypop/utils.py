@@ -469,7 +469,7 @@ def popup_widget(widget, parent, x=None, y=None):
         App().window.container.show_menu(widget)
         return None
     else:
-        from lollypop.widgets_utils import Popover
+        from lollypop.widgets_popover import Popover
         popover = Popover()
         popover.add(widget)
         widget.connect("hidden", on_hidden, popover)

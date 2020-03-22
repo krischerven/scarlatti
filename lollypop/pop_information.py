@@ -12,7 +12,7 @@
 
 from lollypop.define import App, Size, ViewType
 from lollypop.view_information import InformationView
-from lollypop.widgets_utils import Popover
+from lollypop.widgets_popover import Popover
 
 
 class InformationPopover(Popover):
