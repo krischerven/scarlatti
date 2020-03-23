@@ -360,18 +360,14 @@ class BinPlayer:
 
     def _on_bus_eos(self, bus, message):
         """
-            Continue playback if possible and wanted
-            go next otherwise
+            If we are current bus, try to restart playback
+            Else stop playback
         """
-        # Don't do anything if crossfade on, track already changed
-        if self.crossfading:
-            return
         if isinstance(App().player.current_track, Radio):
-            return
-        if self.is_playing and self._playbin.get_bus() == bus:
+            self._load_track(App().player.current_track)
+        elif self._playbin.get_bus() == bus:
             if self._next_track.id is None:
-                # We are in gstreamer thread
-                GLib.idle_add(self.stop)
+                self.stop()
             else:
                 self._load_track(self._next_track)
                 self.next()
@@ -389,7 +385,8 @@ class BinPlayer:
             # See TransitionsPlayer
             if not self.crossfading:
                 self._on_track_finished(App().player.current_track)
-                self._load_track(self._next_track)
+                if self._next_track.id is not None:
+                    self._load_track(self._next_track)
         except Exception as e:
             Logger.error("BinPlayer::_on_stream_about_to_finish(): %s", e)
 
