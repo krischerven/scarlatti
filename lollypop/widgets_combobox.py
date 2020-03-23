@@ -77,7 +77,7 @@ class ComboBox(Gtk.MenuButton):
         self.__popover = Gtk.Popover.new()
         self.__popover.set_relative_to(self)
         height = max(300, App().window.get_allocated_height() / 2)
-        self.__popover.set_size_request(-1, height)
+        self.__popover.set_size_request(300, height)
         self.__scrolled = Gtk.ScrolledWindow.new()
         self.__scrolled.show()
         self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
@@ -100,6 +100,13 @@ class ComboBox(Gtk.MenuButton):
         row = ComboRow(text)
         row.show()
         self.__listbox.add(row)
+        self.__label.set_text(text)
+
+    def set_label(self, text):
+        """
+            Set button label
+            @param text as str
+        """
         self.__label.set_text(text)
 
     def get_active_id(self):

@@ -21,7 +21,6 @@ from lollypop.widgets_combobox import ComboBox
 
 PRESETS = {
            _("Default"): (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-           _("Custom"): (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
            "Separator": (),
            _("Classical"): (0, 0, 0, 0, 0, 0, -4, -4, -4, -6),
            _("Club"): (0, 0, 2, 3, 3, 3, 2, 0, 0, 0),
@@ -138,7 +137,7 @@ class EqualizerWidget(Gtk.Bin):
         if not combo_set:
             App().settings.set_value("equalizer-custom",
                                      GLib.Variant("ad", preset))
-            self.__combobox.set_active_id(_("Custom"))
+            self.__combobox.set_label(_("Custom"))
 
     def __save_equalizer(self):
         """
