@@ -13,6 +13,7 @@
 from gi.repository import GLib
 
 from lollypop.utils_album import tracks_to_albums
+from lollypop.utils import get_default_storage_type
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, Type, Size, StorageType
 from lollypop.objects_album import Album
@@ -257,7 +258,11 @@ class SmartPlaylistsView(PlaylistsView):
 
         def load():
             request = App().playlists.get_smart_sql(self._playlist_id)
-            track_ids = App().db.execute(request)
+            # We need to inject storage_type
+            storage_type = get_default_storage_type()
+            split = request.split("ORDER BY")
+            split[0] += " AND tracks.storage_type&%s " % storage_type
+            track_ids = App().db.execute("ORDER BY".join(split))
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
