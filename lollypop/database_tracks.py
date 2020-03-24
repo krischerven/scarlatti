@@ -150,14 +150,14 @@ class TracksDatabase:
         if artist_ids or orderby == OrderBy.ARTIST:
             order = " ORDER BY artists.sortname\
                      COLLATE NOCASE COLLATE LOCALIZED,\
-                     albums.timestamp,\
+                     tracks.timestamp,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.NAME:
             order = " ORDER BY albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.YEAR_DESC:
-            order = " ORDER BY albums.timestamp DESC,\
+            order = " ORDER BY tracks.timestamp DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         else:
