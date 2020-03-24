@@ -253,7 +253,10 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
             Get listbox
             @return Gtk.ListBox
         """
-        return self.__tracks_view.boxes[0]
+        if self.__tracks_view.boxes:
+            return self.__tracks_view.boxes[0]
+        else:
+            return Gtk.ListBox.new()
 
     @property
     def children(self):
@@ -261,7 +264,10 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
             Get track rows
             @return [TrackRow]
         """
-        return self.__tracks_view.boxes[0].get_children()
+        if self.__tracks_view.boxes:
+            return self.__tracks_view.boxes[0].get_children()
+        else:
+            return []
 
     @property
     def is_populated(self):
