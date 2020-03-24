@@ -283,7 +283,11 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
             Get row name
             @return str
         """
-        return self.__title_label.get_text() + self.__artist_label.get_text()
+        if self.__artwork is None:
+            return ""
+        else:
+            return self.__title_label.get_text() +\
+                self.__artist_label.get_text()
 
     @property
     def album(self):

@@ -940,7 +940,8 @@ class TracksDatabase:
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT rowid FROM tracks\
                                   WHERE loved=1 AND\
-                                  storage_type & ?", (storage_type,))
+                                  storage_type & ? ORDER BY album_id",
+                                 (storage_type,))
             return list(itertools.chain(*result))
 
     def get_ltime(self, track_id):
