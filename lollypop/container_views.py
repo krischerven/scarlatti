@@ -85,9 +85,10 @@ class ViewsContainer:
                                Type.LOVED,
                                Type.RECENTS,
                                Type.LITTLE,
-                               Type.RANDOMS,
-                               Type.WEB]:
+                               Type.RANDOMS]:
                 view = self._get_view_albums(item_ids, [], storage_type)
+            elif item_ids[0] == Type.WEB:
+                view = self._get_view_albums(item_ids, [], StorageType.SAVED)
             elif item_ids[0] == Type.SUGGESTIONS:
                 view = self._get_view_suggestions(storage_type)
             elif item_ids[0] == Type.SEARCH:

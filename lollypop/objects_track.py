@@ -102,18 +102,6 @@ class Track(Base):
             App().tracks.set_loved(self.id, loved)
             self.loved = loved
 
-    def save(self, save):
-        """
-            Save track to collection
-            Cache it to Web Collection (for restore on reset)
-            @param save as bool
-        """
-        if save:
-            App().tracks.set_storage_type(self.id, StorageType.SAVED)
-        else:
-            App().tracks.set_storage_type(self.id, StorageType.EPHEMERAL)
-        self.reset("mtime")
-
     def get_featuring_artist_ids(self, album_artist_ids):
         """
             Get featuring artist ids

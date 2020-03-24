@@ -86,8 +86,12 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         def load():
             album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
                                           self.storage_type)
-            return [Album(album_id, self._genre_ids, self._artist_ids)
-                    for album_id in album_ids]
+            albums = []
+            for album_id in album_ids:
+                album = Album(album_id, self._genre_ids, self._artist_ids)
+                album.set_storage_type(self.storage_type)
+                albums.append(album)
+            return albums
 
         if album_ids:
             FlowBoxView.populate(self, album_ids)
@@ -201,7 +205,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 
         def show_album(status, child):
             child.artwork.get_style_context().remove_class("load-animation")
-            App().window.container.show_view([Type.ALBUM], child.data)
+            App().window.container.show_view([Type.ALBUM], child.data,
+                                             self.storage_type)
 
         if child.data.storage_type & StorageType.COLLECTION:
             App().window.container.show_view([Type.ALBUM], child.data)

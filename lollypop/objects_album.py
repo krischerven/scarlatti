@@ -22,10 +22,11 @@ class Disc:
         Represent an album disc
     """
 
-    def __init__(self, album, disc_number, allow_track_skipping):
+    def __init__(self, album, disc_number, storage_type, allow_track_skipping):
         self.db = App().albums
         self.__tracks = []
         self.__album = album
+        self.__storage_type = storage_type
         self.__number = disc_number
         self.__allow_track_skipping = allow_track_skipping
 
@@ -86,6 +87,7 @@ class Disc:
                 self.album.genre_ids,
                 self.album.artist_ids,
                 self.number,
+                self.__storage_type,
                 self.__allow_track_skipping)]
         return self.__tracks
 
@@ -235,28 +237,30 @@ class Album(Base):
 
     def save(self, save):
         """
-            Save album to collection
+            Save album to collection.
             @param save as bool
         """
+        # Save tracks
+        for track_id in self.track_ids:
+            if save:
+                App().tracks.set_storage_type(track_id, StorageType.SAVED)
+            else:
+                App().tracks.set_storage_type(track_id, StorageType.EPHEMERAL)
+        # Save album
+        self.__save(save)
+
+    def save_track(self, save, track):
+        """
+            Save track to collection
+            @param save as bool
+            @param track as Track
+        """
         if save:
-            self.db.set_storage_type(self.id, StorageType.SAVED)
+            App().tracks.set_storage_type(track.id, StorageType.SAVED)
         else:
-            self.db.set_storage_type(self.id, StorageType.EPHEMERAL)
-        for track in self.tracks:
-            track.save(save)
-        self.reset("mtime")
-        if save:
-            for artist_id in self.artist_ids:
-                emit_signal(App().scanner, "artist-updated",
-                            artist_id, ScanUpdate.ADDED)
-            emit_signal(App().scanner, "album-updated", self.id,
-                        ScanUpdate.ADDED)
-        else:
-            for artist_id in self.artist_ids:
-                emit_signal(App().scanner, "artist-updated", artist_id,
-                            ScanUpdate.REMOVED)
-            emit_signal(App().scanner, "album-updated", self.id,
-                        ScanUpdate.REMOVED)
+            App().tracks.set_storage_type(track.id, StorageType.EPHEMERAL)
+        # Save album
+        self.__save(save)
 
     def load_tracks(self, cancellable):
         """
@@ -266,6 +270,7 @@ class Album(Base):
             @return status as bool
         """
         if self.storage_type & (StorageType.COLLECTION |
+                                StorageType.SAVED |
                                 StorageType.EXTERNAL):
             return False
         elif self.synced != 0 and self.synced != len(self.tracks):
@@ -301,6 +306,13 @@ class Album(Base):
                 tracks.append(track)
         new_album.set_tracks(tracks)
         return new_album
+
+    def set_storage_type(self, storage_type):
+        """
+            Set storage type
+            @param storage_type as StorageType
+        """
+        self._storage_type = storage_type
 
     @property
     def is_web(self):
@@ -360,7 +372,8 @@ class Album(Base):
         """
         if self.__one_disc is None:
             tracks = self.tracks
-            self.__one_disc = Disc(self, 0, self.__allow_track_skipping)
+            self.__one_disc = Disc(self, 0, self.storage_type,
+                                   self.__allow_track_skipping)
             self.__one_disc.set_tracks(tracks)
         return self.__one_disc
 
@@ -373,7 +386,36 @@ class Album(Base):
         if not self._discs:
             disc_numbers = self.db.get_discs(self.id)
             for disc_number in disc_numbers:
-                disc = Disc(self, disc_number, self.__allow_track_skipping)
+                disc = Disc(self, disc_number,
+                            self.storage_type,
+                            self.__allow_track_skipping)
                 if disc.tracks:
                     self._discs.append(disc)
         return self._discs
+
+#######################
+# PRIVATE             #
+#######################
+    def __save(self, save):
+        """
+            Save album to collection.
+            @param save as bool
+        """
+        # Save album by updating storage type
+        if save:
+            self.db.set_storage_type(self.id, StorageType.SAVED)
+        else:
+            self.db.set_storage_type(self.id, StorageType.EPHEMERAL)
+        self.reset("mtime")
+        if save:
+            for artist_id in self.artist_ids:
+                emit_signal(App().scanner, "artist-updated",
+                            artist_id, ScanUpdate.ADDED)
+            emit_signal(App().scanner, "album-updated", self.id,
+                        ScanUpdate.ADDED)
+        else:
+            for artist_id in self.artist_ids:
+                emit_signal(App().scanner, "artist-updated", artist_id,
+                            ScanUpdate.REMOVED)
+            emit_signal(App().scanner, "album-updated", self.id,
+                        ScanUpdate.REMOVED)

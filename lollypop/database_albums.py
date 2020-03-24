@@ -310,7 +310,7 @@ class AlbumsDatabase:
         with SqlCursor(App().db) as sql:
             filters = (storage_type, limit)
             request = "SELECT rowid FROM albums\
-                       WHERE storage_type=? ORDER BY mtime ASC LIMIT ?"
+                       WHERE storage_type&? ORDER BY mtime ASC LIMIT ?"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
@@ -851,7 +851,7 @@ class AlbumsDatabase:
             return list(itertools.chain(*result))
 
     def get_disc_track_ids(self, album_id, genre_ids, artist_ids,
-                           disc, disallow_ignored_tracks):
+                           disc, storage_type, disallow_ignored_tracks):
         """
             Get tracks ids for album id disc
 
@@ -865,7 +865,7 @@ class AlbumsDatabase:
         genre_ids = remove_static(genre_ids)
         artist_ids = remove_static(artist_ids)
         with SqlCursor(App().db) as sql:
-            filters = (album_id, disc)
+            filters = (album_id, disc, storage_type)
             request = "SELECT DISTINCT tracks.rowid\
                        FROM tracks"
             if genre_ids:
@@ -874,8 +874,7 @@ class AlbumsDatabase:
             if artist_ids:
                 request += ", track_artists"
                 filters += tuple(artist_ids)
-            request += " WHERE album_id=?\
-                       AND discnumber=?"
+            request += " WHERE album_id=? AND discnumber=? AND storage_type=?"
             if genre_ids:
                 request += " AND track_genres.track_id = tracks.rowid AND"
                 request += make_subrequest("track_genres.genre_id=?",

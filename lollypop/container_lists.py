@@ -232,9 +232,10 @@ class ListsContainer:
                              Type.LOVED,
                              Type.RECENTS,
                              Type.LITTLE,
-                             Type.RANDOMS,
-                             Type.WEB]:
+                             Type.RANDOMS]:
             view = self._get_view_albums([selected_id], [], storage_type)
+        elif selected_id == Type.WEB:
+            view = self._get_view_albums([selected_id], [], StorageType.SAVED)
         elif selected_id == Type.RADIOS:
             view = self._get_view_radios()
         elif selected_id == Type.YEARS:

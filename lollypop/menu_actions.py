@@ -37,8 +37,7 @@ class ActionsMenu(Gio.Menu):
             self.__object = Album(object.id)
         else:
             self.__object = Track(object.id)
-        if isinstance(self.__object, Album):
-            self.__set_save_action()
+        self.__set_save_action()
         if self.__object.storage_type & StorageType.COLLECTION:
             self.__set_open_action()
 
@@ -79,7 +78,8 @@ class ActionsMenu(Gio.Menu):
                                          "app.clean_album_action")
             menu_item.set_attribute_value("close", GLib.Variant("b", True))
             self.append_item(menu_item)
-        if not self.__object.storage_type & StorageType.COLLECTION:
+        if isinstance(self.__object, Album) and\
+                not self.__object.storage_type & StorageType.COLLECTION:
             buy_action = Gio.SimpleAction(name="buy_album_action")
             App().add_action(buy_action)
             buy_action.connect("activate",
@@ -122,7 +122,11 @@ class ActionsMenu(Gio.Menu):
             @param GLib.Variant
         """
         try:
-            for track in self.__object.tracks:
+            if isinstance(self.__object, Album):
+                tracks = self.__object.tracks
+            else:
+                tracks = [self.__object]
+            for track in tracks:
                 escaped = GLib.uri_escape_string(track.uri, None, True)
                 f = Gio.File.new_for_path("%s/web_%s" % (CACHE_PATH, escaped))
                 if f.query_exists():
@@ -137,7 +141,11 @@ class ActionsMenu(Gio.Menu):
             @param GLib.Variant
             @param save as bool
         """
-        self.__object.save(save)
+        if isinstance(self.__object, Album):
+            self.__object.save(save)
+        else:
+            album = self.__object.album
+            album.save_track(save, self.__object)
         if not save:
             App().tracks.del_non_persistent()
             App().tracks.clean()
