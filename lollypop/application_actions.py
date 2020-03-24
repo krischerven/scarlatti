@@ -24,6 +24,7 @@ class ApplicationActions:
         """
             Init actions
         """
+        self.__special_shortcuts_count = 0
         settings_action = Gio.SimpleAction.new("settings",
                                                GLib.VariantType("i"))
         settings_action.connect("activate", self.__on_settings_activate)
@@ -89,26 +90,30 @@ class ApplicationActions:
             @param enable as bool
         """
         if enable:
-            if Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL:
-                App().set_accels_for_action("app.seek(10000)", ["Left"])
-                App().set_accels_for_action("app.seek(-10000)", ["Right"])
-            else:
-                App().set_accels_for_action("app.seek(10000)", ["Right"])
-                App().set_accels_for_action("app.seek(-10000)", ["Left"])
-            App().set_accels_for_action("app.shortcut::play_pause",
-                                        ["c", "space"])
-            App().set_accels_for_action("app.shortcut::play", ["x"])
-            App().set_accels_for_action("app.shortcut::stop", ["v"])
-            App().set_accels_for_action("app.shortcut::next", ["n"])
-            App().set_accels_for_action("app.shortcut::prev", ["p"])
+            if self.__special_shortcuts_count == 0:
+                if Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL:
+                    App().set_accels_for_action("app.seek(10000)", ["Left"])
+                    App().set_accels_for_action("app.seek(-10000)", ["Right"])
+                else:
+                    App().set_accels_for_action("app.seek(10000)", ["Right"])
+                    App().set_accels_for_action("app.seek(-10000)", ["Left"])
+                App().set_accels_for_action("app.shortcut::play_pause",
+                                            ["c", "space"])
+                App().set_accels_for_action("app.shortcut::play", ["x"])
+                App().set_accels_for_action("app.shortcut::stop", ["v"])
+                App().set_accels_for_action("app.shortcut::next", ["n"])
+                App().set_accels_for_action("app.shortcut::prev", ["p"])
+            self.__special_shortcuts_count += 1
         else:
-            App().set_accels_for_action("app.seek(10000)", [])
-            App().set_accels_for_action("app.seek(-10000)", [])
-            App().set_accels_for_action("app.shortcut::play_pause", [])
-            App().set_accels_for_action("app.shortcut::play", [])
-            App().set_accels_for_action("app.shortcut::stop", [])
-            App().set_accels_for_action("app.shortcut::next", [])
-            App().set_accels_for_action("app.shortcut::prev", [])
+            self.__special_shortcuts_count -= 1
+            if self.__special_shortcuts_count == 0:
+                App().set_accels_for_action("app.seek(10000)", [])
+                App().set_accels_for_action("app.seek(-10000)", [])
+                App().set_accels_for_action("app.shortcut::play_pause", [])
+                App().set_accels_for_action("app.shortcut::play", [])
+                App().set_accels_for_action("app.shortcut::stop", [])
+                App().set_accels_for_action("app.shortcut::next", [])
+                App().set_accels_for_action("app.shortcut::prev", [])
 
 #######################
 # PRIVATE             #

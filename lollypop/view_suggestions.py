@@ -17,14 +17,13 @@ from gettext import gettext as _
 from lollypop.view import View
 from lollypop.utils import get_network_available
 from lollypop.define import ViewType, StorageType, Size, App
-from lollypop.helper_filtering import FilteringHelper
 from lollypop.view_albums_line import AlbumsPopularsLineView
 from lollypop.view_albums_line import AlbumsRandomGenresLineView
 from lollypop.view_artists_line import ArtistsRandomLineView
 from lollypop.widgets_banner_today import TodayBannerWidget
 
 
-class SuggestionsView(FilteringHelper, View):
+class SuggestionsView(View):
     """
         View showing suggestions to user
     """
@@ -36,7 +35,6 @@ class SuggestionsView(FilteringHelper, View):
             @param view_type as ViewType
         """
         View.__init__(self, storage_type, view_type | ViewType.OVERLAY)
-        FilteringHelper.__init__(self)
         self.__grid = Gtk.Grid()
         self.__grid.get_style_context().add_class("padding")
         self.__grid.set_row_spacing(5)
@@ -77,18 +75,6 @@ class SuggestionsView(FilteringHelper, View):
                                                  self.view_type)
             spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
             self.__grid.add(spotify_view)
-
-    def activate_child(self):
-        """
-            Activated typeahead row
-        """
-        for child in reversed(self.__grid.get_children()):
-            child._box.unselect_all()
-        for row in self.filtered:
-            style_context = row.get_style_context()
-            if style_context.has_class("typeahead"):
-                row.activate()
-            style_context.remove_class("typeahead")
 
     @property
     def filtered(self):

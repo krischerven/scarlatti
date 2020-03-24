@@ -15,7 +15,6 @@ from gi.repository import Gtk, Gdk, GLib, GObject, Pango
 from locale import strcoll
 
 from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.fastscroll import FastScroll
 from lollypop.define import Type, App, ArtSize, SelectionListMask
@@ -245,7 +244,7 @@ class SelectionListRow(Gtk.ListBoxRow):
         emit_signal(self, "populated")
 
 
-class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
+class SelectionList(LazyLoadingView, GesturesHelper):
     """
         A list for artists/genres
     """
@@ -259,7 +258,6 @@ class SelectionList(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param base_mask as SelectionListMask
         """
         LazyLoadingView.__init__(self, StorageType.ALL, ViewType.DEFAULT)
-        FilteringHelper.__init__(self)
         self.__selection_pending_ids = []
         self.__base_mask = base_mask
         self.__mask = SelectionListMask.NONE

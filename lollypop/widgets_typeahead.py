@@ -66,8 +66,6 @@ class TypeAheadWidget(Gtk.Revealer):
         view = App().window.container.focused_view
         if view is not None:
             view.activate_child()
-            self.__entry.set_text("")
-            self.__entry.grab_focus()
 
     def _on_close_button_clicked(self, button):
         """

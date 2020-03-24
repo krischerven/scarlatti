@@ -15,13 +15,12 @@ from gi.repository import Gtk
 from locale import strcoll
 
 from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.define import ViewType, App
 from lollypop.utils import get_font_height, popup_widget, set_cursor_type
 
 
-class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
+class FlowBoxView(LazyLoadingView, GesturesHelper):
     """
         Lazy loading FlowBox
     """
@@ -33,7 +32,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, storage_type, view_type)
-        FilteringHelper.__init__(self)
         self._items = []
         self.__hovered_child = None
         self.__font_height = get_font_height()
@@ -83,17 +81,6 @@ class FlowBoxView(FilteringHelper, LazyLoadingView, GesturesHelper):
         """
         for child in self._box.get_children():
             child.destroy()
-
-    def activate_child(self):
-        """
-            Activated typeahead child
-        """
-        self._box.unselect_all()
-        for child in self.filtered:
-            style_context = child.get_style_context()
-            if style_context.has_class("typeahead"):
-                child.activate()
-            style_context.remove_class("typeahead")
 
     @property
     def font_height(self):

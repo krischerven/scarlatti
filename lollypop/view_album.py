@@ -10,20 +10,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from lollypop.define import App, ViewType, MARGIN, ScanUpdate
 from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.logger import Logger
 
 
-class AlbumView(FilteringHelper, LazyLoadingView,
-                ViewController, SignalsHelper):
+class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
     """
         Show artist albums and tracks
     """
@@ -38,7 +35,6 @@ class AlbumView(FilteringHelper, LazyLoadingView,
         """
         LazyLoadingView.__init__(self, storage_type, view_type)
         ViewController.__init__(self, ViewControllerType.ALBUM)
-        FilteringHelper.__init__(self)
         self.__tracks_view = None
         self.__album = album
         self.__others_boxes = []
@@ -66,26 +62,6 @@ class AlbumView(FilteringHelper, LazyLoadingView,
             self.__tracks_view.set_margin_end(MARGIN)
             self.__tracks_view.populate()
             self.__grid.add(self.__tracks_view)
-
-    def activate_child(self):
-        """
-            Activated typeahead row
-        """
-        try:
-            if App().player.is_party:
-                App().lookup_action("party").change_state(
-                    GLib.Variant("b", False))
-            for child in self.filtered:
-                style_context = child.get_style_context()
-                if style_context.has_class("typeahead"):
-                    if hasattr(child, "data"):
-                        child.activate()
-                    else:
-                        track = child.track
-                        App().player.add_album(track.album)
-                        App().player.load(track.album.get_track(track.id))
-        except Exception as e:
-            Logger.error("AlbumView::activate_child: %s" % e)
 
     @property
     def is_populated(self):

@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import get_default_storage_type
 from lollypop.view_lazyloading import LazyLoadingView
@@ -21,13 +19,11 @@ from lollypop.objects_track import Track
 from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.logger import Logger
-from lollypop.helper_filtering import FilteringHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
+class PlaylistsView(LazyLoadingView, ViewController,
                     SignalsHelper, SizeAllocationHelper):
     """
         View showing playlists
@@ -45,7 +41,6 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
                                  ViewType.SCROLLED |
                                  ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.ALBUM)
-        FilteringHelper.__init__(self)
         SizeAllocationHelper.__init__(self)
         self._playlist_id = playlist_id
         # We remove SCROLLED because we want to be the scrolled view
@@ -96,27 +91,6 @@ class PlaylistsView(FilteringHelper, LazyLoadingView, ViewController,
             pause populating
         """
         self._view.pause()
-
-    def activate_child(self):
-        """
-            Activated typeahead row
-        """
-        try:
-            if App().player.is_party:
-                App().lookup_action("party").change_state(
-                    GLib.Variant("b", False))
-            for child in self.filtered:
-                style_context = child.get_style_context()
-                if style_context.has_class("typeahead"):
-                    if hasattr(child, "album"):
-                        App().player.play_album(child.album)
-                    else:
-                        track = child.track
-                        App().player.add_album(track.album)
-                        App().player.load(track.album.get_track(track.id))
-                style_context.remove_class("typeahead")
-        except Exception as e:
-            Logger.error("PlaylistsView::activate_child: %s" % e)
 
     def remove_from_playlist(self, object):
         """

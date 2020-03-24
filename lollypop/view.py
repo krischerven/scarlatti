@@ -17,9 +17,11 @@ from gettext import gettext as _
 from lollypop.define import ViewType, App, MARGIN_SMALL, Type
 from lollypop.adaptive import AdaptiveView
 from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.helper_filtering import FilteringHelper
+from lollypop.logger import Logger
 
 
-class View(AdaptiveView, Gtk.Grid, SignalsHelper):
+class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
     """
         Generic view
     """
@@ -31,8 +33,9 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
             @param storage_type as StorageType
             @param view_type as ViewType
         """
-        AdaptiveView.__init__(self)
         Gtk.Grid.__init__(self)
+        AdaptiveView.__init__(self)
+        FilteringHelper.__init__(self)
         self.__storage_type = storage_type
         self.__view_type = view_type
         self.__scrolled_position = None
@@ -148,18 +151,33 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         self._scrolled_value = value
         return reveal
 
-    def search_for_child(self, text):
-        """
-            Search and hilight child in current view
-            @param text as str
-        """
-        pass
-
     def activate_child(self):
         """
-            Activate hilighted child
+            Activated typeahead row
         """
-        pass
+        try:
+            if App().player.is_party:
+                App().lookup_action("party").change_state(
+                    GLib.Variant("b", False))
+            # Search typeahead chil
+            typeahead_child = None
+            for child in self.filtered:
+                style_context = child.get_style_context()
+                if style_context.has_class("typeahead"):
+                    typeahead_child = child
+                    break
+            App().window.container.type_ahead.entry.set_text("")
+            if typeahead_child is not None:
+                # It's a FlowBox child
+                if hasattr(typeahead_child, "data"):
+                    typeahead_child.activate()
+                # It's a track row
+                else:
+                    track = typeahead_child.track
+                    App().player.add_album(track.album)
+                    App().player.load(track.album.get_track(track.id))
+        except Exception as e:
+            Logger.error("View::activate_child: %s" % e)
 
     def search_prev(self, text):
         """
@@ -182,6 +200,14 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
         """
         if self.view_type & ViewType.SCROLLED:
             self.__scrolled_position = position
+
+    @property
+    def children(self):
+        """
+            Get view children
+            @return [Gtk.Widget]
+        """
+        return []
 
     @property
     def storage_type(self):
@@ -264,9 +290,16 @@ class View(AdaptiveView, Gtk.Grid, SignalsHelper):
 
     def _on_map(self, widget):
         """
-            Set sidebar_id
+            Set initial view state
             @param widget as GtK.Widget
         """
+        # Apply filtering
+        if App().window.container.type_ahead.get_reveal_child():
+            text = App().window.container.type_ahead.entry.get_text()
+            if text:
+                self.search_for_child(text)
+            GLib.idle_add(App().window.container.type_ahead.entry.grab_focus)
+        # Set sidebar id
         if self.sidebar_id is None:
             ids = App().window.container.sidebar.selected_ids
             if ids:
