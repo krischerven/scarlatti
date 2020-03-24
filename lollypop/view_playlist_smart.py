@@ -39,7 +39,7 @@ class SmartPlaylistView(View):
         widget = builder.get_object("widget")
         self.connect("size-allocate", self.__on_size_allocate, widget)
         self.__listbox = builder.get_object("listbox")
-        self._scrolled.set_property("expand", True)
+        self.scrolled.set_property("expand", True)
         self.__match_toggle = builder.get_object("match_toggle")
         self.__operand_combobox = builder.get_object("operand_combobox")
         self.__select_combobox = builder.get_object("select_combobox")

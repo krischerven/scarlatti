@@ -184,7 +184,7 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         """
         LazyLoadingView._on_map(self, widget)
         if self.view_type & ViewType.SCROLLED:
-            self._scrolled.grab_focus()
+            self.scrolled.grab_focus()
 
     def _on_destroy(self, widget):
         """

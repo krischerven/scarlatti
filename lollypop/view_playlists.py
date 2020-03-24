@@ -45,6 +45,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
         self._playlist_id = playlist_id
         # We remove SCROLLED because we want to be the scrolled view
         self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
+        self._view.set_scrolled(self.scrolled)
         self._view.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
             self._view.dnd_helper.connect("dnd-finished",
@@ -132,14 +133,6 @@ class PlaylistsView(LazyLoadingView, ViewController,
             @return int
         """
         return self._banner.height + MARGIN
-
-    @property
-    def scroll_relative_to(self):
-        """
-            Relative to scrolled widget
-            @return Gtk.Widget
-        """
-        return self._view
 
 #######################
 # PROTECTED           #

@@ -42,7 +42,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
         self.__destroyed = False
         self.__banner = None
         self.__placeholder = None
-        self._scrolled_value = 0
+        self.scrolled_value = 0
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.set_border_width(0)
         self.__new_ids = []
@@ -50,18 +50,18 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
         self._empty_icon_name = "emblem-music-symbolic"
 
         if view_type & ViewType.SCROLLED:
-            self._scrolled = Gtk.ScrolledWindow()
+            self.__scrolled = Gtk.ScrolledWindow.new()
             self.__event_controller = Gtk.EventControllerMotion.new(
-                self._scrolled)
+                self.__scrolled)
             self.__event_controller.set_propagation_phase(
                 Gtk.PropagationPhase.TARGET)
             self.__event_controller.connect("leave", self._on_view_leave)
-            self._scrolled.get_vadjustment().connect("value-changed",
-                                                     self._on_value_changed)
-            self._scrolled.show()
-            self._scrolled.set_property("expand", True)
+            self.__scrolled.get_vadjustment().connect("value-changed",
+                                                      self._on_value_changed)
+            self.__scrolled.show()
+            self.__scrolled.set_property("expand", True)
             self.__viewport = Gtk.Viewport()
-            self._scrolled.add(self.__viewport)
+            self.__scrolled.add(self.__viewport)
             self.__viewport.show()
 
         # Stack for placeholder
@@ -88,7 +88,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
             if self.view_type & ViewType.SCROLLED:
-                self.__overlay.add(self._scrolled)
+                self.__overlay.add(self.scrolled)
                 self.__viewport.add(self.__stack)
             else:
                 self.__overlay.add(self.__stack)
@@ -102,7 +102,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             if banner is not None:
                 self.__banner = banner
                 self.add(self.__banner)
-            self.add(self._scrolled)
+            self.add(self.scrolled)
         else:
             if banner is not None:
                 self.__banner = banner
@@ -139,17 +139,13 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
         else:
             self.__stack.set_visible_child_name("main")
 
-    def should_reveal_header(self, adj):
+    def set_scrolled(self, scrolled):
         """
-            Check if we need to reveal header
-            @param adj as Gtk.Adjustment
-            @param delta as int
-            @return int
+            Add an external scrolled window
+            @param scrolled as Gtk.ScrolledWindow
         """
-        value = adj.get_value()
-        reveal = self._scrolled_value > value
-        self._scrolled_value = value
-        return reveal
+        self.__scrolled = scrolled
+        self.__view_type |= ViewType.SCROLLED
 
     def activate_child(self):
         """
@@ -202,6 +198,17 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             self.__scrolled_position = position
 
     @property
+    def scrolled(self):
+        """
+            Get scrolled widget
+            @return Gtk.ScrolledWindow
+        """
+        if self.view_type & ViewType.SCROLLED:
+            return self.__scrolled
+        else:
+            return Gtk.ScrolledWindow.new()
+
+    @property
     def children(self):
         """
             Get view children
@@ -232,7 +239,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             @return float
         """
         if self.view_type & ViewType.SCROLLED:
-            position = self._scrolled.get_vadjustment().get_value()
+            position = self.scrolled.get_vadjustment().get_value()
         else:
             position = 0
         return position
@@ -272,7 +279,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             Update margin if needed
         """
         if self.__banner is not None:
-            reveal = self.should_reveal_header(adj)
+            reveal = self.__should_reveal_header(adj)
             self.__banner.set_reveal_child(reveal)
             if reveal:
                 main_widget = self.__stack.get_child_by_name("main")
@@ -280,10 +287,10 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
                     main_widget.set_margin_top(self.__banner.height +
                                                MARGIN_SMALL)
                 if self.view_type & ViewType.SCROLLED:
-                    self._scrolled.get_vscrollbar().set_margin_top(
+                    self.scrolled.get_vscrollbar().set_margin_top(
                         self.__banner.height)
             elif self.view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(0)
+                self.scrolled.get_vscrollbar().set_margin_top(0)
 
     def _on_album_updated(self, scanner, album_id, added):
         pass
@@ -339,6 +346,18 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __should_reveal_header(self, adj):
+        """
+            Check if we need to reveal header
+            @param adj as Gtk.Adjustment
+            @param delta as int
+            @return int
+        """
+        value = adj.get_value()
+        reveal = self.scrolled_value > value
+        self.scrolled_value = value
+        return reveal
+
     def __on_banner_height_changed(self, banner, height):
         """
             Update scroll margin
@@ -349,7 +368,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             main_widget = self.__stack.get_child_by_name("main")
             main_widget.set_margin_top(height + MARGIN_SMALL)
             if self.view_type & ViewType.SCROLLED:
-                self._scrolled.get_vscrollbar().set_margin_top(height)
+                self.scrolled.get_vscrollbar().set_margin_top(height)
 
     def __on_banner_scroll(self, banner, x, y):
         """
@@ -362,7 +381,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             y = 100
         else:
             y = -100
-        adj = self._scrolled.get_vadjustment()
+        adj = self.scrolled.get_vadjustment()
         new_value = adj.get_value() + y
         lower = adj.get_lower()
         upper = adj.get_upper() - adj.get_page_size()
@@ -378,6 +397,6 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
         if self.__scrolled_position is not None and\
                 allocation.height > self.__scrolled_position:
             stack.disconnect_by_func(self.__on_stack_size_allocated)
-            self._scrolled.get_vadjustment().set_value(
+            self.scrolled.get_vadjustment().set_value(
                 self.__scrolled_position)
             self.__scrolled_position = None

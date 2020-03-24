@@ -26,15 +26,15 @@ class HorizontalScrollingHelper(SizeAllocationHelper):
             Init helper
         """
         SizeAllocationHelper.__init__(self)
-        self.__adjustment = self._scrolled.get_hadjustment()
+        self.__adjustment = self.scrolled.get_hadjustment()
         self.__adjustment.connect("value-changed", self.update_buttons)
         self._backward_button.connect("clicked",
                                       self.__on_backward_button_clicked)
         self._forward_button.connect("clicked",
                                      self.__on_forward_button_clicked)
-        self._scrolled.get_hscrollbar().hide()
-        self._scrolled.set_policy(Gtk.PolicyType.AUTOMATIC,
-                                  Gtk.PolicyType.NEVER)
+        self.scrolled.get_hscrollbar().hide()
+        self.scrolled.set_policy(Gtk.PolicyType.AUTOMATIC,
+                                 Gtk.PolicyType.NEVER)
 
     def __del__(self):
         """
@@ -46,7 +46,7 @@ class HorizontalScrollingHelper(SizeAllocationHelper):
         """
             Update buttons state
         """
-        value = self._scrolled.get_allocated_width()
+        value = self.scrolled.get_allocated_width()
         self._backward_button.set_sensitive(self.__adjustment.get_value() !=
                                             self.__adjustment.get_lower())
         self._forward_button.set_sensitive(self.__adjustment.get_value() !=
@@ -90,7 +90,7 @@ class HorizontalScrollingHelper(SizeAllocationHelper):
         """
         self.__adjustment.disconnect_by_func(self.update_buttons)
         backward_button.set_sensitive(False)
-        value = self._scrolled.get_allocated_width() - ArtSize.BIG
+        value = self.scrolled.get_allocated_width() - ArtSize.BIG
         self.__smooth_scrolling(value, Gtk.DirectionType.LEFT)
 
     def __on_forward_button_clicked(self, forward_button):
@@ -100,5 +100,5 @@ class HorizontalScrollingHelper(SizeAllocationHelper):
         """
         self.__adjustment.disconnect_by_func(self.update_buttons)
         forward_button.set_sensitive(False)
-        value = self._scrolled.get_allocated_width() - ArtSize.BIG
+        value = self.scrolled.get_allocated_width() - ArtSize.BIG
         self.__smooth_scrolling(value, Gtk.DirectionType.RIGHT)

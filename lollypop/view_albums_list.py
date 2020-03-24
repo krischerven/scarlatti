@@ -103,7 +103,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         y = self.__get_current_ordinate()
         if y is not None:
-            self._scrolled.get_vadjustment().set_value(y)
+            self.scrolled.get_vadjustment().set_value(y)
 
     def clear(self, clear_albums=False):
         """

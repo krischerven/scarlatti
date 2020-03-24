@@ -100,15 +100,6 @@ class FilteringHelper():
         """
         return 0
 
-    @property
-    def scroll_relative_to(self):
-        """
-            Relative to scrolled widget
-            @return Gtk.Widget
-        """
-        # Case in most Lollypop views
-        return self._box
-
 #######################
 # PROTECTED           #
 #######################
@@ -117,14 +108,14 @@ class FilteringHelper():
             Scroll to child
             @param child as Gtk.Widget
         """
-        if child == self.__last_scrolled or self.scroll_relative_to is None:
-            return
-        self.__last_scrolled = child
         if self.view_type & ViewType.SCROLLED:
+            if child == self.__last_scrolled:
+                return
+            self.__last_scrolled = child
             coordinates = child.translate_coordinates(
-                self.scroll_relative_to, 0, -self.scroll_shift)
+                self.scrolled, 0, -self.scroll_shift)
             if coordinates:
-                self._scrolled.get_vadjustment().set_value(coordinates[1])
+                self.scrolled.get_vadjustment().set_value(coordinates[1])
 
 #######################
 # PRIVATE             #

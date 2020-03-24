@@ -91,7 +91,7 @@ class LazyLoadingView(View):
             Set an external scrolled window for loading
             @param scrolled as Gtk.ScrolledWindow
         """
-        self._scrolled = scrolled
+        self.scrolled = scrolled
         scrolled.get_vadjustment().connect("value-changed",
                                            self._on_value_changed)
 
@@ -201,9 +201,9 @@ class LazyLoadingView(View):
             @param widget as Gtk.Widget
         """
         widget_alloc = widget.get_allocation()
-        scrolled_alloc = self._scrolled.get_allocation()
+        scrolled_alloc = self.scrolled.get_allocation()
         try:
-            (x, y) = widget.translate_coordinates(self._scrolled, 0, 0)
+            (x, y) = widget.translate_coordinates(self.scrolled, 0, 0)
             return (y > -widget_alloc.height or y >= 0) and\
                 y < scrolled_alloc.height
         except:

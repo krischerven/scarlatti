@@ -88,14 +88,6 @@ class SuggestionsView(View):
         return children
 
     @property
-    def scroll_relative_to(self):
-        """
-            Relative to scrolled widget
-            @return Gtk.Widget
-        """
-        return self
-
-    @property
     def args(self):
         """
             Get default args for __class__

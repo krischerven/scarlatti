@@ -104,14 +104,6 @@ class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
         """
         return self.__banner.height
 
-    @property
-    def scroll_relative_to(self):
-        """
-            Relative to scrolled widget
-            @return Gtk.Widget
-        """
-        return self.__tracks_view
-
 #######################
 # PROTECTED           #
 #######################
