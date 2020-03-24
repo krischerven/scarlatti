@@ -14,7 +14,7 @@ from gi.repository import GLib, GObject
 
 from time import time
 
-from lollypop.define import LoadingState
+from lollypop.define import LoadingState, App
 from lollypop.logger import Logger
 from lollypop.view import View
 from lollypop.utils import emit_signal
@@ -169,6 +169,13 @@ class LazyLoadingView(View):
         else:
             self.__loading_state = LoadingState.FINISHED
             emit_signal(self, "populated")
+            # Apply filtering
+            if App().window.container.type_ahead.get_reveal_child():
+                text = App().window.container.type_ahead.entry.get_text()
+                if text:
+                    self.search_for_child(text)
+                GLib.idle_add(
+                    App().window.container.type_ahead.entry.grab_focus)
             Logger.debug("LazyLoadingView::lazy_loading(): %s",
                          time() - self.__start_time)
 

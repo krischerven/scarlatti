@@ -293,12 +293,6 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             Set initial view state
             @param widget as GtK.Widget
         """
-        # Apply filtering
-        if App().window.container.type_ahead.get_reveal_child():
-            text = App().window.container.type_ahead.entry.get_text()
-            if text:
-                self.search_for_child(text)
-            GLib.idle_add(App().window.container.type_ahead.entry.grab_focus)
         # Set sidebar id
         if self.sidebar_id is None:
             ids = App().window.container.sidebar.selected_ids
