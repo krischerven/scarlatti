@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkNotebook" id="widget">
@@ -206,7 +206,7 @@
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Startpage
-&lt;span size="x-small" alpha="70%"&gt;Artwork search&lt;/span&gt;</property>
+&lt;span size="x-small" alpha="70%"&gt;Search songs , artwork, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -225,7 +225,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">13</property>
+                        <property name="top_attach">14</property>
                       </packing>
                     </child>
                     <child>
@@ -309,7 +309,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">13</property>
+                        <property name="top_attach">14</property>
                       </packing>
                     </child>
                     <child>
@@ -323,7 +323,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">10</property>
+                        <property name="top_attach">11</property>
                       </packing>
                     </child>
                     <child>
@@ -337,7 +337,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">10</property>
+                        <property name="top_attach">11</property>
                       </packing>
                     </child>
                     <child>
@@ -351,7 +351,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">11</property>
+                        <property name="top_attach">12</property>
                       </packing>
                     </child>
                     <child>
@@ -365,7 +365,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">11</property>
+                        <property name="top_attach">12</property>
                       </packing>
                     </child>
                     <child>
@@ -379,7 +379,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">12</property>
+                        <property name="top_attach">13</property>
                       </packing>
                     </child>
                     <child>
@@ -393,7 +393,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">12</property>
+                        <property name="top_attach">13</property>
                       </packing>
                     </child>
                     <child>
@@ -407,7 +407,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">14</property>
+                        <property name="top_attach">15</property>
                       </packing>
                     </child>
                     <child>
@@ -421,7 +421,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">14</property>
+                        <property name="top_attach">15</property>
                       </packing>
                     </child>
                     <child>
@@ -534,6 +534,34 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">DuckDuckGo
+&lt;span size="x-small" alpha="70%"&gt;Search songs , artwork, …&lt;/span&gt;</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="DUCKDUCKGO">
+                        <property name="name">DUCKDUCKGO</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <signal name="state-set" handler="_on_enable_switch_state_set" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">10</property>
                       </packing>
                     </child>
                   </object>
