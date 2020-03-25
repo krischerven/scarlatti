@@ -644,7 +644,7 @@ class TracksDatabase:
         timestamp = time() - offset
         with SqlCursor(App().db, True) as sql:
             sql.execute("DELETE FROM tracks\
-                         WHERE storage_type=? AND\
+                         WHERE storage_type&? AND\
                          mtime < ?",
                         (storage_type, timestamp))
 
