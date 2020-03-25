@@ -89,12 +89,17 @@ class SelectionListMenu(Gio.Menu):
 
         if header:
             from lollypop.menu_header import MenuHeader
-            label = _("Sidebar")
-            icon_name = "org.gnome.Lollypop-sidebar-symbolic"
+            if mask & SelectionListMask.PLAYLISTS:
+                label = _("Playlists")
+                icon_name = "emblem-documents-symbolic"
+            else:
+                label = _("Sidebar")
+                icon_name = "org.gnome.Lollypop-sidebar-symbolic"
             self.append_item(MenuHeader(label, icon_name))
 
         # Options
-        if not App().window.is_adaptive:
+        if not App().window.is_adaptive and\
+                not mask & SelectionListMask.PLAYLISTS:
             options_menu = Gio.Menu()
             action = Gio.SimpleAction.new_stateful(
                     "show_label",

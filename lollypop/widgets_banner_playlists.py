@@ -127,7 +127,6 @@ class PlaylistsBannerWidget(BannerWidget):
         from lollypop.menu_selectionlist import SelectionListMenu
         from lollypop.widgets_menu import MenuBuilder
         menu = SelectionListMenu(self.__view,
-                                 None,
                                  SelectionListMask.PLAYLISTS,
                                  App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
