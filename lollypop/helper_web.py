@@ -10,68 +10,130 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject, Gio
 
-from pickle import load, dump
-
-from lollypop.helper_web_youtube import YouTubeHelper
-from lollypop.helper_web_invidious import InvidiousHelper
 from lollypop.define import CACHE_PATH, App
 from lollypop.logger import Logger
+from lollypop.utils import emit_signal
 
 
-class WebHelper:
+class WebHelper(GObject.Object):
     """
         Web helper
     """
 
-    def __init__(self):
+    __gsignals__ = {
+        "loaded": (GObject.SignalFlags.RUN_FIRST, None, (str,)),
+    }
+
+    def __init__(self, track, cancellable):
         """
             Init helper
-        """
-        if App().settings.get_value("invidious-server").get_string():
-            self.__helpers = [InvidiousHelper()]
-        else:
-            self.__helpers = [YouTubeHelper()]
-
-    def set_uri(self, track, cancellable):
-        """
-            Set uri for track
             @param track as Track
             @param cancellable as Gio.Cancellable
         """
-        escaped = GLib.uri_escape_string(track.uri, None, True)
-        # Read URI from cache
+        GObject.Object.__init__(self)
+        self.__track = track
+        self.__cancellable = cancellable
+        if App().settings.get_value("invidious-server").get_string():
+            from lollypop.helper_web_invidious import InvidiousWebHelper
+            self.__helpers = [InvidiousWebHelper()]
+        else:
+            from lollypop.helper_web_youtube import YouTubeWebHelper
+            self.__helpers = [YouTubeWebHelper()]
+
+    def load(self):
+        """
+            Load track URI
+        """
+        uri = self.__load_from_cache()
+        if uri is None:
+            self.__load_uri_with_helper()
+        else:
+            Logger.info("%s loaded from cache", uri)
+            self.__load_uri_content_with_helper(uri, None)
+
+#######################
+# PRIVATE             #
+#######################
+    def __load_from_cache(self):
+        """
+            Load URI from cache
+            @return str/None
+        """
         try:
-            uri = load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
-            track.set_uri(uri)
-            return
-        except:
-            pass
-
-        # Get URI from helpers
-        for helper in self.__helpers:
-            uri = helper.get_uri(track, cancellable)
-            if uri:
-                Logger.info("Track found by %s" % helper)
-                try:
-                    # CACHE URI
-                    with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
-                        dump(uri, f)
-                except:
-                    pass
-                track.set_uri(uri)
-                break
-
-    def get_track_content(self, track):
-        """
-            Get content uri
-            @param track as Track
-            @return content uri as str
-        """
-        for helper in self.__helpers:
-            uri = helper.get_uri_content(track)
-            if uri:
-                Logger.info("Track URI found by %s" % helper)
-                return uri
+            # Read URI from cache
+            escaped = GLib.uri_escape_string(self.__track.uri, None, True)
+            f = Gio.File.new_for_path(
+                "%s/web_%s" % (CACHE_PATH, escaped))
+            if f.query_exists():
+                (stats, content, tag) = f.load_contents()
+                return content.decode("utf-8")
+        except Exception as e:
+            Logger.error("WebHelper::__load_from_cache(): %s", e)
         return None
+
+    def __save_to_cache(self, uri):
+        """
+            Save URI to cache
+            @param uri as str
+        """
+        try:
+            # Read URI from cache
+            escaped = GLib.uri_escape_string(self.__track.uri, None, True)
+            f = Gio.File.new_for_path(
+                "%s/web_%s" % (CACHE_PATH, escaped))
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                None)
+            if fstream is not None:
+                fstream.write(uri.encode("utf-8"), None)
+                fstream.close()
+        except Exception as e:
+            Logger.error("WebHelper::__save_to_cache(): %s", e)
+
+    def __load_uri_with_helper(self):
+        """
+            Load track with an helper
+        """
+        if self.__helpers:
+            helper = self.__helpers.pop(0)
+            helper.connect("uri-loaded", self.__on_uri_loaded)
+            helper.get_uri(self.__track, self.__cancellable)
+        else:
+            emit_signal(self, "loaded", "")
+
+    def __load_uri_content_with_helper(self, uri, helper):
+        """
+            Load track uri with and helper
+            @param uri as str
+            @param helper as BaseWebHelper
+        """
+        if helper is None and self.__helpers:
+            helper = self.__helpers.pop(0)
+        if helper is not None:
+            helper.connect("uri-content-loaded", self.__on_uri_content_loaded)
+            helper.get_uri_content(uri, self.__cancellable)
+        else:
+            emit_signal(self, "loaded", "")
+
+    def __on_uri_content_loaded(self, helper, uri):
+        """
+            Emit loaded signal with content
+            @param helper as BaseWebHelper
+            @param uri as str
+        """
+        if uri:
+            self.__save_to_cache(uri)
+        emit_signal(self, "loaded", uri)
+
+    def __on_uri_loaded(self, helper, uri):
+        """
+            Load URI content
+            @param helper as BaseWebHelper
+            @param uri as str
+        """
+        if uri:
+            self.__load_uri_content_with_helper(uri, helper)
+        else:
+            emit_signal(self, "loaded", "")

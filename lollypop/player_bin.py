@@ -246,17 +246,15 @@ class BinPlayer:
         """
         Logger.debug("BinPlayer::_load_track(): %s" % track.uri)
         try:
-            self.__cancellable.cancel()
-            self.__cancellable = Gio.Cancellable()
             if self._current_track.is_web:
                 emit_signal(self, "loading-changed", False, track)
             self._current_track = track
-            # We check track is URI track, if yes, do a load from Web
-            # Will not work if we add another music provider one day
+            # If track_uri is different, preload has happened
+            # See Player.set_next()
             track_uri = App().tracks.get_uri(track.id)
             if track.is_web and track.uri == track_uri:
                 emit_signal(self, "loading-changed", True, track)
-                App().task_helper.run(self._load_from_web, track)
+                self.__load_from_web(track)
                 return False
             else:
                 self._playbin.set_property("uri", track.uri)
@@ -264,35 +262,6 @@ class BinPlayer:
             Logger.error("BinPlayer::_load_track(): %s" % e)
             return False
         return True
-
-    def _load_from_web(self, track, play=True):
-        """
-            Load track from web
-            @param track as Track
-            @param play as bool
-        """
-        def play_uri(uri):
-            track.set_uri(uri)
-            if play:
-                self.load(track)
-                App().task_helper.run(self.__update_current_duration,
-                                      track, uri)
-
-        if get_network_available():
-            from lollypop.helper_web import WebHelper
-            helper = WebHelper()
-            helper.set_uri(track, self.__cancellable)
-            uri = helper.get_track_content(track)
-            if uri is not None:
-                GLib.idle_add(play_uri, uri)
-            elif play:
-                GLib.idle_add(
-                    App().notify.send,
-                    "Lollypop",
-                    _("Can't find this track on YouTube"))
-                self.next()
-        elif play:
-            self.skip_album()
 
     def _on_stream_start(self, bus, message):
         """
@@ -392,6 +361,21 @@ class BinPlayer:
 #######################
 # PRIVATE             #
 #######################
+    def __load_from_web(self, track):
+        """
+            Load track from web
+            @param track as Track
+        """
+        if get_network_available():
+            self.__cancellable.cancel()
+            self.__cancellable = Gio.Cancellable()
+            from lollypop.helper_web import WebHelper
+            helper = WebHelper(track, self.__cancellable)
+            helper.connect("loaded", self.__on_web_helper_loaded, track)
+            helper.load()
+        else:
+            self.skip_album()
+
     def __get_bin_position(self, playbin):
         """
             Get position for playbin
@@ -400,15 +384,14 @@ class BinPlayer:
         """
         return playbin.query_position(Gst.Format.TIME)[1] / 1000000
 
-    def __update_current_duration(self, track, uri):
+    def __update_current_duration(self, track):
         """
             Update current track duration
             @param track as Track
-            @param uri as str
         """
         try:
             discoverer = Discoverer()
-            duration = discoverer.get_info(uri).get_duration() / 1000000
+            duration = discoverer.get_info(track.uri).get_duration() / 1000000
             if duration != track.duration and duration > 0:
                 App().tracks.set_duration(track.id, int(duration))
                 track.reset("duration")
@@ -424,3 +407,21 @@ class BinPlayer:
         """
         App().settings.set_value("volume-rate", GLib.Variant("d", self.volume))
         emit_signal(self, "volume-changed")
+
+    def __on_web_helper_loaded(self, helper, uri, track):
+        """
+            Play track URI
+            @param helper as WebHelper
+            @param uri as str
+            @param track as Track
+        """
+        if uri:
+            track.set_uri(uri)
+            self.load(track)
+            App().task_helper.run(self.__update_current_duration, track)
+        else:
+            GLib.idle_add(
+                App().notify.send,
+                "Lollypop",
+                _("Can't find this track on YouTube"))
+            self.next()

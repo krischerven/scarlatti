@@ -120,7 +120,8 @@ NetworkAccessACL = {
     "WIKIA": 1 << 12,
     "GENIUS": 1 << 13,
     "AUDIODB": 1 << 14,
-    "FANARTTV": 1 << 15
+    "FANARTTV": 1 << 15,
+    "DUCKDUCKGO": 1 << 16
 }
 
 

@@ -10,16 +10,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
 import json
 
+from lollypop.helper_web_base import BaseWebHelper
 from lollypop.define import App
-from lollypop.utils import get_page_score
+from lollypop.utils import emit_signal
 from lollypop.logger import Logger
 
 
-class InvidiousHelper:
+class InvidiousWebHelper(BaseWebHelper):
     """
         Invidious helper
     """
@@ -32,84 +31,44 @@ class InvidiousHelper:
         """
             Init heApper
         """
+        BaseWebHelper.__init__(self)
         self.__server = App().settings.get_value(
             "invidious-server").get_string().strip("/")
 
-    def get_uri(self, track, cancellable):
-        """
-            Item youtube uri for web uri
-            @param track as Track
-            @return uri as str
-            @param cancellable as Gio.Cancellable
-        """
-        youtube_id = self.__get_youtube_id(track, cancellable)
-        if youtube_id is None:
-            return ""
-        else:
-            return "https://www.youtube.com/watch?v=%s" % youtube_id
-
-    def get_uri_content(self, track):
+    def get_uri_content(self, uri, cancellable):
         """
             Get content uri
-            @param track as Track
+            @param uri as str
+            @param cancellable as Gio.Cancellable
             @return content uri as str/None
         """
-        try:
-            youtube_id = track.uri.replace("https://www.youtube.com/watch?v=",
-                                           "")
-            video = self.__VIDEO % youtube_id
-            uri = "%s/%s" % (self.__server, video)
-            (status, data) = App().task_helper.load_uri_content_sync(uri)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                for item in decode["adaptiveFormats"]:
-                    if item["container"] == "webm" and\
-                            item["encoding"] == "opus":
-                        return item["url"]
-        except Exception as e:
-            Logger.warning("InvidiousHelper::get_uri_content(): %s", e)
-        return None
+        Logger.info("Loading %s with Invidious %s", uri, self.__server)
+        youtube_id = uri.replace("https://www.youtube.com/watch?v=", "")
+        video = self.__VIDEO % youtube_id
+        uri = "%s/%s" % (self.__server, video)
+        App().task_helper.load_uri_content(uri,
+                                           cancellable,
+                                           self.__on_uri_content)
 
 #######################
 # PRIVATE             #
 #######################
-    def __get_youtube_id(self, track, cancellable):
+    def __on_uri_content(self, uri, status, content):
         """
-            Get YouTube id
-            @param track as Track
-            @param cancellable as Gio.Cancellable
-            @return str
+            Emit signal for content
+            @param uri as str
+            @param status as bool
+            @param content as bytes
         """
-        unescaped = "%s %s" % (track.artists[0],
-                               track.name)
-        search = GLib.uri_escape_string(
-                            unescaped.replace(" ", "+"),
-                            None,
-                            True)
         try:
-            search = self.__SEARCH % search
-            uri = "%s/%s" % (self.__server, search)
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
+            content_uri = ""
             if status:
-                decode = json.loads(data.decode("utf-8"))
-                dic = {}
-                best = 10000000
-                for item in decode:
-                    score = get_page_score(item["title"],
-                                           track.name,
-                                           track.artists[0],
-                                           track.album.name)
-                    if score == -1 or score == best:
-                        continue
-                    elif score < best:
-                        best = score
-                    dic[score] = item["videoId"]
-                # Return url from first dic item
-                if best == 10000000:
-                    return None
-                else:
-                    return dic[best]
+                decode = json.loads(content.decode("utf-8"))
+                for item in decode["adaptiveFormats"]:
+                    if item["container"] == "webm" and\
+                            item["encoding"] == "opus":
+                        content_uri = item["url"]
+                        break
         except Exception as e:
-            Logger.warning("InvidiousHelper::__get_youtube_id(): %s", e)
-        return None
+            Logger.warning("InvidiousWebHelper::__on_uri_content(): %s", e)
+        emit_signal(self, "uri-content-loaded", content_uri)

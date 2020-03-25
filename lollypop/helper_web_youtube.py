@@ -10,18 +10,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, Gio
 
-import json
 from re import sub
 
-from lollypop.define import App, GOOGLE_API_ID
-from lollypop.utils import get_network_available, get_page_score
+from lollypop.helper_web_base import BaseWebHelper
+from lollypop.utils import emit_signal
 from lollypop.utils_file import get_youtube_dl
 from lollypop.logger import Logger
 
 
-class YouTubeHelper:
+class YouTubeWebHelper(BaseWebHelper):
     """
         YoutTube helper
     """
@@ -32,212 +31,55 @@ class YouTubeHelper:
         """
             Init heApper
         """
-        pass
+        BaseWebHelper.__init__(self)
 
-    def get_uri(self, track, cancellable):
-        """
-            Item youtube uri for web uri
-            @param track as Track
-            @return uri as str
-            @param cancellable as Gio.Cancellable
-        """
-        youtube_id = self.__get_youtube_id(track, cancellable)
-        if youtube_id is None:
-            return ""
-        else:
-            return "https://www.youtube.com/watch?v=%s" % youtube_id
-
-    def get_uri_content(self, track):
+    def get_uri_content(self, uri, cancellable):
         """
             Get content uri
-            @param track as Track
+            @param uri as str
+            @param cancellable as Gio.Cancellable
             @return content uri as str/None
         """
+        Logger.info("Loading %s with YouTube", uri)
         try:
             proxy = GLib.environ_getenv(GLib.get_environ(), "all_proxy")
             if proxy is not None and proxy.startswith("socks://"):
                 proxy = proxy.replace("socks://", "socks4://")
             (path, env) = get_youtube_dl()
             # Remove playlist args
-            uri = sub("list=.*", "", track.uri)
-            argv_list = [
-                [path, "-g", "-f", "bestaudio", uri],
-                [path, "-g", uri]]
-            for argv in argv_list:
-                if proxy is not None:
-                    argv += ["--proxy", proxy, None]
-                else:
-                    argv.append(None)
-                (s, o, e, s) = GLib.spawn_sync(None,
-                                               argv,
-                                               env,
-                                               GLib.SpawnFlags.SEARCH_PATH,
-                                               None)
-                if o:
-                    return o.decode("utf-8")
-            error = e.decode("utf-8")
-            Logger.warning("YouTubeHelper::get_uri_content(): %s", error)
+            uri = sub("list=.*", "", uri)
+            argv = [path, "-g", "-f", "bestaudio", uri]
+            if proxy is not None:
+                argv += ["--proxy", proxy, None]
+            else:
+                argv.append(None)
+            process = Gio.Subprocess.new(argv, Gio.SubprocessFlags.STDOUT_PIPE)
+            process.wait_async(cancellable, self.__on_youtube_dl, cancellable)
         except Exception as e:
-            Logger.warning("YouTubeHelper::get_uri_content(): %s", e)
-        return None
+            Logger.error("YouTubeWebHelper::get_uri_content(): %s", e)
 
 #######################
 # PRIVATE             #
 #######################
-    def __get_youtube_id(self, track, cancellable):
+    def __on_youtube_dl(self, process, result, cancellable):
         """
-            Get youtube id
-            @param track as Track
+            Emit signal for content
+            @param process as Gio.Subprocess.
+            @param result as Gio.AsyncResult
             @param cancellable as Gio.Cancellable
-            @return youtube id as str
         """
-        unescaped = "%s %s" % (track.artists[0],
-                               track.name)
-        search = GLib.uri_escape_string(
-                            unescaped.replace(" ", "+"),
-                            None,
-                            True)
-        key = App().settings.get_value("cs-api-key").get_string()
-        data = b""
         try:
-            uri = "https://www.googleapis.com/youtube/v3/" +\
-                  "search?part=snippet&q=%s&" % search +\
-                  "type=video&key=%s&cx=%s" % (key, GOOGLE_API_ID)
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
+            content = ""
+            status = process.wait_check_finish(result)
             if status:
-                decode = json.loads(data.decode("utf-8"))
-                dic = {}
-                best = self.__BAD_SCORE
-                for i in decode["items"]:
-                    score = get_page_score(i["snippet"]["title"],
-                                           track.name,
-                                           track.artists[0],
-                                           track.album.name)
-                    if score == -1 or score == best:
-                        continue
-                    elif score < best:
-                        best = score
-                    dic[score] = i["id"]["videoId"]
-                # Return url from first dic item
-                if best == 10000000:
-                    return None
-                else:
-                    return dic[best]
-        except:
-            Logger.warning("YouTubeHelper::__get_youtube_id(): %s", data)
-            if get_network_available("STARTPAGE"):
-                return self.__get_youtube_id_start(track, cancellable)
-            elif get_network_available("DUCKDUCKGO"):
-                return self.__get_youtube_id_duckduck(track, cancellable)
-        return None
-
-    def __get_youtube_id_start(self, track, cancellable):
-        """
-            Get youtube id via startpage
-            @param track as Track
-            @param cancellable as Gio.Cancellable
-            @return youtube id as str
-        """
-        try:
-            from bs4 import BeautifulSoup
-        except:
-            print("$ sudo pip3 install beautifulsoup4")
-            return None
-        try:
-            unescaped = "%s %s" % (track.artists[0],
-                                   track.name)
-            search = GLib.uri_escape_string(
-                            unescaped.replace(" ", "+"),
-                            None,
-                            True)
-            uri = "https://www.startpage.com/do/search?query=%s" % search
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
-            if not status:
-                return None
-
-            html = data.decode("utf-8")
-            soup = BeautifulSoup(html, "html.parser")
-            ytems = []
-            for link in soup.findAll("a"):
-                href = link.get("href")
-                title = link.get_text()
-                if href is None or title is None or\
-                        href.find("youtube.com/watch?v") == -1:
-                    continue
-                youtube_id = href.split("watch?v=")[1]
-                ytems.append((youtube_id, title))
-            dic = {}
-            best = self.__BAD_SCORE
-            for (yid, title) in ytems:
-                score = get_page_score(title, track.name,
-                                       track.artists[0], track.album.name)
-                if score < best:
-                    best = score
-                elif score == best:
-                    continue  # Keep first result
-                dic[score] = yid
-            # Return url from first dic item
-            if best == self.__BAD_SCORE:
-                return None
-            else:
-                return dic[best]
+                stream = process.get_stdout_pipe()
+                bytes = bytearray(0)
+                buf = stream.read_bytes(1024, cancellable).get_data()
+                while buf:
+                    bytes += buf
+                    buf = stream.read_bytes(1024, cancellable).get_data()
+                stream.close()
+                content = bytes.decode("utf-8")
         except Exception as e:
-            Logger.warning("YouTubeHelper::__get_youtube_id_start(): %s", e)
-        return None
-
-    def __get_youtube_id_duckduck(self, track, cancellable):
-        """
-            Get youtube id via duckduckgo
-            @param track as Track
-            @param cancellable as Gio.Cancellable
-            @return youtube id as str
-        """
-        try:
-            from bs4 import BeautifulSoup
-        except:
-            print("$ sudo pip3 install beautifulsoup4")
-            return None
-        try:
-            unescaped = "%s %s" % (track.artists[0],
-                                   track.name)
-            search = GLib.uri_escape_string(
-                            unescaped.replace(" ", "+"),
-                            None,
-                            True)
-            uri = "https://duckduckgo.com/lite/?q=%s" % search
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
-            if not status:
-                return None
-
-            html = data.decode("utf-8")
-            soup = BeautifulSoup(html, "html.parser")
-            ytems = []
-            for link in soup.findAll("a"):
-                href = GLib.uri_unescape_string(link.get("href"), None)
-                title = link.get_text()
-                if href is None or title is None or\
-                        href.find("youtube.com/watch?v") == -1:
-                    continue
-                youtube_id = href.split("watch?v=")[1]
-                ytems.append((youtube_id, title))
-            dic = {}
-            best = self.__BAD_SCORE
-            for (yid, title) in ytems:
-                score = get_page_score(title, track.name,
-                                       track.artists[0], track.album.name)
-                if score < best:
-                    best = score
-                elif score == best:
-                    continue  # Keep first result
-                dic[score] = yid
-            # Return url from first dic item
-            if best == self.__BAD_SCORE:
-                return None
-            else:
-                return dic[best]
-        except Exception as e:
-            Logger.warning("YouTubeHelper::__get_youtube_id_duckduck(): %s", e)
-        return None
+            Logger.warning("YouTubeWebHelper::__on_youtube_dl(): %s", e)
+        emit_signal(self, "uri-content-loaded", content)
