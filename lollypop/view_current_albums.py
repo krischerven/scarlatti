@@ -35,7 +35,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         view_type |= ViewType.PLAYBACK
         self.__view = AlbumsListView([], [], view_type)
         self.__view.show()
-        self.__view.set_external_scrolled(self.scrolled)
+        self.__view.set_scrolled(self.scrolled)
         self.__view.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
             self.__view.dnd_helper.connect("dnd-finished",

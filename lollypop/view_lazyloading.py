@@ -86,12 +86,12 @@ class LazyLoadingView(View):
         """
         self.__lazy_queue.append(widget)
 
-    def set_external_scrolled(self, scrolled):
+    def set_scrolled(self, scrolled):
         """
-            Set an external scrolled window for loading
+            Add an external scrolled window
             @param scrolled as Gtk.ScrolledWindow
         """
-        self.scrolled = scrolled
+        View.set_scrolled(self, scrolled)
         scrolled.get_vadjustment().connect("value-changed",
                                            self._on_value_changed)
 
