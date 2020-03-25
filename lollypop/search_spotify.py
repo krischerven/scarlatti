@@ -19,7 +19,6 @@ from random import choice, shuffle
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
-from lollypop.utils import get_network_available
 from lollypop.utils import emit_signal, get_default_storage_type
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
@@ -94,14 +93,13 @@ class SpotifySearch(GObject.Object):
                                   callback=(on_token,))
         return wait
 
-    def populate_db(self):
+    def start(self):
         """
             Populate DB in a background task
         """
-        monitor = Gio.NetworkMonitor.get_default()
-        if not monitor.get_network_metered() and\
-                get_network_available("SPOTIFY"):
-            App().task_helper.run(self.__populate_db)
+        if self.__is_running:
+            return
+        App().task_helper.run(self.__populate_db)
         return True
 
     def get_artist_id(self, artist_name, cancellable):
@@ -151,6 +149,8 @@ class SpotifySearch(GObject.Object):
             similar_ids = []
             # Get similars spotify ids
             for (artist_id, name, sortname) in artist_ids:
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
                 spotify_id = self.get_artist_id(name, cancellable)
                 if spotify_id is None:
                     continue
@@ -188,6 +188,8 @@ class SpotifySearch(GObject.Object):
             uri = "https://api.spotify.com/v1/browse/new-releases"
             uris = ["%s?country=%s" % (uri, locale), uri]
             for uri in uris:
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
                 (status, data) = helper.load_uri_content_sync(uri, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
@@ -225,6 +227,8 @@ class SpotifySearch(GObject.Object):
             uri = "https://api.spotify.com/v1/artists/%s/related-artists" %\
                 artist_id
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            if cancellable.is_cancelled():
+                raise Exception("cancelled")
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]:
@@ -329,8 +333,8 @@ class SpotifySearch(GObject.Object):
             # Check if storage type needs to be updated
             # Check if albums newer than a week are enough
             timestamp = time() - 604800
-            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
-                                 StorageType.SPOTIFY_SIMILARS]:
+            for storage_type in [StorageType.SPOTIFY_SIMILARS,
+                                 StorageType.SPOTIFY_NEW_RELEASES]:
                 newer_albums = App().albums.get_newer_for_storage_type(
                                                            storage_type,
                                                            timestamp)
@@ -339,15 +343,17 @@ class SpotifySearch(GObject.Object):
             # Update needed storage types
             if storage_types:
                 for storage_type in storage_types:
+                    if self.__cancellable.is_cancelled():
+                        raise Exception("cancelled")
                     if storage_type == StorageType.SPOTIFY_NEW_RELEASES:
                         self.search_new_releases(self.__cancellable)
                     else:
                         self.search_similar_albums(self.__cancellable)
                 self.clean_old_albums(storage_types)
-            Logger.info("Spotify download finished")
         except Exception as e:
-            Logger.error("SpotifySearch::__populate_db(): %s", e)
+            Logger.warning("SpotifySearch::__populate_db(): %s", e)
         self.__is_running = False
+        Logger.info("Spotify download finished")
 
     def clean_old_albums(self, storage_types):
         """
@@ -466,7 +472,6 @@ class SpotifySearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        # Populate tracks
         for album_item in payload:
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
@@ -478,7 +483,8 @@ class SpotifySearch(GObject.Object):
                                           album_item["images"][0]["url"],
                                           storage_type,
                                           cancellable)
-                emit_signal(self, "match-album", album_id, storage_type)
+                else:
+                    emit_signal(self, "match-album", album_id, storage_type)
                 continue
             (album_saved, album_id,
              album_artist_ids,
@@ -490,6 +496,8 @@ class SpotifySearch(GObject.Object):
                                       album_item["images"][0]["url"],
                                       storage_type,
                                       cancellable)
+            else:
+                emit_signal(self, "match-album", album_id, storage_type)
 
     def __save_album(self, payload, storage_type):
         """

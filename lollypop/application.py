@@ -33,6 +33,7 @@ except Exception as e:
     LastFM = None
 
 from lollypop.utils import init_proxy_from_gnome, emit_signal
+from lollypop.utils import get_network_available
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
@@ -217,10 +218,13 @@ class Application(Gtk.Application, ApplicationActions):
         if Type.SUGGESTIONS not in\
                 self.settings.get_value("shown-album-lists"):
             return
-        if self.__spotify_timeout_id is None:
-            self.spotify.populate_db()
+        monitor = Gio.NetworkMonitor.get_default()
+        if not monitor.get_network_metered() and\
+                get_network_available("SPOTIFY") and\
+                self.__spotify_timeout_id is None:
+            self.spotify.start()
             self.__spotify_timeout_id = GLib.timeout_add_seconds(
-                3600, self.spotify.populate_db)
+                3600, self.spotify.start)
 
     def stop_spotify(self):
         """
