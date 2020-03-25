@@ -657,6 +657,6 @@ flowboxchild:selected  {
 
 .load-animation {
   animation-name: load;
-  animation-duration: 1s;
-  animation-iteration-count: 1;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
 }
