@@ -27,15 +27,6 @@ from lollypop.define import StorageType
 from lollypop.shown import ShownLists
 
 
-def cancellable_sleep(seconds, cancellable):
-    if not App().debug:
-        while seconds > 0:
-            time.sleep(0.1)
-            seconds -= 0.1
-            if cancellable.is_cancelled():
-                raise Exception("cancelled")
-
-
 def make_subrequest(value, operand, count):
     """
         Make a subrequest for value and operand
