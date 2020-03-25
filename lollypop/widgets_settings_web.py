@@ -73,15 +73,13 @@ class WebSettingsWidget(Gtk.Bin):
             if acl & NetworkAccessACL[key]:
                 builder.get_object(key).set_state(True)
 
-        # Check web services access
-        self.__check_acls()
-
         #
         # Google tab
         #
         key = App().settings.get_value("cs-api-key").get_string() or\
             App().settings.get_default_value("cs-api-key").get_string()
-        builder.get_object("cs-entry").set_text(key)
+        self.__cs_entry = builder.get_object("cs-entry")
+        self.__cs_entry.set_text(key)
         uri = App().settings.get_value("invidious-server").get_string()
         recent_youtube_dl = App().settings.get_value("recent-youtube-dl")
         self.__switch_youtube = builder.get_object("switch_youtube")
@@ -118,6 +116,10 @@ class WebSettingsWidget(Gtk.Bin):
         helper.get("librefm", self.__on_get_password)
 
         self.add(builder.get_object("widget"))
+
+        # Check web services access
+        self.__check_acls()
+
         builder.connect_signals(self)
         App().settings.connect("changed::network-access",
                                lambda x, y: self.__check_acls())
@@ -252,6 +254,9 @@ class WebSettingsWidget(Gtk.Bin):
             else:
                 view.set_sensitive(True)
                 label.set_opacity(0)
+        self.__switch_youtube.set_sensitive(acls & NetworkAccessACL["YOUTUBE"])
+        self.__cs_entry.set_sensitive(acls & NetworkAccessACL["YOUTUBE"] or
+                                      acls & NetworkAccessACL["GOOGLE"])
 
     def __update_fm_settings(self, name):
         """
