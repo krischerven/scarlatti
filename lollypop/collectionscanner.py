@@ -543,7 +543,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                         track_id = self.__add2db(
                             discoverer, uri, mtime, storage_type)
                         new_track_ids.append(track_id)
-                    else:
+                    elif scan_type == ScanType.EXTERNAL:
                         track_id = App().tracks.get_id_by_uri(uri)
                         track_ids.append(track_id)
                 except Exception as e:
