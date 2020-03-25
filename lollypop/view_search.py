@@ -115,6 +115,8 @@ class SearchStack(Gtk.Stack):
             Get non visible child
             @return SearchGrid
         """
+        if self.__current_child is None:
+            self.new_current_child()
         return self.__current_child
 
 
