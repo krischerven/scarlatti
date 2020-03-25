@@ -55,7 +55,7 @@ class LastFMBase:
             self.__queue = load(
                 open(LOLLYPOP_DATA_PATH + "/%s_queue.bin" % self.__name, "rb"))
         except Exception as e:
-            Logger.info("LastFM::__init__(): %s", e)
+            Logger.info("LastFMBase::__init__(): %s", e)
             self.__queue = []
         self.connect_service()
         Gio.NetworkMonitor.get_default().connect("notify::network-available",
@@ -179,7 +179,7 @@ class LastFMBase:
             try:
                 track.unlove()
             except Exception as e:
-                Logger.error("Lastfm::unlove(): %s" % e)
+                Logger.error("LastFMBase::unlove(): %s" % e)
 
     def get_similar_artists(self, artist, cancellable):
         """
@@ -198,7 +198,7 @@ class LastFMBase:
                                 similar_item.item.name,
                                 similar_item.item.get_cover_image()))
         except Exception as e:
-            Logger.error("LastFM::get_similar_artists(): %s", e)
+            Logger.error("LastFMBase::get_similar_artists(): %s", e)
         return artists
 
     def get_artist_id(self, artist_name, cancellable):
@@ -294,7 +294,7 @@ class LastFMBase:
             @param mb_track_id as str
             @thread safe
         """
-        Logger.debug("LastFM::__listen(): %s, %s, %s, %s, %s" % (
+        Logger.debug("LastFMBase::__listen(): %s, %s, %s, %s, %s" % (
                                                             artist,
                                                             album,
                                                             title,
@@ -326,7 +326,7 @@ class LastFMBase:
                                     title=title,
                                     duration=duration,
                                     mbid=mb_track_id)
-            Logger.debug("LastFM::__playing_now(): %s, %s, %s, %s, %s" % (
+            Logger.debug("LastFMBase::__playing_now(): %s, %s, %s, %s, %s" % (
                 artist, album, title, duration, mb_track_id))
         except WSError:
             pass
@@ -344,7 +344,7 @@ class LastFMBase:
              @param callback as function
         """
         if attributes is None:
-            Logger.debug("LastFM::__on_get_password(): no attributes")
+            Logger.debug("LastFMBase::__on_get_password(): no attributes")
             return
         self.__login = attributes["login"]
         self.__password = password
