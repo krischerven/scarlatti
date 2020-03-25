@@ -104,8 +104,8 @@ class BaseWebHelper(GObject.Object):
             @param methods as [function]
             @return youtube id as str
         """
-        unescaped = "%s %s" % (track.artists[0],
-                               track.name)
+        unescaped = "%s %s +youtube" % (track.artists[0],
+                                        track.name)
         search = GLib.uri_escape_string(
                         unescaped.replace(" ", "+"),
                         None,
