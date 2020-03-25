@@ -30,6 +30,7 @@
                     <property name="margin_top">15</property>
                     <property name="label" translatable="yes">Control your privacy by selecting allowed services</property>
                     <property name="justify">center</property>
+                    <property name="wrap">True</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
@@ -152,6 +153,7 @@
                         <property name="label" translatable="yes">Last.fm and Libre.fm
 &lt;span size="x-small" alpha="70%"&gt;Scrobbler, artwork, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -166,6 +168,7 @@
                         <property name="label" translatable="yes">Spotify
 &lt;span size="x-small" alpha="70%"&gt;Search songs , artwork, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -180,6 +183,7 @@
                         <property name="label" translatable="yes">YouTube
 &lt;span size="x-small" alpha="70%"&gt;Songs playback&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -194,6 +198,7 @@
                         <property name="label" translatable="yes">Google
 &lt;span size="x-small" alpha="70%"&gt;Artwork search&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -208,6 +213,7 @@
                         <property name="label" translatable="yes">Startpage
 &lt;span size="x-small" alpha="70%"&gt;Search songs , artwork, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -222,6 +228,7 @@
                         <property name="label" translatable="yes">Wikia
 &lt;span size="x-small" alpha="70%"&gt;Search lyrics&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -320,6 +327,7 @@
                         <property name="label" translatable="yes">Wikipedia
 &lt;span size="x-small" alpha="70%"&gt;Artist biography&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -348,6 +356,7 @@
                         <property name="label" translatable="yes">Tunein
 &lt;span size="x-small" alpha="70%"&gt;Radios search&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -376,6 +385,7 @@
                         <property name="label" translatable="yes">MusicBrainz
 &lt;span size="x-small" alpha="70%"&gt;Scrobbler, information, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -404,6 +414,7 @@
                         <property name="label" translatable="yes">Genius
 &lt;span size="x-small" alpha="70%"&gt;Search lyrics&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -432,6 +443,7 @@
                         <property name="label" translatable="yes">ITunes
 &lt;span size="x-small" alpha="70%"&gt;Artwork search&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -446,6 +458,7 @@
                         <property name="label" translatable="yes">Deezer
 &lt;span size="x-small" alpha="70%"&gt;Artwork search&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -488,6 +501,7 @@
                         <property name="label" translatable="yes">AudioDB
 &lt;span size="x-small" alpha="70%"&gt;Artist biography, artwork search, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -516,6 +530,7 @@
                         <property name="label" translatable="yes">FANART.TV
 &lt;span size="x-small" alpha="70%"&gt;Artwork search&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -544,6 +559,7 @@
                         <property name="label" translatable="yes">DuckDuckGo
 &lt;span size="x-small" alpha="70%"&gt;Search songs , artwork, …&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
