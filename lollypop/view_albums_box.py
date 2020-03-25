@@ -59,10 +59,9 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     self._empty_message = _("Missing youtube-dl command")
                     self.show_placeholder(True)
                     self.__populate_wanted = False
-                elif not get_network_available("SPOTIFY") or\
-                        not get_network_available("YOUTUBE"):
-                    self._empty_message = _("You need to enable Spotify ") + \
-                                          _("and YouTube in network settings")
+                elif not get_network_available("YOUTUBE"):
+                    self._empty_message =\
+                        _("You need to enable YouTube in network settings")
                     self.show_placeholder(True)
                     self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])
