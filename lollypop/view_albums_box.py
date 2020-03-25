@@ -70,15 +70,15 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             (App().scanner, "album-updated", "_on_album_updated")
         ]
 
-    def populate(self, album_ids=[]):
+    def populate(self, albums=[]):
         """
             Populate view for album ids
             Show artist_ids/genre_ids if empty
-            @param album_ids as [int]
+            @param albums as [Album]
         """
-        def on_load(album_ids):
-            if album_ids:
-                FlowBoxView.populate(self, album_ids)
+        def on_load(albums):
+            if albums:
+                FlowBoxView.populate(self, albums)
                 self.show_placeholder(False)
             else:
                 self.show_placeholder(True)
@@ -93,8 +93,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 albums.append(album)
             return albums
 
-        if album_ids:
-            FlowBoxView.populate(self, album_ids)
+        if albums:
+            FlowBoxView.populate(self, albums)
         elif self.__populate_wanted:
             App().task_helper.run(load, callback=(on_load,))
 

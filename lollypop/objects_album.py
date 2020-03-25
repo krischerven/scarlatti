@@ -270,7 +270,6 @@ class Album(Base):
             @return status as bool
         """
         if self.storage_type & (StorageType.COLLECTION |
-                                StorageType.SAVED |
                                 StorageType.EXTERNAL):
             return False
         elif self.synced != 0 and self.synced != len(self.tracks):

@@ -25,6 +25,7 @@ from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
 from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
+from lollypop.define import Type
 
 
 class SpotifySearch(GObject.Object):
@@ -168,7 +169,6 @@ class SpotifySearch(GObject.Object):
                     self.__create_albums_from_albums_payload(
                                            [choice(albums_payload)],
                                            StorageType.SPOTIFY_SIMILARS,
-                                           True,
                                            cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search_similar_albums(): %s", e)
@@ -196,7 +196,6 @@ class SpotifySearch(GObject.Object):
                     self.__create_albums_from_albums_payload(
                                              decode["albums"]["items"],
                                              StorageType.SPOTIFY_NEW_RELEASES,
-                                             True,
                                              cancellable)
                     # Check if storage type needs to be updated
                     # Check if albums newer than a week are enough
@@ -269,7 +268,6 @@ class SpotifySearch(GObject.Object):
                 self.__create_albums_from_albums_payload(
                                                  decode["albums"]["items"],
                                                  storage_type,
-                                                 False,
                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
@@ -452,8 +450,6 @@ class SpotifySearch(GObject.Object):
         """
         # Populate tracks
         for item in payload:
-            if not storage_type & StorageType.SEARCH:
-                cancellable_sleep(2, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             track_id = App().tracks.get_id_for_mb_track_id(item["id"])
@@ -462,12 +458,11 @@ class SpotifySearch(GObject.Object):
             emit_signal(self, "match-track", track_id, storage_type)
 
     def __create_albums_from_albums_payload(self, payload, storage_type,
-                                            load_tracks, cancellable):
+                                            cancellable):
         """
             Create albums from albums payload
             @param payload as {}
             @param storage_type as StorageType
-            @param load_tracks as bool
             @param cancellable as Gio.Cancellable
         """
         # Populate tracks
@@ -491,9 +486,6 @@ class SpotifySearch(GObject.Object):
              added_album_artist_ids) = self.__save_album(album_item,
                                                          storage_type)
             album = Album(album_id)
-            if load_tracks:
-                album = Album(album_id)
-                album.load_tracks(cancellable)
             if App().art.get_album_artwork_uri(album) is None:
                 self.__download_cover(album,
                                       album_item["images"][0]["url"],
@@ -505,7 +497,7 @@ class SpotifySearch(GObject.Object):
             Save album payload to DB
             @param payload as {}
             @param storage_type as StorageType
-            @return track_id as int
+            @return album_id as int
         """
         spotify_id = payload["id"]
         uri = "web://%s" % spotify_id
@@ -518,12 +510,20 @@ class SpotifySearch(GObject.Object):
         mtime = int(time())
         Logger.debug("SpotifySearch::__save_album(): %s - %s",
                      album_artists, album_name)
-        return App().scanner.save_album(
+        (album_added,
+         album_id,
+         album_artist_ids,
+         added_album_artist_ids) = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
                         spotify_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
+        App().albums.add_genre(album_id, Type.WEB)
+        return (album_added,
+                album_id,
+                album_artist_ids,
+                added_album_artist_ids)
 
     def __save_track(self, payload, storage_type):
         """

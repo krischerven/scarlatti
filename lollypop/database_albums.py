@@ -1321,9 +1321,14 @@ class AlbumsDatabase:
             Clean albums
             @param commit as bool
         """
+        storage_type = StorageType.EPHEMERAL |\
+            StorageType.COLLECTION | StorageType.EXTERNAL
         with SqlCursor(App().db, commit) as sql:
-            sql.execute("DELETE FROM albums WHERE albums.rowid NOT IN (\
-                            SELECT tracks.album_id FROM tracks)")
+            sql.execute("DELETE FROM albums WHERE\
+                         albums.storage_type&? AND\
+                         albums.rowid NOT IN (\
+                            SELECT tracks.album_id FROM tracks)",
+                        (storage_type,))
             sql.execute("DELETE FROM album_genres\
                          WHERE album_genres.album_id NOT IN (\
                             SELECT albums.rowid FROM albums)")
