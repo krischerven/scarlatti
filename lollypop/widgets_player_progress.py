@@ -149,13 +149,14 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __on_change_value(self, progress, scroll_type, value):
+    def __on_change_value(self, scale, scroll_type, value):
         """
             Update label
-            @param progress as Gtk.Scale
+            @param scale as Gtk.Scale
             @param scroll_type as Gtk.ScrollType
             @param value as float
         """
+        value = min(value, scale.get_adjustment().get_upper())
         time_string = ms_to_string(value)
         self.__time_label.set_markup(
             "<span font_features='tnum'>%s</span>" % time_string)
