@@ -284,6 +284,10 @@ class SpotifySearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         try:
+            while self.wait_for_token(cancellable):
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
+                sleep(1)
             uri = "https://api.spotify.com/v1/albums/%s" % album_id
             token = "Bearer %s" % self.__token
             helper = TaskHelper()
