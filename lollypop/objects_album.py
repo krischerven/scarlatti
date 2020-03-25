@@ -127,6 +127,12 @@ class Album(Base):
         if artist_ids:
             self.artist_ids = artist_ids
 
+    def __del__(self):
+        """
+            Remove ref cycles
+        """
+        self.reset_tracks()
+
     def set_discs(self, discs):
         """
             Set album discs

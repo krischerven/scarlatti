@@ -302,8 +302,7 @@ class BinPlayer:
             @param message as Gst.Message
         """
         if self._current_track.is_web:
-            emit_signal(self, "loading-changed", False,
-                        self._current_track.album)
+            emit_signal(self, "loading-changed", False, self._current_track)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)
@@ -346,7 +345,7 @@ class BinPlayer:
         """
         if self._current_track.is_web:
             emit_signal(self, "loading-changed", False,
-                        self._current_track.album)
+                        self._current_track)
         Logger.info("Player::_on_bus_error(): %s" % message.parse_error()[1])
         if self.current_track.id is not None and self.current_track.id >= 0:
             if self.__codecs.is_missing_codec(message):

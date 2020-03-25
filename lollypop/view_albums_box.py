@@ -67,7 +67,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])
         return [
-            (App().scanner, "album-updated", "_on_album_updated")
+            (App().scanner, "album-updated", "_on_album_updated"),
+            (App().player, "loading-changed", "_on_loading_changed")
         ]
 
     def populate(self, albums=[]):
@@ -193,6 +194,22 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         for child in self._box.get_children():
             if child.data.id == album_id:
                 child.set_artwork()
+
+    def _on_loading_changed(self, player, status, track):
+        """
+            Update row loading status
+            @param player as Player
+            @param status as bool
+            @param track as Track
+        """
+        for child in self.children:
+            if child.data.id == track.album.id:
+                context = child.artwork.get_style_context()
+                if status:
+                    context.add_class("load-animation")
+                else:
+                    context.remove_class("load-animation")
+                break
 
     def _on_child_activated(self, flowbox, child):
         """
