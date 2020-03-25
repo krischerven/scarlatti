@@ -217,7 +217,12 @@ class WebSettingsWidget(Gtk.Bin):
         if key == "SPOTIFY" and not state:
             for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
                                  StorageType.SPOTIFY_SIMILARS]:
-                App().tracks.del_old_for_storage_type(storage_type, 0)
+                album_ids = App().albums.get_for_storage_type(storage_type)
+                for album_id in album_ids:
+                    # EPHEMERAL with not tracks will be cleaned below
+                    App().albums.set_storage_type(album_id,
+                                                  StorageType.EPHEMERAL)
+                    App().tracks.remove_album(album_id)
             App().tracks.clean()
             App().albums.clean()
             App().artists.clean()

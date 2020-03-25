@@ -365,7 +365,8 @@ class SpotifySearch(GObject.Object):
                     storage_type, diff)
                 for album_id in album_ids:
                     # EPHEMERAL with not tracks will be cleaned below
-                    App().albums.set_storage_type(StorageType.EPHEMERAL)
+                    App().albums.set_storage_type(album_id,
+                                                  StorageType.EPHEMERAL)
                     App().tracks.remove_album(album_id, False)
         # On cancel, clean not needed, done in Application::quit()
         if not self.__cancellable.is_cancelled():
