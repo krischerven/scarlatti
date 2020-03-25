@@ -299,8 +299,7 @@ class SpotifySearch(GObject.Object):
                 for item in tracks_payload:
                     item["album"] = decode
                 self.__create_from_tracks_payload(tracks_payload,
-                                                  storage_type |
-                                                  StorageType.SEARCH,
+                                                  storage_type,
                                                   cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::load_tracks(): %s", e)
