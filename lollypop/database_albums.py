@@ -874,7 +874,7 @@ class AlbumsDatabase:
             if artist_ids:
                 request += ", track_artists"
                 filters += tuple(artist_ids)
-            request += " WHERE album_id=? AND discnumber=? AND storage_type=?"
+            request += " WHERE album_id=? AND discnumber=? AND storage_type&?"
             if genre_ids:
                 request += " AND track_genres.track_id = tracks.rowid AND"
                 request += make_subrequest("track_genres.genre_id=?",
