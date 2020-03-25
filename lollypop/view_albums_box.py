@@ -227,7 +227,20 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        App().player.play_album(child.data.get_with_skipping_allowed())
+
+        def play_album(status, child):
+            child.artwork.get_style_context().remove_class("load-animation")
+            child.data.reset_tracks()
+            App().player.play_album(child.data.get_with_skipping_allowed())
+
+        if child.data.storage_type & StorageType.COLLECTION:
+            App().player.play_album(child.data.get_with_skipping_allowed())
+        else:
+            child.artwork.get_style_context().add_class("load-animation")
+            cancellable = Gio.Cancellable.new()
+            App().task_helper.run(child.data.load_tracks,
+                                  cancellable,
+                                  callback=(play_album, child))
 
 
 class AlbumsForGenresBoxView(AlbumsBoxView):
