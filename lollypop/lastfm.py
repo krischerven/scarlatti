@@ -344,7 +344,7 @@ class LastFMBase:
              @param callback as function
         """
         if attributes is None:
-            Logger.error("LastFM::__on_get_password(): no attributes")
+            Logger.debug("LastFM::__on_get_password(): no attributes")
             return
         self.__login = attributes["login"]
         self.__password = password
