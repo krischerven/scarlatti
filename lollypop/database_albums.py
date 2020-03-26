@@ -445,11 +445,11 @@ class AlbumsDatabase:
                 else:
                     request += "AND albums.mb_album_id IS NULL "
                 request += "AND no_album_artist=0 AND\
-                            album_artists.album_id=albums.rowid AND (1=0 "
+                            album_artists.album_id=albums.rowid AND"
+                request += make_subrequest("artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
                 filters += tuple(artist_ids)
-                for artist_id in artist_ids:
-                    request += "OR artist_id=? "
-                request += ")"
             else:
                 request = "SELECT rowid FROM albums\
                            WHERE name=?\
