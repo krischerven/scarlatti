@@ -350,6 +350,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         child = self._get_child(value)
         child.populate()
         if self.mask & SelectionListMask.ARTISTS:
+            self.__fastscroll.clear()
             self.__fastscroll.populate()
 
     def update_value(self, object_id, name):
