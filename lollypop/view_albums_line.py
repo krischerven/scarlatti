@@ -87,7 +87,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_album_updated(self, scanner, album_id, scan_update):
+    def _on_collection_updated(self, scanner, item, scan_update):
         pass
 
     def _on_adaptive_changed(self, window, status):

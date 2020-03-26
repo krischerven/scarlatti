@@ -143,7 +143,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        for artist_id in item.new_artist_ids:
+        for artist_id in item.new_album_artist_ids:
             if scan_update == ScanUpdate.ADDED:
                 artist_name = App().artists.get_name(artist_id)
                 sortname = App().artists.get_sortname(artist_id)
