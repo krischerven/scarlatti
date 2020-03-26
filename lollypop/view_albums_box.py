@@ -281,6 +281,13 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 return child1.data.name > child2.data.name
             else:
                 return artists1 > artists2
+        elif orderby == OrderBy.NAME:
+            return child1.data.name > child2.data.name
+        elif orderby == OrderBy.YEAR_DESC:
+            return child1.data.year < child2.data.year
+        elif orderby == OrderBy.POPULARITY:
+            return child1.data.popularity < child2.data.popularity
+        return False
 
 
 class AlbumsForGenresBoxView(AlbumsBoxView):
