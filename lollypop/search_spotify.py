@@ -517,20 +517,14 @@ class SpotifySearch(GObject.Object):
         mtime = int(time())
         Logger.debug("SpotifySearch::__save_album(): %s - %s",
                      album_artists, album_name)
-        (album_added,
-         album_id,
-         album_artist_ids,
-         added_album_artist_ids) = App().scanner.save_album(
+        item = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
                         spotify_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
-        App().albums.add_genre(album_id, Type.WEB)
-        return (album_added,
-                album_id,
-                album_artist_ids,
-                added_album_artist_ids)
+        App().albums.add_genre(item.album_id, Type.WEB)
+        return item
 
     def __save_track(self, payload, storage_type):
         """
@@ -570,18 +564,15 @@ class SpotifySearch(GObject.Object):
         duration = payload["duration_ms"]
         uri = "web://%s" % spotify_id
         mtime = int(time())
-        (album_saved, album_id,
-         album_artist_ids, added_album_artist_ids) = App().scanner.save_album(
+        item = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
                         spotify_album_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
-        track_id = App().scanner.save_track(
-                   None, artists, "", "",
+        App().scanner.save_track(
+                   item, None, artists, "", "",
                    uri, title, duration, tracknumber, discnumber,
-                   discname, year, timestamp, mtime, 0,
-                   0, 0, 0, spotify_id,
-                   0, album_saved, album_id, album_artist_ids,
-                   added_album_artist_ids, storage_type)
-        return track_id
+                   discname, year, timestamp, mtime, 0, 0, 0, 0, spotify_id,
+                   0, storage_type)
+        return item.track_id
