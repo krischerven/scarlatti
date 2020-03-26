@@ -51,9 +51,9 @@ class PlaylistsView(LazyLoadingView, ViewController,
             self._view.dnd_helper.connect("dnd-finished",
                                           self.__on_dnd_finished)
         self._view.show()
-        self._banner = PlaylistBannerWidget(playlist_id, self._view)
-        self._banner.show()
-        self.add_widget(self._view, self._banner)
+        self.__banner = PlaylistBannerWidget(playlist_id, self._view)
+        self.__banner.show()
+        self.add_widget(self._view, self.__banner)
         return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
@@ -132,7 +132,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             Get scroll shift for y axes
             @return int
         """
-        return self._banner.height + MARGIN
+        return self.__banner.height + MARGIN
 
 #######################
 # PROTECTED           #
@@ -219,7 +219,7 @@ class SmartPlaylistsView(PlaylistsView):
             Populate view
         """
         def on_load(albums):
-            self._banner.spinner.stop()
+            self.banner.spinner.stop()
             self._view.add_reveal_albums(albums)
             self._view.populate(albums)
 
@@ -233,5 +233,5 @@ class SmartPlaylistsView(PlaylistsView):
             return tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
 
-        self._banner.spinner.start()
+        self.banner.spinner.start()
         App().task_helper.run(load, callback=(on_load,))

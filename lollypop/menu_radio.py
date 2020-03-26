@@ -43,7 +43,7 @@ class RadioMenu(Gtk.Grid):
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.__view_type = view_type
         self.__uri_artwork_id = None
-        self.__radio = radio if radio is not None else Radio()
+        self.__radio = radio if radio is not None else Radio(None)
 
         self.set_row_spacing(MARGIN)
         self.set_margin_start(MARGIN_SMALL)

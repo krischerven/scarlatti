@@ -209,6 +209,14 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             return Gtk.ScrolledWindow.new()
 
     @property
+    def banner(self):
+        """
+            Get view banner
+            @return BannerWidget
+        """
+        return self.__banner
+
+    @property
     def children(self):
         """
             Get view children
@@ -270,8 +278,12 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             self.__placeholder.set_adaptive(status)
         if status:
             self.__view_type |= ViewType.ADAPTIVE
+            if self.__banner is not None:
+                self.__banner.add_view_type(ViewType.ADAPTIVE)
         else:
             self.__view_type &= ~ViewType.ADAPTIVE
+            if self.__banner is not None:
+                self.__banner.remove_view_type(ViewType.ADAPTIVE)
         return view_type != self.view_type
 
     def _on_value_changed(self, adj):
