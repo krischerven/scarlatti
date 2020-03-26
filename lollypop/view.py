@@ -60,9 +60,6 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
                                                       self._on_value_changed)
             self.__scrolled.show()
             self.__scrolled.set_property("expand", True)
-            self.__viewport = Gtk.Viewport()
-            self.__scrolled.add(self.__viewport)
-            self.__viewport.show()
 
         # Stack for placeholder
         self.__stack = Gtk.Stack.new()
@@ -89,7 +86,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             self.__overlay.show()
             if self.view_type & ViewType.SCROLLED:
                 self.__overlay.add(self.scrolled)
-                self.__viewport.add(self.__stack)
+                self.__scrolled.add(self.__stack)
             else:
                 self.__overlay.add(self.__stack)
             if banner is not None:
@@ -98,7 +95,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
                 self.__banner.connect("scroll", self.__on_banner_scroll)
             self.add(self.__overlay)
         elif self.view_type & ViewType.SCROLLED:
-            self.__viewport.add(self.__stack)
+            self.__scrolled.add(self.__stack)
             if banner is not None:
                 self.__banner = banner
                 self.add(self.__banner)
@@ -312,6 +309,8 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             Set initial view state
             @param widget as GtK.Widget
         """
+        if self.view_type & ViewType.SCROLLED:
+            self.scrolled.grab_focus()
         # Set sidebar id
         if self.sidebar_id is None:
             ids = App().window.container.sidebar.selected_ids
