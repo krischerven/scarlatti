@@ -177,15 +177,6 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
             return
         self.__popup_menu(child)
 
-    def _on_map(self, widget):
-        """
-            Grab focus on map
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_map(self, widget)
-        if self.view_type & ViewType.SCROLLED:
-            self.scrolled.grab_focus()
-
     def _on_destroy(self, widget):
         """
             Clean up widget
