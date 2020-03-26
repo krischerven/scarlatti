@@ -63,6 +63,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         GObject.GObject.__init__(self)
         self.__thread = None
         self.__tags = {}
+        self.__pending_new_artist_ids = []
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
@@ -158,6 +159,13 @@ class CollectionScanner(GObject.GObject, TagReader):
         (new_album_artist_ids,
          album_artist_ids) = self.add_artists(album_artists, aa_sortnames,
                                               mb_album_artist_id)
+
+        # We handle artists already created by any previous save_track()
+        for artist_id in album_artist_ids:
+            if artist_id in self.__pending_new_artist_ids:
+                new_album_artist_ids.append(artist_id)
+                self.__pending_new_artist_ids.remove(artist_id)
+
         Logger.debug("CollectionScanner::save_track(): Add album: "
                      "%s, %s" % (album_name, album_artist_ids))
         (new_album, album_id) = self.add_album(album_name, mb_album_id,
@@ -204,6 +212,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         (new_artist_ids,
          artist_ids) = self.add_artists(artists, a_sortnames, mb_artist_id)
 
+        self.__pending_new_artist_ids += new_artist_ids
         item.set_new_artist_ids(new_artist_ids)
         item.set_artist_ids(artist_ids)
 
@@ -458,6 +467,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__progress_count = 0
         split_files = split_list(files, max(1, cpu_count() - 2))
         self.__tags = {}
+        self.__pending_new_artist_ids = []
         threads = []
         for files in split_files:
             thread = App().task_helper.run(self.__scan_files, files, db_mtimes,
@@ -489,6 +499,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             albums = tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
             App().player.play_albums(albums)
+        self.__tags = {}
+        self.__pending_new_artist_ids = []
 
     def __scan_to_handle(self, uri):
         """
