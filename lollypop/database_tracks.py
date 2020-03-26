@@ -163,12 +163,12 @@ class TracksDatabase:
             order = " ORDER BY albums.popularity DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
-
+        order = " GROUP BY tracks.album_id " + order
         with SqlCursor(App().db) as sql:
             result = []
             # Get albums for all artists
             if not artist_ids and not genre_ids:
-                request = "SELECT DISTINCT tracks.album_id\
+                request = "SELECT tracks.album_id\
                            FROM tracks, track_artists, artists, albums\
                            WHERE tracks.rowid = track_artists.track_id AND\
                            artists.rowid = track_artists.artist_id AND\
@@ -182,7 +182,7 @@ class TracksDatabase:
             elif not artist_ids:
                 filters = (storage_type,)
                 filters += tuple(genre_ids)
-                request = "SELECT DISTINCT tracks.album_id FROM tracks,\
+                request = "SELECT tracks.album_id FROM tracks,\
                            album, track_genres, track_artists, artists\
                            WHERE tracks.rowid = track_artists.track_id AND\
                            artists.rowid = track_artists.artist_id  AND\
@@ -200,7 +200,7 @@ class TracksDatabase:
             elif not genre_ids:
                 filters = (storage_type,)
                 filters += tuple(artist_ids)
-                request = "SELECT DISTINCT tracks.album_id\
+                request = "SELECT tracks.album_id\
                            FROM tracks, track_artists, artists, albums\
                            WHERE track_artists.track_id=tracks.rowid AND\
                            album_id=tracks.album_id AND\
@@ -218,7 +218,7 @@ class TracksDatabase:
                 filters = (storage_type,)
                 filters += tuple(artist_ids)
                 filters += tuple(genre_ids)
-                request = "SELECT DISTINCT tracks.album_id\
+                request = "SELECT tracks.album_id\
                            FROM tracks, track_genres, albums,\
                            track_artists, artists\
                            WHERE track_genres.track_id=tracks.rowid AND\
