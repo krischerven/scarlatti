@@ -63,7 +63,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         GObject.GObject.__init__(self)
         self.__thread = None
         self.__tags = {}
-        self.__track_ids = []
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
@@ -476,7 +475,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__progress_count = 0
         split_files = split_list(files, max(1, cpu_count() // 2))
         self.__tags = {}
-        self.__track_ids = []
         threads = []
         for files in split_files:
             thread = App().task_helper.run(self.__scan_files, files, db_mtimes,
@@ -491,18 +489,20 @@ class CollectionScanner(GObject.GObject, TagReader):
             storage_type = StorageType.EXTERNAL
         else:
             storage_type = StorageType.COLLECTION
-        new_track_ids = self.__save_in_db(storage_type)
+        track_ids = self.__save_in_db(storage_type)
         self.__remove_old_tracks(db_uris, scan_type)
 
         SqlCursor.remove(App().db)
 
         if scan_type != ScanType.EXTERNAL:
             self.__add_monitor(dirs)
-            GLib.idle_add(self.__finish, new_track_ids)
+            GLib.idle_add(self.__finish, track_ids)
 
         if scan_type == ScanType.EXTERNAL:
-            # FIXME
-            track_ids = new_track_ids + self.__track_ids
+            track_ids = []
+            for (mtime, uri) in files:
+                track_id = App().tracks.get_id_by_uri(uri)
+                track_ids.append(track_id)
             albums = tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
             App().player.play_albums(albums)
@@ -554,9 +554,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                             mtime = int(time())
                         self.__tags[uri] = self.__get_tags(discoverer,
                                                            uri, mtime)
-                    elif scan_type == ScanType.EXTERNAL:
-                        track_id = App().tracks.get_id_by_uri(uri)
-                        self.__track_ids.append(track_id)
                 except Exception as e:
                     Logger.error("Scanning file: %s, %s" % (uri, e))
                 self.__progress_count += 1
@@ -570,13 +567,14 @@ class CollectionScanner(GObject.GObject, TagReader):
             Save current tags into DB
             @param storage_type as StorageType
         """
+        track_ids = []
         SqlCursor.add(App().db)
         self.__new_non_album_artists = []
         for uri in self.__tags.keys():
             Logger.debug("Adding file: %s" % uri)
             tags = self.__tags[uri]
             track_id = self.__add2db(uri, *tags, storage_type)
-            self.__track_ids.append(track_id)
+            track_ids.append(track_id)
             self.__progress_count += 1
             self.__update_progress(self.__progress_count,
                                    self.__progress_total)
@@ -587,6 +585,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 emit_signal(self, "artist-updated",
                             artist_id, ScanUpdate.ADDED)
         SqlCursor.remove(App().db)
+        return track_ids
 
     def __remove_old_tracks(self, uris, scan_type):
         """
