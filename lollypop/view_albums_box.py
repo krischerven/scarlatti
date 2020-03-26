@@ -188,12 +188,16 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param scan_update as ScanUpdate
         """
         if scan_update == ScanUpdate.ADDED:
-            genre_ids = remove_static(self._genre_ids)
-            artist_ids = remove_static(self._artist_ids)
-            if len(set(item.genre_ids) | set(genre_ids)) <=\
-                    len(item.genre_ids) + len(genre_ids) and\
-                    len(set(item.artist_ids) | set(artist_ids)) <=\
-                    len(item.artist_ids) + len(artist_ids):
+            wanted = True
+            for genre_id in item.genre_ids:
+                genre_ids = remove_static(self._genre_ids)
+                if genre_ids and genre_id not in genre_ids:
+                    wanted = False
+            for artist_id in item.artist_ids:
+                artist_ids = remove_static(self._artist_ids)
+                if artist_ids and artist_id not in artist_ids:
+                    wanted = False
+            if wanted:
                 self.add_value(Album(item.album_id))
         elif scan_update == ScanUpdate.MODIFIED:
             for child in self.children:
