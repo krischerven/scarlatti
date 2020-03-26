@@ -103,33 +103,33 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Launch scan in a separate thread
             self.__thread = App().task_helper.run(self.__scan, scan_type, uris)
 
-    def update_album(self, album_id, album_artist_ids,
-                     genre_ids, year, timestamp):
+    def update_album(self, item, genre_ids, year, timestamp):
         """
             Update album artists based on album-artist and artist tags
             This code auto handle compilations: empty "album artist" with
             different artists
-            @param album_id as int
-            @param album_artist_ids as [int]
+            @param item as CollectionItem
             @param genre_ids as [int]
             @param year as int
             @param timestamp as int
             @commit needed
         """
-        if album_artist_ids:
-            App().albums.set_artist_ids(album_id, album_artist_ids)
+        item.album_id, item.album_artist_ids,
+        if item.album_artist_ids:
+            App().albums.set_artist_ids(item.album_id, item.album_artist_ids)
         # Set artist ids based on content
         else:
-            new_album_artist_ids = App().albums.calculate_artist_ids(album_id)
-            App().albums.set_artist_ids(album_id, new_album_artist_ids)
+            new_album_artist_ids = App().albums.calculate_artist_ids(
+                item.album_id)
+            App().albums.set_artist_ids(item.album_id, new_album_artist_ids)
         # Update album genres
         for genre_id in genre_ids:
-            App().albums.add_genre(album_id, genre_id)
+            App().albums.add_genre(item.album_id, genre_id)
         # Update year based on tracks
-        year = App().tracks.get_year_for_album(album_id)
-        App().albums.set_year(album_id, year)
-        timestamp = App().tracks.get_timestamp_for_album(album_id)
-        App().albums.set_timestamp(album_id, timestamp)
+        year = App().tracks.get_year_for_album(item.album_id)
+        App().albums.set_year(item.album_id, year)
+        timestamp = App().tracks.get_timestamp_for_album(item.album_id)
+        App().albums.set_timestamp(item.album_id, timestamp)
 
     def save_album(self, album_artists, aa_sortnames, mb_album_artist_id,
                    album_name, mb_album_id, uri, album_loved, album_pop,
@@ -238,8 +238,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         Logger.debug("CollectionScanner::save_track(): Update track")
         self.update_track(track_id, artist_ids, genre_ids)
         Logger.debug("CollectionScanner::save_track(): Update album")
-        self.update_album(item.album_id, item.album_artist_ids,
-                          genre_ids, year, timestamp)
+        self.update_album(item, genre_ids, year, timestamp)
 
     def update_track(self, track_id, artist_ids, genre_ids):
         """
