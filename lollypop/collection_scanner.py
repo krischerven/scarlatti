@@ -57,6 +57,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         "album-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
     }
 
+    __COMMIT_COUNT = 1000
+
     def __init__(self):
         """
             Init collection scanner
@@ -574,7 +576,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             Notify UI based on current items
             @param items as [CollectionItem]
         """
-        if len(items) < 100:
+        if len(items) < self.__COMMIT_COUNT:
             return
         SqlCursor.commit(App().db)
         for item in items:
