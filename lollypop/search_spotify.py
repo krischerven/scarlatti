@@ -524,7 +524,7 @@ class SpotifySearch(GObject.Object):
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
         App().albums.add_genre(item.album_id, Type.WEB)
-        return item
+        return item.album_id
 
     def __save_track(self, payload, storage_type):
         """
