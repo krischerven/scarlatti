@@ -123,6 +123,13 @@ class CollectionScanner(GObject.GObject, TagReader):
             new_album_artist_ids = App().albums.calculate_artist_ids(
                 item.album_id)
             App().albums.set_artist_ids(item.album_id, new_album_artist_ids)
+            # We handle artists already created by any previous save_track()
+            artist_ids = []
+            for artist_id in new_album_artist_ids:
+                if artist_id in self.__pending_new_artist_ids:
+                    artist_ids.append(artist_id)
+                    self.__pending_new_artist_ids.remove(artist_id)
+            item.set_new_album_artist_ids(artist_ids)
         # Update album genres
         for genre_id in genre_ids:
             App().albums.add_genre(item.album_id, genre_id)
