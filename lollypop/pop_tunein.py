@@ -81,9 +81,6 @@ class TuneinPopover(Gtk.Popover):
             Populate view for uri
             @param uri as str
         """
-        if not get_network_available("TUNEIN"):
-            self.__show_message(_("Can't connect to TuneIn…"))
-            return
         if self.__view.get_children():
             return
         self.__populate(uri)
@@ -143,6 +140,9 @@ class TuneinPopover(Gtk.Popover):
             Populate view for uri
             @param uri as str
         """
+        if not get_network_available("TUNEIN"):
+            self.__show_message(_("Can't connect to TuneIn…"))
+            return
         self.__clear()
         self.__cancellable = Gio.Cancellable()
         self.__spinner.start()
