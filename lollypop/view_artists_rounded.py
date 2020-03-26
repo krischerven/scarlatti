@@ -143,6 +143,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
+        self._box.set_sort_func(self.__sort_func)
         for artist_id in item.new_artist_ids:
             if scan_update == ScanUpdate.ADDED:
                 artist_name = App().artists.get_name(artist_id)
@@ -164,6 +165,14 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __sort_func(self, child1, child2):
+        """
+            Sort items
+            @param child1 as RoundedArtistWidget
+            @param child2 as RoundedArtistWidget
+        """
+        return child1.sortname > child2.sortname
+
     def __on_destroy(self, widget):
         """
             Stop loading

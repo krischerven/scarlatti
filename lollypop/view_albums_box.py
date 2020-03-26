@@ -18,6 +18,7 @@ from random import shuffle
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
+from lollypop.define import OrderBy
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available, popup_widget
 from lollypop.utils import get_font_height, get_title_for_genres_artists
@@ -106,6 +107,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param position as int
             @param cover_uri as int
         """
+        self._box.set_sort_func(self.__sort_func)
         self.show_placeholder(False)
         widget = AlbumSimpleWidget(album, self._genre_ids,
                                    self._artist_ids, self.view_type,
@@ -261,6 +263,24 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             App().task_helper.run(child.data.load_tracks,
                                   cancellable,
                                   callback=(play_album, child))
+
+#######################
+# PRIVATE             #
+#######################
+    def __sort_func(self, child1, child2):
+        """
+            Sort items
+            @param child1 as AlbumSimpleWidget
+            @param child2 as AlbumSimpleWidget
+        """
+        orderby = App().settings.get_enum("orderby")
+        if orderby == OrderBy.ARTIST:
+            artists1 = "".join(child1.data.artists)
+            artists2 = "".join(child2.data.artists)
+            if artists1 == artists2:
+                return child1.data.name > child2.data.name
+            else:
+                return artists1 > artists2
 
 
 class AlbumsForGenresBoxView(AlbumsBoxView):
