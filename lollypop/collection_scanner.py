@@ -456,7 +456,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         # * 2 => Scan + Save
         self.__progress_total = len(files) * 2
         self.__progress_count = 0
-        split_files = split_list(files, max(1, cpu_count() // 2))
+        split_files = split_list(files, max(1, cpu_count() - 2))
         self.__tags = {}
         threads = []
         for files in split_files:
