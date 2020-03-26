@@ -80,6 +80,9 @@ class History:
             @thread safe
         """
         with SqlCursor(self, True) as sql:
+            # Needed because of seconds to ms DB migration
+            # Value in DB is rounded version of Gstreamer value
+            duration //= 1000
             if self.exists(name, duration):
                 sql.execute("UPDATE history\
                              SET popularity=?,rate=?,ltime=?,mtime=?,loved=?,\
@@ -110,6 +113,7 @@ class History:
              as (int, int, int, int, int, int)
         """
         with SqlCursor(self) as sql:
+            duration //= 1000
             result = sql.execute("SELECT popularity, rate, ltime, mtime,\
                                   loved, album_loved, album_popularity,\
                                   album_rate, album_synced\
