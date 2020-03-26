@@ -577,7 +577,7 @@ class SpotifySearch(GObject.Object):
                         spotify_album_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
-        (track_id, album_id) = App().scanner.save_track(
+        track_id = App().scanner.save_track(
                    None, artists, "", "",
                    uri, title, duration, tracknumber, discnumber,
                    discname, year, timestamp, mtime, 0,

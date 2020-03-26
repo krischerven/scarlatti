@@ -22,6 +22,7 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
 
 from gettext import gettext as _
 from time import time
+from multiprocessing import cpu_count
 
 from lollypop.inotify import Inotify
 from lollypop.define import App, ScanType, Type, StorageType, ScanUpdate
@@ -32,7 +33,7 @@ from lollypop.database_history import History
 from lollypop.objects_track import Track
 from lollypop.utils_file import is_audio, is_pls, get_mtime
 from lollypop.utils_album import tracks_to_albums
-from lollypop.utils import emit_signal, profile
+from lollypop.utils import emit_signal, profile, split_list
 
 
 SCAN_QUERY_INFO = "{},{},{},{},{},{}".format(
@@ -61,6 +62,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         GObject.GObject.__init__(self)
         self.__thread = None
+        self.__tags = {}
+        self.__track_ids = []
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
@@ -199,7 +202,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param album_artist_ids as [int]
             @param added_album_artist_ids as [int]
             @param storage_type as int
-            @return (track_id as int, album_id as int)
+            @return track_id as int
         """
         Logger.debug(
             "CollectionScanner::save_track(): Add artists %s" % artists)
@@ -256,7 +259,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             else:
                 emit_signal(self, "album-updated", album_id,
                             ScanUpdate.MODIFIED)
-        return (track_id, album_id)
+        return track_id
 
     def update_track(self, track_id, artist_ids, genre_ids):
         """
@@ -451,7 +454,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
-        self.__new_non_album_artists = []
         SqlCursor.add(App().db)
         App().art.clean_rounded()
 
@@ -469,10 +471,27 @@ class CollectionScanner(GObject.GObject, TagReader):
 
         # Get mtime of all tracks to detect which has to be updated
         db_mtimes = App().tracks.get_mtimes()
-        self.__progress_total = len(files)
+        # * 2 => Scan + Save
+        self.__progress_total = len(files) * 2
         self.__progress_count = 0
-        (current_track_ids,
-         new_track_ids) = self.__scan_files(files, db_mtimes, scan_type)
+        split_files = split_list(files, max(1, cpu_count() // 2))
+        self.__tags = {}
+        self.__track_ids = []
+        threads = []
+        for files in split_files:
+            thread = App().task_helper.run(self.__scan_files, files, db_mtimes,
+                                           scan_type)
+            threads.append(thread)
+
+        # Wait for scan to finish
+        for thread in threads:
+            thread.join()
+
+        if scan_type == ScanType.EXTERNAL:
+            storage_type = StorageType.EXTERNAL
+        else:
+            storage_type = StorageType.COLLECTION
+        new_track_ids = self.__save_in_db(storage_type)
         self.__remove_old_tracks(db_uris, scan_type)
 
         SqlCursor.remove(App().db)
@@ -482,7 +501,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             GLib.idle_add(self.__finish, new_track_ids)
 
         if scan_type == ScanType.EXTERNAL:
-            track_ids = current_track_ids + new_track_ids
+            # FIXME
+            track_ids = new_track_ids + self.__track_ids
             albums = tracks_to_albums(
                 [Track(track_id) for track_id in track_ids])
             App().player.play_albums(albums)
@@ -514,11 +534,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param files as [str]
             @param db_mtimes as {}
             @param scan_type as ScanType
-            @return (track_ids as [int], new_track_ids as [int])
             @thread safe
         """
-        track_ids = new_track_ids = []
-        SqlCursor.add(App().db)
         discoverer = Discoverer()
         try:
             # Scan new files
@@ -532,27 +549,37 @@ class CollectionScanner(GObject.GObject, TagReader):
                     db_mtime = db_mtimes.get(uri, 0)
                     if mtime > db_mtime:
                         # If not saved, use 0 as mtime, easy delete on quit
-                        if scan_type == ScanType.EXTERNAL:
-                            storage_type = StorageType.EXTERNAL
-                        else:
-                            storage_type = StorageType.COLLECTION
                         # Do not use mtime if not intial scan
                         if db_mtimes:
                             mtime = int(time())
-                        Logger.debug("Adding file: %s" % uri)
-                        track_id = self.__add2db(
-                            discoverer, uri, mtime, storage_type)
-                        new_track_ids.append(track_id)
+                        self.__tags[uri] = self.__get_tags(discoverer,
+                                                           uri, mtime)
                     elif scan_type == ScanType.EXTERNAL:
                         track_id = App().tracks.get_id_by_uri(uri)
-                        track_ids.append(track_id)
+                        self.__track_ids.append(track_id)
                 except Exception as e:
-                    Logger.error("Adding file: %s, %s" % (uri, e))
+                    Logger.error("Scanning file: %s, %s" % (uri, e))
                 self.__progress_count += 1
                 self.__update_progress(self.__progress_count,
                                        self.__progress_total)
         except Exception as e:
             Logger.warning("CollectionScanner::__scan_files(): % s" % e)
+
+    def __save_in_db(self, storage_type):
+        """
+            Save current tags into DB
+            @param storage_type as StorageType
+        """
+        SqlCursor.add(App().db)
+        self.__new_non_album_artists = []
+        for uri in self.__tags.keys():
+            Logger.debug("Adding file: %s" % uri)
+            tags = self.__tags[uri]
+            track_id = self.__add2db(uri, *tags, storage_type)
+            self.__track_ids.append(track_id)
+            self.__progress_count += 1
+            self.__update_progress(self.__progress_count,
+                                   self.__progress_total)
         for artist_id in self.__new_non_album_artists:
             album_ids = App().albums.get_ids([artist_id], [],
                                              StorageType.COLLECTION)
@@ -560,7 +587,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                 emit_signal(self, "artist-updated",
                             artist_id, ScanUpdate.ADDED)
         SqlCursor.remove(App().db)
-        return (track_ids, new_track_ids)
 
     def __remove_old_tracks(self, uris, scan_type):
         """
@@ -594,23 +620,41 @@ class CollectionScanner(GObject.GObject, TagReader):
                     Logger.warning("Removed, file has been deleted: %s", uri)
                     self.del_from_db(uri, True)
 
-    def __add2db(self, discoverer, uri,
-                 track_mtime, storage_type=StorageType.COLLECTION):
+    def __get_tags(self, discoverer, uri, track_mtime):
         """
-            Add new file(or update one) to db with information
+            Read track tags
             @param discoverer as Discoverer
             @param uri as string
             @param track_mtime as int
-            @param storage_type as StorageType
-            @return track_id as int
+            @return ()
         """
         f = Gio.File.new_for_uri(uri)
-        Logger.debug("CollectionScanner::add2db(): Read tags")
         info = discoverer.get_info(uri)
         tags = info.get_tags()
         name = f.get_basename()
+        duration = int(info.get_duration() / 1000000)
+        Logger.debug("CollectionScanner::add2db(): Restore stats")
+        # Restore stats
+        track_id = App().tracks.get_id_by_uri(uri)
+        if track_id is None:
+            track_id = App().tracks.get_id_by_basename_duration(name,
+                                                                duration)
+        if track_id is None:
+            (track_pop, track_rate, track_ltime,
+             album_mtime, track_loved, album_loved,
+             album_pop, album_rate, album_synced) = self.__history.get(
+                name, duration)
+        # Delete track and restore from it
+        else:
+            (track_pop, track_rate, track_ltime,
+             album_mtime, track_loved, album_loved,
+             album_pop, album_rate) = self.del_from_db(uri, False)
+
+        Logger.debug("CollectionScanner::add2db(): Read tags")
         title = self.get_title(tags, name)
         version = self.get_version(tags)
+        if version != "":
+            title += " (%s)" % version
         artists = self.get_artists(tags)
         composers = self.get_composers(tags)
         performers = self.get_performers(tags)
@@ -630,15 +674,14 @@ class CollectionScanner(GObject.GObject, TagReader):
         discnumber = self.get_discnumber(tags)
         discname = self.get_discname(tags)
         tracknumber = self.get_tracknumber(tags, name)
-        track_popm = self.get_popm(tags)
+        if track_rate == 0:
+            track_rate = self.get_popm(tags)
+        if album_mtime == 0:
+            album_mtime = track_mtime
         bpm = self.get_bpm(tags)
         (year, timestamp) = self.get_original_year(tags)
         if year is None:
             (year, timestamp) = self.get_year(tags)
-        duration = int(info.get_duration() / 1000000)
-
-        if version != "":
-            title += " (%s)" % version
 
         # If no artists tag, use album artist
         if artists == "":
@@ -652,37 +695,34 @@ class CollectionScanner(GObject.GObject, TagReader):
                 artists = album_artists
             if artists == "":
                 artists = _("Unknown")
+        return (title, artists, genres, a_sortnames, aa_sortnames,
+                album_artists, album_name, discname, album_loved, album_mtime,
+                album_synced, album_rate, album_pop, discnumber, year,
+                timestamp, mb_album_id, mb_track_id, mb_artist_id,
+                mb_album_artist_id, tracknumber, track_pop, track_rate, bpm,
+                track_mtime, track_ltime, track_loved, duration)
 
-        Logger.debug("CollectionScanner::add2db(): Restore stats")
-        # Restore stats
-        track_id = App().tracks.get_id_by_uri(uri)
-        if track_id is None:
-            basename = f.get_basename()
-            track_id = App().tracks.get_id_by_basename_duration(basename,
-                                                                duration)
-        if track_id is None:
-            (track_pop, track_rate, track_ltime,
-             album_mtime, track_loved, album_loved,
-             album_pop, album_rate, album_synced) = self.__history.get(
-                name, duration)
-        # Delete track and restore from it
-        else:
-            (track_pop, track_rate, track_ltime,
-             album_mtime, track_loved, album_loved,
-             album_pop, album_rate) = self.del_from_db(uri, False)
-        # Prefer popm to internal rate
-        if track_popm != 0:
-            track_rate = track_popm
-        # If nothing in stats, use track mtime
-        if album_mtime == 0:
-            album_mtime = track_mtime
-
+    def __add2db(self, uri, title, artists,
+                 genres, a_sortnames, aa_sortnames, album_artists, album_name,
+                 discname, album_loved, album_mtime, album_synced, album_rate,
+                 album_pop, discnumber, year, timestamp, mb_album_id,
+                 mb_track_id, mb_artist_id, mb_album_artist_id,
+                 tracknumber, track_pop, track_rate, bpm, track_mtime,
+                 track_ltime, track_loved, duration,
+                 storage_type=StorageType.COLLECTION):
+        """
+            Add new file to DB
+            @param uri as str
+            @param tags as *()
+            @param storage_type as StorageType
+            @return track_id as int
+        """
         (album_saved, album_id,
          album_artist_ids, added_album_artist_ids) = self.save_album(
                         album_artists, aa_sortnames, mb_album_artist_id,
                         album_name, mb_album_id, uri, album_loved, album_pop,
                         album_rate, album_synced, album_mtime, storage_type)
-        (track_id, album_id) = self.save_track(
+        track_id = self.save_track(
                         genres, artists, a_sortnames, mb_artist_id,
                         uri, title, duration, tracknumber, discnumber,
                         discname, year, timestamp, track_mtime, track_pop,

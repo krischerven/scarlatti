@@ -513,3 +513,14 @@ def profile(f):
         return ret
 
     return wrapper
+
+
+def split_list(l, n=1):
+    """
+        Split list in n parts
+        @param l as []
+        @param n as int
+    """
+    length = len(l)
+    split = [l[i * length // n: (i + 1) * length // n] for i in range(n)]
+    return [l for l in split if l]
