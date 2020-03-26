@@ -13,7 +13,7 @@
 from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
-from lollypop.define import App, Type, ViewType, OrderBy
+from lollypop.define import App, Type, ViewType, OrderBy, ScanUpdate
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_font_height
@@ -137,14 +137,14 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             if child.name == prefix:
                 child.set_artwork()
 
-    def _on_artist_updated(self, scanner, artist_id, add):
+    def _on_artist_updated(self, scanner, artist_id, scan_update):
         """
             Add/remove artist to/from list
             @param scanner as CollectionScanner
             @param artist_id as int
-            @param add as bool
+            @param scan_update as ScanUpdate
         """
-        if add:
+        if scan_update == ScanUpdate.ADDED:
             storage_type = get_default_storage_type()
             artist_ids = App().artists.get_ids([], storage_type)
             # Can happen during scan
@@ -159,7 +159,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             self._box.insert(widget, position)
             widget.show()
             widget.populate()
-        else:
+        elif scan_update == ScanUpdate.REMOVED:
             for child in self._box.get_children():
                 if child.data == artist_id:
                     child.destroy()
