@@ -15,6 +15,7 @@ from lollypop.define import App, StorageType, ScanUpdate
 from lollypop.objects_track import Track
 from lollypop.objects import Base
 from lollypop.utils import emit_signal
+from lollypop.collection_item import CollectionItem
 
 
 class Disc:
@@ -413,14 +414,16 @@ class Album(Base):
             self.db.set_storage_type(self.id, StorageType.EPHEMERAL)
         self.reset("mtime")
         if save:
-            for artist_id in self.artist_ids:
-                emit_signal(App().scanner, "artist-updated",
-                            artist_id, ScanUpdate.ADDED)
-            emit_signal(App().scanner, "album-updated", self.id,
+            item = CollectionItem(artist_ids=self.artist_ids,
+                                  album_id=self.id)
+            emit_signal(App().scanner, "updated", item,
                         ScanUpdate.ADDED)
         else:
+            removed_artist_ids = []
             for artist_id in self.artist_ids:
-                emit_signal(App().scanner, "artist-updated", artist_id,
-                            ScanUpdate.REMOVED)
-            emit_signal(App().scanner, "album-updated", self.id,
+                if not App().artists.get_name(artist_id):
+                    removed_artist_ids.append(artist_id)
+            item = CollectionItem(artist_ids=self.removed_artist_ids,
+                                  album_id=self.id)
+            emit_signal(App().scanner, "updated", self.id,
                         ScanUpdate.REMOVED)

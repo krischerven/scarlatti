@@ -47,7 +47,7 @@ class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
         self.add_widget(self.__grid, self.__banner)
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),
-            (App().scanner, "album-updated", "_on_album_updated")
+            (App().scanner, "updated", "_on_collection_updated")
         ]
 
     def populate(self):
@@ -116,14 +116,14 @@ class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
         if not self.get_sensitive():
             App().window.container.reload_view()
 
-    def _on_album_updated(self, scanner, album_id, scan_update):
+    def _on_collection_updated(self, scanner, item, scan_update):
         """
             Handles changes in collection
             @param scanner as CollectionScanner
-            @param album_id as int
+            @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        if album_id != self.__album.id:
+        if item.album_id != self.__album.id:
             return
         if scan_update == ScanUpdate.REMOVED:
             App().window.container.go_back()

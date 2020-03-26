@@ -21,6 +21,7 @@ from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available, popup_widget
 from lollypop.utils import get_font_height, get_title_for_genres_artists
+from lollypop.utils import remove_static
 from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -66,7 +67,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])
         return [
-            (App().scanner, "album-updated", "_on_album_updated"),
+            (App().scanner, "updated", "_on_collection_updated"),
             (App().player, "loading-changed", "_on_loading_changed")
         ]
 
@@ -161,27 +162,29 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                          self.view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
-    def _on_album_updated(self, scanner, album_id, scan_update):
+    def _on_collection_updated(self, scanner, item, scan_update):
         """
             Handles changes in collection
             @param scanner as CollectionScanner
-            @param album_id as int
+            @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
         if scan_update == ScanUpdate.ADDED:
-            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
-                                          self.storage_type)
-            if album_id in album_ids:
-                index = album_ids.index(album_id)
-                self.insert_album(Album(album_id), index)
+            genre_ids = remove_static(self._genre_ids)
+            artist_ids = remove_static(self._artist_ids)
+            if len(set(item.genre_ids) | set(genre_ids)) <=\
+                    len(item.genre_ids) + len(genre_ids) and\
+                    len(set(item.artist_ids) | set(artist_ids)) <=\
+                    len(item.artist_ids) + len(artist_ids):
+                self.insert_album(Album(item.album_id), -1)
         elif scan_update == ScanUpdate.MODIFIED:
             for child in self.children:
-                if child.data.id == album_id:
+                if child.data.id == item.album_id:
                     child.data.reset_tracks()
                     break
         elif scan_update == ScanUpdate.REMOVED:
             for child in self.children:
-                if child.data.id == album_id:
+                if child.data.id == item.album_id:
                     child.destroy()
                     break
 

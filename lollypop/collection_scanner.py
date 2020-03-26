@@ -52,12 +52,9 @@ class CollectionScanner(GObject.GObject, TagReader):
     """
     __gsignals__ = {
         "scan-finished": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
-        "artist-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "genre-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "album-updated": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
+        "updated": (GObject.SignalFlags.RUN_FIRST, None,
+                    (GObject.TYPE_PYOBJECT, int))
     }
-
-    __COMMIT_COUNT = 1000
 
     def __init__(self):
         """
@@ -69,7 +66,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
-        self.__new_non_album_artists = []
         self.__disable_compilations = True
         if App().settings.get_value("auto-update"):
             self.__inotify = Inotify()
@@ -297,18 +293,21 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().genres.clean()
             App().artists.clean()
             SqlCursor.commit(App().db)
+            item = CollectionItem(album_id=album_id)
             if not App().albums.get_name(album_id):
-                emit_signal(self, "album-updated", album_id,
-                            ScanUpdate.REMOVED)
+                removed_artist_ids = []
                 for artist_id in album_artist_ids + artist_ids:
-                    emit_signal(self, "artist-updated", artist_id,
-                                ScanUpdate.REMOVED)
+                    if not App().artists.get_name(artist_id):
+                        removed_artist_ids.append(artist_id)
+                item.set_artist_ids(removed_artist_ids)
+                removed_genre_ids = []
                 for genre_id in genre_ids:
-                    emit_signal(self, "genre-updated", genre_id,
-                                ScanUpdate.REMOVED)
+                    if not App().genres.get_name(genre_id):
+                        removed_genre_ids.append(genre_id)
+                item.set_genre_ids(removed_genre_ids)
+                emit_signal(self, "updated", item, ScanUpdate.REMOVED)
             else:
-                emit_signal(self, "album-updated", album_id,
-                            ScanUpdate.MODIFIED)
+                emit_signal(self, "updated", item, ScanUpdate.MODIFIED)
             return (track_pop, track_rate, track_ltime, album_mtime,
                     track_loved, album_loved, album_pop, album_rate)
         except Exception as e:
@@ -554,8 +553,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         items = []
         track_ids = []
+        previous_album_id = None
         SqlCursor.add(App().db)
-        self.__new_non_album_artists = []
         for uri in self.__tags.keys():
             Logger.debug("Adding file: %s" % uri)
             tags = self.__tags[uri]
@@ -565,8 +564,10 @@ class CollectionScanner(GObject.GObject, TagReader):
             self.__progress_count += 1
             self.__update_progress(self.__progress_count,
                                    self.__progress_total)
-            if self.__notify_ui(items):
+            if previous_album_id != item.album_id:
+                self.__notify_ui(items)
                 items = []
+                previous_album_id = item.album_id
         self.__notify_ui(items)
         SqlCursor.remove(App().db)
         return [item.track_id for item in items]
@@ -576,26 +577,12 @@ class CollectionScanner(GObject.GObject, TagReader):
             Notify UI based on current items
             @param items as [CollectionItem]
         """
-        if len(items) < self.__COMMIT_COUNT:
-            return
         SqlCursor.commit(App().db)
         for item in items:
-            for artist_id in item.new_artist_ids:
-                album_ids = App().albums.get_ids([artist_id], [],
-                                                 StorageType.COLLECTION |
-                                                 StorageType.SAVED)
-                if album_ids:
-                    emit_signal(self, "artist-updated",
-                                artist_id, ScanUpdate.ADDED)
-            for genre_id in item.new_genre_ids:
-                emit_signal(self, "genre-updated", genre_id, ScanUpdate.ADDED)
             if item.new_album:
-                emit_signal(self, "album-updated", item.album_id,
-                            ScanUpdate.ADDED)
+                emit_signal(self, "updated", item, ScanUpdate.ADDED)
             else:
-                emit_signal(self, "album-updated", item.album_id,
-                            ScanUpdate.MODIFIED)
-        return True
+                emit_signal(self, "updated", item, ScanUpdate.MODIFIED)
 
     def __remove_old_tracks(self, uris, scan_type):
         """

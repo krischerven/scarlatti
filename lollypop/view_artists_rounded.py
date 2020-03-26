@@ -17,7 +17,6 @@ from lollypop.define import App, Type, ViewType, OrderBy, ScanUpdate
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_font_height
-from lollypop.utils import get_default_storage_type
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -39,7 +38,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         return [
             (App().art, "artist-artwork-changed",
              "_on_artist_artwork_changed"),
-            (App().scanner, "artist-updated", "_on_artist_updated")
+            (App().scanner, "updated", "_on_collection_updated")
         ]
 
     def populate(self, artist_ids=[]):
@@ -137,33 +136,30 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             if child.name == prefix:
                 child.set_artwork()
 
-    def _on_artist_updated(self, scanner, artist_id, scan_update):
+    def _on_collection_updated(self, scanner, item, scan_update):
         """
             Add/remove artist to/from list
             @param scanner as CollectionScanner
-            @param artist_id as int
+            @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        if scan_update == ScanUpdate.ADDED:
-            storage_type = get_default_storage_type()
-            artist_ids = App().artists.get_ids([], storage_type)
-            # Can happen during scan
-            if artist_id not in artist_ids:
-                return
-            position = artist_ids.index(artist_id)
-            artist_name = App().artists.get_name(artist_id)
-            sortname = App().artists.get_sortname(artist_id)
-            widget = RoundedArtistWidget((artist_id, artist_name, sortname),
-                                         self.view_type,
-                                         get_font_height())
-            self._box.insert(widget, position)
-            widget.show()
-            widget.populate()
-        elif scan_update == ScanUpdate.REMOVED:
-            for child in self._box.get_children():
-                if child.data == artist_id:
-                    child.destroy()
-                    break
+        for artist_id in item.new_artist_ids:
+            if scan_update == ScanUpdate.ADDED:
+                artist_name = App().artists.get_name(artist_id)
+                sortname = App().artists.get_sortname(artist_id)
+                widget = RoundedArtistWidget((artist_id,
+                                              artist_name,
+                                              sortname),
+                                             self.view_type,
+                                             get_font_height())
+                self._box.insert(widget, -1)
+                widget.show()
+                widget.populate()
+            elif scan_update == ScanUpdate.REMOVED:
+                for child in self._box.get_children():
+                    if child.data == artist_id:
+                        child.destroy()
+                        break
 
 #######################
 # PRIVATE             #
