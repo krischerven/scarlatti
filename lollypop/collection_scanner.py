@@ -115,7 +115,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param timestamp as int
             @commit needed
         """
-        item.album_id, item.album_artist_ids,
         if item.album_artist_ids:
             App().albums.set_artist_ids(item.album_id, item.album_artist_ids)
         # Set artist ids based on content
@@ -251,6 +250,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                                     track_rate, track_loved, track_ltime,
                                     track_mtime, mb_track_id, bpm,
                                     storage_type)
+        item.set_track_id(track_id)
         Logger.debug("CollectionScanner::save_track(): Update track")
         self.update_track(track_id, artist_ids, genre_ids)
         Logger.debug("CollectionScanner::save_track(): Update album")
