@@ -547,7 +547,7 @@ class SpotifySearch(GObject.Object):
         total_tracks = payload["album"]["total_tracks"]
         album_name = payload["album"]["name"]
         discnumber = int(payload["disc_number"])
-        discname = None
+        discname = ""
         tracknumber = int(payload["track_number"])
         try:
             release_date = "%sT00:00:00" % payload["album"]["release_date"]

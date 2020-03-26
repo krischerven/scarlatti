@@ -286,7 +286,7 @@ class TagReader:
             @return disc name as str
         """
         if tags is None:
-            return 0
+            return ""
         discname = ""
         for i in range(tags.get_tag_size("extended-comment")):
             (exists, read) = tags.get_string_index("extended-comment", i)
