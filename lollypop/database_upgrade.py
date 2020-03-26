@@ -159,7 +159,10 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             40: """UPDATE tracks SET duration = duration * 1000""",
             # Here we force an mb_album_id if empty, needed by artwork
             41: """UPDATE albums SET mb_album_id=rowid
-                   WHERE mb_album_id is null"""
+                   WHERE mb_album_id is null""",
+            # Fix previous update
+            42: """UPDATE albums SET mb_album_id=null
+                   WHERE storage_type=2 AND rowid=mb_album_id"""
         }
 
 #######################
