@@ -359,7 +359,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         if count == self.ITEMS:
             return
         if self.__storage_type & storage_type:
-            self.add_value(album_id)
+            self.add_value(Album(album_id))
             self._box.set_min_children_per_line(count + 1)
             self.show()
 

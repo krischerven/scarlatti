@@ -486,10 +486,7 @@ class SpotifySearch(GObject.Object):
                 else:
                     emit_signal(self, "match-album", album_id, storage_type)
                 continue
-            (album_saved, album_id,
-             album_artist_ids,
-             added_album_artist_ids) = self.__save_album(album_item,
-                                                         storage_type)
+            album_id = self.__save_album(album_item, storage_type)
             album = Album(album_id)
             if App().art.get_album_artwork_uri(album) is None:
                 self.__download_cover(album,
