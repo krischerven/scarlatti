@@ -105,6 +105,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param position as int
             @param cover_uri as int
         """
+        self.show_placeholder(False)
         widget = AlbumSimpleWidget(album, self._genre_ids,
                                    self._artist_ids, self.view_type,
                                    get_font_height())
