@@ -558,12 +558,14 @@ class CollectionScanner(GObject.GObject, TagReader):
             Logger.debug("Adding file: %s" % uri)
             tags = self.__tags[uri]
             item = self.__add2db(uri, *tags, storage_type)
+            items.append(item)
             track_ids.append(item.track_id)
             self.__progress_count += 1
             self.__update_progress(self.__progress_count,
                                    self.__progress_total)
             if self.__notify_ui(items):
                 items = []
+        self.__notify_ui(items)
         SqlCursor.remove(App().db)
         return [item.track_id for item in items]
 
@@ -591,6 +593,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             else:
                 emit_signal(self, "album-updated", item.album_id,
                             ScanUpdate.MODIFIED)
+        return True
 
     def __remove_old_tracks(self, uris, scan_type):
         """
