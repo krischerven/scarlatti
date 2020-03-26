@@ -16,7 +16,7 @@ from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, OrderBy, ScanUpdate
 from lollypop.widgets_artist_rounded import RoundedArtistWidget
 from lollypop.objects_album import Album
-from lollypop.utils import get_icon_name, get_font_height
+from lollypop.utils import get_icon_name
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -70,15 +70,15 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _get_child(self, value):
+    def _get_child(self, item):
         """
             Get a child for view
-            @param value as object
+            @param item as (int, str, str)
             @return row as SelectionListRow
         """
         if self.destroyed:
             return None
-        widget = RoundedArtistWidget(value, self.view_type, self.font_height)
+        widget = RoundedArtistWidget(item, self.view_type, self.font_height)
         self._box.insert(widget, -1)
         widget.show()
         return widget
@@ -143,19 +143,11 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        self._box.set_sort_func(self.__sort_func)
         for artist_id in item.new_artist_ids:
             if scan_update == ScanUpdate.ADDED:
                 artist_name = App().artists.get_name(artist_id)
                 sortname = App().artists.get_sortname(artist_id)
-                widget = RoundedArtistWidget((artist_id,
-                                              artist_name,
-                                              sortname),
-                                             self.view_type,
-                                             get_font_height())
-                self._box.insert(widget, -1)
-                widget.show()
-                widget.populate()
+                self.add_value((artist_id, artist_name, sortname))
             elif scan_update == ScanUpdate.REMOVED:
                 for child in self._box.get_children():
                     if child.data == artist_id:
@@ -165,14 +157,6 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __sort_func(self, child1, child2):
-        """
-            Sort items
-            @param child1 as RoundedArtistWidget
-            @param child2 as RoundedArtistWidget
-        """
-        return child1.sortname > child2.sortname
-
     def __on_destroy(self, widget):
         """
             Stop loading

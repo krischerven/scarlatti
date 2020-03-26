@@ -21,7 +21,7 @@ from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
 from lollypop.define import OrderBy
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available, popup_widget
-from lollypop.utils import get_font_height, get_title_for_genres_artists
+from lollypop.utils import get_title_for_genres_artists
 from lollypop.utils import remove_static
 from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
@@ -100,21 +100,15 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         elif self.__populate_wanted:
             App().task_helper.run(load, callback=(on_load,))
 
-    def insert_album(self, album, position):
+    def add_value(self, album_id):
         """
             Add a new album
             @param album as Album
             @param position as int
             @param cover_uri as int
         """
-        self._box.set_sort_func(self.__sort_func)
         self.show_placeholder(False)
-        widget = AlbumSimpleWidget(album, self._genre_ids,
-                                   self._artist_ids, self.view_type,
-                                   get_font_height())
-        self._box.insert(widget, position)
-        widget.show()
-        widget.populate()
+        FlowBoxView.add_value(self, album_id)
 
     def clear(self):
         """
@@ -164,6 +158,28 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                          self.view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
+    def _sort_func(self, child1, child2):
+        """
+            Sort items
+            @param child1 as AlbumSimpleWidget
+            @param child2 as AlbumSimpleWidget
+        """
+        orderby = App().settings.get_enum("orderby")
+        if orderby == OrderBy.ARTIST:
+            artists1 = "".join(child1.data.artists)
+            artists2 = "".join(child2.data.artists)
+            if artists1 == artists2:
+                return child1.data.name > child2.data.name
+            else:
+                return artists1 > artists2
+        elif orderby == OrderBy.NAME:
+            return child1.data.name > child2.data.name
+        elif orderby == OrderBy.YEAR_DESC:
+            return child1.data.year < child2.data.year
+        elif orderby == OrderBy.POPULARITY:
+            return child1.data.popularity < child2.data.popularity
+        return False
+
     def _on_collection_updated(self, scanner, item, scan_update):
         """
             Handles changes in collection
@@ -178,7 +194,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     len(item.genre_ids) + len(genre_ids) and\
                     len(set(item.artist_ids) | set(artist_ids)) <=\
                     len(item.artist_ids) + len(artist_ids):
-                self.insert_album(Album(item.album_id), -1)
+                self.add_value(Album(item.album_id))
         elif scan_update == ScanUpdate.MODIFIED:
             for child in self.children:
                 if child.data.id == item.album_id:
@@ -263,31 +279,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             App().task_helper.run(child.data.load_tracks,
                                   cancellable,
                                   callback=(play_album, child))
-
-#######################
-# PRIVATE             #
-#######################
-    def __sort_func(self, child1, child2):
-        """
-            Sort items
-            @param child1 as AlbumSimpleWidget
-            @param child2 as AlbumSimpleWidget
-        """
-        orderby = App().settings.get_enum("orderby")
-        if orderby == OrderBy.ARTIST:
-            artists1 = "".join(child1.data.artists)
-            artists2 = "".join(child2.data.artists)
-            if artists1 == artists2:
-                return child1.data.name > child2.data.name
-            else:
-                return artists1 > artists2
-        elif orderby == OrderBy.NAME:
-            return child1.data.name > child2.data.name
-        elif orderby == OrderBy.YEAR_DESC:
-            return child1.data.year < child2.data.year
-        elif orderby == OrderBy.POPULARITY:
-            return child1.data.popularity < child2.data.popularity
-        return False
 
 
 class AlbumsForGenresBoxView(AlbumsBoxView):

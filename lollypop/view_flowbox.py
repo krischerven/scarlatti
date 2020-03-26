@@ -61,7 +61,6 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
             Insert item
             @param item_id as int
         """
-        # Setup sort on insert
         self._box.set_sort_func(self._sort_func)
         LazyLoadingView.populate(self, [item_id])
 
