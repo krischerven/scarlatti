@@ -112,7 +112,7 @@ class LazyLoadingView(View):
             @param value as object
             @return object
         """
-        pass
+        return None
 
     def _on_map(self, widget):
         """
