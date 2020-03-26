@@ -57,7 +57,7 @@ from lollypop.objects_radio import Radio
 from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
-from lollypop.collectionscanner import CollectionScanner
+from lollypop.collection_scanner import CollectionScanner
 
 
 class Application(Gtk.Application, ApplicationActions):
