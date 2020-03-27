@@ -174,8 +174,9 @@ class LazyLoadingView(View):
                 text = App().window.container.type_ahead.entry.get_text()
                 if text:
                     self.search_for_child(text)
-                GLib.idle_add(
-                    App().window.container.type_ahead.entry.grab_focus)
+                else:
+                    GLib.idle_add(
+                        App().window.container.type_ahead.entry.grab_focus)
             Logger.debug("LazyLoadingView::lazy_loading(): %s",
                          time() - self.__start_time)
 
