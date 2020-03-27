@@ -41,7 +41,8 @@ class PlaylistMenu(Gio.Menu):
         App().add_action(save_action)
         save_action.connect("activate", self.__on_save_action_activate)
         menu.append(_("Save playlist"), "app.save_pl_action")
-        if playlist_id >= 0:
+        if playlist_id >= 0 and\
+                not App().playlists.get_track_uris(playlist_id):
             smart_action = Gio.SimpleAction(name="smart_action")
             App().add_action(smart_action)
             smart_action.connect("activate", self.__on_smart_action_activate)
