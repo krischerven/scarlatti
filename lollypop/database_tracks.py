@@ -862,7 +862,7 @@ class TracksDatabase:
                                  (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_randoms(self, limit, storage_type):
+    def get_randoms(self, storage_type, limit):
         """
             Return random tracks
             @param limit as int
