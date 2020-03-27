@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
 from lollypop.define import ViewType
 from lollypop.utils import noaccents
@@ -109,11 +109,11 @@ class FilteringHelper():
             @param child as Gtk.Widget
         """
         if self.view_type & ViewType.SCROLLED:
-            if child == self.__last_scrolled:
-                return
-            self.__last_scrolled = child
+            view_widget = self.scrolled.get_child()
+            if isinstance(view_widget, Gtk.Viewport):
+                view_widget = view_widget.get_child()
             coordinates = child.translate_coordinates(
-                self.scrolled, 0, -self.scroll_shift)
+                view_widget, 0, -self.scroll_shift)
             if coordinates:
                 self.scrolled.get_vadjustment().set_value(coordinates[1])
 
