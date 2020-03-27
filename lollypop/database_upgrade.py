@@ -163,7 +163,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             # Fix previous update
             42: """UPDATE albums SET mb_album_id=null
                    WHERE storage_type=2 AND rowid=mb_album_id""",
-            43: self.__upgrade_43
+            43: """CREATE TABLE featuring (artist_id INT NOT NULL,
+                                           album_id INT NOT NULL)"""
         }
 
 #######################
@@ -716,11 +717,3 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                             FROM album_artists) AND artists.rowid NOT IN (\
                                 SELECT track_artists.artist_id\
                                 FROM track_artists)")
-
-    def __upgrade_43(self, db):
-        """
-            Add featuring table
-        """
-        with SqlCursor(db, True) as sql:
-            sql.execute("CREATE TABLE featuring (artist_id INT NOT NULL,\
-                                                 album_id INT NOT NULL)")
