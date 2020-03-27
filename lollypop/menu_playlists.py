@@ -48,6 +48,8 @@ class PlaylistsMenu(Gio.Menu):
         i = 1
         exists = True
         for (playlist_id, name) in App().playlists.get():
+            if App().playlists.get_smart(playlist_id):
+                continue
             for obj in self.__objects:
                 if isinstance(obj, Album):
                     exists = App().playlists.exists_album(playlist_id, obj)
