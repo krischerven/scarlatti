@@ -350,6 +350,7 @@ class SpotifySearch(GObject.Object):
                     else:
                         self.search_similar_albums(self.__cancellable)
                 self.clean_old_albums(storage_types)
+                App().artists.update_featuring()
         except Exception as e:
             Logger.warning("SpotifySearch::__populate_db(): %s", e)
         self.__is_running = False
