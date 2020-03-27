@@ -52,6 +52,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button = builder.get_object("play_button")
         self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
+        self.__widget = builder.get_object("widget")
         if view_type & ViewType.OVERLAY:
             style = "banner-button"
         else:
@@ -65,6 +66,11 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if view_type & ViewType.ALBUM:
             self.__artist_label.show()
             self.__artist_label.set_label(", ".join(album.artists))
+        else:
+            self.__title_label.set_opacity(0.8)
+            self.__year_label.set_opacity(0.7)
+            self.__duration_label.set_opacity(0.6)
+            self.__widget.get_style_context().add_class("album-banner")
         if album.year is not None:
             self.__year_label.set_label(str(album.year))
             self.__year_label.show()
@@ -80,7 +86,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         year_eventbox.connect("realize", set_cursor_type)
         self.__gesture2 = GesturesHelper(
             year_eventbox, primary_press_callback=self._on_year_press)
-        self.__widget = builder.get_object("widget")
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__bottom_box = builder.get_object("bottom_box")
         self.__loved_widget = LovedWidget(album, Gtk.IconSize.INVALID)

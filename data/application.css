@@ -477,6 +477,14 @@ flowboxchild:selected  {
 
 }
 
+.album-banner {
+    border: 1px solid shade(@theme_bg_color, 0.7);
+    padding: 10px;
+    border-radius: 4px;
+    background-color: shade(@theme_bg_color, 0.99);
+
+}
+
 .banner-button {
     opacity: 0.8;
 	box-shadow: none;
