@@ -149,8 +149,6 @@ class TuneinPopover(Gtk.Popover):
         self.__cancellable = Gio.Cancellable()
         self.__spinner.start()
         self.__stack.set_visible_child_name("spinner")
-        self.__back_btn.set_sensitive(False)
-        self.__home_btn.set_sensitive(False)
         self.__label.set_text(_("Please wait…"))
         App().task_helper.load_uri_content(uri,
                                            self.__cancellable,
