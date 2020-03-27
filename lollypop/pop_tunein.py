@@ -140,6 +140,8 @@ class TuneinPopover(Gtk.Popover):
             Populate view for uri
             @param uri as str
         """
+        self.__back_btn.set_sensitive(False)
+        self.__home_btn.set_sensitive(False)
         if not get_network_available("TUNEIN"):
             self.__show_message(_("Can't connect to TuneIn…"))
             return
