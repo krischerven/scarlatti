@@ -36,6 +36,7 @@ class ArtistViewList(LazyLoadingView):
                                  view_type |
                                  ViewType.OVERLAY |
                                  ViewType.ARTIST)
+        self.__others_boxes = []
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__storage_type = storage_type
@@ -45,14 +46,15 @@ class ArtistViewList(LazyLoadingView):
         self.__list = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN * 4)
         self.__list.show()
         self.add_widget(self.__list, self.__banner)
+        self.connect("populated", self.__on_populated)
 
     def populate(self):
         """
             Populate list
         """
-        album_ids = App().tracks.get_album_ids(self.__artist_ids,
-                                               self.__genre_ids,
-                                               self.storage_type)
+        album_ids = App().albums.get_ids(self.__artist_ids,
+                                         self.__genre_ids,
+                                         self.storage_type)
         LazyLoadingView.populate(self, album_ids)
 
     @property
@@ -65,6 +67,18 @@ class ArtistViewList(LazyLoadingView):
                 "artist_ids": self.__artist_ids,
                 "storage_type": self.storage_type,
                 "view_type": self.view_type}
+
+    @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = self.children
+        for box in self.__others_boxes:
+            for child in box.children:
+                filtered.append(child)
+        return filtered
 
     @property
     def scroll_shift(self):
@@ -93,3 +107,20 @@ class ArtistViewList(LazyLoadingView):
         widget.set_property("valign", Gtk.Align.START)
         self.__list.add(widget)
         return widget
+
+    def __on_populated(self, view):
+        """
+            Add appears on albums
+            @param view as ArtistViewBox
+        """
+        from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
+        others_box = AlbumsArtistAppearsOnLineView(self.__artist_ids,
+                                                   self.__genre_ids,
+                                                   self.storage_type,
+                                                   ViewType.SMALL |
+                                                   ViewType.SCROLLED)
+        others_box.set_margin_start(MARGIN)
+        others_box.set_margin_end(MARGIN)
+        others_box.populate()
+        self.__list.add(others_box)
+        self.__others_boxes.append(others_box)

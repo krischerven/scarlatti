@@ -180,10 +180,9 @@ class AlbumsArtistAppearsOnLineView(AlbumsLineView):
         self.__artist_ids = artist_ids
         self.__genre_ids = genre_ids
 
-    def populate(self, excluded_album_ids):
+    def populate(self):
         """
             Populate view
-            @param excluded_album_ids as [int]
         """
         def on_load(items):
             AlbumsLineView.populate(self, items)
