@@ -14,7 +14,7 @@ from gi.repository import Gio, Gtk, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN_SMALL
+from lollypop.define import App, MARGIN_SMALL, ViewType
 
 
 class PlaylistMenu(Gio.Menu):
@@ -22,10 +22,11 @@ class PlaylistMenu(Gio.Menu):
         A playlist menu
     """
 
-    def __init__(self, playlist_id, header=False):
+    def __init__(self, playlist_id, view_type, header=False):
         """
             Init variable
             @param playlist_id as int
+            @param view_type as ViewType
             @param header as bool
         """
         Gio.Menu.__init__(self)
@@ -40,25 +41,29 @@ class PlaylistMenu(Gio.Menu):
         App().add_action(save_action)
         save_action.connect("activate", self.__on_save_action_activate)
         menu.append(_("Save playlist"), "app.save_pl_action")
-        smart_action = Gio.SimpleAction(name="smart_action")
-        App().add_action(smart_action)
-        smart_action.connect("activate", self.__on_smart_action_activate)
-        menu.append(_("Manage smart playlist"), "app.smart_action")
-        remove_action = Gio.SimpleAction(name="remove_pl_action")
-        App().add_action(remove_action)
-        remove_action.connect("activate", self.__on_remove_action_activate)
-        menu.append(_("Remove playlist"), "app.remove_pl_action")
+        if playlist_id >= 0 and\
+                not App().playlists.get_track_uris(playlist_id):
+            smart_action = Gio.SimpleAction(name="smart_action")
+            App().add_action(smart_action)
+            smart_action.connect("activate", self.__on_smart_action_activate)
+            menu.append(_("Manage smart playlist"), "app.smart_action")
+            remove_action = Gio.SimpleAction(name="remove_pl_action")
+            App().add_action(remove_action)
+            remove_action.connect("activate", self.__on_remove_action_activate)
+            menu.append(_("Remove playlist"), "app.remove_pl_action")
         from lollypop.menu_playback import PlaylistPlaybackMenu
         playback_menu = PlaylistPlaybackMenu(playlist_id)
-        show_track_number = Gio.SimpleAction.new_stateful(
-                "show_track_number",
-                None,
-                GLib.Variant.new_boolean(
-                    App().settings.get_value("show-tag-tracknumber")))
-        App().add_action(show_track_number)
-        show_track_number.connect("change-state",
-                                  self.__on_show_track_number_change_state)
-        playback_menu.append(_("Show tracks number"), "app.show_track_number")
+        if view_type & ViewType.BANNER:
+            show_track_number = Gio.SimpleAction.new_stateful(
+                    "show_track_number",
+                    None,
+                    GLib.Variant.new_boolean(
+                        App().settings.get_value("show-tag-tracknumber")))
+            App().add_action(show_track_number)
+            show_track_number.connect("change-state",
+                                      self.__on_show_track_number_change_state)
+            playback_menu.append(_("Show tracks number"),
+                                 "app.show_track_number")
         self.append_section(_("Playlist"), playback_menu)
         section = Gio.Menu()
         self.append_section(_("Add to"), section)

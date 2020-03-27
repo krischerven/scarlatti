@@ -192,7 +192,8 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_playlist import PlaylistMenu, PlaylistMenuExt
-        menu = PlaylistMenu(child.data, App().window.is_adaptive)
+        menu = PlaylistMenu(child.data, self.view_type,
+                            App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         if child.data >= 0:
             menu_widget = MenuBuilder(menu)

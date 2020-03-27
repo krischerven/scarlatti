@@ -143,7 +143,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(self.__artist_ids[0],
                           self.__storage_type,
-                          self.view_type | ViewType.BANNER,
+                          self.view_type,
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
