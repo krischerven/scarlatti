@@ -14,7 +14,7 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, Type, StorageType
+from lollypop.define import App, Type, StorageType, OrderBy
 from lollypop.utils import get_default_storage_type, make_subrequest
 from lollypop.utils import format_artist_name, remove_static
 
@@ -304,10 +304,33 @@ class ArtistsDatabase:
             @param artist_ids as [int]
             @param storage_type as StorageType
         """
+        orderby = App().settings.get_enum("orderby")
+        if orderby == OrderBy.ARTIST:
+            order = " ORDER BY artists.sortname\
+                     COLLATE NOCASE COLLATE LOCALIZED,\
+                     albums.timestamp,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
+        elif orderby == OrderBy.NAME:
+            order = " ORDER BY albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
+        elif orderby == OrderBy.YEAR_DESC:
+            order = " ORDER BY albums.timestamp DESC,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
+        elif orderby == OrderBy.YEAR_ASC:
+            order = " ORDER BY albums.timestamp ASC,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
+        else:
+            order = " ORDER BY albums.popularity DESC,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
         with SqlCursor(App().db) as sql:
             request = "SELECT DISTINCT featuring.album_id\
-                       FROM featuring, album_genres, albums\
+                       FROM featuring, album_genres, albums, artists\
                        WHERE albums.storage_type&? AND\
+                             artists.rowid=featuring.artist_id AND\
                              albums.rowid=featuring.album_id AND "
             filters = (storage_type,)
             if artist_ids:
@@ -321,6 +344,7 @@ class ArtistsDatabase:
                 request += make_subrequest("album_genres.genre_id=?",
                                            "OR",
                                            len(genre_ids))
+            request += order
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
