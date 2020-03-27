@@ -123,7 +123,9 @@ class PlaylistBannerWidget(BannerWidget):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_playlist import PlaylistMenu, PlaylistMenuExt
-        menu = PlaylistMenu(self.__playlist_id, App().window.is_adaptive)
+        menu = PlaylistMenu(self.__playlist_id,
+                            self.view_type,
+                            App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         if self.__playlist_id >= 0:
             menu_widget = MenuBuilder(menu)

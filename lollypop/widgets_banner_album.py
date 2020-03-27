@@ -141,7 +141,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_objects import AlbumMenu
         menu = AlbumMenu(self.__album,
                          self.__storage_type,
-                         self.view_type | ViewType.BANNER,
+                         self.view_type,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
