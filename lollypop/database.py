@@ -75,6 +75,9 @@ class Database:
                                                name TEXT NOT NULL,
                                                sortname TEXT NOT NULL,
                                                mb_artist_id TEXT)"""
+    __create_featuring = """CREATE TABLE featuring (
+                                               artist_id INT NOT NULL,
+                                               album_id INT NOT NULL)"""
     __create_genres = """CREATE TABLE genres (id INTEGER PRIMARY KEY,
                                             name TEXT NOT NULL)"""
     __create_album_artists = """CREATE TABLE album_artists (
@@ -137,6 +140,7 @@ class Database:
                 with SqlCursor(self, True) as sql:
                     sql.execute(self.__create_albums)
                     sql.execute(self.__create_artists)
+                    sql.execute(self.__create_featuring)
                     sql.execute(self.__create_genres)
                     sql.execute(self.__create_album_genres)
                     sql.execute(self.__create_album_artists)

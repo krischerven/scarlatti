@@ -279,6 +279,51 @@ class ArtistsDatabase:
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
+    def update_featuring(self):
+        """
+            Calculate featuring for current DB
+        """
+        with SqlCursor(App().db, True) as sql:
+            sql.execute("DELETE FROM featuring")
+            result = sql.execute(
+                        "SELECT track_artists.artist_id, tracks.album_id\
+                         FROM tracks, track_artists\
+                         WHERE track_artists.track_id = tracks.rowid\
+                         AND NOT EXISTS (\
+                          SELECT * FROM album_artists WHERE\
+                          album_artists.album_id = tracks.album_id AND\
+                          album_artists.artist_id = track_artists.artist_id)")
+            for (artist_id, album_id) in result:
+                sql.execute("INSERT INTO featuring (artist_id, album_id)\
+                             VALUES (?, ?)", (artist_id, album_id))
+
+    def get_featuring(self, genre_ids, artist_ids, storage_type):
+        """
+            Get albums where artist is in featuring
+            @param genre_ids as [int]
+            @param artist_ids as [int]
+            @param storage_type as StorageType
+        """
+        with SqlCursor(App().db) as sql:
+            request = "SELECT DISTINCT featuring.album_id\
+                       FROM featuring, album_genres, albums\
+                       WHERE albums.storage_type&? AND\
+                             albums.rowid=featuring.album_id AND "
+            filters = (storage_type,)
+            if artist_ids:
+                filters += tuple(artist_ids)
+                request += make_subrequest("featuring.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
+            if genre_ids:
+                filters += tuple(genre_ids)
+                request += " AND "
+                request += make_subrequest("album_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
+            result = sql.execute(request, filters)
+            return list(itertools.chain(*result))
+
     def exists(self, artist_id):
         """
             Return True if artist exist

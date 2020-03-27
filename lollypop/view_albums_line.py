@@ -189,12 +189,9 @@ class AlbumsArtistAppearsOnLineView(AlbumsLineView):
             AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = []
-            for album_id in App().tracks.get_album_ids(self.__artist_ids,
-                                                       self.__genre_ids,
-                                                       self.storage_type):
-                if album_id not in excluded_album_ids:
-                    album_ids.append(album_id)
+            album_ids = App().artists.get_featuring(self.__genre_ids,
+                                                    self.__artist_ids,
+                                                    self.storage_type)
             return [Album(album_id) for album_id in album_ids]
 
         self._label.set_text(_("Appears on"))
