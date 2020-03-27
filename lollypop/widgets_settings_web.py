@@ -16,14 +16,16 @@ from gettext import gettext as _
 
 from lollypop.define import App, NetworkAccessACL, StorageType
 from lollypop.utils import get_network_available
+from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
 
 
-class WebSettingsWidget(Gtk.Bin):
+class WebSettingsWidget(Gtk.Bin, SignalsHelper):
     """
         Widget allowing user to configure web providers
     """
 
+    @signals_map
     def __init__(self):
         """
             Init widget
@@ -121,10 +123,12 @@ class WebSettingsWidget(Gtk.Bin):
         self.__check_acls()
 
         builder.connect_signals(self)
-        App().settings.connect("changed::network-access",
-                               lambda x, y: self.__check_acls())
-        App().settings.connect("changed::network-access-acl",
-                               lambda x, y: self.__check_acls())
+        return [
+            (App().settings, "changed::network-access",
+             "_on_network_access_changed"),
+            (App().settings, "changed::network-access-acl",
+             "_on_network_access_changed"),
+        ]
 
 #######################
 # PROTECTED           #
@@ -232,6 +236,9 @@ class WebSettingsWidget(Gtk.Bin):
                 App().tracks.clean()
                 App().albums.clean()
                 App().artists.clean()
+
+    def _on_network_access_changed(self, *ignore):
+        self.__check_acls()
 
 #######################
 # PRIVATE             #
