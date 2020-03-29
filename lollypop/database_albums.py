@@ -1144,8 +1144,10 @@ class AlbumsDatabase:
         """
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT album_id\
-                                  FROM tracks\
-                                  WHERE storage_type & ?\
+                                  FROM tracks, albums\
+                                  WHERE albums.storage_type & ? AND\
+                                  albums.rowid=album_id AND\
+                                  albums.loved != -1\
                                   GROUP BY album_id\
                                   ORDER BY SUM(ltime)/COUNT(ltime), \
                                   random() LIMIT ?",
