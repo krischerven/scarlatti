@@ -85,6 +85,18 @@ class ArtistViewBox(AlbumsBoxView):
         return self.__banner.height + MARGIN
 
 #######################
+# PROTECTED           #
+#######################
+    def _on_map(self, widget):
+        """
+            Set initial view state
+            @param widget as GtK.Widget
+        """
+        AlbumsBoxView._on_map(self, widget)
+        if self.view_type & ViewType.SCROLLED:
+            self.scrolled.grab_focus()
+
+#######################
 # PRIVATE             #
 #######################
     def __on_populated(self, view):

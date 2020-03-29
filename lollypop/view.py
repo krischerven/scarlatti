@@ -309,8 +309,6 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             Set initial view state
             @param widget as GtK.Widget
         """
-        if self.view_type & ViewType.SCROLLED:
-            self.scrolled.grab_focus()
         # Set sidebar id
         if self.sidebar_id is None:
             ids = App().window.container.sidebar.selected_ids

@@ -97,6 +97,18 @@ class SuggestionsView(View):
                 "view_type": self.view_type}
 
 #######################
+# PROTECTED           #
+#######################
+    def _on_map(self, widget):
+        """
+            Set initial view state
+            @param widget as GtK.Widget
+        """
+        View._on_map(self, widget)
+        if self.view_type & ViewType.SCROLLED:
+            self.scrolled.grab_focus()
+
+#######################
 # PRIVATE             #
 #######################
     def __welcome_screen(self):
