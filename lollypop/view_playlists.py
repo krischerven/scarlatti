@@ -225,9 +225,10 @@ class SmartPlaylistsView(PlaylistsView):
 
         def load():
             request = App().playlists.get_smart_sql(self._playlist_id)
-            # We need to inject storage_type
+            # We need to inject skipped/storage_type
             storage_type = get_default_storage_type()
             split = request.split("ORDER BY")
+            split[0] += " AND loved != ?" % Type.NONE
             split[0] += " AND tracks.storage_type&%s " % storage_type
             track_ids = App().db.execute("ORDER BY".join(split))
             return tracks_to_albums(

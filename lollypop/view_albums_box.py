@@ -309,6 +309,18 @@ class AlbumsForGenresBoxView(AlbumsBoxView):
         self.add_widget(self._box, self.__banner)
 
 #######################
+# PROTECTED           #
+#######################
+    def _on_map(self, widget):
+        """
+            Set initial view state
+            @param widget as GtK.Widget
+        """
+        AlbumsBoxView._on_map(self, widget)
+        if self.view_type & ViewType.SCROLLED:
+            self.scrolled.grab_focus()
+
+#######################
 # PRIVATE             #
 #######################
     def __on_banner_play_all(self, banner, random):
@@ -413,3 +425,15 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
     @property
     def args(self):
         return None
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_map(self, widget):
+        """
+            Set initial view state
+            @param widget as GtK.Widget
+        """
+        AlbumsBoxView._on_map(self, widget)
+        if self.view_type & ViewType.SCROLLED:
+            self.scrolled.grab_focus()

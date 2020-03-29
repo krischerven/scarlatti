@@ -377,7 +377,8 @@ class MPRIS(Server):
             return "Stopped"
 
     def __update_metadata(self):
-        if self.__get_status() == "Stopped":
+        if App().player.current_track.id is None or\
+                self.__get_status() == "Stopped":
             self.__metadata = {"mpris:trackid": GLib.Variant(
                 "o",
                 "/org/mpris/MediaPlayer2/TrackList/NoTrack")}
