@@ -190,7 +190,7 @@ class MtpSync(GObject.Object):
     __ENCODERS = {"convert_none": None,
                   "convert_mp3": " ! lamemp3enc target=bitrate\
                                    cbr=true bitrate=%s ! id3v2mux",
-                  "convert_vorbis": " ! vorbisenc max-bitrate=%s\
+                  "convert_vorbis": " ! vorbisenc bitrate=%s\
                                       ! oggmux",
                   "convert_flac": " ! flacenc",
                   "convert_aac": " ! faac bitrate=%s ! mp4mux"}
