@@ -95,7 +95,7 @@ class Radios(GObject.GObject):
                         SET name=?\
                         WHERE rowid=?",
                         (name, radio_id))
-            emit_signal(self, "radio-changed", radio_id)
+        emit_signal(self, "radio-changed", radio_id)
 
     def remove(self, radio_id):
         """
