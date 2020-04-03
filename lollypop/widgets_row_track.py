@@ -263,7 +263,6 @@ class TrackRow(Gtk.ListBoxRow):
             @param button as Gtk.Button
         """
         if self.__view_type & ViewType.PLAYBACK:
-            self._track.album.remove_track(self._track)
             emit_signal(self, "removed")
         elif self.__view_type & ViewType.PLAYLISTS:
             from lollypop.view_playlists import PlaylistsView
