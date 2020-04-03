@@ -474,7 +474,9 @@ class CollectionScanner(GObject.GObject, TagReader):
         # * 2 => Scan + Save
         self.__progress_total = len(files) * 2
         self.__progress_count = 0
-        split_files = split_list(files, max(1, cpu_count() - 2))
+        # Min: 1 thread, Max: 5 threads
+        count = max(1, min(5, cpu_count() // 2))
+        split_files = split_list(files, count)
         self.__tags = {}
         self.__pending_new_artist_ids = []
         threads = []
@@ -483,17 +485,24 @@ class CollectionScanner(GObject.GObject, TagReader):
                                            scan_type)
             threads.append(thread)
 
-        # Wait for scan to finish
-        for thread in threads:
-            thread.join()
-
         if scan_type == ScanType.EXTERNAL:
             storage_type = StorageType.EXTERNAL
         else:
             storage_type = StorageType.COLLECTION
-        track_ids = self.__save_in_db(storage_type)
+        # Start getting files and populating DB
+        track_ids = []
+        i = 0
+        SqlCursor.add(App().db)
+        while threads:
+            thread = threads[i]
+            if not thread.isAlive():
+                threads.remove(thread)
+            track_ids += self.__save_in_db(storage_type)
+            if i >= len(threads) - 1:
+                i = 0
+            else:
+                i += 1
         self.__remove_old_tracks(db_uris, scan_type)
-
         SqlCursor.remove(App().db)
 
         if scan_type != ScanType.EXTERNAL:
@@ -574,8 +583,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         items = []
         track_ids = []
         previous_album_id = None
-        SqlCursor.add(App().db)
-        for uri in self.__tags.keys():
+        for uri in list(self.__tags.keys()):
             Logger.debug("Adding file: %s" % uri)
             tags = self.__tags[uri]
             item = self.__add2db(uri, *tags, storage_type)
@@ -588,8 +596,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                 self.__notify_ui(items)
                 items = []
                 previous_album_id = item.album_id
+            del self.__tags[uri]
         self.__notify_ui(items)
-        SqlCursor.remove(App().db)
         return [item.track_id for item in items]
 
     def __notify_ui(self, items):
