@@ -106,6 +106,20 @@ class AlbumsPlayer:
         except Exception as e:
             Logger.error("Player::remove_album_by_ids(): %s" % e)
 
+    def remove_track_from_album(self, track, album):
+        """
+            Remove track from album
+            @param track as Track
+            @param album as Album
+        """
+        is_current_track = track == self.current_track
+        if is_current_track:
+            self.next()
+        if album.remove_track(track):
+            self.remove_album(album)
+        elif not is_current_track:
+            self.update_next_prev()
+
     def play_album(self, album):
         """
             Play album
