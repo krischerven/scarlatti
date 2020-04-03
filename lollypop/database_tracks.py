@@ -15,7 +15,7 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, StorageType, OrderBy, Type
+from lollypop.define import App, StorageType, OrderBy
 from lollypop.utils import noaccents, remove_static, make_subrequest
 
 
@@ -539,10 +539,7 @@ class TracksDatabase:
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT artist_id FROM track_artists\
                                   WHERE track_id=?", (track_id,))
-            artist_ids = list(itertools.chain(*result))
-            if not artist_ids:
-                artist_ids = [Type.NONE]
-            return artist_ids
+            return list(itertools.chain(*result))
 
     def get_mb_artist_ids(self, track_id):
         """
@@ -569,10 +566,7 @@ class TracksDatabase:
                                   WHERE track_artists.track_id=?\
                                   AND track_artists.artist_id=artists.rowid",
                                  (track_id,))
-            artists = list(itertools.chain(*result))
-            if not artists:
-                artists = [_("Unknown")]
-            return artists
+            return list(itertools.chain(*result))
 
     def get_genre_ids(self, track_id):
         """
