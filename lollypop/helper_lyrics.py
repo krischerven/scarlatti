@@ -199,10 +199,7 @@ class LyricsHelper:
             if len(split) > 0:
                 artist = split[0]
         else:
-            if track.artists:
-                artist = track.artists[0]
-            elif track.album_artists:
-                artist = track.album_artists[0]
+            artist = track.artists[0]
         if escape:
             return GLib.uri_escape_string(artist, None, False)
         else:
