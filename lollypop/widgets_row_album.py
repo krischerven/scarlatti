@@ -73,7 +73,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         context_style.add_class("albumrow-collapsed")
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
-        self.__tracks_view = self.__get_track_view()
+        self.__tracks_view = self.__get_new_tracks_view()
         return [
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
@@ -201,21 +201,14 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         else:
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
-    def stop(self):
-        """
-            Stop view loading
-        """
-        self.__artwork = None
-        if self.__tracks_view.is_populated:
-            self.__tracks_view.stop()
-
     def reset(self):
         """
             Get a new track view
         """
-        self.stop()
+        self.__tracks_view.stop()
         self.__tracks_view.destroy()
-        self.__tracks_view = self.__get_tracks_view()
+        self.__tracks_view = self.__get_new_tracks_view()
+        self.__tracks_view.populate()
         self.__revealer.add(self.__tracks_view)
 
     def set_artwork(self):
@@ -312,7 +305,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __get_track_view(self):
+    def __get_new_tracks_view(self):
         """
             Get a new track view
             @return AlbumTracksView

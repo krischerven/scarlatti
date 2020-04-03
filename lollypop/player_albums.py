@@ -117,8 +117,11 @@ class AlbumsPlayer:
             self.next()
         if album.remove_track(track):
             self.remove_album(album)
-        elif not is_current_track:
-            self.update_next_prev()
+            emit_signal(self, "playback-removed", album)
+        else:
+            emit_signal(self, "playback-updated", album)
+            if not is_current_track:
+                self.update_next_prev()
 
     def play_album(self, album):
         """

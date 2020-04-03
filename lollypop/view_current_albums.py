@@ -121,7 +121,6 @@ class CurrentAlbumsView(View, SignalsHelper):
         for child in self.__view.children:
             if child.album == album:
                 child.reset()
-                child.populate()
                 break
 
     def _on_playback_removed(self, player, album):

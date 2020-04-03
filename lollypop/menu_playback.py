@@ -447,7 +447,7 @@ class TrackPlaybackMenu(PlaybackMenu):
 
     def _remove_from_playback(self, action, variant):
         """
-            Delete track id from playback
+            Delete track from playback
             @param Gio.SimpleAction
             @param GLib.Variant
         """
@@ -456,9 +456,8 @@ class TrackPlaybackMenu(PlaybackMenu):
                 if self.__track.id in album.track_ids:
                     index = album.track_ids.index(self.__track.id)
                     track = album.tracks[index]
-                    album.remove_track(track)
+                    App().player.remove_track_from_album(track, album)
                     break
-        App().player.update_next_prev()
 
 #######################
 # PRIVATE             #

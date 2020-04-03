@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio, GObject
+from gi.repository import Gtk, GObject
 
 
 from lollypop.widgets_tracks import TracksWidget
@@ -46,7 +46,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         self._tracks_widget_right = {}
         self._responsive_widget = None
         self.__orientation = None
-        self.__cancellable = Gio.Cancellable()
         self.connect("realize", self.__on_realize)
         return [
             (App().player, "loading-changed", "_on_loading_changed")
@@ -62,12 +61,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             if child.id == App().player.current_track.id:
                 return child.translate_coordinates(parent, 0, 0)[1]
         return None
-
-    def stop(self):
-        """
-            Stop loading
-        """
-        self.__cancellable.cancel()
 
     def set_playing_indicator(self):
         """
