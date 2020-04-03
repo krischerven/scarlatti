@@ -57,10 +57,11 @@ class AlbumsPlayer:
             for album in albums:
                 # Merge album if previous is same
                 if self._albums and self._albums[-1].id == album.id:
-                    tracks = list(set(self._albums[-1].tracks) |
-                                  set(album.tracks))
-                    self._albums[-1].set_tracks(tracks)
-                    emit_signal(self, "playback-updated", album)
+                    track_ids = self._albums[-1].track_ids
+                    for track in album.tracks:
+                        if track.id not in track_ids:
+                            self._albums[-1].append_track(track)
+                    emit_signal(self, "playback-updated", self._albums[-1])
                 else:
                     self._albums.append(album)
                     emit_signal(self, "playback-added", album)

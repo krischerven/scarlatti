@@ -431,19 +431,13 @@ class TrackPlaybackMenu(PlaybackMenu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        albums = App().player.albums
-        # If album last in list, merge
-        if albums and albums[-1].id == self.__track.album.id:
-            albums[-1].append_track(self.__track)
-            App().player.set_next()
-        # Add album with only one track
+        album = Album(self.__track.album.id)
+        album.set_tracks([self.__track])
+        App().player.add_album(album)
+        if App().player.is_playing:
+            App().player.add_album(album)
         else:
-            album = Album(self.__track.album.id)
-            album.set_tracks([self.__track])
-            if App().player.is_playing:
-                App().player.add_album(album)
-            else:
-                App().player.play_album(album)
+            App().player.play_album(album)
 
     def _remove_from_playback(self, action, variant):
         """

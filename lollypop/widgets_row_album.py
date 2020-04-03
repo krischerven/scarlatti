@@ -205,7 +205,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         """
             Get a new track view
         """
-        self.__tracks_view.stop()
         self.__tracks_view.destroy()
         self.__tracks_view = self.__get_new_tracks_view()
         self.__tracks_view.populate()
