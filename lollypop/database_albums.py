@@ -11,8 +11,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
-
-from gettext import gettext as _
 from time import time
 from random import shuffle
 
@@ -538,10 +536,7 @@ class AlbumsDatabase:
                                  WHERE album_artists.album_id=?\
                                  AND album_artists.artist_id=artists.rowid",
                                  (album_id,))
-            artists = list(itertools.chain(*result))
-            if not artists:
-                artists = [_("Unknown")]
-            return artists
+            return list(itertools.chain(*result))
 
     def get_artist_ids(self, album_id):
         """
@@ -554,10 +549,7 @@ class AlbumsDatabase:
                                   FROM album_artists\
                                   WHERE album_id=?",
                                  (album_id,))
-            artist_ids = list(itertools.chain(*result))
-            if not artist_ids:
-                artist_ids = [Type.NONE]
-            return artist_ids
+            return list(itertools.chain(*result))
 
     def get_mb_album_id(self, album_id):
         """
