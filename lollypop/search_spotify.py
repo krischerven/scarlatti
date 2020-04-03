@@ -544,6 +544,8 @@ class SpotifySearch(GObject.Object):
         # Translate to tag value
         artists = ";".join(_artists)
         album_artists = ";".join(_album_artists)
+        if not artists:
+            artists = album_artists
         spotify_album_id = payload["album"]["id"]
         total_tracks = payload["album"]["total_tracks"]
         album_name = payload["album"]["name"]
