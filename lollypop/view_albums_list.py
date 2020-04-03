@@ -62,6 +62,13 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         self.__reveals += list(albums)
 
+    def add_value(self, album):
+        """
+            Insert item
+            @param album as Album
+        """
+        LazyLoadingView.populate(self, [album])
+
     def insert_album(self, album, index):
         """
             Insert album at index

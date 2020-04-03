@@ -103,7 +103,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         return [
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed"),
-                (App().player, "playback-changed", "_on_playback_changed")
+                (App().player, "playback-added", "_on_playback_changed"),
+                (App().player, "playback-updated", "_on_playback_changed"),
+                (App().player, "playback-removed", "_on_playback_changed")
         ]
 
     def update_for_width(self, width):
@@ -178,10 +180,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if album_id == self.__album.id:
             self.__set_artwork()
 
-    def _on_playback_changed(self, player):
+    def _on_playback_changed(self, *ignore):
         """
             Update add button
-            @param player as Player
         """
         self.__update_add_button()
 

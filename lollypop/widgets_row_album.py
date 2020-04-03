@@ -73,18 +73,11 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         context_style.add_class("albumrow-collapsed")
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
-        self.__tracks_view = AlbumTracksView(self.__album,
-                                             self.__view_type |
-                                             ViewType.SINGLE_COLUMN)
-        self.__tracks_view.connect("activated",
-                                   self.__on_tracks_view_activated)
-        self.__tracks_view.connect("populated",
-                                   self.__on_tracks_view_populated)
-        self.__tracks_view.connect("track-removed",
-                                   self.__on_tracks_view_track_removed)
-        self.__tracks_view.show()
+        self.__tracks_view = self.__get_track_view()
         return [
-            (App().player, "playback-changed", "_on_playback_changed")
+            (App().player, "playback-added", "_on_playback_changed"),
+            (App().player, "playback-updated", "_on_playback_changed"),
+            (App().player, "playback-removed", "_on_playback_changed")
         ]
 
     def populate(self):
@@ -216,6 +209,15 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         if self.__tracks_view.is_populated:
             self.__tracks_view.stop()
 
+    def reset(self):
+        """
+            Get a new track view
+        """
+        self.stop()
+        self.__tracks_view.destroy()
+        self.__tracks_view = self.__get_tracks_view()
+        self.__revealer.add(self.__tracks_view)
+
     def set_artwork(self):
         """
             Set album artwork
@@ -300,7 +302,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_playback_changed(self, player):
+    def _on_playback_changed(self, *ignore):
         """
             Update button state
         """
@@ -310,6 +312,23 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __get_track_view(self):
+        """
+            Get a new track view
+            @return AlbumTracksView
+        """
+        tracks_view = AlbumTracksView(self.__album,
+                                      self.__view_type |
+                                      ViewType.SINGLE_COLUMN)
+        tracks_view.connect("activated",
+                            self.__on_tracks_view_activated)
+        tracks_view.connect("populated",
+                            self.__on_tracks_view_populated)
+        tracks_view.connect("track-removed",
+                            self.__on_tracks_view_track_removed)
+        tracks_view.show()
+        return tracks_view
+
     def __update_list_button(self, button):
         """
             Update list button based on current status

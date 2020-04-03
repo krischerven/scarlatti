@@ -50,7 +50,12 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         "status-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "volume-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "queue-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
-        "playback-changed": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "playback-added": (GObject.SignalFlags.RUN_FIRST, None,
+                           (GObject.TYPE_PYOBJECT,)),
+        "playback-updated": (GObject.SignalFlags.RUN_FIRST, None,
+                             (GObject.TYPE_PYOBJECT,)),
+        "playback-removed": (GObject.SignalFlags.RUN_FIRST, None,
+                             (GObject.TYPE_PYOBJECT,)),
         "rate-changed": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
     }
 

@@ -71,7 +71,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         return [
                (App().art, "artist-artwork-changed",
                 "_on_artist_artwork_changed"),
-               (App().player, "playback-changed", "_on_playback_changed"),
+               (App().player, "playback-added", "_on_playback_changed"),
+               (App().player, "playback-updated", "_on_playback_changed"),
+               (App().player, "playback-removed", "_on_playback_changed"),
                (App().settings, "changed::artist-artwork",
                 "_on_artist_artwork_setting_changed")
 
@@ -179,10 +181,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 self.__set_artwork()
                 self.__set_internal_size()
 
-    def _on_playback_changed(self, player):
+    def _on_playback_changed(self, *ignore):
         """
             Update add button
-            @param player as Player
         """
         self.__update_add_button()
 

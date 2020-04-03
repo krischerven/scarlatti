@@ -12,7 +12,7 @@
 
 from gi.repository import GLib
 
-from random import choice, shuffle
+from random import choice
 
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
@@ -60,10 +60,11 @@ class AlbumsPlayer:
                     tracks = list(set(self._albums[-1].tracks) |
                                   set(album.tracks))
                     self._albums[-1].set_tracks(tracks)
+                    emit_signal(self, "playback-updated", album)
                 else:
                     self._albums.append(album)
+                    emit_signal(self, "playback-added", album)
             self.update_next_prev()
-            emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::add_albums(): %s" % e)
 
@@ -79,7 +80,7 @@ class AlbumsPlayer:
                 self.skip_album()
             self._albums.remove(album)
             self.update_next_prev()
-            emit_signal(self, "playback-changed")
+            emit_signal(self, "playback-removed", album)
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
@@ -100,8 +101,8 @@ class AlbumsPlayer:
                 for album in self._albums:
                     if album.id == album_id:
                         self.remove_album(album)
+                        emit_signal(self, "playback-removed", album)
             self.update_next_prev()
-            emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album_by_ids(): %s" % e)
 
@@ -122,7 +123,8 @@ class AlbumsPlayer:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self._albums = albums
         self.load(track)
-        emit_signal(self, "playback-changed")
+        for album in albums:
+            emit_signal(self, "playback-added", album)
 
     def play_album_for_albums(self, album, albums):
         """
@@ -132,11 +134,14 @@ class AlbumsPlayer:
         """
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
+        for _album in self._albums:
+            emit_signal(self, "playback-removed", _album)
         if App().settings.get_value("shuffle"):
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
-        emit_signal(self, "playback-changed")
+        for _album in albums:
+            emit_signal(self, "playback-added", _album)
 
     def play_albums(self, albums):
         """
@@ -162,9 +167,10 @@ class AlbumsPlayer:
         """
             Clear all albums
         """
+        for album in self._albums:
+            emit_signal(self, "playback-removed", album)
         self._albums = []
         self.update_next_prev()
-        emit_signal(self, "playback-changed")
 
     def skip_album(self):
         """
@@ -239,25 +245,6 @@ class AlbumsPlayer:
 #######################
 # PRIVATE             #
 #######################
-    def __play_shuffle_albums(self, album, albums):
-        """
-            Start shuffle albums playback. Prepend album if not None
-            @param album as Album
-            @param albums as [albums]
-        """
-        track = None
-        if album is None:
-            album = choice(albums)
-        else:
-            self._albums = [album]
-            albums.remove(album)
-        shuffle(albums)
-        self._albums += albums
-        if album.tracks:
-            track = album.tracks[0]
-        if track is not None:
-            self.load(track)
-
     def __play_shuffle_tracks(self, album, albums):
         """
             Start shuffle tracks playback.

@@ -45,7 +45,9 @@ class CurrentAlbumsView(View, SignalsHelper):
         self.add_widget(self.__view, self.__banner)
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
-            (App().player, "playback-changed", "_on_playback_changed")
+            (App().player, "playback-added", "_on_playback_added"),
+            (App().player, "playback-updated", "_on_playback_updated"),
+            (App().player, "playback-removed", "_on_playback_removed")
         ]
 
     def populate(self):
@@ -102,16 +104,37 @@ class CurrentAlbumsView(View, SignalsHelper):
             self.__view.clear()
             self.populate()
 
-    def _on_playback_changed(self, *ignore):
+    def _on_playback_added(self, player, album):
         """
-            Clear and populate view again
+            Add album
+            @param player as Player
+            @param album as Album
         """
-        self.__view.stop()
-        self.__view.clear()
-        self.__banner.clear_button.set_sensitive(True)
-        self.__banner.jump_button.set_sensitive(True)
-        self.__banner.menu_button.set_sensitive(True)
-        self.populate()
+        self.__view.add_value(album)
+
+    def _on_playback_updated(self, player, album):
+        """
+            Reset album
+            @param player as Player
+            @param album as Album
+        """
+        for child in self.__view.children:
+            if child.album == album:
+                child.reset()
+                child.populate()
+                break
+
+    def _on_playback_removed(self, player, album):
+        """
+            Add album
+            @param player as Player
+            @param album as Album
+        """
+        for child in self.__view.children:
+            if child.album == album:
+                child.stop()
+                child.destroy()
+                break
 
 #######################
 # PRIVATE             #
