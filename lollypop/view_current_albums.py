@@ -131,7 +131,6 @@ class CurrentAlbumsView(View, SignalsHelper):
         """
         for child in self.__view.children:
             if child.album == album:
-                child.stop()
                 child.destroy()
                 break
 
