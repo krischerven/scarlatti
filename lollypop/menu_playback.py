@@ -458,8 +458,7 @@ class TrackPlaybackMenu(PlaybackMenu):
                     track = album.tracks[index]
                     album.remove_track(track)
                     break
-        App().player.set_next()
-        App().player.set_prev()
+        App().player.update_next_prev()
 
 #######################
 # PRIVATE             #
