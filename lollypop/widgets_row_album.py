@@ -406,11 +406,9 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
             @param row as TrackRow
         """
         row.destroy()
-        if row.track.album.remove_track(row.track):
-            App().player.remove_album(self.__album)
+        App().player.remove_track_from_album(row.track, row.track.album)
+        if len(self.children) == 0:
             self.destroy()
-        else:
-            App().player.update_next_prev()
 
     def __on_tracks_view_populated(self, view):
         """
