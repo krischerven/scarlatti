@@ -148,7 +148,7 @@ class LastFMBase:
                        track.artists[0],
                        track.album_name,
                        track.title,
-                       int(track.duration),
+                       track.duration // 1000,
                        track.mb_track_id)
 
     def love(self, artist, title):
