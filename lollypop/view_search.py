@@ -273,7 +273,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         if storage_type & StorageType.SEARCH:
             album = Album(album_id)
             self.__stack.current_child.albums_line_view.show()
-            self.__stack.current_child.albums_line_view.add_value(album.id)
+            self.__stack.current_child.albums_line_view.add_value(album)
             self.show_placeholder(False)
             # If artist name matchs, add it to artists line
             if album.artists:
