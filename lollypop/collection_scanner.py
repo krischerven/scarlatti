@@ -454,71 +454,71 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uris as [str]
             @thread safe
         """
-        SqlCursor.add(App().db)
-        App().art.clean_rounded()
-
-        (files, dirs) = self.__get_objects_for_uris(scan_type, uris)
-
-        if files is None:
-            App().notify.send("Lollypop",
-                              _("Scan disabled, missing collection"))
-            return
-
-        if scan_type == ScanType.NEW_FILES:
-            db_uris = App().tracks.get_uris(uris)
-        else:
-            db_uris = App().tracks.get_uris()
-
-        # Get mtime of all tracks to detect which has to be updated
-        db_mtimes = App().tracks.get_mtimes()
-        # * 2 => Scan + Save
-        self.__progress_total = len(files) * 2
-        self.__progress_count = 0
-        # Min: 1 thread, Max: 5 threads
-        count = max(1, min(5, cpu_count() // 2))
-        split_files = split_list(files, count)
-        self.__tags = {}
-        self.__pending_new_artist_ids = []
-        threads = []
-        for files in split_files:
-            thread = App().task_helper.run(self.__scan_files, files, db_mtimes,
-                                           scan_type)
-            threads.append(thread)
-
-        if scan_type == ScanType.EXTERNAL:
-            storage_type = StorageType.EXTERNAL
-        else:
-            storage_type = StorageType.COLLECTION
-        # Start getting files and populating DB
-        track_ids = []
-        i = 0
-        SqlCursor.add(App().db)
-        while threads:
-            thread = threads[i]
-            if not thread.isAlive():
-                threads.remove(thread)
-            track_ids += self.__save_in_db(storage_type)
-            if i >= len(threads) - 1:
-                i = 0
+        try:
+            SqlCursor.add(App().db)
+            App().art.clean_rounded()
+            (files, dirs) = self.__get_objects_for_uris(scan_type, uris)
+            if files is None:
+                App().notify.send("Lollypop",
+                                  _("Scan disabled, missing collection"))
+                return
+            if scan_type == ScanType.NEW_FILES:
+                db_uris = App().tracks.get_uris(uris)
             else:
-                i += 1
-        self.__remove_old_tracks(db_uris, scan_type)
-        SqlCursor.remove(App().db)
+                db_uris = App().tracks.get_uris()
 
-        if scan_type != ScanType.EXTERNAL:
-            self.__add_monitor(dirs)
-            GLib.idle_add(self.__finish, track_ids)
+            # Get mtime of all tracks to detect which has to be updated
+            db_mtimes = App().tracks.get_mtimes()
+            # * 2 => Scan + Save
+            self.__progress_total = len(files) * 2
+            self.__progress_count = 0
+            # Min: 1 thread, Max: 5 threads
+            count = max(1, min(5, cpu_count() // 2))
+            split_files = split_list(files, count)
+            self.__tags = {}
+            self.__pending_new_artist_ids = []
+            threads = []
+            for files in split_files:
+                thread = App().task_helper.run(self.__scan_files,
+                                               files, db_mtimes,
+                                               scan_type)
+                threads.append(thread)
 
-        if scan_type == ScanType.EXTERNAL:
+            if scan_type == ScanType.EXTERNAL:
+                storage_type = StorageType.EXTERNAL
+            else:
+                storage_type = StorageType.COLLECTION
+            # Start getting files and populating DB
             track_ids = []
-            for (mtime, uri) in files:
-                track_id = App().tracks.get_id_by_uri(uri)
-                track_ids.append(track_id)
-            albums = tracks_to_albums(
-                [Track(track_id) for track_id in track_ids])
-            App().player.play_albums(albums)
-        self.__tags = {}
-        self.__pending_new_artist_ids = []
+            i = 0
+            while threads:
+                thread = threads[i]
+                if not thread.isAlive():
+                    threads.remove(thread)
+                track_ids += self.__save_in_db(storage_type)
+                if i >= len(threads) - 1:
+                    i = 0
+                else:
+                    i += 1
+            self.__remove_old_tracks(db_uris, scan_type)
+
+            if scan_type != ScanType.EXTERNAL:
+                self.__add_monitor(dirs)
+                GLib.idle_add(self.__finish, track_ids)
+
+            if scan_type == ScanType.EXTERNAL:
+                track_ids = []
+                for (mtime, uri) in files:
+                    track_id = App().tracks.get_id_by_uri(uri)
+                    track_ids.append(track_id)
+                albums = tracks_to_albums(
+                    [Track(track_id) for track_id in track_ids])
+                App().player.play_albums(albums)
+            self.__tags = {}
+            self.__pending_new_artist_ids = []
+        except Exception as e:
+            Logger.warning("CollectionScanner::__scan(): %s", e)
+        SqlCursor.remove(App().db)
 
     def __scan_to_handle(self, uri):
         """
@@ -584,6 +584,9 @@ class CollectionScanner(GObject.GObject, TagReader):
         track_ids = []
         previous_album_id = None
         for uri in list(self.__tags.keys()):
+            # Handle a stop request
+            if self.__thread is None:
+                raise Exception("cancelled")
             Logger.debug("Adding file: %s" % uri)
             tags = self.__tags[uri]
             item = self.__add2db(uri, *tags, storage_type)
@@ -597,6 +600,9 @@ class CollectionScanner(GObject.GObject, TagReader):
                 items = []
                 previous_album_id = item.album_id
             del self.__tags[uri]
+        # Handle a stop request
+        if self.__thread is None:
+            raise Exception("cancelled")
         self.__notify_ui(items)
         return [item.track_id for item in items]
 
