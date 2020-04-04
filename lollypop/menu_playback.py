@@ -135,7 +135,7 @@ class ArtistPlaybackMenu(PlaybackMenu):
             True if current object in player
             return bool
         """
-        album_ids = App().albums.get_ids([self.__artist_id], [],
+        album_ids = App().albums.get_ids([], [self.__artist_id],
                                          self.__storage_type)
         return set(App().player.album_ids) & set(album_ids) == set(album_ids)
 
@@ -236,8 +236,7 @@ class GenrePlaybackMenu(PlaybackMenu):
         album_ids = App().albums.get_compilation_ids([self.__genre_id],
                                                      storage_type,
                                                      True)
-        album_ids += App().albums.get_ids([],
-                                          [self.__genre_id],
+        album_ids += App().albums.get_ids([self.__genre_id], [],
                                           storage_type,
                                           True)
         return album_ids

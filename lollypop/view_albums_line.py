@@ -153,7 +153,7 @@ class AlbumsArtistLineView(AlbumsLineView):
                     self.__genre_ids, self.storage_type)
             else:
                 album_ids = App().albums.get_ids(
-                    [self.__artist_id], self.__genre_ids, self.storage_type)
+                    self.__genre_ids, [self.__artist_id], self.storage_type)
             if excluded_album_id in album_ids:
                 album_ids.remove(excluded_album_id)
             return [Album(album_id) for album_id in album_ids]

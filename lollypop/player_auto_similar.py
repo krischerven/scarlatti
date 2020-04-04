@@ -73,7 +73,7 @@ class AutoSimilarPlayer:
         """
         # Get an album
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids(similar_artist_ids, [], storage_type)
+        album_ids = App().albums.get_ids([], similar_artist_ids, storage_type)
         shuffle(album_ids)
         while album_ids:
             album_id = album_ids.pop(0)

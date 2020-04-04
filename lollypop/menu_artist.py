@@ -54,7 +54,7 @@ class ArtistMenu(Gio.Menu):
         menu = Gio.Menu()
         self.append_section(_("Artist"), menu)
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([artist_id], [], storage_type, True)
+        album_ids = App().albums.get_ids([], [artist_id], storage_type, True)
         albums = [Album(album_id) for album_id in album_ids]
         menu.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
         menu.append_submenu(_("Playlists"), PlaylistsMenu(albums))

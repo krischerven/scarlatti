@@ -43,8 +43,7 @@ class GenreMenu(Gio.Menu):
         section = Gio.Menu()
         self.append_section(_("Add to"), section)
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([],
-                                         [genre_id],
+        album_ids = App().albums.get_ids([genre_id], [],
                                          storage_type,
                                          True)
         album_ids += App().albums.get_compilation_ids([genre_id],

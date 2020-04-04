@@ -112,10 +112,10 @@ class ShufflePlayer:
         """
         party_ids = App().settings.get_value("party-ids")
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([], party_ids, storage_type, True)
+        album_ids = App().albums.get_ids(party_ids, [], storage_type, True)
         # All albums are blacklisted, WTF?
         if not album_ids:
-            album_ids = App().albums.get_ids([], party_ids,
+            album_ids = App().albums.get_ids(party_ids, [],
                                              storage_type, False)
         for album in self._albums:
             emit_signal(self, "playback-removed", album)

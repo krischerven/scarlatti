@@ -58,7 +58,7 @@ def get_album_ids_for(genre_ids, artist_ids, storage_type):
     elif genre_ids and not artist_ids:
         if App().settings.get_value("show-compilations-in-album-view"):
             items = App().albums.get_compilation_ids(genre_ids, storage_type)
-        items += App().albums.get_ids([], genre_ids, storage_type)
+        items += App().albums.get_ids(genre_ids, [], storage_type)
     else:
-        items = App().albums.get_ids(artist_ids, genre_ids, storage_type)
+        items = App().albums.get_ids(genre_ids, artist_ids, storage_type)
     return items

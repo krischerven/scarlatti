@@ -146,8 +146,7 @@ class InformationView(View):
             widget.attach(albums_view, 2, 1, 1, 2)
             albums = []
             storage_type = get_default_storage_type()
-            for album_id in App().albums.get_ids([artist_id],
-                                                 [],
+            for album_id in App().albums.get_ids([], [artist_id],
                                                  storage_type):
                 albums.append(Album(album_id))
             if not albums:

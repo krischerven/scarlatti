@@ -91,7 +91,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
                                             ArtBehaviour.CACHE,
                                             self.__on_artist_artwork)
         else:
-            album_ids = App().albums.get_ids([self._data], [],
+            album_ids = App().albums.get_ids([], [self._data],
                                              StorageType.ALL)
             if album_ids:
                 shuffle(album_ids)

@@ -34,7 +34,7 @@ class ArtistProvider:
         artists = []
         (artist_id, db_name) = App().artists.get_id(artist)
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([artist_id], [], storage_type)
+        album_ids = App().albums.get_ids([], [artist_id], storage_type)
         if album_ids:
             storage_type = get_default_storage_type()
             genre_ids = App().albums.get_genre_ids(album_ids[0])
@@ -59,7 +59,7 @@ def play_artists(artist_ids, genre_ids):
         if App().player.is_party:
             App().lookup_action("party").change_state(
                 GLib.Variant("b", False))
-        album_ids = App().albums.get_ids(artist_ids, genre_ids, storage_type)
+        album_ids = App().albums.get_ids(genre_ids, artist_ids, storage_type)
         albums = [Album(album_id) for album_id in album_ids]
         App().player.play_albums(albums)
     except Exception as e:
@@ -75,7 +75,7 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
     """
     try:
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids(artist_ids, genre_ids, storage_type)
+        album_ids = App().albums.get_ids(genre_ids, artist_ids, storage_type)
         for album_id in album_ids:
             if add and album_id not in App().player.album_ids:
                 App().player.add_album(Album(album_id, genre_ids, artist_ids))

@@ -943,12 +943,12 @@ class AlbumsDatabase:
                 return v[0]
             return 0
 
-    def get_ids(self, artist_ids, genre_ids, storage_type,
+    def get_ids(self, genre_ids, artist_ids, storage_type,
                 ignore=False, orderby=None):
         """
             Get albums ids
-            @param artist_ids as [int]
             @param genre_ids as [int]
+            @param artist_ids as [int]
             @param storage_type as StorageType
             @param ignore as bool => ignore albums with loved == 1
             @param orderby as OrderBy
