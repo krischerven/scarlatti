@@ -122,9 +122,16 @@ class ArtistPlaybackMenu(PlaybackMenu):
         self.__storage_type = storage_type
         play_action = Gio.SimpleAction(name="artist_play_action")
         App().add_action(play_action)
-        play_action.connect("activate", self.__play)
+        play_action.connect("activate", self.__on_play_action_activate)
         menu_item = Gio.MenuItem.new(_("Play this artist"),
                                      "app.artist_play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action")
+        App().add_action(radio_action)
+        radio_action.connect("activate", self.__on_radio_action_activate)
+        menu_item = Gio.MenuItem.new(_("Play a radio"),
+                                     "app.radio_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         self._set_playback_actions()
@@ -163,7 +170,7 @@ class ArtistPlaybackMenu(PlaybackMenu):
 #######################
 # PRIVATE             #
 #######################
-    def __play(self, action, variant):
+    def __on_play_action_activate(self, action, variant):
         """
             Play albums
             @param Gio.SimpleAction
@@ -171,6 +178,14 @@ class ArtistPlaybackMenu(PlaybackMenu):
         """
         from lollypop.utils_artist import play_artists
         play_artists([self.__artist_id], [])
+
+    def __on_radio_action_activate(self, action, variant):
+        """
+            Play a radio linked to album
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().player.play_radio([self.__artist_id])
 
 
 class GenrePlaybackMenu(PlaybackMenu):
@@ -343,11 +358,18 @@ class AlbumPlaybackMenu(PlaybackMenu):
         """
         PlaybackMenu.__init__(self)
         self.__album = album
-        play_action = Gio.SimpleAction(name="album_play_action")
+        play_action = Gio.SimpleAction(name="play_action")
         App().add_action(play_action)
-        play_action.connect("activate", self.__play)
+        play_action.connect("activate", self.__on_play_action_activate)
         menu_item = Gio.MenuItem.new(_("Play this album"),
-                                     "app.album_play_action")
+                                     "app.play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action")
+        App().add_action(radio_action)
+        radio_action.connect("activate", self.__on_radio_action_activate)
+        menu_item = Gio.MenuItem.new(_("Play a radio"),
+                                     "app.radio_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         self._set_playback_actions()
@@ -382,13 +404,21 @@ class AlbumPlaybackMenu(PlaybackMenu):
 #######################
 # PRIVATE             #
 #######################
-    def __play(self, action, variant):
+    def __on_play_action_activate(self, action, variant):
         """
             Play album
             @param Gio.SimpleAction
             @param GLib.Variant
         """
         App().player.play_album(self.__album)
+
+    def __on_radio_action_activate(self, action, variant):
+        """
+            Play a radio linked to album
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().player.play_radio(self.__album.artist_ids)
 
 
 class TrackPlaybackMenu(PlaybackMenu):

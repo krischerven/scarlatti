@@ -15,11 +15,13 @@ from gi.repository import Gio
 from random import shuffle
 
 from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.logger import Logger
-from lollypop.define import App, Repeat
+from lollypop.define import App, Repeat, StorageType
 from lollypop.utils import get_network_available, sql_escape
 from lollypop.utils import get_default_storage_type
 from lollypop.utils_artist import ArtistProvider
+from lollypop.utils_album import tracks_to_albums
 
 
 class AutoSimilarPlayer:
@@ -46,6 +48,18 @@ class AutoSimilarPlayer:
         if similar_artist_ids:
             return self.__get_album_from_artists(similar_artist_ids)
         return None
+
+    def play_radio(self, artist_ids):
+        """
+            Play a radio based on current artist
+            @param artist_ids as [int]
+        """
+        genre_ids = App().artists.get_genre_ids(artist_ids,
+                                                StorageType.COLLECTION)
+        track_ids = App().tracks.get_randoms(genre_ids, StorageType.COLLECTION,
+                                             100)
+        albums = tracks_to_albums([Track(track_id) for track_id in track_ids])
+        self.play_albums(albums)
 
 #######################
 # PRIVATE             #

@@ -16,7 +16,7 @@ import itertools
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, StorageType
-from lollypop.utils import noaccents
+from lollypop.utils import noaccents, make_subrequest
 
 
 class TracksDatabase:
@@ -164,53 +164,6 @@ class TracksDatabase:
             if v is not None:
                 return v[0]
             return None
-
-    def get_id_by(self, name, album_id, artist_ids=[]):
-        """
-            Get track for name, album and artists
-            @param name as escaped str
-            @param album_id as int
-            @param artist_ids as [int]
-            @return track id as int
-        """
-        with SqlCursor(App().db) as sql:
-            if artist_ids:
-                filters = (name, album_id) + tuple(artist_ids)
-                request = "SELECT tracks.rowid FROM tracks\
-                           WHERE sql_escape(name) = ? COLLATE NOCASE\
-                           AND album_id = ?\
-                           AND EXISTS (\
-                                SELECT rowid\
-                                FROM track_artists\
-                                WHERE track_artists.track_id=tracks.rowid\
-                                AND ("
-                for artist_id in artist_ids:
-                    request += " track_artists.artist_id=? OR"
-                request += " 1=0))"
-            else:
-                filters = (name, album_id)
-                request = "SELECT tracks.rowid FROM tracks\
-                           WHERE sql_escape(name) = ? COLLATE NOCASE\
-                           AND album_id = ?"
-            result = sql.execute(request, filters)
-            v = result.fetchone()
-            if v is not None:
-                return v[0]
-            return None
-
-    def get_ids_by_artist(self, artist_id):
-        """
-            Return track id for artist
-            @param artist_id as int
-            @return [int]
-        """
-        with SqlCursor(App().db) as sql:
-            filters = (artist_id,)
-            request = "SELECT tracks.rowid FROM tracks, track_artists\
-                       WHERE track_artists.artist_id=? AND\
-                       tracks.rowid = track_artists.track_id"
-            result = sql.execute(request, filters)
-            return list(itertools.chain(*result))
 
     def get_name(self, track_id):
         """
@@ -758,20 +711,31 @@ class TracksDatabase:
                                  (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_randoms(self, storage_type, limit):
+    def get_randoms(self, genre_ids, storage_type, limit):
         """
             Return random tracks
-            @param limit as int
+            @param genre_ids as [int]
             @param storage_type as StorageType
-            @return array of track ids as int
+            @param limit as int
+            @return track ids as [int]
         """
         with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks WHERE storage_type & ?\
-                                  ORDER BY random() LIMIT ?",
-                                 (storage_type, limit))
-            tracks = list(itertools.chain(*result))
-            return tracks
+            filters = (storage_type,)
+            request = "SELECT tracks.rowid FROM tracks"
+            if genre_ids:
+                request += ",track_genres"
+            request += " WHERE storage_type & ? AND\
+                        tracks.rowid=track_genres.track_id"
+            if genre_ids:
+                filters += tuple(genre_ids)
+                request += " AND "
+                request += make_subrequest("track_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
+            request += " ORDER BY random() LIMIT ?"
+            filters += (limit,)
+            result = sql.execute(request, filters)
+            return list(itertools.chain(*result))
 
     def set_popularity(self, track_id, popularity):
         """

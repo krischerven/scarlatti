@@ -279,6 +279,27 @@ class ArtistsDatabase:
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
+    def get_genre_ids(self, artist_ids, storage_type):
+        """
+            Get genre ids for artist ids
+            @param artist_ids as [int]
+            @param storage_type as StorageType
+            @return genre ids as [int]
+        """
+        with SqlCursor(App().db) as sql:
+            filters = (storage_type,)
+            filters += tuple(artist_ids)
+            request = "SELECT DISTINCT album_genres.genre_id\
+                       FROM artists, album_genres, album_artists, albums\
+                       WHERE album_artists.album_id=album_genres.album_id\
+                       AND albums.storage_type & ?\
+                       AND albums.rowid=album_artists.album_id AND"
+            request += make_subrequest("album_artists.artist_id=?",
+                                       "OR",
+                                       len(artist_ids))
+            result = sql.execute(request, filters)
+            return list(itertools.chain(*result))
+
     def update_featuring(self):
         """
             Calculate featuring for current DB
