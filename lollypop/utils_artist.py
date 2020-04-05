@@ -12,40 +12,10 @@
 
 from gi.repository import GLib
 
-from random import shuffle
-
 from lollypop.logger import Logger
 from lollypop.define import App
 from lollypop.objects_album import Album
 from lollypop.utils import get_default_storage_type
-
-
-class ArtistProvider:
-    """
-        Internal lollypop provider API compatible with LastFM/SpotifySearch
-    """
-    def get_similar_artists(self, artist, cancellable):
-        """
-            Search similar artists
-            @param artist as str
-            @param cancellable as Gio.Cancellable
-            @return [(str, str)] : list of (artist, cover_uri)
-        """
-        artists = []
-        (artist_id, db_name) = App().artists.get_id(artist)
-        storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([], [artist_id], storage_type)
-        if album_ids:
-            storage_type = get_default_storage_type()
-            genre_ids = App().albums.get_genre_ids(album_ids[0])
-            artist_ids = App().artists.get(genre_ids, storage_type)
-            for (artist_id, name, sortname) in artist_ids:
-                artists.append((name, name, None))
-        shuffle(artists)
-        return artists[0:20]
-
-    def get_artist_id(self, artist_name, cancellable):
-        return artist_name
 
 
 def play_artists(artist_ids, genre_ids):

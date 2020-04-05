@@ -96,9 +96,8 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
-        menu_ext = SimilarsMenu()
+        menu_ext = SimilarsMenu(child.data)
         menu_ext.show()
-        menu_ext.populate(child.data)
         menu_widget.append_widget(menu_ext)
         return menu_widget
 

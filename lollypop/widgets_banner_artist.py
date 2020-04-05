@@ -149,9 +149,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
-        menu_ext = SimilarsMenu()
+        menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
-        menu_ext.populate(self.__artist_ids[0])
         menu_widget.append_widget(menu_ext)
         popup_widget(menu_widget, button)
 

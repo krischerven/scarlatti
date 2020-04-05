@@ -20,6 +20,9 @@ LOLLYPOP_DATA_PATH = GLib.get_user_data_dir() + "/lollypop"
 
 App = Gio.Application.get_default
 
+LASTFM_API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
+LASTFM_API_SECRET = "9254319364d73bec6c59ace485a95c98"
+
 GOOGLE_API_ID = "015987506728554693370:waw3yqru59a"
 
 MARGIN = 15

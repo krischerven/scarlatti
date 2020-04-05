@@ -57,6 +57,7 @@ from lollypop.objects_radio import Radio
 from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
+from lollypop.helper_token import TokenHelper
 from lollypop.collection_scanner import CollectionScanner
 
 
@@ -192,6 +193,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.art_helper = ArtHelper()
         self.art = Art()
         self.art.update_art_size()
+        self.token_helper = TokenHelper()
         self.spotify = SpotifySearch()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS

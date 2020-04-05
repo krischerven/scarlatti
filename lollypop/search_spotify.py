@@ -10,10 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Soup, GObject, Gio
+from gi.repository import GLib, GObject, Gio
 
 import json
-from base64 import b64encode
 from time import time, sleep
 from random import choice, shuffle
 from locale import getdefaultlocale
@@ -23,8 +22,7 @@ from lollypop.utils import emit_signal, get_default_storage_type
 from lollypop.objects_album import Album
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
-from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, App, StorageType
-from lollypop.define import Type
+from lollypop.define import App, StorageType, Type
 
 
 class SpotifySearch(GObject.Object):
@@ -44,54 +42,8 @@ class SpotifySearch(GObject.Object):
             Init object
         """
         GObject.Object.__init__(self)
-        self.__token_expires = 0
-        self.__token = None
-        self.__loading_token = False
         self.__is_running = False
         self.__cancellable = Gio.Cancellable()
-
-    def get_token(self, cancellable):
-        """
-            Get a new auth token
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            def on_response(uri, status, data):
-                try:
-                    decode = json.loads(data.decode("utf-8"))
-                    self.__token_expires = int(time()) +\
-                        int(decode["expires_in"])
-                    self.__token = decode["access_token"]
-                except Exception as e:
-                    Logger.error("SpotifySearch::get_token(): %s", e)
-            token_uri = "https://accounts.spotify.com/api/token"
-            credentials = "%s:%s" % (SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
-            encoded = b64encode(credentials.encode("utf-8"))
-            credentials = encoded.decode("utf-8")
-            data = {"grant_type": "client_credentials"}
-            msg = Soup.form_request_new_from_hash("POST", token_uri, data)
-            msg.request_headers.append("Authorization",
-                                       "Basic %s" % credentials)
-            App().task_helper.send_message(msg, cancellable, on_response)
-        except Exception as e:
-            Logger.error("SpotifySearch::get_token(): %s", e)
-
-    def wait_for_token(self, cancellable):
-        """
-            True if should wait for token
-            @param cancellable as Gio.Cancellable
-            @return bool
-        """
-        def on_token(token):
-            self.__loading_token = False
-        # Remove 60 seconds to be sure
-        wait = int(time()) + 60 > self.__token_expires or\
-            self.__token is None
-        if wait and not self.__loading_token:
-            self.__loading_token = True
-            App().task_helper.run(self.get_token, cancellable,
-                                  callback=(on_token,))
-        return wait
 
     def start(self):
         """
@@ -102,62 +54,27 @@ class SpotifySearch(GObject.Object):
         App().task_helper.run(self.__populate_db)
         return True
 
-    def get_artist_id(self, artist_name, cancellable):
-        """
-            Get artist id
-            @param artist_name as str
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            while self.wait_for_token(cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            artist_name = GLib.uri_escape_string(
-                artist_name, None, True).replace(" ", "+")
-            token = "Bearer %s" % self.__token
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            uri = "https://api.spotify.com/v1/search?q=%s&type=artist" %\
-                artist_name
-            (status, data) = helper.load_uri_content_sync(uri, None)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                for item in decode["artists"]["items"]:
-                    artist_id = item["id"]
-                    return artist_id
-        except Exception as e:
-            Logger.error("SpotifySearch::get_artist_id(): %s", e)
-        return None
-
     def search_similar_albums(self, cancellable):
         """
             Add similar albums to DB
             @param cancellable as Gio.Cancellable
         """
+        from lollypop.similars_spotify import SpotifySimilars
+        similars = SpotifySimilars()
         try:
-            while self.wait_for_token(cancellable):
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
-            token = "Bearer %s" % self.__token
+            token = "Bearer %s" % App().token_helper.spotify
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             storage_type = get_default_storage_type()
-            artist_ids = App().artists.get_randoms(
+            artists = App().artists.get_randoms(
                 self.__MAX_ITEMS_PER_STORAGE_TYPE, storage_type)
-            similar_ids = []
-            # Get similars spotify ids
-            for (artist_id, name, sortname) in artist_ids:
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                spotify_id = self.get_artist_id(name, cancellable)
-                if spotify_id is None:
-                    continue
-                similar_artists = self.get_similar_artists(spotify_id,
-                                                           cancellable)
-                for (similar_id, name, cover_uri) in similar_artists:
-                    similar_ids.append(similar_id)
+            artist_names = [name for (aid, name, sortname) in artists]
+            similar_ids = similars.get_similar_artist_ids(artist_names,
+                                                          cancellable)
             # Add albums
             shuffle(similar_ids)
             for similar_id in similar_ids[:self.__MAX_ITEMS_PER_STORAGE_TYPE]:
@@ -178,11 +95,11 @@ class SpotifySearch(GObject.Object):
         """
         locale = getdefaultlocale()[0][0:2]
         try:
-            while self.wait_for_token(cancellable):
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
-            token = "Bearer %s" % self.__token
+            token = "Bearer %s" % App().token_helper.spotify
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/browse/new-releases"
@@ -211,17 +128,17 @@ class SpotifySearch(GObject.Object):
     def get_similar_artists(self, artist_id, cancellable):
         """
            Get similar artists
-           @param artist_id as int
+           @param artist_id as str
            @param cancellable as Gio.Cancellable
            @return [(str, str)] : list of (artist, cover_uri)
         """
         artists = []
         try:
-            while self.wait_for_token(cancellable):
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
-            token = "Bearer %s" % self.__token
+            token = "Bearer %s" % App().token_helper.spotify
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/artists/%s/related-artists" %\
@@ -252,11 +169,11 @@ class SpotifySearch(GObject.Object):
         """
         try:
             storage_type = StorageType.SEARCH | StorageType.EPHEMERAL
-            while self.wait_for_token(cancellable):
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
-            token = "Bearer %s" % self.__token
+            token = "Bearer %s" % App().token_helper.spotify
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/search?"
@@ -284,12 +201,12 @@ class SpotifySearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         try:
-            while self.wait_for_token(cancellable):
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
             uri = "https://api.spotify.com/v1/albums/%s" % album_id
-            token = "Bearer %s" % self.__token
+            token = "Bearer %s" % App().token_helper.spotify
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             (status, data) = helper.load_uri_content_sync(uri, cancellable)
@@ -315,6 +232,7 @@ class SpotifySearch(GObject.Object):
     def is_running(self):
         """
             Return populate status
+            @return bool
         """
         return self.__is_running
 
@@ -391,11 +309,11 @@ class SpotifySearch(GObject.Object):
             @return {}
         """
         try:
-            while self.wait_for_token(cancellable):
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
                 sleep(1)
-            token = "Bearer %s" % self.__token
+            token = "Bearer %s" % App().token_helper.spotify
             helper = TaskHelper()
             helper.add_header("Authorization", token)
             uri = "https://api.spotify.com/v1/artists/%s/albums" % spotify_id

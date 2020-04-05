@@ -30,6 +30,7 @@ from pickle import load, dump
 import re
 
 from lollypop.define import App, LOLLYPOP_DATA_PATH
+from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET
 from lollypop.objects_track import Track
 from lollypop.utils import get_network_available
 from lollypop.logger import Logger
@@ -180,29 +181,6 @@ class LastFMBase:
                 track.unlove()
             except Exception as e:
                 Logger.error("LastFMBase::unlove(): %s" % e)
-
-    def get_similar_artists(self, artist, cancellable):
-        """
-            Search similar artists
-            @param artist as str
-            @param cancellable as Gio.Cancellable
-            @return [(str, str)] : list of (artist, cover_uri)
-        """
-        artists = []
-        try:
-            artist_item = self.get_artist(artist)
-            for similar_item in artist_item.get_similar(10):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                artists.append((None,
-                                similar_item.item.name,
-                                similar_item.item.get_cover_image()))
-        except Exception as e:
-            Logger.error("LastFMBase::get_similar_artists(): %s", e)
-        return artists
-
-    def get_artist_id(self, artist_name, cancellable):
-        return artist_name
 
     def set_loved(self, track, loved):
         """
@@ -428,8 +406,8 @@ class LastFM(LastFMBase, LastFMNetwork):
             self.__API_SECRET = auth.props.client_secret
         else:
             Logger.debug("LastFMNetwork.__init__(secret)")
-            self.__API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
-            self.__API_SECRET = "9254319364d73bec6c59ace485a95c98"
+            self.__API_KEY = LASTFM_API_KEY
+            self.__API_SECRET = LASTFM_API_SECRET
         LastFMNetwork.__init__(self,
                                api_key=self.__API_KEY,
                                api_secret=self.__API_SECRET)
