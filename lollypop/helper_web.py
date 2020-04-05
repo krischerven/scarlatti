@@ -123,8 +123,6 @@ class WebHelper(GObject.Object):
             @param helper as BaseWebHelper
             @param uri as str
         """
-        if uri:
-            self.__save_to_cache(uri)
         emit_signal(self, "loaded", uri)
 
     def __on_uri_loaded(self, helper, uri):
@@ -135,5 +133,6 @@ class WebHelper(GObject.Object):
         """
         if uri:
             self.__load_uri_content_with_helper(uri, helper)
+            self.__save_to_cache(uri)
         else:
             emit_signal(self, "loaded", "")
