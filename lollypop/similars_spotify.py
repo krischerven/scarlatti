@@ -70,7 +70,9 @@ class SpotifySimilars:
             if cancellable.is_cancelled():
                 return []
             spotify_id = self.get_artist_id(artist_name, cancellable)
-            if spotify_id is None or cancellable.is_cancelled():
+            if spotify_id is None:
+                continue
+            if cancellable.is_cancelled():
                 return []
             result += self.__get_similar_artists_from_spotify_id(spotify_id,
                                                                  cancellable)
@@ -88,7 +90,9 @@ class SpotifySimilars:
             if cancellable.is_cancelled():
                 return []
             spotify_id = self.get_artist_id(artist_name, cancellable)
-            if spotify_id is None or cancellable.is_cancelled():
+            if spotify_id is None:
+                continue
+            if cancellable.is_cancelled():
                 return []
             result += self.__get_similar_artists_from_spotify_id(spotify_id,
                                                                  cancellable)
