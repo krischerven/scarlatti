@@ -12,8 +12,10 @@
 
 from gi.repository import GLib, GObject
 
-from time import time
+from time import time, sleep
+import json
 
+from lollypop.helper_task import TaskHelper
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.objects_album import Album
@@ -35,6 +37,34 @@ class SpotifyHelper(GObject.Object):
             Init helper
         """
         GObject.Object.__init__(self)
+
+    def get_artist_id(self, artist_name, cancellable):
+        """
+            Get artist id
+            @param artist_name as str
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
+                sleep(1)
+            artist_name = GLib.uri_escape_string(
+                artist_name, None, True).replace(" ", "+")
+            token = "Bearer %s" % App().token_helper.spotify
+            helper = TaskHelper()
+            helper.add_header("Authorization", token)
+            uri = "https://api.spotify.com/v1/search?q=%s&type=artist" %\
+                artist_name
+            (status, data) = helper.load_uri_content_sync(uri, None)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for item in decode["artists"]["items"]:
+                    artist_id = item["id"]
+                    return artist_id
+        except Exception as e:
+            Logger.error("SpotifyHelper::get_artist_id(): %s", e)
+        return None
 
     def save_tracks_payload_to_db(self, payload, storage_type, cancellable):
         """

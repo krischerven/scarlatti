@@ -10,17 +10,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
-
 from time import sleep
 import json
 
 from lollypop.logger import Logger
 from lollypop.define import App
 from lollypop.helper_task import TaskHelper
+from lollypop.helper_spotify import SpotifyHelper
 
 
-class SpotifySimilars:
+class SpotifySimilars(SpotifyHelper):
     """
         Search similar artists with Spotify
     """
@@ -28,35 +27,7 @@ class SpotifySimilars:
         """
             Init provider
         """
-        pass
-
-    def get_artist_id(self, artist_name, cancellable):
-        """
-            Get artist id
-            @param artist_name as str
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            artist_name = GLib.uri_escape_string(
-                artist_name, None, True).replace(" ", "+")
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            uri = "https://api.spotify.com/v1/search?q=%s&type=artist" %\
-                artist_name
-            (status, data) = helper.load_uri_content_sync(uri, None)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                for item in decode["artists"]["items"]:
-                    artist_id = item["id"]
-                    return artist_id
-        except Exception as e:
-            Logger.error("SpotifySimilars::get_artist_id(): %s", e)
-        return None
+        SpotifyHelper.__init__(self)
 
     def get_similar_artist_ids(self, artist_names, cancellable):
         """
