@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GObject, Gio
+from gi.repository import Gio
 
 import json
 from time import time, sleep
@@ -31,14 +31,6 @@ class SpotifySearch(SpotifyHelper):
     """
     __MIN_ITEMS_PER_STORAGE_TYPE = 20
     __MAX_ITEMS_PER_STORAGE_TYPE = 50
-
-    gsignals = {
-        "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
-    for signal in gsignals:
-        args = gsignals[signal]
-        GObject.signal_new(signal, SpotifyHelper,
-                           args[0], args[1], args[2])
 
     def __init__(self):
         """
@@ -98,8 +90,8 @@ class SpotifySearch(SpotifyHelper):
             @param cancellable as Gio.Cancellable
         """
         Logger.info("Get new releases")
-        locale = getdefaultlocale()[0][0:2]
         try:
+            locale = getdefaultlocale()[0][0:2]
             while App().token_helper.wait_for_token("SPOTIFY", cancellable):
                 if cancellable.is_cancelled():
                     raise Exception("cancelled")
@@ -195,7 +187,7 @@ class SpotifySearch(SpotifyHelper):
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
         if not cancellable.is_cancelled():
-            emit_signal(self, "search-finished")
+            emit_signal(self, "finished")
 
     def load_tracks(self, album_id, storage_type, cancellable):
         """

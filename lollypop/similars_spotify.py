@@ -11,10 +11,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from time import sleep
+from random import choice
 import json
 
 from lollypop.logger import Logger
 from lollypop.define import App
+from lollypop.utils import emit_signal
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_spotify import SpotifyHelper
 
@@ -28,6 +30,24 @@ class SpotifySimilars(SpotifyHelper):
             Init provider
         """
         SpotifyHelper.__init__(self)
+
+    def load_similars(self, artist_ids, storage_type, cancellable):
+        """
+            Load similar artists for artist ids
+            @param artist_ids as int
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        names = [App().artists.get_name(artist_id) for artist_id in artist_ids]
+        spotify_ids = self.get_similar_artist_ids(names, cancellable)
+        for spotify_id in spotify_ids:
+            spotify_ids = self.get_artist_top_tracks(spotify_id, cancellable)
+            spotify_id = choice(spotify_ids)
+            payload = self.get_track_payload(spotify_id, cancellable)
+            self.save_tracks_payload_to_db([payload],
+                                           storage_type,
+                                           cancellable)
+        emit_signal(self, "finished")
 
     def get_similar_artist_ids(self, artist_names, cancellable):
         """

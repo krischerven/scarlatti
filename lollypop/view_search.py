@@ -163,12 +163,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 (self.__local_search, "match-artist", "_on_match_artist"),
                 (self.__local_search, "match-album", "_on_match_album"),
                 (self.__local_search, "match-track", "_on_match_track"),
-                (self.__local_search, "search-finished",
-                 "_on_search_finished"),
+                (self.__local_search, "finished", "_on_search_finished"),
                 (App().spotify, "match-album", "_on_match_album"),
                 (App().spotify, "match-track", "_on_match_track"),
-                (App().spotify, "search-finished",
-                 "_on_search_finished"),
+                (App().spotify, "finished", "_on_search_finished"),
         ]
 
     def populate(self):

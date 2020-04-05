@@ -26,7 +26,7 @@ class LocalSearch(GObject.Object):
         "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self):
@@ -180,7 +180,7 @@ class LocalSearch(GObject.Object):
             GLib.idle_add(self.emit, "match-artist", artist_id, storage_type)
         self.__search_count -= 1
         if self.__search_count == 0:
-            GLib.idle_add(self.emit, "search-finished")
+            GLib.idle_add(self.emit, "finished")
 
     def __get_albums(self, search, storage_type, cancellable):
         """
@@ -199,7 +199,7 @@ class LocalSearch(GObject.Object):
             GLib.idle_add(self.emit, "match-album", album_id, storage_type)
         self.__search_count -= 1
         if self.__search_count == 0:
-            GLib.idle_add(self.emit, "search-finished")
+            GLib.idle_add(self.emit, "finished")
 
     def __get_tracks(self, search, storage_type, cancellable):
         """
@@ -218,4 +218,4 @@ class LocalSearch(GObject.Object):
             GLib.idle_add(self.emit, "match-track", track_id, storage_type)
         self.__search_count -= 1
         if self.__search_count == 0:
-            GLib.idle_add(self.emit, "search-finished")
+            GLib.idle_add(self.emit, "finished")

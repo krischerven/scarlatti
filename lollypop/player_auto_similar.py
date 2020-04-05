@@ -18,7 +18,7 @@ from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.logger import Logger
 from lollypop.define import App, Repeat, StorageType
-from lollypop.utils import sql_escape
+from lollypop.utils import sql_escape, get_network_available
 from lollypop.utils import get_default_storage_type
 from lollypop.utils_album import tracks_to_albums
 
@@ -32,7 +32,8 @@ class AutoSimilarPlayer:
         """
             Init player
         """
-        self.__cancellable = Gio.Cancellable()
+        self.__next_cancellable = Gio.Cancellable()
+        self.__radio_cancellable = Gio.Cancellable()
         self.connect("next-changed", self.__on_next_changed)
 
     def next_album(self):
@@ -54,14 +55,39 @@ class AutoSimilarPlayer:
             Play a radio based on current artist
             @param artist_ids as [int]
         """
-        genre_ids = App().artists.get_genre_ids(artist_ids,
-                                                StorageType.COLLECTION)
-        track_ids = App().tracks.get_randoms(genre_ids,
-                                             StorageType.COLLECTION,
-                                             100)
-        albums = tracks_to_albums(
-            [Track(track_id) for track_id in track_ids])
-        self.play_albums(albums)
+        self.__radio_cancellable.cancel()
+        self.__radio_cancellable = Gio.Cancellable()
+
+        def on_match_track(similars, track_id, storage_type):
+            track = Track(track_id)
+            if self.albums:
+                self.add_album(track.album)
+            else:
+                self.play_album(track.album)
+
+        def on_finished(similars):
+            self.__radio_cancellable.cancel()
+
+        if get_network_available("SPOTIFY") and\
+                get_network_available("YOUTUBE"):
+            from lollypop.similars_spotify import SpotifySimilars
+            similars = SpotifySimilars()
+            similars.connect("match-track", on_match_track)
+            similars.connect("finished", on_finished)
+            self.clear_albums()
+            App().task_helper.run(similars.load_similars,
+                                  artist_ids,
+                                  StorageType.EPHEMERAL,
+                                  self.__radio_cancellable)
+        else:
+            genre_ids = App().artists.get_genre_ids(artist_ids,
+                                                    StorageType.COLLECTION)
+            track_ids = App().tracks.get_randoms(genre_ids,
+                                                 StorageType.COLLECTION,
+                                                 100)
+            albums = tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
+            self.play_albums(albums)
 
 #######################
 # PRIVATE             #
@@ -102,7 +128,7 @@ class AutoSimilarPlayer:
             Add one album from artists to player
             @param artists as []
         """
-        if self.__cancellable.is_cancelled():
+        if self.__next_cancellable.is_cancelled():
             return
         similar_artist_ids = self.__get_artist_ids(artists)
         album = None
@@ -117,7 +143,7 @@ class AutoSimilarPlayer:
             Add one album from artists to player
             @param artists as []
         """
-        if self.__cancellable.is_cancelled():
+        if self.__next_cancellable.is_cancelled():
             return
         similar_artist_ids = self.__get_artist_ids(artists)
         album = None
@@ -129,7 +155,7 @@ class AutoSimilarPlayer:
             App().task_helper.run(
                 similars.get_similar_artists,
                 App().player.current_track.artist_ids,
-                self.__cancellable,
+                self.__next_cancellable,
                 callback=(self.__on_get_local_similar_artists,))
         else:
             Logger.info("Found a similar album")
@@ -139,8 +165,11 @@ class AutoSimilarPlayer:
         """
             Add a new album if playback finished and wanted by user
         """
-        self.__cancellable.cancel()
-        self.__cancellable = Gio.Cancellable()
+        self.__next_cancellable.cancel()
+        # Do not load an album if a radio is loading
+        if not self.__radio_cancellable.is_cancelled():
+            return
+        self.__next_cancellable = Gio.Cancellable()
         # Check if we need to add a new album
         if App().settings.get_enum("repeat") == Repeat.AUTO_SIMILAR and\
                 player.next_track.id is None and\
@@ -152,5 +181,5 @@ class AutoSimilarPlayer:
             App().task_helper.run(
                 similars.get_similar_artists,
                 player.current_track.artist_ids,
-                self.__cancellable,
+                self.__next_cancellable,
                 callback=(self.__on_get_similar_artists,))
