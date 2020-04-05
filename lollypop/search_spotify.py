@@ -59,6 +59,7 @@ class SpotifySearch(GObject.Object):
             Add similar albums to DB
             @param cancellable as Gio.Cancellable
         """
+        Logger.info("Get similar albums")
         from lollypop.similars_spotify import SpotifySimilars
         similars = SpotifySimilars()
         try:
@@ -93,6 +94,7 @@ class SpotifySearch(GObject.Object):
             Get new released albums from spotify
             @param cancellable as Gio.Cancellable
         """
+        Logger.info("Get new releases")
         locale = getdefaultlocale()[0][0:2]
         try:
             while App().token_helper.wait_for_token("SPOTIFY", cancellable):
