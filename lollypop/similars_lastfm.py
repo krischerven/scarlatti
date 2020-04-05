@@ -44,4 +44,6 @@ class LastFMSimilars:
                                    similar_item.item.get_cover_image()))
             except Exception as e:
                 Logger.error("LastFMSimilars::get_similar_artists(): %s", e)
+        if result:
+            Logger.info("Found similar artists with LastFMSimilars")
         return result

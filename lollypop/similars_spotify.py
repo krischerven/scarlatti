@@ -84,7 +84,10 @@ class SpotifySimilars:
             spotify_id = self.get_artist_id(artist_name, cancellable)
             result += self.__get_similar_artists_from_spotify_id(spotify_id,
                                                                  cancellable)
-        return [(name, uri) for (spotify_id, name, uri) in result]
+        result = [(name, uri) for (spotify_id, name, uri) in result]
+        if result:
+            Logger.info("Found similar artists with SpotifySimilars")
+        return result
 
 #######################
 # PRIVATE             #

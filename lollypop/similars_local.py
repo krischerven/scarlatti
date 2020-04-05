@@ -13,6 +13,7 @@
 from random import shuffle
 
 from lollypop.define import App, StorageType
+from lollypop.logger import Logger
 
 
 class LocalSimilars:
@@ -36,4 +37,7 @@ class LocalSimilars:
                                                 StorageType.COLLECTION)
         artists = App().artists.get(genre_ids, StorageType.COLLECTION)
         shuffle(artists)
-        return [(name, None) for (artist_id, name, sortname) in artists]
+        result = [(name, None) for (artist_id, name, sortname) in artists]
+        if result:
+            Logger.info("Found similar artists with LocalSimilars")
+        return result
