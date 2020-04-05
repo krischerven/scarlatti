@@ -67,7 +67,11 @@ class SpotifySimilars:
         """
         result = []
         for artist_name in artist_names:
+            if cancellable.is_cancelled():
+                return []
             spotify_id = self.get_artist_id(artist_name, cancellable)
+            if spotify_id is None or cancellable.is_cancelled():
+                return []
             result += self.__get_similar_artists_from_spotify_id(spotify_id,
                                                                  cancellable)
         return [spotify_id for (spotify_id, name, uri) in result]
@@ -81,7 +85,11 @@ class SpotifySimilars:
         """
         result = []
         for artist_name in artist_names:
+            if cancellable.is_cancelled():
+                return []
             spotify_id = self.get_artist_id(artist_name, cancellable)
+            if spotify_id is None or cancellable.is_cancelled():
+                return []
             result += self.__get_similar_artists_from_spotify_id(spotify_id,
                                                                  cancellable)
         result = [(name, uri) for (spotify_id, name, uri) in result]
@@ -123,8 +131,8 @@ class SpotifySimilars:
                     artists.append((item["id"],
                                     item["name"],
                                     image_uri))
-        except Exception as e:
+        except:
             Logger.error(
                 "SpotifySimilars::__get_similar_artists_from_spotify_id(): %s",
-                e)
+                spotify_id)
         return artists
