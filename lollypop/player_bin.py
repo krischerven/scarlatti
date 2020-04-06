@@ -366,10 +366,11 @@ class BinPlayer:
         """
         if get_network_available():
             self.__cancellable.cancel()
-            self.__cancellable = Gio.Cancellable()
+            self.__cancellable = Gio.Cancellable.new()
             from lollypop.helper_web import WebHelper
             helper = WebHelper(track, self.__cancellable)
-            helper.connect("loaded", self.__on_web_helper_loaded, track)
+            helper.connect("loaded", self.__on_web_helper_loaded,
+                           track, self.__cancellable)
             helper.load()
         else:
             self.skip_album()
@@ -406,13 +407,16 @@ class BinPlayer:
         App().settings.set_value("volume-rate", GLib.Variant("d", self.volume))
         emit_signal(self, "volume-changed")
 
-    def __on_web_helper_loaded(self, helper, uri, track):
+    def __on_web_helper_loaded(self, helper, uri, track, cancellable):
         """
             Play track URI
             @param helper as WebHelper
             @param uri as str
             @param track as Track
+            @param cancellable as Gio.Cancellable
         """
+        if cancellable.is_cancelled():
+            return
         if uri:
             track.set_uri(uri)
             self.load(track)
