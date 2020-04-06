@@ -195,7 +195,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Set previous track
         """
-        if self.current_track.id is None:
+        if self._current_playback_track.id is None:
             return
         if isinstance(self.current_track, Radio):
             return
@@ -213,7 +213,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Play next track
         """
-        if self.current_track.id is None:
+        if self._current_playback_track.id is None:
             return
         if isinstance(self.current_track, Radio) or\
                 self._current_track.id == self.__stop_after_track_id:
