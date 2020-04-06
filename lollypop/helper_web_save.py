@@ -27,11 +27,13 @@ class SaveWebHelper:
        Web helper for saving Spotify payloads
     """
 
-    def save_tracks_payload_to_db(self, payload, storage_type, cancellable):
+    def save_tracks_payload_to_db(self, payload, storage_type,
+                                  save_artwork, cancellable):
         """
             Create albums from a track payload
             @param payload as {}
             @param storage_type as StorageType
+            @param save_artwork as bool
             @param cancellable as Gio.Cancellable
         """
         # Populate tracks
@@ -42,16 +44,19 @@ class SaveWebHelper:
             if track_id < 0:
                 track_id = self.__save_track(item, storage_type)
                 track = Track(track_id)
-                self.save_artwork(track,
-                                  item["album"]["images"][0]["url"],
-                                  cancellable)
+                if save_artwork:
+                    self.save_artwork(track,
+                                      item["album"]["images"][0]["url"],
+                                      cancellable)
             emit_signal(self, "match-track", track_id, storage_type)
 
-    def save_albums_payload_to_db(self, payload, storage_type, cancellable):
+    def save_albums_payload_to_db(self, payload, storage_type,
+                                  save_artwork, cancellable):
         """
             Create albums from albums payload
             @param payload as {}
             @param storage_type as StorageType
+            @param save_artwork as bool
             @param cancellable as Gio.Cancellable
         """
         for album_item in payload:
@@ -67,9 +72,10 @@ class SaveWebHelper:
                 continue
             album_id = self.__save_album(album_item, storage_type)
             album = Album(album_id)
-            self.save_artwork(album,
-                              album_item["images"][0]["url"],
-                              cancellable)
+            if save_artwork:
+                self.save_artwork(album,
+                                  album_item["images"][0]["url"],
+                                  cancellable)
             emit_signal(self, "match-album", album_id, storage_type)
 
     def save_artwork(self, obj, cover_uri, cancellable):

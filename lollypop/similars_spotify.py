@@ -49,12 +49,14 @@ class SpotifySimilars(SpotifyWebHelper):
             payload = self.get_track_payload(spotify_id, cancellable)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
+                                           True,
                                            cancellable)
         shuffle(track_ids)
         for spotify_id in track_ids:
             payload = self.get_track_payload(spotify_id, cancellable)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
+                                           True,
                                            cancellable)
         emit_signal(self, "finished")
 

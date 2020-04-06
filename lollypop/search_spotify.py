@@ -80,6 +80,7 @@ class SpotifySearch(SpotifyWebHelper):
                     self.save_albums_payload_to_db(
                                            [choice(albums_payload)],
                                            StorageType.SPOTIFY_SIMILARS,
+                                           True,
                                            cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search_similar_albums(): %s", e)
@@ -110,6 +111,7 @@ class SpotifySearch(SpotifyWebHelper):
                     self.save_albums_payload_to_db(
                                              decode["albums"]["items"],
                                              StorageType.SPOTIFY_NEW_RELEASES,
+                                             True,
                                              cancellable)
                     # Check if storage type needs to be updated
                     # Check if albums newer than a week are enough
@@ -180,9 +182,11 @@ class SpotifySearch(SpotifyWebHelper):
                 decode = json.loads(data.decode("utf-8"))
                 self.save_tracks_payload_to_db(decode["tracks"]["items"],
                                                storage_type,
+                                               False,
                                                cancellable)
                 self.save_albums_payload_to_db(decode["albums"]["items"],
                                                storage_type,
+                                               True,
                                                cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
@@ -213,6 +217,7 @@ class SpotifySearch(SpotifyWebHelper):
                     item["album"] = decode
                 self.save_tracks_payload_to_db(tracks_payload,
                                                storage_type,
+                                               False,
                                                cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::load_tracks(): %s", e)

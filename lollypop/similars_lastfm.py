@@ -57,12 +57,14 @@ class LastFMSimilars(MusicBrainzWebHelper):
             payload = self.get_track_payload(track_id)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
+                                           True,
                                            cancellable)
         shuffle(track_ids)
         for track_id in track_ids:
             payload = self.get_track_payload(track_id)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
+                                           True,
                                            cancellable)
         emit_signal(self, "finished")
 
