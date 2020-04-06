@@ -296,6 +296,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             self._current_playback_track = self._current_track
         ShufflePlayer._on_stream_start(self, bus, message)
         BinPlayer._on_stream_start(self, bus, message)
+        AutoSimilarPlayer._on_stream_start(self, bus, message)
         self.set_next()
         self.set_prev()
 

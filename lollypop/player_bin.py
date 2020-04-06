@@ -246,8 +246,7 @@ class BinPlayer:
         """
         Logger.debug("BinPlayer::_load_track(): %s" % track.uri)
         try:
-            if self._current_track.is_web:
-                emit_signal(self, "loading-changed", False, track)
+            emit_signal(self, "loading-changed", False, self._current_track)
             self._current_track = track
             # If track_uri is different, preload has happened
             # See Player.set_next()
@@ -270,8 +269,7 @@ class BinPlayer:
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        if self._current_track.is_web:
-            emit_signal(self, "loading-changed", False, self._current_track)
+        emit_signal(self, "loading-changed", False, self._current_track)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)

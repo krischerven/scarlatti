@@ -19,7 +19,7 @@ from lollypop.objects_track import Track
 from lollypop.logger import Logger
 from lollypop.define import App, Repeat, StorageType
 from lollypop.utils import sql_escape, get_network_available
-from lollypop.utils import get_default_storage_type
+from lollypop.utils import get_default_storage_type, emit_signal
 from lollypop.utils_album import tracks_to_albums
 
 
@@ -69,6 +69,7 @@ class AutoSimilarPlayer:
             Play a radio from the Spotify for artist ids
             @param artist_ids as [int]
         """
+        emit_signal(self, "loading-changed", True, Track())
         self.__radio_cancellable.cancel()
         self.__radio_cancellable = Gio.Cancellable()
 
@@ -99,6 +100,7 @@ class AutoSimilarPlayer:
             Play a radio from the Last.FM for artist ids
             @param artist_ids as [int]
         """
+        emit_signal(self, "loading-changed", True, Track())
         self.__radio_cancellable.cancel()
         self.__radio_cancellable = Gio.Cancellable()
 
@@ -124,6 +126,15 @@ class AutoSimilarPlayer:
                                   artist_ids,
                                   StorageType.EPHEMERAL,
                                   self.__radio_cancellable)
+
+    def _on_stream_start(self, bus, message):
+        """
+            Cancel radio loading if current not a web track
+            @param bus as Gst.Bus
+            @param message as Gst.Message
+        """
+        if not self.current_track.is_web:
+            self.__radio_cancellable.cancel()
 
 #######################
 # PRIVATE             #
