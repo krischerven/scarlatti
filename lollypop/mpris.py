@@ -377,6 +377,7 @@ class MPRIS(Server):
             return "Stopped"
 
     def __update_metadata(self):
+        self.__metadata = {}
         if App().player.current_track.id is None or\
                 self.__get_status() == "Stopped":
             self.__metadata = {"mpris:trackid": GLib.Variant(
@@ -423,9 +424,7 @@ class MPRIS(Server):
                 cover_path = App().art.get_album_cache_path(
                     App().player.current_track.album,
                     ArtSize.MPRIS, ArtSize.MPRIS)
-            if cover_path is None:
-                self.__metadata["mpris:artUrl"] = GLib.Variant("s", "")
-            else:
+            if cover_path is not None:
                 self.__metadata["mpris:artUrl"] = GLib.Variant(
                     "s",
                     "file://" + cover_path)
