@@ -423,7 +423,9 @@ class MPRIS(Server):
                 cover_path = App().art.get_album_cache_path(
                     App().player.current_track.album,
                     ArtSize.MPRIS, ArtSize.MPRIS)
-            if cover_path is not None:
+            if cover_path is None:
+                self.__metadata["mpris:artUrl"] = GLib.Variant("s", "")
+            else:
                 self.__metadata["mpris:artUrl"] = GLib.Variant(
                     "s",
                     "file://" + cover_path)

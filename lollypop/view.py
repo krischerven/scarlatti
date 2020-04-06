@@ -172,20 +172,6 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
         except Exception as e:
             Logger.error("View::activate_child: %s" % e)
 
-    def search_prev(self, text):
-        """
-            Search and hilight prev child
-            @param text as str
-        """
-        pass
-
-    def search_next(self, text):
-        """
-            Search and hilight next child
-            @param text as str
-        """
-        pass
-
     def set_populated_scrolled_position(self, position):
         """
             Set scrolled position on populated
