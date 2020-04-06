@@ -10,12 +10,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET
-from lollypop.logger import Logger
 from pylast import LastFMNetwork
+from random import choice, shuffle
+
+from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET, App
+from lollypop.logger import Logger
+from lollypop.utils import emit_signal
+from lollypop.helper_spotify import SpotifyHelper
 
 
-class LastFMSimilars:
+# Last.FM API is not useful to get albums
+class LastFMSimilars(SpotifyHelper):
     """
         Search similar artists with Last.FM
     """
@@ -23,8 +28,41 @@ class LastFMSimilars:
         """
             Init provider
         """
+        SpotifyHelper.__init__(self)
         self.__pylast = LastFMNetwork(api_key=LASTFM_API_KEY,
                                       api_secret=LASTFM_API_SECRET)
+
+    def load_similars(self, artist_ids, storage_type, cancellable):
+        """
+            Load similar artists for artist ids
+            @param artist_ids as int
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        names = [App().artists.get_name(artist_id) for artist_id in artist_ids]
+        result = self.get_similar_artists(names, cancellable)
+        spotify_ids = []
+        for (artist_name, cover_uri) in result:
+            spotify_id = self.get_artist_id(artist_name, cancellable)
+            if spotify_id is not None:
+                spotify_ids.append(spotify_id)
+        track_ids = []
+        for spotify_id in spotify_ids:
+            spotify_ids = self.get_artist_top_tracks(spotify_id, cancellable)
+            # We want some randomizing so keep tracks for later usage
+            spotify_id = choice(spotify_ids)
+            track_ids += spotify_ids
+            payload = self.get_track_payload(spotify_id, cancellable)
+            self.save_tracks_payload_to_db([payload],
+                                           storage_type,
+                                           cancellable)
+        shuffle(track_ids)
+        for spotify_id in track_ids:
+            payload = self.get_track_payload(spotify_id, cancellable)
+            self.save_tracks_payload_to_db([payload],
+                                           storage_type,
+                                           cancellable)
+        emit_signal(self, "finished")
 
     def get_similar_artists(self, artist_names, cancellable):
         """

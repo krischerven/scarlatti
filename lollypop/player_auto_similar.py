@@ -50,9 +50,23 @@ class AutoSimilarPlayer:
             return Track(track_ids[0]).album
         return None
 
-    def play_radio(self, artist_ids):
+    def play_radio_from_collection(self, artist_ids):
         """
-            Play a radio based on current artist
+            Play a radio from collection for artist ids
+            @param artist_ids as [int]
+        """
+        genre_ids = App().artists.get_genre_ids(artist_ids,
+                                                StorageType.COLLECTION)
+        track_ids = App().tracks.get_randoms(genre_ids,
+                                             StorageType.COLLECTION,
+                                             100)
+        albums = tracks_to_albums(
+            [Track(track_id) for track_id in track_ids])
+        self.play_albums(albums)
+
+    def play_radio_from_spotify(self, artist_ids):
+        """
+            Play a radio from the Spotify for artist ids
             @param artist_ids as [int]
         """
         self.__radio_cancellable.cancel()
@@ -79,15 +93,37 @@ class AutoSimilarPlayer:
                                   artist_ids,
                                   StorageType.EPHEMERAL,
                                   self.__radio_cancellable)
-        else:
-            genre_ids = App().artists.get_genre_ids(artist_ids,
-                                                    StorageType.COLLECTION)
-            track_ids = App().tracks.get_randoms(genre_ids,
-                                                 StorageType.COLLECTION,
-                                                 100)
-            albums = tracks_to_albums(
-                [Track(track_id) for track_id in track_ids])
-            self.play_albums(albums)
+
+    def play_radio_from_lastfm(self, artist_ids):
+        """
+            Play a radio from the Last.FM for artist ids
+            @param artist_ids as [int]
+        """
+        self.__radio_cancellable.cancel()
+        self.__radio_cancellable = Gio.Cancellable()
+
+        def on_match_track(similars, track_id, storage_type):
+            track = Track(track_id)
+            if self.albums:
+                self.add_album(track.album)
+            else:
+                self.play_album(track.album)
+
+        def on_finished(similars):
+            self.__radio_cancellable.cancel()
+
+        if get_network_available("SPOTIFY") and\
+                get_network_available("LASTFM") and\
+                get_network_available("YOUTUBE"):
+            from lollypop.similars_lastfm import LastFMSimilars
+            similars = LastFMSimilars()
+            similars.connect("match-track", on_match_track)
+            similars.connect("finished", on_finished)
+            self.clear_albums()
+            App().task_helper.run(similars.load_similars,
+                                  artist_ids,
+                                  StorageType.EPHEMERAL,
+                                  self.__radio_cancellable)
 
 #######################
 # PRIVATE             #
