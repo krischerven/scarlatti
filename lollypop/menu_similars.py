@@ -46,7 +46,7 @@ class ArtistRow(Gtk.ListBoxRow):
         self.__artwork = Gtk.Image.new()
         self.__artwork.set_size_request(ArtSize.SMALL,
                                         ArtSize.SMALL)
-        if App().art.artist_artwork_exists(artist_name) is not None:
+        if App().art.get_artist_artwork_path(artist_name) is not None:
             App().art_helper.set_artist_artwork(artist_name,
                                                 ArtSize.SMALL,
                                                 ArtSize.SMALL,
