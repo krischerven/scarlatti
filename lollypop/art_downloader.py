@@ -469,10 +469,8 @@ class DownloaderArt:
                 uri = "http://musicbrainz.org/ws/2/release-group/" +\
                       "?query=%s&fmt=json"
             string = GLib.uri_escape_string(string, None, True)
-            helper = TaskHelper()
-            helper.add_header("User-Agent",
-                              "org.gnome.Lollypop/%s" % App().version)
-            (status, data) = helper.load_uri_content_sync(uri % string,
+            (status, data) = App().task_helper.load_uri_content_sync(
+                                                          uri % string,
                                                           cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))

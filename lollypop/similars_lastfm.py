@@ -16,11 +16,11 @@ from random import choice, shuffle
 from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET, App
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
-from lollypop.helper_spotify import SpotifyHelper
+from lollypop.helper_web_musicbrainz import MusicBrainzWebHelper
 
 
 # Last.FM API is not useful to get albums
-class LastFMSimilars(SpotifyHelper):
+class LastFMSimilars(MusicBrainzWebHelper):
     """
         Search similar artists with Last.FM
     """
@@ -28,7 +28,7 @@ class LastFMSimilars(SpotifyHelper):
         """
             Init provider
         """
-        SpotifyHelper.__init__(self)
+        MusicBrainzWebHelper.__init__(self)
         self.__pylast = LastFMNetwork(api_key=LASTFM_API_KEY,
                                       api_secret=LASTFM_API_SECRET)
 
@@ -41,24 +41,26 @@ class LastFMSimilars(SpotifyHelper):
         """
         names = [App().artists.get_name(artist_id) for artist_id in artist_ids]
         result = self.get_similar_artists(names, cancellable)
-        spotify_ids = []
+        artist_ids = []
         for (artist_name, cover_uri) in result:
-            spotify_id = self.get_artist_id(artist_name, cancellable)
-            if spotify_id is not None:
-                spotify_ids.append(spotify_id)
+            artist_id = self.get_artist_id(artist_name, cancellable)
+            if artist_id is not None:
+                artist_ids.append(artist_id)
         track_ids = []
-        for spotify_id in spotify_ids:
-            spotify_ids = self.get_artist_top_tracks(spotify_id, cancellable)
+        for artist_id in artist_ids:
+            _track_ids = self.get_artist_top_tracks(artist_id, cancellable)
+            if not _track_ids:
+                continue
             # We want some randomizing so keep tracks for later usage
-            spotify_id = choice(spotify_ids)
-            track_ids += spotify_ids
-            payload = self.get_track_payload(spotify_id, cancellable)
+            track_id = choice(_track_ids)
+            track_ids += _track_ids
+            payload = self.get_track_payload(track_id)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
                                            cancellable)
         shuffle(track_ids)
-        for spotify_id in track_ids:
-            payload = self.get_track_payload(spotify_id, cancellable)
+        for track_id in track_ids:
+            payload = self.get_track_payload(track_id)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
                                            cancellable)

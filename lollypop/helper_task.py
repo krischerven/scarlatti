@@ -16,6 +16,7 @@ from gi.repository import GLib, Soup
 
 from threading import Thread
 
+from lollypop.define import App
 from lollypop.logger import Logger
 
 
@@ -95,6 +96,9 @@ class TaskHelper:
         """
         try:
             session = Soup.Session.new()
+            session.set_property(
+                "user-agent",
+                "Lollypop/%s (cedric.bellegarde@adishatz.org)" % App().version)
             # Set headers
             if self.__headers:
                 msg = Soup.Message.new("GET", uri)

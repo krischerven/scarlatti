@@ -112,7 +112,7 @@ class AutoSimilarPlayer:
         def on_finished(similars):
             self.__radio_cancellable.cancel()
 
-        if get_network_available("SPOTIFY") and\
+        if get_network_available("MUSICBRAINZ") and\
                 get_network_available("LASTFM") and\
                 get_network_available("YOUTUBE"):
             from lollypop.similars_lastfm import LastFMSimilars

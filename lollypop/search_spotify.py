@@ -21,11 +21,11 @@ from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_default_storage_type
 from lollypop.sqlcursor import SqlCursor
 from lollypop.helper_task import TaskHelper
-from lollypop.helper_spotify import SpotifyHelper
+from lollypop.helper_web_spotify import SpotifyWebHelper
 from lollypop.define import App, StorageType
 
 
-class SpotifySearch(SpotifyHelper):
+class SpotifySearch(SpotifyWebHelper):
     """
         Search for Spotify
     """
@@ -36,7 +36,7 @@ class SpotifySearch(SpotifyHelper):
         """
             Init object
         """
-        SpotifyHelper.__init__(self)
+        SpotifyWebHelper.__init__(self)
         self.__is_running = False
         self.__cancellable = Gio.Cancellable()
 

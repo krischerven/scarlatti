@@ -10,13 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GObject
+from gi.repository import GLib
 
-from time import time, sleep
+from time import time
 import json
-from locale import getdefaultlocale
 
-from lollypop.helper_task import TaskHelper
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.objects_album import Album
@@ -24,102 +22,10 @@ from lollypop.objects_track import Track
 from lollypop.define import App, Type
 
 
-class SpotifyHelper(GObject.Object):
+class SaveWebHelper:
     """
-        Helper for Spotify
+       Web helper for saving Spotify payloads
     """
-
-    __gsignals__ = {
-        "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
-
-    def __init__(self):
-        """
-            Init helper
-        """
-        GObject.Object.__init__(self)
-
-    def get_artist_id(self, artist_name, cancellable):
-        """
-            Get artist id
-            @param artist_name as str
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            artist_name = GLib.uri_escape_string(
-                artist_name, None, True).replace(" ", "+")
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            uri = "https://api.spotify.com/v1/search?q=%s&type=artist" %\
-                artist_name
-            (status, data) = helper.load_uri_content_sync(uri, None)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                for item in decode["artists"]["items"]:
-                    return item["id"]
-        except Exception as e:
-            Logger.error("SpotifyHelper::get_artist_id(): %s", e)
-        return None
-
-    def get_track_payload(self, spotify_id, cancellable):
-        """
-            Get track payload for spotify id
-            @param spotify_id as str
-            @param cancellable as Gio.Cancellable
-            @return {}
-        """
-        try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            uri = "https://api.spotify.com/v1/tracks/%s" % spotify_id
-            (status, data) = helper.load_uri_content_sync(uri, None)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                return decode
-        except Exception as e:
-            Logger.error("SpotifyHelper::get_track_payload(): %s", e)
-        return None
-
-    def get_artist_top_tracks(self, spotify_id, cancellable):
-        """
-            Get top tracks for spotify id
-            @param spotify_id as str
-            @param cancellable as Gio.Cancellable
-            @return str
-        """
-        try:
-            locale = getdefaultlocale()[0][0:2]
-            track_ids = []
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            uri = "https://api.spotify.com/v1/artists/%s/top-tracks" %\
-                spotify_id
-            uri += "?country=%s" % locale
-            (status, data) = helper.load_uri_content_sync(uri, None)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                for item in decode["tracks"]:
-                    track_ids.append(item["id"])
-        except Exception as e:
-            Logger.error("SpotifyHelper::get_artist_top_tracks(): %s", e)
-        return track_ids
 
     def save_tracks_payload_to_db(self, payload, storage_type, cancellable):
         """
@@ -136,12 +42,10 @@ class SpotifyHelper(GObject.Object):
             if track_id < 0:
                 track_id = self.__save_track(item, storage_type)
                 track = Track(track_id)
-                self.download_cover(track,
-                                    item["album"]["images"][0]["url"],
-                                    storage_type,
-                                    cancellable)
-            else:
-                emit_signal(self, "match-track", track_id, storage_type)
+                self.save_artwork(track,
+                                  item["album"]["images"][0]["url"],
+                                  cancellable)
+            emit_signal(self, "match-track", track_id, storage_type)
 
     def save_albums_payload_to_db(self, payload, storage_type, cancellable):
         """
@@ -156,30 +60,23 @@ class SpotifyHelper(GObject.Object):
             album_id = App().albums.get_id_for_mb_album_id(album_item["id"])
             if album_id >= 0:
                 album = Album(album_id)
-                if App().art.get_album_artwork_uri(album) is None:
-                    self.download_cover(album,
-                                        album_item["images"][0]["url"],
-                                        storage_type,
-                                        cancellable)
-                else:
-                    emit_signal(self, "match-album", album_id, storage_type)
+                self.save_artwork(album,
+                                  album_item["images"][0]["url"],
+                                  cancellable)
+                emit_signal(self, "match-album", album_id, storage_type)
                 continue
             album_id = self.__save_album(album_item, storage_type)
             album = Album(album_id)
-            if App().art.get_album_artwork_uri(album) is None:
-                self.download_cover(album,
-                                    album_item["images"][0]["url"],
-                                    storage_type,
-                                    cancellable)
-            else:
-                emit_signal(self, "match-album", album_id, storage_type)
+            self.save_artwork(album,
+                              album_item["images"][0]["url"],
+                              cancellable)
+            emit_signal(self, "match-album", album_id, storage_type)
 
-    def download_cover(self, obj, cover_uri, storage_type, cancellable):
+    def save_artwork(self, obj, cover_uri, cancellable):
         """
-            Create album and download cover
+            Save artwork for obj
             @param obj as Album/Track
-            @param cover_uri as str
-            @param storage_type as StorageType
+            @param cover_uri/mbid as str
             @param cancellable as Gio.Cancellable
         """
         try:
@@ -189,24 +86,46 @@ class SpotifyHelper(GObject.Object):
                 album = obj
             else:
                 album = obj.album
-            if App().art.get_album_artwork_uri(album) is None and\
-                    cover_uri is not None:
+            if App().art.get_album_artwork_uri(album) is None:
+                # We need to get URI from mbid
+                if not cover_uri.startswith("http"):
+                    cover_uri = self.__get_cover_art_uri(cover_uri,
+                                                         cancellable)
+                if cover_uri is None:
+                    return
                 (status, data) = App().task_helper.load_uri_content_sync(
                                                         cover_uri,
                                                         cancellable)
                 if status:
                     App().art.save_album_artwork(album, data)
-            if isinstance(obj, Album):
-                emit_signal(self, "match-album", album.id, storage_type)
-            else:
-                emit_signal(self, "match-track", obj.id, storage_type)
         except Exception as e:
             Logger.error(
-                "SpotifyHelper::download_cover(): %s", e)
+                "SaveWebHelper::save_artwork(): %s", e)
 
 #######################
 # PRIVATE             #
 #######################
+    def __get_cover_art_uri(self, mbid, cancellable):
+        """
+            Get cover art URI for mbid
+            @param mbid as str
+            @param cancellable as Gio.Cancellable
+            @return str/None
+        """
+        try:
+            uri = "http://coverartarchive.org/release/%s" % mbid
+            (status, data) = App().task_helper.load_uri_content_sync(uri, None)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for image in decode["images"]:
+                    if not image["front"]:
+                        continue
+                    return image["image"]
+        except Exception as e:
+            Logger.error(
+                "MusicBrainzWebHelper::__get_cover_art_uri(): %s", e)
+        return None
+
     def __save_album(self, payload, storage_type):
         """
             Save album payload to DB
@@ -223,7 +142,7 @@ class SpotifyHelper(GObject.Object):
         album_artists = ";".join(album_artists)
         album_name = payload["name"]
         mtime = int(time())
-        Logger.debug("SpotifyHelper::__save_album(): %s - %s",
+        Logger.debug("SpotifyWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
         item = App().scanner.save_album(
                         album_artists,
@@ -249,7 +168,7 @@ class SpotifyHelper(GObject.Object):
         _album_artists = []
         for artist in payload["album"]["artists"]:
             _album_artists.append(artist["name"])
-        Logger.debug("SpotifyHelper::__save_track(): %s - %s",
+        Logger.debug("SpotifyWebHelper::save_track(): %s - %s",
                      _artists, title)
         # Translate to tag value
         artists = ";".join(_artists)
