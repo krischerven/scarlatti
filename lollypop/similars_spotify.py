@@ -11,7 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from time import sleep
-from random import choice
+from random import choice, shuffle
 import json
 
 from lollypop.logger import Logger
@@ -40,9 +40,18 @@ class SpotifySimilars(SpotifyHelper):
         """
         names = [App().artists.get_name(artist_id) for artist_id in artist_ids]
         spotify_ids = self.get_similar_artist_ids(names, cancellable)
+        track_ids = []
         for spotify_id in spotify_ids:
             spotify_ids = self.get_artist_top_tracks(spotify_id, cancellable)
+            # We want some randomizing so keep tracks for later usage
             spotify_id = choice(spotify_ids)
+            track_ids += spotify_ids
+            payload = self.get_track_payload(spotify_id, cancellable)
+            self.save_tracks_payload_to_db([payload],
+                                           storage_type,
+                                           cancellable)
+        shuffle(track_ids)
+        for spotify_id in track_ids:
             payload = self.get_track_payload(spotify_id, cancellable)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
