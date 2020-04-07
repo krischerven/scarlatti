@@ -17,7 +17,7 @@ from lollypop.similars_spotify import SpotifySimilars
 from lollypop.similars_lastfm import LastFMSimilars
 
 
-class Similars(LocalSimilars, SpotifySimilars, LastFMSimilars):
+class Similars():
     """
         Search similar artists
     """
@@ -25,9 +25,9 @@ class Similars(LocalSimilars, SpotifySimilars, LastFMSimilars):
         """
             Init similars
         """
-        LocalSimilars.__init__(self)
-        SpotifySimilars.__init__(self)
-        LastFMSimilars.__init__(self)
+        self.__local_helper = LocalSimilars()
+        self.__spotify_helper = SpotifySimilars()
+        self.__lastfm_helper = LastFMSimilars()
 
     def get_similar_artists(self, artist_ids, cancellable):
         """
@@ -42,13 +42,13 @@ class Similars(LocalSimilars, SpotifySimilars, LastFMSimilars):
             artist_names.append(App().artists.get_name(artist_id))
 
         if get_network_available("SPOTIFY"):
-            result = SpotifySimilars.get_similar_artists(
-                self, artist_names, cancellable)
+            result = self.__local_helper.get_similar_artists(
+                artist_names, cancellable)
         if not result and App().lastfm is not None and\
                 get_network_available("LASTFM"):
-            result = LastFMSimilars.get_similar_artists(
-                self, artist_names, cancellable)
+            result = self.__lastfm_helper.get_similar_artists(
+                artist_names, cancellable)
         if not result:
-            result = LocalSimilars.get_similar_artists(
-                self, artist_ids, cancellable)
+            result = self.__local_helper.get_similar_artists(
+                artist_ids, cancellable)
         return result
