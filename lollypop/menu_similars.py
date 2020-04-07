@@ -118,6 +118,9 @@ class ArtistRow(Gtk.ListBoxRow):
                                                    self.__cancellable,
                                                    self.__on_uri_content)
                 self.__cover_uri = None
+            # Cache for later usage
+            else:
+                App().art.cache_artist_artwork(self.__artist_name)
             self.__artwork.get_style_context().add_class("circle-icon")
             self.__artwork.set_from_icon_name("avatar-default-symbolic",
                                               Gtk.IconSize.INVALID)
