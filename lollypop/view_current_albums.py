@@ -123,6 +123,18 @@ class CurrentAlbumsView(View, SignalsHelper):
                 child.reset()
                 break
 
+    def _on_playback_setted(self, player, albums):
+        """
+            Add album
+            @param player as Player
+            @param albums as [Album]
+        """
+        if albums:
+            self.__view.populate(albums)
+        else:
+            self.__view.stop()
+            self.__view.clear()
+
     def _on_playback_removed(self, player, album):
         """
             Add album

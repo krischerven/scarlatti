@@ -54,6 +54,8 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                            (GObject.TYPE_PYOBJECT,)),
         "playback-updated": (GObject.SignalFlags.RUN_FIRST, None,
                              (GObject.TYPE_PYOBJECT,)),
+        "playback-setted": (GObject.SignalFlags.RUN_FIRST, None,
+                            (GObject.TYPE_PYOBJECT,)),
         "playback-removed": (GObject.SignalFlags.RUN_FIRST, None,
                              (GObject.TYPE_PYOBJECT,)),
         "rate-changed": (GObject.SignalFlags.RUN_FIRST, None, (int, int))
