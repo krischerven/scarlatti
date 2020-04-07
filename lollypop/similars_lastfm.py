@@ -82,8 +82,7 @@ class LastFMSimilars(MusicBrainzWebHelper):
                 for similar_item in artist_item.get_similar(10):
                     if cancellable.is_cancelled():
                         raise Exception("cancelled")
-                    result.append((similar_item.item.name,
-                                   similar_item.item.get_cover_image()))
+                    result.append((similar_item.item.name, None))
             except Exception as e:
                 Logger.error("LastFMSimilars::get_similar_artists(): %s", e)
         if result:
