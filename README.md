@@ -43,6 +43,7 @@ It provides:
 - `python-gobject`
 - `python-sqlite`
 - `python-pylast >= 1.0`
+- `beautifulsoup4`
 
 ## Building from Git
 
