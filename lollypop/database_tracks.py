@@ -724,9 +724,9 @@ class TracksDatabase:
             request = "SELECT tracks.rowid FROM tracks"
             if genre_ids:
                 request += ",track_genres"
-            request += " WHERE storage_type & ? AND\
-                        tracks.rowid=track_genres.track_id"
+            request += " WHERE storage_type & ?"
             if genre_ids:
+                request += "AND tracks.rowid=track_genres.track_id"
                 filters += tuple(genre_ids)
                 request += " AND "
                 request += make_subrequest("track_genres.genre_id=?",
