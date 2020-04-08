@@ -83,7 +83,7 @@ class LastFMSearch(SaveWebHelper):
         """
         tracks = []
         album_payload = {}
-        album_payload["id"] = "lastfm:%s" % payload["album"]["mbid"]
+        album_payload["id"] = "lf:%s" % payload["album"]["mbid"]
         album_payload["name"] = payload["album"]["name"]
         album_payload["artists"] = [{"name": payload["album"]["artist"]}]
         album_payload["total_tracks"] = len(payload["album"]["tracks"])
@@ -96,7 +96,7 @@ class LastFMSearch(SaveWebHelper):
         i = 1
         for track in payload["album"]["tracks"]:
             track_payload = {}
-            track_payload["id"] = "mb:%s" % track["mbid"]
+            track_payload["id"] = "lf:%s" % track["mbid"]
             track_payload["name"] = track["name"]
             track_payload["artists"] = [{"name": track["artist"]}]
             track_payload["disc_number"] = "1"

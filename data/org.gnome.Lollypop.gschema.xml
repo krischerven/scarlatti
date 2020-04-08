@@ -85,9 +85,9 @@
             <summary>Enabled genres in party mode</summary>
             <description>ID for genres.</description>
         </key>
-        <key type="b" name="search-spotify">
-            <default>false</default>
-            <summary>Search on Spotify</summary>
+        <key type="s" name="web-search">
+            <default>"NONE"</default>
+            <summary>Search on the Web</summary>
             <description></description>
         </key>
         <key type="b" name="sync-usb-disks">

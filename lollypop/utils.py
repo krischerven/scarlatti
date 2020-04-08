@@ -456,6 +456,9 @@ def popup_widget(widget, parent, x=None, y=None):
     def on_hidden(widget, hide, popover):
         popover.popdown()
 
+    def on_unmap(popover, parent):
+        parent.unset_state_flags(Gtk.StateFlags.SELECTED)
+
     if App().window.is_adaptive:
         App().window.container.show_menu(widget)
         return None
@@ -464,6 +467,8 @@ def popup_widget(widget, parent, x=None, y=None):
         popover = Popover()
         popover.add(widget)
         widget.connect("hidden", on_hidden, popover)
+        popover.connect("unmap", on_unmap, parent)
+        parent.set_state_flags(Gtk.StateFlags.SELECTED, False)
         popover.set_relative_to(parent)
         if x is not None and y is not None:
             rect = Gdk.Rectangle()

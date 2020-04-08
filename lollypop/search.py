@@ -12,7 +12,7 @@
 
 from gi.repository import GObject
 
-from lollypop.define import StorageType
+from lollypop.define import StorageType, App
 from lollypop.utils import emit_signal
 from lollypop.search_local import LocalSearch
 
@@ -25,7 +25,7 @@ class Search(GObject.Object):
         "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "finished": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
     def __init__(self):
@@ -43,8 +43,9 @@ class Search(GObject.Object):
             Set web search to name
             @param name as str
         """
-        self.__web_search.destroy()
-        self.__web_search = None
+        if self.__web_search is not None:
+            self.__web_search.destroy()
+            self.__web_search = None
         if name == "SPOTIFY":
             from lollypop.search_spotify import SpotifySearch
             self.__web_search = SpotifySearch()
@@ -62,6 +63,7 @@ class Search(GObject.Object):
         """
         mbid = album.mb_album_id
         if mbid.startswith("lf:"):
+            # Track always loaded at album creation for now
             pass
         else:
             from lollypop.search_spotify import SpotifySearch
@@ -77,11 +79,13 @@ class Search(GObject.Object):
         storage_type = StorageType.COLLECTION |\
             StorageType.SAVED |\
             StorageType.SEARCH
-        self.__local_search.get(search, storage_type, cancellable)
+        App().task_helper.run(self.__local_search.get,
+                              search, storage_type, cancellable)
         self.__search_count += 1
         if self.__web_search is not None:
             storage_type = StorageType.SEARCH | StorageType.EPHEMERAL
-            self.__web_search.get(search, storage_type, cancellable)
+            App().task_helper.run(self.__web_search.get,
+                                  search, storage_type, cancellable)
             self.__search_count += 1
 
 #######################
@@ -93,23 +97,17 @@ class Search(GObject.Object):
             @param search as Search provider
         """
         self.__search_count -= 1
-        if self.__search_count == 0:
-            emit_signal(self, "finished")
+        emit_signal(self, "finished", self.__search_count == 0)
 
     def __connect_search_signals(self, search):
         """
             Connect search signals
             @param search as Search provider
         """
-        self.__local_search.connect(
-            "match-artist",
-            lambda x, y, z: self.emit("match-artist", y, z))
-        self.__local_search.connect(
-            "match-album",
-            lambda x, y, z: self.emit("match-album", y, z))
-        self.__local_search.connect(
-            "match-track",
-            lambda x, y, z: self.emit("match-track", y, z))
-        self.__local_search.connect(
-            "finished",
-            self.__on_finished)
+        search.connect("match-artist",
+                       lambda x, y, z: self.emit("match-artist", y, z))
+        search.connect("match-album",
+                       lambda x, y, z: self.emit("match-album", y, z))
+        search.connect("match-track",
+                       lambda x, y, z: self.emit("match-track", y, z))
+        search.connect("finished", self.__on_finished)

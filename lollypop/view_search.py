@@ -145,6 +145,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__timeout_id = None
         self.__current_search = ""
         self.__search = Search()
+        self.__search.set_web_search(
+            App().settings.get_value("web-search").get_string())
         self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
@@ -162,7 +164,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 (self.__search, "match-artist", "_on_match_artist"),
                 (self.__search, "match-album", "_on_match_album"),
                 (self.__search, "match-track", "_on_match_track"),
-                (self.__search, "finished", "_on_search_finished")
+                (self.__search, "finished", "_on_search_finished"),
+                (App().settings, "changed::web-search",
+                 "_on_web_search_changed")
         ]
 
     def populate(self):
@@ -279,10 +283,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.search_tracks_view.append_row(track)
             self.show_placeholder(False)
 
-    def _on_search_finished(self, search_handler):
+    def _on_search_finished(self, search_handler, last):
         """
             Stop spinner and show placeholder if not result
             @param search_handler as LocalSearch/SpotifySearch
+            @param last as bool
         """
         tracks_len = len(
             self.__stack.current_child.search_tracks_view.children)
@@ -292,9 +297,18 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.artists_line_view.children)
         empty = albums_len == 0 and tracks_len == 0 and artists_len == 0
         self.__stack.set_visible_child(self.__stack.current_child)
-        self.__banner.spinner.stop()
-        if empty:
-            self.show_placeholder(True, _("No results for this search"))
+        if last:
+            self.__banner.spinner.stop()
+            if empty:
+                self.show_placeholder(True, _("No results for this search"))
+
+    def _on_web_search_changed(self, settings, value):
+        """
+            Show/hide labels
+            @param settings as Gio.Settings
+            @param value as GLib.Variant
+        """
+        self.__search.set_web_search(value.get_string())
 
 #######################
 # PRIVATE             #

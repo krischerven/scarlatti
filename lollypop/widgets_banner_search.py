@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ArtSize, ViewType
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import get_network_available
+from lollypop.utils import popup_widget
 
 
 class SearchBannerWidget(BannerWidget):
@@ -29,7 +29,7 @@ class SearchBannerWidget(BannerWidget):
         BannerWidget.__init__(self, ViewType.OVERLAY)
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SearchBannerWidget.ui")
-        self.__spotify_button = builder.get_object("spotify_button")
+        self.__menu = builder.get_object("menu")
         self.__spinner = builder.get_object("spinner")
         self.__entry = builder.get_object("entry")
         widget = builder.get_object("widget")
@@ -37,14 +37,6 @@ class SearchBannerWidget(BannerWidget):
         self._overlay.set_overlay_pass_through(widget, True)
         self.connect("map", self.__on_map)
         builder.connect_signals(self)
-        if not get_network_available("SPOTIFY") or\
-                not get_network_available("YOUTUBE"):
-            self.__spotify_button.set_sensitive(False)
-            App().settings.set_value("search-spotify",
-                                     GLib.Variant("b", False))
-        else:
-            self.__spotify_button.set_active(
-                App().settings.get_value("search-spotify"))
 
     def update_for_width(self, width):
         """
@@ -89,13 +81,17 @@ class SearchBannerWidget(BannerWidget):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__entry.set_size_request(self.width / 3, -1)
 
-    def _on_spotify_button_toggled(self, button):
+    def _on_menu_button_clicked(self, button):
         """
-            Update setting
+            Show playlist menu
             @param button as Gtk.Button
         """
-        App().settings.set_value("search-spotify",
-                                 GLib.Variant("b", button.get_active()))
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_search import SearchMenu
+        menu = SearchMenu(App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)
 
 #######################
 # PRIVATE             #
