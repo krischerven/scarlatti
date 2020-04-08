@@ -18,7 +18,6 @@ from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
 from lollypop.search import Search
 from lollypop.view import View
-from lollypop.utils import escape, noaccents
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -257,14 +256,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.albums_line_view.show()
             self.__stack.current_child.albums_line_view.add_value(album)
             self.show_placeholder(False)
-            # If artist name matchs, add it to artists line
-            if album.artists:
-                artist = escape(noaccents(album.artists[0]))
-                search = escape(noaccents(self.__current_search))
-                if artist.find(search) != -1:
-                    self._on_match_artist(search,
-                                          album.artist_ids[0],
-                                          storage_type)
 
     def _on_match_track(self, search, track_id, storage_type):
         """
