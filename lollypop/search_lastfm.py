@@ -57,11 +57,14 @@ class LastFMSearch(SaveWebHelper):
                     uri, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
-                    payload = self.__get_spotify_payload(decode["album"])
-                    self.save_tracks_payload_to_db(payload,
-                                                   storage_type,
-                                                   True,
-                                                   cancellable)
+                    try:
+                        payload = self.__get_spotify_payload(decode["album"])
+                        self.save_tracks_payload_to_db(payload,
+                                                       storage_type,
+                                                       True,
+                                                       cancellable)
+                    except:
+                        Logger.warning("LastFMSearch::get(): %s", decode)
         except Exception as e:
             Logger.warning("LastFMSearch::get(): %s", e)
         if not cancellable.is_cancelled():
