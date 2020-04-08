@@ -95,8 +95,9 @@ class LastFMSearch(SaveWebHelper):
         i = 1
         for track in album["tracks"]["track"]:
             track_payload = {}
-            track_payload["id"] = "lf:%s-%s" % (track["artist"]["name"],
-                                                track["name"])
+            track_payload["id"] = "lf:%s-%s-%s" % (track["artist"]["name"],
+                                                   album["name"],
+                                                   track["name"])
             track_payload["name"] = track["name"]
             track_payload["artists"] = [track["artist"]]
             track_payload["disc_number"] = "1"

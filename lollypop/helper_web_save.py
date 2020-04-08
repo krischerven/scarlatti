@@ -51,6 +51,7 @@ class SaveWebHelper(GObject.Object):
         """
         # Populate tracks
         artwork_uri = None
+        track = None
         for item in payload:
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
@@ -63,7 +64,7 @@ class SaveWebHelper(GObject.Object):
                 track = Track(track_id)
             if not match_album:
                 emit_signal(self, "match-track", track_id, storage_type)
-        if match_album:
+        if match_album and track is not None:
             if artwork_uri is not None:
                 self.save_artwork(track,
                                   artwork_uri,
