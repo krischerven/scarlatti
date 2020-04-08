@@ -133,11 +133,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         View.__init__(self,
                       StorageType.COLLECTION |
-                      StorageType.SAVED |
-                      StorageType.SEARCH |
-                      StorageType.EPHEMERAL |
-                      StorageType.SPOTIFY_NEW_RELEASES |
-                      StorageType.SPOTIFY_SIMILARS,
+                      StorageType.SAVED,
                       ViewType.SEARCH |
                       ViewType.SCROLLED |
                       ViewType.OVERLAY)
