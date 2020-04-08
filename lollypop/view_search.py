@@ -295,7 +295,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             @param settings as Gio.Settings
             @param value as GLib.Variant
         """
-        self.__search.set_web_search(value)
+        self.__search.set_web_search(
+            App().settings.get_value("web-search").get_string())
 
 #######################
 # PRIVATE             #
