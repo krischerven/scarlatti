@@ -30,6 +30,7 @@ class SpotifyWebHelper(GObject.Object, SaveWebHelper):
     __gsignals__ = {
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -119,6 +120,35 @@ class SpotifyWebHelper(GObject.Object, SaveWebHelper):
         except Exception as e:
             Logger.error("SpotifyWebHelper::get_artist_top_tracks(): %s", e)
         return track_ids
+
+    def load_tracks(self, album_id, storage_type, cancellable):
+        """
+            Load tracks for album
+            @param album_id as str
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
+                if cancellable.is_cancelled():
+                    raise Exception("cancelled")
+                sleep(1)
+            uri = "https://api.spotify.com/v1/albums/%s" % album_id
+            token = "Bearer %s" % App().token_helper.spotify
+            helper = TaskHelper()
+            helper.add_header("Authorization", token)
+            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                tracks_payload = decode["tracks"]["items"]
+                for item in tracks_payload:
+                    item["album"] = decode
+                self.save_tracks_payload_to_db(tracks_payload,
+                                               storage_type,
+                                               False,
+                                               cancellable)
+        except Exception as e:
+            Logger.warning("SpotifyWebHelper::load_tracks(): %s", e)
 
 #######################
 # PRIVATE             #

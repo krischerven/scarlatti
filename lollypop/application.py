@@ -33,7 +33,6 @@ except Exception as e:
     LastFM = None
 
 from lollypop.utils import init_proxy_from_gnome, emit_signal
-from lollypop.utils import get_network_available
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
@@ -42,7 +41,7 @@ from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
 from lollypop.art import Art
 from lollypop.logger import Logger
-from lollypop.search_spotify import SpotifySearch
+from lollypop.ws_director import DirectorWebService
 from lollypop.sqlcursor import SqlCursor
 from lollypop.settings import Settings
 from lollypop.database_albums import AlbumsDatabase
@@ -108,7 +107,6 @@ class Application(Gtk.Application, ApplicationActions):
         self.shown_sidebar_tooltip = False
         self.__window = None
         self.__fs_window = None
-        self.__spotify_timeout_id = None
         settings = Gio.Settings.new("org.gnome.desktop.interface")
         self.animations = settings.get_value("enable-animations").get_boolean()
         GLib.set_application_name("Lollypop")
@@ -194,7 +192,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.art = Art()
         self.art.update_art_size()
         self.token_helper = TokenHelper()
-        self.spotify = SpotifySearch()
+        self.ws_director = DirectorWebService()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
             MPRIS(self)
@@ -211,31 +209,6 @@ class Application(Gtk.Application, ApplicationActions):
                 not monitor.get_network_metered() and\
                 self.settings.get_value("recent-youtube-dl"):
             self.task_helper.run(install_youtube_dl)
-        self.start_spotify()
-
-    def start_spotify(self):
-        """
-            Start spotify timeout and start a new populate
-        """
-        if Type.SUGGESTIONS not in\
-                self.settings.get_value("shown-album-lists"):
-            return
-        monitor = Gio.NetworkMonitor.get_default()
-        if not monitor.get_network_metered() and\
-                get_network_available("SPOTIFY") and\
-                self.__spotify_timeout_id is None:
-            self.spotify.start()
-            self.__spotify_timeout_id = GLib.timeout_add_seconds(
-                3600, self.spotify.start)
-
-    def stop_spotify(self):
-        """
-            Stop spotify timeout and stop current populate
-        """
-        if self.__spotify_timeout_id is not None:
-            self.spotify.stop()
-            GLib.source_remove(self.__spotify_timeout_id)
-            self.__spotify_timeout_id = None
 
     def do_startup(self):
         """
@@ -258,8 +231,7 @@ class Application(Gtk.Application, ApplicationActions):
         """
         self.__window.container.stop()
         self.__window.hide()
-        if self.spotify.is_running:
-            self.spotify.stop()
+        if not self.ws_director.stop():
             GLib.timeout_add(100, self.quit, vacuum)
             return
         if self.settings.get_value("save-state"):

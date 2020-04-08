@@ -16,9 +16,9 @@ from gettext import gettext as _
 
 from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
-from lollypop.search_local import LocalSearch
+from lollypop.search import Search
 from lollypop.view import View
-from lollypop.utils import get_network_available, escape, noaccents
+from lollypop.utils import escape, noaccents
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -144,8 +144,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         Gtk.Bin.__init__(self)
         self.__timeout_id = None
         self.__current_search = ""
-        self.__local_search = LocalSearch()
-        self.__searches_count = 0
+        self.__search = Search()
         self.__cancellable = Gio.Cancellable()
         self._empty_message = _("Search for artists, albums and tracks")
         self._empty_icon_name = "edit-find-symbolic"
@@ -160,13 +159,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                               _("Search for artists, albums and tracks"))
         self.set_search(initial_search)
         return [
-                (self.__local_search, "match-artist", "_on_match_artist"),
-                (self.__local_search, "match-album", "_on_match_album"),
-                (self.__local_search, "match-track", "_on_match_track"),
-                (self.__local_search, "finished", "_on_search_finished"),
-                (App().spotify, "match-album", "_on_match_album"),
-                (App().spotify, "match-track", "_on_match_track"),
-                (App().spotify, "finished", "_on_search_finished"),
+                (self.__search, "match-artist", "_on_match_artist"),
+                (self.__search, "match-album", "_on_match_album"),
+                (self.__search, "match-track", "_on_match_track"),
+                (self.__search, "finished", "_on_search_finished")
         ]
 
     def populate(self):
@@ -179,19 +175,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
             current_search = self.__current_search.lower()
-            if App().settings.get_value("search-spotify") and\
-                    get_network_available("SPOTIFY") and\
-                    get_network_available("YOUTUBE"):
-                self.__searches_count += 1
-                App().task_helper.run(App().spotify.search,
-                                      current_search,
-                                      self.__cancellable)
-            # Only local items
-            mask = StorageType.COLLECTION |\
-                StorageType.SAVED |\
-                StorageType.SEARCH
-            self.__searches_count += 1
-            self.__local_search.get(current_search, mask, self.__cancellable)
+            self.__search.get(current_search, self.__cancellable)
         else:
             self.show_placeholder(True,
                                   _("Search for artists, albums and tracks"))
@@ -300,7 +284,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Stop spinner and show placeholder if not result
             @param search_handler as LocalSearch/SpotifySearch
         """
-        self.__searches_count -= 1
         tracks_len = len(
             self.__stack.current_child.search_tracks_view.children)
         albums_len = len(
@@ -309,10 +292,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.artists_line_view.children)
         empty = albums_len == 0 and tracks_len == 0 and artists_len == 0
         self.__stack.set_visible_child(self.__stack.current_child)
-        if self.__searches_count == 0:
-            self.__banner.spinner.stop()
-            if empty:
-                self.show_placeholder(True, _("No results for this search"))
+        self.__banner.spinner.stop()
+        if empty:
+            self.show_placeholder(True, _("No results for this search"))
 
 #######################
 # PRIVATE             #
@@ -322,29 +304,6 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             Set placeholder for no result
         """
         self.__placeholder.set_text()
-
-    def __on_search_get(self, result, search, storage_type):
-        """
-            Add rows for internal results
-            @param result as [(int, Album, bool)]
-        """
-        if result:
-            albums = []
-            reveal_albums = []
-            for (album, in_tracks) in result:
-                albums.append(album)
-                if in_tracks:
-                    reveal_albums.append(album)
-            self.__view.add_reveal_albums(reveal_albums)
-            self.__view.populate(albums)
-            self.show_placeholder(False)
-
-        if storage_type & StorageType.EPHEMERAL:
-            App().task_helper.run(App().spotify.search,
-                                  search,
-                                  self.__cancellable)
-        else:
-            self._on_search_finished()
 
     def _on_search_changed(self, widget):
         """

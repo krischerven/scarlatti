@@ -16,6 +16,7 @@ from lollypop.objects_track import Track
 from lollypop.objects import Base
 from lollypop.utils import emit_signal
 from lollypop.collection_item import CollectionItem
+from lollypop.logger import Logger
 
 
 class Disc:
@@ -276,13 +277,16 @@ class Album(Base):
             @param cancellable as Gio.Cancellable
             @return status as bool
         """
-        if self.storage_type & (StorageType.COLLECTION |
-                                StorageType.EXTERNAL):
-            return False
-        elif self.synced != 0 and self.synced != len(self.tracks):
-            App().spotify.load_tracks(self.mb_album_id, self.storage_type,
-                                      cancellable)
-            self.reset_tracks()
+        try:
+            if self.storage_type & (StorageType.COLLECTION |
+                                    StorageType.EXTERNAL):
+                return False
+            elif self.synced != 0 and self.synced != len(self.tracks):
+                from lollypop.search import Search
+                Search().load_tracks(self, cancellable)
+                self.reset_tracks()
+        except Exception as e:
+            Logger.warning("Album::load_tracks(): %s" % e)
         return True
 
     def set_synced(self, mask):

@@ -311,7 +311,8 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         self.__cancellable = Gio.Cancellable()
         self.__storage_type = StorageType.NONE
         return [
-                (App().spotify, "match-album", "_on_album_match"),
+                (App().ws_director.spotify_ws, "match-album",
+                 "_on_album_match"),
                 (App().settings, "changed::network-access",
                  "_on_network_access_changed"),
                 (App().settings, "changed::network-access-acl",
