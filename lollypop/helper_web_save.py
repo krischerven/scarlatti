@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 
 from time import time
 import json
@@ -22,21 +22,35 @@ from lollypop.objects_track import Track
 from lollypop.define import App, Type
 
 
-class SaveWebHelper:
+class SaveWebHelper(GObject.Object):
     """
        Web helper for saving Spotify payloads
     """
 
+    __gsignals__ = {
+        "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
+    def __init__(self):
+        """
+            Init helper
+        """
+        GObject.Object.__init__(self)
+
     def save_tracks_payload_to_db(self, payload, storage_type,
-                                  save_artwork, cancellable):
+                                  match_album, cancellable,):
         """
             Create albums from a track payload
             @param payload as {}
             @param storage_type as StorageType
-            @param save_artwork as bool
+            @param match_album as bool
             @param cancellable as Gio.Cancellable
         """
         # Populate tracks
+        artwork_uri = None
         for item in payload:
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
@@ -44,11 +58,17 @@ class SaveWebHelper:
             if track_id < 0:
                 track_id = self.__save_track(item, storage_type)
                 track = Track(track_id)
-                if save_artwork:
-                    self.save_artwork(track,
-                                      item["album"]["images"][0]["url"],
-                                      cancellable)
-            emit_signal(self, "match-track", track_id, storage_type)
+                artwork_uri = item["album"]["images"][0]["url"]
+            else:
+                track = Track(track_id)
+            if not match_album:
+                emit_signal(self, "match-track", track_id, storage_type)
+        if match_album:
+            if artwork_uri is not None:
+                self.save_artwork(track,
+                                  artwork_uri,
+                                  cancellable)
+            emit_signal(self, "match-album", track.album.id, storage_type)
 
     def save_albums_payload_to_db(self, payload, storage_type,
                                   save_artwork, cancellable):

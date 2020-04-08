@@ -75,7 +75,6 @@ class DirectorWebService:
                 GLib.source_remove(self.__spotify_timeout_id)
                 self.__spotify_timeout_id = None
             self.__spotify_ws.stop()
-            self.__spotify_ws.destroy()
             self.__spotify_ws = None
             Logger.info("Spotify web service stopped")
 

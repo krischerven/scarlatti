@@ -15,7 +15,7 @@ import json
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.helper_web_save import SaveWebHelper
-from lollypop.define import StorageType, LASTFM_API_KEY, App
+from lollypop.define import LASTFM_API_KEY, App
 
 
 class LastFMSearch(SaveWebHelper):
@@ -30,25 +30,24 @@ class LastFMSearch(SaveWebHelper):
         """
         SaveWebHelper.__init__(self)
 
-    def search(self, search, cancellable):
+    def get(self, search, storage_type, cancellable):
         """
             Get albums for search
             We need a thread because we are going to populate DB
             @param search as str
+            @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
         try:
-            storage_type = StorageType.SEARCH | StorageType.EPHEMERAL
             uri = "http://ws.audioscrobbler.com/2.0/?method=album.search"
-            uri += "&album=%s&api_key=%s&format=json %" % (
+            uri += "&album=%s&api_key=%s&format=json" % (
                 search, LASTFM_API_KEY)
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             albums = []
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                query = decode["results"]["opensearch:Query"]
-                for album in query["albummatches"]:
+                for album in decode["results"]["albummatches"]["album"]:
                     albums.append((album["name"], album["artist"]))
             for (album, artist) in albums:
                 uri = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo"
@@ -58,13 +57,13 @@ class LastFMSearch(SaveWebHelper):
                     uri, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
-                    payload = self.__get_spotify_payload(album)
+                    payload = self.__get_spotify_payload(decode)
                     self.save_tracks_payload_to_db(payload,
                                                    storage_type,
-                                                   False,
+                                                   True,
                                                    cancellable)
         except Exception as e:
-            Logger.warning("LastFMSearch::search(): %s", e)
+            Logger.warning("LastFMSearch::get(): %s", e)
         if not cancellable.is_cancelled():
             emit_signal(self, "finished")
 
@@ -74,11 +73,10 @@ class LastFMSearch(SaveWebHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __get_spotify_payload(self, payload, cancellable):
+    def __get_spotify_payload(self, payload):
         """
             Convert tracks to a Spotify payload
             @param payload as {}
-            @param cancellable as Gio.Cancellable
             return [{}]
         """
         tracks = []
@@ -89,19 +87,20 @@ class LastFMSearch(SaveWebHelper):
         album_payload["total_tracks"] = len(payload["album"]["tracks"])
         album_payload["release_date"] = None
         try:
-            artwork_uri = payload["image"][-1]["#text"]
+            artwork_uri = payload["album"]["image"][-1]["#text"]
         except:
             artwork_uri = None
         album_payload["images"] = [{"url": artwork_uri}]
         i = 1
-        for track in payload["album"]["tracks"]:
+        for track in payload["album"]["tracks"]["track"]:
             track_payload = {}
-            track_payload["id"] = "lf:%s" % track["mbid"]
+            track_payload["id"] = "lf:%s-%s" % (track["artist"]["name"],
+                                                track["name"])
             track_payload["name"] = track["name"]
-            track_payload["artists"] = [{"name": track["artist"]}]
+            track_payload["artists"] = [track["artist"]]
             track_payload["disc_number"] = "1"
             track_payload["track_number"] = i
-            track_payload["duration_ms"] = track["duration"] * 1000
+            track_payload["duration_ms"] = int(track["duration"]) * 1000
             i += 1
             track_payload["album"] = album_payload
             tracks.append(track_payload)

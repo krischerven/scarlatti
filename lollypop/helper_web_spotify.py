@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GObject
+from gi.repository import GLib
 
 from time import sleep
 import json
@@ -22,23 +22,15 @@ from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import App
 
 
-class SpotifyWebHelper(GObject.Object, SaveWebHelper):
+class SpotifyWebHelper(SaveWebHelper):
     """
        Web helper for Spotify
     """
-
-    __gsignals__ = {
-        "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
-    }
 
     def __init__(self):
         """
             Init helper
         """
-        GObject.Object.__init__(self)
         SaveWebHelper.__init__(self)
 
     def get_artist_id(self, artist_name, cancellable):

@@ -43,16 +43,14 @@ class Search(GObject.Object):
             Set web search to name
             @param name as str
         """
-        if self.__web_search is not None:
-            self.__web_search.destroy()
-            self.__web_search = None
+        self.__web_search = None
         if name == "SPOTIFY":
             from lollypop.search_spotify import SpotifySearch
             self.__web_search = SpotifySearch()
             self.__connect_search_signals(self.__web_search)
         elif name == "LASTFM":
-            from lollypop.search_lastfm import LastfmSearch
-            self.__web_search = LastfmSearch()
+            from lollypop.search_lastfm import LastFMSearch
+            self.__web_search = LastFMSearch()
             self.__connect_search_signals(self.__web_search)
 
     def load_tracks(self, album, cancellable):
