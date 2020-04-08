@@ -57,7 +57,7 @@ class LastFMSearch(SaveWebHelper):
                     uri, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
-                    payload = self.__get_spotify_payload(decode)
+                    payload = self.__get_spotify_payload(decode["album"])
                     self.save_tracks_payload_to_db(payload,
                                                    storage_type,
                                                    True,
@@ -73,26 +73,27 @@ class LastFMSearch(SaveWebHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __get_spotify_payload(self, payload):
+    def __get_spotify_payload(self, album):
         """
             Convert tracks to a Spotify payload
-            @param payload as {}
+            @param album as {}
             return [{}]
         """
         tracks = []
         album_payload = {}
-        album_payload["id"] = "lf:%s" % payload["album"]["mbid"]
-        album_payload["name"] = payload["album"]["name"]
-        album_payload["artists"] = [{"name": payload["album"]["artist"]}]
-        album_payload["total_tracks"] = len(payload["album"]["tracks"])
+        album_payload["id"] = "lf:%s-%s" % (album["artist"],
+                                            album["name"])
+        album_payload["name"] = album["name"]
+        album_payload["artists"] = [{"name": album["artist"]}]
+        album_payload["total_tracks"] = len(album["tracks"])
         album_payload["release_date"] = None
         try:
-            artwork_uri = payload["album"]["image"][-1]["#text"]
+            artwork_uri = album["image"][-1]["#text"]
         except:
             artwork_uri = None
         album_payload["images"] = [{"url": artwork_uri}]
         i = 1
-        for track in payload["album"]["tracks"]["track"]:
+        for track in album["tracks"]["track"]:
             track_payload = {}
             track_payload["id"] = "lf:%s-%s" % (track["artist"]["name"],
                                                 track["name"])
