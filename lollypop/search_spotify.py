@@ -14,7 +14,7 @@ import json
 from time import sleep
 
 from lollypop.logger import Logger
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_web_spotify import SpotifyWebHelper
 from lollypop.define import App, StorageType
@@ -38,6 +38,9 @@ class SpotifySearch(SpotifyWebHelper):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
+        if not get_network_available("SPOTIFY"):
+            emit_signal(self, "finished")
+            return
         try:
             storage_type = StorageType.SEARCH | StorageType.EPHEMERAL
             while App().token_helper.wait_for_token("SPOTIFY", cancellable):

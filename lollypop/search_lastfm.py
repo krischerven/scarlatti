@@ -13,7 +13,7 @@
 import json
 
 from lollypop.logger import Logger
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import LASTFM_API_KEY, App
 
@@ -38,6 +38,9 @@ class LastFMSearch(SaveWebHelper):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
+        if not get_network_available("LASTFM"):
+            emit_signal(self, "finished")
+            return
         try:
             uri = "http://ws.audioscrobbler.com/2.0/?method=album.search"
             uri += "&album=%s&api_key=%s&format=json" % (
