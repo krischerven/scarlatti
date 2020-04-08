@@ -38,7 +38,7 @@ class DirectorWebService:
             @return bool
         """
         stopped = True
-        if self.__spotify_ws.is_running:
+        if self.__spotify_ws is not None and self.__spotify_ws.is_running:
             self.__spotify_ws.stop()
             stopped = False
         if stopped:
@@ -63,15 +63,15 @@ class DirectorWebService:
         """
         show_album_lists = App().settings.get_value("shown-album-lists")
         if Type.SUGGESTIONS in show_album_lists and\
-                acl & NetworkAccessACL["SPOTIFY"] and\
-                self.__spotify_timeout_id is None:
+                acl & NetworkAccessACL["SPOTIFY"]:
             from lollypop.ws_spotify import SpotifyWebService
             self.__spotify_ws = SpotifyWebService()
             Logger.info("Spotify web service started")
             self.__spotify_ws.start()
-            self.__spotify_timeout_id = GLib.timeout_add_seconds(
-                3600, self.__spotify_ws.start)
-        else:
+            if self.__spotify_timeout_id is None:
+                self.__spotify_timeout_id = GLib.timeout_add_seconds(
+                    3600, self.__spotify_ws.start)
+        elif self.__spotify_ws is not None:
             if self.__spotify_timeout_id is not None:
                 GLib.source_remove(self.__spotify_timeout_id)
                 self.__spotify_timeout_id = None
