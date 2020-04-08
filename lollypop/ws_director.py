@@ -40,8 +40,9 @@ class DirectorWebService:
         stopped = True
         if self.__spotify_ws.is_running:
             self.__spotify_ws.stop()
-            Logger.info("Spotify web service stopped")
             stopped = False
+        if stopped:
+            Logger.info("Spotify web service stopped")
         return stopped
 
     @property
