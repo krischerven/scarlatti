@@ -97,7 +97,7 @@ class SpotifyWebService(SpotifyWebHelper):
             token = App().ws_director.token_ws.get_token("SPOTIFY",
                                                          cancellable)
             bearer = "Bearer %s" % token
-            headers = ["Authorization", bearer]
+            headers = [("Authorization", bearer)]
             uri = "https://api.spotify.com/v1/browse/new-releases"
             uris = ["%s?country=%s" % (uri, locale), uri]
             for uri in uris:
