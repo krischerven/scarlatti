@@ -30,6 +30,7 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             Init widget
         """
         Gtk.Bin.__init__(self)
+        self.__cancellable = Gio.Cancellable()
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SettingsWeb.ui")
 
@@ -82,6 +83,7 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
         self.__check_acls()
 
         builder.connect_signals(self)
+        self.connect("unmap", self.__on_unmap)
         return [
             (App().settings, "changed::network-access",
              "_on_network_access_changed"),
@@ -196,15 +198,17 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             @param button as Gtk.Button
             @thread safe
         """
-        cancellable = Gio.Cancellable()
-        App().ws_director.token_ws.clear_token("LASTFM")
-        token = App().ws_director.token_ws.get_token("LASTFM", cancellable)
+        App().ws_director.token_ws.clear_token("LASTFM", True)
+        token = App().ws_director.token_ws.get_token("LASTFM",
+                                                     self.__cancellable)
         validation_token = token.replace("validation:", "")
         uri = "http://www.last.fm/api/auth/?api_key=%s&token=%s" % (
             LASTFM_API_KEY, validation_token)
         Gtk.show_uri_on_window(App().window,
                                uri,
                                Gdk.CURRENT_TIME)
+        # Force web service to validate token
+        App().ws_director.token_ws.clear_token("LASTFM")
 
     def __check_acls(self):
         """
@@ -227,3 +231,10 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
         self.__switch_youtube.set_sensitive(acls & NetworkAccessACL["YOUTUBE"])
         self.__cs_entry.set_sensitive(acls & NetworkAccessACL["YOUTUBE"] or
                                       acls & NetworkAccessACL["GOOGLE"])
+
+    def __on_unmap(self, widget):
+        """
+            Cancel current tasks and clear token
+            @param widget as Gtk.Widget
+        """
+        self.__cancellable.cancel()

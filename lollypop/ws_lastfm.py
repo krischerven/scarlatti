@@ -43,6 +43,7 @@ class LastFMWebService:
             self.__uri = "http://libre.fm/2.0/"
         else:
             self.__uri = "http://ws.audioscrobbler.com/2.0/"
+            App().task_helper.run(self.__populate_loved_tracks)
 
     def stop(self):
         """
@@ -237,3 +238,23 @@ class LastFMWebService:
                 Logger.debug("%s: %s", self.__uri, data)
         except Exception as e:
             Logger.error("LastFMWebService::__playing_now(): %s" % e)
+
+    def __populate_loved_tracks(self):
+        """
+            Populate loved tracks playlist
+        """
+        return
+        try:
+            user = self.get_user(self.login)
+            for loved in user.get_loved_tracks(limit=None):
+                artist = str(loved.track.artist)
+                title = str(loved.track.title)
+                track_id = App().tracks.search_track(artist, title)
+                if track_id is None:
+                    Logger.warning(
+                        "LastFM::__populate_loved_tracks(): %s, %s" % (
+                            artist, title))
+                else:
+                    pass  # Track(track_id).set_loved(1)
+        except Exception as e:
+            Logger.error("LastFM::__populate_loved_tracks: %s" % e)

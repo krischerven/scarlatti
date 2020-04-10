@@ -62,13 +62,14 @@ class TokenWebService:
             self.__loading_token[service] = False
         return self.__tokens[service]
 
-    def clear_token(self, service):
+    def clear_token(self, service, clear_secret=False):
         """
             Clear token
             @param service as str
+            @param clear_secret as bool
         """
         self.__tokens[service] = None
-        if service not in self.__token_expires.keys():
+        if clear_secret:
             self.__passwords_helper.clear(service)
 
 #######################
@@ -181,8 +182,10 @@ class TokenWebService:
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 self.__tokens[service] = decode["session"]["key"]
-                self.__passwords_helper.store(service,
+                self.__passwords_helper.clear(service,
+                                              self.__passwords_helper.store,
                                               service,
+                                              decode["session"]["name"],
                                               self.__tokens[service])
         except:
             Logger.error(
