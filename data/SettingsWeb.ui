@@ -614,13 +614,13 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="halign">center</property>
-        <property name="valign">start</property>
+        <property name="valign">center</property>
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
-        <property name="row_spacing">20</property>
+        <property name="row_spacing">40</property>
         <property name="column_spacing">20</property>
         <child>
-          <object class="GtkButton" id="connect_btn">
+          <object class="GtkButton" id="lastfm_button">
             <property name="label" translatable="yes">Connect</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -638,7 +638,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">Connect to Last.FM</property>
+            <property name="label" translatable="yes">Last.FM:</property>
             <property name="ellipsize">end</property>
           </object>
           <packing>
@@ -651,7 +651,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">Connect to Librefm</property>
+            <property name="label" translatable="yes">Librefm:</property>
             <property name="ellipsize">end</property>
           </object>
           <packing>
@@ -660,7 +660,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="connect_btn1">
+          <object class="GtkButton" id="librefm_button">
             <property name="label" translatable="yes">Connect</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>

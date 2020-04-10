@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, NetworkAccessACL, StorageType
 from lollypop.define import LASTFM_API_KEY
+from lollypop.helper_passwords import PasswordsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -84,6 +85,13 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
 
         builder.connect_signals(self)
         self.connect("unmap", self.__on_unmap)
+
+        password_helper = PasswordsHelper()
+        password_helper.get("LASTFM", self.__on_get_password,
+                            builder.get_object("lastfm_button"))
+        password_helper.get("LIBREFM", self.__on_get_password,
+                            builder.get_object("librefm_button"))
+
         return [
             (App().settings, "changed::network-access",
              "_on_network_access_changed"),
@@ -117,16 +125,24 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             Connect to lastfm
             @param button as Gtk.Button
         """
-        button.set_sensitive(False)
-        App().task_helper.run(self.__get_lastfm_token, button)
+        if button.get_tooltip_text():
+            button.set_label(_("Connect"))
+            App().ws_director.token_ws.clear_token("LASTFM", True)
+        else:
+            button.set_sensitive(False)
+            App().task_helper.run(self.__get_lastfm_token, button)
 
     def _on_librefm_button_clicked(self, button):
         """
             Test librefm connection
             @param button as Gtk.Button
         """
-        button.set_sensitive(False)
-        self.__get_librefm_token(button)
+        if button.get_tooltip_text():
+            button.set_label(_("Connect"))
+            App().ws_director.token_ws.clear_token("LIBREFM", True)
+        else:
+            button.set_sensitive(False)
+            self.__get_librefm_token(button)
 
     def _on_switch_youtube_state_set(self, widget, state):
         """
@@ -238,3 +254,15 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             @param widget as Gtk.Widget
         """
         self.__cancellable.cancel()
+
+    def __on_get_password(self, attributes, password, service, button):
+        """
+            Set button state
+            @param attributes as {}
+            @param password as str
+            @param service as str
+            @param button as Gtk.Button
+        """
+        if attributes is not None:
+            button.set_label(_("Disconnect"))
+            button.set_tooltip_text(attributes["login"])
