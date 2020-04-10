@@ -44,8 +44,7 @@ class Similars():
         if get_network_available("SPOTIFY"):
             result = self.__local_helper.get_similar_artists(
                 artist_names, cancellable)
-        if not result and App().lastfm is not None and\
-                get_network_available("LASTFM"):
+        if not result and get_network_available("LASTFM"):
             result = self.__lastfm_helper.get_similar_artists(
                 artist_names, cancellable)
         if not result:
