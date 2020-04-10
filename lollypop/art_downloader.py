@@ -444,15 +444,16 @@ class DownloaderArt:
         """
         if not get_network_available("LASTFM"):
             return []
-        if App().lastfm is not None:
-            try:
-                last_album = App().lastfm.get_album(artist, album)
-                uri = last_album.get_cover_image(4)
-                return [uri]
-            except Exception as e:
-                Logger.warning(
-                    "DownloaderArt::_get_album_art_lastfm_uri: %s, %s: %s" %
-                    (e, artist, album))
+        try:
+            from lollypop.helper_web_lastfm import LastFMWebHelper
+            helper = LastFMWebHelper()
+            payload = helper.get_album_payload(album, artist, cancellable)
+            artwork_uri = payload["image"][-1]["#text"]
+            return [artwork_uri]
+        except Exception as e:
+            Logger.warning(
+                "DownloaderArt::_get_album_art_lastfm_uri: %s, %s: %s" %
+                (e, artist, album))
         return []
 
 #######################
