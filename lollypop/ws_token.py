@@ -62,6 +62,35 @@ class TokenWebService:
             self.__loading_token[service] = False
         return self.__tokens[service]
 
+    def get_lastfm_auth_token(self, service, cancellable, callback):
+        """
+            Get a new initial auth token
+            @param service as str
+            @param cancellable as Gio.Cancellable
+            @param callback as function
+            @thread safe
+        """
+        try:
+            if service == "LASTFM":
+                uri = "http://ws.audioscrobbler.com/2.0/"
+            else:
+                uri = "http://libre.fm/2.0/"
+            uri += "?api_key=%s&format=json&method=auth.gettoken" %\
+                LASTFM_API_KEY
+            api_sig = "api_key%smethodauth.gettoken%s" % (
+                LASTFM_API_KEY, LASTFM_API_SECRET)
+            encoded = md5(api_sig.encode("utf-8")).hexdigest()
+            uri += "&api_sig=%s" % encoded
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                token = "validation:%s" % decode["token"]
+                callback(token, service)
+        except:
+            Logger.error(
+                "TokenWebService::get_lastfm_auth_token(): %s", data)
+
     def clear_token(self, service, clear_secret=False):
         """
             Clear token
@@ -75,22 +104,19 @@ class TokenWebService:
 #######################
 # PRIVATE             #
 #######################
-    def __valid_token(self, token, service):
+    def __load_token_for_service(self, token, service):
         """
-            Validate token, return False if token is not available
+            Load token for service
             @param token as str
             @param service as str
-            @return bool
         """
         if token is None:
             self.__tokens[service] = ""
-            return False
-        if token.startswith("validation:"):
+        elif token.startswith("validation:"):
             validation_token = token.replace("validation:", "")
-            self.__get_lastfm_user_token(validation_token, service, None)
+            self.__get_lastfm_token(validation_token, service, None)
         else:
             self.__tokens[service] = token
-        return True
 
     def __get_token(self, service, cancellable):
         """
@@ -102,8 +128,7 @@ class TokenWebService:
             self.__get_spotify_token(cancellable)
         else:
             token = self.__passwords_helper.get_sync(service)
-            if not self.__valid_token(token, service):
-                self.__get_lastfm_token(service, cancellable)
+            self.__load_token_for_service(token, service)
 
     def __get_spotify_token(self, cancellable):
         """
@@ -129,37 +154,7 @@ class TokenWebService:
             Logger.error("TokenWebService::__get_spotify_token(): %s", e)
         self.__loading_token["SPOTIFY"] = False
 
-    def __get_lastfm_token(self, service, cancellable):
-        """
-            Get a new auth token
-            @param service as str
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            if service == "LASTFM":
-                uri = "http://ws.audioscrobbler.com/2.0/"
-            else:
-                uri = "http://libre.fm/2.0/"
-            uri += "?api_key=%s&format=json&method=auth.gettoken" %\
-                LASTFM_API_KEY
-            api_sig = "api_key%smethodauth.gettoken%s" % (
-                LASTFM_API_KEY, LASTFM_API_SECRET)
-            encoded = md5(api_sig.encode("utf-8")).hexdigest()
-            uri += "&api_sig=%s" % encoded
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                self.__tokens[service] = "validation:%s" % decode["token"]
-                self.__passwords_helper.clear(service,
-                                              self.__passwords_helper.store,
-                                              service,
-                                              service,
-                                              self.__tokens[service])
-        except:
-            Logger.error("TokenWebService::__get_lastfm_token(): %s", decode)
-
-    def __get_lastfm_user_token(self, token, service, cancellable):
+    def __get_lastfm_token(self, token, service, cancellable):
         """
             Get token validated by user
             @param token as str
@@ -169,14 +164,15 @@ class TokenWebService:
         try:
             if service == "LASTFM":
                 uri = "http://ws.audioscrobbler.com/2.0/"
+                uri += "?api_key=%s&format=json" % LASTFM_API_KEY
+                uri += "&method=auth.getsession&token=%s" % token
+                api_sig = "api_key%smethodauth.getsessiontoken%s%s" % (
+                    LASTFM_API_KEY, token, LASTFM_API_SECRET)
+                encoded = md5(api_sig.encode("utf-8")).hexdigest()
+                uri += "&api_sig=%s" % encoded
             else:
                 uri = "http://libre.fm/2.0/?format=json"
-            uri += "?api_key=%s&format=json" % LASTFM_API_KEY
-            uri += "&method=auth.getsession&token=%s" % token
-            api_sig = "api_key%smethodauth.getsessiontoken%s%s" % (
-                LASTFM_API_KEY, token, LASTFM_API_SECRET)
-            encoded = md5(api_sig.encode("utf-8")).hexdigest()
-            uri += "&api_sig=%s" % encoded
+                uri += "&method=auth.getsession&token=%s" % token
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             if status:

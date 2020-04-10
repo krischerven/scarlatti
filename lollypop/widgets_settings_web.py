@@ -86,11 +86,11 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
         builder.connect_signals(self)
         self.connect("unmap", self.__on_unmap)
 
-        password_helper = PasswordsHelper()
-        password_helper.get("LASTFM", self.__on_get_password,
-                            builder.get_object("lastfm_button"))
-        password_helper.get("LIBREFM", self.__on_get_password,
-                            builder.get_object("librefm_button"))
+        self.__passwords_helper = PasswordsHelper()
+        self.__passwords_helper.get("LASTFM", self.__on_get_password,
+                                    builder.get_object("lastfm_button"))
+        self.__passwords_helper.get("LIBREFM", self.__on_get_password,
+                                    builder.get_object("librefm_button"))
 
         return [
             (App().settings, "changed::network-access",
@@ -126,11 +126,12 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             @param button as Gtk.Button
         """
         if button.get_tooltip_text():
+            button.set_tooltip_text("")
             button.set_label(_("Connect"))
             App().ws_director.token_ws.clear_token("LASTFM", True)
         else:
             button.set_sensitive(False)
-            App().task_helper.run(self.__get_lastfm_token, button)
+            App().task_helper.run(self.__get_lastfm_token, button, "LASTFM")
 
     def _on_librefm_button_clicked(self, button):
         """
@@ -138,11 +139,12 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             @param button as Gtk.Button
         """
         if button.get_tooltip_text():
+            button.set_tooltip_text("")
             button.set_label(_("Connect"))
             App().ws_director.token_ws.clear_token("LIBREFM", True)
         else:
             button.set_sensitive(False)
-            self.__get_librefm_token(button)
+            App().task_helper.run(self.__get_lastfm_token, button, "LIBREFM")
 
     def _on_switch_youtube_state_set(self, widget, state):
         """
@@ -208,23 +210,36 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __get_lastfm_token(self, button):
+    def __get_lastfm_token(self, button, service):
         """
             Get Last.FM token
             @param button as Gtk.Button
+            @param service as str
             @thread safe
         """
-        App().ws_director.token_ws.clear_token("LASTFM", True)
-        token = App().ws_director.token_ws.get_token("LASTFM",
-                                                     self.__cancellable)
-        validation_token = token.replace("validation:", "")
-        uri = "http://www.last.fm/api/auth/?api_key=%s&token=%s" % (
-            LASTFM_API_KEY, validation_token)
-        Gtk.show_uri_on_window(App().window,
-                               uri,
-                               Gdk.CURRENT_TIME)
-        # Force web service to validate token
-        App().ws_director.token_ws.clear_token("LASTFM")
+        def on_token(token, service):
+            self.__passwords_helper.clear(service,
+                                          self.__passwords_helper.store,
+                                          service,
+                                          service,
+                                          token)
+            validation_token = token.replace("validation:", "")
+            if service == "LIBREFM":
+                uri = "http://libre.fm/api/auth?api_key=%s&token=%s" % (
+                    LASTFM_API_KEY, validation_token)
+            else:
+                uri = "http://www.last.fm/api/auth?api_key=%s&token=%s" % (
+                    LASTFM_API_KEY, validation_token)
+            GLib.idle_add(show_uri, uri)
+            # Force web service to validate token
+            App().ws_director.token_ws.clear_token(service)
+
+        def show_uri(uri):
+            Gtk.show_uri_on_window(App().window, uri, Gdk.CURRENT_TIME)
+
+        App().ws_director.token_ws.clear_token(service, True)
+        App().ws_director.token_ws.get_lastfm_auth_token(
+            service, self.__cancellable, on_token)
 
     def __check_acls(self):
         """
