@@ -122,13 +122,16 @@ class GenresDatabase:
             result = sql.execute("SELECT DISTINCT\
                                   genres.rowid, genres.name, genres.name\
                                   FROM genres\
-                                  WHERE genres.rowid IN (\
-                                    SELECT album_genres.genre_id\
-                                    FROM album_genres, albums\
-                                    WHERE album_genres.album_id=albums.rowid\
-                                    AND albums.mtime!=0)\
+                                  WHERE EXISTS (\
+                                    SELECT *\
+                                    FROM album_genres, album_artists\
+                                    WHERE album_genres.album_id=\
+                                        album_artists.album_id AND\
+                                        album_artists.artist_id != ? AND\
+                                        album_genres.genre_id=genres.rowid)\
                                   ORDER BY genres.name\
-                                  COLLATE NOCASE COLLATE LOCALIZED")
+                                  COLLATE NOCASE COLLATE LOCALIZED",
+                                 (Type.COMPILATIONS,))
             return list(result)
 
     def get_ids(self):
@@ -139,13 +142,16 @@ class GenresDatabase:
         with SqlCursor(App().db) as sql:
             result = sql.execute("SELECT DISTINCT genres.rowid\
                                   FROM genres\
-                                  WHERE genres.rowid IN (\
-                                    SELECT album_genres.genre_id\
-                                    FROM album_genres, albums\
-                                    WHERE album_genres.album_id=albums.rowid\
-                                    AND albums.mtime!=0)\
+                                  WHERE EXISTS (\
+                                    SELECT *\
+                                    FROM album_genres, album_artists\
+                                    WHERE album_genres.album_id=\
+                                        album_artists.album_id AND\
+                                        album_artists.artist_id != ? AND\
+                                        album_genres.genre_id=genres.rowid)\
                                   ORDER BY genres.name\
-                                  COLLATE NOCASE COLLATE LOCALIZED")
+                                  COLLATE NOCASE COLLATE LOCALIZED",
+                                 (Type.COMPILATIONS,))
             return list(itertools.chain(*result))
 
     def get_random(self):
