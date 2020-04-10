@@ -96,16 +96,6 @@ class LovedWidget(Gtk.Bin):
 #######################
 # PRIVATE             #
 #######################
-    def __set_lastfm_status(self, status):
-        """
-            Set lastfm status for track
-            @param status as int
-        """
-        self.__timeout_id = None
-        App().task_helper.run(App().lastfm.set_loved,
-                              self.__object,
-                              status)
-
     def __set_artwork(self, status):
         """
             Set artwork base on object status
