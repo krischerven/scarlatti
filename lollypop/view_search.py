@@ -254,7 +254,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         if storage_type & StorageType.SEARCH:
             album = Album(album_id)
             self.__stack.current_child.albums_line_view.show()
-            self.__stack.current_child.albums_line_view.add_value(album)
+            self.__stack.current_child.albums_line_view.prepend_value(album)
             self.show_placeholder(False)
 
     def _on_match_track(self, search, track_id, storage_type):

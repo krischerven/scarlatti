@@ -66,8 +66,8 @@ class LastFMSearch(LastFMWebHelper):
                                                        storage_type,
                                                        True,
                                                        cancellable)
-                    except:
-                        Logger.warning("LastFMSearch::get(): %s", decode)
+                    except Exception as e:
+                        Logger.warning("LastFMSearch::get(): %s", e)
         except Exception as e:
             Logger.warning("LastFMSearch::get(): %s", e)
         if not cancellable.is_cancelled():

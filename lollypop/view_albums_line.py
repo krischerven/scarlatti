@@ -72,12 +72,20 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             self._box.set_min_children_per_line(len(albums))
             AlbumsBoxView.populate(self, albums)
 
-    def add_value(self, album_id):
+    def add_value(self, album):
         """
             Add a new album
-            @param album_id as int
+            @param album as Album
         """
-        AlbumsBoxView.add_value(self, album_id)
+        AlbumsBoxView.add_value(self, album)
+        self.update_buttons()
+
+    def prepend_value(self, album):
+        """
+            Prepend a new album
+            @param album as Album
+        """
+        AlbumsBoxView.prepend_value(self, album)
         self.update_buttons()
 
     @property
@@ -273,15 +281,15 @@ class AlbumsSearchLineView(AlbumsLineView):
         self.__album_ids = []
         self._label.set_text(_("Albums"))
 
-    def add_value(self, album_id):
+    def prepend_value(self, album):
         """
-            Insert item
+            Prepend a new album
             @param album as Album
         """
-        if album_id in self.__album_ids:
+        if album.id in self.__album_ids:
             return
-        self.__album_ids.append(album_id)
-        AlbumsLineView.add_value(self, album_id)
+        self.__album_ids.append(album.id)
+        AlbumsLineView.prepend_value(self, album)
         self._box.set_min_children_per_line(len(self._box.get_children()))
 
     def clear(self):

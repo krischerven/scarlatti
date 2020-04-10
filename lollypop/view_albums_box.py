@@ -100,15 +100,21 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         elif self.__populate_wanted:
             App().task_helper.run(load, callback=(on_load,))
 
-    def add_value(self, album_id):
+    def add_value(self, album):
         """
             Add a new album
             @param album as Album
-            @param position as int
-            @param cover_uri as int
         """
         self.show_placeholder(False)
-        FlowBoxView.add_value(self, album_id)
+        FlowBoxView.add_value(self, album)
+
+    def prepend_value(self, album):
+        """
+            Prepend a new album
+            @param album as Album
+        """
+        self.show_placeholder(False)
+        FlowBoxView.prepend_value(self, album)
 
     def clear(self):
         """
@@ -132,17 +138,18 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _get_child(self, value):
+    def _get_child(self, value, position=-1):
         """
             Get a child for view
             @param value as object
+            @param position as int
             @return row as SelectionListRow
         """
         if self.destroyed:
             return None
         widget = AlbumSimpleWidget(value,  self._genre_ids, self._artist_ids,
                                    self.view_type, self.font_height)
-        self._box.insert(widget, -1)
+        self._box.insert(widget, position)
         widget.show()
         return widget
 

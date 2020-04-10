@@ -56,21 +56,30 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         """
         LazyLoadingView.populate(self, items)
 
-    def add_value(self, item_id):
+    def add_value(self, value):
         """
-            Insert item
-            @param item_id as int
+            Append item
+            @param value as object
         """
         self._box.set_sort_func(self._sort_func)
-        LazyLoadingView.populate(self, [item_id])
+        LazyLoadingView.populate(self, [value])
 
-    def remove_value(self, item_id):
+    def prepend_value(self, value):
+        """
+            Prepend item
+            @param value as object
+        """
+        child = self._get_child(value, 0)
+        child.populate()
+        child.show()
+
+    def remove_value(self, value):
         """
             Remove value
-            @param item_id as int
+            @param value as object
         """
         for child in self._box.get_children():
-            if child.data == item_id:
+            if child.data == value:
                 child.destroy()
                 break
 
