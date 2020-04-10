@@ -21,7 +21,7 @@ from lollypop.logger import Logger
 from lollypop.define import App
 
 
-class MusicBrainzWebHelper(GObject.Object, SaveWebHelper):
+class MusicBrainzWebHelper(SaveWebHelper):
     """
         Web helper for MusicBrainz
     """

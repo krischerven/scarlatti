@@ -14,11 +14,11 @@ import json
 
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_network_available
-from lollypop.helper_web_save import SaveWebHelper
+from lollypop.helper_web_lastfm import LastFMWebHelper
 from lollypop.define import LASTFM_API_KEY, App
 
 
-class LastFMSearch(SaveWebHelper):
+class LastFMSearch(LastFMWebHelper):
     """
         Search for LastFM
         We are not using pylast here, too slow: one request per method()
@@ -28,7 +28,7 @@ class LastFMSearch(SaveWebHelper):
         """
             Init object
         """
-        SaveWebHelper.__init__(self)
+        LastFMWebHelper.__init__(self)
 
     def get(self, search, storage_type, cancellable):
         """
@@ -61,7 +61,7 @@ class LastFMSearch(SaveWebHelper):
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     try:
-                        payload = self.__get_spotify_payload(decode["album"])
+                        payload = self.get_spotify_payload(decode["album"])
                         self.save_tracks_payload_to_db(payload,
                                                        storage_type,
                                                        True,
@@ -75,41 +75,3 @@ class LastFMSearch(SaveWebHelper):
 
     def load_tracks(self, album_id, storage_type, cancellable):
         pass
-
-#######################
-# PRIVATE             #
-#######################
-    def __get_spotify_payload(self, album):
-        """
-            Convert tracks to a Spotify payload
-            @param album as {}
-            return [{}]
-        """
-        tracks = []
-        album_payload = {}
-        album_payload["id"] = "lf:%s-%s" % (album["artist"],
-                                            album["name"])
-        album_payload["name"] = album["name"]
-        album_payload["artists"] = [{"name": album["artist"]}]
-        album_payload["total_tracks"] = len(album["tracks"])
-        album_payload["release_date"] = None
-        try:
-            artwork_uri = album["image"][-1]["#text"]
-        except:
-            artwork_uri = None
-        album_payload["images"] = [{"url": artwork_uri}]
-        i = 1
-        for track in album["tracks"]["track"]:
-            track_payload = {}
-            track_payload["id"] = "lf:%s-%s-%s" % (track["artist"]["name"],
-                                                   album["name"],
-                                                   track["name"])
-            track_payload["name"] = track["name"]
-            track_payload["artists"] = [track["artist"]]
-            track_payload["disc_number"] = "1"
-            track_payload["track_number"] = i
-            track_payload["duration_ms"] = int(track["duration"]) * 1000
-            i += 1
-            track_payload["album"] = album_payload
-            tracks.append(track_payload)
-        return tracks

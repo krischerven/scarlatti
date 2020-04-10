@@ -318,6 +318,5 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         # We can listen if the track has been played
         # for at least half its duration, or for 4 minutes
         if played >= track.duration / 2000 or played >= 240:
-            for scrobbler in App().scrobblers:
-                if scrobbler.available:
-                    scrobbler.listen(track, int(finished_start_time))
+            for scrobbler in App().ws_director.scrobblers:
+                scrobbler.listen(track, int(finished_start_time))

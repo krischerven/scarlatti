@@ -12,11 +12,9 @@
 
 from gi.repository import GLib
 
-from time import sleep
 import json
 from locale import getdefaultlocale
 
-from lollypop.helper_task import TaskHelper
 from lollypop.logger import Logger
 from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import App
@@ -38,20 +36,20 @@ class SpotifyWebHelper(SaveWebHelper):
             Get artist id
             @param artist_name as str
             @param cancellable as Gio.Cancellable
+            @return str/None
         """
         try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
             artist_name = GLib.uri_escape_string(
                 artist_name, None, True).replace(" ", "+")
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
             uri = "https://api.spotify.com/v1/search?q=%s&type=artist" %\
                 artist_name
-            (status, data) = helper.load_uri_content_sync(uri, None)
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]["items"]:
@@ -65,18 +63,17 @@ class SpotifyWebHelper(SaveWebHelper):
             Get track payload for spotify id
             @param spotify_id as str
             @param cancellable as Gio.Cancellable
-            @return {}
+            @return {}/None
         """
         try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
             uri = "https://api.spotify.com/v1/tracks/%s" % spotify_id
-            (status, data) = helper.load_uri_content_sync(uri, None)
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 return decode
@@ -94,17 +91,16 @@ class SpotifyWebHelper(SaveWebHelper):
         try:
             locale = getdefaultlocale()[0][0:2]
             track_ids = []
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
             uri = "https://api.spotify.com/v1/artists/%s/top-tracks" %\
                 spotify_id
             uri += "?country=%s" % locale
-            (status, data) = helper.load_uri_content_sync(uri, None)
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["tracks"]:
@@ -121,15 +117,16 @@ class SpotifyWebHelper(SaveWebHelper):
             @param cancellable as Gio.Cancellable
         """
         try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
             uri = "https://api.spotify.com/v1/albums/%s" % album_id
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 tracks_payload = decode["tracks"]["items"]

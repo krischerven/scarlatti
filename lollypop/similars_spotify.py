@@ -10,14 +10,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from time import sleep
 from random import choice, shuffle
 import json
 
 from lollypop.logger import Logger
 from lollypop.define import App
 from lollypop.utils import emit_signal
-from lollypop.helper_task import TaskHelper
 from lollypop.helper_web_spotify import SpotifyWebHelper
 
 
@@ -49,14 +47,14 @@ class SpotifySimilars(SpotifyWebHelper):
             payload = self.get_track_payload(spotify_id, cancellable)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
-                                           True,
+                                           False,
                                            cancellable)
         shuffle(track_ids)
         for spotify_id in track_ids:
             payload = self.get_track_payload(spotify_id, cancellable)
             self.save_tracks_payload_to_db([payload],
                                            storage_type,
-                                           True,
+                                           False,
                                            cancellable)
         emit_signal(self, "finished")
 
@@ -115,16 +113,15 @@ class SpotifySimilars(SpotifyWebHelper):
         """
         artists = []
         try:
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
             uri = "https://api.spotify.com/v1/artists/%s/related-artists" %\
                 spotify_id
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if cancellable.is_cancelled():
                 raise Exception("cancelled")
             if status:

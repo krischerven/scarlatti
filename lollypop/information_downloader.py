@@ -79,13 +79,11 @@ class InformationDownloader:
             @param artist as str
             @return info as bytes
         """
-        info = None
-        try:
-            if App().lastfm is not None and get_network_available("LASTFM"):
-                info = App().lastfm.get_artist_bio(artist)
-        except Exception as e:
-            Logger.error("InfoDownloader::_get_lastfm_artist_info(): %s" % e)
-        return info
+        if get_network_available("LASTFM"):
+            from lollypop.helper_web_lastfm import LastFMWebHelper
+            helper = LastFMWebHelper()
+            return helper.get_artist_bio(artist)
+        return None
 
 #######################
 # PRIVATE             #

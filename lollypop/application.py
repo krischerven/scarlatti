@@ -24,14 +24,6 @@ from pickle import dump
 from signal import signal, SIGINT, SIGTERM
 from urllib.parse import urlparse
 
-
-try:
-    from lollypop.lastfm import LastFM, LibreFM
-except Exception as e:
-    print(e)
-    print("$ sudo pip3 install pylast")
-    LastFM = None
-
 from lollypop.utils import init_proxy_from_gnome, emit_signal
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
@@ -56,7 +48,6 @@ from lollypop.objects_radio import Radio
 from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
-from lollypop.helper_token import TokenHelper
 from lollypop.collection_scanner import CollectionScanner
 
 
@@ -102,7 +93,6 @@ class Application(Gtk.Application, ApplicationActions):
                     GLib.setenv("SSL_CERT_FILE", path, True)
                     break
         self.cursors = {}
-        self.scrobblers = []
         self.debug = False
         self.shown_sidebar_tooltip = False
         self.__window = None
@@ -191,7 +181,6 @@ class Application(Gtk.Application, ApplicationActions):
         self.art_helper = ArtHelper()
         self.art = Art()
         self.art.update_art_size()
-        self.token_helper = TokenHelper()
         self.ws_director = DirectorWebService()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
@@ -240,8 +229,6 @@ class Application(Gtk.Application, ApplicationActions):
         if vacuum:
             self.__vacuum()
             self.art.clean_artwork()
-        for scrobbler in self.scrobblers:
-            scrobbler.save()
         Gio.Application.quit(self)
         if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
             import gc
@@ -318,20 +305,6 @@ class Application(Gtk.Application, ApplicationActions):
             Return True if application is fullscreen
         """
         return self.__fs_window is not None
-
-    @property
-    def lastfm(self):
-        """
-            Get lastfm provider from scrobbler
-            @return LastFM/None
-        """
-        if LastFM is None:
-            return None
-        from pylast import LastFMNetwork
-        for scrobbler in self.scrobblers:
-            if isinstance(scrobbler, LastFMNetwork):
-                return scrobbler
-        return None
 
     @property
     def main_window(self):
@@ -486,11 +459,6 @@ class Application(Gtk.Application, ApplicationActions):
             options = app_cmd_line.get_options_dict()
             if options.contains("debug"):
                 self.debug = True
-            # We are forced to enable scrobblers here if we want full debug
-            if not self.scrobblers:
-                if LastFM is not None:
-                    self.scrobblers = [LastFM(), LibreFM()]
-                self.load_listenbrainz()
             if options.contains("set-rating"):
                 value = options.lookup_value("set-rating").get_string()
                 try:

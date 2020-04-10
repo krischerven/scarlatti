@@ -274,9 +274,8 @@ class BinPlayer:
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)
         emit_signal(self, "current-changed")
-        for scrobbler in App().scrobblers:
-            if scrobbler.available:
-                scrobbler.playing_now(self._current_track)
+        for scrobbler in App().ws_director.scrobblers:
+            scrobbler.playing_now(self._current_track)
 
     def _on_bus_message_tag(self, bus, message):
         """

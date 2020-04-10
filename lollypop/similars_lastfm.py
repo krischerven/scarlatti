@@ -10,17 +10,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from pylast import LastFMNetwork
-from random import choice, shuffle
+from random import shuffle, sample
+import json
 
-from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET, App
+from lollypop.define import LASTFM_API_KEY, App
 from lollypop.logger import Logger
-from lollypop.utils import emit_signal
-from lollypop.helper_web_musicbrainz import MusicBrainzWebHelper
+from lollypop.utils import emit_signal, get_network_available
+from lollypop.helper_web_lastfm import LastFMWebHelper
 
 
 # Last.FM API is not useful to get albums
-class LastFMSimilars(MusicBrainzWebHelper):
+class LastFMSimilars(LastFMWebHelper):
     """
         Search similar artists with Last.FM
     """
@@ -28,9 +28,7 @@ class LastFMSimilars(MusicBrainzWebHelper):
         """
             Init provider
         """
-        MusicBrainzWebHelper.__init__(self)
-        self.__pylast = LastFMNetwork(api_key=LASTFM_API_KEY,
-                                      api_secret=LASTFM_API_SECRET)
+        LastFMWebHelper.__init__(self)
 
     def load_similars(self, artist_ids, storage_type, cancellable):
         """
@@ -41,31 +39,23 @@ class LastFMSimilars(MusicBrainzWebHelper):
         """
         names = [App().artists.get_name(artist_id) for artist_id in artist_ids]
         result = self.get_similar_artists(names, cancellable)
-        artist_ids = []
+        tracks = []
         for (artist_name, cover_uri) in result:
-            artist_id = self.get_artist_id(artist_name, cancellable)
-            if artist_id is not None:
-                artist_ids.append(artist_id)
-        track_ids = []
-        for artist_id in artist_ids:
-            _track_ids = self.get_artist_top_tracks(artist_id, cancellable)
-            if not _track_ids:
+            albums = self.get_artist_top_albums(artist_name, cancellable)
+            albums = sample(albums, min(len(albums), 3))
+            if not albums:
                 continue
-            # We want some randomizing so keep tracks for later usage
-            track_id = choice(_track_ids)
-            track_ids += _track_ids
-            payload = self.get_track_payload(track_id)
-            self.save_tracks_payload_to_db([payload],
-                                           storage_type,
-                                           True,
-                                           cancellable)
-        shuffle(track_ids)
-        for track_id in track_ids:
-            payload = self.get_track_payload(track_id)
-            self.save_tracks_payload_to_db([payload],
-                                           storage_type,
-                                           True,
-                                           cancellable)
+            for (album, artist) in albums:
+                payload = self.get_album_payload(album, artist, cancellable)
+                if payload is None:
+                    continue
+                album_tracks = self.get_spotify_payload(payload)
+                tracks += sample(album_tracks, min(len(album_tracks), 3))
+        shuffle(tracks)
+        self.save_tracks_payload_to_db(tracks,
+                                       storage_type,
+                                       False,
+                                       cancellable)
         emit_signal(self, "finished")
 
     def get_similar_artists(self, artist_names, cancellable):
@@ -78,13 +68,38 @@ class LastFMSimilars(MusicBrainzWebHelper):
         result = []
         for artist_name in artist_names:
             try:
-                artist_item = self.__pylast.get_artist(artist_name)
-                for similar_item in artist_item.get_similar(10):
+                for similar in self.__get_similar_artists(artist_name):
                     if cancellable.is_cancelled():
                         raise Exception("cancelled")
-                    result.append((similar_item.item.name, None))
+                    result.append((similar, None))
             except Exception as e:
                 Logger.error("LastFMSimilars::get_similar_artists(): %s", e)
         if result:
             Logger.info("Found similar artists with LastFMSimilars")
         return result
+
+#######################
+# PRIVATE             #
+#######################
+    def __get_similar_artists(self, artist):
+        """
+            Get artist biography
+            @param artist as str
+            @return similars as [str]
+        """
+        if not get_network_available("LASTFM"):
+            return []
+        artists = []
+        try:
+            uri = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo"
+            uri += "&artist=%s&api_key=%s&format=json" % (
+                artist, LASTFM_API_KEY)
+            (status, data) = App().task_helper.load_uri_content_sync(uri, None)
+            if status:
+                content = json.loads(data.decode("utf-8"))
+                for artist in content["artist"]["similar"]["artist"]:
+                    artists.append(artist["name"])
+        except:
+            Logger.error(
+                "LastFMWebHelper::__get_similar_artists(): %s", data)
+        return artists

@@ -10,18 +10,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Soup
+from gi.repository import GLib
 
 import json
-from base64 import b64encode
 
 from lollypop.define import App, GOOGLE_API_ID, Type, AUDIODB_CLIENT_ID
-from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, FANARTTV_ID
+from lollypop.define import FANARTTV_ID
 from lollypop.define import StorageType
 from lollypop.utils import get_network_available, noaccents, emit_signal
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
-from lollypop.helper_task import TaskHelper
 
 
 class DownloaderArt:
@@ -243,10 +241,13 @@ class DownloaderArt:
                 artist, None, True).replace(" ", "+")
             uri = "https://api.spotify.com/v1/search?q=%s" % artist_formated +\
                   "&type=artist"
-            token = "Bearer %s" % self.__get_spotify_token(cancellable)
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 uri = None
                 decode = json.loads(data.decode("utf-8"))
@@ -334,15 +335,17 @@ class DownloaderArt:
             return []
         artists_spotify_ids = []
         try:
-            token = self.__get_spotify_token(cancellable)
             artist_formated = GLib.uri_escape_string(
                 artist, None, True).replace(" ", "+")
             uri = "https://api.spotify.com/v1/search?q=%s" % artist_formated +\
                   "&type=artist"
-            token = "Bearer %s" % token
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]["items"]:
@@ -351,7 +354,8 @@ class DownloaderArt:
             for artist_spotify_id in artists_spotify_ids:
                 uri = "https://api.spotify.com/v1/artists/" +\
                       "%s/albums" % artist_spotify_id
-                (status, data) = helper.load_uri_content_sync(uri, cancellable)
+                (status, data) = App().task_helper.load_uri_content_sync(
+                    uri, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     uri = None
@@ -491,31 +495,6 @@ class DownloaderArt:
             Logger.warning("DownloaderArt::__get_musicbrainz_mbid: %s"
                            % e)
         return None
-
-    def __get_spotify_token(self, cancellable):
-        """
-            Get a new auth token
-            @param cancellable as Gio.Cancellable
-            @return str
-        """
-        try:
-            token_uri = "https://accounts.spotify.com/api/token"
-            credentials = "%s:%s" % (SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
-            encoded = b64encode(credentials.encode("utf-8"))
-            credentials = encoded.decode("utf-8")
-            session = Soup.Session.new()
-            data = {"grant_type": "client_credentials"}
-            msg = Soup.form_request_new_from_hash("POST", token_uri, data)
-            msg.request_headers.append("Authorization",
-                                       "Basic %s" % credentials)
-            status = session.send_message(msg)
-            if status == 200:
-                body = msg.get_property("response-body")
-                data = body.flatten().get_data()
-                decode = json.loads(data.decode("utf-8"))
-                return decode["access_token"]
-        except:
-            return ""
 
     def __cache_artists_artwork(self):
         """

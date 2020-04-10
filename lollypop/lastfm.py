@@ -84,18 +84,6 @@ class LastFMBase:
                   "wb") as f:
             dump(list(self.__queue), f)
 
-    def get_artist_artwork_uri(self, artist):
-        """
-            Get artist infos
-            @param artist as str
-            @return uri as str/None
-        """
-        if not get_network_available("LASTFM"):
-            return (None, None, None)
-        last_artist = self.get_artist(artist)
-        uri = last_artist.get_cover_image(3)
-        return uri
-
     def get_artist_bio(self, artist):
         """
             Get artist infos

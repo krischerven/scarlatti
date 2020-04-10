@@ -29,15 +29,7 @@ class TaskHelper:
         """
             Init helper
         """
-        self.__headers = []
-
-    def add_header(self, name, value):
-        """
-            Add header
-            @param name as str
-            @param value as str
-        """
-        self.__headers.append((name, value))
+        pass
 
     def run(self, command, *args, **kwargs):
         """
@@ -61,30 +53,36 @@ class TaskHelper:
             @param callback as a function
             @callback (uri as str, status as bool, content as bytes, args)
         """
+        self.load_uri_content_with_headers(uri, [], cancellable,
+                                           callback, *args)
+
+    def load_uri_content_with_headers(self, uri, headers, cancellable,
+                                      callback, *args):
+        """
+            Load uri content async with headers
+            @param uri as str
+            @param headers as []
+            @param cancellable as Gio.Cancellable
+            @param callback as a function
+            @callback (uri as str, status as bool, content as bytes, args)
+        """
         try:
             session = Soup.Session.new()
             session.set_property('accept-language-auto', True)
-            # Post message
-            if self.__headers:
-                msg = Soup.Message.new("GET", uri)
+            session.set_property(
+                "user-agent",
+                "Lollypop/%s (cedric.bellegarde@adishatz.org)" % App().version)
+            msg = Soup.Message.new("GET", uri)
+            if headers:
                 headers = msg.get_property("request-headers")
-                for header in self.__headers:
+                for header in headers:
                     headers.append(header[0],
                                    header[1])
-                session.send_async(msg, cancellable,
-                                   self.__on_load_uri_content,
-                                   callback, cancellable, uri, *args)
-            # Get message
-            else:
-                request = session.request(uri)
-                request.send_async(cancellable,
-                                   self.__on_request_send_async,
-                                   callback,
-                                   cancellable,
-                                   uri,
-                                   *args)
+            session.send_async(msg, cancellable,
+                               self.__on_load_uri_content,
+                               callback, cancellable, uri, *args)
         except Exception as e:
-            Logger.error("HelperTask::load_uri_content(): %s" % e)
+            Logger.error("HelperTask::load_uri_content_with_headers(): %s" % e)
             callback(uri, False, b"", *args)
 
     def load_uri_content_sync(self, uri, cancellable=None):
@@ -94,34 +92,35 @@ class TaskHelper:
             @param cancellable as Gio.Cancellable
             @return (loaded as bool, content as bytes)
         """
+        return self.load_uri_content_sync_with_headers(uri, [], cancellable)
+
+    def load_uri_content_sync_with_headers(self, uri, headers,
+                                           cancellable=None):
+        """
+            Load uri
+            @param uri as str
+            @param headers as []
+            @param cancellable as Gio.Cancellable
+            @return (loaded as bool, content as bytes)
+        """
         try:
             session = Soup.Session.new()
+            session.set_property('accept-language-auto', True)
             session.set_property(
                 "user-agent",
                 "Lollypop/%s (cedric.bellegarde@adishatz.org)" % App().version)
-            # Set headers
-            if self.__headers:
-                msg = Soup.Message.new("GET", uri)
-                headers = msg.get_property("request-headers")
-                for header in self.__headers:
-                    headers.append(header[0],
-                                   header[1])
-                session.send_message(msg)
-                body = msg.get_property("response-body")
-                bytes = body.flatten().get_data()
-            # Get message
-            else:
-                request = session.request(uri)
-                stream = request.send(cancellable)
-                bytes = bytearray(0)
-                buf = stream.read_bytes(1024, cancellable).get_data()
-                while buf:
-                    bytes += buf
-                    buf = stream.read_bytes(1024, cancellable).get_data()
-                stream.close()
+            msg = Soup.Message.new("GET", uri)
+            if headers:
+                request_headers = msg.get_property("request-headers")
+                for header in headers:
+                    request_headers.append(header[0], header[1])
+            session.send_message(msg)
+            body = msg.get_property("response-body")
+            bytes = body.flatten().get_data()
             return (True, bytes)
         except Exception as e:
-            Logger.error("TaskHelper::load_uri_content_sync(): %s" % e)
+            Logger.error(
+                "TaskHelper::load_uri_content_sync_with_headers(): %s" % e)
             return (False, b"")
 
     def send_message(self, message, cancellable, callback, *args):
@@ -143,6 +142,27 @@ class TaskHelper:
                                *args)
         except Exception as e:
             Logger.error("TaskHelper::send_message(): %s" % e)
+
+    def send_message_sync(self, message, cancellable):
+        """
+            Send message sync
+            @param message as Soup.Message
+            @param cancellable as Gio.Cancellable
+            @return bytes
+        """
+        try:
+            session = Soup.Session.new()
+            stream = session.send(message, cancellable)
+            bytes = bytearray(0)
+            buf = stream.read_bytes(1024, cancellable).get_data()
+            while buf:
+                bytes += buf
+                buf = stream.read_bytes(1024, cancellable).get_data()
+            stream.close()
+            return bytes
+        except Exception as e:
+            Logger.error("TaskHelper::send_message_sync(): %s" % e)
+        return None
 
 #######################
 # PRIVATE             #

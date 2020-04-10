@@ -64,6 +64,11 @@ class SaveWebHelper(GObject.Object):
                 track = Track(track_id)
             if not match_album:
                 emit_signal(self, "match-track", track_id, storage_type)
+                if artwork_uri is not None:
+                    self.save_artwork(track,
+                                      artwork_uri,
+                                      cancellable)
+        # On album match, save artwork at the end
         if match_album and track is not None:
             if artwork_uri is not None:
                 self.save_artwork(track,

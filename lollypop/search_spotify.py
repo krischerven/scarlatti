@@ -11,11 +11,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from time import sleep
 
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_network_available
-from lollypop.helper_task import TaskHelper
 from lollypop.helper_web_spotify import SpotifyWebHelper
 from lollypop.define import App, StorageType
 
@@ -43,16 +41,15 @@ class SpotifySearch(SpotifyWebHelper):
             return
         try:
             storage_type = StorageType.SEARCH | StorageType.EPHEMERAL
-            while App().token_helper.wait_for_token("SPOTIFY", cancellable):
-                if cancellable.is_cancelled():
-                    raise Exception("cancelled")
-                sleep(1)
-            token = "Bearer %s" % App().token_helper.spotify
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
             uri = "https://api.spotify.com/v1/search?"
             uri += "q=%s&type=album,track" % search
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 self.save_tracks_payload_to_db(decode["tracks"]["items"],

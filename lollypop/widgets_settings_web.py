@@ -10,14 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Gio
+from gi.repository import Gtk, GLib, Gio, Gdk
 
 from gettext import gettext as _
 
 from lollypop.define import App, NetworkAccessACL, StorageType
-from lollypop.utils import get_network_available
+from lollypop.define import LASTFM_API_KEY
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.logger import Logger
 
 
 class WebSettingsWidget(Gtk.Bin, SignalsHelper):
@@ -42,27 +41,6 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
                            builder.get_object("google_error_label"),
                            None,
                            False)]
-
-        # First check lastfm support is available
-        if App().lastfm is None:
-            builder.get_object("lastfm_error_label").set_text(
-                _("You need to install pylast and gi secret"))
-            builder.get_object("librefm_error_label").set_text(
-                _("You need to install pylast and gi secret"))
-            builder.get_object("lastfm_error_label").set_opacity(1)
-            builder.get_object("librefm_error_label").set_opacity(1)
-            builder.get_object("lastfm_view").set_sensitive(False)
-            builder.get_object("librefm_view").set_sensitive(False)
-
-        else:
-            self.__widgets += [(builder.get_object("lastfm_view"),
-                                builder.get_object("lastfm_error_label"),
-                                NetworkAccessACL["LASTFM"],
-                                App().lastfm.is_goa),
-                               (builder.get_object("librefm_view"),
-                                builder.get_object("librefm_error_label"),
-                                NetworkAccessACL["LASTFM"],
-                                False)]
 
         # Web services access
         self.__acl_grid = builder.get_object("acl_grid")
@@ -98,25 +76,6 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             "listenbrainz-user-token").get_string()
         builder.get_object("listenbrainz_user_token_entry").set_text(token)
 
-        from lollypop.helper_passwords import PasswordsHelper
-        helper = PasswordsHelper()
-
-        #
-        # Last.fm tab
-        #
-        self.__lastfm_test_image = builder.get_object("lastfm_test_image")
-        self.__lastfm_login = builder.get_object("lastfm_login")
-        self.__lastfm_password = builder.get_object("lastfm_password")
-        helper.get("lastfm", self.__on_get_password)
-
-        #
-        # Libre.fm tab
-        #
-        self.__librefm_test_image = builder.get_object("librefm_test_image")
-        self.__librefm_login = builder.get_object("librefm_login")
-        self.__librefm_password = builder.get_object("librefm_password")
-        helper.get("librefm", self.__on_get_password)
-
         self.add(builder.get_object("widget"))
 
         # Check web services access
@@ -151,29 +110,21 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
                                  GLib.Variant("s", value))
         App().load_listenbrainz()
 
-    def _on_lastfm_test_btn_clicked(self, button):
+    def _on_lastfm_button_clicked(self, button):
         """
-            Test lastfm connection
+            Connect to lastfm
             @param button as Gtk.Button
         """
-        self.__update_fm_settings("lastfm")
-        if not get_network_available():
-            self.__lastfm_test_image.set_from_icon_name(
-                "computer-fail-symbolic",
-                Gtk.IconSize.MENU)
-            return
+        button.set_sensitive(False)
+        App().task_helper.run(self.__get_lastfm_token, button)
 
-    def _on_librefm_test_btn_clicked(self, button):
+    def _on_librefm_button_clicked(self, button):
         """
             Test librefm connection
             @param button as Gtk.Button
         """
-        self.__update_fm_settings("librefm")
-        if not get_network_available():
-            self.__librefm_test_image.set_from_icon_name(
-                "computer-fail-symbolic",
-                Gtk.IconSize.MENU)
-            return
+        button.set_sensitive(False)
+        self.__get_librefm_token(button)
 
     def _on_switch_youtube_state_set(self, widget, state):
         """
@@ -239,6 +190,22 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __get_lastfm_token(self, button):
+        """
+            Get Last.FM token
+            @param button as Gtk.Button
+            @thread safe
+        """
+        cancellable = Gio.Cancellable()
+        App().ws_director.token_ws.clear_token("LASTFM")
+        token = App().ws_director.token_ws.get_token("LASTFM", cancellable)
+        validation_token = token.replace("validation:", "")
+        uri = "http://www.last.fm/api/auth/?api_key=%s&token=%s" % (
+            LASTFM_API_KEY, validation_token)
+        Gtk.show_uri_on_window(App().window,
+                               uri,
+                               Gdk.CURRENT_TIME)
+
     def __check_acls(self):
         """
             Check network ACLs
@@ -260,94 +227,3 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
         self.__switch_youtube.set_sensitive(acls & NetworkAccessACL["YOUTUBE"])
         self.__cs_entry.set_sensitive(acls & NetworkAccessACL["YOUTUBE"] or
                                       acls & NetworkAccessACL["GOOGLE"])
-
-    def __update_fm_settings(self, name):
-        """
-            Update *fm settings
-            @param name as str (librefm/lastfm)
-        """
-        fm = None
-        for scrobbler in App().scrobblers:
-            if scrobbler.service_name == name:
-                fm = scrobbler
-                break
-        if fm is None:
-            return
-        elif name == "librefm":
-            callback = self.__test_librefm_connection
-            login = self.__librefm_login.get_text()
-            password = self.__librefm_password.get_text()
-        else:
-            callback = self.__test_lastfm_connection
-            login = self.__lastfm_login.get_text()
-            password = self.__lastfm_password.get_text()
-        try:
-            if fm is not None and login and password:
-                from lollypop.helper_passwords import PasswordsHelper
-                helper = PasswordsHelper()
-                helper.clear(name,
-                             helper.store,
-                             name,
-                             login,
-                             password,
-                             self.__on_password_store,
-                             fm,
-                             callback)
-        except Exception as e:
-            Logger.error("SettingsDialog::__update_fm_settings(): %s" % e)
-
-    def __test_lastfm_connection(self, result, fm):
-        """
-            Test lastfm connection
-            @param result as None
-            @param fm as LastFM
-        """
-        if fm.available:
-            self.__lastfm_test_image.set_from_icon_name(
-                "object-select-symbolic",
-                Gtk.IconSize.MENU)
-        else:
-            self.__lastfm_test_image.set_from_icon_name(
-                "computer-fail-symbolic",
-                Gtk.IconSize.MENU)
-
-    def __test_librefm_connection(self, result, fm):
-        """
-            Test librefm connection
-            @param result as None
-            @param fm as LastFM
-        """
-        if fm.available:
-            self.__librefm_test_image.set_from_icon_name(
-                "object-select-symbolic",
-                Gtk.IconSize.MENU)
-        else:
-            self.__librefm_test_image.set_from_icon_name(
-                "computer-fail-symbolic",
-                Gtk.IconSize.MENU)
-
-    def __on_password_store(self, source, result, fm, callback):
-        """
-            Connect service
-            @param source as GObject.Object
-            @param result as Gio.AsyncResult
-            @param fm as LastFM
-            @param callback as function
-        """
-        fm.connect_service(True, callback, fm)
-
-    def __on_get_password(self, attributes, password, name):
-        """
-             Set password label
-             @param attributes as {}
-             @param password as str
-             @param name as str
-        """
-        if attributes is None:
-            return
-        if name == "librefm":
-            self.__librefm_login.set_text(attributes["login"])
-            self.__librefm_password.set_text(password)
-        else:
-            self.__lastfm_login.set_text(attributes["login"])
-            self.__lastfm_password.set_text(password)

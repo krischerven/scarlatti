@@ -620,11 +620,38 @@
         <property name="row_spacing">20</property>
         <property name="column_spacing">20</property>
         <child>
+          <object class="GtkButton" id="connect_btn">
+            <property name="label" translatable="yes">Connect</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="valign">center</property>
+            <signal name="clicked" handler="_on_lastfm_button_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkLabel" id="label6">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">Login:</property>
+            <property name="label" translatable="yes">Connect to Last.FM</property>
+            <property name="ellipsize">end</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Connect to Librefm</property>
             <property name="ellipsize">end</property>
           </object>
           <packing>
@@ -633,88 +660,18 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label7">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">Password:</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="lastfm_login">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="halign">center</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="lastfm_password">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="halign">center</property>
-            <property name="visibility">False</property>
-            <property name="invisible_char">●</property>
-            <property name="input_purpose">password</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">2</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="connect_btn">
+          <object class="GtkButton" id="connect_btn1">
             <property name="label" translatable="yes">Connect</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="valign">center</property>
-            <signal name="clicked" handler="_on_lastfm_test_btn_clicked" swapped="no"/>
+            <signal name="clicked" handler="_on_librefm_button_clicked" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">1</property>
-            <property name="top_attach">3</property>
+            <property name="top_attach">1</property>
           </packing>
-        </child>
-        <child>
-          <object class="GtkImage" id="lastfm_test_image">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="valign">center</property>
-          </object>
-          <packing>
-            <property name="left_attach">2</property>
-            <property name="top_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="lastfm_error_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="opacity">0</property>
-            <property name="margin_bottom">50</property>
-            <property name="label" translatable="yes">Disabled in network settings</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
       <packing>
@@ -729,129 +686,6 @@
       </object>
       <packing>
         <property name="position">1</property>
-        <property name="tab_fill">False</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="librefm_view">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="halign">center</property>
-        <property name="valign">start</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
-        <property name="row_spacing">20</property>
-        <property name="column_spacing">20</property>
-        <child>
-          <object class="GtkLabel" id="label3">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">Login:</property>
-            <property name="ellipsize">end</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label5">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="label" translatable="yes">Password:</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="librefm_login">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="halign">center</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="librefm_password">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="halign">center</property>
-            <property name="visibility">False</property>
-            <property name="invisible_char">●</property>
-            <property name="input_purpose">password</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">2</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="connect_btn1">
-            <property name="label" translatable="yes">Connect</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="valign">center</property>
-            <signal name="clicked" handler="_on_librefm_test_btn_clicked" swapped="no"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkImage" id="librefm_test_image">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="valign">center</property>
-          </object>
-          <packing>
-            <property name="left_attach">2</property>
-            <property name="top_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="librefm_error_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="opacity">0</property>
-            <property name="margin_bottom">50</property>
-            <property name="label" translatable="yes">Disabled in network settings</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-            <property name="width">3</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="position">2</property>
-      </packing>
-    </child>
-    <child type="tab">
-      <object class="GtkLabel">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Libre.fm</property>
-      </object>
-      <packing>
-        <property name="position">2</property>
         <property name="tab_fill">False</property>
       </packing>
     </child>
@@ -928,7 +762,7 @@
         </child>
       </object>
       <packing>
-        <property name="position">3</property>
+        <property name="position">2</property>
       </packing>
     </child>
     <child type="tab">
@@ -938,7 +772,7 @@
         <property name="label" translatable="yes">ListenBrainz</property>
       </object>
       <packing>
-        <property name="position">3</property>
+        <property name="position">2</property>
         <property name="tab_fill">False</property>
       </packing>
     </child>
@@ -1160,7 +994,7 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
         </child>
       </object>
       <packing>
-        <property name="position">4</property>
+        <property name="position">3</property>
       </packing>
     </child>
     <child type="tab">
@@ -1170,7 +1004,7 @@ Lollypop needs this to search for artwork.&lt;/small&gt;</property>
         <property name="label" translatable="yes">Google</property>
       </object>
       <packing>
-        <property name="position">4</property>
+        <property name="position">3</property>
         <property name="tab_fill">False</property>
       </packing>
     </child>
