@@ -41,17 +41,17 @@ class DirectorWebService:
             Stop all web services
             @return bool
         """
-        stopped = True
+        stopped = stopping = 0
         if self.__lastfm_ws is not None:
-            self.__lastfm_ws.stop()
+            stopping += 1
+            stopped += self.__lastfm_ws.stop()
         if self.__librefm_ws is not None:
-            self.__librefm_ws.stop()
-        if self.__spotify_ws is not None and self.__spotify_ws.is_running:
-            self.__spotify_ws.stop()
-            stopped = False
-        if stopped:
-            Logger.info("Spotify web service stopped")
-        return stopped
+            stopping += 1
+            stopped += self.__librefm_ws.stop()
+        if self.__spotify_ws is not None:
+            stopping += 1
+            stopped += self.__spotify_ws.stop()
+        return stopped == stopping
 
     @property
     def scrobblers(self):
@@ -105,7 +105,7 @@ class DirectorWebService:
                 self.__spotify_timeout_id = None
             self.__spotify_ws.stop()
             self.__spotify_ws = None
-            Logger.info("Spotify web service stopped")
+            Logger.info("Spotify web service stopping")
 
     def __handle_lastfm(self, acl):
         """
@@ -118,7 +118,7 @@ class DirectorWebService:
             Logger.info("Last.FM web service started")
         elif self.__lastfm_ws is not None:
             self.__lastfm_ws = None
-            Logger.info("Last.FM web service stopped")
+            Logger.info("Last.FM web service stopping")
 
     def __handle_librefm(self, acl):
         """
@@ -132,7 +132,7 @@ class DirectorWebService:
             Logger.info("LibreFM web service started")
         elif self.__lastfm_ws is not None:
             self.__lastfm_ws = None
-            Logger.info("LibreFM web service stopped")
+            Logger.info("LibreFM web service stopping")
 
     def __on_network_access_acl_changed(self, *ignore):
         """

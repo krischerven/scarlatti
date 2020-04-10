@@ -48,6 +48,7 @@ class LastFMWebService:
     def stop(self):
         """
             Stop current tasks and save queue to disk
+            @return bool
         """
         self.__cancellable.cancel()
         try:
@@ -56,6 +57,7 @@ class LastFMWebService:
                 dump(list(self.__queue), f)
         except Exception as e:
             Logger.info("LastFMWebService::stop: %s", e)
+        return True
 
     def listen(self, track, timestamp):
         """

@@ -48,6 +48,15 @@ class SpotifyWebService(SpotifyWebHelper):
         App().task_helper.run(self.__populate_db)
         return True
 
+    def stop(self):
+        """
+            Stop db populate
+            @return bool
+        """
+        if not self.__cancellable.is_cancelled():
+            self.__cancellable.cancel()
+        return self.__is_running
+
     def search_similar_albums(self, cancellable):
         """
             Add similar albums to DB
@@ -148,21 +157,6 @@ class SpotifyWebService(SpotifyWebHelper):
         except Exception as e:
             Logger.error("SpotifyWebService::get_similar_artists(): %s", e)
         return artists
-
-    def stop(self):
-        """
-            Stop db populate
-        """
-        if not self.__cancellable.is_cancelled():
-            self.__cancellable.cancel()
-
-    @property
-    def is_running(self):
-        """
-            Return populate status
-            @return bool
-        """
-        return self.__is_running
 
 #######################
 # PRIVATE             #
