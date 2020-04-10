@@ -75,7 +75,7 @@ class SpotifyWebService(SpotifyWebHelper):
                                            True,
                                            cancellable)
         except Exception as e:
-            Logger.warning("SpotifySearch::search_similar_albums(): %s", e)
+            Logger.warning("SpotifyWebService::search_similar_albums(): %s", e)
 
     def search_new_releases(self, cancellable):
         """
@@ -113,7 +113,7 @@ class SpotifyWebService(SpotifyWebHelper):
                     if len(newer_albums) >= self.__MIN_ITEMS_PER_STORAGE_TYPE:
                         break
         except Exception as e:
-            Logger.warning("SpotifySearch::search_new_releases(): %s", e)
+            Logger.warning("SpotifyWebService::search_new_releases(): %s", e)
 
     def get_similar_artists(self, artist_id, cancellable):
         """
@@ -146,7 +146,7 @@ class SpotifyWebService(SpotifyWebHelper):
                                     item["name"],
                                     image_uri))
         except Exception as e:
-            Logger.error("SpotifySearch::get_similar_artists(): %s", e)
+            Logger.error("SpotifyWebService::get_similar_artists(): %s", e)
         return artists
 
     def stop(self):
@@ -198,7 +198,7 @@ class SpotifyWebService(SpotifyWebHelper):
                 self.clean_old_albums(storage_types)
                 App().artists.update_featuring()
         except Exception as e:
-            Logger.warning("SpotifySearch::__populate_db(): %s", e)
+            Logger.warning("SpotifyWebService::__populate_db(): %s", e)
         self.__is_running = False
         Logger.info("Spotify download finished")
 
@@ -250,5 +250,5 @@ class SpotifyWebService(SpotifyWebHelper):
                 return decode["items"]
         except Exception as e:
             Logger.warning(
-                "SpotifySearch::__get_artist_albums_payload(): %s", e)
+                "SpotifyWebService::__get_artist_albums_payload(): %s", e)
         return None
