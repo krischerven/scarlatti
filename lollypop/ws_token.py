@@ -72,9 +72,9 @@ class TokenWebService:
         """
         try:
             if service == "LASTFM":
-                uri = "http://ws.audioscrobbler.com/2.0/"
+                uri = "https://ws.audioscrobbler.com/2.0/"
             else:
-                uri = "http://libre.fm/2.0/"
+                uri = "https://libre.fm/2.0/"
             uri += "?api_key=%s&format=json&method=auth.gettoken" %\
                 LASTFM_API_KEY
             api_sig = "api_key%smethodauth.gettoken%s" % (
@@ -163,7 +163,7 @@ class TokenWebService:
         """
         try:
             if service == "LASTFM":
-                uri = "http://ws.audioscrobbler.com/2.0/"
+                uri = "https://ws.audioscrobbler.com/2.0/"
                 uri += "?api_key=%s&format=json" % LASTFM_API_KEY
                 uri += "&method=auth.getsession&token=%s" % token
                 api_sig = "api_key%smethodauth.getsessiontoken%s%s" % (
@@ -171,7 +171,7 @@ class TokenWebService:
                 encoded = md5(api_sig.encode("utf-8")).hexdigest()
                 uri += "&api_sig=%s" % encoded
             else:
-                uri = "http://libre.fm/2.0/?format=json"
+                uri = "https://libre.fm/2.0/?format=json"
                 uri += "&method=auth.getsession&token=%s" % token
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)

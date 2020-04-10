@@ -42,7 +42,7 @@ class LastFMWebService:
         if name == "LIBREFM":
             self.__uri = "http://libre.fm/2.0/"
         else:
-            self.__uri = "http://ws.audioscrobbler.com/2.0/"
+            self.__uri = "https://ws.audioscrobbler.com/2.0/"
             App().task_helper.run(self.__populate_loved_tracks)
 
     def stop(self):
