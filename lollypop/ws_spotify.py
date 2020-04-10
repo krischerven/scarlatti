@@ -55,7 +55,7 @@ class SpotifyWebService(SpotifyWebHelper):
         """
         if not self.__cancellable.is_cancelled():
             self.__cancellable.cancel()
-        return self.__is_running
+        return not self.__is_running
 
     def search_similar_albums(self, cancellable):
         """
