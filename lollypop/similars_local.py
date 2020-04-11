@@ -26,13 +26,16 @@ class LocalSimilars:
         """
         pass
 
-    def get_similar_artists(self, artist_ids, cancellable):
+    def get_similar_artists(self, artist_names, cancellable):
         """
             Get similar artists
             @param artist_ids as [int]
             @param cancellable as Gio.Cancellable
             @return [(str, None)]
         """
+        artist_ids = []
+        for artist_name in artist_names:
+            artist_ids.append(App().artists.get_id(artist_name)[0])
         genre_ids = App().artists.get_genre_ids(artist_ids,
                                                 StorageType.COLLECTION)
         artists = App().artists.get(genre_ids, StorageType.COLLECTION)
