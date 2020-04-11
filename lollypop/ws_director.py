@@ -130,7 +130,7 @@ class DirectorWebService:
         elif self.__lastfm_ws is not None:
             self.__lastfm_ws = None
             Logger.info("Last.FM web service stopping")
-        if acl & NetworkAccessACL["LASTFM"]:
+        if acl & NetworkAccessACL["LIBREFM"]:
             from lollypop.ws_lastfm import LastFMWebService
             self.__librefm_ws = LastFMWebService("LIBREFM")
             Logger.info("LibreFM web service started")
