@@ -85,7 +85,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         if self.is_locked() and scan_type != ScanType.EXTERNAL:
             self.stop()
             GLib.timeout_add(250, self.update, scan_type, uris)
-        elif not App().ws_directory.stop():
+        elif not App().ws_director.stop():
             GLib.timeout_add(250, self.update, scan_type, uris)
         else:
             self.__disable_compilations = not App().settings.get_value(
