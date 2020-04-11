@@ -435,7 +435,7 @@ class DownloaderArt:
 
     def _get_lastfm_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork using Last.FM
+            Get album artwork using Last.fm
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable

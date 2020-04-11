@@ -19,10 +19,10 @@ from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_lastfm import LastFMWebHelper
 
 
-# Last.FM API is not useful to get albums
+# Last.fm API is not useful to get albums
 class LastFMSimilars(LastFMWebHelper):
     """
-        Search similar artists with Last.FM
+        Search similar artists with Last.fm
     """
     def __init__(self):
         """

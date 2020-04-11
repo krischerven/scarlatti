@@ -212,7 +212,7 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
 #######################
     def __get_lastfm_token(self, button, service):
         """
-            Get Last.FM token
+            Get Last.fm token
             @param button as Gtk.Button
             @param service as str
             @thread safe

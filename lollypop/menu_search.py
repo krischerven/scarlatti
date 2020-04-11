@@ -49,7 +49,7 @@ class SearchMenu(Gio.Menu):
                                          "app.web_search('SPOTIFY')")
             section.append_item(menu_item)
         if get_network_available("LASTFM"):
-            menu_item = Gio.MenuItem.new(_("Last.FM"),
+            menu_item = Gio.MenuItem.new(_("Last.fm"),
                                          "app.web_search('LASTFM')")
             section.append_item(menu_item)
         self.append_section(_("Search on the Web"), section)

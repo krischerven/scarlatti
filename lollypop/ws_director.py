@@ -120,23 +120,23 @@ class DirectorWebService:
 
     def __handle_lastfm(self, acl):
         """
-            Start/stop Last.FM based on acl
+            Start/stop Last.fm based on acl
             @param acl as int
         """
         if acl & NetworkAccessACL["LASTFM"]:
             from lollypop.ws_lastfm import LastFMWebService
             self.__lastfm_ws = LastFMWebService("LASTFM")
-            Logger.info("Last.FM web service started")
+            Logger.info("Last.fm web service started")
         elif self.__lastfm_ws is not None:
             self.__lastfm_ws = None
-            Logger.info("Last.FM web service stopping")
+            Logger.info("Last.fm web service stopping")
         if acl & NetworkAccessACL["LIBREFM"]:
             from lollypop.ws_lastfm import LastFMWebService
             self.__librefm_ws = LastFMWebService("LIBREFM")
-            Logger.info("LibreFM web service started")
+            Logger.info("Libre.fm web service started")
         elif self.__librefm_ws is not None:
             self.__librefm_ws = None
-            Logger.info("LibreFM web service stopping")
+            Logger.info("Libre.fm web service stopping")
 
     def __on_network_access_acl_changed(self, *ignore):
         """

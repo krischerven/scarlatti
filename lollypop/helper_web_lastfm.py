@@ -24,7 +24,7 @@ from lollypop.utils import get_network_available
 
 class LastFMWebHelper(SaveWebHelper):
     """
-        Web helper for Last.FM
+        Web helper for Last.fm
     """
 
     def __init__(self):

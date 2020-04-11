@@ -103,7 +103,7 @@ class RadioPlaybackMenu(Gio.Menu):
                              self.__on_radio_action_activate,
                              artist_ids)
         radio_action.set_enabled(get_network_available("LASTFM"))
-        menu_item = Gio.MenuItem.new(_("From Last.FM"),
+        menu_item = Gio.MenuItem.new(_("From Last.fm"),
                                      "app.radio_action_lastfm")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)

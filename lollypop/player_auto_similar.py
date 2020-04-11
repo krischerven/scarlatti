@@ -97,7 +97,7 @@ class AutoSimilarPlayer:
 
     def play_radio_from_lastfm(self, artist_ids):
         """
-            Play a radio from the Last.FM for artist ids
+            Play a radio from the Last.fm for artist ids
             @param artist_ids as [int]
         """
         emit_signal(self, "loading-changed", True, Track())

@@ -23,7 +23,7 @@ from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET
 
 class LastFMWebService:
     """
-        Handle scrobbling to Last.FM and all authenticated API calls
+        Handle scrobbling to Last.fm and all authenticated API calls
     """
 
     def __init__(self, name):
