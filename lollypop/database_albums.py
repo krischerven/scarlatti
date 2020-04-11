@@ -453,7 +453,12 @@ class AlbumsDatabase:
             else:
                 request = "SELECT rowid FROM albums\
                            WHERE name=?\
-                           AND no_album_artist=1"
+                           AND no_album_artist=1 "
+                if mb_album_id:
+                    request += "AND albums.mb_album_id=? "
+                    filters += (mb_album_id,)
+                else:
+                    request += "AND albums.mb_album_id IS NULL "
             result = sql.execute(request, filters)
             v = result.fetchone()
             if v is not None:
@@ -1269,11 +1274,12 @@ class AlbumsDatabase:
             result = sql.execute(request, filters)
             return list(result)
 
-    def calculate_artist_ids(self, album_id):
+    def calculate_artist_ids(self, album_id, disable_compilations):
         """
             Calculate artist ids based on tracks
             @WARNING Be sure album already have a track
             @param album_id as int
+            @param disable_compilations as bool
             @return artist_ids as [int]
         """
         ret = []
@@ -1284,12 +1290,17 @@ class AlbumsDatabase:
                 result = sql.execute(request, (album_id,))
                 for track_id in list(itertools.chain(*result)):
                     artist_ids = App().tracks.get_artist_ids(track_id)
-                    # Check if previous track and
-                    # track do not have same artists
-                    if ret:
-                        if not set(ret) & set(artist_ids):
-                            return [Type.COMPILATIONS]
-                    ret = artist_ids
+                    if disable_compilations:
+                        for artist_id in artist_ids:
+                            if artist_id not in ret:
+                                ret.append(artist_id)
+                    else:
+                        # Check if previous track and
+                        # track do not have same artists
+                        if ret:
+                            if not set(ret) & set(artist_ids):
+                                return [Type.COMPILATIONS]
+                        ret = artist_ids
         except Exception as e:
             Logger.error("AlbumsDatabase::calculate_artist_ids(): %s" % e)
         return ret

@@ -67,7 +67,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
-        self.__disable_compilations = True
+        self.__disable_compilations = not App().settings.get_value(
+                "show-compilations")
         if App().settings.get_value("auto-update"):
             self.__inotify = Inotify()
         else:
@@ -88,9 +89,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         elif not App().ws_director.stop():
             GLib.timeout_add(250, self.update, scan_type, uris)
         else:
-            self.__disable_compilations = not App().settings.get_value(
-                "show-compilations")
-
             if scan_type == ScanType.FULL:
                 uris = App().settings.get_music_uris()
             if not uris:
@@ -119,7 +117,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         # Set artist ids based on content
         else:
             new_album_artist_ids = App().albums.calculate_artist_ids(
-                item.album_id)
+                item.album_id, self.__disable_compilations)
             App().albums.set_artist_ids(item.album_id, new_album_artist_ids)
             # We handle artists already created by any previous save_track()
             item.new_album_artist_ids = []
@@ -219,11 +217,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__pending_new_artist_ids += new_artist_ids
         item.new_artist_ids = new_artist_ids
         item.artist_ids = artist_ids
-
-        # User does not want compilations
-        if self.__disable_compilations and not item.album_artist_ids:
-            item.album_artist_ids = artist_ids
-
         missing_artist_ids = list(set(item.album_artist_ids) - set(artist_ids))
         # Special case for broken tags
         # If all artist album tags are missing
