@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, GObject, Gdk, GdkPixbuf, GLib, Pango
 
 from lollypop.objects_album import Album
 from lollypop.define import App, ArtSize, ArtBehaviour, MARGIN
@@ -82,7 +82,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 self.__boxes[widget.submenu_name].add(widget)
                 button = Gtk.ModelButton.new()
                 button.set_label(widget.submenu_name)
-                button.set_alignment(0, 0.5)
+                button.get_child().set_halign(Gtk.Align.START)
                 button.set_property("menu-name", widget.submenu_name)
                 button.show()
                 self.__boxes["main"].add(button)
@@ -122,6 +122,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.set_property("menu-name", "main")
                 button.set_property("inverted", True)
                 button.set_label(menu_name)
+                button.get_child().set_halign(Gtk.Align.START)
                 button.show()
                 box.add(button)
 
@@ -214,7 +215,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button = Gtk.ModelButton.new()
         button.set_action_name(action.get_string())
         button.set_label(text.get_string())
-        button.set_alignment(0, 0.5)
+        button.get_child().set_halign(Gtk.Align.START)
         if close:
             button.connect("clicked",
                            lambda x: emit_signal(self, "hidden", True))
@@ -263,7 +264,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button = Gtk.ModelButton.new()
         button.set_property("menu-name", submenu_name)
         button.set_label(text.get_string())
-        button.set_alignment(0, 0.5)
+        button.get_child().set_halign(Gtk.Align.START)
         button.show()
         self.__boxes[menu_name].add(button)
 
@@ -275,20 +276,24 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
-        button.set_alignment(0, 0.5)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         label.show()
         artwork = Gtk.Image.new_from_icon_name(icon_name,
                                                Gtk.IconSize.INVALID)
         artwork.set_pixel_size(ArtSize.SMALL)
         artwork.show()
+        close_image = Gtk.Image.new_from_icon_name("pan-up-symbolic",
+                                                   Gtk.IconSize.BUTTON)
+        close_image.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN)
         grid.add(artwork)
         grid.add(label)
+        grid.add(close_image)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
         self.__boxes[menu_name].add(button)
@@ -301,17 +306,22 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
-        button.set_alignment(0, 0.5)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         label.show()
         artwork = Gtk.Image.new()
+        close_image = Gtk.Image.new_from_icon_name("pan-up-symbolic",
+                                                   Gtk.IconSize.BUTTON)
+        close_image.show()
         grid = Gtk.Grid()
+        grid.set_halign(Gtk.Align.START)
         grid.set_column_spacing(MARGIN)
         grid.add(artwork)
         grid.add(label)
+        grid.add(close_image)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
         App().art_helper.set_album_artwork(
@@ -332,17 +342,21 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
-        button.set_alignment(0, 0.5)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
         label.set_markup(text)
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         label.show()
         artwork = Gtk.Image.new()
+        close_image = Gtk.Image.new_from_icon_name("pan-up-symbolic",
+                                                   Gtk.IconSize.BUTTON)
+        close_image.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN)
         grid.add(artwork)
         grid.add(label)
+        grid.add(close_image)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
         artist_name = App().artists.get_name(artist_id)
@@ -379,18 +393,22 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 del rounded
                 artwork.show()
         button = Gtk.ModelButton.new()
-        button.set_alignment(0, 0.5)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         label.set_markup(text)
         label.show()
         artwork = Gtk.Image.new()
         artwork.get_style_context().add_class("light-background")
+        close_image = Gtk.Image.new_from_icon_name("pan-up-symbolic",
+                                                   Gtk.IconSize.BUTTON)
+        close_image.show()
         grid = Gtk.Grid()
         grid.set_column_spacing(MARGIN)
         grid.add(artwork)
         grid.add(label)
+        grid.add(close_image)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
         App().task_helper.run(
