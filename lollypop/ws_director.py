@@ -35,7 +35,6 @@ class DirectorWebService:
         App().settings.connect("changed::network-access-acl",
                                self.__on_network_access_acl_changed)
         self.__on_network_access_acl_changed()
-        Logger.info("LibreFM web service started")
 
     def start(self):
         """
