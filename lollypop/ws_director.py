@@ -40,6 +40,17 @@ class DirectorWebService:
         self.__librefm_ws = LastFMWebService("LIBREFM")
         Logger.info("LibreFM web service started")
 
+    def start(self):
+        """
+            Start all web services
+        """
+        if self.__lastfm_ws is not None:
+            self.__lastfm_ws.start()
+        if self.__librefm_ws is not None:
+            self.__librefm_ws.start()
+        if self.__spotify_ws is not None:
+            self.__spotify_ws.start()
+
     def stop(self):
         """
             Stop all web services

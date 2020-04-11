@@ -33,17 +33,24 @@ class LastFMWebService:
         """
         self.__cancellable = Gio.Cancellable()
         self.__name = name
+        self.__queue = []
+        if name == "LIBREFM":
+            self.__uri = "http://libre.fm/2.0/"
+        else:
+            self.__uri = "https://ws.audioscrobbler.com/2.0/"
+            App().task_helper.run(self.__populate_loved_tracks)
+        self.start()
+
+    def start(self):
+        """
+            Start web service (load save queue)
+        """
         try:
             self.__queue = load(
                 open(LOLLYPOP_DATA_PATH + "/%s_queue.bin" % self.__name, "rb"))
         except Exception as e:
             Logger.info("LastFMWebService::__init__(): %s", e)
             self.__queue = []
-        if name == "LIBREFM":
-            self.__uri = "http://libre.fm/2.0/"
-        else:
-            self.__uri = "https://ws.audioscrobbler.com/2.0/"
-            App().task_helper.run(self.__populate_loved_tracks)
 
     def stop(self):
         """

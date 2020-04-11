@@ -375,7 +375,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         App().albums.update_max_count()
         # Update featuring
         App().artists.update_featuring()
-        App().start_spotify()
+        App().ws_director.start()
 
     def __add_monitor(self, dirs):
         """
