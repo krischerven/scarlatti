@@ -122,12 +122,11 @@ class CollectionScanner(GObject.GObject, TagReader):
                 item.album_id)
             App().albums.set_artist_ids(item.album_id, new_album_artist_ids)
             # We handle artists already created by any previous save_track()
-            artist_ids = []
+            item.new_album_artist_ids = []
             for artist_id in new_album_artist_ids:
                 if artist_id in self.__pending_new_artist_ids:
-                    artist_ids.append(artist_id)
+                    item.new_album_artist_ids.append(artist_id)
                     self.__pending_new_artist_ids.remove(artist_id)
-            item.set_new_album_artist_ids(artist_ids)
         # Update album genres
         for genre_id in genre_ids:
             App().albums.add_genre(item.album_id, genre_id)
@@ -218,12 +217,12 @@ class CollectionScanner(GObject.GObject, TagReader):
          artist_ids) = self.add_artists(artists, a_sortnames, mb_artist_id)
 
         self.__pending_new_artist_ids += new_artist_ids
-        item.set_new_artist_ids(new_artist_ids)
-        item.set_artist_ids(artist_ids)
+        item.new_artist_ids = new_artist_ids
+        item.artist_ids = artist_ids
 
         # User does not want compilations
         if self.__disable_compilations and not item.album_artist_ids:
-            item.set_album_artist_ids(artist_ids)
+            item.album_artist_ids = artist_ids
 
         missing_artist_ids = list(set(item.album_artist_ids) - set(artist_ids))
         # Special case for broken tags
@@ -238,8 +237,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         else:
             (new_genre_ids, genre_ids) = self.add_genres(genres)
 
-        item.set_new_genre_ids(new_genre_ids)
-        item.set_genre_ids(genre_ids)
+        item.new_genre_ids = new_genre_ids
+        item.genre_ids = genre_ids
 
         # Add track to db
         Logger.debug("CollectionScanner::save_track(): Add track")
@@ -249,7 +248,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                                     track_rate, track_loved, track_ltime,
                                     track_mtime, mb_track_id, bpm,
                                     storage_type)
-        item.set_track_id(track_id)
+        item.track_id = track_id
         Logger.debug("CollectionScanner::save_track(): Update track")
         self.update_track(track_id, artist_ids, genre_ids)
         Logger.debug("CollectionScanner::save_track(): Update album")
@@ -309,16 +308,14 @@ class CollectionScanner(GObject.GObject, TagReader):
             SqlCursor.commit(App().db)
             item = CollectionItem(album_id=album_id)
             if not App().albums.get_name(album_id):
-                removed_artist_ids = []
+                item.artist_ids = []
                 for artist_id in album_artist_ids + artist_ids:
                     if not App().artists.get_name(artist_id):
-                        removed_artist_ids.append(artist_id)
-                item.set_artist_ids(removed_artist_ids)
-                removed_genre_ids = []
+                        item.artist_ids.append(artist_id)
+                item.genre_ids = []
                 for genre_id in genre_ids:
                     if not App().genres.get_name(genre_id):
-                        removed_genre_ids.append(genre_id)
-                item.set_genre_ids(removed_genre_ids)
+                        item.genre_ids.append(genre_id)
                 emit_signal(self, "updated", item, ScanUpdate.REMOVED)
             else:
                 emit_signal(self, "updated", item, ScanUpdate.MODIFIED)
