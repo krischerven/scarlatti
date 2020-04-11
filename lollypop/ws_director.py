@@ -16,7 +16,6 @@ from gi.repository import Gio, GLib
 from lollypop.define import NetworkAccessACL, App, Type
 from lollypop.ws_token import TokenWebService
 from lollypop.logger import Logger
-from lollypop.ws_lastfm import LastFMWebService
 
 
 class DirectorWebService:
@@ -36,8 +35,6 @@ class DirectorWebService:
         App().settings.connect("changed::network-access-acl",
                                self.__on_network_access_acl_changed)
         self.__on_network_access_acl_changed()
-        # LibreFM does not have network acl
-        self.__librefm_ws = LastFMWebService("LIBREFM")
         Logger.info("LibreFM web service started")
 
     def start(self):
@@ -134,6 +131,13 @@ class DirectorWebService:
         elif self.__lastfm_ws is not None:
             self.__lastfm_ws = None
             Logger.info("Last.FM web service stopping")
+        if acl & NetworkAccessACL["LASTFM"]:
+            from lollypop.ws_lastfm import LastFMWebService
+            self.__librefm_ws = LastFMWebService("LIBREFM")
+            Logger.info("LibreFM web service started")
+        elif self.__librefm_ws is not None:
+            self.__librefm_ws = None
+            Logger.info("LibreFM web service stopping")
 
     def __on_network_access_acl_changed(self, *ignore):
         """
