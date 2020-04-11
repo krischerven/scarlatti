@@ -171,14 +171,6 @@ class SimilarsMenu(Gtk.Bin):
         self.add(self.__stack)
 
     @property
-    def submenu_height(self):
-        """
-            Get submenu height
-            @return int
-        """
-        return 300
-
-    @property
     def submenu_name(self):
         """
             Get submenu name

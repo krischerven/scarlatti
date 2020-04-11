@@ -442,5 +442,5 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             self.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT)
             self.set_size_request(-1, -1)
         else:
-            self.set_size_request(-1, 300)
+            self.set_size_request(300, 400)
             self.set_transition_type(Gtk.StackTransitionType.SLIDE_RIGHT)
