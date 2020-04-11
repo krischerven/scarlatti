@@ -510,7 +510,7 @@ flowboxchild:selected  {
     color: shade(@theme_selected_bg_color, 1.25);
 }
 
-.banner-button:selected {
+.banner-button:visited {
     background-color: alpha(black, 0.7);
     opacity: 0.9;
 }
