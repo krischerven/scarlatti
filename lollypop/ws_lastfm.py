@@ -31,7 +31,6 @@ class LastFMWebService:
             Init service
             @param name as str
         """
-        self.__cancellable = Gio.Cancellable()
         self.__name = name
         self.__queue = []
         if name == "LIBREFM":
@@ -46,6 +45,7 @@ class LastFMWebService:
             Start web service (load save queue)
         """
         try:
+            self.__cancellable = Gio.Cancellable()
             self.__queue = load(
                 open(LOLLYPOP_DATA_PATH + "/%s_queue.bin" % self.__name, "rb"))
         except Exception as e:

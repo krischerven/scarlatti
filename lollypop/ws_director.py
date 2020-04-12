@@ -31,6 +31,7 @@ class DirectorWebService:
         self.__spotify_ws = None
         self.__lastfm_ws = None
         self.__librefm_ws = None
+        self.__listenbrainz_ws = None
         self.__spotify_timeout_id = None
         App().settings.connect("changed::network-access-acl",
                                self.__on_network_access_acl_changed)
@@ -44,6 +45,8 @@ class DirectorWebService:
             self.__lastfm_ws.start()
         if self.__librefm_ws is not None:
             self.__librefm_ws.start()
+        if self.__listenbrainz_ws is not None:
+            self.__listenbrainz_ws.start()
         if self.__spotify_ws is not None:
             self.__spotify_ws.start()
 
@@ -59,6 +62,9 @@ class DirectorWebService:
         if self.__librefm_ws is not None:
             stopping += 1
             stopped += self.__librefm_ws.stop()
+        if self.__listenbrainz_ws is not None:
+            stopping += 1
+            stopped += self.__listenbrainz_ws.stop()
         if self.__spotify_ws is not None:
             stopping += 1
             stopped += self.__spotify_ws.stop()
@@ -71,7 +77,8 @@ class DirectorWebService:
             @return [LastFMWebService/ListenBrainzWebService]
         """
         web_services = []
-        for ws in [self.__lastfm_ws, self.__librefm_ws]:
+        for ws in [self.__lastfm_ws, self.__librefm_ws,
+                   self.__listenbrainz_ws]:
             if ws is not None:
                 web_services.append(ws)
         return web_services
@@ -138,6 +145,24 @@ class DirectorWebService:
             self.__librefm_ws = None
             Logger.info("Libre.fm web service stopping")
 
+    def __handle_listenbrainz(self, acl):
+        """
+            Start/stop ListenBrainz based on acl
+            @param acl as int
+        """
+        if acl & NetworkAccessACL["MUSICBRAINZ"]:
+            from lollypop.ws_listenbrainz import ListenBrainzWebService
+            self.__listenbrainz_ws = ListenBrainzWebService()
+            App().settings.bind("listenbrainz-user-token",
+                                self.__listenbrainz_ws,
+                                "user_token", 0)
+            Logger.info("ListenBrainz web service started")
+        elif self.__listenbrainz_ws is not None:
+            App().settings.unbind(self.__listenbrainz_ws,
+                                  "listenbrainz-user-token")
+            self.__listenbrainz_ws = None
+            Logger.info("ListenBrainz web service stopping")
+
     def __on_network_access_acl_changed(self, *ignore):
         """
             Update available webservices
@@ -151,3 +176,4 @@ class DirectorWebService:
                 "network-access-acl").get_int32()
         self.__handle_spotify(network_acl)
         self.__handle_lastfm(network_acl)
+        self.__handle_listenbrainz(network_acl)

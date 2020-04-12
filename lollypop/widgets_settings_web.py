@@ -118,7 +118,6 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
         value = entry.get_text().strip()
         App().settings.set_value("listenbrainz-user-token",
                                  GLib.Variant("s", value))
-        App().load_listenbrainz()
 
     def _on_lastfm_button_clicked(self, button):
         """

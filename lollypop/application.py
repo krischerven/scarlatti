@@ -237,20 +237,6 @@ class Application(Gtk.Application, ApplicationActions):
                 s = str(x)
                 print(type(x), "\n  ", s)
 
-    def load_listenbrainz(self):
-        """
-            Load listenbrainz support if needed
-        """
-        if self.settings.get_value("listenbrainz-user-token").get_string():
-            from lollypop.listenbrainz import ListenBrainz
-            for scrobbler in self.scrobblers:
-                if isinstance(scrobbler, ListenBrainz):
-                    return
-            listenbrainz = ListenBrainz()
-            self.scrobblers.append(listenbrainz)
-            self.settings.bind("listenbrainz-user-token", listenbrainz,
-                               "user_token", 0)
-
     def fullscreen(self):
         """
             Go fullscreen
