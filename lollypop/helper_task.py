@@ -69,6 +69,8 @@ class TaskHelper:
             @param callback as a function
             @callback (uri as str, status as bool, content as bytes, args)
         """
+        if cancellable is not None and cancellable.is_cancelled():
+            callback(uri, False, b"", *args)
         try:
             delay = self.__get_delay_for_uri(uri)
             if delay > 0:
@@ -119,6 +121,8 @@ class TaskHelper:
             delay = self.__get_delay_for_uri(uri)
             if delay > 0:
                 sleep(delay)
+                if cancellable is not None and cancellable.is_cancelled():
+                    return (False, b"")
 
             session = Soup.Session.new()
             session.set_property('accept-language-auto', True)
@@ -195,6 +199,8 @@ class TaskHelper:
             delay = self.__get_delay_for_uri(uri)
             if delay > 0:
                 sleep(delay)
+                if cancellable is not None and cancellable.is_cancelled():
+                    return None
 
             session = Soup.Session.new()
             stream = session.send(message, cancellable)
