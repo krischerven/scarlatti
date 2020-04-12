@@ -119,7 +119,6 @@ class TaskHelper:
             delay = self.__get_delay_for_uri(uri)
             if delay > 0:
                 sleep(delay)
-                return
 
             session = Soup.Session.new()
             session.set_property('accept-language-auto', True)
@@ -133,14 +132,22 @@ class TaskHelper:
                     request_headers.append(header[0], header[1])
             session.send_message(msg)
             response_headers = msg.get_property("response-headers")
-            wait = self.__handle_ratelimit(response_headers)
+            wait = self.__handle_ratelimit(response_headers, uri)
             if wait is None:
+                if uri in self.__retries.keys():
+                    del self.__retries[uri]
                 body = msg.get_property("response-body")
                 bytes = body.flatten().get_data()
                 return (True, bytes)
             else:
-                return self.load_uri_content_sync_with_headers(uri, headers,
-                                                               cancellable)
+                retries = self.__get_retries_for_uri(uri)
+                if retries < 5:
+                    parsed = urlparse(uri)
+                    self.__ratelimit[parsed.netloc] = wait
+                    return self.load_uri_content_sync_with_headers(
+                        uri, headers, cancellable)
+                else:
+                    del self.__retries[uri]
         except Exception as e:
             Logger.error(
                 "TaskHelper::load_uri_content_sync_with_headers(): %s" % e)
@@ -188,17 +195,27 @@ class TaskHelper:
             delay = self.__get_delay_for_uri(uri)
             if delay > 0:
                 sleep(delay)
-                return
 
             session = Soup.Session.new()
             stream = session.send(message, cancellable)
-            bytes = bytearray(0)
-            buf = stream.read_bytes(1024, cancellable).get_data()
-            while buf:
-                bytes += buf
+            response_headers = message.get_property("response-headers")
+            wait = self.__handle_ratelimit(response_headers, uri)
+            if wait is None:
+                bytes = bytearray(0)
                 buf = stream.read_bytes(1024, cancellable).get_data()
-            stream.close()
-            return bytes
+                while buf:
+                    bytes += buf
+                    buf = stream.read_bytes(1024, cancellable).get_data()
+                stream.close()
+                return bytes
+            else:
+                retries = self.__get_retries_for_uri(uri)
+                if retries < 5:
+                    parsed = urlparse(uri)
+                    self.__ratelimit[parsed.netloc] = wait
+                    return self.send_message_sync(message, cancellable)
+                else:
+                    del self.__retries[uri]
         except Exception as e:
             Logger.error("TaskHelper::send_message_sync(): %s" % e)
         return None
@@ -219,7 +236,7 @@ class TaskHelper:
             wait = self.__ratelimit[parsed.netloc]
             delay = wait - now
             if delay < 0:
-                del self.__ratelimit[uri]
+                del self.__ratelimit[parsed.netloc]
         return delay
 
     def __get_retries_for_uri(self, uri):
@@ -235,10 +252,11 @@ class TaskHelper:
             self.__retries[uri] = 0
         return retries
 
-    def __handle_ratelimit(self, response):
+    def __handle_ratelimit(self, response, uri):
         """
             Set rate limit from response
             @param response as Soup.MessageHeaders
+            @param uri as str
             @return next_time as int
         """
         remaining_keys = ["X-RateLimit-Remaining", "X-Rate-Limit-Remaining"]
@@ -254,11 +272,15 @@ class TaskHelper:
                 break
         if remaining is None or reset is None:
             return None
-        Logger.info("X-RateLimit-Remaining: %s" % remaining)
-        Logger.info("X-RateLimit-Reset: %s" % reset)
         # No more request available
-        if (int(remaining) == 0):
-            return time() + int(reset)
+        if (int(remaining) < 1):
+            Logger.info(uri)
+            Logger.info("X-RateLimit-Remaining: %s" % remaining)
+            Logger.info("X-RateLimit-Reset: %s" % reset)
+            return int(reset)
+
+        if uri in self.__retries.keys():
+            del self.__retries[uri]
         return None
 
     def __run(self, command, kwd, *args):
@@ -339,10 +361,8 @@ class TaskHelper:
         """
         try:
             response_headers = message.get_property("response-headers")
-            wait = self.__handle_ratelimit(response_headers)
+            wait = self.__handle_ratelimit(response_headers, uri)
             if wait is None:
-                if uri in self.__retries.keys():
-                    del self.__retries[uri]
                 stream = source.send_finish(result)
                 # We use a bytearray here as seems that bytes += is really slow
                 stream.read_bytes_async(4096, GLib.PRIORITY_LOW,
@@ -377,10 +397,8 @@ class TaskHelper:
         """
         try:
             response_headers = msg.get_property("response-headers")
-            wait = self.__handle_ratelimit(response_headers)
+            wait = self.__handle_ratelimit(response_headers, uri)
             if wait is None:
-                if uri in self.__retries.keys():
-                    del self.__retries[uri]
                 stream = source.send_finish(result)
                 # We use a bytearray here as seems that bytes += is really slow
                 stream.read_bytes_async(4096, GLib.PRIORITY_LOW,

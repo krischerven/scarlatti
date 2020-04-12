@@ -164,7 +164,8 @@ class DownloaderArt:
                         uri = item[key]
                         if uri is not None:
                             return [uri]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_audiodb_artist_artwork_uri: %s", data)
         return []
@@ -191,7 +192,8 @@ class DownloaderArt:
                 decode = json.loads(data.decode("utf-8"))
                 uri = decode["data"][0]["picture_xl"]
                 return [uri]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_deezer_artist_artwork_uri(): %s", data)
         return []
@@ -218,7 +220,8 @@ class DownloaderArt:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artistbackground"]:
                     uris.append(item["url"])
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_fanarttv_artist_artwork_uri: %s", data)
         return uris
@@ -253,7 +256,8 @@ class DownloaderArt:
                             noaccents(artist.lower()):
                         uri = item["images"][0]["url"]
                         return [uri]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_spotify_artist_artwork_uri(): %s", data)
         return []
@@ -283,9 +287,10 @@ class DownloaderArt:
                             noaccents(artist.lower()):
                         uri = item["cover_xl"]
                         return [uri]
-        except:
-            Logger.warning("DownloaderArt::__get_deezer_album_artwork_uri: %s"
-                           % data)
+        except Exception as e:
+            Logger.warning(e)
+            Logger.warning("DownloaderArt::__get_deezer_album_artwork_uri: %s",
+                           data)
         return []
 
     def _get_fanarttv_album_artwork_uri(self, artist, album, cancellable=None):
@@ -312,9 +317,10 @@ class DownloaderArt:
                 decode = json.loads(data.decode("utf-8"))
                 for cover in decode["albums"][mbid]["albumcover"]:
                     uris.append(cover["url"])
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
-                "DownloaderArt::_get_fanarttv_album_artwork_uri: %s" % data)
+                "DownloaderArt::_get_fanarttv_album_artwork_uri: %s", data)
         return uris
 
     def _get_spotify_album_artwork_uri(self, artist, album, cancellable=None):
@@ -358,7 +364,8 @@ class DownloaderArt:
                         if noaccents(item["name"].lower()) ==\
                                 noaccents(album.lower()):
                             return [item["images"][0]["url"]]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_album_art_spotify_uri: %s", data)
         return []
@@ -389,7 +396,8 @@ class DownloaderArt:
                         uri = item["artworkUrl60"].replace("60x60",
                                                            "1024x1024")
                         return [uri]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_album_art_itunes_uri: %s", data)
         return []
@@ -420,7 +428,8 @@ class DownloaderArt:
                     for item in decode["album"]:
                         uri = item["strAlbumThumb"]
                         return [uri]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_audiodb_album_artwork_uri: %s", data)
         return []
@@ -442,7 +451,8 @@ class DownloaderArt:
             payload = helper.get_album_payload(album, artist, cancellable)
             artwork_uri = payload["image"][-1]["#text"]
             return [artwork_uri]
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning(
                 "DownloaderArt::_get_album_art_lastfm_uri: %s", payload)
         return []
@@ -483,7 +493,8 @@ class DownloaderArt:
                         elif item["primary-type"] == "EP" and mbid is None:
                             mbid = item["id"]
                 return mbid
-        except:
+        except Exception as e:
+            Logger.warning(e)
             Logger.warning("DownloaderArt::__get_musicbrainz_mbid: %s", data)
         return None
 
