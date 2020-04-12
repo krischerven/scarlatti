@@ -76,7 +76,7 @@ class TaskHelper:
             if delay > 0:
                 GLib.timeout_add_seconds(
                                  delay,
-                                 self.load_uri_content_sync_with_headers,
+                                 self.load_uri_content_with_headers,
                                  uri, headers, cancellable,
                                  callback, *args)
                 return

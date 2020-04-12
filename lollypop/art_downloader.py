@@ -355,8 +355,9 @@ class DownloaderArt:
             for artist_spotify_id in artists_spotify_ids:
                 uri = "https://api.spotify.com/v1/artists/" +\
                       "%s/albums" % artist_spotify_id
-                (status, data) = App().task_helper.load_uri_content_sync(
-                    uri, cancellable)
+                (status,
+                 data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     uri = None
