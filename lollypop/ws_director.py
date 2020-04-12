@@ -108,8 +108,10 @@ class DirectorWebService:
             @param acl as int
         """
         show_album_lists = App().settings.get_value("shown-album-lists")
-        if Type.SUGGESTIONS in show_album_lists and\
-                acl & NetworkAccessACL["SPOTIFY"]:
+        if Type.SUGGESTIONS not in show_album_lists:
+            return
+        start = acl & NetworkAccessACL["MUSICBRAINZ"]
+        if start and self.__spotify_ws is None:
             from lollypop.ws_spotify import SpotifyWebService
             self.__spotify_ws = SpotifyWebService()
             Logger.info("Spotify web service started")
@@ -117,7 +119,7 @@ class DirectorWebService:
             if self.__spotify_timeout_id is None:
                 self.__spotify_timeout_id = GLib.timeout_add_seconds(
                     3600, self.__spotify_ws.start)
-        elif self.__spotify_ws is not None:
+        elif not start and self.__spotify_ws is not None:
             if self.__spotify_timeout_id is not None:
                 GLib.source_remove(self.__spotify_timeout_id)
                 self.__spotify_timeout_id = None
@@ -130,18 +132,20 @@ class DirectorWebService:
             Start/stop Last.fm based on acl
             @param acl as int
         """
-        if acl & NetworkAccessACL["LASTFM"]:
+        start = acl & NetworkAccessACL["LASTFM"]
+        if start and self.__lastfm_ws is None:
             from lollypop.ws_lastfm import LastFMWebService
             self.__lastfm_ws = LastFMWebService("LASTFM")
             Logger.info("Last.fm web service started")
-        elif self.__lastfm_ws is not None:
+        elif not start and self.__lastfm_ws is not None:
             self.__lastfm_ws = None
             Logger.info("Last.fm web service stopping")
-        if acl & NetworkAccessACL["LIBREFM"]:
+        start = acl & NetworkAccessACL["LIBREFM"]
+        if start and self.__librefm_ws is None:
             from lollypop.ws_lastfm import LastFMWebService
             self.__librefm_ws = LastFMWebService("LIBREFM")
             Logger.info("Libre.fm web service started")
-        elif self.__librefm_ws is not None:
+        elif not start and self.__librefm_ws is not None:
             self.__librefm_ws = None
             Logger.info("Libre.fm web service stopping")
 
@@ -150,14 +154,15 @@ class DirectorWebService:
             Start/stop ListenBrainz based on acl
             @param acl as int
         """
-        if acl & NetworkAccessACL["MUSICBRAINZ"]:
+        start = acl & NetworkAccessACL["MUSICBRAINZ"]
+        if start and self.__listenbrainz_ws is None:
             from lollypop.ws_listenbrainz import ListenBrainzWebService
             self.__listenbrainz_ws = ListenBrainzWebService()
             App().settings.bind("listenbrainz-user-token",
                                 self.__listenbrainz_ws,
                                 "user_token", 0)
             Logger.info("ListenBrainz web service started")
-        elif self.__listenbrainz_ws is not None:
+        elif not start and self.__listenbrainz_ws is not None:
             App().settings.unbind(self.__listenbrainz_ws,
                                   "listenbrainz-user-token")
             self.__listenbrainz_ws = None
