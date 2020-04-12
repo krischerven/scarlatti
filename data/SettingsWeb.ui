@@ -667,7 +667,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">Last.FM:</property>
+            <property name="label" translatable="yes">Last.fm:</property>
             <property name="ellipsize">end</property>
           </object>
           <packing>
@@ -680,7 +680,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="label" translatable="yes">Librefm:</property>
+            <property name="label" translatable="yes">Libre.fm:</property>
             <property name="ellipsize">end</property>
           </object>
           <packing>
