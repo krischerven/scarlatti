@@ -718,16 +718,18 @@ class TagReader:
             @commit needed
         """
         added = False
-        f = Gio.File.new_for_uri(uri)
-        d = f.get_parent()
-        parent_uri = "" if d is None else d.get_uri()
+        if uri.find("://") != -1:
+            f = Gio.File.new_for_uri(uri)
+            parent = f.get_parent()
+            if parent is not None:
+                uri = parent.get_uri()
         album_id = App().albums.get_id(album_name, mb_album_id, artist_ids)
         if album_id is None:
             added = True
             album_id = App().albums.add(album_name, mb_album_id, artist_ids,
-                                        parent_uri, loved, popularity,
+                                        uri, loved, popularity,
                                         rate, synced, mtime, storage_type)
-        # Now we have our album id, check if path doesn"t change
-        if App().albums.get_uri(album_id) != parent_uri:
-            App().albums.set_uri(album_id, parent_uri)
+        # Check if path did not change
+        elif App().albums.get_uri(album_id) != uri:
+            App().albums.set_uri(album_id, uri)
         return (added, album_id)

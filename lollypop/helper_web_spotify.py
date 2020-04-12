@@ -137,7 +137,8 @@ class SpotifyWebHelper(SaveWebHelper):
                                                False,
                                                cancellable)
         except Exception as e:
-            Logger.warning("SpotifyWebHelper::load_tracks(): %s", e)
+            Logger.warning("SpotifyWebHelper::load_tracks(): %s, %s",
+                           e, data)
 
 #######################
 # PRIVATE             #

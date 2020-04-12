@@ -175,7 +175,7 @@ class SaveWebHelper(GObject.Object):
         mtime = int(time())
         album_id_string = "%s-%s" % (album_name, album_artists)
         album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        uri = "web://%s" % album_id
+        uri = payload["id"]
         Logger.debug("SpotifyWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
         item = App().scanner.save_album(
@@ -228,11 +228,12 @@ class SaveWebHelper(GObject.Object):
         album_id_string = "%s-%s" % (album_name, album_artists)
         track_id = md5(track_id_string.encode("utf-8")).hexdigest()
         album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        uri = "web://%s" % track_id
+        uri = payload["id"]
+        album_uri = payload["album"]["id"]
         item = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
-                        album_id, uri, 0, 0, 0,
+                        album_id, album_uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
         App().scanner.save_track(

@@ -59,13 +59,12 @@ class Search(GObject.Object):
             @param album as Album
             @param cancellable as Gio.Cancellable
         """
-        mbid = album.mb_album_id
-        if mbid.startswith("lf:"):
-            # Track always loaded at album creation for now
+        uri = album.uri
+        if not uri:
             pass
         else:
             from lollypop.search_spotify import SpotifySearch
-            SpotifySearch().load_tracks(mbid, album.storage_type, cancellable)
+            SpotifySearch().load_tracks(uri, album.storage_type, cancellable)
 
     def get(self, search, cancellable):
         """
