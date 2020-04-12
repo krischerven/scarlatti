@@ -62,10 +62,10 @@ class WebHelper(GObject.Object):
             @return str/None
         """
         if not self.__track.mb_track_id:
-            None
+            return None
         try:
             f = Gio.File.new_for_path(
-                "%s/%s.uri" % (CACHE_PATH, self.__track.mb_track_id))
+                "%s/%s" % (CACHE_PATH, self.__track.mb_track_id))
             if f.query_exists():
                 (stats, content, tag) = f.load_contents()
                 return content.decode("utf-8")
