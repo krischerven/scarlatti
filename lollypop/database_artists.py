@@ -24,11 +24,12 @@ class ArtistsDatabase:
         Artists database helper
     """
 
-    def __init__(self):
+    def __init__(self, db):
         """
             Init artists database object
+            @param db as Database
         """
-        pass
+        self.__db = db
 
     def add(self, name, sortname, mb_artist_id):
         """
@@ -41,7 +42,7 @@ class ArtistsDatabase:
         """
         if sortname == "":
             sortname = format_artist_name(name)
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             result = sql.execute("INSERT INTO artists (name, sortname,\
                                   mb_artist_id)\
                                   VALUES (?, ?, ?)",
@@ -55,7 +56,7 @@ class ArtistsDatabase:
             @param sort_name a str
             @warning: commit needed
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE artists\
                          SET sortname=?\
                          WHERE rowid=?",
@@ -67,7 +68,7 @@ class ArtistsDatabase:
             @param artist_id as int
             @return sortname as string
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT sortname from artists\
                                   WHERE rowid=?", (artist_id,))
             v = result.fetchone()
@@ -82,7 +83,7 @@ class ArtistsDatabase:
             @param mb_artist_id as str
             @return (artist_id as int, name as str)
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             request = "SELECT rowid, name from artists\
                      WHERE name=?"
             params = [name]
@@ -102,7 +103,7 @@ class ArtistsDatabase:
             @param name as escaped string
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             request = "SELECT rowid from artists WHERE sql_escape(name)=?"
             result = sql.execute(request, (name,))
             v = result.fetchone()
@@ -116,7 +117,7 @@ class ArtistsDatabase:
             @param artist_id as int
             @return str
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             if artist_id == Type.COMPILATIONS:
                 return _("Many artists")
 
@@ -133,7 +134,7 @@ class ArtistsDatabase:
             @param artist_id as int
             @param name as str
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE artists\
                          SET name=?\
                          WHERE rowid=?",
@@ -145,7 +146,7 @@ class ArtistsDatabase:
             @param artist_id as int
             @param mb_artist_id as str
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE artists\
                          SET mb_artist_id=?\
                          WHERE rowid=?",
@@ -157,7 +158,7 @@ class ArtistsDatabase:
             @param artist_id as int
             @return MusicBrainz artist id as str
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT mb_artist_id FROM artists\
                                   WHERE rowid=?", (artist_id,))
             v = result.fetchone()
@@ -171,7 +172,7 @@ class ArtistsDatabase:
             @param artist_id as int
             @return bool
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             storage_type = get_default_storage_type()
             request = "SELECT DISTINCT albums.rowid\
                        FROM album_artists, albums\
@@ -193,7 +194,7 @@ class ArtistsDatabase:
             select = "artists.rowid, artists.sortname, artists.sortname"
         else:
             select = "artists.rowid, artists.name, artists.sortname"
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = []
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
@@ -228,7 +229,7 @@ class ArtistsDatabase:
             @param limit as int
             @return [int, str, str]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             request = "SELECT DISTINCT artists.rowid,\
                                        artists.name,\
                                        artists.sortname\
@@ -249,7 +250,7 @@ class ArtistsDatabase:
             @param storage_type as StorageType
             @return artist ids as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = []
             if not genre_ids or genre_ids[0] == Type.ALL:
                 # Only artist that really have an album
@@ -286,7 +287,7 @@ class ArtistsDatabase:
             @param storage_type as StorageType
             @return genre ids as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             filters = (storage_type,)
             filters += tuple(artist_ids)
             request = "SELECT DISTINCT album_genres.genre_id\
@@ -304,7 +305,7 @@ class ArtistsDatabase:
         """
             Calculate featuring for current DB
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("DELETE FROM featuring")
             result = sql.execute(
                         "SELECT track_artists.artist_id, tracks.album_id\
@@ -347,7 +348,7 @@ class ArtistsDatabase:
             order = " ORDER BY albums.popularity DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             request = "SELECT DISTINCT featuring.album_id\
                        FROM featuring, album_genres, albums, artists\
                        WHERE albums.storage_type&? AND\
@@ -374,7 +375,7 @@ class ArtistsDatabase:
             Return True if artist exist
             @param artist_id as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT COUNT(1) FROM artists WHERE rowid=?",
                                  (artist_id,))
             v = result.fetchone()
@@ -389,7 +390,7 @@ class ArtistsDatabase:
             @param storage_type as StorageType
             @return artist ids as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             filters = ("%" + searched + "%", storage_type)
             request = "SELECT DISTINCT artists.rowid, artists.name\
                    FROM albums, album_artists, artists\
@@ -405,7 +406,7 @@ class ArtistsDatabase:
             Count artists
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT COUNT(DISTINCT artists.rowid)\
                                   FROM artists, album_artists, albums\
                                   WHERE album_artists.album_id=albums.rowid\
@@ -422,7 +423,7 @@ class ArtistsDatabase:
             Clean artists
             @param commit as bool
         """
-        with SqlCursor(App().db, commit) as sql:
+        with SqlCursor(self.__db, commit) as sql:
             sql.execute("DELETE FROM artists WHERE artists.rowid NOT IN (\
                             SELECT album_artists.artist_id\
                             FROM album_artists) AND artists.rowid NOT IN (\

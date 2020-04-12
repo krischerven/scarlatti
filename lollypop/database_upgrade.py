@@ -723,10 +723,19 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
         """
             Delete spotify albums as spotify id is not stored in URI
         """
-        with SqlCursor(db, True) as sql:
-            filters = (StorageType.SPOTIFY_NEW_RELEASES |
-                       StorageType.SPOTIFY_SIMILARS,)
-            request = "DELETE FROM albums WHERE storage_type & ?"
-            sql.execute(request, filters)
-            request = "DELETE FROM tracks WHERE storage_type & ?"
-            sql.execute(request, filters)
+        from lollypop.database_albums import AlbumsDatabase
+        from lollypop.database_artists import ArtistsDatabase
+        from lollypop.database_tracks import TracksDatabase
+        albums = AlbumsDatabase(db)
+        artists = ArtistsDatabase(db)
+        tracks = TracksDatabase(db)
+        for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
+                             StorageType.SPOTIFY_SIMILARS]:
+            album_ids = albums.get_for_storage_type(storage_type)
+            for album_id in album_ids:
+                # EPHEMERAL with not tracks will be cleaned below
+                albums.set_storage_type(album_id, StorageType.EPHEMERAL)
+                tracks.remove_album(album_id)
+        tracks.clean()
+        albums.clean()
+        artists.clean()
