@@ -35,7 +35,7 @@ class LastFMWebService:
         self.__name = name
         self.__queue = []
         if name == "LIBREFM":
-            self.__uri = "http://libre.fm/2.0/"
+            self.__uri = "https://libre.fm/2.0/"
         else:
             self.__uri = "https://ws.audioscrobbler.com/2.0/"
             App().task_helper.run(self.__populate_loved_tracks)
@@ -148,6 +148,7 @@ class LastFMWebService:
             msg = Soup.form_request_new_from_hash("POST",
                                                   self.__uri,
                                                   post_data)
+            msg.request_headers.append("Accept-Charset", "utf-8")
             data = App().task_helper.send_message_sync(msg, self.__cancellable)
             if data is not None:
                 Logger.debug("%s: %s", self.__uri, data)
@@ -161,8 +162,7 @@ class LastFMWebService:
             @return [str]
         """
         args = [("method", method)]
-        if self.__name == "LASTFM":
-            args.append(("api_key", LASTFM_API_KEY))
+        args.append(("api_key", LASTFM_API_KEY))
         return args
 
     def __get_sig_for_args(self, args):
@@ -175,8 +175,7 @@ class LastFMWebService:
         api_sig = ""
         for (name, value) in args:
             api_sig += "%s%s" % (name, value)
-        if self.__name == "LASTFM":
-            api_sig = "%s%s" % (api_sig, LASTFM_API_SECRET)
+        api_sig += LASTFM_API_SECRET
         return md5(api_sig.encode("utf-8")).hexdigest()
 
     def __listen(self, track, timestamp):
@@ -209,6 +208,7 @@ class LastFMWebService:
                 msg = Soup.form_request_new_from_hash("POST",
                                                       self.__uri,
                                                       post_data)
+                msg.request_headers.append("Accept-Charset", "utf-8")
                 data = App().task_helper.send_message_sync(msg,
                                                            self.__cancellable)
                 if data is not None:
@@ -242,9 +242,10 @@ class LastFMWebService:
             msg = Soup.form_request_new_from_hash("POST",
                                                   self.__uri,
                                                   post_data)
+            msg.request_headers.append("Accept-Charset", "utf-8")
             data = App().task_helper.send_message_sync(msg, self.__cancellable)
             if data is not None:
-                Logger.debug("%s: %s", self.__uri, data)
+                Logger.debug("%s: %s -> %s", self.__uri, data, post_data)
         except Exception as e:
             Logger.error("LastFMWebService::__playing_now(): %s" % e)
 
