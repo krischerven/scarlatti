@@ -52,6 +52,10 @@ class Search(GObject.Object):
             from lollypop.search_lastfm import LastFMSearch
             self.__web_search = LastFMSearch()
             self.__connect_search_signals(self.__web_search)
+        elif name == "MUSICBRAINZ":
+            from lollypop.search_musicbrainz import MusicBrainzSearch
+            self.__web_search = MusicBrainzSearch()
+            self.__connect_search_signals(self.__web_search)
 
     def load_tracks(self, album, cancellable):
         """
@@ -62,9 +66,12 @@ class Search(GObject.Object):
         uri = album.uri
         if not uri:
             pass
+        elif uri.startswith("mb:"):
+            from lollypop.helper_web_musicbrainz import MusicBrainzWebHelper
+            MusicBrainzWebHelper().load_tracks(album, cancellable)
         else:
-            from lollypop.search_spotify import SpotifySearch
-            SpotifySearch().load_tracks(uri, album.storage_type, cancellable)
+            from lollypop.helper_web_spotify import SpotifyWebHelper
+            SpotifyWebHelper().load_tracks(album, cancellable)
 
     def get(self, search, cancellable):
         """

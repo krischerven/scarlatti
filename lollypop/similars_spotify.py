@@ -45,17 +45,31 @@ class SpotifySimilars(SpotifyWebHelper):
             spotify_id = choice(spotify_ids)
             track_ids += spotify_ids
             payload = self.get_track_payload(spotify_id, cancellable)
-            self.save_tracks_payload_to_db([payload],
-                                           storage_type,
-                                           False,
-                                           cancellable)
+            lollypop_payload = self.lollypop_album_payload(payload["album"])
+            item = self.save_album_payload_to_db(lollypop_payload,
+                                                 storage_type,
+                                                 True,
+                                                 cancellable)
+            lollypop_payload = self.lollypop_track_payload(payload)
+            self.save_track_payload_to_db(lollypop_payload,
+                                          item,
+                                          storage_type,
+                                          True,
+                                          cancellable)
         shuffle(track_ids)
         for spotify_id in track_ids:
             payload = self.get_track_payload(spotify_id, cancellable)
-            self.save_tracks_payload_to_db([payload],
-                                           storage_type,
-                                           False,
-                                           cancellable)
+            lollypop_payload = self.lollypop_album_payload(payload["album"])
+            item = self.save_album_payload_to_db(lollypop_payload,
+                                                 storage_type,
+                                                 True,
+                                                 cancellable)
+            lollypop_payload = self.lollypop_track_payload(payload)
+            self.save_track_payload_to_db(lollypop_payload,
+                                          item,
+                                          storage_type,
+                                          True,
+                                          cancellable)
         emit_signal(self, "finished")
 
     def get_similar_artist_ids(self, artist_names, cancellable):
@@ -76,6 +90,8 @@ class SpotifySimilars(SpotifyWebHelper):
                 return []
             result += self.__get_similar_artists_from_spotify_id(spotify_id,
                                                                  cancellable)
+        if result:
+            Logger.info("Found similar artists with SpotifySimilars")
         return [spotify_id for (spotify_id, name, uri) in result]
 
     def get_similar_artists(self, artist_names, cancellable):

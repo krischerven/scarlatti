@@ -13,6 +13,7 @@
 from gi.repository import GLib
 
 import json
+from hashlib import md5
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
@@ -109,17 +110,16 @@ class SpotifyWebHelper(SaveWebHelper):
             Logger.error("SpotifyWebHelper::get_artist_top_tracks(): %s", e)
         return track_ids
 
-    def load_tracks(self, album_id, storage_type, cancellable):
+    def load_tracks(self, album, cancellable):
         """
             Load tracks for album
-            @param album_id as str
-            @param storage_type as StorageType
+            @param album as Album
             @param cancellable as Gio.Cancellable
         """
         try:
             token = App().ws_director.token_ws.get_token("SPOTIFY",
                                                          cancellable)
-            uri = "https://api.spotify.com/v1/albums/%s" % album_id
+            uri = "https://api.spotify.com/v1/albums/%s" % album.uri
             token = App().ws_director.token_ws.get_token("SPOTIFY",
                                                          cancellable)
             bearer = "Bearer %s" % token
@@ -129,16 +129,59 @@ class SpotifyWebHelper(SaveWebHelper):
                     uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                tracks_payload = decode["tracks"]["items"]
-                for item in tracks_payload:
-                    item["album"] = decode
-                self.save_tracks_payload_to_db(tracks_payload,
-                                               storage_type,
-                                               False,
-                                               cancellable)
+                for track in decode["tracks"]["items"]:
+                    lollypop_payload = self.lollypop_track_payload(track)
+                    self.save_track_payload_to_db(lollypop_payload,
+                                                  album.collection_item,
+                                                  album.storage_type,
+                                                  False,
+                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifyWebHelper::load_tracks(): %s, %s",
                            e, data)
+
+    def lollypop_album_payload(self, payload):
+        """
+            Convert payload to Lollypop one
+            @param payload as {}
+            return {}
+        """
+        lollypop_payload = {}
+        lollypop_payload["uri"] = payload["id"]
+        lollypop_payload["name"] = payload["name"]
+        lollypop_payload["artists"] = []
+        for artist in payload["artists"]:
+            lollypop_payload["artists"].append(artist["name"])
+        lollypop_payload["track-count"] = payload["total_tracks"]
+        lollypop_payload["date"] = payload["release_date"]
+        lollypop_payload["artwork-uri"] = payload["images"][0]["url"]
+        album_id_string = "%s-%s" % (lollypop_payload["name"],
+                                     lollypop_payload["artists"])
+        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
+        lollypop_payload["id"] = album_id
+        return lollypop_payload
+
+    def lollypop_track_payload(self, payload):
+        """
+            Convert payload to Lollypop one
+            @param payload as {}
+            return {}
+        """
+        lollypop_payload = {}
+        lollypop_payload["uri"] = payload["id"]
+        lollypop_payload["name"] = payload["name"]
+        lollypop_payload["artists"] = []
+        for artist in payload["artists"]:
+            lollypop_payload["artists"].append(artist["name"])
+        lollypop_payload["discnumber"] = "1"
+        lollypop_payload["tracknumber"] = payload["track_number"]
+        lollypop_payload["duration"] = payload["duration_ms"]
+        track_id_string = "%s-%s-%s" % (lollypop_payload["name"],
+                                        lollypop_payload["tracknumber"],
+                                        lollypop_payload["artists"])
+        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
+        lollypop_payload["id"] = track_id
+        return lollypop_payload
 
 #######################
 # PRIVATE             #

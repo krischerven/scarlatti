@@ -325,6 +325,16 @@ class Album(Base):
         self._storage_type = storage_type
 
     @property
+    def collection_item(self):
+        """
+            Get collection item related to album
+            @return CollectionItem
+        """
+        item = CollectionItem(album_id=self.id,
+                              artist_ids=self.artist_ids)
+        return item
+
+    @property
     def is_web(self):
         """
             True if track is a web track

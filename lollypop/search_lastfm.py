@@ -21,7 +21,6 @@ from lollypop.define import LASTFM_API_KEY, App
 class LastFMSearch(LastFMWebHelper):
     """
         Search for LastFM
-        We are not using pylast here, too slow: one request per method()
     """
 
     def __init__(self):
@@ -61,11 +60,20 @@ class LastFMSearch(LastFMWebHelper):
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     try:
-                        payload = self.get_spotify_payload(decode["album"])
-                        self.save_tracks_payload_to_db(payload,
-                                                       storage_type,
-                                                       True,
-                                                       cancellable)
+                        payload = self.lollypop_album_payload(decode["album"])
+                        item = self.save_album_payload_to_db(payload,
+                                                             storage_type,
+                                                             True,
+                                                             cancellable)
+                        i = 1
+                        for track in decode["album"]["tracks"]["track"]:
+                            payload = self.lollypop_track_payload(track, i)
+                            i += 1
+                            self.save_track_payload_to_db(payload,
+                                                          item,
+                                                          storage_type,
+                                                          True,
+                                                          cancellable)
                     except Exception as e:
                         Logger.warning("LastFMSearch::get(): %s", e)
         except Exception as e:

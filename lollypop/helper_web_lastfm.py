@@ -14,6 +14,7 @@ from gi.repository import GLib, GObject
 
 import json
 import re
+from hashlib import md5
 from locale import getdefaultlocale
 
 from lollypop.helper_web_save import SaveWebHelper
@@ -101,7 +102,7 @@ class LastFMWebHelper(SaveWebHelper):
                 "LastFMWebHelper::get_album_payload(): %s", uri)
         return None
 
-    def get_track_payload(self, mbid, cancellable):
+    def get_lollypop_payload(self, mbid, cancellable):
         """
             Get track payload for mbid
             @param mbid as str
@@ -118,7 +119,7 @@ class LastFMWebHelper(SaveWebHelper):
                 return json.loads(data.decode("utf-8"))["track"]
         except:
             Logger.error(
-                "LastFMWebHelper::get_track_payload(): %s", uri)
+                "LastFMWebHelper::get_lollypop_payload(): %s", uri)
         return None
 
     def get_artist_bio(self, artist):
@@ -146,39 +147,50 @@ class LastFMWebHelper(SaveWebHelper):
                 "LastFMWebHelper::get_artist_bio(): %s", uri)
         return None
 
-    def get_spotify_payload(self, album):
+    def lollypop_album_payload(self, payload):
         """
-            Convert tracks to a Spotify payload
-            @param album as {}
-            return [{}]
+            Convert payload to Lollypop one
+            @param payload as {}
+            return {}
         """
-        tracks = []
-        album_payload = {}
-        album_payload["id"] = "lastfm"
-        album_payload["name"] = album["name"]
-        album_payload["artists"] = [{"name": album["artist"]}]
-        album_payload["total_tracks"] = len(album["tracks"])
-        album_payload["release_date"] = None
+        lollypop_payload = {}
+        lollypop_payload = {}
+        lollypop_payload["name"] = payload["name"]
+        lollypop_payload["uri"] = ""
+        lollypop_payload["artists"] = [payload["artist"]]
+        lollypop_payload["track-count"] = len(payload["tracks"])
+        lollypop_payload["release_date"] = None
         try:
-            artwork_uri = album["image"][-1]["#text"]
+            artwork_uri = payload["image"][-1]["#text"]
         except:
             artwork_uri = None
-        album_payload["images"] = [{"url": artwork_uri}]
-        i = 1
-        for track in album["tracks"]["track"]:
-            track_payload = {}
-            track_payload["id"] = "lf:%s-%s-%s" % (track["artist"]["name"],
-                                                   album["name"],
-                                                   track["name"])
-            track_payload["name"] = track["name"]
-            track_payload["artists"] = [track["artist"]]
-            track_payload["disc_number"] = "1"
-            track_payload["track_number"] = i
-            track_payload["duration_ms"] = track["duration"]
-            i += 1
-            track_payload["album"] = album_payload
-            tracks.append(track_payload)
-        return tracks
+        lollypop_payload["artwork-uri"] = artwork_uri
+        album_id_string = "%s-%s" % (lollypop_payload["name"],
+                                     lollypop_payload["artists"])
+        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
+        lollypop_payload["id"] = album_id
+        return lollypop_payload
+
+    def lollypop_track_payload(self, track, tracknumber):
+        """
+            Convert payload to Lollypop one
+            @param payload as {}
+            @param tracknumber as int
+            @return {}
+        """
+        lollypop_payload = {}
+        lollypop_payload["name"] = track["name"]
+        lollypop_payload["uri"] = ""
+        lollypop_payload["artists"] = [track["artist"]["name"]]
+        lollypop_payload["discnumber"] = "1"
+        lollypop_payload["tracknumber"] = tracknumber
+        lollypop_payload["duration"] = track["duration"]
+        track_id_string = "%s-%s-%s" % (lollypop_payload["name"],
+                                        lollypop_payload["tracknumber"],
+                                        lollypop_payload["artists"])
+        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
+        lollypop_payload["id"] = track_id
+        return lollypop_payload
 
 #######################
 # PRIVATE             #

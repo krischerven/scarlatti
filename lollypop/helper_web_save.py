@@ -13,13 +13,11 @@
 from gi.repository import GLib, GObject
 
 from time import time
-from hashlib import md5
 import json
 
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.objects_album import Album
-from lollypop.objects_track import Track
 from lollypop.define import App, Type
 
 
@@ -41,69 +39,49 @@ class SaveWebHelper(GObject.Object):
         """
         GObject.Object.__init__(self)
 
-    def save_tracks_payload_to_db(self, payload, storage_type,
-                                  match_album, cancellable,):
+    def save_track_payload_to_db(self, payload, item,
+                                 storage_type, notify, cancellable):
         """
-            Create albums from a track payload
+            Save track to DB
             @param payload as {}
+            @param item as CollectionItem
             @param storage_type as StorageType
-            @param match_album as bool
             @param cancellable as Gio.Cancellable
+            @param notify as bool
         """
-        # Populate tracks
-        artwork_uri = None
-        track = None
-        for item in payload:
-            if cancellable.is_cancelled():
-                raise Exception("cancelled")
-            track_id = App().tracks.get_id_for_mb_track_id(item["id"])
-            if track_id < 0:
-                track_id = self.__save_track(item, storage_type)
-                track = Track(track_id)
-                artwork_uri = item["album"]["images"][0]["url"]
-            else:
-                track = Track(track_id)
-            if not match_album:
-                emit_signal(self, "match-track", track_id, storage_type)
-                if artwork_uri is not None:
-                    self.save_artwork(track,
-                                      artwork_uri,
-                                      cancellable)
-        # On album match, save artwork at the end
-        if match_album and track is not None:
-            if artwork_uri is not None:
-                self.save_artwork(track,
-                                  artwork_uri,
-                                  cancellable)
-            emit_signal(self, "match-album", track.album.id, storage_type)
+        item.track_id = App().tracks.get_id_for_mb_track_id(payload["id"])
+        if item.track_id < 0:
+            self.__save_track(payload, item, storage_type)
+        if notify:
+            emit_signal(self, "match-track", item.track_id, storage_type)
 
-    def save_albums_payload_to_db(self, payload, storage_type,
-                                  save_artwork, cancellable):
+    def save_album_payload_to_db(self, payload, storage_type,
+                                 notify, cancellable):
         """
-            Create albums from albums payload
+            Save album to DB
             @param payload as {}
             @param storage_type as StorageType
-            @param save_artwork as bool
+            @param notify as bool
             @param cancellable as Gio.Cancellable
+            @return CollectionItem/None
         """
-        for album_item in payload:
-            if cancellable.is_cancelled():
-                raise Exception("cancelled")
-            album_id = App().albums.get_id_for_mb_album_id(album_item["id"])
-            if album_id >= 0:
-                album = Album(album_id)
+        album_id = App().albums.get_id_for_mb_album_id(payload["id"])
+        if album_id >= 0:
+            album = Album(album_id)
+            if notify:
                 self.save_artwork(album,
-                                  album_item["images"][0]["url"],
+                                  payload["artwork-uri"],
                                   cancellable)
                 emit_signal(self, "match-album", album_id, storage_type)
-                continue
-            album_id = self.__save_album(album_item, storage_type)
-            album = Album(album_id)
-            if save_artwork:
-                self.save_artwork(album,
-                                  album_item["images"][0]["url"],
-                                  cancellable)
-            emit_signal(self, "match-album", album_id, storage_type)
+            return album.collection_item
+        item = self.__save_album(payload, storage_type)
+        album = Album(item.album_id)
+        if notify:
+            self.save_artwork(album,
+                              payload["artwork-uri"],
+                              cancellable)
+            emit_signal(self, "match-album", album.id, storage_type)
+        return item
 
     def save_artwork(self, obj, cover_uri, cancellable):
         """
@@ -112,6 +90,8 @@ class SaveWebHelper(GObject.Object):
             @param cover_uri/mbid as str
             @param cancellable as Gio.Cancellable
         """
+        if not cover_uri:
+            return
         try:
             if cancellable.is_cancelled():
                 return
@@ -155,8 +135,9 @@ class SaveWebHelper(GObject.Object):
                         continue
                     return image["image"]
         except Exception as e:
+            Logger.error(e)
             Logger.error(
-                "MusicBrainzWebHelper::__get_cover_art_uri(): %s", e)
+                "SaveWebHelper::__get_cover_art_uri(): %s", data)
         return None
 
     def __save_album(self, payload, storage_type):
@@ -164,30 +145,37 @@ class SaveWebHelper(GObject.Object):
             Save album payload to DB
             @param payload as {}
             @param storage_type as StorageType
-            @return album_id as int
+            @return CollectionItem
         """
-        total_tracks = payload["total_tracks"]
         album_artists = []
         for artist in payload["artists"]:
-            album_artists.append(artist["name"])
+            album_artists.append(artist)
         album_artists = ";".join(album_artists)
         album_name = payload["name"]
         mtime = int(time())
-        album_id_string = "%s-%s" % (album_name, album_artists)
-        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        uri = payload["id"]
-        Logger.debug("SpotifyWebHelper::save_album(): %s - %s",
+        uri = payload["uri"]
+        track_count = payload["track-count"]
+        mb_album_id = payload["id"]
+        Logger.debug("SaveWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
         item = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
-                        album_id, uri, 0, 0, 0,
+                        mb_album_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
-                        total_tracks, mtime, storage_type)
+                        track_count, mtime, storage_type)
         App().albums.add_genre(item.album_id, Type.WEB)
-        return item.album_id
+        try:
+            release_date = payload["date"]
+            dt = GLib.DateTime.new_from_iso8601(release_date,
+                                                GLib.TimeZone.new_local())
+            item.timestamp = dt.to_unix()
+            item.year = dt.get_year()
+        except:
+            pass
+        return item
 
-    def __save_track(self, payload, storage_type):
+    def __save_track(self, payload, item, storage_type):
         """
             Save track payload to DB
             @param payload as {}
@@ -197,48 +185,20 @@ class SaveWebHelper(GObject.Object):
         title = payload["name"]
         _artists = []
         for artist in payload["artists"]:
-            _artists.append(artist["name"])
-        _album_artists = []
-        for artist in payload["album"]["artists"]:
-            _album_artists.append(artist["name"])
-        Logger.debug("SpotifyWebHelper::save_track(): %s - %s",
+            _artists.append(artist)
+        Logger.debug("SaveWebHelper::save_track(): %s - %s",
                      _artists, title)
         # Translate to tag value
         artists = ";".join(_artists)
-        album_artists = ";".join(_album_artists)
-        if not artists:
-            artists = album_artists
-        total_tracks = payload["album"]["total_tracks"]
-        album_name = payload["album"]["name"]
-        discnumber = int(payload["disc_number"])
+        discnumber = int(payload["discnumber"])
         discname = ""
-        tracknumber = int(payload["track_number"])
-        try:
-            release_date = "%sT00:00:00" % payload["album"]["release_date"]
-            dt = GLib.DateTime.new_from_iso8601(release_date,
-                                                GLib.TimeZone.new_local())
-            timestamp = dt.to_unix()
-            year = dt.get_year()
-        except:
-            timestamp = None
-            year = None
-        duration = payload["duration_ms"]
+        tracknumber = int(payload["tracknumber"])
+        duration = payload["duration"]
         mtime = int(time())
-        track_id_string = "%s-%s-%s" % (title, album_name, album_artists)
-        album_id_string = "%s-%s" % (album_name, album_artists)
-        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
-        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        uri = payload["id"]
-        album_uri = payload["album"]["id"]
-        item = App().scanner.save_album(
-                        album_artists,
-                        "", "", album_name,
-                        album_id, album_uri, 0, 0, 0,
-                        # HACK: Keep total tracks in sync int field
-                        total_tracks, mtime, storage_type)
+        uri = payload["uri"]
+        mb_track_id = payload["id"]
         App().scanner.save_track(
                    item, None, artists, "", "",
                    uri, title, duration, tracknumber, discnumber,
-                   discname, year, timestamp, mtime, 0, 0, 0, 0, track_id,
-                   0, storage_type)
-        return item.track_id
+                   discname, item.year, item.timestamp, mtime, 0, 0, 0, 0,
+                   mb_track_id, 0, storage_type)

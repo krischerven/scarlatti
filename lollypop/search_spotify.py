@@ -52,14 +52,25 @@ class SpotifySearch(SpotifyWebHelper):
                     uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                self.save_tracks_payload_to_db(decode["tracks"]["items"],
-                                               storage_type,
-                                               False,
-                                               cancellable)
-                self.save_albums_payload_to_db(decode["albums"]["items"],
-                                               storage_type,
-                                               True,
-                                               cancellable)
+                for album in decode["albums"]["items"]:
+                    payload = self.lollypop_album_payload(album)
+                    self.save_album_payload_to_db(payload,
+                                                  storage_type,
+                                                  True,
+                                                  cancellable)
+                for track in decode["tracks"]["items"]:
+                    payload = self.lollypop_album_payload(track["album"])
+                    item = self.save_album_payload_to_db(
+                                                  payload,
+                                                  storage_type,
+                                                  False,
+                                                  cancellable)
+                    payload = self.lollypop_track_payload(track)
+                    self.save_track_payload_to_db(payload,
+                                                  item,
+                                                  storage_type,
+                                                  True,
+                                                  cancellable)
         except Exception as e:
             Logger.warning("SpotifySearch::search(): %s", e)
         if not cancellable.is_cancelled():

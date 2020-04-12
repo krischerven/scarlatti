@@ -49,13 +49,23 @@ class LastFMSimilars(LastFMWebHelper):
                 payload = self.get_album_payload(album, artist, cancellable)
                 if payload is None:
                     continue
-                album_tracks = self.get_spotify_payload(payload)
-                tracks += sample(album_tracks, min(len(album_tracks), 3))
-        shuffle(tracks)
-        self.save_tracks_payload_to_db(tracks,
-                                       storage_type,
-                                       False,
-                                       cancellable)
+                lollypop_payload = self.lollypop_album_payload(payload)
+                item = self.save_album_payload_to_db(lollypop_payload,
+                                                     storage_type,
+                                                     True,
+                                                     cancellable)
+                tracks = sample(payload["tracks"]["track"],
+                                min(len(payload["tracks"]["track"]), 3))
+                shuffle(tracks)
+                i = 1
+                for track in tracks:
+                    lollypop_payload = self.lollypop_track_payload(track, i)
+                    i += 1
+                    self.save_track_payload_to_db(lollypop_payload,
+                                                  item,
+                                                  storage_type,
+                                                  True,
+                                                  cancellable)
         emit_signal(self, "finished")
 
     def get_similar_artists(self, artist_names, cancellable):

@@ -14,7 +14,7 @@ from gi.repository import Gio
 
 import json
 from time import time
-from random import choice, shuffle
+from random import shuffle
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
@@ -77,12 +77,15 @@ class SpotifyWebService(SpotifyWebHelper):
             for similar_id in similar_ids[:self.__MAX_ITEMS_PER_STORAGE_TYPE]:
                 albums_payload = self.__get_artist_albums_payload(similar_id,
                                                                   cancellable)
-                if albums_payload:
-                    self.save_albums_payload_to_db(
-                                           [choice(albums_payload)],
+                shuffle(albums_payload)
+                for album in albums_payload:
+                    lollypop_payload = self.lollypop_album_payload(album)
+                    self.save_album_payload_to_db(
+                                           lollypop_payload,
                                            StorageType.SPOTIFY_SIMILARS,
                                            True,
                                            cancellable)
+                    break
         except Exception as e:
             Logger.warning("SpotifyWebService::search_similar_albums(): %s", e)
 
@@ -108,8 +111,10 @@ class SpotifyWebService(SpotifyWebHelper):
                     uri, headers, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
-                    self.save_albums_payload_to_db(
-                                             decode["albums"]["items"],
+                    for album in decode["albums"]["items"]:
+                        lollypop_payload = self.lollypop_album_payload(album)
+                        self.save_album_payload_to_db(
+                                             lollypop_payload,
                                              StorageType.SPOTIFY_NEW_RELEASES,
                                              True,
                                              cancellable)
