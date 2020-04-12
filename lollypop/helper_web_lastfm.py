@@ -154,8 +154,7 @@ class LastFMWebHelper(SaveWebHelper):
         """
         tracks = []
         album_payload = {}
-        album_payload["id"] = "lf:%s-%s" % (album["artist"],
-                                            album["name"])
+        album_payload["id"] = "lastfm"
         album_payload["name"] = album["name"]
         album_payload["artists"] = [{"name": album["artist"]}]
         album_payload["total_tracks"] = len(album["tracks"])

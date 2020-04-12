@@ -13,6 +13,7 @@
 from gi.repository import GLib, GObject
 
 from time import time
+from hashlib import md5
 import json
 
 from lollypop.logger import Logger
@@ -165,8 +166,6 @@ class SaveWebHelper(GObject.Object):
             @param storage_type as StorageType
             @return album_id as int
         """
-        spotify_id = payload["id"]
-        uri = "web://%s" % spotify_id
         total_tracks = payload["total_tracks"]
         album_artists = []
         for artist in payload["artists"]:
@@ -174,12 +173,15 @@ class SaveWebHelper(GObject.Object):
         album_artists = ";".join(album_artists)
         album_name = payload["name"]
         mtime = int(time())
+        album_id_string = "%s-%s" % (album_name, album_artists)
+        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
+        uri = "web://%s" % album_id
         Logger.debug("SpotifyWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
         item = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
-                        spotify_id, uri, 0, 0, 0,
+                        album_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
         App().albums.add_genre(item.album_id, Type.WEB)
@@ -192,7 +194,6 @@ class SaveWebHelper(GObject.Object):
             @param storage_type as StorageType
             @return track_id as int
         """
-        spotify_id = payload["id"]
         title = payload["name"]
         _artists = []
         for artist in payload["artists"]:
@@ -207,7 +208,6 @@ class SaveWebHelper(GObject.Object):
         album_artists = ";".join(_album_artists)
         if not artists:
             artists = album_artists
-        spotify_album_id = payload["album"]["id"]
         total_tracks = payload["album"]["total_tracks"]
         album_name = payload["album"]["name"]
         discnumber = int(payload["disc_number"])
@@ -223,17 +223,21 @@ class SaveWebHelper(GObject.Object):
             timestamp = None
             year = None
         duration = payload["duration_ms"]
-        uri = "web://%s" % spotify_id
         mtime = int(time())
+        track_id_string = "%s-%s-%s" % (title, album_name, album_artists)
+        album_id_string = "%s-%s" % (album_name, album_artists)
+        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
+        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
+        uri = "web://%s" % track_id
         item = App().scanner.save_album(
                         album_artists,
                         "", "", album_name,
-                        spotify_album_id, uri, 0, 0, 0,
+                        album_id, uri, 0, 0, 0,
                         # HACK: Keep total tracks in sync int field
                         total_tracks, mtime, storage_type)
         App().scanner.save_track(
                    item, None, artists, "", "",
                    uri, title, duration, tracknumber, discnumber,
-                   discname, year, timestamp, mtime, 0, 0, 0, 0, spotify_id,
+                   discname, year, timestamp, mtime, 0, 0, 0, 0, track_id,
                    0, storage_type)
         return item.track_id

@@ -192,7 +192,7 @@ class MusicBrainzWebHelper(SaveWebHelper):
             return {}
         """
         spotify_payload = {}
-        spotify_payload["id"] = "mb:%s" % payload["id"]
+        spotify_payload["id"] = "musicbrainz"
         spotify_payload["name"] = payload["title"]
         spotify_payload["artists"] = []
         for artist in payload["artist-credit"]:
