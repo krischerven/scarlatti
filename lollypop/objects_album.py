@@ -427,7 +427,7 @@ class Album(Base):
             for artist_id in self.artist_ids:
                 if not App().artists.get_name(artist_id):
                     removed_artist_ids.append(artist_id)
-            item = CollectionItem(artist_ids=self.removed_artist_ids,
+            item = CollectionItem(artist_ids=removed_artist_ids,
                                   album_id=self.id)
-            emit_signal(App().scanner, "updated", self.id,
+            emit_signal(App().scanner, "updated", item,
                         ScanUpdate.REMOVED)

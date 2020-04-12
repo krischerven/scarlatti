@@ -78,6 +78,6 @@ class ScannerContainer:
             @param scan_update as ScanUpdate
         """
         for genre_id in item.genre_ids:
-            self.__handle_genre_update(item, scan_update)
+            self.__handle_genre_update(genre_id, scan_update)
         for artist_id in item.artist_ids:
-            self.__handle_artist_update(item, scan_update)
+            self.__handle_artist_update(artist_id, scan_update)
