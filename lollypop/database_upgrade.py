@@ -164,7 +164,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             42: """UPDATE albums SET mb_album_id=null
                    WHERE storage_type=2 AND rowid=mb_album_id""",
             43: """CREATE TABLE featuring (artist_id INT NOT NULL,
-                                           album_id INT NOT NULL)"""
+                                           album_id INT NOT NULL)""",
+            44: self.__upgrade_44
         }
 
 #######################
@@ -717,3 +718,15 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                             FROM album_artists) AND artists.rowid NOT IN (\
                                 SELECT track_artists.artist_id\
                                 FROM track_artists)")
+
+    def __upgrade_44(self, db):
+        """
+            Delete spotify albums as spotify id is not stored in URI
+        """
+        with SqlCursor(db, True) as sql:
+            filters = (StorageType.SPOTIFY_NEW_RELEASES |
+                       StorageType.SPOTIFY_SIMILARS,)
+            request = "DELETE FROM albums WHERE storage_type & ?"
+            sql.execute(request, filters)
+            request = "DELETE FROM tracks WHERE storage_type & ?"
+            sql.execute(request, filters)
