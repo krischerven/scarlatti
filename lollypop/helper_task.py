@@ -254,7 +254,7 @@ class TaskHelper:
                 break
         if remaining is None or reset is None:
             return None
-        Logger.ingo("X-RateLimit-Remaining: %s" % remaining)
+        Logger.info("X-RateLimit-Remaining: %s" % remaining)
         Logger.info("X-RateLimit-Reset: %s" % reset)
         # No more request available
         if (int(remaining) == 0):

@@ -42,7 +42,7 @@ class LastFMSimilars(LastFMWebHelper):
         tracks = []
         for (artist_name, cover_uri) in result:
             albums = self.get_artist_top_albums(artist_name, cancellable)
-            albums = sample(albums, min(len(albums), 3))
+            albums = sample(albums, min(len(albums), 10))
             if not albums:
                 continue
             for (album, artist) in albums:
