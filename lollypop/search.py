@@ -56,6 +56,10 @@ class Search(GObject.Object):
             from lollypop.search_musicbrainz import MusicBrainzSearch
             self.__web_search = MusicBrainzSearch()
             self.__connect_search_signals(self.__web_search)
+        elif name == "DEEZER":
+            from lollypop.search_deezer import DeezerSearch
+            self.__web_search = DeezerSearch()
+            self.__connect_search_signals(self.__web_search)
 
     def load_tracks(self, album, cancellable):
         """
@@ -69,6 +73,9 @@ class Search(GObject.Object):
         elif uri.startswith("mb:"):
             from lollypop.helper_web_musicbrainz import MusicBrainzWebHelper
             MusicBrainzWebHelper().load_tracks(album, cancellable)
+        elif uri.startswith("dz:"):
+            from lollypop.helper_web_deezer import DeezerWebHelper
+            DeezerWebHelper().load_tracks(album, cancellable)
         else:
             from lollypop.helper_web_spotify import SpotifyWebHelper
             SpotifyWebHelper().load_tracks(album, cancellable)

@@ -56,6 +56,10 @@ class SearchMenu(Gio.Menu):
             menu_item = Gio.MenuItem.new(_("MusicBrainz"),
                                          "app.web_search('MUSICBRAINZ')")
             section.append_item(menu_item)
+        if get_network_available("DEEZER"):
+            menu_item = Gio.MenuItem.new(_("Deezer"),
+                                         "app.web_search('DEEZER')")
+            section.append_item(menu_item)
         self.append_section(_("Search on the Web"), section)
 
 #######################
