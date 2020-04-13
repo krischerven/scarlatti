@@ -58,20 +58,18 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
 
     def add_value(self, value):
         """
-            Append item
+            Append value
             @param value as object
         """
         self._box.set_sort_func(self._sort_func)
         LazyLoadingView.populate(self, [value])
 
-    def prepend_value(self, value):
+    def add_value_unsorted(self, value):
         """
-            Prepend item
+            Add value unsorted
             @param value as object
         """
-        child = self._get_child(value, 0)
-        child.populate()
-        child.show()
+        LazyLoadingView.populate(self, [value])
 
     def remove_value(self, value):
         """

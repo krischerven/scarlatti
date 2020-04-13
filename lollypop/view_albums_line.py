@@ -77,15 +77,8 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             Add a new album
             @param album as Album
         """
-        AlbumsBoxView.add_value(self, album)
-        self.update_buttons()
-
-    def prepend_value(self, album):
-        """
-            Prepend a new album
-            @param album as Album
-        """
-        AlbumsBoxView.prepend_value(self, album)
+        AlbumsBoxView.add_value_unsorted(self, album)
+        self._box.set_min_children_per_line(len(self._box.get_children()))
         self.update_buttons()
 
     @property
@@ -281,16 +274,15 @@ class AlbumsSearchLineView(AlbumsLineView):
         self.__album_ids = []
         self._label.set_text(_("Albums"))
 
-    def prepend_value(self, album):
+    def add_value(self, album):
         """
-            Prepend a new album
+            Add a new album
             @param album as Album
         """
         if album.id in self.__album_ids:
             return
         self.__album_ids.append(album.id)
-        AlbumsLineView.prepend_value(self, album)
-        self._box.set_min_children_per_line(len(self._box.get_children()))
+        AlbumsLineView.add_value(self, album)
 
     def clear(self):
         """
@@ -365,7 +357,6 @@ class AlbumsStorageTypeLineView(AlbumsLineView):
             return
         if self.__storage_type & storage_type:
             self.add_value(Album(album_id))
-            self._box.set_min_children_per_line(count + 1)
             self.show()
 
     def _on_network_access_changed(self, *ignore):
