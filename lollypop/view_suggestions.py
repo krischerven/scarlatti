@@ -127,7 +127,9 @@ class SuggestionsView(View):
                    (_("Suggestions from Spotify"),
                     StorageType.SPOTIFY_SIMILARS),
                    (_("New releases on Spotify"),
-                    StorageType.SPOTIFY_NEW_RELEASES)]:
+                    StorageType.SPOTIFY_NEW_RELEASES),
+                   (_("Top albums on Deezer"),
+                    StorageType.DEEZER_CHARTS)]:
                 if not storage_type & mask:
                     continue
                 view = AlbumsStorageTypeLineView(title,

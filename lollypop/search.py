@@ -71,14 +71,14 @@ class Search(GObject.Object):
         if not uri:
             pass
         elif uri.startswith("mb:"):
-            from lollypop.helper_web_musicbrainz import MusicBrainzWebHelper
-            MusicBrainzWebHelper().load_tracks(album, cancellable)
+            from lollypop.search_musicbrainz import MusicBrainzSearch
+            MusicBrainzSearch().load_tracks(album, cancellable)
         elif uri.startswith("dz:"):
-            from lollypop.helper_web_deezer import DeezerWebHelper
-            DeezerWebHelper().load_tracks(album, cancellable)
+            from lollypop.search_deezer import DeezerSearch
+            DeezerSearch().load_tracks(album, cancellable)
         else:
-            from lollypop.helper_web_spotify import SpotifyWebHelper
-            SpotifyWebHelper().load_tracks(album, cancellable)
+            from lollypop.search_spotify import SpotifySearch
+            SpotifySearch().load_tracks(album, cancellable)
 
     def get(self, search, cancellable):
         """

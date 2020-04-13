@@ -12,6 +12,11 @@
 
 from hashlib import md5
 
+import json
+
+from lollypop.logger import Logger
+from lollypop.define import App
+
 
 class DeezerWebHelper:
     """
@@ -23,6 +28,24 @@ class DeezerWebHelper:
             Init helper
         """
         pass
+
+    def get_album_payload(self, album_id, cancellable):
+        """
+            Get album payload for id
+            @param album_id as int
+            @param cancellable as Gio.Cancellable
+            @return {}
+        """
+        try:
+            uri = "https://api.deezer.com/album/%s" % album_id
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                return decode
+        except Exception as e:
+            Logger.warning("DeezerWebHelper::get_album_payload(): %s", e)
+        return None
 
     def lollypop_album_payload(self, payload):
         """

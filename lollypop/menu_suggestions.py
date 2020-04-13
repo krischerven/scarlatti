@@ -56,6 +56,17 @@ class SuggestionsMenu(Gio.Menu):
         menu_item = Gio.MenuItem.new(_("Suggestions from Spotify"),
                                      "app.spotify_similars")
         section.append_item(menu_item)
+        action = Gio.SimpleAction.new_stateful(
+            "deezer_charts",
+            None,
+            GLib.Variant("b", mask & StorageType.DEEZER_CHARTS))
+        action.connect("change-state",
+                       self.__on_change_state,
+                       StorageType.DEEZER_CHARTS)
+        App().add_action(action)
+        menu_item = Gio.MenuItem.new(_("Top albums on Deezer"),
+                                     "app.deezer_charts")
+        section.append_item(menu_item)
         self.append_section(_("From the Web"), section)
 
 #######################

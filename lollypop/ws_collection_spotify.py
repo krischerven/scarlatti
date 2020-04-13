@@ -23,7 +23,7 @@ from lollypop.define import App, StorageType
 
 class SpotifyCollectionWebService(SpotifyWebHelper):
     """
-        Search for Spotify
+        Add items to collection with Spotify
         Depends on SaveWebHelper
     """
     def __init__(self):
@@ -54,7 +54,8 @@ class SpotifyCollectionWebService(SpotifyWebHelper):
                                                                   cancellable)
                 shuffle(albums_payload)
                 for album in albums_payload:
-                    lollypop_payload = self.lollypop_album_payload(album)
+                    lollypop_payload = SpotifyWebHelper.lollypop_album_payload(
+                        self, album)
                     self.save_album_payload_to_db(
                                            lollypop_payload,
                                            StorageType.SPOTIFY_SIMILARS,
@@ -87,7 +88,9 @@ class SpotifyCollectionWebService(SpotifyWebHelper):
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     for album in decode["albums"]["items"]:
-                        lollypop_payload = self.lollypop_album_payload(album)
+                        lollypop_payload =\
+                            SpotifyWebHelper.lollypop_album_payload(
+                                self, album)
                         self.save_album_payload_to_db(
                                              lollypop_payload,
                                              StorageType.SPOTIFY_NEW_RELEASES,
