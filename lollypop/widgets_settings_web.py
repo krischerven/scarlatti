@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Gio, Gdk
 
 from gettext import gettext as _
 
-from lollypop.define import App, NetworkAccessACL, StorageType
+from lollypop.define import App, NetworkAccessACL
 from lollypop.define import LASTFM_API_KEY
 from lollypop.helper_passwords import PasswordsHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -190,18 +190,6 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             acl &= ~NetworkAccessACL[key]
         acl = App().settings.set_value("network-access-acl",
                                        GLib.Variant("i", acl))
-        if key == "SPOTIFY" and not state:
-            for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
-                                 StorageType.SPOTIFY_SIMILARS]:
-                album_ids = App().albums.get_for_storage_type(storage_type)
-                for album_id in album_ids:
-                    # EPHEMERAL with not tracks will be cleaned below
-                    App().albums.set_storage_type(album_id,
-                                                  StorageType.EPHEMERAL)
-                    App().tracks.remove_album(album_id)
-            App().tracks.clean()
-            App().albums.clean()
-            App().artists.clean()
 
     def _on_network_access_changed(self, *ignore):
         self.__check_acls()

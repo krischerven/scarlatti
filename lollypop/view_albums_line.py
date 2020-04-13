@@ -301,9 +301,9 @@ class AlbumsSearchLineView(AlbumsLineView):
         GLib.idle_add(self.hide)
 
 
-class AlbumsSpotifyLineView(AlbumsLineView):
+class AlbumsStorageTypeLineView(AlbumsLineView):
     """
-        Spotify album line
+        Storage type album line
     """
 
     @signals
@@ -319,7 +319,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         self.__cancellable = Gio.Cancellable()
         self.__storage_type = StorageType.NONE
         return [
-                (App().ws_director.spotify_ws, "match-album",
+                (App().ws_director.collection_ws, "match-album",
                  "_on_album_match"),
                 (App().settings, "changed::network-access",
                  "_on_network_access_changed"),

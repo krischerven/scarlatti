@@ -15,10 +15,11 @@ import json
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_musicbrainz import MusicBrainzWebHelper
+from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import App
 
 
-class MusicBrainzSearch(MusicBrainzWebHelper):
+class MusicBrainzSearch(SaveWebHelper, MusicBrainzWebHelper):
     """
         Search for MusicBrainz
     """
@@ -27,6 +28,7 @@ class MusicBrainzSearch(MusicBrainzWebHelper):
         """
             Init object
         """
+        SaveWebHelper.__init__(self)
         MusicBrainzWebHelper.__init__(self)
 
     def get(self, search, storage_type, cancellable):
@@ -57,3 +59,22 @@ class MusicBrainzSearch(MusicBrainzWebHelper):
             Logger.warning("MusicBrainzSearch::get(): %s", e)
         if not cancellable.is_cancelled():
             emit_signal(self, "finished")
+
+    def load_tracks(self, album, cancellable):
+        """
+            Load tracks for album
+            @param album as Album
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            mbid = album.uri.replace("mb:", "")
+            tracks = self.get_tracks_payload(mbid, cancellable)
+            for track in tracks:
+                lollypop_payload = self.lollypop_track_payload(track)
+                self.save_track_payload_to_db(lollypop_payload,
+                                              album.collection_item,
+                                              album.storage_type,
+                                              False,
+                                              cancellable)
+        except Exception as e:
+            Logger.error("MusicBrainzSearch::load_tracks(): %s", e)

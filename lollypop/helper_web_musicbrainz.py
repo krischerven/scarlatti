@@ -10,17 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GObject
-
 import json
 from hashlib import md5
 
-from lollypop.helper_web_save import SaveWebHelper
 from lollypop.logger import Logger
 from lollypop.define import App
 
 
-class MusicBrainzWebHelper(SaveWebHelper):
+class MusicBrainzWebHelper:
     """
         Web helper for MusicBrainz
     """
@@ -29,8 +26,7 @@ class MusicBrainzWebHelper(SaveWebHelper):
         """
             Init helper
         """
-        GObject.Object.__init__(self)
-        SaveWebHelper.__init__(self)
+        pass
 
     def get_tracks_payload(self, mbid, cancellable):
         """
@@ -95,24 +91,6 @@ class MusicBrainzWebHelper(SaveWebHelper):
         lollypop_payload["id"] = track_id
         return lollypop_payload
 
-    def load_tracks(self, album, cancellable):
-        """
-            Load tracks for album
-            @param album as Album
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            mbid = album.uri.replace("mb:", "")
-            tracks = self.get_tracks_payload(mbid, cancellable)
-            for track in tracks:
-                lollypop_payload = self.lollypop_track_payload(track)
-                self.save_track_payload_to_db(lollypop_payload,
-                                              album.collection_item,
-                                              album.storage_type,
-                                              False,
-                                              cancellable)
-        except Exception as e:
-            Logger.error("MusicBrainzHelper::load_tracks(): %s", e)
 #######################
 # PRIVATE             #
 #######################

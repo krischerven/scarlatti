@@ -15,10 +15,11 @@ import json
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_lastfm import LastFMWebHelper
+from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import LASTFM_API_KEY, App
 
 
-class LastFMSearch(LastFMWebHelper):
+class LastFMSearch(LastFMWebHelper, SaveWebHelper):
     """
         Search for LastFM
     """
@@ -27,6 +28,7 @@ class LastFMSearch(LastFMWebHelper):
         """
             Init object
         """
+        SaveWebHelper.__init__(self)
         LastFMWebHelper.__init__(self)
 
     def get(self, search, storage_type, cancellable):

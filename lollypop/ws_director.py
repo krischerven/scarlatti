@@ -28,7 +28,7 @@ class DirectorWebService:
             Init object
         """
         self.__token_ws = TokenWebService()
-        self.__spotify_ws = None
+        self.__collection_ws = None
         self.__lastfm_ws = None
         self.__librefm_ws = None
         self.__listenbrainz_ws = None
@@ -47,8 +47,8 @@ class DirectorWebService:
             self.__librefm_ws.start()
         if self.__listenbrainz_ws is not None:
             self.__listenbrainz_ws.start()
-        if self.__spotify_ws is not None:
-            self.__spotify_ws.start()
+        if self.__collection_ws is not None:
+            self.__collection_ws.start()
 
     def stop(self):
         """
@@ -65,9 +65,9 @@ class DirectorWebService:
         if self.__listenbrainz_ws is not None:
             stopping += 1
             stopped += self.__listenbrainz_ws.stop()
-        if self.__spotify_ws is not None:
+        if self.__collection_ws is not None:
             stopping += 1
-            stopped += self.__spotify_ws.stop()
+            stopped += self.__collection_ws.stop()
         return stopped == stopping
 
     @property
@@ -92,12 +92,12 @@ class DirectorWebService:
         return self.__token_ws
 
     @property
-    def spotify_ws(self):
+    def collection_ws(self):
         """
-            Get Spotify web service
-            @return SpotifyWebService
+            Get Collection web service
+            @return CollectionWebService
         """
-        return self.__spotify_ws
+        return self.__collection_ws
 
 #######################
 # PRIVATE             #
@@ -110,22 +110,22 @@ class DirectorWebService:
         show_album_lists = App().settings.get_value("shown-album-lists")
         if Type.SUGGESTIONS not in show_album_lists:
             return
-        start = acl & NetworkAccessACL["MUSICBRAINZ"]
-        if start and self.__spotify_ws is None:
-            from lollypop.ws_spotify import SpotifyWebService
-            self.__spotify_ws = SpotifyWebService()
-            Logger.info("Spotify web service started")
-            self.__spotify_ws.start()
+        start = acl & NetworkAccessACL["YOUTUBE"]
+        if start and self.__collection_ws is None:
+            from lollypop.ws_collection import CollectionWebService
+            self.__collection_ws = CollectionWebService()
+            Logger.info("Collection web service started")
+            self.__collection_ws.start()
             if self.__spotify_timeout_id is None:
                 self.__spotify_timeout_id = GLib.timeout_add_seconds(
-                    3600, self.__spotify_ws.start)
-        elif not start and self.__spotify_ws is not None:
+                    3600, self.__collection_ws.start)
+        elif not start and self.__collection_ws is not None:
             if self.__spotify_timeout_id is not None:
                 GLib.source_remove(self.__spotify_timeout_id)
                 self.__spotify_timeout_id = None
-            self.__spotify_ws.stop()
-            self.__spotify_ws = None
-            Logger.info("Spotify web service stopping")
+            self.__collection_ws.stop()
+            self.__collection_ws = None
+            Logger.info("Collection web service stopping")
 
     def __handle_lastfm(self, acl):
         """

@@ -15,10 +15,11 @@ import json
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_spotify import SpotifyWebHelper
+from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import App, StorageType
 
 
-class SpotifySearch(SpotifyWebHelper):
+class SpotifySearch(SpotifyWebHelper, SaveWebHelper):
     """
         Search for Spotify
     """
@@ -26,6 +27,7 @@ class SpotifySearch(SpotifyWebHelper):
         """
             Init object
         """
+        SaveWebHelper.__init__(self)
         SpotifyWebHelper.__init__(self)
 
     def get(self, search, storage_type, cancellable):
@@ -75,6 +77,36 @@ class SpotifySearch(SpotifyWebHelper):
             Logger.warning("SpotifySearch::search(): %s", e)
         if not cancellable.is_cancelled():
             emit_signal(self, "finished")
+
+    def load_tracks(self, album, cancellable):
+        """
+            Load tracks for album
+            @param album as Album
+            @param cancellable as Gio.Cancellable
+        """
+        try:
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            uri = "https://api.spotify.com/v1/albums/%s" % album.uri
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for track in decode["tracks"]["items"]:
+                    lollypop_payload = self.lollypop_track_payload(track)
+                    self.save_track_payload_to_db(lollypop_payload,
+                                                  album.collection_item,
+                                                  album.storage_type,
+                                                  False,
+                                                  cancellable)
+        except Exception as e:
+            Logger.warning("SpotifySearch::load_tracks(): %s, %s",
+                           e, data)
 
 #######################
 # PRIVATE             #

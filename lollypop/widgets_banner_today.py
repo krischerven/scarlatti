@@ -21,7 +21,7 @@ from lollypop.widgets_banner import BannerWidget
 from lollypop.widgets_cover import CoverWidget
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
-from lollypop.utils import get_default_storage_type
+from lollypop.utils import get_default_storage_type, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -75,27 +75,37 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label.set_xalign(0.0)
         self.__title_label.set_vexpand(True)
+        self.__title_label.set_margin_start(MARGIN)
         self.__cover_widget = CoverWidget(self.__album, view_type)
         self.__cover_widget.show()
-        self.__play_button = Gtk.Button.new()
-        self.__play_button.show()
+        play_button = Gtk.Button.new()
+        play_button.show()
+        play_button.set_property("valign", Gtk.Align.CENTER)
         image = Gtk.Image.new()
         image.show()
-        self.__play_button.set_image(image)
-        self.__play_button.connect("clicked", self.__on_play_button_clicked)
-        self.__play_button.get_style_context().add_class("banner-button")
-        self.__play_button.set_property("valign", Gtk.Align.CENTER)
-        self.__play_button.set_property("halign", Gtk.Align.END)
-        self.__play_button.set_hexpand(True)
-        self.__play_button.get_image().set_from_icon_name(
+        play_button.set_image(image)
+        play_button.connect("clicked", self.__on_play_button_clicked)
+        play_button.get_style_context().add_class("banner-button")
+        play_button.set_property("halign", Gtk.Align.END)
+        play_button.set_hexpand(True)
+        play_button.get_image().set_from_icon_name(
             "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
+        menu_button = Gtk.Button.new_from_icon_name(
+            "view-more-symbolic", Gtk.IconSize.BUTTON)
+        menu_button.show()
+        menu_button.set_property("valign", Gtk.Align.CENTER)
+        menu_button.get_style_context().add_class("banner-button")
+        menu_button.set_property("halign", Gtk.Align.END)
+        menu_button.connect("clicked", self.__on_menu_button_clicked)
         grid = Gtk.Grid()
         grid.show()
-        grid.set_column_spacing(MARGIN)
+        grid.get_style_context().add_class("linked")
         grid.add(self.__cover_widget)
         grid.add(self.__title_label)
-        grid.add(self.__play_button)
-        grid.set_property("margin", MARGIN)
+        grid.add(play_button)
+        grid.add(menu_button)
+        grid.set_margin_start(MARGIN)
+        grid.set_margin_end(MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         return [
@@ -181,3 +191,15 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
             @param button as Gtk.Button
         """
         App().player.play_album(self.__album)
+
+    def __on_menu_button_clicked(self, button):
+        """
+            Show suggestions menu
+            @param button as Gtk.Button
+        """
+        from lollypop.menu_suggestions import SuggestionsMenu
+        from lollypop.widgets_menu import MenuBuilder
+        menu = SuggestionsMenu(App().window.is_adaptive)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        popup_widget(menu_widget, button)

@@ -10,20 +10,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GObject
+from gi.repository import GLib
 
 import json
 import re
 from hashlib import md5
 from locale import getdefaultlocale
 
-from lollypop.helper_web_save import SaveWebHelper
 from lollypop.logger import Logger
 from lollypop.define import App, LASTFM_API_KEY
 from lollypop.utils import get_network_available
 
 
-class LastFMWebHelper(SaveWebHelper):
+class LastFMWebHelper:
     """
         Web helper for Last.fm
     """
@@ -32,8 +31,7 @@ class LastFMWebHelper(SaveWebHelper):
         """
             Init helper
         """
-        GObject.Object.__init__(self)
-        SaveWebHelper.__init__(self)
+        pass
 
     def get_artist_id(self, artist_name, cancellable):
         """

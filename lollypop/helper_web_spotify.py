@@ -17,11 +17,10 @@ from hashlib import md5
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
-from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import App
 
 
-class SpotifyWebHelper(SaveWebHelper):
+class SpotifyWebHelper:
     """
        Web helper for Spotify
     """
@@ -30,7 +29,7 @@ class SpotifyWebHelper(SaveWebHelper):
         """
             Init helper
         """
-        SaveWebHelper.__init__(self)
+        pass
 
     def get_artist_id(self, artist_name, cancellable):
         """
@@ -109,36 +108,6 @@ class SpotifyWebHelper(SaveWebHelper):
         except Exception as e:
             Logger.error("SpotifyWebHelper::get_artist_top_tracks(): %s", e)
         return track_ids
-
-    def load_tracks(self, album, cancellable):
-        """
-            Load tracks for album
-            @param album as Album
-            @param cancellable as Gio.Cancellable
-        """
-        try:
-            token = App().ws_director.token_ws.get_token("SPOTIFY",
-                                                         cancellable)
-            uri = "https://api.spotify.com/v1/albums/%s" % album.uri
-            token = App().ws_director.token_ws.get_token("SPOTIFY",
-                                                         cancellable)
-            bearer = "Bearer %s" % token
-            headers = [("Authorization", bearer)]
-            (status,
-             data) = App().task_helper.load_uri_content_sync_with_headers(
-                    uri, headers, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                for track in decode["tracks"]["items"]:
-                    lollypop_payload = self.lollypop_track_payload(track)
-                    self.save_track_payload_to_db(lollypop_payload,
-                                                  album.collection_item,
-                                                  album.storage_type,
-                                                  False,
-                                                  cancellable)
-        except Exception as e:
-            Logger.warning("SpotifyWebHelper::load_tracks(): %s, %s",
-                           e, data)
 
     def lollypop_album_payload(self, payload):
         """
