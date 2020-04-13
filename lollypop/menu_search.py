@@ -44,9 +44,9 @@ class SearchMenu(Gio.Menu):
         menu_item = Gio.MenuItem.new(_("Disabled"),
                                      "app.web_search('NONE')")
         section.append_item(menu_item)
-        if get_network_available("SPOTIFY"):
-            menu_item = Gio.MenuItem.new(_("Spotify"),
-                                         "app.web_search('SPOTIFY')")
+        if get_network_available("DEEZER"):
+            menu_item = Gio.MenuItem.new(_("Deezer"),
+                                         "app.web_search('DEEZER')")
             section.append_item(menu_item)
         if get_network_available("LASTFM"):
             menu_item = Gio.MenuItem.new(_("Last.fm"),
@@ -56,9 +56,9 @@ class SearchMenu(Gio.Menu):
             menu_item = Gio.MenuItem.new(_("MusicBrainz"),
                                          "app.web_search('MUSICBRAINZ')")
             section.append_item(menu_item)
-        if get_network_available("DEEZER"):
-            menu_item = Gio.MenuItem.new(_("Deezer"),
-                                         "app.web_search('DEEZER')")
+        if get_network_available("SPOTIFY"):
+            menu_item = Gio.MenuItem.new(_("Spotify"),
+                                         "app.web_search('SPOTIFY')")
             section.append_item(menu_item)
         self.append_section(_("Search on the Web"), section)
 
