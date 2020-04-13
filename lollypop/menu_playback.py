@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, ViewType
+from lollypop.define import App, ViewType, Type
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import get_default_storage_type, emit_signal
 from lollypop.objects_track import Track
@@ -96,13 +96,18 @@ class PlaylistPlaybackMenu(Gio.Menu):
             @param playlist_id as int
         """
         if App().playlists.get_smart(playlist_id):
-            tracks = []
             request = App().playlists.get_smart_sql(playlist_id)
-            for track_id in App().db.execute(request):
-                tracks.append(Track(track_id))
+            # We need to inject skipped/storage_type
+            storage_type = get_default_storage_type()
+            split = request.split("ORDER BY")
+            split[0] += " AND loved != %s" % Type.NONE
+            split[0] += " AND tracks.storage_type&%s " % storage_type
+            track_ids = App().db.execute("ORDER BY".join(split))
+            albums = tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
         else:
             tracks = App().playlists.get_tracks(playlist_id)
-        albums = tracks_to_albums(tracks)
+            albums = tracks_to_albums(tracks)
         App().player.play_albums(albums)
 
 
