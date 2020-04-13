@@ -226,7 +226,8 @@ class CollectionsSettingsWidget(Gtk.Bin):
             @param history as History
         """
         if uris:
-            App().ws_director.collection_ws.stop()
+            if App().ws_director.collection_ws is not None:
+                App().ws_director.collection_ws.stop()
             uri = uris.pop(0)
             App().scanner.del_from_db(uri, True)
             self.__progress.set_fraction((count - len(uris)) / count)

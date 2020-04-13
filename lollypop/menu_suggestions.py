@@ -96,9 +96,10 @@ class SuggestionsMenu(Gio.Menu):
             @param state as bool
             @param mask as int
         """
-        if not App().ws_director.collection_ws.stop():
-            GLib.timeout_add(500, self.__handle_mask_change, state, mask)
-            return
+        if App().ws_director.collection_ws is not None:
+            if not App().ws_director.collection_ws.stop():
+                GLib.timeout_add(500, self.__handle_mask_change, state, mask)
+                return
         suggestion_mask = App().settings.get_value(
             "suggestions-mask").get_int32()
         if state:
@@ -108,7 +109,8 @@ class SuggestionsMenu(Gio.Menu):
         App().settings.set_value("suggestions-mask",
                                  GLib.Variant("i", suggestion_mask))
         self.__clean_storage_type(state, mask)
-        App().ws_director.collection_ws.start()
+        if App().ws_director.collection_ws is not None:
+            App().ws_director.collection_ws.start()
 
     def __on_change_state(self, action, state, mask):
         """
