@@ -16,13 +16,13 @@ from time import time
 
 from lollypop.logger import Logger
 from lollypop.sqlcursor import SqlCursor
-from lollypop.ws_spotify import SpotifyWebService
+from lollypop.ws_collection_spotify import SpotifyCollectionWebService
 from lollypop.helper_web_save import SaveWebHelper
 from lollypop.define import App, StorageType
 
 
 class CollectionWebService(SaveWebHelper,
-                           SpotifyWebService):
+                           SpotifyCollectionWebService):
     """
         Add items to collection based on current user settings
     """
@@ -30,9 +30,9 @@ class CollectionWebService(SaveWebHelper,
     MAX_ITEMS_PER_STORAGE_TYPE = 50
     __METHODS = {
         StorageType.SPOTIFY_SIMILARS:
-            SpotifyWebService.search_similar_albums,
+            SpotifyCollectionWebService.search_similar_albums,
         StorageType.SPOTIFY_NEW_RELEASES:
-            SpotifyWebService.search_new_releases
+            SpotifyCollectionWebService.search_new_releases
     }
     __STORAGE_TYPES = [StorageType.SPOTIFY_SIMILARS,
                        StorageType.SPOTIFY_NEW_RELEASES]
@@ -42,7 +42,7 @@ class CollectionWebService(SaveWebHelper,
             Init object
         """
         SaveWebHelper.__init__(self)
-        SpotifyWebService.__init__(self)
+        SpotifyCollectionWebService.__init__(self)
         self.__is_running = False
         self.__cancellable = Gio.Cancellable()
 

@@ -21,7 +21,7 @@ from lollypop.helper_web_spotify import SpotifyWebHelper
 from lollypop.define import App, StorageType
 
 
-class SpotifyWebService(SpotifyWebHelper):
+class SpotifyCollectionWebService(SpotifyWebHelper):
     """
         Search for Spotify
         Depends on SaveWebHelper
