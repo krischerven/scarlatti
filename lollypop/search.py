@@ -76,6 +76,7 @@ class Search(GObject.Object):
         elif uri.startswith("dz:"):
             from lollypop.search_deezer import DeezerSearch
             DeezerSearch().load_tracks(album, cancellable)
+        # elif uri.startswith("sp:"): => compatibility
         else:
             from lollypop.search_spotify import SpotifySearch
             SpotifySearch().load_tracks(album, cancellable)

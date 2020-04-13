@@ -14,6 +14,7 @@ from gi.repository import GLib, Gio
 
 import itertools
 from time import time
+from hashlib import md5
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.utils import translate_artist_name
@@ -165,7 +166,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                    WHERE storage_type=2 AND rowid=mb_album_id""",
             43: """CREATE TABLE featuring (artist_id INT NOT NULL,
                                            album_id INT NOT NULL)""",
-            44: self.__upgrade_44
+            44: self.__upgrade_44,
+            45: self.__upgrade_45
         }
 
 #######################
@@ -730,7 +732,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
         artists = ArtistsDatabase(db)
         tracks = TracksDatabase(db)
         for storage_type in [StorageType.SPOTIFY_NEW_RELEASES,
-                             StorageType.SPOTIFY_SIMILARS]:
+                             StorageType.SPOTIFY_SIMILARS,
+                             StorageType.DEEZER_CHARTS]:
             album_ids = albums.get_for_storage_type(storage_type)
             for album_id in album_ids:
                 # EPHEMERAL with not tracks will be cleaned below
@@ -739,3 +742,23 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
         tracks.clean()
         albums.clean()
         artists.clean()
+
+    def __upgrade_45(self, db):
+        """
+            Add lp album/track id + track count
+        """
+        def sqlmd5(value):
+            try:
+                return md5(value.encode("utf-8")).hexdigest()
+            except Exception as e:
+                print(e)
+
+        with SqlCursor(db, True) as sql:
+            sql.create_function("md5", 1, sqlmd5)
+            sql.execute("ALTER TABLE tracks ADD lp_track_id TEXT")
+            sql.execute("ALTER TABLE albums ADD lp_album_id TEXT")
+            # Here we force a fake id. Recalculate all ids for all items
+            # is too slow. This will break lp ids purpose.
+            sql.execute("UPDATE albums SET lp_album_id=md5(uri)")
+            sql.execute("UPDATE tracks SET lp_track_id=md5(uri)")
+        self.__upgrade_44(db)

@@ -34,7 +34,7 @@ class TracksDatabase:
 
     def add(self, name, uri, duration, tracknumber, discnumber, discname,
             album_id, year, timestamp, popularity, rate, loved, ltime, mtime,
-            mb_track_id, bpm, storage_type):
+            mb_track_id, lp_track_id, bpm, storage_type):
         """
             Add a new track to database
             @param name as string
@@ -52,6 +52,7 @@ class TracksDatabase:
             @param ltime as int
             @param mtime as int
             @param mb_track_id as str
+            @param lp_track_id as str
             @param bpm as double
             @return inserted rowid as int
             @warning: commit needed
@@ -61,25 +62,12 @@ class TracksDatabase:
                 "INSERT INTO tracks (name, uri, duration, tracknumber,\
                 discnumber, discname, album_id,\
                 year, timestamp, popularity, rate, loved,\
-                ltime, mtime, mb_track_id, bpm, storage_type) VALUES\
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
-                    name,
-                    uri,
-                    duration,
-                    tracknumber,
-                    discnumber,
-                    discname,
-                    album_id,
-                    year,
-                    timestamp,
-                    popularity,
-                    rate,
-                    loved,
-                    ltime,
-                    mtime,
-                    mb_track_id,
-                    bpm,
-                    storage_type))
+                ltime, mtime, mb_track_id, lp_track_id, bpm, storage_type)\
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, uri, duration, tracknumber, discnumber,
+                 discname, album_id, year, timestamp, popularity,
+                 rate, loved, ltime, mtime, mb_track_id, lp_track_id,
+                 bpm, storage_type))
             return result.lastrowid
 
     def add_artist(self, track_id, artist_id):
@@ -351,15 +339,15 @@ class TracksDatabase:
                 return v[0]
             return ""
 
-    def get_id_for_mb_track_id(self, mb_track_id):
+    def get_id_for_lp_track_id(self, lp_track_id):
         """
-            Get track id for MusicBrainz recording id
-            @param MusicBrainz id as str
+            Get track id for Lollypop recording id
+            @param Lollypop id as str
             @return track id as int
         """
         with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE mb_track_id=?", (mb_track_id,))
+                                  WHERE lp_track_id=?", (lp_track_id,))
             v = result.fetchone()
             if v is not None:
                 return v[0]
@@ -519,6 +507,21 @@ class TracksDatabase:
             if v is not None:
                 return v[0]
             return 0
+
+    def get_lp_track_id(self, track_id):
+        """
+            Get Lollypop id
+            @param track_id as int
+            @return str
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT lp_track_id FROM\
+                                  tracks where rowid=?",
+                                 (track_id,))
+            v = result.fetchone()
+            if v and v[0]:
+                return v[0]
+            return ""
 
     def get_discnumber(self, track_id):
         """

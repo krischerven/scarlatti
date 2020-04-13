@@ -61,6 +61,7 @@ class Database:
     __create_albums = """CREATE TABLE albums (id INTEGER PRIMARY KEY,
                                               name TEXT NOT NULL,
                                               mb_album_id TEXT,
+                                              lp_album_id TEXT,
                                               no_album_artist BOOLEAN NOT NULL,
                                               year INT,
                                               timestamp INT,
@@ -107,6 +108,7 @@ class Database:
                                               mtime INT NOT NULL,
                                               storage_type INT NOT NULL,
                                               mb_track_id TEXT,
+                                              lp_track_id TEXT,
                                               bpm DOUBLE
                                               )"""
     __create_track_artists = """CREATE TABLE track_artists (

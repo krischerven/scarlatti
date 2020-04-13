@@ -33,12 +33,13 @@ class AlbumsDatabase:
         self.__db = db
         self.__max_count = 1
 
-    def add(self, album_name, mb_album_id, artist_ids,
+    def add(self, album_name, mb_album_id, lp_album_id, artist_ids,
             uri, loved, popularity, rate, synced, mtime, storage_type):
         """
             Add a new album to database
             @param album_name as str
             @param mb_album_id as str
+            @param lp_album_id as str
             @param artist_ids as int
             @param uri as str
             @param loved as bool
@@ -52,11 +53,12 @@ class AlbumsDatabase:
         """
         with SqlCursor(self.__db, True) as sql:
             result = sql.execute("INSERT INTO albums\
-                                  (name, mb_album_id, no_album_artist,\
-                                  uri, loved, popularity, rate, mtime, synced,\
-                                  storage_type)\
-                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                 (album_name, mb_album_id or None,
+                                  (name, mb_album_id, lp_album_id,\
+                                   no_album_artist, uri,\
+                                   loved, popularity, rate, mtime, synced,\
+                                   storage_type)\
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                 (album_name, mb_album_id or None, lp_album_id,
                                   artist_ids == [], uri, loved, popularity,
                                   rate, mtime, synced, storage_type))
             for artist_id in artist_ids:
@@ -572,15 +574,15 @@ class AlbumsDatabase:
                 return v[0]
             return ""
 
-    def get_id_for_mb_album_id(self, mb_album_id):
+    def get_id_for_lp_album_id(self, lp_album_id):
         """
-            Get album id for MusicBrainz recording id
-            @param MusicBrainz id as str
+            Get album id for Lollypop recording id
+            @param Lollypop id as str
             @return album id as int
         """
         with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid FROM albums\
-                                  WHERE mb_album_id=?", (mb_album_id,))
+                                  WHERE lp_album_id=?", (lp_album_id,))
             v = result.fetchone()
             if v is not None:
                 return v[0]
@@ -604,7 +606,7 @@ class AlbumsDatabase:
         """
             Get album year
             @param album_id as int
-            @return album year as int
+            @return int
         """
         with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT year FROM albums where rowid=?",
@@ -614,11 +616,40 @@ class AlbumsDatabase:
                 return v[0]
             return None
 
+    def get_trackcount(self, album_id):
+        """
+            Get track count, only used to load tracks after album created
+            @param album_id as int
+            @return int
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT trackcount FROM albums where rowid=?",
+                                 (album_id,))
+            v = result.fetchone()
+            if v and v[0]:
+                return v[0]
+            return 0
+
+    def get_lp_album_id(self, album_id):
+        """
+            Get Lollypop id
+            @param album_id as int
+            @return str
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT lp_album_id FROM\
+                                  albums where rowid=?",
+                                 (album_id,))
+            v = result.fetchone()
+            if v and v[0]:
+                return v[0]
+            return ""
+
     def get_uri(self, album_id):
         """
             Get album uri for album id
             @param album_id as int
-            @return Album uri as string
+            @return uri
         """
         with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT uri FROM albums WHERE rowid=?",

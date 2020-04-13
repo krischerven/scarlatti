@@ -19,7 +19,8 @@ class CollectionItem:
     def __init__(self, track_id=None, album_id=None, new_album=False,
                  genre_ids=[], new_genre_ids=[], artist_ids=[],
                  new_artist_ids=[], album_artist_ids=[],
-                 new_album_artist_ids=[], year=None, timestamp=None):
+                 new_album_artist_ids=[], album_name="",
+                 year=None, timestamp=None):
         """
             Init item
             @param track_id as int
@@ -34,6 +35,7 @@ class CollectionItem:
         """
         self.track_id = track_id
         self.album_id = album_id
+        self.album_name = album_name
         self.new_album = new_album
         self.genre_ids = genre_ids
         self.new_genre_ids = new_genre_ids

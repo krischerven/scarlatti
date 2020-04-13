@@ -40,6 +40,7 @@ class Track(Base):
                 "loved": False,
                 "storage_type": StorageType.COLLECTION,
                 "mb_track_id": None,
+                "lp_track_id": None,
                 "mb_artist_ids": []}
 
     def __init__(self, track_id=None, album=None):

@@ -17,8 +17,10 @@ import json
 
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
+from lollypop.utils import get_lollypop_album_id, get_lollypop_track_id
 from lollypop.objects_album import Album
 from lollypop.define import App, Type
+from lollypop.collection_item import CollectionItem
 
 
 class SaveWebHelper(GObject.Object):
@@ -49,7 +51,11 @@ class SaveWebHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
             @param notify as bool
         """
-        item.track_id = App().tracks.get_id_for_mb_track_id(payload["id"])
+        lp_track_id = get_lollypop_track_id(payload["name"],
+                                            payload["artists"],
+                                            item.year,
+                                            item.album_name)
+        item.track_id = App().tracks.get_id_for_lp_track_id(lp_track_id)
         if item.track_id < 0:
             self.__save_track(payload, item, storage_type)
         if notify:
@@ -65,7 +71,10 @@ class SaveWebHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
             @return CollectionItem/None
         """
-        album_id = App().albums.get_id_for_mb_album_id(payload["id"])
+        lp_album_id = get_lollypop_album_id(payload["name"],
+                                            payload["artists"],
+                                            payload["date"])
+        album_id = App().albums.get_id_for_lp_album_id(lp_album_id)
         if album_id >= 0:
             album = Album(album_id)
             if notify:
@@ -147,18 +156,18 @@ class SaveWebHelper(GObject.Object):
             @param storage_type as StorageType
             @return CollectionItem
         """
-        album_artists = []
-        for artist in payload["artists"]:
-            album_artists.append(artist)
+        album_artists = payload["artists"]
         album_artists = ";".join(album_artists)
         album_name = payload["name"]
         mtime = int(time())
-        uri = payload["uri"]
         track_count = payload["track-count"]
-        mb_album_id = payload["id"]
+        mb_album_id = payload["mbid"]
+        uri = payload["uri"]
         Logger.debug("SaveWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
-        item = App().scanner.save_album(
+        item = CollectionItem(album_name=album_name)
+        App().scanner.save_album(
+                        item,
                         album_artists,
                         "", "", album_name,
                         mb_album_id, uri, 0, 0, 0,
@@ -196,7 +205,7 @@ class SaveWebHelper(GObject.Object):
         duration = payload["duration"]
         mtime = int(time())
         uri = payload["uri"]
-        mb_track_id = payload["id"]
+        mb_track_id = payload["mbid"]
         App().scanner.save_track(
                    item, None, artists, "", "",
                    uri, title, duration, tracknumber, discnumber,

@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from hashlib import md5
-
 import json
 
 from lollypop.logger import Logger
@@ -54,16 +52,13 @@ class DeezerWebHelper:
             return {}
         """
         lollypop_payload = {}
-        lollypop_payload = {}
+        lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "dz:%s" % payload["id"]
         lollypop_payload["artists"] = [payload["artist"]["name"]]
         lollypop_payload["track-count"] = payload["nb_tracks"]
         lollypop_payload["artwork-uri"] = payload["cover_big"]
-        album_id_string = "%s-%s" % (lollypop_payload["name"],
-                                     lollypop_payload["artists"])
-        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = album_id
+        lollypop_payload["date"] = None
         return lollypop_payload
 
     def lollypop_track_payload(self, payload):
@@ -73,17 +68,13 @@ class DeezerWebHelper:
             @return {}
         """
         lollypop_payload = {}
+        lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "dz:%s" % payload["id"]
         lollypop_payload["artists"] = [payload["artist"]["name"]]
         lollypop_payload["discnumber"] = payload["disk_number"]
         lollypop_payload["tracknumber"] = payload["track_position"]
         lollypop_payload["duration"] = payload["duration"] * 1000
-        track_id_string = "%s-%s-%s" % (lollypop_payload["name"],
-                                        lollypop_payload["tracknumber"],
-                                        lollypop_payload["artists"])
-        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = track_id
         return lollypop_payload
 
 #######################

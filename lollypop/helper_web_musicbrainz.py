@@ -11,7 +11,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from hashlib import md5
 
 from lollypop.logger import Logger
 from lollypop.define import App
@@ -55,7 +54,7 @@ class MusicBrainzWebHelper:
             return {}
         """
         lollypop_payload = {}
-        lollypop_payload = {}
+        lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "mb:%s" % payload["id"]
         lollypop_payload["artists"] = []
@@ -63,10 +62,7 @@ class MusicBrainzWebHelper:
             lollypop_payload["artists"].append(artist["name"])
         lollypop_payload["track-count"] = payload["media"][0]["track-count"]
         lollypop_payload["artwork-uri"] = payload["id"]
-        album_id_string = "%s-%s" % (lollypop_payload["name"],
-                                     lollypop_payload["artists"])
-        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = album_id
+        lollypop_payload["date"] = None
         return lollypop_payload
 
     def lollypop_track_payload(self, payload):
@@ -76,6 +72,7 @@ class MusicBrainzWebHelper:
             @return {}
         """
         lollypop_payload = {}
+        lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "mb:%s" % payload["id"]
         lollypop_payload["artists"] = []
@@ -84,11 +81,6 @@ class MusicBrainzWebHelper:
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = payload["position"]
         lollypop_payload["duration"] = payload["length"]
-        track_id_string = "%s-%s-%s" % (lollypop_payload["name"],
-                                        lollypop_payload["tracknumber"],
-                                        lollypop_payload["artists"])
-        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = track_id
         return lollypop_payload
 
 #######################

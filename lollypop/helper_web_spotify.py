@@ -13,7 +13,6 @@
 from gi.repository import GLib
 
 import json
-from hashlib import md5
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
@@ -116,7 +115,8 @@ class SpotifyWebHelper:
             return {}
         """
         lollypop_payload = {}
-        lollypop_payload["uri"] = payload["id"]
+        lollypop_payload["mbid"] = None
+        lollypop_payload["uri"] = "sp:%s" % payload["id"]
         lollypop_payload["name"] = payload["name"]
         lollypop_payload["artists"] = []
         for artist in payload["artists"]:
@@ -124,10 +124,6 @@ class SpotifyWebHelper:
         lollypop_payload["track-count"] = payload["total_tracks"]
         lollypop_payload["date"] = payload["release_date"]
         lollypop_payload["artwork-uri"] = payload["images"][0]["url"]
-        album_id_string = "%s-%s" % (lollypop_payload["name"],
-                                     lollypop_payload["artists"])
-        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = album_id
         return lollypop_payload
 
     def lollypop_track_payload(self, payload):
@@ -137,7 +133,8 @@ class SpotifyWebHelper:
             return {}
         """
         lollypop_payload = {}
-        lollypop_payload["uri"] = payload["id"]
+        lollypop_payload["mbid"] = None
+        lollypop_payload["uri"] = "sp:%s" % payload["id"]
         lollypop_payload["name"] = payload["name"]
         lollypop_payload["artists"] = []
         for artist in payload["artists"]:
@@ -145,11 +142,6 @@ class SpotifyWebHelper:
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = payload["track_number"]
         lollypop_payload["duration"] = payload["duration_ms"]
-        track_id_string = "%s-%s-%s" % (lollypop_payload["name"],
-                                        lollypop_payload["tracknumber"],
-                                        lollypop_payload["artists"])
-        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = track_id
         return lollypop_payload
 
 #######################

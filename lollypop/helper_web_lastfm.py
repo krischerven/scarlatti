@@ -14,7 +14,6 @@ from gi.repository import GLib
 
 import json
 import re
-from hashlib import md5
 from locale import getdefaultlocale
 
 from lollypop.logger import Logger
@@ -152,21 +151,17 @@ class LastFMWebHelper:
             return {}
         """
         lollypop_payload = {}
-        lollypop_payload = {}
+        lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["name"]
         lollypop_payload["uri"] = ""
         lollypop_payload["artists"] = [payload["artist"]]
         lollypop_payload["track-count"] = len(payload["tracks"])
-        lollypop_payload["release_date"] = None
+        lollypop_payload["date"] = None
         try:
             artwork_uri = payload["image"][-1]["#text"]
         except:
             artwork_uri = None
         lollypop_payload["artwork-uri"] = artwork_uri
-        album_id_string = "%s-%s" % (lollypop_payload["name"],
-                                     lollypop_payload["artists"])
-        album_id = md5(album_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = album_id
         return lollypop_payload
 
     def lollypop_track_payload(self, track, tracknumber):
@@ -177,17 +172,13 @@ class LastFMWebHelper:
             @return {}
         """
         lollypop_payload = {}
+        lollypop_payload["mbid"] = None
         lollypop_payload["name"] = track["name"]
         lollypop_payload["uri"] = ""
         lollypop_payload["artists"] = [track["artist"]["name"]]
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = tracknumber
         lollypop_payload["duration"] = track["duration"]
-        track_id_string = "%s-%s-%s" % (lollypop_payload["name"],
-                                        lollypop_payload["tracknumber"],
-                                        lollypop_payload["artists"])
-        track_id = md5(track_id_string.encode("utf-8")).hexdigest()
-        lollypop_payload["id"] = track_id
         return lollypop_payload
 
 #######################

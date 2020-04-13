@@ -13,7 +13,6 @@
 from gi.repository import GLib, GdkPixbuf, Gio, Gst
 
 from random import choice
-from hashlib import md5
 from gettext import gettext as _
 from time import time
 
@@ -52,11 +51,9 @@ class AlbumArt:
             @param height as int
             @return cover path as string or None if no cover
         """
-        filename = ""
         try:
-            filename = self.__get_album_artwork_name(album)
             cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                                  filename,
+                                                  album.lp_album_id,
                                                   width,
                                                   height)
             f = Gio.File.new_for_path(cache_path_jpg)
@@ -82,20 +79,20 @@ class AlbumArt:
         if album.id is None:
             return None
         try:
-            filename = self.__get_album_artwork_name(album) + ".jpg"
             self.__update_album_uri(album)
             if not album.storage_type & StorageType.COLLECTION:
-                store_path = ALBUMS_WEB_PATH + "/" + filename
+                store_path = "%s/%s.jpg" % (ALBUMS_WEB_PATH, album.lp_album_id)
+                uris = [GLib.filename_to_uri(store_path)]
             else:
-                store_path = ALBUMS_PATH + "/" + filename
-            uris = [
-                # Used when album.uri is readonly or for Web
-                GLib.filename_to_uri(store_path),
-                # Default favorite artwork
-                album.uri + "/" + self.__favorite,
-                # Used when having muliple albums in same folder
-                album.uri + "/" + filename
-            ]
+                store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
+                uris = [
+                    # Used when album.uri is readonly or for Web
+                    GLib.filename_to_uri(store_path),
+                    # Default favorite artwork
+                    "%s/%s.jpg" % (album.uri, self.__favorite),
+                    # Used when having muliple albums in same folder
+                    "%s/%s.jpg" % (album.uri, album.lp_album_id)
+                ]
             for uri in uris:
                 f = Gio.File.new_for_uri(uri)
                 if f.query_exists():
@@ -112,6 +109,9 @@ class AlbumArt:
         """
         # Folders with many albums, get_album_artwork_uri()
         if App().albums.get_uri_count(album.uri) > 1:
+            return None
+        if not album.storage_type & (StorageType.COLLECTION |
+                                     StorageType.EXTERNAL):
             return None
         f = Gio.File.new_for_uri(album.uri)
         infos = f.enumerate_children("standard::name",
@@ -132,8 +132,11 @@ class AlbumArt:
             @param album as Album
             @return [paths]
         """
-        uris = []
+        if not album.storage_type & (StorageType.COLLECTION |
+                                     StorageType.EXTERNAL):
+            return []
         try:
+            uris = []
             f = Gio.File.new_for_uri(album.uri)
             infos = f.enumerate_children(
                 "standard::name",
@@ -168,7 +171,6 @@ class AlbumArt:
             return None
         width *= scale_factor
         height *= scale_factor
-        filename = self.__get_album_artwork_name(album)
         # Blur when reading from tags can be slow, so prefer cached version
         # Blur allows us to ignore width/height until we want CROP/CACHE
         optimized_blur = behaviour & (ArtBehaviour.BLUR |
@@ -182,7 +184,8 @@ class AlbumArt:
         else:
             w = width
             h = height
-        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH, filename, w, h)
+        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH, album.lp_album_id,
+                                              w, h)
         pixbuf = None
         try:
             # Look in cache
@@ -207,7 +210,9 @@ class AlbumArt:
                             stream, None)
                         stream.close()
                 # Use tags artwork
-                if pixbuf is None and album.tracks and album.uri != "":
+                if pixbuf is None and album.tracks and\
+                        album.storage_type & (StorageType.COLLECTION |
+                                              StorageType.EXTERNAL):
                     try:
                         if behaviour & (ArtBehaviour.BLUR |
                                         ArtBehaviour.BLUR_HARD):
@@ -219,7 +224,9 @@ class AlbumArt:
                         Logger.error("AlbumArt::get_album_artwork(): %s", e)
 
                 # Use folder artwork
-                if pixbuf is None and album.uri != "":
+                if pixbuf is None and\
+                        album.storage_type & (StorageType.COLLECTION |
+                                              StorageType.EXTERNAL):
                     uri = self.get_first_album_artwork(album)
                     # Look in album folder
                     if uri is not None:
@@ -249,7 +256,7 @@ class AlbumArt:
         try:
             if not album.storage_type & StorageType.COLLECTION:
                 self.__save_web_album_artwork(album, data)
-            elif album.uri == "" or is_readonly(album.uri):
+            elif is_readonly(album.uri):
                 self.__save_ro_album_artwork(album, data)
             else:
                 self.__save_album_artwork(album, data)
@@ -290,13 +297,12 @@ class AlbumArt:
         """
         try:
             from pathlib import Path
-            name = self.__get_album_artwork_name(album)
             if width == -1 or height == -1:
-                for p in Path(CACHE_PATH).glob("%s*.jpg" % name):
+                for p in Path(CACHE_PATH).glob("%s*.jpg" % album.lp_album_id):
                     p.unlink()
             else:
                 filename = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                                name,
+                                                album.lp_album_id,
                                                 width,
                                                 height)
                 f = Gio.File.new_for_path(filename)
@@ -336,27 +342,13 @@ class AlbumArt:
 #######################
 # PRIVATE             #
 #######################
-    def __get_album_artwork_name(self, album):
-        """
-            Get a uniq string for album
-            @param album as Album
-        """
-        # We want DB storage type, not object one
-        storage_type = App().albums.get_storage_type(album.id)
-        if storage_type & (StorageType.COLLECTION | StorageType.EXTERNAL):
-            name = "%s_%s_%s" % (" ".join(album.artists),
-                                 album.name,
-                                 album.year)
-        else:
-            name = album.mb_album_id
-        return md5(name.encode("utf-8")).hexdigest()
-
     def __update_album_uri(self, album):
         """
             Check if album uri exists, update if not
             @param album as Album
         """
-        if not album.uri:
+        if not album.storage_type & (StorageType.COLLECTION |
+                                     StorageType.EXTERNAL):
             return
         d = Gio.File.new_for_uri(album.uri)
         if not d.query_exists():
@@ -373,8 +365,7 @@ class AlbumArt:
             @param album as Album
             @param data as bytes
         """
-        filename = self.__get_album_artwork_name(album) + ".jpg"
-        store_path = ALBUMS_WEB_PATH + "/" + filename
+        store_path = "%s/%s.jpg" % (ALBUMS_WEB_PATH, album.lp_album_id)
         if data is None:
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
@@ -391,8 +382,7 @@ class AlbumArt:
             @param album as Album
             @param data as bytes
         """
-        filename = self.__get_album_artwork_name(album) + ".jpg"
-        store_path = ALBUMS_PATH + "/" + filename
+        store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
         if data is None:
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
@@ -409,8 +399,7 @@ class AlbumArt:
             @param album as Album
             @param data as bytes
         """
-        filename = self.__get_album_artwork_name(album) + ".jpg"
-        store_path = ALBUMS_PATH + "/" + filename
+        store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
         save_to_tags = App().settings.get_value("save-to-tags")
         # Multiple albums at same path
         uri_count = App().albums.get_uri_count(album.uri)
@@ -429,7 +418,7 @@ class AlbumArt:
 
         # Name file with album information
         if uri_count > 1:
-            art_uri = album.uri + "/" + filename
+            art_uri = "%s/%s.jpg" % (album.uri, album.lp_album_id)
 
         if data is None:
             f = Gio.File.new_for_path(store_path)

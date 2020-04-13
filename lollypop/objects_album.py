@@ -110,7 +110,8 @@ class Album(Base):
                 "synced": 0,
                 "loved": False,
                 "storage_type": 0,
-                "mb_album_id": None}
+                "mb_album_id": None,
+                "lp_album_id": None}
 
     def __init__(self, album_id=None, genre_ids=[], artist_ids=[]):
         """
@@ -331,6 +332,7 @@ class Album(Base):
             @return CollectionItem
         """
         item = CollectionItem(album_id=self.id,
+                              album_name=self.name,
                               artist_ids=self.artist_ids)
         return item
 

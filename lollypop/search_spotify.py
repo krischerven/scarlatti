@@ -85,9 +85,10 @@ class SpotifySearch(SpotifyWebHelper, SaveWebHelper):
             @param cancellable as Gio.Cancellable
         """
         try:
+            spotify_id = album.uri.replace("sp:", "")
             token = App().ws_director.token_ws.get_token("SPOTIFY",
                                                          cancellable)
-            uri = "https://api.spotify.com/v1/albums/%s" % album.uri
+            uri = "https://api.spotify.com/v1/albums/%s" % spotify_id
             token = App().ws_director.token_ws.get_token("SPOTIFY",
                                                          cancellable)
             bearer = "Bearer %s" % token

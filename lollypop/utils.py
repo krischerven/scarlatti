@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 import unicodedata
 import cairo
 import time
+from hashlib import md5
 from threading import current_thread
 from functools import wraps
 
@@ -191,6 +192,29 @@ def init_proxy_from_gnome():
     except Exception as e:
         Logger.warning("set_proxy_from_gnome(): %s", e)
     return (None, None)
+
+
+def get_lollypop_album_id(name, artists, year):
+    """
+        Calculate Lollypop album id
+        @param name as str
+        @param artists as [str]
+        @param year as str
+    """
+    name = "%s_%s_%s" % (" ".join(artists), name, year)
+    return md5(name.encode("utf-8")).hexdigest()
+
+
+def get_lollypop_track_id(name, artists, year, album_name):
+    """
+        Calculate Lollypop track id
+        @param name as str
+        @param artists as [str]
+        @param year as str
+        @param album_name as str
+    """
+    name = "%s_%s_%s_%s" % (" ".join(artists), name, year, album_name)
+    return md5(name.encode("utf-8")).hexdigest()
 
 
 def debug(str):

@@ -113,6 +113,8 @@ def is_readonly(uri):
         Check if uri is readonly
     """
     try:
+        if not uri:
+            return True
         f = Gio.File.new_for_uri(uri)
         info = f.query_info("access::can-write",
                             Gio.FileQueryInfoFlags.NONE,
