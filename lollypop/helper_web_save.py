@@ -53,7 +53,6 @@ class SaveWebHelper(GObject.Object):
         """
         lp_track_id = get_lollypop_track_id(payload["name"],
                                             payload["artists"],
-                                            item.year,
                                             item.album_name)
         item.track_id = App().tracks.get_id_for_lp_track_id(lp_track_id)
         if item.track_id < 0:
@@ -71,11 +70,8 @@ class SaveWebHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
             @return CollectionItem/None
         """
-        (payload["timestamp"],
-         payload["year"]) = self.__get_date_from_payload(payload)
         lp_album_id = get_lollypop_album_id(payload["name"],
-                                            payload["artists"],
-                                            payload["timestamp"])
+                                            payload["artists"])
         album_id = App().albums.get_id_for_lp_album_id(lp_album_id)
         if album_id >= 0:
             album = Album(album_id)
@@ -181,9 +177,10 @@ class SaveWebHelper(GObject.Object):
         uri = payload["uri"]
         Logger.debug("SaveWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
+        (timestamp, year) = self.__get_date_from_payload(payload)
         item = CollectionItem(album_name=album_name,
-                              timestamp=payload["timestamp"],
-                              year=payload["year"])
+                              timestamp=timestamp,
+                              year=year)
         App().scanner.save_album(
                         item,
                         album_artists,

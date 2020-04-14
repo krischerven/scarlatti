@@ -58,7 +58,10 @@ class DeezerWebHelper:
         lollypop_payload["artists"] = payload["artist"]["name"]
         lollypop_payload["track-count"] = payload["nb_tracks"]
         lollypop_payload["artwork-uri"] = payload["cover_big"]
-        lollypop_payload["date"] = "%sT00:00:00" % payload["release_date"]
+        try:
+            lollypop_payload["date"] = "%sT00:00:00" % payload["release_date"]
+        except:
+            lollypop_payload["date"] = None
         return lollypop_payload
 
     def lollypop_track_payload(self, payload):

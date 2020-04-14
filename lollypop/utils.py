@@ -274,18 +274,17 @@ def escape(str, ignore=["_", "-", " ", "."]):
                     c.isdigit() or c in ignore]).rstrip()
 
 
-def get_lollypop_album_id(name, artists, year):
+def get_lollypop_album_id(name, artists):
     """
         Calculate Lollypop album id
         @param name as str
         @param artists as [str]
-        @param year as str
     """
-    name = "%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name), year)
+    name = "%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name))
     return md5(name.encode("utf-8")).hexdigest()
 
 
-def get_lollypop_track_id(name, artists, year, album_name):
+def get_lollypop_track_id(name, artists, album_name):
     """
         Calculate Lollypop track id
         @param name as str
@@ -293,8 +292,8 @@ def get_lollypop_track_id(name, artists, year, album_name):
         @param year as str
         @param album_name as str
     """
-    name = "%s_%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name),
-                            year, sql_escape(album_name))
+    name = "%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name),
+                         sql_escape(album_name))
     return md5(name.encode("utf-8")).hexdigest()
 
 

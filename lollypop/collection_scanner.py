@@ -171,11 +171,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 item.new_album_artist_ids.append(artist_id)
                 self.__pending_new_artist_ids.remove(artist_id)
 
-        if item.timestamp is None:
-            year = item.year
-        else:
-            year = item.timestamp
-        lp_album_id = get_lollypop_album_id(album_name, album_artists, year)
+        lp_album_id = get_lollypop_album_id(album_name, album_artists)
         Logger.debug("CollectionScanner::save_track(): Add album: "
                      "%s, %s" % (album_name, item.album_artist_ids))
         (item.new_album, item.album_id) = self.add_album(
@@ -239,8 +235,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         item.new_genre_ids = new_genre_ids
         item.genre_ids = genre_ids
 
-        lp_track_id = get_lollypop_track_id(name, artists, year,
-                                            item.album_name)
+        lp_track_id = get_lollypop_track_id(name, artists, item.album_name)
 
         # Add track to db
         Logger.debug("CollectionScanner::save_track(): Add track")
