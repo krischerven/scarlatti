@@ -19,7 +19,6 @@ from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_lastfm import LastFMWebHelper
 
 
-# Last.fm API is not useful to get albums
 class LastFMSimilars(LastFMWebHelper):
     """
         Search similar artists with Last.fm
@@ -93,7 +92,7 @@ class LastFMSimilars(LastFMWebHelper):
 #######################
     def __get_similar_artists(self, artist):
         """
-            Get artist biography
+            Get similar artists
             @param artist as str
             @return similars as [str]
         """

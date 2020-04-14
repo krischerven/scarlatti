@@ -15,6 +15,7 @@ from lollypop.utils import get_network_available
 from lollypop.similars_local import LocalSimilars
 from lollypop.similars_spotify import SpotifySimilars
 from lollypop.similars_lastfm import LastFMSimilars
+from lollypop.similars_deezer import DeezerSimilars
 
 
 class Similars():
@@ -28,6 +29,7 @@ class Similars():
         self.__local_helper = LocalSimilars()
         self.__spotify_helper = SpotifySimilars()
         self.__lastfm_helper = LastFMSimilars()
+        self.__deezer_helper = DeezerSimilars()
 
     def get_similar_artists(self, artist_ids, cancellable):
         """
@@ -41,8 +43,11 @@ class Similars():
         for artist_id in artist_ids:
             artist_names.append(App().artists.get_name(artist_id))
 
-        if get_network_available("SPOTIFY"):
-            result = self.__local_helper.get_similar_artists(
+        if get_network_available("DEEZER"):
+            result = self.__deezer_helper.get_similar_artists(
+                artist_names, cancellable)
+        if not result and get_network_available("SPOTIFY"):
+            result = self.__spotify_helper.get_similar_artists(
                 artist_names, cancellable)
         if not result and get_network_available("LASTFM"):
             result = self.__lastfm_helper.get_similar_artists(

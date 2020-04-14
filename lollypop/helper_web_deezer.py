@@ -27,6 +27,25 @@ class DeezerWebHelper:
         """
         pass
 
+    def get_artist_id(self, artist_name, cancellable):
+        """
+            Get artist id
+            @param artist_name as str
+            @param cancellable as Gio.Cancellable
+            @return {}
+        """
+        try:
+            uri = "https://api.deezer.com/search/artist?q=%s" % artist_name
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                for artist in decode["data"]:
+                    return artist["id"]
+        except Exception as e:
+            Logger.warning("DeezerWebHelper::get_artist_id(): %s", e)
+        return None
+
     def get_album_payload(self, album_id, cancellable):
         """
             Get album payload for id

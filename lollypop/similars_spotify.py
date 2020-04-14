@@ -138,8 +138,6 @@ class SpotifySimilars(SpotifyWebHelper):
             (status,
              data) = App().task_helper.load_uri_content_sync_with_headers(
                     uri, headers, cancellable)
-            if cancellable.is_cancelled():
-                raise Exception("cancelled")
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]:
