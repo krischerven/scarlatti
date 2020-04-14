@@ -169,25 +169,19 @@ class SaveWebHelper(GObject.Object):
             @param storage_type as StorageType
             @return CollectionItem
         """
-        album_artists = payload["artists"]
-        album_name = payload["name"]
-        mtime = int(time())
-        track_count = payload["track-count"]
-        mb_album_id = payload["mbid"]
-        uri = payload["uri"]
-        Logger.debug("SaveWebHelper::save_album(): %s - %s",
-                     album_artists, album_name)
         (timestamp, year) = self.__get_date_from_payload(payload)
-        item = CollectionItem(album_name=album_name,
+        item = CollectionItem(uri=payload["uri"],
+                              album_artists=payload["artists"],
+                              album_name=payload["name"],
+                              album_mtime=int(time()),
+                              year=year,
                               timestamp=timestamp,
-                              year=year)
-        App().scanner.save_album(
-                        item,
-                        album_artists,
-                        "", "", album_name,
-                        mb_album_id, uri, 0, 0, 0,
-                        # HACK: Keep total tracks in sync int field
-                        track_count, mtime, storage_type)
+                              mb_album_id=payload["mbid"],
+                              tracknumber=payload["track-count"],
+                              storage_type=storage_type)
+        Logger.debug("SaveWebHelper::save_album(): %s - %s",
+                     item.album_artists, item.album_name)
+        App().scanner.save_album(item)
         App().albums.add_genre(item.album_id, Type.WEB)
         return item
 
@@ -198,19 +192,15 @@ class SaveWebHelper(GObject.Object):
             @param storage_type as StorageType
             @return track_id as int
         """
-        title = payload["name"]
-        artists = payload["artists"]
+        item.track_name = payload["name"]
+        item.artists = payload["artists"]
         Logger.debug("SaveWebHelper::save_track(): %s - %s",
-                     artists, title)
-        discnumber = int(payload["discnumber"])
-        discname = ""
-        tracknumber = int(payload["tracknumber"])
-        duration = payload["duration"]
-        mtime = int(time())
-        uri = payload["uri"]
-        mb_track_id = payload["mbid"]
-        App().scanner.save_track(
-                   item, None, artists, "", "",
-                   uri, title, duration, tracknumber, discnumber,
-                   discname, item.year, item.timestamp, mtime, 0, 0, 0, 0,
-                   mb_track_id, 0, storage_type)
+                     item.artists, item.track_name)
+        item.discnumber = int(payload["discnumber"])
+        item.tracknumber = int(payload["tracknumber"])
+        item.duration = payload["duration"]
+        item.track_mtime = int(time())
+        item.uri = payload["uri"]
+        item.mb_track_id = payload["mbid"]
+        item.storage_type = storage_type
+        App().scanner.save_track(item)

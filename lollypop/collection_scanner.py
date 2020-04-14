@@ -102,16 +102,101 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Launch scan in a separate thread
             self.__thread = App().task_helper.run(self.__scan, scan_type, uris)
 
-    def update_album(self, item, genre_ids, year, timestamp):
+    def save_album(self, item,):
+        """
+            Add album to DB
+            @param item as CollectionItem
+        """
+        Logger.debug("CollectionScanner::save_album(): "
+                     "Add album artists %s" % item.album_artists)
+        (item.new_album_artist_ids,
+         item.album_artist_ids) = self.add_artists(item.album_artists,
+                                                   item.aa_sortnames,
+                                                   item.mb_album_artist_id)
+        # We handle artists already created by any previous save_track()
+        for artist_id in item.album_artist_ids:
+            if artist_id in self.__pending_new_artist_ids:
+                item.new_album_artist_ids.append(artist_id)
+                self.__pending_new_artist_ids.remove(artist_id)
+
+        item.lp_album_id = get_lollypop_album_id(item.album_name,
+                                                 item.album_artists)
+        Logger.debug("CollectionScanner::save_track(): Add album: "
+                     "%s, %s" % (item.album_name, item.album_artist_ids))
+        (item.new_album, item.album_id) = self.add_album(
+                                               item.album_name,
+                                               item.mb_album_id,
+                                               item.lp_album_id,
+                                               item.album_artist_ids,
+                                               item.uri,
+                                               item.album_loved,
+                                               item.album_pop,
+                                               item.album_rate,
+                                               item.album_synced,
+                                               item.album_mtime,
+                                               item.storage_type)
+
+    def save_track(self, item):
+        """
+            Add track to DB
+            @param item as CollectionItem
+        """
+        Logger.debug(
+            "CollectionScanner::save_track(): Add artists %s" % item.artists)
+        (item.new_artist_ids,
+         item.artist_ids) = self.add_artists(item.artists,
+                                             item.a_sortnames,
+                                             item.mb_artist_id)
+
+        self.__pending_new_artist_ids += item.new_artist_ids
+        missing_artist_ids = list(
+            set(item.album_artist_ids) - set(item.artist_ids))
+        # Special case for broken tags
+        # If all artist album tags are missing
+        # Can't do more because don't want to break split album behaviour
+        if len(missing_artist_ids) == len(item.album_artist_ids):
+            item.artist_ids += missing_artist_ids
+
+        if item.genres is None:
+            (item.new_genre_ids, item.genre_ids) = ([], [Type.WEB])
+        else:
+            (item.new_genre_ids, item.genre_ids) = self.add_genres(item.genres)
+
+        item.lp_track_id = get_lollypop_track_id(item.track_name,
+                                                 item.artists,
+                                                 item.album_name)
+
+        # Add track to db
+        Logger.debug("CollectionScanner::save_track(): Add track")
+        item.track_id = App().tracks.add(item.track_name,
+                                         item.uri,
+                                         item.duration,
+                                         item.tracknumber,
+                                         item.discnumber,
+                                         item.discname,
+                                         item.album_id,
+                                         item.year,
+                                         item.timestamp,
+                                         item.track_pop,
+                                         item.track_rate,
+                                         item.track_loved,
+                                         item.track_ltime,
+                                         item.track_mtime,
+                                         item.mb_track_id,
+                                         item.lp_track_id,
+                                         item.bpm,
+                                         item.storage_type)
+        Logger.debug("CollectionScanner::save_track(): Update track")
+        self.update_track(item)
+        Logger.debug("CollectionScanner::save_track(): Update album")
+        self.update_album(item)
+
+    def update_album(self, item):
         """
             Update album artists based on album-artist and artist tags
             This code auto handle compilations: empty "album artist" with
             different artists
             @param item as CollectionItem
-            @param genre_ids as [int]
-            @param year as int
-            @param timestamp as int
-            @commit needed
         """
         if item.album_artist_ids:
             App().albums.set_artist_ids(item.album_id, item.album_artist_ids)
@@ -126,8 +211,14 @@ class CollectionScanner(GObject.GObject, TagReader):
                 if artist_id in self.__pending_new_artist_ids:
                     item.new_album_artist_ids.append(artist_id)
                     self.__pending_new_artist_ids.remove(artist_id)
+        # Update lp_album_id
+        lp_album_id = get_lollypop_album_id(item.album_name,
+                                            item.album_artists)
+        if lp_album_id != item.lp_album_id:
+            print("mise à jour")
+            App().albums.set_lp_album_id(item.album_id, lp_album_id)
         # Update album genres
-        for genre_id in genre_ids:
+        for genre_id in item.genre_ids:
             App().albums.add_genre(item.album_id, genre_id)
         # Update year based on tracks
         year = App().tracks.get_year_for_album(item.album_id)
@@ -135,135 +226,16 @@ class CollectionScanner(GObject.GObject, TagReader):
         timestamp = App().tracks.get_timestamp_for_album(item.album_id)
         App().albums.set_timestamp(item.album_id, timestamp)
 
-    def save_album(self, item, album_artists, aa_sortnames, mb_album_artist_id,
-                   album_name, mb_album_id, uri, album_loved, album_pop,
-                   album_rate, album_synced, album_mtime, storage_type):
-        """
-            Add album to DB
-            @param item as CollectionItem
-            @param artists as str
-            @param a_sortnames as str
-            @param mb_artist_id as str
-            @param album_artists as str
-            @param aa_sortnames as str
-            @param mb_album_artist_id as str
-            @param album_name as str
-            @param mb_album_id as str
-            @param uri as str
-            @param album_loved as int
-            @param album_pop as int
-            @param album_rate as int
-            @param album_synced as int
-            @param album_mtime as int
-            @param storage_type as int
-            @return (True, int)
-        """
-        Logger.debug("CollectionScanner::save_album(): "
-                     "Add album artists %s" % album_artists)
-        (item.new_album_artist_ids,
-         item.album_artist_ids) = self.add_artists(album_artists,
-                                                   aa_sortnames,
-                                                   mb_album_artist_id)
-
-        # We handle artists already created by any previous save_track()
-        for artist_id in item.album_artist_ids:
-            if artist_id in self.__pending_new_artist_ids:
-                item.new_album_artist_ids.append(artist_id)
-                self.__pending_new_artist_ids.remove(artist_id)
-
-        lp_album_id = get_lollypop_album_id(album_name, album_artists)
-        Logger.debug("CollectionScanner::save_track(): Add album: "
-                     "%s, %s" % (album_name, item.album_artist_ids))
-        (item.new_album, item.album_id) = self.add_album(
-                                               album_name, mb_album_id,
-                                               lp_album_id,
-                                               item.album_artist_ids,
-                                               uri, album_loved, album_pop,
-                                               album_rate, album_synced,
-                                               album_mtime, storage_type)
-
-    def save_track(self, item, genres, artists, a_sortnames, mb_artist_id, uri,
-                   name, duration, tracknumber, discnumber, discname,
-                   year, timestamp, track_mtime, track_pop, track_rate,
-                   track_loved, track_ltime, mb_track_id, bpm, storage_type):
-        """
-            Add track to DB
-            @param item as CollectionItem
-            @param genres as str/None
-            @param artists as str
-            @param a_sortnames as str
-            @param mb_artist_id as str
-            @param uri as str
-            @param name as str
-            @param duration as int
-            @param tracknumber as int
-            @param discnumber as int
-            @param discname as str
-            @param year as int
-            @param timestamp as int
-            @param track_mtime as int
-            @param track_pop as int
-            @param track_rate as int
-            @param track_loved as int
-            @param track_ltime as int
-            @param mb_track_id as str
-            @param bpm as int
-            @param album_id as int
-            @param storage_type as int
-        """
-        Logger.debug(
-            "CollectionScanner::save_track(): Add artists %s" % artists)
-        (new_artist_ids,
-         artist_ids) = self.add_artists(artists, a_sortnames, mb_artist_id)
-
-        self.__pending_new_artist_ids += new_artist_ids
-        item.new_artist_ids = new_artist_ids
-        item.artist_ids = artist_ids
-        missing_artist_ids = list(set(item.album_artist_ids) - set(artist_ids))
-        # Special case for broken tags
-        # If all artist album tags are missing
-        # Can't do more because don't want to break split album behaviour
-        if len(missing_artist_ids) == len(item.album_artist_ids):
-            artist_ids += missing_artist_ids
-
-        if genres is None:
-            new_genre_ids = []
-            genre_ids = [Type.WEB]
-        else:
-            (new_genre_ids, genre_ids) = self.add_genres(genres)
-
-        item.new_genre_ids = new_genre_ids
-        item.genre_ids = genre_ids
-
-        lp_track_id = get_lollypop_track_id(name, artists, item.album_name)
-
-        # Add track to db
-        Logger.debug("CollectionScanner::save_track(): Add track")
-        track_id = App().tracks.add(name, uri, duration,
-                                    tracknumber, discnumber, discname,
-                                    item.album_id, year, timestamp, track_pop,
-                                    track_rate, track_loved, track_ltime,
-                                    track_mtime, mb_track_id, lp_track_id, bpm,
-                                    storage_type)
-        item.track_id = track_id
-        Logger.debug("CollectionScanner::save_track(): Update track")
-        self.update_track(track_id, artist_ids, genre_ids)
-        Logger.debug("CollectionScanner::save_track(): Update album")
-        self.update_album(item, genre_ids, year, timestamp)
-
-    def update_track(self, track_id, artist_ids, genre_ids):
+    def update_track(self, item):
         """
             Set track artists/genres
-            @param track_id as int
-            @param artist_ids as [int]
-            @param genre_ids as [int]
-            @commit needed
+            @param item as CollectionItem
         """
         # Set artists/genres for track
-        for artist_id in artist_ids:
-            App().tracks.add_artist(track_id, artist_id)
-        for genre_id in genre_ids:
-            App().tracks.add_genre(track_id, genre_id)
+        for artist_id in item.artist_ids:
+            App().tracks.add_artist(item.track_id, artist_id)
+        for genre_id in item.genre_ids:
+            App().tracks.add_genre(item.track_id, genre_id)
 
     def del_from_db(self, uri, backup):
         """
@@ -725,7 +697,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 mb_album_artist_id, tracknumber, track_pop, track_rate, bpm,
                 track_mtime, track_ltime, track_loved, duration)
 
-    def __add2db(self, uri, title, artists,
+    def __add2db(self, uri, name, artists,
                  genres, a_sortnames, aa_sortnames, album_artists, album_name,
                  discname, album_loved, album_mtime, album_synced, album_rate,
                  album_pop, discnumber, year, timestamp, mb_album_id,
@@ -740,17 +712,36 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param storage_type as StorageType
             @return CollectionItem
         """
-        item = CollectionItem(album_name=album_name,
+        item = CollectionItem(uri=uri,
+                              track_name=name,
+                              artists=artists,
+                              genres=genres,
+                              a_sortnames=a_sortnames,
+                              aa_sortnames=aa_sortnames,
+                              album_artists=album_artists,
+                              album_name=album_name,
+                              discname=discname,
+                              album_loved=album_loved,
+                              album_mtime=album_mtime,
+                              album_synced=album_synced,
+                              album_rate=album_rate,
+                              album_pop=album_pop,
+                              discnumber=discnumber,
                               year=year,
-                              timestamp=timestamp)
-        self.save_album(item,
-                        album_artists, aa_sortnames, mb_album_artist_id,
-                        album_name, mb_album_id, uri, album_loved, album_pop,
-                        album_rate, album_synced, album_mtime, storage_type)
-        self.save_track(item,
-                        genres, artists, a_sortnames, mb_artist_id,
-                        uri, title, duration, tracknumber, discnumber,
-                        discname, year, timestamp, track_mtime, track_pop,
-                        track_rate, track_loved, track_ltime, mb_track_id,
-                        bpm, storage_type)
+                              timestamp=timestamp,
+                              mb_album_id=mb_album_id,
+                              mb_track_id=mb_track_id,
+                              mb_artist_id=mb_artist_id,
+                              mb_album_artist_id=mb_album_artist_id,
+                              tracknumber=tracknumber,
+                              track_pop=track_pop,
+                              track_rate=track_rate,
+                              bpm=bpm,
+                              track_mtime=track_mtime,
+                              track_ltime=track_ltime,
+                              track_loved=track_loved,
+                              duration=duration,
+                              storage_type=storage_type)
+        self.save_album(item)
+        self.save_track(item)
         return item

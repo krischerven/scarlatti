@@ -631,12 +631,12 @@ class TagReader:
         lyrics = get_id3()
         return lyrics
 
-    def add_artists(self, artists, sortnames, mb_artist_ids=""):
+    def add_artists(self, artists, sortnames, mb_artist_id=""):
         """
             Add artists to db
-            @param artists as [string]
-            @param sortnames as [string]
-            @param mb_artist_ids as [string]
+            @param artists as str
+            @param sortnames as str
+            @param mb_artist_id as str
             @return ([int], [int]): (added artist ids, artist ids)
         """
         artist_ids = []
@@ -644,7 +644,7 @@ class TagReader:
         artistsplit = artists.split(";")
         sortsplit = sortnames.split(";")
         sortlen = len(sortsplit)
-        mbidsplit = mb_artist_ids.split(";")
+        mbidsplit = mb_artist_id.split(";")
         mbidlen = len(mbidsplit)
         if len(artistsplit) != mbidlen:
             mbidsplit = []

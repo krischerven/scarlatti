@@ -132,6 +132,16 @@ class AlbumsDatabase:
             sql.execute("UPDATE albums SET mtime=? WHERE rowid=?",
                         (mtime, album_id))
 
+    def set_lp_album_id(self, album_id, lp_album_id):
+        """
+            Set lp album id
+            @param album_id as int
+            @param lp_album_id as int
+        """
+        with SqlCursor(self.__db, True) as sql:
+            sql.execute("UPDATE albums SET lp_album_id=? WHERE rowid=?",
+                        (lp_album_id, album_id))
+
     def set_loved(self, album_id, loved):
         """
             Set album loved

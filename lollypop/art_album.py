@@ -86,10 +86,10 @@ class AlbumArt:
             else:
                 store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
                 uris = [
+                    # Default favorite artwork
+                    "%s/%s" % (album.uri, self.__favorite),
                     # Used when album.uri is readonly or for Web
                     GLib.filename_to_uri(store_path),
-                    # Default favorite artwork
-                    "%s/%s.jpg" % (album.uri, self.__favorite),
                     # Used when having muliple albums in same folder
                     "%s/%s.jpg" % (album.uri, album.lp_album_id)
                 ]
