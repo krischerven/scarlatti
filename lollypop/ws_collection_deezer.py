@@ -44,6 +44,8 @@ class DeezerCollectionWebService(DeezerWebHelper):
                 for album in decode["data"]:
                     album_ids.append(album["id"])
             for album_id in album_ids:
+                if cancellable.is_cancelled():
+                    raise Exception("Cancelled")
                 payload = DeezerWebHelper.get_album_payload(
                     self, album_id, cancellable)
                 if payload is None:

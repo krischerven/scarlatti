@@ -71,9 +71,11 @@ class SaveWebHelper(GObject.Object):
             @param cancellable as Gio.Cancellable
             @return CollectionItem/None
         """
+        (payload["timestamp"],
+         payload["year"]) = self.__get_date_from_payload(payload)
         lp_album_id = get_lollypop_album_id(payload["name"],
                                             payload["artists"],
-                                            payload["date"])
+                                            payload["timestamp"])
         album_id = App().albums.get_id_for_lp_album_id(lp_album_id)
         if album_id >= 0:
             album = Album(album_id)
@@ -101,9 +103,9 @@ class SaveWebHelper(GObject.Object):
         """
         if not cover_uri:
             return
+        if cancellable.is_cancelled():
+            raise Exception("Cancelled")
         try:
-            if cancellable.is_cancelled():
-                return
             if isinstance(obj, Album):
                 album = obj
             else:
@@ -127,6 +129,21 @@ class SaveWebHelper(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
+    def __get_date_from_payload(self, payload):
+        """
+            Get date from payload
+            @param payload as {}
+            @param return (int, int)
+        """
+        try:
+            release_date = payload["date"]
+            dt = GLib.DateTime.new_from_iso8601(release_date,
+                                                GLib.TimeZone.new_local())
+            return (dt.to_unix(), dt.get_year())
+        except:
+            pass
+        return (None, None)
+
     def __get_cover_art_uri(self, mbid, cancellable):
         """
             Get cover art URI for mbid
@@ -157,7 +174,6 @@ class SaveWebHelper(GObject.Object):
             @return CollectionItem
         """
         album_artists = payload["artists"]
-        album_artists = ";".join(album_artists)
         album_name = payload["name"]
         mtime = int(time())
         track_count = payload["track-count"]
@@ -165,7 +181,9 @@ class SaveWebHelper(GObject.Object):
         uri = payload["uri"]
         Logger.debug("SaveWebHelper::save_album(): %s - %s",
                      album_artists, album_name)
-        item = CollectionItem(album_name=album_name)
+        item = CollectionItem(album_name=album_name,
+                              timestamp=payload["timestamp"],
+                              year=payload["year"])
         App().scanner.save_album(
                         item,
                         album_artists,
@@ -174,14 +192,6 @@ class SaveWebHelper(GObject.Object):
                         # HACK: Keep total tracks in sync int field
                         track_count, mtime, storage_type)
         App().albums.add_genre(item.album_id, Type.WEB)
-        try:
-            release_date = payload["date"]
-            dt = GLib.DateTime.new_from_iso8601(release_date,
-                                                GLib.TimeZone.new_local())
-            item.timestamp = dt.to_unix()
-            item.year = dt.get_year()
-        except:
-            pass
         return item
 
     def __save_track(self, payload, item, storage_type):
@@ -192,13 +202,9 @@ class SaveWebHelper(GObject.Object):
             @return track_id as int
         """
         title = payload["name"]
-        _artists = []
-        for artist in payload["artists"]:
-            _artists.append(artist)
+        artists = payload["artists"]
         Logger.debug("SaveWebHelper::save_track(): %s - %s",
-                     _artists, title)
-        # Translate to tag value
-        artists = ";".join(_artists)
+                     artists, title)
         discnumber = int(payload["discnumber"])
         discname = ""
         tracknumber = int(payload["tracknumber"])

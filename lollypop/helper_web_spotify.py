@@ -118,11 +118,12 @@ class SpotifyWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["uri"] = "sp:%s" % payload["id"]
         lollypop_payload["name"] = payload["name"]
-        lollypop_payload["artists"] = []
+        artists = []
         for artist in payload["artists"]:
-            lollypop_payload["artists"].append(artist["name"])
+            artists.append(artist["name"])
+        lollypop_payload["artists"] = ";".join(artists)
         lollypop_payload["track-count"] = payload["total_tracks"]
-        lollypop_payload["date"] = payload["release_date"]
+        lollypop_payload["date"] = "%sT00:00:00" % payload["release_date"]
         lollypop_payload["artwork-uri"] = payload["images"][0]["url"]
         return lollypop_payload
 
@@ -136,9 +137,10 @@ class SpotifyWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["uri"] = "sp:%s" % payload["id"]
         lollypop_payload["name"] = payload["name"]
-        lollypop_payload["artists"] = []
+        artists = []
         for artist in payload["artists"]:
-            lollypop_payload["artists"].append(artist["name"])
+            artists.append(artist["name"])
+        lollypop_payload["artists"] = ";".join(artists)
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = payload["track_number"]
         lollypop_payload["duration"] = payload["duration_ms"]

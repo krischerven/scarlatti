@@ -54,6 +54,8 @@ class SpotifyCollectionWebService(SpotifyWebHelper):
                                                                   cancellable)
                 shuffle(albums_payload)
                 for album in albums_payload:
+                    if cancellable.is_cancelled():
+                        raise Exception("Cancelled")
                     lollypop_payload = SpotifyWebHelper.lollypop_album_payload(
                         self, album)
                     self.save_album_payload_to_db(
@@ -88,6 +90,8 @@ class SpotifyCollectionWebService(SpotifyWebHelper):
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     for album in decode["albums"]["items"]:
+                        if cancellable.is_cancelled():
+                            raise Exception("Cancelled")
                         lollypop_payload =\
                             SpotifyWebHelper.lollypop_album_payload(
                                 self, album)

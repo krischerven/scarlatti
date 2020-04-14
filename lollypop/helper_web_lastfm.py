@@ -154,7 +154,7 @@ class LastFMWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["name"]
         lollypop_payload["uri"] = ""
-        lollypop_payload["artists"] = [payload["artist"]]
+        lollypop_payload["artists"] = payload["artist"]
         lollypop_payload["track-count"] = len(payload["tracks"])
         lollypop_payload["date"] = None
         try:
@@ -164,7 +164,7 @@ class LastFMWebHelper:
         lollypop_payload["artwork-uri"] = artwork_uri
         return lollypop_payload
 
-    def lollypop_track_payload(self, track, tracknumber):
+    def lollypop_track_payload(self, payload, tracknumber):
         """
             Convert payload to Lollypop one
             @param payload as {}
@@ -173,12 +173,12 @@ class LastFMWebHelper:
         """
         lollypop_payload = {}
         lollypop_payload["mbid"] = None
-        lollypop_payload["name"] = track["name"]
+        lollypop_payload["name"] = payload["name"]
         lollypop_payload["uri"] = ""
-        lollypop_payload["artists"] = [track["artist"]["name"]]
+        lollypop_payload["artists"] = payload["artist"]["name"]
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = tracknumber
-        lollypop_payload["duration"] = track["duration"]
+        lollypop_payload["duration"] = payload["duration"]
         return lollypop_payload
 
 #######################

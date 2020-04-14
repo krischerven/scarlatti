@@ -57,9 +57,10 @@ class MusicBrainzWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "mb:%s" % payload["id"]
-        lollypop_payload["artists"] = []
+        artists = []
         for artist in payload["artist-credit"]:
-            lollypop_payload["artists"].append(artist["name"])
+            artists.append(artist["name"])
+        lollypop_payload["artists"] = ";".join(artists)
         lollypop_payload["track-count"] = payload["media"][0]["track-count"]
         lollypop_payload["artwork-uri"] = payload["id"]
         lollypop_payload["date"] = None
@@ -75,9 +76,10 @@ class MusicBrainzWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "mb:%s" % payload["id"]
-        lollypop_payload["artists"] = []
+        artists = []
         for artist in payload["artist-credit"]:
-            lollypop_payload["artists"].append(artist["name"])
+            artists.append(artist["name"])
+        lollypop_payload["artists"] = ";".join(artists)
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = payload["position"]
         lollypop_payload["duration"] = payload["length"]

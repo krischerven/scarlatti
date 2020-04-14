@@ -55,10 +55,10 @@ class DeezerWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "dz:%s" % payload["id"]
-        lollypop_payload["artists"] = [payload["artist"]["name"]]
+        lollypop_payload["artists"] = payload["artist"]["name"]
         lollypop_payload["track-count"] = payload["nb_tracks"]
         lollypop_payload["artwork-uri"] = payload["cover_big"]
-        lollypop_payload["date"] = payload["release_date"]
+        lollypop_payload["date"] = "%sT00:00:00" % payload["release_date"]
         return lollypop_payload
 
     def lollypop_track_payload(self, payload):
@@ -71,7 +71,7 @@ class DeezerWebHelper:
         lollypop_payload["mbid"] = None
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "dz:%s" % payload["id"]
-        lollypop_payload["artists"] = [payload["artist"]["name"]]
+        lollypop_payload["artists"] = payload["artist"]["name"]
         lollypop_payload["discnumber"] = payload["disk_number"]
         lollypop_payload["tracknumber"] = payload["track_position"]
         lollypop_payload["duration"] = payload["duration"] * 1000
