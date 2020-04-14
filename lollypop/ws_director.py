@@ -35,20 +35,21 @@ class DirectorWebService:
         self.__spotify_timeout_id = None
         App().settings.connect("changed::network-access-acl",
                                self.__on_network_access_acl_changed)
-        self.__on_network_access_acl_changed()
 
     def start(self):
         """
             Start all web services
         """
-        if self.__lastfm_ws is not None:
-            self.__lastfm_ws.start()
-        if self.__librefm_ws is not None:
-            self.__librefm_ws.start()
-        if self.__listenbrainz_ws is not None:
-            self.__listenbrainz_ws.start()
-        if self.__collection_ws is not None:
-            self.__collection_ws.start()
+        monitor = Gio.NetworkMonitor.get_default()
+        if monitor.get_network_metered() or\
+                not App().settings.get_value("network-access"):
+            network_acl = 0
+        else:
+            network_acl = App().settings.get_value(
+                "network-access-acl").get_int32()
+        self.__handle_collection(network_acl)
+        self.__handle_lastfm(network_acl)
+        self.__handle_listenbrainz(network_acl)
 
     def stop(self):
         """
@@ -102,9 +103,9 @@ class DirectorWebService:
 #######################
 # PRIVATE             #
 #######################
-    def __handle_spotify(self, acl):
+    def __handle_collection(self, acl):
         """
-            Start/stop Spotify based on acl
+            Start/stop collection based on acl
             @param acl as int
         """
         show_album_lists = App().settings.get_value("shown-album-lists")
@@ -136,6 +137,7 @@ class DirectorWebService:
         if start and self.__lastfm_ws is None:
             from lollypop.ws_lastfm import LastFMWebService
             self.__lastfm_ws = LastFMWebService("LASTFM")
+            self.__lastfm_ws.start()
             Logger.info("Last.fm web service started")
         elif not start and self.__lastfm_ws is not None:
             self.__lastfm_ws = None
@@ -144,6 +146,7 @@ class DirectorWebService:
         if start and self.__librefm_ws is None:
             from lollypop.ws_lastfm import LastFMWebService
             self.__librefm_ws = LastFMWebService("LIBREFM")
+            self.__librefm_ws.start()
             Logger.info("Libre.fm web service started")
         elif not start and self.__librefm_ws is not None:
             self.__librefm_ws = None
@@ -158,6 +161,7 @@ class DirectorWebService:
         if start and self.__listenbrainz_ws is None:
             from lollypop.ws_listenbrainz import ListenBrainzWebService
             self.__listenbrainz_ws = ListenBrainzWebService()
+            self.__listenbrainz_ws.start()
             App().settings.bind("listenbrainz-user-token",
                                 self.__listenbrainz_ws,
                                 "user_token", 0)
@@ -172,13 +176,4 @@ class DirectorWebService:
         """
             Update available webservices
         """
-        monitor = Gio.NetworkMonitor.get_default()
-        if monitor.get_network_metered() or\
-                not App().settings.get_value("network-access"):
-            network_acl = 0
-        else:
-            network_acl = App().settings.get_value(
-                "network-access-acl").get_int32()
-        self.__handle_spotify(network_acl)
-        self.__handle_lastfm(network_acl)
-        self.__handle_listenbrainz(network_acl)
+        self.start()

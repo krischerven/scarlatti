@@ -87,7 +87,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         if self.is_locked() and scan_type != ScanType.EXTERNAL:
             self.stop()
             GLib.timeout_add(250, self.update, scan_type, uris)
-        elif not App().ws_director.stop():
+        elif App().ws_director.collection_ws is not None and\
+                not App().ws_director.collection_ws.stop():
             GLib.timeout_add(250, self.update, scan_type, uris)
         else:
             if scan_type == ScanType.FULL:
@@ -341,7 +342,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         App().albums.update_max_count()
         # Update featuring
         App().artists.update_featuring()
-        App().ws_director.start()
+        if App().ws_director.collection_ws is not None:
+            App().ws_director.collection_ws.start()
 
     def __add_monitor(self, dirs):
         """

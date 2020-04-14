@@ -182,6 +182,7 @@ class Application(Gtk.Application, ApplicationActions):
         self.art = Art()
         self.art.update_art_size()
         self.ws_director = DirectorWebService()
+        self.ws_director.start()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
             MPRIS(self)
