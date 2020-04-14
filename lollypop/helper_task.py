@@ -96,7 +96,8 @@ class TaskHelper:
                                self.__on_load_uri_content, msg, headers,
                                callback, cancellable, uri, *args)
         except Exception as e:
-            Logger.error("HelperTask::load_uri_content_with_headers(): %s" % e)
+            Logger.warning(
+                "HelperTask::load_uri_content_with_headers(): %s" % e)
             callback(uri, False, b"", *args)
 
     def load_uri_content_sync(self, uri, cancellable=None):
@@ -153,7 +154,7 @@ class TaskHelper:
                 else:
                     del self.__retries[uri]
         except Exception as e:
-            Logger.error(
+            Logger.warning(
                 "TaskHelper::load_uri_content_sync_with_headers(): %s" % e)
             return (False, b"")
 
@@ -185,7 +186,7 @@ class TaskHelper:
                                uri,
                                *args)
         except Exception as e:
-            Logger.error("TaskHelper::send_message(): %s" % e)
+            Logger.warning("TaskHelper::send_message(): %s" % e)
 
     def send_message_sync(self, message, cancellable):
         """
@@ -223,7 +224,7 @@ class TaskHelper:
                 else:
                     del self.__retries[uri]
         except Exception as e:
-            Logger.error("TaskHelper::send_message_sync(): %s" % e)
+            Logger.warning("TaskHelper::send_message_sync(): %s" % e)
         return None
 
 #######################
@@ -303,8 +304,8 @@ class TaskHelper:
                 if callback is not None:
                     GLib.idle_add(callback, result, *callback_args)
         except Exception as e:
-            Logger.error("TaskHelper::__run(): %s: %s -> %s"
-                         % (e, command, kwd))
+            Logger.warning("TaskHelper::__run(): %s: %s -> %s" %
+                           (e, command, kwd))
 
     def __on_read_bytes_async(self, stream, result, content,
                               cancellable, callback, uri, *args):
@@ -330,7 +331,7 @@ class TaskHelper:
             else:
                 callback(uri, True, bytes(content), *args)
         except Exception as e:
-            Logger.error("TaskHelper::__on_read_bytes_async(): %s" % e)
+            Logger.warning("TaskHelper::__on_read_bytes_async(): %s" % e)
             callback(uri, False, b"", *args)
 
     def __on_request_send_async(self, source, result, callback,
@@ -351,7 +352,7 @@ class TaskHelper:
                                     bytearray(0), cancellable, callback, uri,
                                     *args)
         except Exception as e:
-            Logger.error("TaskHelper::__on_soup_msg_finished(): %s" % e)
+            Logger.warning("TaskHelper::__on_soup_msg_finished(): %s" % e)
             callback(uri, False, b"", *args)
 
     def __on_message_send_async(self, source, result, message, callback,
@@ -386,7 +387,7 @@ class TaskHelper:
                 else:
                     del self.__retries[uri]
         except Exception as e:
-            Logger.error("TaskHelper::__on_soup_msg_finished(): %s" % e)
+            Logger.warning("TaskHelper::__on_soup_msg_finished(): %s" % e)
             callback(uri, False, b"", *args)
 
     def __on_load_uri_content(self, source, result, msg, headers, callback,
@@ -423,5 +424,5 @@ class TaskHelper:
                 else:
                     del self.__retries[uri]
         except Exception as e:
-            Logger.error("TaskHelper::__on_soup_msg_finished(): %s" % e)
+            Logger.warning("TaskHelper::__on_soup_msg_finished(): %s" % e)
             callback(uri, False, b"", *args)
