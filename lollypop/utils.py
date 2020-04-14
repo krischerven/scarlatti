@@ -194,29 +194,6 @@ def init_proxy_from_gnome():
     return (None, None)
 
 
-def get_lollypop_album_id(name, artists, year):
-    """
-        Calculate Lollypop album id
-        @param name as str
-        @param artists as [str]
-        @param year as str
-    """
-    name = "%s_%s_%s" % (" ".join(artists), name, year)
-    return md5(name.encode("utf-8")).hexdigest()
-
-
-def get_lollypop_track_id(name, artists, year, album_name):
-    """
-        Calculate Lollypop track id
-        @param name as str
-        @param artists as [str]
-        @param year as str
-        @param album_name as str
-    """
-    name = "%s_%s_%s_%s" % (" ".join(artists), name, year, album_name)
-    return md5(name.encode("utf-8")).hexdigest()
-
-
 def debug(str):
     """
         Print debug
@@ -295,6 +272,30 @@ def escape(str, ignore=["_", "-", " ", "."]):
     return "".join([c for c in str if
                     c.isalpha() or
                     c.isdigit() or c in ignore]).rstrip()
+
+
+def get_lollypop_album_id(name, artists, year):
+    """
+        Calculate Lollypop album id
+        @param name as str
+        @param artists as [str]
+        @param year as str
+    """
+    name = "%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name), year)
+    return md5(name.encode("utf-8")).hexdigest()
+
+
+def get_lollypop_track_id(name, artists, year, album_name):
+    """
+        Calculate Lollypop track id
+        @param name as str
+        @param artists as [str]
+        @param year as str
+        @param album_name as str
+    """
+    name = "%s_%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name),
+                            year, sql_escape(album_name))
+    return md5(name.encode("utf-8")).hexdigest()
 
 
 def is_unity():
