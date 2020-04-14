@@ -44,6 +44,21 @@ class PlaybackMenu(Gio.Menu):
 #######################
 # PROTECTED           #
 #######################
+    def _set_radio_action(self, artist_ids):
+        """
+            Set radio action
+            @param artist_ids as [int]
+        """
+        radio_action = Gio.SimpleAction(name="radio_action_collection")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        menu_item = Gio.MenuItem.new(_("Play a radio"),
+                                     "app.radio_action_collection")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
     def _set_playback_actions(self):
         """
             Setup playback actions
@@ -65,6 +80,18 @@ class PlaybackMenu(Gio.Menu):
                                          "app.del_playback_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_radio_action_activate(self, action, variant, artist_ids):
+        """
+            Play a radio from storage type
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param artist_ids as [int]
+        """
+        App().player.play_radio_from_collection(artist_ids)
 
 
 class RadioPlaybackMenu(Gio.Menu):
@@ -205,8 +232,13 @@ class ArtistPlaybackMenu(PlaybackMenu):
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         self._set_playback_actions()
-        submenu = RadioPlaybackMenu([artist_id])
-        self.append_submenu(_("Play a radio"), submenu)
+        if get_network_available("SPOTIFY") or\
+                get_network_available("LASTFM") or\
+                get_network_available("DEEZER"):
+            submenu = RadioPlaybackMenu([artist_id])
+            self.append_submenu(_("Play a radio"), submenu)
+        else:
+            self._set_radio_action([artist_id])
 
     @property
     def in_player(self):
@@ -430,8 +462,13 @@ class AlbumPlaybackMenu(PlaybackMenu):
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         self._set_playback_actions()
-        submenu = RadioPlaybackMenu(album.artist_ids)
-        self.append_submenu(_("Play a radio"), submenu)
+        if get_network_available("SPOTIFY") or\
+                get_network_available("LASTFM") or\
+                get_network_available("DEEZER"):
+            submenu = RadioPlaybackMenu(album.artist_ids)
+            self.append_submenu(_("Play a radio"), submenu)
+        else:
+            self._set_radio_action(album.artist_ids)
 
     @property
     def in_player(self):
