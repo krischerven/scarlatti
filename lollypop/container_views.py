@@ -259,7 +259,8 @@ class ViewsContainer:
             @return ArtistViewBox/ArtistViewList
         """
         view_type = ViewType.SCROLLED
-        if App().settings.get_value("show-artist-tracks"):
+        if App().settings.get_value("show-artist-tracks") and\
+                not storage_type & StorageType.SEARCH:
             from lollypop.view_artist_list import ArtistViewList
             view = ArtistViewList(genre_ids, artist_ids,
                                   storage_type, view_type)
