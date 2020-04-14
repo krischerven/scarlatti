@@ -17,9 +17,10 @@ from lollypop.define import LASTFM_API_KEY, App
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal, get_network_available
 from lollypop.helper_web_lastfm import LastFMWebHelper
+from lollypop.helper_web_save import SaveWebHelper
 
 
-class LastFMSimilars(LastFMWebHelper):
+class LastFMSimilars(SaveWebHelper, LastFMWebHelper):
     """
         Search similar artists with Last.fm
     """
@@ -27,6 +28,7 @@ class LastFMSimilars(LastFMWebHelper):
         """
             Init provider
         """
+        SaveWebHelper.__init__(self)
         LastFMWebHelper.__init__(self)
 
     def load_similars(self, artist_ids, storage_type, cancellable):

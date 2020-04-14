@@ -87,14 +87,14 @@ class RadioPlaybackMenu(Gio.Menu):
                                      "app.radio_action_collection")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
-        radio_action = Gio.SimpleAction(name="radio_action_spotify")
+        radio_action = Gio.SimpleAction(name="radio_action_deezer")
         App().add_action(radio_action)
         radio_action.connect("activate",
                              self.__on_radio_action_activate,
                              artist_ids)
-        radio_action.set_enabled(get_network_available("SPOTIFY"))
-        menu_item = Gio.MenuItem.new(_("From Spotify"),
-                                     "app.radio_action_spotify")
+        radio_action.set_enabled(get_network_available("DEEZER"))
+        menu_item = Gio.MenuItem.new(_("From Deezer"),
+                                     "app.radio_action_deezer")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         radio_action = Gio.SimpleAction(name="radio_action_lastfm")
@@ -105,6 +105,16 @@ class RadioPlaybackMenu(Gio.Menu):
         radio_action.set_enabled(get_network_available("LASTFM"))
         menu_item = Gio.MenuItem.new(_("From Last.fm"),
                                      "app.radio_action_lastfm")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action_spotify")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        radio_action.set_enabled(get_network_available("SPOTIFY"))
+        menu_item = Gio.MenuItem.new(_("From Spotify"),
+                                     "app.radio_action_spotify")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
 
@@ -124,6 +134,8 @@ class RadioPlaybackMenu(Gio.Menu):
             App().player.play_radio_from_spotify(artist_ids)
         elif action.get_name() == "radio_action_lastfm":
             App().player.play_radio_from_lastfm(artist_ids)
+        elif action.get_name() == "radio_action_deezer":
+            App().player.play_radio_from_deezer(artist_ids)
 
 
 class PlaylistPlaybackMenu(Gio.Menu):

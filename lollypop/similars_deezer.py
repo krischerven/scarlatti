@@ -16,9 +16,10 @@ from lollypop.define import App
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.helper_web_deezer import DeezerWebHelper
+from lollypop.helper_web_save import SaveWebHelper
 
 
-class DeezerSimilars(DeezerWebHelper):
+class DeezerSimilars(SaveWebHelper, DeezerWebHelper):
     """
         Search similar artists with Deezer
     """
@@ -26,6 +27,7 @@ class DeezerSimilars(DeezerWebHelper):
         """
             Init provider
         """
+        SaveWebHelper.__init__(self)
         DeezerWebHelper.__init__(self)
 
     def load_similars(self, artist_ids, storage_type, cancellable):
@@ -35,6 +37,35 @@ class DeezerSimilars(DeezerWebHelper):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
+        for artist_id in artist_ids:
+            artist_name = App().artists.get_name(artist_id)
+            deezer_id = self.get_artist_id(artist_name, cancellable)
+            try:
+                uri = "https://api.deezer.com/artist/%s/radio" % deezer_id
+                (status, data) = App().task_helper.load_uri_content_sync(
+                    uri, cancellable)
+                if status:
+                    decode = json.loads(data.decode("utf-8"))
+                    for payload in decode["data"]:
+                        track_payload = self.get_track_payload(
+                            payload["id"], cancellable)
+                        album_payload = self.get_album_payload(
+                            payload["album"]["id"], cancellable)
+                        lollypop_payload = self.lollypop_album_payload(
+                            album_payload)
+                        item = self.save_album_payload_to_db(lollypop_payload,
+                                                             storage_type,
+                                                             True,
+                                                             cancellable)
+                        lollypop_payload = self.lollypop_track_payload(
+                            track_payload)
+                        self.save_track_payload_to_db(lollypop_payload,
+                                                      item,
+                                                      storage_type,
+                                                      True,
+                                                      cancellable)
+            except Exception as e:
+                Logger.error("DeezerSimilars::load_similars(): %s", e)
         emit_signal(self, "finished")
 
     def get_similar_artists(self, artist_names, cancellable):

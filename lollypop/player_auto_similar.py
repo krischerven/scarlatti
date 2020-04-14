@@ -69,63 +69,36 @@ class AutoSimilarPlayer:
             Play a radio from the Spotify for artist ids
             @param artist_ids as [int]
         """
-        emit_signal(self, "loading-changed", True, Track())
-        self.__radio_cancellable.cancel()
-        self.__radio_cancellable = Gio.Cancellable()
-
-        def on_match_track(similars, track_id, storage_type):
-            track = Track(track_id)
-            if self.albums:
-                self.add_album(track.album)
-            else:
-                self.play_album(track.album)
-
-        def on_finished(similars):
-            self.__radio_cancellable.cancel()
-
+        self.__play_radio_common()
         if get_network_available("SPOTIFY") and\
                 get_network_available("YOUTUBE"):
             from lollypop.similars_spotify import SpotifySimilars
             similars = SpotifySimilars()
-            similars.connect("match-track", on_match_track)
-            similars.connect("finished", on_finished)
-            self.clear_albums()
-            App().task_helper.run(similars.load_similars,
-                                  artist_ids,
-                                  StorageType.EPHEMERAL,
-                                  self.__radio_cancellable)
+            self.__load_similars(similars, artist_ids)
 
     def play_radio_from_lastfm(self, artist_ids):
         """
             Play a radio from the Last.fm for artist ids
             @param artist_ids as [int]
         """
-        emit_signal(self, "loading-changed", True, Track())
-        self.__radio_cancellable.cancel()
-        self.__radio_cancellable = Gio.Cancellable()
-
-        def on_match_track(similars, track_id, storage_type):
-            track = Track(track_id)
-            if self.albums:
-                self.add_album(track.album)
-            else:
-                self.play_album(track.album)
-
-        def on_finished(similars):
-            self.__radio_cancellable.cancel()
-
-        if get_network_available("MUSICBRAINZ") and\
-                get_network_available("LASTFM") and\
+        self.__play_radio_common()
+        if get_network_available("LASTFM") and\
                 get_network_available("YOUTUBE"):
             from lollypop.similars_lastfm import LastFMSimilars
             similars = LastFMSimilars()
-            similars.connect("match-track", on_match_track)
-            similars.connect("finished", on_finished)
-            self.clear_albums()
-            App().task_helper.run(similars.load_similars,
-                                  artist_ids,
-                                  StorageType.EPHEMERAL,
-                                  self.__radio_cancellable)
+            self.__load_similars(similars, artist_ids)
+
+    def play_radio_from_deezer(self, artist_ids):
+        """
+            Play a radio from the Last.fm for artist ids
+            @param artist_ids as [int]
+        """
+        self.__play_radio_common()
+        if get_network_available("DEEZER") and\
+                get_network_available("YOUTUBE"):
+            from lollypop.similars_deezer import DeezerSimilars
+            similars = DeezerSimilars()
+            self.__load_similars(similars, artist_ids)
 
     def _on_stream_start(self, bus, message):
         """
@@ -139,6 +112,28 @@ class AutoSimilarPlayer:
 #######################
 # PRIVATE             #
 #######################
+    def __load_similars(self, similars, artist_ids):
+        """
+            Load similars for artist ids
+            @param similars as Similars
+            @param artist ids as [int]
+        """
+        similars.connect("match-track", self.__on_match_track)
+        similars.connect("finished", self.__on_finished)
+        self.clear_albums()
+        App().task_helper.run(similars.load_similars,
+                              artist_ids,
+                              StorageType.EPHEMERAL,
+                              self.__radio_cancellable)
+
+    def __play_radio_common(self):
+        """
+            Emit signal and reset cancellable
+        """
+        emit_signal(self, "loading-changed", True, Track())
+        self.__radio_cancellable.cancel()
+        self.__radio_cancellable = Gio.Cancellable()
+
     def __get_album_from_artists(self,  similar_artist_ids):
         """
             Add a new album to playback
@@ -230,3 +225,23 @@ class AutoSimilarPlayer:
                 player.current_track.artist_ids,
                 self.__next_cancellable,
                 callback=(self.__on_get_similar_artists,))
+
+    def __on_match_track(self, similars, track_id, storage_type):
+        """
+            Load/Play track album
+            @param similars as Similars
+            @param track_id as int
+            @param storage_type as StorageType
+        """
+        track = Track(track_id)
+        if self.albums:
+            self.add_album(track.album)
+        else:
+            self.play_album(track.album)
+
+    def __on_finished(self, similars):
+        """
+            Cancel radio loading
+            @param similars as Similars
+        """
+        self.__radio_cancellable.cancel()

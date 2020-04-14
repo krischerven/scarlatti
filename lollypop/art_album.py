@@ -263,6 +263,23 @@ class AlbumArt:
         except Exception as e:
             Logger.error("AlbumArt::save_album_artwork(): %s" % e)
 
+    def move_artwork(self, old_lp_album_id, new_lp_album_id):
+        """
+            Move artwork when lp_album_id changed
+            @param old_lp_album_id as str
+            @param new_lp_album_id s str
+        """
+        try:
+            for store in [ALBUMS_WEB_PATH, ALBUMS_PATH]:
+                old_path = "%s/%s.jpg" % (store, old_lp_album_id)
+                old = Gio.File.new_for_path(old_path)
+                if old.query_exists():
+                    new_path = "%s/%s.jpg" % (store, new_lp_album_id)
+                    new = Gio.File.new_for_path(new_path)
+                    old.move(new, Gio.FileCopyFlags.OVERWRITE, None, None)
+        except Exception as e:
+            Logger.error("AlbumArt::move_artwork(): %s" % e)
+
     def album_artwork_update(self, album_id):
         """
             Announce album cover update

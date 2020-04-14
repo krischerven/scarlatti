@@ -17,9 +17,10 @@ from lollypop.logger import Logger
 from lollypop.define import App
 from lollypop.utils import emit_signal
 from lollypop.helper_web_spotify import SpotifyWebHelper
+from lollypop.helper_web_save import SaveWebHelper
 
 
-class SpotifySimilars(SpotifyWebHelper):
+class SpotifySimilars(SaveWebHelper, SpotifyWebHelper):
     """
         Search similar artists with Spotify
     """
@@ -27,6 +28,7 @@ class SpotifySimilars(SpotifyWebHelper):
         """
             Init provider
         """
+        SaveWebHelper.__init__(self)
         SpotifyWebHelper.__init__(self)
 
     def load_similars(self, artist_ids, storage_type, cancellable):

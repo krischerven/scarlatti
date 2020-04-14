@@ -64,6 +64,24 @@ class DeezerWebHelper:
             Logger.warning("DeezerWebHelper::get_album_payload(): %s", e)
         return None
 
+    def get_track_payload(self, track_id, cancellable):
+        """
+            Get album payload for id
+            @param album_id as int
+            @param cancellable as Gio.Cancellable
+            @return {}
+        """
+        try:
+            uri = "https://api.deezer.com/track/%s" % track_id
+            (status, data) = App().task_helper.load_uri_content_sync(
+                uri, cancellable)
+            if status:
+                decode = json.loads(data.decode("utf-8"))
+                return decode
+        except Exception as e:
+            Logger.warning("DeezerWebHelper::get_track_payload(): %s", e)
+        return None
+
     def lollypop_album_payload(self, payload):
         """
             Convert payload to Lollypop one
@@ -94,7 +112,10 @@ class DeezerWebHelper:
         lollypop_payload["name"] = payload["title"]
         lollypop_payload["uri"] = "dz:%s" % payload["id"]
         lollypop_payload["artists"] = payload["artist"]["name"]
-        lollypop_payload["discnumber"] = payload["disk_number"]
+        try:
+            lollypop_payload["discnumber"] = payload["disk_number"]
+        except:
+            lollypop_payload["discnumber"] = 1
         lollypop_payload["tracknumber"] = payload["track_position"]
         lollypop_payload["duration"] = payload["duration"] * 1000
         return lollypop_payload
