@@ -10,11 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gio
+from gi.repository import GLib, Gio, Gtk
 
 import itertools
 from time import time
-from hashlib import md5
+from gettext import gettext as _
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.utils import translate_artist_name
@@ -22,6 +22,7 @@ from lollypop.database_history import History
 from lollypop.radios import Radios
 from lollypop.define import App, Type, StorageType
 from lollypop.logger import Logger
+from lollypop.helper_task import TaskHelper
 
 
 class DatabaseUpgrade:
@@ -167,7 +168,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             43: """CREATE TABLE featuring (artist_id INT NOT NULL,
                                            album_id INT NOT NULL)""",
             44: self.__upgrade_44,
-            45: self.__upgrade_45
+            45: self.__upgrade_45,
+            46: self.__upgrade_46
         }
 
 #######################
@@ -745,20 +747,67 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
 
     def __upgrade_45(self, db):
         """
-            Add lp album/track id + track count
+            Add lp_album_id/lp_track_id
         """
-        def sqlmd5(value):
-            try:
-                return md5(value.encode("utf-8")).hexdigest()
-            except Exception as e:
-                print(e)
-
         with SqlCursor(db, True) as sql:
-            sql.create_function("md5", 1, sqlmd5)
             sql.execute("ALTER TABLE tracks ADD lp_track_id TEXT")
             sql.execute("ALTER TABLE albums ADD lp_album_id TEXT")
-            # Here we force a fake id. Recalculate all ids for all items
-            # is too slow. This will break lp ids purpose.
-            sql.execute("UPDATE albums SET lp_album_id=md5(uri)")
-            sql.execute("UPDATE tracks SET lp_track_id=md5(uri)")
-        self.__upgrade_44(db)
+
+    def __upgrade_46(self, db):
+        """
+            Populate lp_album_id/lp_track_id
+        """
+        from lollypop.database_albums import AlbumsDatabase
+        from lollypop.database_tracks import TracksDatabase
+        from lollypop.utils import get_lollypop_album_id, get_lollypop_track_id
+        albums = AlbumsDatabase(db)
+        tracks = TracksDatabase(db)
+
+        def do_migration(dialog, label, progress):
+            GLib.idle_add(
+                label.set_text,
+                _("Please wait while Lollypop is updating albums"))
+            album_ids = albums.get_ids([], [], StorageType.ALL, True)
+            count = len(album_ids)
+            i = 0
+            for album_id in album_ids:
+                if i % 10 == 0:
+                    GLib.idle_add(progress.set_fraction, i / count)
+                name = albums.get_name(album_id)
+                artists = ";".join(albums.get_artists(album_id))
+                lp_album_id = get_lollypop_album_id(name, artists)
+                albums.set_lp_album_id(album_id, lp_album_id)
+                i += 1
+
+            track_ids = tracks.get_ids(StorageType.ALL)
+            count = len(track_ids)
+            i = 0
+            GLib.idle_add(
+                label.set_text,
+                _("Please wait while Lollypop is updating tracks"))
+            for track_id in track_ids:
+                if i % 10 == 0:
+                    GLib.idle_add(progress.set_fraction, i / count)
+                name = tracks.get_name(track_id)
+                artists = ";".join(tracks.get_artists(track_id))
+                album_name = tracks.get_album_name(track_id)
+                lp_track_id = get_lollypop_track_id(name, artists, album_name)
+                tracks.set_lp_track_id(track_id, lp_track_id)
+                i += 1
+            GLib.idle_add(dialog.destroy)
+
+        dialog = Gtk.MessageDialog(buttons=Gtk.ButtonsType.NONE)
+        progress = Gtk.ProgressBar.new()
+        progress.show()
+        label = Gtk.Label.new()
+        label.show()
+        grid = Gtk.Grid.new()
+        grid.set_orientation(Gtk.Orientation.VERTICAL)
+        grid.set_row_spacing(10)
+        grid.show()
+        grid.add(label)
+        grid.add(progress)
+        dialog.set_image(grid)
+        helper = TaskHelper()
+        helper.run(do_migration, dialog, label, progress)
+        dialog.run()

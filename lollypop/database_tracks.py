@@ -822,6 +822,16 @@ class TracksDatabase:
                 return v[0]
             return 0
 
+    def set_lp_track_id(self, track_id, lp_track_id):
+        """
+            Set lp track id
+            @param album_id as int
+            @param lp_album_id as int
+        """
+        with SqlCursor(self.__db, True) as sql:
+            sql.execute("UPDATE tracks SET lp_track_id=? WHERE rowid=?",
+                        (lp_track_id, track_id))
+
     def set_loved(self, track_id, loved):
         """
             Set track loved
