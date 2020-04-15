@@ -768,6 +768,7 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                 label.set_text,
                 _("Please wait while Lollypop is updating albums"))
             album_ids = albums.get_ids([], [], StorageType.ALL, True)
+            album_ids += albums.get_compilation_ids([], StorageType.ALL, True)
             count = len(album_ids)
             i = 0
             for album_id in album_ids:
