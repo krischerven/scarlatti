@@ -128,6 +128,10 @@ class Album(Base):
         self.__one_disc = None
         # Use artist ids from db else
         if artist_ids:
+            artists = []
+            for artist_id in set(artist_ids) | set(self.artist_ids):
+                artists.append(App().artists.get_name(artist_id))
+            self.artists = artists
             self.artist_ids = artist_ids
 
     def __del__(self):
