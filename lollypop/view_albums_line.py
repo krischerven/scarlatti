@@ -168,7 +168,7 @@ class AlbumsArtistLineView(AlbumsLineView):
 
 class AlbumsArtistAppearsOnLineView(AlbumsLineView):
     """
-        Show albums where artist is in featuring
+        Show albums where artist is in featured
     """
 
     def __init__(self,  artist_ids, genre_ids, storage_type, view_type):
@@ -189,9 +189,9 @@ class AlbumsArtistAppearsOnLineView(AlbumsLineView):
             AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = App().artists.get_featuring(self.__genre_ids,
-                                                    self.__artist_ids,
-                                                    self.storage_type)
+            album_ids = App().artists.get_featured(self.__genre_ids,
+                                                   self.__artist_ids,
+                                                   self.storage_type)
             return [Album(album_id) for album_id in album_ids]
 
         self._label.set_text(_("Appears on"))

@@ -30,7 +30,13 @@ def play_artists(artist_ids, genre_ids):
             App().lookup_action("party").change_state(
                 GLib.Variant("b", False))
         album_ids = App().albums.get_ids(genre_ids, artist_ids, storage_type)
-        albums = [Album(album_id) for album_id in album_ids]
+        if App().settings.get_value("play-featured"):
+            album_ids += App().artists.get_featured(genre_ids,
+                                                    artist_ids,
+                                                    storage_type)
+        albums = []
+        for album_id in album_ids:
+            albums.append(Album(album_id, genre_ids, artist_ids))
         App().player.play_albums(albums)
     except Exception as e:
         Logger.error("play_artists(): %s" % e)
@@ -46,6 +52,10 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
     try:
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_ids(genre_ids, artist_ids, storage_type)
+        if App().settings.get_value("play-featured"):
+            album_ids += App().artists.get_featured(genre_ids,
+                                                    artist_ids,
+                                                    storage_type)
         for album_id in album_ids:
             if add and album_id not in App().player.album_ids:
                 App().player.add_album(Album(album_id, genre_ids, artist_ids))

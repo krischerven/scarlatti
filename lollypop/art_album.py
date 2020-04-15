@@ -214,11 +214,7 @@ class AlbumArt:
                         album.storage_type & (StorageType.COLLECTION |
                                               StorageType.EXTERNAL):
                     try:
-                        if behaviour & (ArtBehaviour.BLUR |
-                                        ArtBehaviour.BLUR_HARD):
-                            track = album.tracks[0]
-                        else:
-                            track = choice(album.tracks)
+                        track = choice(album.tracks)
                         pixbuf = self.pixbuf_from_tags(track.uri)
                     except Exception as e:
                         Logger.error("AlbumArt::get_album_artwork(): %s", e)
