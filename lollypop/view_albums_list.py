@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.utils import popup_widget
+from lollypop.utils import popup_widget, emit_signal
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, StorageType
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -69,22 +69,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         LazyLoadingView.populate(self, [album])
 
-    def insert_album(self, album, index):
-        """
-            Insert album at index
-            @param album as Album
-            @param index as int
-        """
-        children = self.children
-        if children and\
-                index < len(children) + 1 and\
-                children[index].album.id == album.id:
-            children[index].tracks_view.append_rows(album.tracks)
-        else:
-            row = AlbumRow(album, self.__height, self.view_type)
-            row.populate()
-            self.insert_row(row, index)
-
     def insert_row(self, row, index):
         """
             Insert row at index
@@ -94,6 +78,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.insert(row, index)
+        emit_signal("initialized")
 
     def populate(self, albums):
         """
@@ -183,6 +168,9 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             return None
         row = AlbumRow(album, self.__height, self.view_type)
         row.connect("activated", self.__on_row_activated)
+        row.connect("destroy", lambda x: self.emit("initialized"))
+        row.tracks_view.connect("track-removed",
+                                lambda x, y: self.emit("initialized"))
         row.show()
         self._box.add(row)
         return row

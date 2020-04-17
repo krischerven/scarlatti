@@ -149,7 +149,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             album = Album(track.album.id)
             album.set_tracks([track])
             self._view.add_reveal_albums([album])
-            self._view.insert_album(album, -1)
+            self._view.add_value(album)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
         """

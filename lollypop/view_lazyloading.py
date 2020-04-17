@@ -26,7 +26,9 @@ class LazyLoadingView(View):
     """
 
     __gsignals__ = {
+        # View has been populated/depopulated, children are not populated
         "initialized": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        # All children are populated
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
