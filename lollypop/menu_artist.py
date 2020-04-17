@@ -47,6 +47,14 @@ class ArtistMenu(Gio.Menu):
             action.connect("change-state", self.__on_change_state)
             self.append(_("Show tracks"), "app.show-artist-tracks")
             action = Gio.SimpleAction.new_stateful(
+                "show-year-below-name",
+                None,
+                GLib.Variant.new_boolean(
+                    App().settings.get_value("show-year-below-name")))
+            App().add_action(action)
+            action.connect("change-state", self.__on_change_state)
+            self.append(_("Show album year"), "app.show-year-below-name")
+            action = Gio.SimpleAction.new_stateful(
                 "play-featured",
                 None,
                 GLib.Variant.new_boolean(
@@ -78,7 +86,7 @@ class ArtistMenu(Gio.Menu):
         name = action.get_name()
         action.set_state(variant)
         App().settings.set_value(name, variant)
-        if name == "show-artist-tracks":
+        if name.find("show") != -1:
             App().window.container.reload_view()
 
 

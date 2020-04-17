@@ -120,6 +120,11 @@
             <summary>If true, Lollypop will not use system youtube-dl</summary>
             <description></description>
         </key>
+        <key type="b" name="show-year-below-name">
+            <default>false</default>
+            <summary>Show year below album name</summary>
+            <description></description>
+        </key>
         <key type="b" name="import-playlists">
             <default>false</default>
             <summary>Import playlists from collections</summary>
