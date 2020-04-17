@@ -82,6 +82,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param scan_type as ScanType
             @param uris as [str]
         """
+        self.__disable_compilations = not App().settings.get_value(
+                "show-compilations")
         App().lookup_action("update_db").set_enabled(False)
         # Stop previous scan
         if self.is_locked() and scan_type != ScanType.EXTERNAL:
