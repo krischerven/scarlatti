@@ -273,19 +273,25 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             Scrobble track, update last played time and increment popularity
             @param track as Track
         """
-        self.__scrobble(track, self._start_time)
-        if track.id is not None and track.id >= 0:
-            App().tracks.set_listened_at(track.id, int(time()))
-            # Increment popularity
-            App().tracks.set_more_popular(track.id)
-            # In party mode, linear popularity
-            if self.is_party:
-                pop_to_add = 1
-            # In normal mode, based on tracks count
-            else:
-                count = track.album.tracks_count
-                pop_to_add = int(App().albums.max_count / count)
-            App().albums.set_more_popular(track.album_id, pop_to_add)
+        if track.id is None:
+            return
+        # Track has been played
+        # for at least half its duration, or for 4 minutes
+        played = time() - self._start_time
+        if played >= track.duration / 2000 or played >= 240:
+            self.__scrobble(track, self._start_time)
+            if track.id >= 0:
+                App().tracks.set_listened_at(track.id, int(time()))
+                # Increment popularity
+                App().tracks.set_more_popular(track.id)
+                # In party mode, linear popularity
+                if self.is_party:
+                    pop_to_add = 1
+                # In normal mode, based on tracks count
+                else:
+                    count = track.album.tracks_count
+                    pop_to_add = int(App().albums.max_count / count)
+                App().albums.set_more_popular(track.album_id, pop_to_add)
 
     def _on_stream_start(self, bus, message):
         """
@@ -311,12 +317,8 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             @param track as Track
             @param finished_start_time as int
         """
-        played = time() - finished_start_time
         # Last.fm policy, force it for ListenBrainz too
         if track.duration < 30000:
             return
-        # We can listen if the track has been played
-        # for at least half its duration, or for 4 minutes
-        if played >= track.duration / 2000 or played >= 240:
-            for scrobbler in App().ws_director.scrobblers:
-                scrobbler.listen(track, int(finished_start_time))
+        for scrobbler in App().ws_director.scrobblers:
+            scrobbler.listen(track, int(finished_start_time))
