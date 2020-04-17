@@ -24,7 +24,7 @@ class CollectionItem:
                  year=None, timestamp=None, mb_album_artist_id="",
                  mb_album_id=None, mb_artist_id="", mb_track_id=None,
                  lp_album_id=None, uri="", album_loved=False,
-                 album_pop=0, album_rate=0, album_synced=False,
+                 album_pop=0, album_rate=0, album_synced=0,
                  album_mtime=0, duration=0, tracknumber=0,
                  discnumber=1, discname="", track_mtime=0, track_pop=0,
                  track_rate=0, track_loved=False, track_ltime=0, bpm=0,

@@ -177,7 +177,7 @@ class SaveWebHelper(GObject.Object):
                               year=year,
                               timestamp=timestamp,
                               mb_album_id=payload["mbid"],
-                              tracknumber=payload["track-count"],
+                              album_synced=payload["track-count"],
                               storage_type=storage_type)
         Logger.debug("SaveWebHelper::save_album(): %s - %s",
                      item.album_artists, item.album_name)
