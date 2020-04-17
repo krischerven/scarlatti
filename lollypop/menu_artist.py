@@ -53,7 +53,7 @@ class ArtistMenu(Gio.Menu):
                     App().settings.get_value("show-year-below-name")))
             App().add_action(action)
             action.connect("change-state", self.__on_change_state)
-            self.append(_("Show album year"), "app.show-year-below-name")
+            self.append(_("Show year"), "app.show-year-below-name")
             action = Gio.SimpleAction.new_stateful(
                 "play-featured",
                 None,
