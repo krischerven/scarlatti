@@ -787,9 +787,14 @@ class TracksDatabase:
             @return [int]
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
+            result = sql.execute("SELECT tracks.rowid\
+                                  FROM tracks, track_artists, artists\
                                   WHERE loved=1 AND\
-                                  storage_type & ? ORDER BY album_id",
+                                  artists.rowid=track_artists.artist_id AND\
+                                  tracks.rowid=track_artists.track_id AND\
+                                  storage_type & ?\
+                                  GROUP BY track_artists.artist_id, album_id\
+                                  ORDER BY artists.name",
                                  (storage_type,))
             return list(itertools.chain(*result))
 
