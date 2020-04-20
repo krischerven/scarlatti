@@ -12,9 +12,11 @@
 
 from gi.repository import Soup, Gio
 
+import json
 from hashlib import md5
 from pickle import load, dump
 
+from lollypop.helper_passwords import PasswordsHelper
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
 from lollypop.define import LOLLYPOP_DATA_PATH, App
@@ -37,7 +39,6 @@ class LastFMWebService:
             self.__uri = "https://libre.fm/2.0/"
         else:
             self.__uri = "https://ws.audioscrobbler.com/2.0/"
-            App().task_helper.run(self.__populate_loved_tracks)
         self.start()
 
     def start(self):
@@ -117,6 +118,13 @@ class LastFMWebService:
             self.love(",".join(track.artists), track.name)
         else:
             self.unlove(",".join(track.artists), track.name)
+
+    def sync_loved_tracks(self):
+        """
+            Synced loved tracks from Last.fm
+        """
+        self.__passwords_helper = PasswordsHelper()
+        self.__passwords_helper.get("LASTFM", self.__on_get_password)
 
 #######################
 # PRIVATE             #
@@ -249,22 +257,39 @@ class LastFMWebService:
         except Exception as e:
             Logger.error("LastFMWebService::__playing_now(): %s" % e)
 
-    def __populate_loved_tracks(self):
+    def __populate_loved_tracks(self, user):
         """
             Populate loved tracks playlist
+            @parma user as str
         """
-        return
         try:
-            user = self.get_user(self.login)
-            for loved in user.get_loved_tracks(limit=None):
-                artist = str(loved.track.artist)
-                title = str(loved.track.title)
-                track_id = App().tracks.search_track(artist, title)
-                if track_id is None:
-                    Logger.warning(
-                        "LastFM::__populate_loved_tracks(): %s, %s" % (
-                            artist, title))
-                else:
-                    pass  # Track(track_id).set_loved(1)
+            uri = "http://ws.audioscrobbler.com/2.0/"
+            uri += "?method=user.getLovedTracks"
+            uri += "&user=%s&api_key=%s&format=json&limit=1000" % (
+                user, LASTFM_API_KEY)
+            (status, data) = App().task_helper.load_uri_content_sync(uri, None)
+            if status:
+                content = json.loads(data.decode("utf-8"))
+                for track in content["lovedtracks"]["track"]:
+                    artist = track["artist"]["name"]
+                    name = track["name"]
+                    track_id = App().tracks.search_track(artist, name)
+                    if track_id is None:
+                        Logger.warning(
+                            "LastFM: can't find %s, %s" % (
+                                artist, name))
+                    else:
+                        App().tracks.set_loved(track_id, 1)
         except Exception as e:
             Logger.error("LastFM::__populate_loved_tracks: %s" % e)
+
+    def __on_get_password(self, attributes, password, service):
+        """
+            Populate loved tracks
+            @param attributes as {}
+            @param password as str
+            @param service as str
+        """
+        if attributes is not None:
+            App().task_helper.run(
+                self.__populate_loved_tracks, attributes["login"])

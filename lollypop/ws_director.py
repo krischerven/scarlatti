@@ -85,6 +85,14 @@ class DirectorWebService:
         return web_services
 
     @property
+    def lastfm_ws(self):
+        """
+            Get Last.fm web service
+            @return TokenWebService
+        """
+        return self.__lastfm_ws
+
+    @property
     def token_ws(self):
         """
             Get token web service
