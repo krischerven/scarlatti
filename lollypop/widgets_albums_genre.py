@@ -66,4 +66,5 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
             Get album ids
             @return [int]
         """
-        return App().albums.get_ids([self._data], [], self.__storage_type)
+        return App().albums.get_ids([self._data], [],
+                                    self.__storage_type, True)

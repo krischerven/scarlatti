@@ -24,13 +24,13 @@ class Disc:
         Represent an album disc
     """
 
-    def __init__(self, album, disc_number, storage_type, allow_track_skipping):
+    def __init__(self, album, disc_number, storage_type, skipped):
         self.db = App().albums
         self.__tracks = []
         self.__album = album
         self.__storage_type = storage_type
         self.__number = disc_number
-        self.__allow_track_skipping = allow_track_skipping
+        self.__skipped = skipped
 
     def __del__(self):
         """
@@ -90,7 +90,7 @@ class Disc:
                 self.album.artist_ids,
                 self.number,
                 self.__storage_type,
-                self.__allow_track_skipping)]
+                self.__skipped)]
         return self.__tracks
 
 
@@ -113,18 +113,21 @@ class Album(Base):
                 "mb_album_id": None,
                 "lp_album_id": None}
 
-    def __init__(self, album_id=None, genre_ids=[], artist_ids=[]):
+    def __init__(self, album_id=None, genre_ids=[], artist_ids=[],
+                 skipped=False):
         """
             Init album
             @param album_id as int
             @param genre_ids as [int]
+            @param artist_ids as [int]
+            @param skipped as bool
         """
         Base.__init__(self, App().albums)
         self.id = album_id
         self.genre_ids = genre_ids
         self._tracks = []
         self._discs = []
-        self.__allow_track_skipping = False
+        self.__skipped = False
         self.__one_disc = None
         # Use artist ids from db else
         if artist_ids:
@@ -302,19 +305,13 @@ class Album(Base):
         self.db.set_synced(self.id, mask)
         self.synced = mask
 
-    def set_skipping_allowed(self):
+    def clone(self, skipped):
         """
-            Mark album as allowing skiiping
-            Calling reset_tracks() needed if already populated
-        """
-        self.__allow_track_skipping = True
-
-    def get_with_skipping_allowed(self):
-        """
-            Get an album clone with skipping activated
+            Clone album
+            @param skipped as bool
             @return album
         """
-        new_album = Album(self.id)
+        new_album = Album(self.id, self.genre_ids, self.artist_ids, skipped)
         tracks = []
         for track in self.tracks:
             if track.loved != -1:
@@ -399,7 +396,7 @@ class Album(Base):
         if self.__one_disc is None:
             tracks = self.tracks
             self.__one_disc = Disc(self, 0, self.storage_type,
-                                   self.__allow_track_skipping)
+                                   self.__skipped)
             self.__one_disc.set_tracks(tracks)
         return self.__one_disc
 
@@ -414,7 +411,7 @@ class Album(Base):
             for disc_number in disc_numbers:
                 disc = Disc(self, disc_number,
                             self.storage_type,
-                            self.__allow_track_skipping)
+                            self.__skipped)
                 if disc.tracks:
                     self._discs.append(disc)
         return self._discs

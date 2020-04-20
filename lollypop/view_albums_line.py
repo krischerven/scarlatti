@@ -151,10 +151,11 @@ class AlbumsArtistLineView(AlbumsLineView):
         def load():
             if self.__artist_id == Type.COMPILATIONS:
                 album_ids = App().albums.get_compilation_ids(
-                    self.__genre_ids, self.storage_type)
+                    self.__genre_ids, self.storage_type, False)
             else:
                 album_ids = App().albums.get_ids(
-                    self.__genre_ids, [self.__artist_id], self.storage_type)
+                    self.__genre_ids, [self.__artist_id],
+                    self.storage_type, False)
             if excluded_album_id in album_ids:
                 album_ids.remove(excluded_album_id)
             return [Album(album_id) for album_id in album_ids]
@@ -221,6 +222,7 @@ class AlbumsPopularsLineView(AlbumsLineView):
         def load():
             storage_type = get_default_storage_type()
             album_ids = App().albums.get_populars_at_the_moment(storage_type,
+                                                                False,
                                                                 self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
@@ -254,6 +256,7 @@ class AlbumsRandomGenresLineView(AlbumsLineView):
             storage_type = get_default_storage_type()
             album_ids = App().albums.get_randoms(storage_type,
                                                  genre_id,
+                                                 False,
                                                  self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 

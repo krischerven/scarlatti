@@ -45,9 +45,9 @@ class GenreMenu(Gio.Menu):
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_ids([genre_id], [],
                                          storage_type,
-                                         True)
+                                         False)
         album_ids += App().albums.get_compilation_ids([genre_id],
                                                       storage_type,
-                                                      True)
+                                                      False)
         albums = [Album(album_id) for album_id in album_ids]
         section.append_submenu(_("Devices"), SyncAlbumsMenu(albums))

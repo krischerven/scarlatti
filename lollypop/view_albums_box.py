@@ -87,10 +87,11 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 
         def load():
             album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
-                                          self.storage_type)
+                                          self.storage_type, True)
             albums = []
             for album_id in album_ids:
-                album = Album(album_id, self._genre_ids, self._artist_ids)
+                album = Album(album_id, self._genre_ids,
+                              self._artist_ids, True)
                 album.set_storage_type(self.storage_type)
                 albums.append(album)
             return albums
@@ -280,10 +281,10 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         def play_album(status, child):
             child.artwork.get_style_context().remove_class("load-animation")
             child.data.reset_tracks()
-            App().player.play_album(child.data.get_with_skipping_allowed())
+            App().player.play_album(child.data.clone(True))
 
         if child.data.storage_type & StorageType.COLLECTION:
-            App().player.play_album(child.data.get_with_skipping_allowed())
+            App().player.play_album(child.data.clone(True))
         else:
             child.artwork.get_style_context().add_class("load-animation")
             cancellable = Gio.Cancellable.new()
@@ -390,10 +391,10 @@ class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
         def load():
             items = []
             for year in self._artist_ids:
-                items += App().albums.get_compilations_for_year(
-                    year, self.storage_type)
-                items += App().albums.get_albums_for_year(
-                    year, self.storage_type)
+                items += App().albums.get_compilation_ids_for_year(
+                    year, self.storage_type, True)
+                items += App().albums.get_ids_for_year(
+                    year, self.storage_type, True)
             return [Album(album_id, [Type.YEARS], []) for album_id in items]
 
         App().task_helper.run(load, callback=(on_load,))

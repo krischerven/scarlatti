@@ -112,16 +112,11 @@ class ShufflePlayer:
         """
         party_ids = App().settings.get_value("party-ids")
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids(party_ids, [], storage_type, True)
-        # All albums are blacklisted, WTF?
-        if not album_ids:
-            album_ids = App().albums.get_ids(party_ids, [],
-                                             storage_type, False)
+        album_ids = App().albums.get_ids(party_ids, [], storage_type, False)
         emit_signal(self, "playback-setted", [])
         self._albums = []
         for album_id in album_ids:
-            album = Album(album_id, [], [])
-            album.set_skipping_allowed()
+            album = Album(album_id, [], [], False)
             self._albums.append(album)
         emit_signal(self, "playback-setted", self._albums)
 

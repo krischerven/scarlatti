@@ -147,7 +147,7 @@ class InformationView(View):
             albums = []
             storage_type = get_default_storage_type()
             for album_id in App().albums.get_ids([], [artist_id],
-                                                 storage_type):
+                                                 storage_type, True):
                 albums.append(Album(album_id))
             if not albums:
                 albums = [App().player.current_track.album]

@@ -67,7 +67,8 @@ class ScannerContainer:
         genre_ids = []
         if scan_update == ScanUpdate.ADDED:
             selection_list.add_value((artist_id, artist_name, sortname))
-        elif not App().albums.get_ids(genre_ids, [artist_id], storage_type):
+        elif not App().albums.get_ids(
+                genre_ids, [artist_id], storage_type, True):
             selection_list.remove_value(artist_id)
 
     def __on_collection_updated(self, scanner, item, scan_update):

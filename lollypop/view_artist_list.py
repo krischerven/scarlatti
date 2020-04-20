@@ -54,7 +54,8 @@ class ArtistViewList(LazyLoadingView):
         """
         album_ids = App().albums.get_ids(self.__genre_ids,
                                          self.__artist_ids,
-                                         self.storage_type)
+                                         self.storage_type,
+                                         True)
         LazyLoadingView.populate(self, album_ids)
 
     @property

@@ -247,7 +247,7 @@ class ArtistPlaybackMenu(PlaybackMenu):
             return bool
         """
         album_ids = App().albums.get_ids([], [self.__artist_id],
-                                         self.__storage_type)
+                                         self.__storage_type, False)
         return set(App().player.album_ids) & set(album_ids) == set(album_ids)
 
 #######################
@@ -346,10 +346,10 @@ class GenrePlaybackMenu(PlaybackMenu):
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_compilation_ids([self.__genre_id],
                                                      storage_type,
-                                                     True)
+                                                     False)
         album_ids += App().albums.get_ids([self.__genre_id], [],
                                           storage_type,
-                                          True)
+                                          False)
         return album_ids
 
     def __play(self, action, variant):
@@ -425,10 +425,10 @@ class DecadePlaybackMenu(PlaybackMenu):
         storage_type = get_default_storage_type()
         album_ids = []
         for year in self.__years:
-            album_ids += App().albums.get_compilations_for_year(
-                year, storage_type)
-            album_ids += App().albums.get_albums_for_year(
-                year, storage_type)
+            album_ids += App().albums.get_compilation_ids_for_year(
+                year, storage_type, False)
+            album_ids += App().albums.get_ids_for_year(
+                year, storage_type, False)
         return album_ids
 
     def __play(self, action, variant):

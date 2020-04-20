@@ -257,7 +257,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             Set image as +/-
         """
         album_ids = App().albums.get_ids(self.__genre_ids, self.__artist_ids,
-                                         self.__storage_type)
+                                         self.__storage_type, False)
         add = set(App().player.album_ids) & set(album_ids) != set(album_ids)
         if add:
             # Translators: artist context
