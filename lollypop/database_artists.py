@@ -319,13 +319,13 @@ class ArtistsDatabase:
                 sql.execute("INSERT INTO featuring (artist_id, album_id)\
                              VALUES (?, ?)", (artist_id, album_id))
 
-    def get_featured(self, genre_ids, artist_ids, storage_type, ignore=False):
+    def get_featured(self, genre_ids, artist_ids, storage_type, skipped):
         """
             Get albums where artist is in featuring
             @param genre_ids as [int]
             @param artist_ids as [int]
             @param storage_type as StorageType
-            @param ignore as bool
+            @param skipped as bool
         """
         orderby = App().settings.get_enum("orderby")
         if orderby == OrderBy.ARTIST:
@@ -367,7 +367,7 @@ class ArtistsDatabase:
                 request += make_subrequest("album_genres.genre_id=?",
                                            "OR",
                                            len(genre_ids))
-            if ignore:
+            if not skipped:
                 request += " AND albums.loved != -1"
             request += order
             result = sql.execute(request, filters)
