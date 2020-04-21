@@ -351,10 +351,13 @@ class Application(Gtk.Application, ApplicationActions):
                 track_id = self.player.current_track.id
                 # Save albums context
                 try:
+                    albums = {}
+                    for album in self.player.albums:
+                        albums[album.id] = album.track_ids
                     with open(LOLLYPOP_DATA_PATH + "/Albums.bin", "wb") as f:
-                        dump(self.player.albums, f)
+                        dump(albums, f)
                 except Exception as e:
-                    Logger.error("Application::__save_state(): %s" % e)
+                    Logger.error("Application::__save_state_albums(): %s" % e)
             dump(track_id, open(LOLLYPOP_DATA_PATH + "/track_id.bin", "wb"))
             dump([self.player.is_playing, self.player.is_party],
                  open(LOLLYPOP_DATA_PATH + "/player.bin", "wb"))

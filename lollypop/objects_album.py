@@ -173,6 +173,16 @@ class Album(Base):
             new_album._tracks = new_tracks
             self._tracks = tracks
 
+    def set_track_ids(self, track_ids):
+        """
+            Set track ids
+            @param track_ids as [int]
+        """
+        tracks = []
+        for track_id in track_ids:
+            tracks.append(Track(track_id, self))
+        self._tracks = tracks
+
     def append_track(self, track, clone=True):
         """
             Append track to album, do not disable clone if you know self is
