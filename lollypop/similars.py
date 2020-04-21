@@ -54,5 +54,5 @@ class Similars():
                 artist_names, cancellable)
         if not result:
             result = self.__local_helper.get_similar_artists(
-                artist_ids, cancellable)
+                artist_names, cancellable)
         return result
