@@ -114,7 +114,7 @@ class Album(Base):
                 "lp_album_id": None}
 
     def __init__(self, album_id=None, genre_ids=[], artist_ids=[],
-                 skipped=False):
+                 skipped=True):
         """
             Init album
             @param album_id as int
@@ -127,7 +127,7 @@ class Album(Base):
         self.genre_ids = genre_ids
         self._tracks = []
         self._discs = []
-        self.__skipped = False
+        self.__skipped = skipped
         self.__one_disc = None
         # Use artist ids from db else
         if artist_ids:
