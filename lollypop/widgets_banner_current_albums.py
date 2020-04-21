@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, GLib
 
 from gettext import gettext as _
 
@@ -90,7 +90,11 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         return [
-            (view, "initialized", "_on_view_initialized")
+            (view, "initialized", "_on_view_initialized"),
+            (App().player, "playback-added", "_on_playback_changed"),
+            (App().player, "playback-updated", "_on_playback_changed"),
+            (App().player, "playback-setted", "_on_playback_changed"),
+            (App().player, "playback-removed", "_on_playback_changed"),
         ]
 
     def update_for_width(self, width):
@@ -170,6 +174,17 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
                 duration += track.duration
         self.__duration_label.set_text(get_human_duration(duration))
 
+    def _on_playback_changed(self, player, *ignore):
+        """
+            Update clear button state
+            @param player as Player
+        """
+        sensitive = player.albums != []
+        GLib.idle_add(self.__clear_button.set_sensitive, sensitive)
+        GLib.idle_add(self.__clear_button.set_sensitive, sensitive)
+        GLib.idle_add(self.__jump_button.set_sensitive, sensitive)
+        GLib.idle_add(self.__menu_button.set_sensitive, sensitive)
+
 #######################
 # PRIVATE             #
 #######################
@@ -215,7 +230,4 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         """
         self.__view.clear(True)
         self.__view.populate([])
-        self.__clear_button.set_sensitive(False)
-        self.__jump_button.set_sensitive(False)
-        self.__menu_button.set_sensitive(False)
         emit_signal(App().player, "status-changed")
