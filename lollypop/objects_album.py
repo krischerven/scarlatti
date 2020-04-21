@@ -326,6 +326,12 @@ class Album(Base):
         """
         self._storage_type = storage_type
 
+    def set_skipped(self):
+        """
+            Set album as skipped, not allowing skipped tracks
+        """
+        self.__skipped = True
+
     @property
     def collection_item(self):
         """

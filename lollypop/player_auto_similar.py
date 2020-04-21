@@ -235,10 +235,12 @@ class AutoSimilarPlayer:
             @param storage_type as StorageType
         """
         track = Track(track_id)
+        album = track.album
+        album.set_skipped()
         if self.albums:
-            self.add_album(track.album)
+            self.add_album(album)
         else:
-            self.play_album(track.album)
+            self.play_album(album)
 
     def __on_finished(self, similars):
         """
