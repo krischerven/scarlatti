@@ -40,7 +40,7 @@ def get_album_ids_for(genre_ids, artist_ids, storage_type, skipped):
     items = []
     limit = App().settings.get_value("view-limit").get_int32()
     if genre_ids and genre_ids[0] == Type.POPULARS:
-        items = App().albums.get_rated(storage_type, skipped)
+        items = App().albums.get_rated(storage_type, skipped, limit)
         count = limit - len(items)
         for album in App().albums.get_populars(storage_type, skipped, count):
             if album not in items:
