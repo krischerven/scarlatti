@@ -179,6 +179,7 @@ class AlbumsPlayer:
             Set player albums
         """
         self._albums = albums
+        emit_signal(self, "playback-setted", albums)
         self.update_next_prev()
 
     def clear_albums(self):

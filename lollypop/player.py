@@ -162,11 +162,12 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                             App().lookup_action("party").change_state(
                                 GLib.Variant("b", True))
                         else:
-                            self._albums = []
+                            _albums = []
                             for album_id in albums.keys():
                                 album = Album(album_id)
                                 album.set_track_ids(albums[album_id])
-                                self._albums.append(album)
+                                _albums.append(album)
+                            self.set_albums(_albums)
                         # Load track from player albums
                         index = self.album_ids.index(
                             self._current_playback_track.album.id)
