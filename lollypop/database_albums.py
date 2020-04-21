@@ -1215,8 +1215,8 @@ class AlbumsDatabase:
             request = "SELECT album_id FROM tracks, albums\
                        WHERE albums.storage_type & ? AND albums.rowid=album_id"
             if not skipped:
-                request += " AND albums.loved != -1 "
-            request += "GROUP BY album_id\
+                request += " AND albums.loved != -1"
+            request += " GROUP BY album_id\
                         ORDER BY SUM(ltime)/COUNT(ltime), random() LIMIT ?"
             result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
