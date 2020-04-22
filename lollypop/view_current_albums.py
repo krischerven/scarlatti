@@ -43,6 +43,10 @@ class CurrentAlbumsView(View, SignalsHelper):
         self.__banner = CurrentAlbumsBannerWidget(self.__view)
         self.__banner.show()
         self.add_widget(self.__view, self.__banner)
+        self.allow_duplicate("_on_queue_changed")
+        self.allow_duplicate("_on_playback_added")
+        self.allow_duplicate("_on_playback_updated")
+        self.allow_duplicate("_on_playback_removed")
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
             (App().player, "playback-added", "_on_playback_added"),
