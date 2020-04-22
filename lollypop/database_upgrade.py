@@ -780,7 +780,7 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                 albums.set_lp_album_id(album_id, lp_album_id)
                 i += 1
 
-            track_ids = tracks.get_ids(StorageType.ALL)
+            track_ids = tracks.get_ids(StorageType.ALL, True)
             count = len(track_ids)
             i = 0
             GLib.idle_add(

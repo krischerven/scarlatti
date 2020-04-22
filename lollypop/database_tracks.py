@@ -99,16 +99,20 @@ class TracksDatabase:
                              VALUES (?, ?)",
                             (track_id, genre_id))
 
-    def get_ids(self, storage_type):
+    def get_ids(self, storage_type, skipped):
         """
             Return all internal track ids
             @param storage_type as StorageType
+            @param skipped as bool
             @return track ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE storage_type & ?\
-                                  ORDER BY album_id", (storage_type,))
+            request = "SELECT rowid FROM tracks\
+                       WHERE storage_type & ?"
+            if not skipped:
+                request += " AND loved != -1 "
+            request += " ORDER BY album_id"
+            result = sql.execute(request, (storage_type,))
             return list(itertools.chain(*result))
 
     def get_ids_for_name(self, name):
@@ -597,35 +601,40 @@ class TracksDatabase:
                 return v[0] == 0
             return True
 
-    def get_rated(self, storage_type, limit):
+    def get_rated(self, storage_type, skipped, limit):
         """
             Return tracks with rate >= 4
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE rate >= 4 AND\
-                                  storage_type & ?\
-                                  ORDER BY popularity DESC LIMIT ?",
-                                 (storage_type, limit))
+            request = "SELECT rowid FROM tracks\
+                       WHERE rate >= 4 AND storage_type & ?"
+            if not skipped:
+                request += " AND loved != -1 "
+            request += " ORDER BY popularity DESC LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_populars(self, storage_type, limit):
+    def get_populars(self, storage_type, skipped, limit):
         """
             Return populars tracks
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE popularity!=0 AND\
-                                  mtime != 0 AND\
-                                  storage_type & ?\
-                                  ORDER BY popularity DESC LIMIT ?",
-                                 (storage_type, limit))
+            request = "SELECT rowid FROM tracks\
+                       WHERE popularity!=0 AND\
+                       mtime != 0 AND\
+                       storage_type & ?"
+            if not skipped:
+                request += " AND loved != -1 "
+            request += " ORDER BY popularity DESC LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
     def get_higher_popularity(self):
@@ -685,34 +694,37 @@ class TracksDatabase:
             sql.execute("UPDATE tracks set ltime=? WHERE rowid=?",
                         (time, track_id))
 
-    def get_little_played(self, storage_type, limit):
+    def get_little_played(self, storage_type, skipped, limit):
         """
             Return random tracks little played
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT rowid\
-                                  FROM tracks\
-                                  WHERE storage_type & ?\
-                                  ORDER BY ltime, random() LIMIT ?",
-                                 (storage_type, limit))
+            request = "SELECT rowid FROM tracks WHERE storage_type & ?"
+            if not skipped:
+                request += " AND loved !=-1 "
+            request += " ORDER BY ltime, random() LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_recently_listened_to(self, storage_type, limit):
+    def get_recently_listened_to(self, storage_type, skipped, limit):
         """
             Return tracks listened recently
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
             @return tracks as [int]
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks\
-                                  WHERE ltime!=0 AND storage_type & ?\
-                                  ORDER BY ltime DESC LIMIT ?",
-                                 (storage_type, limit))
+            request = "SELECT tracks.rowid FROM tracks\
+                       WHERE ltime!=0 AND storage_type & ?"
+            if not skipped:
+                request += " AND loved != -1 "
+            request += " ORDER BY ltime DESC LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
     def get_randoms(self, genre_ids, storage_type, skipped, limit):

@@ -289,18 +289,22 @@ class Playlists(GObject.GObject):
         limit = App().settings.get_value("view-limit").get_int32()
         storage_type = get_default_storage_type()
         if playlist_id == Type.POPULARS:
-            track_ids = App().tracks.get_rated(storage_type, limit)
-            for track in App().tracks.get_populars(storage_type, limit):
+            track_ids = App().tracks.get_rated(storage_type, False, limit)
+            for track in App().tracks.get_populars(storage_type, False, limit):
                 track_ids.append(track)
         elif playlist_id == Type.RECENTS:
             track_ids = App().tracks.get_recently_listened_to(storage_type,
+                                                              False,
                                                               limit)
         elif playlist_id == Type.LITTLE:
-            track_ids = App().tracks.get_little_played(storage_type, limit)
+            track_ids = App().tracks.get_little_played(storage_type,
+                                                       False,
+                                                       limit)
         elif playlist_id == Type.RANDOMS:
-            track_ids = App().tracks.get_randoms([], storage_type, limit)
+            track_ids = App().tracks.get_randoms([], storage_type,
+                                                 False, limit)
         elif playlist_id == Type.ALL:
-            track_ids = App().tracks.get_ids(storage_type)
+            track_ids = App().tracks.get_ids(storage_type, False)
         elif playlist_id == Type.LOVED:
             track_ids = App().tracks.get_loved_track_ids(storage_type)
         else:
