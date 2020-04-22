@@ -177,7 +177,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                                     "rb"))
                     self.seek(position)
                 else:
-                    Logger.info("Player::restore_state(): track missing")
+                    Logger.debug("Player::restore_state(): track missing")
         except Exception as e:
             Logger.error("Player::restore_state(): %s" % e)
 
