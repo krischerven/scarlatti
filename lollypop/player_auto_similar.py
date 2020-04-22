@@ -59,6 +59,7 @@ class AutoSimilarPlayer:
                                                 StorageType.COLLECTION)
         track_ids = App().tracks.get_randoms(genre_ids,
                                              StorageType.COLLECTION,
+                                             False,
                                              100)
         albums = tracks_to_albums(
             [Track(track_id) for track_id in track_ids])

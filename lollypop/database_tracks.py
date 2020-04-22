@@ -715,11 +715,12 @@ class TracksDatabase:
                                  (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_randoms(self, genre_ids, storage_type, limit):
+    def get_randoms(self, genre_ids, storage_type, skipped, limit):
         """
             Return random tracks
             @param genre_ids as [int]
             @param storage_type as StorageType
+            @parma skipped as bool
             @param limit as int
             @return track ids as [int]
         """
@@ -728,7 +729,9 @@ class TracksDatabase:
             request = "SELECT tracks.rowid FROM tracks"
             if genre_ids:
                 request += ",track_genres"
-            request += " WHERE storage_type & ?"
+            request += " WHERE storage_type & ? "
+            if not skipped:
+                request += " AND loved != -1 "
             if genre_ids:
                 request += "AND tracks.rowid=track_genres.track_id"
                 filters += tuple(genre_ids)
