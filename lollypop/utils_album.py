@@ -14,9 +14,12 @@
 from lollypop.define import App, Type
 
 
-def tracks_to_albums(tracks):
+def tracks_to_albums(tracks, allow_skipped=True):
     """
         Convert tracks list to albums list
+        @param tracks as [Track]
+        @param allow_skipped as bool
+        @return [Album]
     """
     albums = []
     for track in tracks:
@@ -24,6 +27,8 @@ def tracks_to_albums(tracks):
             albums[-1].append_track(track, False)
         else:
             album = track.album
+            if album.loved == -1 and not allow_skipped:
+                continue
             album.set_tracks([track], False)
             albums.append(album)
     return albums
