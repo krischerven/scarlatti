@@ -26,7 +26,6 @@ from lollypop.player_radio import RadioPlayer
 from lollypop.player_transitions import TransitionsPlayer
 from lollypop.radios import Radios
 from lollypop.logger import Logger
-from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.objects_radio import Radio
 from lollypop.define import App, Type, LOLLYPOP_DATA_PATH
@@ -162,12 +161,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                             App().lookup_action("party").change_state(
                                 GLib.Variant("b", True))
                         else:
-                            _albums = []
-                            for album_id in albums.keys():
-                                album = Album(album_id)
-                                album.set_track_ids(albums[album_id])
-                                _albums.append(album)
-                            self.set_albums(_albums)
+                            self.set_albums(albums)
                         # Load track from player albums
                         index = self.album_ids.index(
                             self._current_playback_track.album.id)

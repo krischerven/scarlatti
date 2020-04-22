@@ -66,6 +66,15 @@ class Track(Base):
         """
         self.__album = None
 
+    # Used by pickle
+    def __getstate__(self):
+        self.db = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.db = App().tracks
+
     def set_album(self, album):
         """
             Set track album

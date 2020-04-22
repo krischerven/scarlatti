@@ -38,6 +38,15 @@ class Disc:
         """
         self.__album = None
 
+    # Used by pickle
+    def __getstate__(self):
+        self.db = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.db = App().albums
+
     def set_tracks(self, tracks):
         """
             Set disc tracks
@@ -143,6 +152,15 @@ class Album(Base):
         """
         self.reset_tracks()
 
+    # Used by pickle
+    def __getstate__(self):
+        self.db = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.db = App().albums
+
     def set_discs(self, discs):
         """
             Set album discs
@@ -172,16 +190,6 @@ class Album(Base):
                     new_tracks.append(track)
             new_album._tracks = new_tracks
             self._tracks = tracks
-
-    def set_track_ids(self, track_ids):
-        """
-            Set track ids
-            @param track_ids as [int]
-        """
-        tracks = []
-        for track_id in track_ids:
-            tracks.append(Track(track_id, self))
-        self._tracks = tracks
 
     def append_track(self, track, clone=True):
         """
