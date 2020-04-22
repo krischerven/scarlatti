@@ -167,6 +167,7 @@ class AlbumArt:
             @return cairo surface
             @thread safe
         """
+        uri = None
         if album.id is None:
             return None
         width *= scale_factor
@@ -240,7 +241,7 @@ class AlbumArt:
                                              width, height, behaviour)
                 return pixbuf
         except Exception as e:
-            Logger.error("AlbumArt::get_album_artwork(): %s" % e)
+            Logger.error("AlbumArt::get_album_artwork(): %s -> %s" % (uri, e))
             return None
 
     def save_album_artwork(self, album, data):
