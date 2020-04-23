@@ -213,7 +213,12 @@ class ShufflePlayer:
                         self.__history = []
                         repeat = App().settings.get_enum("repeat")
                         if repeat == Repeat.ALL:
-                            return self.__get_next()
+                            # Only one track in playback
+                            if self._albums and\
+                                    len(self._albums[0].tracks) > 1:
+                                return self.__get_next()
+                            else:
+                                return self.current_track
                     return track
         except Exception as e:  # Recursion error
             Logger.error("ShufflePLayer::__get_next(): %s", e)
