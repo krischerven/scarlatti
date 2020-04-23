@@ -159,7 +159,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Play album
            @param button as Gtk.Button
         """
-        App().player.play_album(self.__album.clone(True))
+        App().player.play_album(self.__album.clone(False))
 
     def _on_add_button_clicked(self, button):
         """
@@ -169,7 +169,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if self.__album.id in App().player.album_ids:
             App().player.remove_album_by_id(self.__album.id)
         else:
-            App().player.add_album(self.__album.clone(True))
+            App().player.add_album(self.__album.clone(False))
 
     def _on_album_artwork_changed(self, art, album_id):
         """

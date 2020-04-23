@@ -347,7 +347,7 @@ class AlbumsForGenresBoxView(AlbumsBoxView):
             @param banner as AlbumsBannerWidget
             @param random as bool
         """
-        albums = [c.data for c in self._box.get_children()]
+        albums = [c.data.clone(False) for c in self._box.get_children()]
         if not albums:
             return
         if random:

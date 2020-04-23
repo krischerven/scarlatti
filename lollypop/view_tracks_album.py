@@ -64,11 +64,7 @@ class AlbumTracksView(TracksView):
             self.__populated = True
             emit_signal(self, "populated")
             if not self.children:
-                text = (_("""This album has no track."""
-                          """ Check tags, all 'album artist'"""
-                          """ tags should be in 'artist' tags"""))
-                label = Gtk.Label.new(text)
-                label.get_style_context().add_class("text-large")
+                label = Gtk.Label.new(_("All tracks skipped"))
                 label.show()
                 self._responsive_widget.insert_row(0)
                 self._responsive_widget.attach(label, 0, 0, 2, 1)

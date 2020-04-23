@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from itertools import chain
+
 from lollypop.define import Repeat, App
 from lollypop.objects_track import Track
 from lollypop.logger import Logger
@@ -42,14 +44,21 @@ class LinearPlayer:
         if new_track_position >= len(album.track_ids):
             try:
                 pos = self.albums.index(album)
-                # we are on last album, go to first
-                if pos + 1 >= len(self._albums):
+                albums_count = len(self._albums)
+                new_pos = 0
+                # Search for a next album
+                for idx in chain(range(pos + 1, albums_count),
+                                 range(0, pos)):
+                    if self._albums[idx].tracks:
+                        new_pos = idx
+                        break
+                if new_pos == 0:
                     if repeat == Repeat.ALL:
                         pos = 0
                     else:
                         return Track()
                 else:
-                    pos += 1
+                    pos = new_pos
             except Exception as e:
                 Logger.error("LinearPlayer::next(): %s", e)
                 pos = 0  # Happens if current album has been removed
@@ -75,13 +84,21 @@ class LinearPlayer:
         if new_track_position < 0:
             try:
                 pos = self.albums.index(album)
-                if pos - 1 < 0:  # we are on last album, go to first
+                albums_count = len(self._albums)
+                new_pos = 0
+                # Search for a prev album
+                for idx in chain(reversed(range(0, pos - 1)),
+                                 reversed(range(pos, albums_count))):
+                    if self._albums[idx].tracks:
+                        new_pos = idx
+                        break
+                if new_pos == albums_count - 1:
                     if repeat == Repeat.ALL:
-                        pos = len(self._albums) - 1
+                        pos = new_pos
                     else:
                         return Track()
                 else:
-                    pos -= 1
+                    pos = new_pos
             except Exception as e:
                 Logger.error("LinearPlayer::prev(): %s", e)
                 pos = 0  # Happens if current album has been removed

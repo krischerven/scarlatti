@@ -329,13 +329,7 @@ class Album(Base):
             @param skipped as bool
             @return album
         """
-        new_album = Album(self.id, self.genre_ids, self.artist_ids, skipped)
-        tracks = []
-        for track in self.tracks:
-            if track.loved != -1:
-                tracks.append(track)
-        new_album.set_tracks(tracks)
-        return new_album
+        return Album(self.id, self.genre_ids, self.artist_ids, skipped)
 
     def set_storage_type(self, storage_type):
         """
