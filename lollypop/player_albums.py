@@ -13,6 +13,7 @@
 from gi.repository import GLib
 
 from random import choice
+from gettext import gettext as _
 
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
@@ -53,6 +54,9 @@ class AlbumsPlayer:
             Add albums to player
             @param albums as [Album]
         """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
         try:
             for album in albums:
                 # Merge album if previous is same
@@ -150,6 +154,9 @@ class AlbumsPlayer:
             @param album as Album
             @param albums as [Album]
         """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         for _album in self._albums:
@@ -167,6 +174,7 @@ class AlbumsPlayer:
             @param album as [Album]
         """
         if not albums:
+            App().notify.send(_("No album available"))
             return
         if App().settings.get_value("shuffle"):
             album = choice(albums)
@@ -178,6 +186,9 @@ class AlbumsPlayer:
         """
             Set player albums
         """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
         self._albums = albums
         emit_signal(self, "playback-setted", albums)
         self.update_next_prev()

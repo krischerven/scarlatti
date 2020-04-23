@@ -62,7 +62,7 @@ class AutoSimilarPlayer:
                                              False,
                                              100)
         albums = tracks_to_albums(
-            [Track(track_id) for track_id in track_ids])
+            [Track(track_id) for track_id in track_ids], False)
         self.play_albums(albums)
 
     def play_radio_from_spotify(self, artist_ids):

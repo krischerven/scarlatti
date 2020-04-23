@@ -86,8 +86,16 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 self.show_placeholder(True)
 
         def load():
+            # No skipped albums for this views
+            if self._genre_ids and self._genre_ids[0] in [Type.POPULARS,
+                                                          Type.LITTLE,
+                                                          Type.RANDOMS,
+                                                          Type.RECENTS]:
+                skipped = False
+            else:
+                skipped = True
             album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
-                                          self.storage_type, True)
+                                          self.storage_type, skipped)
             albums = []
             for album_id in album_ids:
                 album = Album(album_id, self._genre_ids,
