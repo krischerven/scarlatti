@@ -234,6 +234,8 @@ class ShufflePlayer:
             self.__not_played_albums = list(self.__to_play_albums)
         while self.__not_played_albums:
             album = self.__not_played_albums.pop(0)
+            if not album.tracks:
+                continue
             for track in sorted(album.tracks,
                                 key=lambda *args: random()):
                 if not self.__in_shuffle_history(track):
