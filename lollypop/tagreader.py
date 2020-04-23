@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from lollypop.define import App
 from lollypop.logger import Logger
-from lollypop.utils import format_artist_name
+from lollypop.utils import format_artist_name, get_iso_date_from_string
 
 
 class Discoverer:
@@ -392,9 +392,9 @@ class TagReader:
                     string = m.data.decode("utf-8")
                     if string.startswith("TDOR"):
                         split = string.split("\x00")
-                        date = split[-1]
+                        date = get_iso_date_from_string(split[-1])
                         datetime = GLib.DateTime.new_from_iso8601(date, None)
-                        return (datetime.year(), datetime.to_unix())
+                        return (datetime.get_year(), datetime.to_unix())
             except:
                 pass
             return (None, None)
@@ -408,18 +408,19 @@ class TagReader:
                         i)
                     if not exists or not sample.startswith("ORIGINALDATE="):
                         continue
-                    date = sample[13:]
+                    date = get_iso_date_from_string(sample[13:])
                     datetime = GLib.DateTime.new_from_iso8601(date, None)
-                    return (datetime.year(), datetime.to_unix())
-            except:
-                pass
-            return None
+                    return (datetime.get_year(), datetime.to_unix())
+            except Exception as e:
+                print(e)
+            return (None, None)
 
         if tags is None:
             return None
         values = get_id3()
-        if values is None:
+        if values[0] is None:
             values = get_ogg()
+        print(values)
         return values
 
     def get_bpm(self, tags):

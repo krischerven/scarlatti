@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 import unicodedata
 import cairo
 import time
+import re
 from hashlib import md5
 from threading import current_thread
 from functools import wraps
@@ -295,6 +296,26 @@ def get_lollypop_track_id(name, artists, album_name):
     name = "%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name),
                          sql_escape(album_name))
     return md5(name.encode("utf-8")).hexdigest()
+
+
+def get_iso_date_from_string(string):
+    """
+        Convert any string to an iso date
+        @param string as str
+        @return str/None
+    """
+    model = ["1970", "01", "01", "00", "00", "00"]
+    try:
+        split = re.split('[-:TZ]', string)
+        length = len(split)
+        while length < 6:
+            split.append(model[length])
+            length = len(split)
+        return "%s-%s-%sT%s:%s:%sZ" % (split[0], split[1], split[2],
+                                       split[3], split[4], split[5])
+    except Exception as e:
+        Logger.error("get_iso_date_from_string(): %s -> %s", string, e)
+        return None
 
 
 def is_unity():
