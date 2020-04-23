@@ -172,7 +172,7 @@ class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
                                                   (next_artists,
                                                    next_title))
         else:
-            self.__prev_button.set_tooltip_text("")
+            self.__next_button.set_tooltip_text("")
 
     def _on_status_changed(self, player):
         """
