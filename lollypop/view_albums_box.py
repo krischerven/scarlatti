@@ -236,6 +236,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param track as Track
         """
         for child in self.children:
+            if child.artwork is None:
+                continue
             if child.data.id == track.album.id:
                 context = child.artwork.get_style_context()
                 if status:
