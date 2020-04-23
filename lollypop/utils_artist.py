@@ -34,7 +34,8 @@ def play_artists(artist_ids, genre_ids):
         if App().settings.get_value("play-featured"):
             album_ids += App().artists.get_featured(genre_ids,
                                                     artist_ids,
-                                                    storage_type)
+                                                    storage_type,
+                                                    False)
         albums = []
         for album_id in album_ids:
             albums.append(Album(album_id, genre_ids, artist_ids, False))
@@ -57,7 +58,8 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
         if App().settings.get_value("play-featured"):
             album_ids += App().artists.get_featured(genre_ids,
                                                     artist_ids,
-                                                    storage_type)
+                                                    storage_type,
+                                                    False)
         for album_id in album_ids:
             if add and album_id not in App().player.album_ids:
                 App().player.add_album(
