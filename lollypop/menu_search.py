@@ -35,8 +35,9 @@ class SearchMenu(Gio.Menu):
             "web_search",
             GLib.VariantType.new("s"),
             GLib.Variant("s", "NONE"))
-        if get_network_available():
-            search_action.set_state(App().settings.get_value("web-search"))
+        web_search = App().settings.get_value("web-search")
+        if get_network_available(web_search.get_string()):
+            search_action.set_state(web_search)
         search_action.connect("change-state",
                               self.__on_search_change_state)
         App().add_action(search_action)
