@@ -145,8 +145,8 @@ class AlbumsPlayer:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self._albums = albums
         self.load(track)
-        for album in albums:
-            emit_signal(self, "playback-added", album)
+        emit_signal(self, "playback-setted", albums)
+        self.update_next_prev()
 
     def play_album_for_albums(self, album, albums):
         """
@@ -159,14 +159,10 @@ class AlbumsPlayer:
             return
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
-        for _album in self._albums:
-            emit_signal(self, "playback-removed", _album)
         if App().settings.get_value("shuffle"):
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
-        for _album in albums:
-            emit_signal(self, "playback-added", _album)
 
     def play_albums(self, albums):
         """
@@ -288,6 +284,7 @@ class AlbumsPlayer:
         else:
             track = None
         self._albums = albums
+        emit_signal(self, "playback-setted", albums)
         if track is not None:
             self.load(track)
         else:
@@ -306,6 +303,7 @@ class AlbumsPlayer:
         else:
             track = None
         self._albums = albums
+        emit_signal(self, "playback-setted", albums)
         if track is not None:
             self.load(track)
         else:

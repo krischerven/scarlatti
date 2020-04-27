@@ -272,6 +272,8 @@ class ShufflePlayer:
             @param player as Player
             @param album as Album
         """
+        if not App().settings.get_value("shuffle"):
+            return
         if album not in self.__to_play_albums:
             self.__to_play_albums.append(album)
             shuffle(self.__to_play_albums)
@@ -286,6 +288,8 @@ class ShufflePlayer:
             @param player as Player
             @param albums as [Album]
         """
+        if not App().settings.get_value("shuffle"):
+            return
         self.__to_play_albums = albums
         if albums:
             shuffle(self.__to_play_albums)
@@ -301,6 +305,8 @@ class ShufflePlayer:
             @param player as Player
             @param album as Album
         """
+        if not App().settings.get_value("shuffle"):
+            return
         if album in self.__to_play_albums:
             self.__to_play_albums.remove(album)
         if album in self.__not_played_albums:
