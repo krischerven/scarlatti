@@ -38,22 +38,23 @@ class ArtistMenu(Gio.Menu):
             from lollypop.menu_header import ArtistMenuHeader
             self.append_item(ArtistMenuHeader(artist_id))
         if view_type & ViewType.BANNER:
+            show_artist_tracks = App().settings.get_value("show-artist-tracks")
             action = Gio.SimpleAction.new_stateful(
                 "show-artist-tracks",
                 None,
-                GLib.Variant.new_boolean(
-                    App().settings.get_value("show-artist-tracks")))
+                GLib.Variant.new_boolean(show_artist_tracks))
             App().add_action(action)
             action.connect("change-state", self.__on_change_state)
             self.append(_("Show tracks"), "app.show-artist-tracks")
-            action = Gio.SimpleAction.new_stateful(
-                "show-year-below-name",
-                None,
-                GLib.Variant.new_boolean(
-                    App().settings.get_value("show-year-below-name")))
-            App().add_action(action)
-            action.connect("change-state", self.__on_change_state)
-            self.append(_("Show year"), "app.show-year-below-name")
+            if not show_artist_tracks:
+                action = Gio.SimpleAction.new_stateful(
+                    "show-year-below-name",
+                    None,
+                    GLib.Variant.new_boolean(
+                        App().settings.get_value("show-year-below-name")))
+                App().add_action(action)
+                action.connect("change-state", self.__on_change_state)
+                self.append(_("Show year"), "app.show-year-below-name")
             action = Gio.SimpleAction.new_stateful(
                 "play-featured",
                 None,
