@@ -50,6 +50,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
             (App().player, "playback-added", "_on_playback_added"),
+            (App().player, "playback-setted", "_on_playback_setted"),
             (App().player, "playback-updated", "_on_playback_updated"),
             (App().player, "playback-removed", "_on_playback_removed")
         ]
@@ -115,6 +116,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param album as Album
         """
         self.__view.add_value(album)
+        self.show_placeholder(False)
 
     def _on_playback_updated(self, player, album):
         """
@@ -135,9 +137,11 @@ class CurrentAlbumsView(View, SignalsHelper):
         """
         if albums:
             self.__view.populate(albums)
+            self.show_placeholder(False)
         else:
             self.__view.stop()
             self.__view.clear()
+            self.show_placeholder(True)
 
     def _on_playback_removed(self, player, album):
         """
@@ -149,6 +153,8 @@ class CurrentAlbumsView(View, SignalsHelper):
             if child.album == album:
                 child.destroy()
                 break
+        if not self.__view_children:
+            self.show_placeholder(True)
 
 #######################
 # PRIVATE             #
