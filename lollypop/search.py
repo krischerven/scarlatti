@@ -13,7 +13,7 @@
 from gi.repository import GObject
 
 from lollypop.define import StorageType, App
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, get_network_available
 from lollypop.search_local import LocalSearch
 
 
@@ -44,6 +44,9 @@ class Search(GObject.Object):
             @param name as str
         """
         self.__web_search = None
+        if not get_network_available("YOUTUBE"):
+            return
+
         if name == "SPOTIFY":
             from lollypop.search_spotify import SpotifySearch
             self.__web_search = SpotifySearch()

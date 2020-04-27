@@ -35,16 +35,22 @@ class SearchMenu(Gio.Menu):
             "web_search",
             GLib.VariantType.new("s"),
             GLib.Variant("s", "NONE"))
+        App().add_action(search_action)
+        section = Gio.Menu()
+        self.append_section(_("Search on the Web"), section)
+        menu_item = Gio.MenuItem.new(_("Disabled"),
+                                     "app.web_search('NONE')")
+        section.append_item(menu_item)
+
+        if not get_network_available("YOUTUBE"):
+            return
+
         web_search = App().settings.get_value("web-search")
         if get_network_available(web_search.get_string()):
             search_action.set_state(web_search)
         search_action.connect("change-state",
                               self.__on_search_change_state)
-        App().add_action(search_action)
-        section = Gio.Menu()
-        menu_item = Gio.MenuItem.new(_("Disabled"),
-                                     "app.web_search('NONE')")
-        section.append_item(menu_item)
+
         if get_network_available("DEEZER"):
             menu_item = Gio.MenuItem.new(_("Deezer"),
                                          "app.web_search('DEEZER')")
@@ -61,7 +67,6 @@ class SearchMenu(Gio.Menu):
             menu_item = Gio.MenuItem.new(_("Spotify"),
                                          "app.web_search('SPOTIFY')")
             section.append_item(menu_item)
-        self.append_section(_("Search on the Web"), section)
 
 #######################
 # PRIVATE             #
