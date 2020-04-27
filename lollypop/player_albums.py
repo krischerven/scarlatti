@@ -177,15 +177,18 @@ class AlbumsPlayer:
             album = albums[0]
         self.play_album_for_albums(album, albums)
 
-    def set_albums(self, albums):
+    def set_albums(self, albums, signal=True):
         """
             Set player albums
+            @param albums as [Album]
+            @param signal as bool
         """
         if not albums:
             App().notify.send(_("No album available"))
             return
         self._albums = albums
-        emit_signal(self, "playback-setted", albums)
+        if signal:
+            emit_signal(self, "playback-setted", albums)
         self.update_next_prev()
 
     def clear_albums(self):

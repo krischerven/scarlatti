@@ -136,6 +136,8 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param albums as [Album]
         """
         if albums:
+            self.__view.stop()
+            self.__view.clear()
             self.__view.populate(albums)
             self.show_placeholder(False)
         else:
@@ -167,4 +169,4 @@ class CurrentAlbumsView(View, SignalsHelper):
         albums = []
         for child in self.__view.children:
             albums.append(child.album)
-        App().player.set_albums(albums)
+        App().player.set_albums(albums, False)
