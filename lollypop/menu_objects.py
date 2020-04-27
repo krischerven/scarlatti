@@ -42,12 +42,13 @@ class AlbumMenu(Gio.Menu):
         if header:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(album))
+        self.append_section(_("Playback"),
+                            AlbumPlaybackMenu(album, view_type))
         if not view_type & ViewType.BANNER:
-            self.append_section(_("Playback"), AlbumPlaybackMenu(album))
-        from lollypop.menu_artist import ArtistAlbumsMenu
-        menu = ArtistAlbumsMenu(album.artist_ids[0], album.storage_type)
-        if menu.get_n_items() != 0:
-            self.append_section(_("Artist"), menu)
+            from lollypop.menu_artist import ArtistAlbumsMenu
+            menu = ArtistAlbumsMenu(album.artist_ids[0], album.storage_type)
+            if menu.get_n_items() != 0:
+                self.append_section(_("Artist"), menu)
         section = Gio.Menu()
         if album.storage_type & (StorageType.COLLECTION | StorageType.SAVED):
             section.append_submenu(_("Playlists"), PlaylistsMenu([album]))

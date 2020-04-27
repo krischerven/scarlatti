@@ -447,21 +447,23 @@ class AlbumPlaybackMenu(PlaybackMenu):
         Contextual menu for an album
     """
 
-    def __init__(self, album):
+    def __init__(self, album, view_type):
         """
             Init album menu
             @param album as Album
+            @param view_type as ViewType
         """
         PlaybackMenu.__init__(self)
         self.__album = album
-        play_action = Gio.SimpleAction(name="play_action")
-        App().add_action(play_action)
-        play_action.connect("activate", self.__on_play_action_activate)
-        menu_item = Gio.MenuItem.new(_("Play this album"),
-                                     "app.play_action")
-        menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        self.append_item(menu_item)
-        self._set_playback_actions()
+        if not view_type & ViewType.BANNER:
+            play_action = Gio.SimpleAction(name="play_action")
+            App().add_action(play_action)
+            play_action.connect("activate", self.__on_play_action_activate)
+            menu_item = Gio.MenuItem.new(_("Play this album"),
+                                         "app.play_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            self.append_item(menu_item)
+            self._set_playback_actions()
         if get_network_available("SPOTIFY") or\
                 get_network_available("LASTFM") or\
                 get_network_available("DEEZER"):
