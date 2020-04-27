@@ -238,7 +238,9 @@ class LyricsHelper:
         """
         title = self.__get_title(track, False)
         artist = self.__get_artist(track, False)
-        string = escape("%s %s" % (artist, title)).replace(".", "")
+        string = escape("%s %s" % (artist, title),
+                        ignore=["_", "-", " ", ".", "/"]).replace(".", "")
+        string = string.replace("/", " ")
         uri = "https://genius.com/%s-lyrics" % string.replace(" ", "-")
         helper = TaskHelper()
         helper.load_uri_content(uri,
