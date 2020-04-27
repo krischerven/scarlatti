@@ -803,12 +803,12 @@ class TracksDatabase:
         """
         with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks, track_artists, artists\
+                                  FROM tracks, album_artists, artists\
                                   WHERE loved=1 AND\
-                                  artists.rowid=track_artists.artist_id AND\
-                                  tracks.rowid=track_artists.track_id AND\
+                                  artists.rowid=album_artists.artist_id AND\
+                                  tracks.album_id=album_artists.album_id AND\
                                   storage_type & ?\
-                                  GROUP BY track_artists.artist_id, album_id\
+                                  GROUP BY artists.rowid, tracks.album_id\
                                   ORDER BY artists.name",
                                  (storage_type,))
             return list(itertools.chain(*result))
