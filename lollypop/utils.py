@@ -489,13 +489,14 @@ def get_title_for_genres_artists(genre_ids, artist_ids):
     return title_str
 
 
-def popup_widget(widget, parent, x=None, y=None):
+def popup_widget(widget, parent, x, y, state_widget):
     """
         Popup menu on widget as x, y
         @param widget as Gtk.Widget
         @param parent as Gtk.Widget
         @param x as int
         @param y as int
+        @param state_widget as Gtk.Widget
         @return Gtk.Popover/None
     """
     def on_hidden(widget, hide, popover):
@@ -512,8 +513,9 @@ def popup_widget(widget, parent, x=None, y=None):
         popover = Popover()
         popover.add(widget)
         widget.connect("hidden", on_hidden, popover)
-        popover.connect("unmap", on_unmap, parent)
-        parent.set_state_flags(Gtk.StateFlags.VISITED, False)
+        if state_widget is not None:
+            popover.connect("unmap", on_unmap, state_widget)
+            state_widget.set_state_flags(Gtk.StateFlags.VISITED, False)
         popover.set_relative_to(parent)
         if x is not None and y is not None:
             rect = Gdk.Rectangle()

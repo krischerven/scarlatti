@@ -154,7 +154,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
                 menu_ext.show()
                 menu_widget.append_widget(menu_ext)
             self.set_state_flags(Gtk.StateFlags.FOCUSED, False)
-            popup_widget(menu_widget, self.__eventbox)
+            popup_widget(menu_widget, self.__eventbox, None, None, None)
 
     def __on_query_tooltip(self, widget, x, y, keyboard, tooltip):
         """

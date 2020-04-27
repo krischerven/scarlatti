@@ -203,4 +203,4 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         menu = SuggestionsMenu(App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)

@@ -203,7 +203,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         else:
             menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popup_widget(menu_widget, child)
+        popup_widget(menu_widget, child, None, None, None)
 
 
 class PlaylistsManagerDeviceView(PlaylistsManagerView):

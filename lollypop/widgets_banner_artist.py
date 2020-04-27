@@ -152,7 +152,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
         menu_widget.append_widget(menu_ext)
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)
 
     def _on_badge_button_release(self, eventbox, event):
         """
@@ -166,7 +166,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         artwork_search.show()
         # Let current animation run
         GLib.timeout_add(250, artwork_search.populate)
-        popup_widget(artwork_search, eventbox)
+        popup_widget(artwork_search, eventbox, None, None, None)
 
     def _on_artist_artwork_changed(self, art, prefix):
         """

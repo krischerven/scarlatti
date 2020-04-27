@@ -147,7 +147,8 @@ class ToolbarEnd(Gtk.Bin):
             from lollypop.widgets_menu import MenuBuilder
             self.__playback_menu = MenuBuilder(self.__shuffle_menu)
             self.__playback_menu.show()
-            popover = popup_widget(self.__playback_menu, button)
+            popover = popup_widget(self.__playback_menu, button,
+                                   None, None, None)
             if popover is None:
                 self.__playback_menu.connect("hidden",
                                              self.__on_menu_hidden,
@@ -177,7 +178,7 @@ class ToolbarEnd(Gtk.Bin):
                 emit_signal(self.__playback_menu, "hidden", True)
             self.__app_menu = ApplicationMenu()
             self.__app_menu.show()
-            popover = popup_widget(self.__app_menu, button)
+            popover = popup_widget(self.__app_menu, button, None, None, None)
             if popover is None:
                 self.__app_menu.connect("hidden",
                                         self.__on_menu_hidden,

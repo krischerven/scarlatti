@@ -201,7 +201,6 @@ class TrackRow(Gtk.ListBoxRow):
             @param y as int
         """
         def on_hidden(widget, hide):
-            self.unset_state_flags(Gtk.StateFlags.CHECKED)
             self.set_indicator()
 
         from lollypop.menu_objects import TrackMenu, TrackMenuExt
@@ -214,8 +213,7 @@ class TrackRow(Gtk.ListBoxRow):
             menu_ext = TrackMenuExt(self._track)
             menu_ext.show()
             menu_widget.append_widget(menu_ext)
-        self.set_state_flags(Gtk.StateFlags.CHECKED, False)
-        popover = popup_widget(menu_widget, parent, x, y)
+        popover = popup_widget(menu_widget, parent, x, y, self)
         if popover is None:
             menu_widget.connect("hidden", on_hidden)
         else:

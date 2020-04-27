@@ -202,7 +202,7 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         menu_widget = self._get_menu_widget(child)
         if menu_widget is not None:
             menu_widget.show()
-            popup_widget(menu_widget, child.artwork)
+            popup_widget(menu_widget, child.artwork, None, None, None)
 
     def __unselect_selected(self):
         """

@@ -252,9 +252,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param x as int
             @param y as int
         """
-        def on_hidden(popover, hide, row):
-            row.unset_state_flags(Gtk.StateFlags.CHECKED)
-
         row = self._box.get_row_at_y(y)
         if row is None:
             return
@@ -264,10 +261,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popover = popup_widget(menu_widget, self._box, x, y)
-        if popover is not None:
-            popover.connect("hidden", on_hidden, row)
-        row.set_state_flags(Gtk.StateFlags.CHECKED, True)
+        popup_widget(menu_widget, self._box, x, y, row)
 
     def __reveal_row(self, row):
         """
