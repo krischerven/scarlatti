@@ -78,7 +78,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.insert(row, index)
-        emit_signal("initialized")
+        emit_signal(self, "initialized")
 
     def populate(self, albums):
         """
