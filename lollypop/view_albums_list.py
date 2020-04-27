@@ -67,7 +67,14 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             Insert item
             @param album as Album
         """
-        LazyLoadingView.populate(self, [album])
+        # Merge album if previous is same
+        if self.children and self.children[-1].album.id == album.id:
+            track_ids = self.children[-1].album.track_ids
+            for track in album.tracks:
+                if track.id not in track_ids:
+                    self.children[-1].append_track(track)
+        else:
+            LazyLoadingView.populate(self, [album])
 
     def insert_row(self, row, index):
         """
@@ -101,6 +108,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
             Clear the view
         """
+        self.__reveals = []
         for child in self._box.get_children():
             GLib.idle_add(child.destroy)
         if clear_albums:

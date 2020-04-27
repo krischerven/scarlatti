@@ -59,7 +59,8 @@ class PlaylistsView(LazyLoadingView, ViewController,
                  "_on_playlist_track_added"),
                 (App().playlists, "playlist-track-removed",
                  "_on_playlist_track_removed"),
-                (App().playlists, "playlists-changed", "_on_playlist_changed")
+                (App().playlists, "playlists-removed", "_on_playlist_removed"),
+                (App().playlists, "playlists-renamed", "_on_playlist_renamed"),
         ]
 
     def populate(self):
@@ -170,19 +171,21 @@ class PlaylistsView(LazyLoadingView, ViewController,
                                 album_row.destroy()
                                 break
 
-    def _on_playlist_changed(self, playlists, playlist_id):
+    def _on_playlist_removed(self, playlists, playlist_id):
         """
-            Update playlist
+            Go back
             @param playlists as Playlists
             @param playlist_id as int
         """
-        if playlist_id == self._playlist_id:
-            # Playlist has been removed
-            if not playlists.exists(playlist_id):
-                App().window.container.go_back()
-            else:
-                self._view.clear()
-                self.populate()
+        App().window.container.go_back()
+
+    def _on_playlist_renamed(self, playlists, playlist_id):
+        """
+            Update banner
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        self.__banner.rename(App().playlists.get_name(playlist_id))
 
 #######################
 # PRIVATE             #

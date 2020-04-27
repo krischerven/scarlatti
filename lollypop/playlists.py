@@ -38,9 +38,10 @@ class Playlists(GObject.GObject):
     __LOCAL_PATH = GLib.get_user_data_dir() + "/lollypop"
     _DB_PATH = "%s/playlists.db" % __LOCAL_PATH
     __gsignals__ = {
-        # Add or remove a playlist
-        "playlists-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        # Objects added/removed to/from playlist
+        "playlists-added": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "playlists-removed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "playlists-updated": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "playlists-renamed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "playlist-track-added": (
             GObject.SignalFlags.RUN_FIRST, None, (int, str)),
         "playlist-track-removed": (
@@ -111,7 +112,7 @@ class Playlists(GObject.GObject):
                                   VALUES (?, ?)",
                                  (name, 0))
             lastrowid = result.lastrowid
-        emit_signal(self, "playlists-changed", lastrowid)
+        emit_signal(self, "playlists-added", lastrowid)
         return lastrowid
 
     def exists(self, playlist_id):
@@ -141,7 +142,7 @@ class Playlists(GObject.GObject):
                         SET name=?\
                         WHERE rowid=?",
                         (name, playlist_id))
-        emit_signal(self, "playlists-changed", playlist_id)
+        emit_signal(self, "playlists-renamed", playlist_id)
         App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
 
     def remove(self, playlist_id):
@@ -157,7 +158,7 @@ class Playlists(GObject.GObject):
             sql.execute("DELETE FROM tracks\
                         WHERE playlist_id=?",
                         (playlist_id,))
-        emit_signal(self, "playlists-changed", playlist_id)
+        emit_signal(self, "playlists-removed", playlist_id)
         App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
 
     def clear(self, playlist_id):
@@ -501,7 +502,7 @@ class Playlists(GObject.GObject):
                         SET smart_enabled=?\
                         WHERE rowid=?",
                         (smart, playlist_id))
-            emit_signal(self, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-updated", playlist_id)
 
     def set_smart_sql(self, playlist_id, request):
         """
@@ -517,7 +518,7 @@ class Playlists(GObject.GObject):
                         SET smart_sql=?\
                         WHERE rowid=?",
                         (request, playlist_id))
-            emit_signal(self, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-updated", playlist_id)
 
     def get_position(self, playlist_id, track_id):
         """

@@ -201,6 +201,13 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         else:
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
+    def append_track(self, track):
+        """
+            Add a new track to album
+            @param track as Track
+        """
+        self.__tracks_view.append_row(track)
+
     def reset(self):
         """
             Get a new track view

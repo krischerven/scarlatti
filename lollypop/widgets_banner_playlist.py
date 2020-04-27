@@ -62,6 +62,13 @@ class PlaylistBannerWidget(BannerWidget):
         BannerWidget.update_for_width(self, width)
         self.__set_internal_size()
 
+    def rename(self, name):
+        """
+            Rename playlist
+            @param name as str
+        """
+        self.__title_label.set_label(name)
+
     @property
     def spinner(self):
         """
