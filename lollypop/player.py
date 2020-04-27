@@ -302,8 +302,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         ShufflePlayer._on_stream_start(self, bus, message)
         BinPlayer._on_stream_start(self, bus, message)
         AutoSimilarPlayer._on_stream_start(self, bus, message)
-        self.set_next()
-        self.set_prev()
+        self.update_next_prev()
 
 #######################
 # PRIVATE             #

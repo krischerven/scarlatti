@@ -146,7 +146,6 @@ class AlbumsPlayer:
         self._albums = albums
         self.load(track)
         emit_signal(self, "playback-setted", albums)
-        self.update_next_prev()
 
     def play_album_for_albums(self, album, albums):
         """
