@@ -87,7 +87,7 @@ class LinearPlayer:
                 albums_count = len(self._albums)
                 new_pos = 0
                 # Search for a prev album
-                for idx in chain(reversed(range(0, pos - 1)),
+                for idx in chain(reversed(range(0, pos)),
                                  reversed(range(pos, albums_count))):
                     if self._albums[idx].tracks:
                         new_pos = idx
