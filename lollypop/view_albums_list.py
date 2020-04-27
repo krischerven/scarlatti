@@ -260,7 +260,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             return
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(row.album, ViewType.ALBUM,
+        menu = AlbumMenu(row.album, ViewType.ALBUM, row.album.storage_type,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
