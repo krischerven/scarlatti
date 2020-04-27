@@ -153,7 +153,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             if child.album == album:
                 child.destroy()
                 break
-        if not self.__view_children:
+        if not self.__view.children:
             self.show_placeholder(True)
 
 #######################
