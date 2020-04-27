@@ -108,8 +108,8 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Play next track
         """
+        self._on_track_finished(self._current_track)
         if self._next_track.id is not None:
-            self._on_track_finished(self._current_track)
             self.load(self._next_track)
         else:
             self.stop()
