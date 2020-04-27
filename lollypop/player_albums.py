@@ -239,14 +239,14 @@ class AlbumsPlayer:
         """
             True if track present in current playback
             @param track as Track
-            @return bool
+            @return Track/None
         """
         for album in self._albums:
             if album.id == track.album.id:
-                for track_id in album.track_ids:
-                    if track.id == track_id:
-                        return True
-        return False
+                for _track in album.tracks:
+                    if track.id == _track.id:
+                        return _track
+        return None
 
     def get_albums_for_id(self, album_id):
         """
