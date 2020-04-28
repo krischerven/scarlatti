@@ -51,7 +51,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             (App().player, "loading-changed", "_on_loading_changed")
         ]
 
-    # check
     def get_current_ordinate(self, parent):
         """
             If current track in widget, return it ordinate,

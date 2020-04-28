@@ -517,6 +517,10 @@ def popup_widget(widget, parent, x, y, state_widget):
             popover.connect("unmap", on_unmap, state_widget)
             state_widget.set_state_flags(Gtk.StateFlags.VISITED, False)
         popover.set_relative_to(parent)
+        # Workaround a GTK autoscrolling issue in Gtk.ListBox
+        # Gtk autoscroll to last focused widget on popover close
+        if state_widget is not None:
+            state_widget.grab_focus()
         if x is not None and y is not None:
             rect = Gdk.Rectangle()
             rect.x = x
