@@ -69,10 +69,11 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
             App().player.add_albums(albums)
         else:
             App().player.remove_album_by_ids(album_ids)
-            if len(App().player.album_ids) == 0:
+            if len(App().player.albums) == 0:
                 App().player.stop()
             elif App().player.current_track.album.id\
                     not in App().player.album_ids:
+                print("ici")
                 App().player.skip_album()
     except Exception as e:
         Logger.error("add_artist_to_playback(): %s" % e)

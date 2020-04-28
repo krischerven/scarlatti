@@ -34,11 +34,17 @@ class LinearPlayer:
             @return track as Track
         """
         repeat = App().settings.get_enum("repeat")
-        if not self._albums:
+        # No album in playback
+        if not self.albums:
             return Track()
+        # User want us to repeat current track
         elif repeat == Repeat.TRACK:
             return self._current_playback_track
         album = self._current_playback_track.album
+        track = self.__fallback_track_if_album_missing(album)
+        # Current album missing, go to fallback track
+        if track is not None:
+            return track
         new_track_position = self._current_playback_track.position + 1
         # next album
         if new_track_position >= len(album.track_ids):
@@ -74,11 +80,17 @@ class LinearPlayer:
             @return track as Track
         """
         repeat = App().settings.get_enum("repeat")
+        # No album in playback
         if not self._albums:
             return Track()
+        # User want us to repeat current track
         elif repeat == Repeat.TRACK:
             return self._current_playback_track
         album = self._current_playback_track.album
+        track = self.__fallback_track_if_album_missing(album)
+        # Current album missing, go to fallback track
+        if track is not None:
+            return track
         new_track_position = self._current_playback_track.position - 1
         # Previous album
         if new_track_position < 0:
@@ -107,3 +119,17 @@ class LinearPlayer:
         else:
             track = album.tracks[new_track_position]
         return track
+
+    def __fallback_track_if_album_missing(self, album):
+        """
+            Get a fallback track if album not in player
+            @param album as Album
+            @return Track/None
+        """
+        if album not in self._albums:
+            album = self._albums[0]
+            if album.tracks:
+                return album.tracks[0]
+            else:
+                return Track
+        return None

@@ -81,8 +81,6 @@ class AlbumsPlayer:
         try:
             if album not in self._albums:
                 return
-            if self._current_track.album == album:
-                self.skip_album()
             self._albums.remove(album)
             self.update_next_prev()
             emit_signal(self, "playback-removed", album)
@@ -208,8 +206,6 @@ class AlbumsPlayer:
             # In party or shuffle, just update next track
             if self.is_party or App().settings.get_value("shuffle"):
                 self.set_next()
-                # We send this signal to update next popover
-                emit_signal(self, "queue-changed")
             elif self._current_track.id is not None:
                 index = self._albums.index(
                     self._current_playback_track.album)
@@ -226,10 +222,13 @@ class AlbumsPlayer:
                     elif repeat == Repeat.ALL:
                         next_album = self._albums[0]
                     else:
-                        self.stop()
+                        next_album = None
                 else:
                     next_album = self._albums[index + 1]
-                self.load(next_album.tracks[0])
+                if next_album is None:
+                    self.stop()
+                else:
+                    self.load(next_album.tracks[0])
         except Exception as e:
             Logger.error("Player::skip_album(): %s" % e)
 

@@ -333,6 +333,8 @@ class GenrePlaybackMenu(PlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
+        if App().player.current_track.album.id in album_ids:
+            App().player.skip_album()
         App().player.remove_album_by_ids(album_ids)
 
 #######################
@@ -412,6 +414,8 @@ class DecadePlaybackMenu(PlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
+        if App().player.current_track.album.id in album_ids:
+            App().player.skip_album()
         App().player.remove_album_by_ids(album_ids)
 
 #######################
@@ -497,6 +501,8 @@ class AlbumPlaybackMenu(PlaybackMenu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
+        if App().player.current_track.album.id == self.__album.id:
+            App().player.skip_album()
         App().player.remove_album_by_id(self.__album.id)
 
 #######################

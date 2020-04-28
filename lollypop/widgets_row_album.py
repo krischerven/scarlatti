@@ -16,13 +16,11 @@ from gettext import gettext as _
 
 from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.define import ArtSize, App, ViewType, MARGIN_SMALL
-from lollypop.define import ArtBehaviour, StorageType
-from lollypop.utils import popup_widget, emit_signal
-from lollypop.helper_gestures import GesturesHelper
-from lollypop.helper_signals import SignalsHelper, signals_map
+from lollypop.define import ArtBehaviour
+from lollypop.utils import emit_signal
 
 
-class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
+class AlbumRow(Gtk.ListBoxRow):
     """
         Album row
     """
@@ -51,7 +49,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         else:
             return cover_height + 4
 
-    @signals_map
     def __init__(self, album, height, view_type):
         """
             Init row widgets
@@ -74,11 +71,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         self.set_property("height-request", height)
         self.connect("destroy", self.__on_destroy)
         self.__tracks_view = self.__get_new_tracks_view()
-        return [
-            (App().player, "playback-added", "_on_playback_changed"),
-            (App().player, "playback-updated", "_on_playback_changed"),
-            (App().player, "playback-removed", "_on_playback_changed")
-        ]
 
     def populate(self):
         """
@@ -106,36 +98,16 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
-        buttons = []
-        if self.__view_type & ViewType.SEARCH:
-            button = Gtk.Button.new_from_icon_name(
-                    "media-playback-start-symbolic",
-                    Gtk.IconSize.MENU)
-            button.set_tooltip_text(_("Play this album"))
-            self.__gesture_play = GesturesHelper(
-                button,
-                primary_press_callback=self.__on_play_button_press)
-            buttons.append(button)
-            if self.__album.storage_type & StorageType.EPHEMERAL:
-                button = Gtk.Button.new_from_icon_name(
-                    "document-save-symbolic", Gtk.IconSize.MENU)
-                button.set_tooltip_text(_("Save in collection"))
-                self.__gesture_save = GesturesHelper(
-                    button,
-                    primary_press_callback=self.__on_save_button_press)
-                buttons.append(button)
-        if self.__view_type & (ViewType.PLAYBACK |
-                               ViewType.PLAYLISTS |
-                               ViewType.SEARCH):
-            button = Gtk.Button()
-            image = Gtk.Image.new()
-            button.set_image(image)
-            self.__update_list_button(button)
-            self.__gesture_list = GesturesHelper(
-                button,
-                primary_press_callback=self.__on_list_button_press)
-            buttons.append(button)
-
+        button = Gtk.Button.new_from_icon_name("list-remove-symbolic",
+                                               Gtk.IconSize.BUTTON)
+        if self.__view_type & ViewType.PLAYBACK:
+            button.set_tooltip_text(_("Remove from playback"))
+        else:
+            button.set_tooltip_text(_("Remove from playlist"))
+        button.connect("clicked", self.__on_button_clicked)
+        button.set_relief(Gtk.ReliefStyle.NONE)
+        button.get_style_context().add_class("menu-button")
+        button.set_property("valign", Gtk.Align.CENTER)
         header = Gtk.Grid.new()
         header.set_column_spacing(MARGIN_SMALL)
         header.show()
@@ -147,13 +119,7 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         header.attach(self.__artwork, 0, 0, 1, 2)
         header.attach(self.__artist_label, 1, 0, 1, 1)
         header.attach(self.__title_label, 1, 1, 1, 1)
-        i = 2
-        for button in buttons:
-            button.set_relief(Gtk.ReliefStyle.NONE)
-            button.get_style_context().add_class("menu-button")
-            button.set_property("valign", Gtk.Align.CENTER)
-            header.attach(button, i, 0, 1, 2)
-            i += 1
+        header.attach(button, 2, 0, 1, 2)
 
         self.__revealer = Gtk.Revealer.new()
         self.__revealer.show()
@@ -299,16 +265,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         return self.__album
 
 #######################
-# PROTECTED           #
-#######################
-    def _on_playback_changed(self, *ignore):
-        """
-            Update button state
-        """
-        if self.__artwork is not None and self.__gesture_list is not None:
-            self.__update_list_button(self.__gesture_list.widget)
-
-#######################
 # PRIVATE             #
 #######################
     def __get_new_tracks_view(self):
@@ -327,37 +283,6 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
                             self.__on_tracks_view_track_removed)
         tracks_view.show()
         return tracks_view
-
-    def __update_list_button(self, button):
-        """
-            Update list button based on current status
-            @param button as Gtk.Button
-        """
-        if self.__view_type & ViewType.SEARCH and\
-                self.__album.id not in App().player.album_ids:
-            button.get_image().set_from_icon_name("list-add-symbolic",
-                                                  Gtk.IconSize.MENU)
-            button.set_tooltip_text(_("Add to playback"))
-        else:
-            button.get_image().set_from_icon_name("list-remove-symbolic",
-                                                  Gtk.IconSize.MENU)
-            if self.__view_type & ViewType.PLAYLISTS:
-                button.set_tooltip_text(_("Remove from playlist"))
-            else:
-                button.set_tooltip_text(_("Remove from playback"))
-
-    def __popup_menu(self, widget):
-        """
-            Popup menu for album
-            @param widget as Gtk.Widget
-        """
-        from lollypop.menu_objects import AlbumMenu
-        from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(self.__album, ViewType.ALBUM,
-                         App().window.is_adaptive)
-        menu_widget = MenuBuilder(menu)
-        menu_widget.show()
-        popup_widget(menu_widget, widget, None, None, self)
 
     def __on_album_artwork(self, surface):
         """
@@ -433,75 +358,24 @@ class AlbumRow(Gtk.ListBoxRow, SignalsHelper):
         else:
             emit_signal(self, "populated")
 
-    def __on_list_button_press(self, x, y, event):
+    def __on_button_clicked(self, button):
         """
-            Add/Remove album from playlist/playback
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
+            Remove album from playback/playlist
+            @param button as Gtk.Button
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
-        if self.__view_type & (ViewType.PLAYBACK | ViewType.SEARCH):
+        if self.__view_type & ViewType.PLAYBACK:
             if self.__album.id in App().player.album_ids:
+                if App().player.current_track.album == self.__album:
+                    App().player.skip_album()
                 App().player.remove_album(self.__album)
             else:
                 App().player.add_album(self.__album)
-            if self.__view_type & ViewType.PLAYBACK:
-                self.destroy()
-            else:
-                self.__update_list_button(self.__gesture_list.widget)
+            self.destroy()
         elif self.__view_type & ViewType.PLAYLISTS:
-            if App().player.current_track.album.id == self.__album.id:
-                # Stop playback or loop for last album
-                # Else skip current
-                if len(App().player.albums) == 1:
-                    App().player.remove_album(self.__album)
-                    App().player.next()
-                else:
-                    App().player.skip_album()
-                    App().player.remove_album(self.__album)
-            else:
-                App().player.remove_album(self.__album)
             from lollypop.view_playlists import PlaylistsView
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
                 view.remove_from_playlist(self.__album)
             self.destroy()
-
-    def __on_save_button_press(self, x, y, event):
-        """
-            Show row menu
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
-        """
-        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-            return True
-        if self.__album.storage_type & StorageType.EPHEMERAL:
-            for artist in self.__album.artists:
-                App().art.cache_artist_artwork(artist)
-            self.__album.save(True)
-            self.__gesture_save.widget.set_sensitive(False)
-
-    def __on_play_button_press(self, x, y, event):
-        """
-            Show row menu
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
-        """
-        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-            return True
-        App().player.play_album(self.__album)
-
-    def __on_menu_button_press(self, x, y, event):
-        """
-            Show row menu
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
-        """
-        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
-            return True
-        self.__popup_menu(self.__gesture_menu.widget)
