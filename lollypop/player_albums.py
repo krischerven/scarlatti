@@ -135,6 +135,20 @@ class AlbumsPlayer:
         """
         self.play_album_for_albums(album, [album])
 
+    def play_albums(self, albums):
+        """
+            Play albums
+            @param album as [Album]
+        """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
+        if App().settings.get_value("shuffle"):
+            album = choice(albums)
+        else:
+            album = albums[0]
+        self.play_album_for_albums(album, albums)
+
     def play_track_for_albums(self, track, albums):
         """
             Play track and set albums as current playlist
@@ -162,20 +176,6 @@ class AlbumsPlayer:
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
-
-    def play_albums(self, albums):
-        """
-            Play albums
-            @param album as [Album]
-        """
-        if not albums:
-            App().notify.send(_("No album available"))
-            return
-        if App().settings.get_value("shuffle"):
-            album = choice(albums)
-        else:
-            album = albums[0]
-        self.play_album_for_albums(album, albums)
 
     def set_albums(self, albums, signal=True):
         """

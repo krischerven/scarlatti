@@ -73,6 +73,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 "_on_artist_artwork_changed"),
                (App().player, "playback-added", "_on_playback_changed"),
                (App().player, "playback-updated", "_on_playback_changed"),
+               (App().player, "playback-setted", "_on_playback_changed"),
                (App().player, "playback-removed", "_on_playback_changed"),
                (App().settings, "changed::artist-artwork",
                 "_on_artist_artwork_setting_changed")

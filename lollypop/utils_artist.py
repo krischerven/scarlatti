@@ -60,16 +60,19 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
                                                     artist_ids,
                                                     storage_type,
                                                     False)
-        for album_id in album_ids:
-            if add and album_id not in App().player.album_ids:
-                App().player.add_album(
-                    Album(album_id, genre_ids, artist_ids, False))
-            elif not add and album_id in App().player.album_ids:
-                App().player.remove_album_by_id(album_id)
-        if len(App().player.album_ids) == 0:
-            App().player.stop()
-        elif App().player.current_track.album.id\
-                not in App().player.album_ids:
-            App().player.skip_album()
+        if add:
+            albums = []
+            for album_id in album_ids:
+                if album_id not in App().player.album_ids:
+                    album = Album(album_id, genre_ids, artist_ids, False)
+                    albums.append(album)
+            App().player.add_albums(albums)
+        else:
+            App().player.remove_album_by_ids(album_ids)
+            if len(App().player.album_ids) == 0:
+                App().player.stop()
+            elif App().player.current_track.album.id\
+                    not in App().player.album_ids:
+                App().player.skip_album()
     except Exception as e:
         Logger.error("add_artist_to_playback(): %s" % e)
