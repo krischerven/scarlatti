@@ -48,7 +48,7 @@ class YouTubeWebHelper(BaseWebHelper):
             (path, env) = get_youtube_dl()
             # Remove playlist args
             uri = sub("list=.*", "", uri)
-            argv = [path, "-g", "-f", "bestaudio", uri]
+            argv = [path, "--no-cache-dir", "-g", "-f", "bestaudio", uri]
             if proxy is not None:
                 argv += ["--proxy", proxy, None]
             else:
