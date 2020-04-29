@@ -530,7 +530,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                         continue
                     db_mtime = db_mtimes.get(uri, 0)
                     if mtime > db_mtime:
-                        # If not saved, use 0 as mtime, easy delete on quit
                         # Do not use mtime if not intial scan
                         if db_mtimes:
                             mtime = int(time())
