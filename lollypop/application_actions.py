@@ -225,6 +225,8 @@ class ApplicationActions:
             App().window.unmaximize()
             App().window.resize(1, 1)
         else:
+            if App().window.miniplayer is not None:
+                App().window.miniplayer.reveal(False)
             size = App().settings.get_value("window-size")
             maximized = App().settings.get_value("window-maximized")
             App().window.resize(size[0], size[1])
