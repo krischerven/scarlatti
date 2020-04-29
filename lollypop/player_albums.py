@@ -157,7 +157,7 @@ class AlbumsPlayer:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self._albums = albums
         self.load(track)
-        emit_signal(self, "playback-setted", albums)
+        emit_signal(self, "playback-setted", list(albums))
 
     def play_album_for_albums(self, album, albums):
         """
@@ -186,7 +186,7 @@ class AlbumsPlayer:
             return
         self._albums = albums
         if signal:
-            emit_signal(self, "playback-setted", albums)
+            emit_signal(self, "playback-setted", list(albums))
         self.update_next_prev()
 
     def clear_albums(self):
@@ -285,7 +285,7 @@ class AlbumsPlayer:
         else:
             track = None
         self._albums = albums
-        emit_signal(self, "playback-setted", albums)
+        emit_signal(self, "playback-setted", list(albums))
         if track is not None:
             self.load(track)
         else:
@@ -304,7 +304,7 @@ class AlbumsPlayer:
         else:
             track = None
         self._albums = albums
-        emit_signal(self, "playback-setted", albums)
+        emit_signal(self, "playback-setted", list(albums))
         if track is not None:
             self.load(track)
         else:
