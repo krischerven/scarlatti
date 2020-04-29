@@ -62,7 +62,7 @@
     <property name="vexpand">False</property>
     <property name="spacing">6</property>
     <child>
-      <object class="GtkToggleButton" id="appmenu_button">
+      <object class="GtkToggleButton" id="menu_button">
         <property name="can_focus">True</property>
 	<property name="visible">True</property>
         <property name="receives_default">True</property>
@@ -88,7 +88,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkToggleButton" id="shuffle_button">
+      <object class="GtkToggleButton" id="playback_button">
         <property name="visible">True</property>
         <property name="valign">center</property>
         <property name="can_focus">False</property>

@@ -69,25 +69,72 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__vgrid.add(self.__container)
         self.add(self.__vgrid)
 
+    def show_miniplayer(self, show, reveal=False):
+        """
+            Show/hide subtoolbar
+            @param show as bool
+            @param reveal as bool
+        """
+        def show_buttons(show):
+            if show:
+                if self.is_adaptive:
+                    self.toolbar.end.home_button.show()
+                self.toolbar.end.menu_button.show()
+                self.toolbar.end.playback_button.show()
+                self.toolbar.end.devices_button.show()
+                self.toolbar.playback.back_button.show()
+            else:
+                self.toolbar.end.home_button.hide()
+                self.toolbar.end.menu_button.hide()
+                self.toolbar.end.playback_button.hide()
+                self.toolbar.end.devices_button.hide()
+                self.toolbar.playback.back_button.hide()
+
+        def on_revealed(miniplayer, revealed):
+            miniplayer.set_vexpand(revealed)
+            show_buttons(not revealed)
+            if revealed:
+                self.__container.hide()
+                emit_signal(self.__container, "can-go-back-changed", False)
+            else:
+                self.__container.show()
+                emit_signal(self.__container, "can-go-back-changed",
+                            self.__container.can_go_back)
+        if show and self.__miniplayer is None:
+            from lollypop.miniplayer import MiniPlayer
+            self.__miniplayer = MiniPlayer()
+            if App().player.current_track.id is not None:
+                self.__miniplayer.show()
+            self.__miniplayer.connect("revealed", on_revealed)
+            self.__vgrid.add(self.__miniplayer)
+            self.__miniplayer.set_vexpand(False)
+            if reveal:
+                self.__miniplayer.reveal(True)
+            else:
+                self.__miniplayer.update_artwork()
+        elif not show and self.__miniplayer is not None:
+            self.__miniplayer.destroy()
+            self.__miniplayer = None
+            self.__container.show()
+            show_buttons(True)
+
     @property
     def miniplayer(self):
         """
-            True if miniplayer is on
-            @return bool
+            @return MiniPlayer
         """
-        return self.__miniplayer is not None
+        return self.__miniplayer
 
     @property
     def toolbar(self):
         """
-            toolbar as Toolbar
+            @return Toolbar
         """
         return self.__toolbar
 
     @property
     def container(self):
         """
-            Get container
             @return Container
         """
         return self.__container
@@ -117,6 +164,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param y as int
         """
         AdaptiveWindow._on_configure_event_timeout(self, width, height, x, y)
+        if App().lookup_action("miniplayer").get_state():
+            return
         if not self.is_maximized():
             # Keep a minimal height
             if height < AdaptiveSize.SMALL:
@@ -146,35 +195,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         except Exception as e:
             Logger.error("Window::__setup_size_and_position(): %s", e)
 
-    def __show_miniplayer(self, show):
-        """
-            Show/hide subtoolbar
-            @param show as bool
-        """
-        def on_revealed(miniplayer, revealed):
-            miniplayer.set_vexpand(revealed)
-            if revealed:
-                self.__container.hide()
-                emit_signal(self.__container, "can-go-back-changed", False)
-                self.toolbar.end.home_button.set_sensitive(False)
-            else:
-                self.__container.show()
-                emit_signal(self.__container, "can-go-back-changed",
-                            self.__container.can_go_back)
-                self.toolbar.end.home_button.set_sensitive(True)
-        if show and self.__miniplayer is None:
-            from lollypop.miniplayer import MiniPlayer
-            self.__miniplayer = MiniPlayer()
-            if App().player.current_track.id is not None:
-                self.__miniplayer.show()
-            self.__miniplayer.connect("revealed", on_revealed)
-            self.__miniplayer.set_vexpand(False)
-            self.__vgrid.add(self.__miniplayer)
-        elif not show and self.__miniplayer is not None:
-            self.__miniplayer.destroy()
-            self.__miniplayer = None
-            self.__container.show()
-
     def __on_realize(self, window):
         """
             Init window content
@@ -201,9 +221,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         """
             Save maximised state
         """
-        App().settings.set_boolean("window-maximized",
-                                   "GDK_WINDOW_STATE_MAXIMIZED" in
-                                   event.new_window_state.value_names)
+        if not App().lookup_action("miniplayer").get_state():
+            App().settings.set_boolean("window-maximized",
+                                       "GDK_WINDOW_STATE_MAXIMIZED" in
+                                       event.new_window_state.value_names)
 
     def __on_adaptive_size_changed(self, window, adaptive_size):
         """
@@ -211,10 +232,10 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param window as Gtk.Window
             @param adaptive_size as AdaptiveSize
         """
-        self.__show_miniplayer(adaptive_size & (AdaptiveSize.PHONE |
-                                                AdaptiveSize.SMALL |
-                                                AdaptiveSize.MEDIUM |
-                                                AdaptiveSize.NORMAL))
+        self.show_miniplayer(adaptive_size & (AdaptiveSize.PHONE |
+                                              AdaptiveSize.SMALL |
+                                              AdaptiveSize.MEDIUM |
+                                              AdaptiveSize.NORMAL))
 
     def __on_destroy(self, widget):
         """

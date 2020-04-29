@@ -36,7 +36,6 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         builder.add_from_resource("/org/gnome/Lollypop/Appmenu.ui")
         widget = builder.get_object("widget")
         self.add(widget)
-        self.__equalizer_button = builder.get_object("equalizer_button")
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
         builder.connect_signals(self)
@@ -60,7 +59,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         if popover is not None:
             popover.popdown()
         else:
-            emit_signal(self, "hidden", button != self.__equalizer_button)
+            emit_signal(self, "hidden", True)
 
     def _emit_hidden(self, button):
         """
