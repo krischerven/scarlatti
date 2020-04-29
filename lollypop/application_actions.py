@@ -213,19 +213,25 @@ class ApplicationActions:
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
-        App().window.hide()
+        def replace_window():
+            App().window.hide()
+            App().window.show()
+            App().window.set_opacity(1)
+
+        App().window.set_opacity(0)
         action.set_state(value)
         if value:
             App().window.show_miniplayer(True, True)
             App().window.unmaximize()
-            GLib.idle_add(App().window.resize, 1, 1)
+            App().window.resize(1, 1)
         else:
             size = App().settings.get_value("window-size")
             maximized = App().settings.get_value("window-maximized")
             App().window.resize(size[0], size[1])
             if maximized:
                 GLib.idle_add(App().window.maximize)
-        GLib.idle_add(App().window.show)
+        # Big hack, wait unmaximize/maximize to finish
+        GLib.timeout_add(250, replace_window)
 
     def __on_settings_activate(self, action, value):
         """
