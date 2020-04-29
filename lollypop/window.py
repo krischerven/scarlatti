@@ -100,6 +100,7 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                 self.__container.show()
                 emit_signal(self.__container, "can-go-back-changed",
                             self.__container.can_go_back)
+
         if show and self.__miniplayer is None:
             from lollypop.miniplayer import MiniPlayer
             self.__miniplayer = MiniPlayer()
@@ -108,15 +109,16 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__miniplayer.connect("revealed", on_revealed)
             self.__vgrid.add(self.__miniplayer)
             self.__miniplayer.set_vexpand(False)
-            if reveal:
-                self.__miniplayer.reveal(True)
-            else:
-                self.__miniplayer.update_artwork()
         elif not show and self.__miniplayer is not None:
             self.__miniplayer.destroy()
             self.__miniplayer = None
             self.__container.show()
             show_buttons(True)
+        if self.__miniplayer is not None:
+            if reveal:
+                self.__miniplayer.reveal(True)
+            else:
+                self.__miniplayer.update_artwork()
 
     @property
     def miniplayer(self):

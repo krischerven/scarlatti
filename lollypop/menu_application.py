@@ -38,6 +38,8 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         self.add(widget)
         self.__volume = builder.get_object("volume")
         self.__volume.set_value(App().player.volume)
+        if App().window.is_adaptive:
+            builder.get_object("miniplayer_button").hide()
         builder.connect_signals(self)
         if App().settings.get_value("background-mode"):
             builder.get_object("quit_button").show()
