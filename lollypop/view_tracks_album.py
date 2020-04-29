@@ -77,6 +77,8 @@ class AlbumTracksView(TracksView):
             @param position as int
         """
         self._init()
+        if not self.is_populated:
+            self.populate()
         self.__album.append_track(track)
         for key in self._tracks_widget_left.keys():
             self._add_tracks(self._tracks_widget_left[key], [track])
@@ -89,6 +91,8 @@ class AlbumTracksView(TracksView):
             @param tracks as [Track]
         """
         self._init()
+        if not self.is_populated:
+            self.populate()
         self.__album.append_tracks(tracks)
         for key in self._tracks_widget_left.keys():
             self._add_tracks(self._tracks_widget_left[key], tracks)

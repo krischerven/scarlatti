@@ -72,7 +72,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             track_ids = self.children[-1].album.track_ids
             for track in album.tracks:
                 if track.id not in track_ids:
-                    self.children[-1].append_track(track)
+                    self.children[-1].tracks_view.append_row(track)
         else:
             LazyLoadingView.populate(self, [album])
 
