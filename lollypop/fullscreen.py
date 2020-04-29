@@ -80,7 +80,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__buttons_widget.set_size_request(500, -1)
         self.__buttons_widget.set_property("valign", Gtk.Align.CENTER)
         self.__buttons_widget.set_property("halign", Gtk.Align.CENTER)
-        self.__artwork_widget = ArtworkPlayerWidget()
+        self.__artwork_widget = ArtworkPlayerWidget(
+            ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE)
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
         self.__artwork_widget.set_art_size(art_size, art_size)

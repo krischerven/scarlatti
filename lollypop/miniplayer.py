@@ -61,12 +61,14 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         buttons_widget.show()
         buttons_widget.update()
         buttons_widget.set_property("valign", Gtk.Align.CENTER)
-        self.__artwork_widget = ArtworkPlayerWidget()
+        self.__artwork_widget = ArtworkPlayerWidget(
+            ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE)
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
         if App().lookup_action("miniplayer").get_state():
             self.__artwork_widget.set_art_size(ArtSize.MEDIUM,
                                                ArtSize.MEDIUM)
+            self.__artwork_widget.set_opacity(0.5)
         else:
             self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
                                                ArtSize.MINIPLAYER)
@@ -123,7 +125,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             self.__revealer.set_reveal_child(False)
             emit_signal(self, "revealed", False)
             self.update_artwork()
-        self.__add_label_widget()
+        self.__set_widgets_position()
 
     def update_artwork(self):
         """
@@ -135,7 +137,8 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
                     ArtSize.SMALL,
                     ArtSize.SMALL,
                     self.__artwork_button.get_scale_factor(),
-                    ArtBehaviour.NONE,
+                    ArtBehaviour.CACHE |
+                    ArtBehaviour.CROP_SQUARE,
                     self.__on_button_artwork)
 
     def do_get_preferred_width(self):
@@ -219,7 +222,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __add_label_widget(self):
+    def __set_widgets_position(self):
         """
             Add label widget to wanted UI part
         """

@@ -27,7 +27,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
     def __init__(self, behaviour=ArtBehaviour.CACHE):
         """
             Init artwork
-            @param effect as effect=ArtBehaviour
+            @param behaviour as ArtBehaviour
         """
         Gtk.Image.__init__(self)
         self.__behaviour = behaviour
