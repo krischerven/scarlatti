@@ -19,10 +19,10 @@ from lollypop.logger import Logger
 from lollypop.define import App
 
 
-def is_audio(f):
+def is_audio(info):
     """
         Return True if files is audio
-        @param f as Gio.File
+        @param info as Gio.FileInfo
     """
     audio = ["application/ogg", "application/x-ogg", "application/x-ogm-audio",
              "audio/aac", "audio/mp4", "audio/mpeg", "audio/mpegurl",
@@ -39,32 +39,21 @@ def is_audio(f):
              "audio/x-matroska", "audio/x-wavpack", "video/mp4",
              "audio/x-mod", "audio/x-mo3", "audio/x-xm", "audio/x-s3m",
              "audio/x-it", "audio/aiff", "audio/x-aiff"]
-    try:
-        info = f.query_info("standard::content-type",
-                            Gio.FileQueryInfoFlags.NONE)
-        if info is not None:
-            content_type = info.get_content_type()
-            if content_type in audio:
-                return True
-    except Exception as e:
-        Logger.error("is_audio: %s", e)
+    if info is not None:
+        if info.get_content_type() in audio:
+            return True
     return False
 
 
-def is_pls(f):
+def is_pls(info):
     """
         Return True if files is a playlist
-        @param f as Gio.File
+        @param info as Gio.FileInfo
     """
-    try:
-        info = f.query_info("standard::content-type",
-                            Gio.FileQueryInfoFlags.NONE)
-        if info is not None:
-            if info.get_content_type() in ["audio/x-mpegurl",
-                                           "application/xspf+xml"]:
-                return True
-    except:
-        pass
+    if info is not None:
+        if info.get_content_type() in ["audio/x-mpegurl",
+                                       "application/xspf+xml"]:
+            return True
     return False
 
 

@@ -497,12 +497,14 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         try:
             f = Gio.File.new_for_uri(uri)
+            info = f.query_info("standard::content-type",
+                                Gio.FileQueryInfoFlags.NONE)
             # Scan file
-            if is_pls(f):
+            if is_pls(info):
                 # Import playlist
                 if App().settings.get_value("import-playlists"):
                     App().playlists.import_tracks(f)
-            elif is_audio(f):
+            elif is_audio(info):
                 return True
             else:
                 Logger.debug("Not detected as a music file: %s" % f.get_uri())
@@ -527,6 +529,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                     raise Exception("cancelled")
                 try:
                     if not self.__scan_to_handle(uri):
+                        # Scan + Save
+                        self.__progress_count += 2
                         continue
                     db_mtime = db_mtimes.get(uri, 0)
                     if mtime > db_mtime:
@@ -535,9 +539,12 @@ class CollectionScanner(GObject.GObject, TagReader):
                             mtime = int(time())
                         self.__tags[uri] = self.__get_tags(discoverer,
                                                            uri, mtime)
+                        self.__progress_count += 1
+                    else:
+                        # Scan + Save
+                        self.__progress_count += 2
                 except Exception as e:
                     Logger.error("Scanning file: %s, %s" % (uri, e))
-                self.__progress_count += 1
                 self.__update_progress(self.__progress_count,
                                        self.__progress_total)
         except Exception as e:
