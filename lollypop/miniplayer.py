@@ -64,8 +64,12 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__artwork_widget = ArtworkPlayerWidget()
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
-        self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
-                                           ArtSize.MINIPLAYER)
+        if App().lookup_action("miniplayer").get_state():
+            self.__artwork_widget.set_art_size(ArtSize.MEDIUM,
+                                               ArtSize.MEDIUM)
+        else:
+            self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
+                                               ArtSize.MINIPLAYER)
         self.__label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN)
         self.__label_box.show()
         self.__label_widget = LabelPlayerWidget(False, 9)

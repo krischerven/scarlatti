@@ -218,7 +218,7 @@ class ApplicationActions:
         if value:
             App().window.show_miniplayer(True, True)
             App().window.unmaximize()
-            App().window.resize(1, 1)
+            GLib.idle_add(App().window.resize, 1, 1)
         else:
             size = App().settings.get_value("window-size")
             maximized = App().settings.get_value("window-maximized")
