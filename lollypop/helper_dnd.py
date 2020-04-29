@@ -79,6 +79,7 @@ class DNDHelper(GObject.Object):
                 return False
             if row1.album.id == row2.album.id:
                 row1.tracks_view.append_rows(row2.album.tracks)
+                row1.reveal(True)
                 return True
             return False
 
