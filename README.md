@@ -44,7 +44,6 @@ It provides:
 - `python-cairo`
 - `python-gobject`
 - `python-sqlite`
-- `python-pylast >= 1.0`
 - `beautifulsoup4`
 
 ## Building from Git
@@ -54,13 +53,6 @@ $ git clone https://gitlab.gnome.org/World/lollypop.git
 $ cd lollypop
 $ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
-```
-
-Installation of `pylast` is required for integration with [Last.fm](http://last.fm) 
-
-```bash
-# apt-get install python3-pip
-# pip3 install pylast
 ```
 
 ### On Debian/Ubuntu
