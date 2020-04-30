@@ -61,7 +61,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         geometry = screen.get_monitor_geometry(monitor)
         art_size_fs = ArtSize.FULLSCREEN / self.get_scale_factor()
-        font_size_fs = 40 / self.get_scale_factor()
+        font_size_fs = 30 / self.get_scale_factor()
         if geometry.width > geometry.height:
             art_size = int(art_size_fs * geometry.height / 1080)
             font_size = int(font_size_fs * geometry.height / 1080)
