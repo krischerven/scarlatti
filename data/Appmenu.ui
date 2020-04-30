@@ -175,10 +175,17 @@
           </packing>
         </child>
         <child>
-          <object class="GtkImage">
+          <object class="GtkEventBox" id="volume_mute_box">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="icon_name">audio-speakers-symbolic</property>
+            <property name="can_focus">True</property>
+            <signal name="button-press-event" handler="_mute_volume" swapped="no"/>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">audio-speakers-symbolic</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
