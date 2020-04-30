@@ -411,8 +411,8 @@ class TagReader:
                     date = get_iso_date_from_string(sample[13:])
                     datetime = GLib.DateTime.new_from_iso8601(date, None)
                     return (datetime.get_year(), datetime.to_unix())
-            except Exception as e:
-                print(e)
+            except:
+                pass
             return (None, None)
 
         if tags is None:
@@ -420,7 +420,6 @@ class TagReader:
         values = get_id3()
         if values[0] is None:
             values = get_ogg()
-        print(values)
         return values
 
     def get_bpm(self, tags):
