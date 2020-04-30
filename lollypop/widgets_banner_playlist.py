@@ -102,8 +102,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         """
         duration = 0
         for child in view.children:
-            for track in child.album.tracks:
-                duration += track.duration
+            duration += child.album.duration
         self.__duration_label.set_text(get_human_duration(duration))
 
     def _on_play_button_clicked(self, button):
