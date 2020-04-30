@@ -11,6 +11,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from hashlib import md5
+
 from lollypop.define import App, StorageType, ScanUpdate
 from lollypop.objects_track import Track
 from lollypop.objects import Base
@@ -113,7 +115,6 @@ class Album(Base):
                 "year": None,
                 "timestamp": 0,
                 "uri": "",
-                "duration": 0,
                 "popularity": 0,
                 "mtime": 1,
                 "synced": 0,
@@ -433,6 +434,29 @@ class Album(Base):
                 if disc.tracks:
                     self._discs.append(disc)
         return self._discs
+
+    @property
+    def duration(self):
+        """
+            Get album duration and handle caching
+            @return int
+        """
+        if not self._tracks:
+            album_hash = "%s-%s-%s" % (self.lp_album_id,
+                                       self.genre_ids,
+                                       self.artist_ids)
+        else:
+            track_ids = [track.lp_track_id for track in self.tracks]
+            track_str = "%s" % sorted(track_ids)
+            track_hash = md5(track_str.encode("utf-8")).hexdigest()
+            album_hash = "%s-%s" % (self.lp_album_id, track_hash)
+        duration = App().cache.get_duration(album_hash)
+        if duration is None:
+            duration = self.db.get_duration(self.id,
+                                            self.genre_ids,
+                                            self.artist_ids)
+            App().cache.set_duration(self.id, album_hash, duration)
+        return duration
 
 #######################
 # PRIVATE             #

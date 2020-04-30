@@ -74,9 +74,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if album.year is not None:
             self.__year_label.set_label(str(album.year))
             self.__year_label.show()
-        duration = App().albums.get_duration(self.__album.id,
-                                             self.__album.genre_ids)
-        human_duration = get_human_duration(duration)
+        human_duration = get_human_duration(album.duration)
         self.__duration_label.set_text(human_duration)
         artist_eventbox = builder.get_object("artist_eventbox")
         artist_eventbox.connect("realize", set_cursor_type)

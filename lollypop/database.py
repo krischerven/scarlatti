@@ -10,14 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gio
+from gi.repository import Gio
 
 import sqlite3
 from threading import Lock
 from random import shuffle
 import itertools
 
-from lollypop.define import App
+from lollypop.define import App, LOLLYPOP_DATA_PATH
 from lollypop.database_upgrade import DatabaseAlbumsUpgrade
 from lollypop.sqlcursor import SqlCursor
 from lollypop.logger import Logger
@@ -50,8 +50,8 @@ class Database:
     """
         Base database object
     """
-    __LOCAL_PATH = GLib.get_user_data_dir() + "/lollypop"
-    DB_PATH = "%s/lollypop.db" % __LOCAL_PATH
+
+    DB_PATH = "%s/lollypop.db" % LOLLYPOP_DATA_PATH
 
     # SQLite documentation:
     # In SQLite, a column with type INTEGER PRIMARY KEY
@@ -135,7 +135,7 @@ class Database:
         upgrade = DatabaseAlbumsUpgrade()
         if not f.query_exists():
             try:
-                d = Gio.File.new_for_path(self.__LOCAL_PATH)
+                d = Gio.File.new_for_path(LOLLYPOP_DATA_PATH)
                 if not d.query_exists():
                     d.make_directory_with_parents()
                 # Create db schema
