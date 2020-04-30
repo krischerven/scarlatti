@@ -30,7 +30,7 @@ def get_file_type(uri):
              "ogg", "opus", "ra", "raw", "rf64", "sln", "tta", "voc", "vox",
              "wav", "wma", "wv", "webm", "8svx", "cda"]
     compress = ["7z", "arj", "deb", "pkg", "rar", "rpm", "tar.gz", "z", "zip"]
-    image = ["ai", "bmp", "gif", "ico", "jpeg",
+    image = ["ai", "bmp", "gif", "ico", "jpeg", "jpg",
              "png", "ps", "psd", "svg", "tif"]
     pls = ["pls", "m3u"]
     split = uri.lower().split(".")
