@@ -29,7 +29,9 @@ def get_file_type(uri):
              "m4a", "m4b", "m4p", "mmf", "mp3", "mpc", "msv", "nmf", "nsf",
              "ogg", "opus", "ra", "raw", "rf64", "sln", "tta", "voc", "vox",
              "wav", "wma", "wv", "webm", "8svx", "cda"]
-    compress = ["7z", "arj", "deb", "pkg", "rar", "rpm", "tar.gz", "z", "zip"]
+    other = ["7z", "arj", "deb", "pkg", "rar", "rpm", "tar.gz", "z", "zip",
+             "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "db", "txt",
+             "mov", "avi", "html", "ini", "cue", "nfo", "lrc"]
     image = ["ai", "bmp", "gif", "ico", "jpeg", "jpg",
              "png", "ps", "psd", "svg", "tif"]
     pls = ["pls", "m3u"]
@@ -40,7 +42,7 @@ def get_file_type(uri):
         return FileType.AUDIO
     elif split[-1] in pls:
         return FileType.PLS
-    elif split[-1] in image + compress:
+    elif split[-1] in image + other:
         return FileType.OTHER
     else:
         return FileType.UNKNOWN
