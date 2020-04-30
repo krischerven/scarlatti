@@ -94,8 +94,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__label_widget.set_justify(Gtk.Justification.CENTER)
         eventbox = Gtk.EventBox.new()
         eventbox.show()
-        eventbox.set_property("valign", Gtk.Align.END)
-        eventbox.set_property("halign", Gtk.Align.END)
         eventbox.connect("button-release-event",
                          self.__on_image_button_release_event)
         eventbox.connect("realize", self.__on_image_realize)
@@ -111,6 +109,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             self.__overlay_grid.attach(eventbox, 2, 2, 1, 3)
             self.__progress_widget.set_margin_start(50)
             eventbox.set_margin_end(50)
+            eventbox.set_property("valign", Gtk.Align.END)
+            eventbox.set_property("halign", Gtk.Align.END)
             self.__label_widget.set_margin_start(50)
             self.__label_widget.set_property("valign", Gtk.Align.END)
             self.__artwork_widget.set_property("valign", Gtk.Align.END)
