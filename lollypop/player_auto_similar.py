@@ -101,6 +101,28 @@ class AutoSimilarPlayer:
             similars = DeezerSimilars()
             self.__load_similars(similars, artist_ids)
 
+    def play_radio_from_loved(self, artist_ids):
+        """
+            Play a radio from artists loved tracks
+            @param artist_ids as [int]
+        """
+        track_ids = App().tracks.get_loved_track_ids(artist_ids,
+                                                     StorageType.ALL)
+        shuffle(track_ids)
+        albums = tracks_to_albums([Track(track_id) for track_id in track_ids])
+        App().player.play_albums(albums)
+
+    def play_radio_from_populars(self, artist_ids):
+        """
+            Play a radio from artists popular tracks
+            @param artist_ids as [int]
+        """
+        track_ids = App().tracks.get_populars(artist_ids, StorageType.ALL,
+                                              False, 100)
+        shuffle(track_ids)
+        albums = tracks_to_albums([Track(track_id) for track_id in track_ids])
+        App().player.play_albums(albums)
+
     def _on_stream_start(self, bus, message):
         """
             Cancel radio loading if current not a web track

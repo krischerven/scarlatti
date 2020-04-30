@@ -290,9 +290,8 @@ class Playlists(GObject.GObject):
         limit = App().settings.get_value("view-limit").get_int32()
         storage_type = get_default_storage_type()
         if playlist_id == Type.POPULARS:
-            track_ids = App().tracks.get_rated(storage_type, False, limit)
-            for track in App().tracks.get_populars(storage_type, False, limit):
-                track_ids.append(track)
+            track_ids = App().tracks.get_populars([], storage_type,
+                                                  False, limit)
         elif playlist_id == Type.RECENTS:
             track_ids = App().tracks.get_recently_listened_to(storage_type,
                                                               False,
@@ -307,7 +306,7 @@ class Playlists(GObject.GObject):
         elif playlist_id == Type.ALL:
             track_ids = App().tracks.get_ids(storage_type, False)
         elif playlist_id == Type.LOVED:
-            track_ids = App().tracks.get_loved_track_ids(storage_type)
+            track_ids = App().tracks.get_loved_track_ids([], storage_type)
         else:
             with SqlCursor(self) as sql:
                 result = sql.execute("SELECT music.tracks.rowid\

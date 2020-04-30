@@ -601,41 +601,82 @@ class TracksDatabase:
                 return v[0] == 0
             return True
 
-    def get_rated(self, storage_type, skipped, limit):
+    def get_loved_track_ids(self, artist_ids, storage_type):
         """
-            Return tracks with rate >= 4
+            Get loved track ids
             @param storage_type as StorageType
-            @param skipped as bool
-            @param limit as int
-            @return tracks as [int]
+            @return [int]
         """
         with SqlCursor(self.__db) as sql:
-            request = "SELECT rowid FROM tracks\
-                       WHERE rate >= 4 AND storage_type & ?"
-            if not skipped:
-                request += " AND loved != -1 "
-            request += " ORDER BY popularity DESC LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
+            filters = (storage_type,)
+            request = "SELECT tracks.rowid\
+                       FROM tracks, album_artists, artists\
+                       WHERE loved=1 AND\
+                       artists.rowid=album_artists.artist_id AND\
+                       tracks.album_id=album_artists.album_id AND\
+                       storage_type & ?"
+            if artist_ids:
+                filters += tuple(artist_ids)
+                request += " AND "
+                request += make_subrequest("album_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
+            request += "GROUP BY artists.rowid, tracks.album_id\
+                        ORDER BY artists.name"
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
-    def get_populars(self, storage_type, skipped, limit):
+    def get_populars(self, artist_ids, storage_type, skipped, limit):
         """
             Return populars tracks
+            @param artist_ids as int
             @param storage_type as StorageType
             @param skipped as bool
             @param limit as int
-            @return tracks as [int]
+            @return track ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            request = "SELECT rowid FROM tracks\
-                       WHERE popularity!=0 AND\
-                       mtime != 0 AND\
-                       storage_type & ?"
+            filters = (storage_type,)
+            request = "SELECT tracks.rowid FROM"
+            if artist_ids:
+                request += " tracks, track_artists "
+            else:
+                request += " tracks "
+            request += "WHERE rate >= 4 AND storage_type & ?"
+            if artist_ids:
+                filters += tuple(artist_ids)
+                request += " AND track_artists.track_id=tracks.rowid AND"
+                request += make_subrequest("track_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
             if not skipped:
                 request += " AND loved != -1 "
+            filters += (limit,)
             request += " ORDER BY popularity DESC LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
-            return list(itertools.chain(*result))
+            result = sql.execute(request, filters)
+            track_ids = list(itertools.chain(*result))
+            if len(track_ids) < limit:
+                filters = (storage_type,)
+                request = "SELECT tracks.rowid FROM"
+                if artist_ids:
+                    request += " tracks, track_artists "
+                else:
+                    request += " tracks "
+                request += "WHERE popularity!=0 AND\
+                            storage_type & ?"
+                if artist_ids:
+                    filters += tuple(artist_ids)
+                    request += " AND track_artists.track_id=tracks.rowid AND"
+                    request += make_subrequest("track_artists.artist_id=?",
+                                               "OR",
+                                               len(artist_ids))
+                if not skipped:
+                    request += " AND loved != -1 "
+                filters += (limit,)
+                request += " ORDER BY popularity DESC LIMIT ?"
+                result = sql.execute(request, filters)
+                track_ids += list(itertools.chain(*result))
+            return list(set(track_ids))
 
     def get_higher_popularity(self):
         """
@@ -794,24 +835,6 @@ class TracksDatabase:
             if v is not None:
                 return v[0]
             return 0
-
-    def get_loved_track_ids(self, storage_type):
-        """
-            Get loved track ids
-            @param storage_type as StorageType
-            @return [int]
-        """
-        with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks, album_artists, artists\
-                                  WHERE loved=1 AND\
-                                  artists.rowid=album_artists.artist_id AND\
-                                  tracks.album_id=album_artists.album_id AND\
-                                  storage_type & ?\
-                                  GROUP BY artists.rowid, tracks.album_id\
-                                  ORDER BY artists.name",
-                                 (storage_type,))
-            return list(itertools.chain(*result))
 
     def get_ltime(self, track_id):
         """
