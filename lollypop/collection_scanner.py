@@ -27,12 +27,13 @@ from multiprocessing import cpu_count
 from lollypop.collection_item import CollectionItem
 from lollypop.inotify import Inotify
 from lollypop.define import App, ScanType, Type, StorageType, ScanUpdate
+from lollypop.define import FileType
 from lollypop.sqlcursor import SqlCursor
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.logger import Logger
 from lollypop.database_history import History
 from lollypop.objects_track import Track
-from lollypop.utils_file import is_audio, is_pls, get_mtime
+from lollypop.utils_file import is_audio, is_pls, get_mtime, get_file_type
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import emit_signal, profile, split_list
 from lollypop.utils import get_lollypop_album_id, get_lollypop_track_id
@@ -325,9 +326,12 @@ class CollectionScanner(GObject.GObject, TagReader):
             Update progress bar status
             @param scanned items as int, total items as int
         """
-        GLib.idle_add(App().window.container.progress.set_fraction,
-                      current / total,
-                      self)
+        # Do not flood main loop
+        modulo = 100 if total > 1000 else 10
+        if current % modulo == 0:
+            GLib.idle_add(App().window.container.progress.set_fraction,
+                          current / total,
+                          self)
 
     def __finish(self, new_track_ids):
         """
@@ -496,18 +500,23 @@ class CollectionScanner(GObject.GObject, TagReader):
             @return bool
         """
         try:
-            f = Gio.File.new_for_uri(uri)
-            info = f.query_info("standard::content-type",
-                                Gio.FileQueryInfoFlags.NONE)
-            # Scan file
-            if is_pls(info):
-                # Import playlist
+            file_type = get_file_type(uri)
+            # Get file type using Gio (slower)
+            if file_type == FileType.UNKNOWN:
+                f = Gio.File.new_for_uri(uri)
+                info = f.query_info("standard::content-type",
+                                    Gio.FileQueryInfoFlags.NONE)
+                if is_pls(info):
+                    file_type = FileType.PLS
+                elif is_audio(info):
+                    file_type = FileType.AUDIO
+            if file_type == FileType.PLS:
+                Logger.debug("Importing playlist %s" % uri)
                 if App().settings.get_value("import-playlists"):
-                    App().playlists.import_tracks(f)
-            elif is_audio(info):
+                    App().playlists.import_tracks(uri)
+            elif file_type == FileType.AUDIO:
+                Logger.debug("Importing audio %s" % uri)
                 return True
-            else:
-                Logger.debug("Not detected as a music file: %s" % f.get_uri())
         except Exception as e:
             Logger.error("CollectionScanner::__scan_to_handle(): %s" % e)
         return False

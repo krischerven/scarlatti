@@ -627,11 +627,12 @@ class Playlists(GObject.GObject):
             sql.execute("UPDATE playlists SET synced = synced & ~(1<<?)",
                         (index,))
 
-    def import_tracks(self, f):
+    def import_tracks(self, uri):
         """
             Import file as playlist
-            @param f as Gio.File
+            @param uri as str
         """
+        f = Gio.File.new_for_uri(uri)
         # Create playlist and get id
         basename = ".".join(f.get_basename().split(".")[:-1])
         playlist_id = self.get_id(basename)

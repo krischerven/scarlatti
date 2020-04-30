@@ -563,7 +563,7 @@ def profile(f):
         ret = f(*args, **kwargs)
 
         elapsed_time = time.perf_counter() - start_time
-        Logger.debug("%s::%s: execution time %d:%f" % (
+        Logger.info("%s::%s: execution time %d:%f" % (
             f.__module__, f.__name__, elapsed_time / 60, elapsed_time % 60))
 
         return ret

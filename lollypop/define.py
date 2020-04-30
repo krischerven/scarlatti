@@ -50,6 +50,13 @@ class TimeStamp:
     THREE_YEAR = 94608000
 
 
+class FileType:
+    UNKNOWN = 0
+    AUDIO = 1
+    PLS = 2
+    OTHER = 3
+
+
 class Repeat:
     NONE = 0
     AUTO_SIMILAR = 1

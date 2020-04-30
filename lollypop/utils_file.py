@@ -16,7 +16,34 @@ from gi.repository.Gio import FILE_ATTRIBUTE_TIME_ACCESS
 from time import time
 
 from lollypop.logger import Logger
-from lollypop.define import App
+from lollypop.define import App, FileType
+
+
+def get_file_type(uri):
+    """
+        Get file type from file extension
+        @param uri as str
+    """
+    audio = ["3gp", "aa", "aac", "aax", "act", "aiff", "alac", "amr", "ape",
+             "au", "awb", "dct", "dss", "dvf", "flac", "gsm", "iklax", "ivs",
+             "m4a", "m4b", "m4p", "mmf", "mp3", "mpc", "msv", "nmf", "nsf",
+             "ogg", "opus", "ra", "raw", "rf64", "sln", "tta", "voc", "vox",
+             "wav", "wma", "wv", "webm", "8svx", "cda"]
+    compress = ["7z", "arj", "deb", "pkg", "rar", "rpm", "tar.gz", "z", "zip"]
+    image = ["ai", "bmp", "gif", "ico", "jpeg",
+             "png", "ps", "psd", "svg", "tif"]
+    pls = ["pls", "m3u"]
+    split = uri.lower().split(".")
+    if len(split) < 2:
+        return FileType.UNKNOWN
+    elif split[-1] in audio:
+        return FileType.AUDIO
+    elif split[-1] in pls:
+        return FileType.PLS
+    elif split[-1] in image + compress:
+        return FileType.OTHER
+    else:
+        return FileType.UNKNOWN
 
 
 def is_audio(info):
