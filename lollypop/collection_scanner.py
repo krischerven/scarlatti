@@ -69,6 +69,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__history = History()
         self.__progress_total = 1
         self.__progress_count = 0
+        self.__progress_fraction = 0
         self.__disable_compilations = not App().settings.get_value(
                 "show-compilations")
         if App().settings.get_value("auto-update"):
@@ -321,17 +322,19 @@ class CollectionScanner(GObject.GObject, TagReader):
 #######################
 # PRIVATE             #
 #######################
-    def __update_progress(self, current, total):
+    def __update_progress(self, current, total, allowed_diff):
         """
             Update progress bar status
-            @param scanned items as int, total items as int
+            @param current as int
+            @param total as int
+            @param allowed_diff as float => allows to prevent
+                                            main loop flooding
         """
-        # Do not flood main loop
-        modulo = 100 if total > 1000 else 10
-        if current % modulo == 0:
+        new_fraction = current / total
+        if new_fraction > self.__progress_fraction + allowed_diff:
+            self.__progress_fraction = new_fraction
             GLib.idle_add(App().window.container.progress.set_fraction,
-                          current / total,
-                          self)
+                          new_fraction, self)
 
     def __finish(self, new_track_ids):
         """
@@ -445,6 +448,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # * 2 => Scan + Save
             self.__progress_total = len(files) * 2
             self.__progress_count = 0
+            self.__progress_fraction = 0
             # Min: 1 thread, Max: 5 threads
             count = max(1, min(5, cpu_count() // 2))
             split_files = split_list(files, count)
@@ -549,13 +553,17 @@ class CollectionScanner(GObject.GObject, TagReader):
                         self.__tags[uri] = self.__get_tags(discoverer,
                                                            uri, mtime)
                         self.__progress_count += 1
+                        self.__update_progress(self.__progress_count,
+                                               self.__progress_total,
+                                               0.001)
                     else:
                         # Scan + Save
                         self.__progress_count += 2
+                        self.__update_progress(self.__progress_count,
+                                               self.__progress_total,
+                                               0.1)
                 except Exception as e:
                     Logger.error("Scanning file: %s, %s" % (uri, e))
-                self.__update_progress(self.__progress_count,
-                                       self.__progress_total)
         except Exception as e:
             Logger.warning("CollectionScanner::__scan_files(): % s" % e)
 
@@ -578,7 +586,8 @@ class CollectionScanner(GObject.GObject, TagReader):
             track_ids.append(item.track_id)
             self.__progress_count += 1
             self.__update_progress(self.__progress_count,
-                                   self.__progress_total)
+                                   self.__progress_total,
+                                   0.001)
             if previous_album_id != item.album_id:
                 self.__notify_ui(items)
                 items = []
