@@ -45,6 +45,7 @@ class DatabaseUpgrade:
             @param db as Database
         """
         version = 0
+        SqlCursor.add(db)
         with SqlCursor(db, True) as sql:
             result = sql.execute("PRAGMA user_version")
             v = result.fetchone()
@@ -55,12 +56,15 @@ class DatabaseUpgrade:
                     try:
                         if isinstance(self._UPGRADES[i], str):
                             sql.execute(self._UPGRADES[i])
+                            SqlCursor.commit(db)
                         else:
                             self._UPGRADES[i](db)
+                            SqlCursor.commit(db)
                     except Exception as e:
                         Logger.error("DB upgrade %s failed: %s" %
                                      (i, e))
                 sql.execute("PRAGMA user_version=%s" % self.version)
+        SqlCursor.remove(db)
 
     @property
     def version(self):
