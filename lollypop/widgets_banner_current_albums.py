@@ -180,6 +180,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         GLib.idle_add(self.__clear_button.set_sensitive, sensitive)
         GLib.idle_add(self.__jump_button.set_sensitive, sensitive)
         GLib.idle_add(self.__menu_button.set_sensitive, sensitive)
+        self.__calculate_duration()
 
 #######################
 # PRIVATE             #

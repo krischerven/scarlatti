@@ -51,7 +51,11 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
         return [
-            (view, "initialized", "_on_view_initialized")
+            (view, "initialized", "_on_view_initialized"),
+            (App().player, "playback-added", "_on_playback_changed"),
+            (App().player, "playback-updated", "_on_playback_changed"),
+            (App().player, "playback-setted", "_on_playback_changed"),
+            (App().player, "playback-removed", "_on_playback_changed"),
         ]
 
     def update_for_width(self, width):
@@ -149,6 +153,13 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
             menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)
+
+    def _on_playback_changed(self, player, *ignore):
+        """
+            Update clear button state
+            @param player as Player
+        """
+        self.__calculate_duration()
 
 #######################
 # PRIVATE             #
