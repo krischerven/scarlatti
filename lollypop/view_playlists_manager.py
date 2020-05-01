@@ -45,7 +45,9 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             self.__banner.show()
             self.add_widget(self._box, self.__banner)
         return [
-            (App().playlists, "playlists-changed", "_on_playlist_changed")
+            (App().playlists, "playlists-added", "_on_playlist_added"),
+            (App().playlists, "playlists-removed", "_on_playlist_removed"),
+            (App().playlists, "playlists-renamed", "_on_playlist_renamed")
         ]
 
     def populate(self):
@@ -159,28 +161,39 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             return
         self.__popup_menu(child)
 
-    def _on_playlist_changed(self, playlists, playlist_id):
+    def _on_playlist_added(self, playlists, playlist_id):
         """
-            Update view based on playlist_id status
+            Add playlist
             @param playlists as Playlists
             @param playlist_id as int
         """
-        exists = playlists.exists(playlist_id)
-        if exists:
-            item = None
-            for child in self._box.get_children():
-                if child.data == playlist_id:
-                    item = child
-                    break
-            if item is None:
-                self.add_value(playlist_id)
-            else:
-                name = App().playlists.get_name(playlist_id)
-                item.rename(name)
-        else:
-            for child in self._box.get_children():
-                if child.data == playlist_id:
-                    child.destroy()
+        self.add_value(playlist_id)
+
+    def _on_playlist_removed(self, playlists, playlist_id):
+        """
+            Remove playlist
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        for child in self._box.get_children():
+            if child.data == playlist_id:
+                child.destroy()
+                break
+
+    def _on_playlist_renamed(self, playlists, playlist_id):
+        """
+            Rename playlist
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        item = None
+        for child in self._box.get_children():
+            if child.data == playlist_id:
+                item = child
+                break
+        if item is not None:
+            name = App().playlists.get_name(playlist_id)
+            item.rename(name)
 
 #######################
 # PRIVATE             #
@@ -203,7 +216,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
         else:
             menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popup_widget(menu_widget, child)
+        popup_widget(menu_widget, child, None, None, None)
 
 
 class PlaylistsManagerDeviceView(PlaylistsManagerView):

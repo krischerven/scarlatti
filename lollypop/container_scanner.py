@@ -23,16 +23,14 @@ class ScannerContainer:
         """
             Init container
         """
-        App().scanner.connect("genre-updated", self.__on_genre_updated)
-        App().scanner.connect("artist-updated", self.__on_artist_updated)
+        App().scanner.connect("updated", self.__on_collection_updated)
 
 ############
 # PRIVATE  #
 ############
-    def __on_genre_updated(self, scanner, genre_id, scan_update):
+    def __handle_genre_update(self, genre_id, scan_update):
         """
             Add genre to genre list
-            @param scanner as CollectionScanner
             @param genre_id as int
             @param scan_update as ScanUpdate
         """
@@ -44,10 +42,9 @@ class ScannerContainer:
             elif not App().artists.get_ids([genre_id], storage_type):
                 self.left_list.remove_value(genre_id)
 
-    def __on_artist_updated(self, scanner, artist_id, scan_update):
+    def __handle_artist_update(self, artist_id, scan_update):
         """
             Add/remove artist to/from list
-            @param scanner as CollectionScanner
             @param artist_id as int
             @param scan_update as ScanUpdate
         """
@@ -70,5 +67,18 @@ class ScannerContainer:
         genre_ids = []
         if scan_update == ScanUpdate.ADDED:
             selection_list.add_value((artist_id, artist_name, sortname))
-        elif not App().albums.get_ids([artist_id], genre_ids, storage_type):
+        elif not App().albums.get_ids(
+                genre_ids, [artist_id], storage_type, True):
             selection_list.remove_value(artist_id)
+
+    def __on_collection_updated(self, scanner, item, scan_update):
+        """
+            Update lists based on collection changes
+            @param scanner as CollectionScanner
+            @param item as CollectionItem
+            @param scan_update as ScanUpdate
+        """
+        for genre_id in item.genre_ids:
+            self.__handle_genre_update(genre_id, scan_update)
+        for artist_id in item.artist_ids:
+            self.__handle_artist_update(artist_id, scan_update)

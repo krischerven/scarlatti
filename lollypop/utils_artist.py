@@ -12,40 +12,10 @@
 
 from gi.repository import GLib
 
-from random import shuffle
-
 from lollypop.logger import Logger
 from lollypop.define import App
 from lollypop.objects_album import Album
 from lollypop.utils import get_default_storage_type
-
-
-class ArtistProvider:
-    """
-        Internal lollypop provider API compatible with LastFM/SpotifySearch
-    """
-    def get_similar_artists(self, artist, cancellable):
-        """
-            Search similar artists
-            @param artist as str
-            @param cancellable as Gio.Cancellable
-            @return [(str, str)] : list of (artist, cover_uri)
-        """
-        artists = []
-        (artist_id, db_name) = App().artists.get_id(artist)
-        storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([artist_id], [], storage_type)
-        if album_ids:
-            storage_type = get_default_storage_type()
-            genre_ids = App().albums.get_genre_ids(album_ids[0])
-            artist_ids = App().artists.get(genre_ids, storage_type)
-            for (artist_id, name, sortname) in artist_ids:
-                artists.append((name, name, None))
-        shuffle(artists)
-        return artists[0:20]
-
-    def get_artist_id(self, artist_name, cancellable):
-        return artist_name
 
 
 def play_artists(artist_ids, genre_ids):
@@ -59,8 +29,16 @@ def play_artists(artist_ids, genre_ids):
         if App().player.is_party:
             App().lookup_action("party").change_state(
                 GLib.Variant("b", False))
-        album_ids = App().albums.get_ids(artist_ids, genre_ids, storage_type)
-        albums = [Album(album_id) for album_id in album_ids]
+        album_ids = App().albums.get_ids(genre_ids, artist_ids, storage_type,
+                                         False)
+        if App().settings.get_value("play-featured"):
+            album_ids += App().artists.get_featured(genre_ids,
+                                                    artist_ids,
+                                                    storage_type,
+                                                    False)
+        albums = []
+        for album_id in album_ids:
+            albums.append(Album(album_id, genre_ids, artist_ids, False))
         App().player.play_albums(albums)
     except Exception as e:
         Logger.error("play_artists(): %s" % e)
@@ -75,16 +53,26 @@ def add_artist_to_playback(artist_ids, genre_ids, add):
     """
     try:
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids(artist_ids, genre_ids, storage_type)
-        for album_id in album_ids:
-            if add and album_id not in App().player.album_ids:
-                App().player.add_album(Album(album_id, genre_ids, artist_ids))
-            elif not add and album_id in App().player.album_ids:
-                App().player.remove_album_by_id(album_id)
-        if len(App().player.album_ids) == 0:
-            App().player.stop()
-        elif App().player.current_track.album.id\
-                not in App().player.album_ids:
-            App().player.skip_album()
+        album_ids = App().albums.get_ids(genre_ids, artist_ids, storage_type,
+                                         False)
+        if App().settings.get_value("play-featured"):
+            album_ids += App().artists.get_featured(genre_ids,
+                                                    artist_ids,
+                                                    storage_type,
+                                                    False)
+        if add:
+            albums = []
+            for album_id in album_ids:
+                if album_id not in App().player.album_ids:
+                    album = Album(album_id, genre_ids, artist_ids, False)
+                    albums.append(album)
+            App().player.add_albums(albums)
+        else:
+            App().player.remove_album_by_ids(album_ids)
+            if len(App().player.albums) == 0:
+                App().player.stop()
+            elif App().player.current_track.album.id\
+                    not in App().player.album_ids:
+                App().player.skip_album()
     except Exception as e:
         Logger.error("add_artist_to_playback(): %s" % e)

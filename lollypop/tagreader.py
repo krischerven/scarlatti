@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from lollypop.define import App
 from lollypop.logger import Logger
-from lollypop.utils import format_artist_name
+from lollypop.utils import format_artist_name, get_iso_date_from_string
 
 
 class Discoverer:
@@ -286,7 +286,7 @@ class TagReader:
             @return disc name as str
         """
         if tags is None:
-            return 0
+            return ""
         discname = ""
         for i in range(tags.get_tag_size("extended-comment")):
             (exists, read) = tags.get_string_index("extended-comment", i)
@@ -392,9 +392,9 @@ class TagReader:
                     string = m.data.decode("utf-8")
                     if string.startswith("TDOR"):
                         split = string.split("\x00")
-                        date = split[-1]
+                        date = get_iso_date_from_string(split[-1])
                         datetime = GLib.DateTime.new_from_iso8601(date, None)
-                        return (datetime.year(), datetime.to_unix())
+                        return (datetime.get_year(), datetime.to_unix())
             except:
                 pass
             return (None, None)
@@ -408,17 +408,17 @@ class TagReader:
                         i)
                     if not exists or not sample.startswith("ORIGINALDATE="):
                         continue
-                    date = sample[13:]
+                    date = get_iso_date_from_string(sample[13:])
                     datetime = GLib.DateTime.new_from_iso8601(date, None)
-                    return (datetime.year(), datetime.to_unix())
+                    return (datetime.get_year(), datetime.to_unix())
             except:
                 pass
-            return None
+            return (None, None)
 
         if tags is None:
             return None
         values = get_id3()
-        if values is None:
+        if values[0] is None:
             values = get_ogg()
         return values
 
@@ -631,12 +631,12 @@ class TagReader:
         lyrics = get_id3()
         return lyrics
 
-    def add_artists(self, artists, sortnames, mb_artist_ids=""):
+    def add_artists(self, artists, sortnames, mb_artist_id=""):
         """
             Add artists to db
-            @param artists as [string]
-            @param sortnames as [string]
-            @param mb_artist_ids as [string]
+            @param artists as str
+            @param sortnames as str
+            @param mb_artist_id as str
             @return ([int], [int]): (added artist ids, artist ids)
         """
         artist_ids = []
@@ -644,7 +644,7 @@ class TagReader:
         artistsplit = artists.split(";")
         sortsplit = sortnames.split(";")
         sortlen = len(sortsplit)
-        mbidsplit = mb_artist_ids.split(";")
+        mbidsplit = mb_artist_id.split(";")
         mbidlen = len(mbidsplit)
         if len(artistsplit) != mbidlen:
             mbidsplit = []
@@ -700,12 +700,13 @@ class TagReader:
                 genre_ids.append(genre_id)
         return (added_genre_ids, genre_ids)
 
-    def add_album(self, album_name, mb_album_id, artist_ids,
+    def add_album(self, album_name, mb_album_id, lp_album_id, artist_ids,
                   uri, loved, popularity, rate, synced, mtime, storage_type):
         """
             Add album to db
             @param album_name as str
             @param mb_album_id as str
+            @param lp_album_id as str
             @param artist_ids as [int]
             @param uri as str
             @param loved as bool
@@ -718,16 +719,18 @@ class TagReader:
             @commit needed
         """
         added = False
-        f = Gio.File.new_for_uri(uri)
-        d = f.get_parent()
-        parent_uri = "" if d is None else d.get_uri()
+        if uri.find("://") != -1:
+            f = Gio.File.new_for_uri(uri)
+            parent = f.get_parent()
+            if parent is not None:
+                uri = parent.get_uri()
         album_id = App().albums.get_id(album_name, mb_album_id, artist_ids)
         if album_id is None:
             added = True
-            album_id = App().albums.add(album_name, mb_album_id, artist_ids,
-                                        parent_uri, loved, popularity,
+            album_id = App().albums.add(album_name, mb_album_id, lp_album_id,
+                                        artist_ids, uri, loved, popularity,
                                         rate, synced, mtime, storage_type)
-        # Now we have our album id, check if path doesn"t change
-        if App().albums.get_uri(album_id) != parent_uri:
-            App().albums.set_uri(album_id, parent_uri)
+        # Check if path did not change
+        elif App().albums.get_uri(album_id) != uri:
+            App().albums.set_uri(album_id, uri)
         return (added, album_id)

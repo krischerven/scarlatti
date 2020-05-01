@@ -61,7 +61,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         geometry = screen.get_monitor_geometry(monitor)
         art_size_fs = ArtSize.FULLSCREEN / self.get_scale_factor()
-        font_size_fs = 40 / self.get_scale_factor()
+        font_size_fs = 30 / self.get_scale_factor()
         if geometry.width > geometry.height:
             art_size = int(art_size_fs * geometry.height / 1080)
             font_size = int(font_size_fs * geometry.height / 1080)
@@ -80,7 +80,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__buttons_widget.set_size_request(500, -1)
         self.__buttons_widget.set_property("valign", Gtk.Align.CENTER)
         self.__buttons_widget.set_property("halign", Gtk.Align.CENTER)
-        self.__artwork_widget = ArtworkPlayerWidget()
+        self.__artwork_widget = ArtworkPlayerWidget(
+            ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE)
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
         self.__artwork_widget.set_art_size(art_size, art_size)
@@ -93,8 +94,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__label_widget.set_justify(Gtk.Justification.CENTER)
         eventbox = Gtk.EventBox.new()
         eventbox.show()
-        eventbox.set_property("valign", Gtk.Align.END)
-        eventbox.set_property("halign", Gtk.Align.END)
         eventbox.connect("button-release-event",
                          self.__on_image_button_release_event)
         eventbox.connect("realize", self.__on_image_realize)
@@ -110,6 +109,8 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             self.__overlay_grid.attach(eventbox, 2, 2, 1, 3)
             self.__progress_widget.set_margin_start(50)
             eventbox.set_margin_end(50)
+            eventbox.set_property("valign", Gtk.Align.END)
+            eventbox.set_property("halign", Gtk.Align.END)
             self.__label_widget.set_margin_start(50)
             self.__label_widget.set_property("valign", Gtk.Align.END)
             self.__artwork_widget.set_property("valign", Gtk.Align.END)

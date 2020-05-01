@@ -16,9 +16,13 @@
 from gi.repository import Gio, GLib
 
 
-LOLLYPOP_DATA_PATH = GLib.get_user_data_dir() + "/lollypop"
-
 App = Gio.Application.get_default
+
+LASTFM_API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
+LASTFM_API_SECRET = "9254319364d73bec6c59ace485a95c98"
+
+DISCOGS_API_KEY = "vcKgyONtKsaQZLvpUfOU"
+DISCOGS_API_SECRET = "SmWphfGWALsmDnoyhPuQlDDQEIvFJuPM"
 
 GOOGLE_API_ID = "015987506728554693370:waw3yqru59a"
 
@@ -26,22 +30,29 @@ MARGIN = 15
 MARGIN_MEDIUM = 10
 MARGIN_SMALL = 5
 
-data_dir = GLib.get_user_data_dir()
+LOLLYPOP_DATA_PATH = GLib.get_user_data_dir() + "/lollypop"
 # All cache goes here
 CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
 # Stores for albums
-ALBUMS_PATH = data_dir + "/lollypop/albums"
-ALBUMS_WEB_PATH = data_dir + "/lollypop/albums_web"
+ALBUMS_PATH = LOLLYPOP_DATA_PATH + "/albums"
+ALBUMS_WEB_PATH = LOLLYPOP_DATA_PATH + "/albums_web"
 # Stores for artists
-ARTISTS_PATH = data_dir + "/lollypop/artists"
+ARTISTS_PATH = LOLLYPOP_DATA_PATH + "/artists"
 # Store for lyrics
-LYRICS_PATH = data_dir + "/lollypop/lyrics"
+LYRICS_PATH = LOLLYPOP_DATA_PATH + "/lyrics"
 
 
 class TimeStamp:
     ONE_YEAR = 31536000
     TWO_YEAR = 63072000
     THREE_YEAR = 94608000
+
+
+class FileType:
+    UNKNOWN = 0
+    AUDIO = 1
+    PLS = 2
+    OTHER = 3
 
 
 class Repeat:
@@ -67,7 +78,8 @@ class StorageType:
     SPOTIFY_SIMILARS = 1 << 5
     EXTERNAL = 1 << 6
     SEARCH = 1 << 7
-    ALL = 1 << 1 | 1 << 2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7
+    DEEZER_CHARTS = 1 << 8
+    ALL = 1 << 1 | 1 << 2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7 | 1 << 8
 
 
 class ArtBehaviour:
@@ -121,7 +133,8 @@ NetworkAccessACL = {
     "GENIUS": 1 << 13,
     "AUDIODB": 1 << 14,
     "FANARTTV": 1 << 15,
-    "DUCKDUCKGO": 1 << 16
+    "DUCKDUCKGO": 1 << 16,
+    "LIBREFM": 1 << 17
 }
 
 

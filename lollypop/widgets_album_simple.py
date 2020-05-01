@@ -68,6 +68,14 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             album_name = GLib.markup_escape_text(self.__album.name)
             if self.__view_type & ViewType.ALBUM:
                 self.__label.set_markup(album_name)
+            elif self.__view_type & ViewType.ARTIST:
+                if self.__album.year and\
+                        App().settings.get_value("show-year-below-name"):
+                    self.__label.set_markup(
+                        "<b>%s</b>\n<span alpha='25000'>%s</span>" % (
+                            album_name, self.__album.year))
+                else:
+                    self.__label.set_markup("<b>%s</b>" % album_name)
             else:
                 artist_name = GLib.markup_escape_text(", ".join(
                                                       self.__album.artists))

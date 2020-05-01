@@ -38,15 +38,31 @@ class ArtistMenu(Gio.Menu):
             from lollypop.menu_header import ArtistMenuHeader
             self.append_item(ArtistMenuHeader(artist_id))
         if view_type & ViewType.BANNER:
-            show_tracks_action = Gio.SimpleAction.new_stateful(
-                "show_tracks_action",
+            show_artist_tracks = App().settings.get_value("show-artist-tracks")
+            action = Gio.SimpleAction.new_stateful(
+                "show-artist-tracks",
+                None,
+                GLib.Variant.new_boolean(show_artist_tracks))
+            App().add_action(action)
+            action.connect("change-state", self.__on_change_state)
+            self.append(_("Show tracks"), "app.show-artist-tracks")
+            if not show_artist_tracks:
+                action = Gio.SimpleAction.new_stateful(
+                    "show-year-below-name",
+                    None,
+                    GLib.Variant.new_boolean(
+                        App().settings.get_value("show-year-below-name")))
+                App().add_action(action)
+                action.connect("change-state", self.__on_change_state)
+                self.append(_("Show year"), "app.show-year-below-name")
+            action = Gio.SimpleAction.new_stateful(
+                "play-featured",
                 None,
                 GLib.Variant.new_boolean(
-                    App().settings.get_value("show-artist-tracks")))
-            App().add_action(show_tracks_action)
-            show_tracks_action.connect("change-state",
-                                       self.__on_show_tracks_change_state)
-            self.append(_("Show tracks"), "app.show_tracks_action")
+                    App().settings.get_value("play-featured")))
+            App().add_action(action)
+            action.connect("change-state", self.__on_change_state)
+            self.append(_("Play featured"), "app.play-featured")
         else:
             from lollypop.menu_playback import ArtistPlaybackMenu
             self.append_section(_("Playback"),
@@ -54,7 +70,7 @@ class ArtistMenu(Gio.Menu):
         menu = Gio.Menu()
         self.append_section(_("Artist"), menu)
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([artist_id], [], storage_type, True)
+        album_ids = App().albums.get_ids([], [artist_id], storage_type, False)
         albums = [Album(album_id) for album_id in album_ids]
         menu.append_submenu(_("Devices"), SyncAlbumsMenu(albums))
         menu.append_submenu(_("Playlists"), PlaylistsMenu(albums))
@@ -62,15 +78,17 @@ class ArtistMenu(Gio.Menu):
 #######################
 # PRIVATE             #
 #######################
-    def __on_show_tracks_change_state(self, action, variant):
+    def __on_change_state(self, action, variant):
         """
             Save option and reload view
             @param Gio.SimpleAction
             @param GLib.Variant
         """
+        name = action.get_name()
         action.set_state(variant)
-        App().settings.set_value("show-artist-tracks", variant)
-        App().window.container.reload_view()
+        App().settings.set_value(name, variant)
+        if name.find("show") != -1:
+            App().window.container.reload_view()
 
 
 class ArtistAlbumsMenu(Gio.Menu):

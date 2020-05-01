@@ -16,13 +16,42 @@ from gi.repository.Gio import FILE_ATTRIBUTE_TIME_ACCESS
 from time import time
 
 from lollypop.logger import Logger
-from lollypop.define import App
+from lollypop.define import App, FileType
 
 
-def is_audio(f):
+def get_file_type(uri):
+    """
+        Get file type from file extension
+        @param uri as str
+    """
+    audio = ["3gp", "aa", "aac", "aax", "act", "aiff", "alac", "amr", "ape",
+             "au", "awb", "dct", "dss", "dvf", "flac", "gsm", "iklax", "ivs",
+             "m4a", "m4b", "m4p", "mmf", "mp3", "mpc", "msv", "nmf", "nsf",
+             "ogg", "opus", "ra", "raw", "rf64", "sln", "tta", "voc", "vox",
+             "wav", "wma", "wv", "webm", "8svx", "cda"]
+    other = ["7z", "arj", "deb", "pkg", "rar", "rpm", "tar.gz", "z", "zip",
+             "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "db", "txt",
+             "mov", "avi", "html", "ini", "cue", "nfo", "lrc"]
+    image = ["ai", "bmp", "gif", "ico", "jpeg", "jpg",
+             "png", "ps", "psd", "svg", "tif"]
+    pls = ["pls", "m3u"]
+    split = uri.lower().split(".")
+    if len(split) < 2:
+        return FileType.UNKNOWN
+    elif split[-1] in audio:
+        return FileType.AUDIO
+    elif split[-1] in pls:
+        return FileType.PLS
+    elif split[-1] in image + other:
+        return FileType.OTHER
+    else:
+        return FileType.UNKNOWN
+
+
+def is_audio(info):
     """
         Return True if files is audio
-        @param f as Gio.File
+        @param info as Gio.FileInfo
     """
     audio = ["application/ogg", "application/x-ogg", "application/x-ogm-audio",
              "audio/aac", "audio/mp4", "audio/mpeg", "audio/mpegurl",
@@ -39,32 +68,21 @@ def is_audio(f):
              "audio/x-matroska", "audio/x-wavpack", "video/mp4",
              "audio/x-mod", "audio/x-mo3", "audio/x-xm", "audio/x-s3m",
              "audio/x-it", "audio/aiff", "audio/x-aiff"]
-    try:
-        info = f.query_info("standard::content-type",
-                            Gio.FileQueryInfoFlags.NONE)
-        if info is not None:
-            content_type = info.get_content_type()
-            if content_type in audio:
-                return True
-    except Exception as e:
-        Logger.error("is_audio: %s", e)
+    if info is not None:
+        if info.get_content_type() in audio:
+            return True
     return False
 
 
-def is_pls(f):
+def is_pls(info):
     """
         Return True if files is a playlist
-        @param f as Gio.File
+        @param info as Gio.FileInfo
     """
-    try:
-        info = f.query_info("standard::content-type",
-                            Gio.FileQueryInfoFlags.NONE)
-        if info is not None:
-            if info.get_content_type() in ["audio/x-mpegurl",
-                                           "application/xspf+xml"]:
-                return True
-    except:
-        pass
+    if info is not None:
+        if info.get_content_type() in ["audio/x-mpegurl",
+                                       "application/xspf+xml"]:
+            return True
     return False
 
 
@@ -113,6 +131,8 @@ def is_readonly(uri):
         Check if uri is readonly
     """
     try:
+        if not uri:
+            return True
         f = Gio.File.new_for_uri(uri)
         info = f.query_info("access::can-write",
                             Gio.FileQueryInfoFlags.NONE,

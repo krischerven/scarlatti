@@ -16,8 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
 from lollypop.logger import Logger
-from lollypop.utils import get_network_available, sql_escape
-from lollypop.utils_artist import ArtistProvider
+from lollypop.utils import sql_escape
 from lollypop.utils_file import get_youtube_dl
 
 
@@ -47,7 +46,7 @@ class ArtistRow(Gtk.ListBoxRow):
         self.__artwork = Gtk.Image.new()
         self.__artwork.set_size_request(ArtSize.SMALL,
                                         ArtSize.SMALL)
-        if App().art.artist_artwork_exists(artist_name) is not None:
+        if App().art.get_artist_artwork_path(artist_name) is not None:
             App().art_helper.set_artist_artwork(artist_name,
                                                 ArtSize.SMALL,
                                                 ArtSize.SMALL,
@@ -119,6 +118,9 @@ class ArtistRow(Gtk.ListBoxRow):
                                                    self.__cancellable,
                                                    self.__on_uri_content)
                 self.__cover_uri = None
+            # Cache for later usage
+            else:
+                App().art.cache_artist_artwork(self.__artist_name)
             self.__artwork.get_style_context().add_class("circle-icon")
             self.__artwork.set_from_icon_name("avatar-default-symbolic",
                                               Gtk.IconSize.INVALID)
@@ -135,15 +137,16 @@ class SimilarsMenu(Gtk.Bin):
         A popover with similar artists
     """
 
-    def __init__(self):
+    def __init__(self, artist_id):
         """
             Init popover
+            @param artist_id as int
         """
         Gtk.Bin.__init__(self)
         (path, env) = get_youtube_dl()
         self.__show_all = path is not None
         self.__added = []
-        self.__artist = ""
+        self.__artist_id = artist_id
         self.__cancellable = Gio.Cancellable()
         self.connect("map", self.__on_map)
         self.connect("unmap", self.__on_unmap)
@@ -167,21 +170,6 @@ class SimilarsMenu(Gtk.Bin):
         self.__stack.add(self.__listbox)
         self.add(self.__stack)
 
-    def populate(self, artist_id):
-        """
-            Populate view for artist id
-            @param artist_id as int
-        """
-        self.__artist = App().artists.get_name(artist_id)
-
-    @property
-    def submenu_height(self):
-        """
-            Get submenu height
-            @return int
-        """
-        return 300
-
     @property
     def submenu_name(self):
         """
@@ -193,21 +181,6 @@ class SimilarsMenu(Gtk.Bin):
 #######################
 # PRIVATE             #
 #######################
-    def __populate(self, providers):
-        """
-            Populate view with providers
-            @param providers as []
-        """
-        if providers:
-            provider = providers.pop(0)
-            App().task_helper.run(provider.get_artist_id,
-                                  self.__artist, self.__cancellable,
-                                  callback=(self.__on_get_artist_id,
-                                            providers, provider))
-        elif not self.__listbox.get_children() and\
-                not self.__cancellable.is_cancelled():
-            self.__label.set_text(_("No results"))
-
     def __sort_func(self, row_a, row_b):
         """
             Sort rows
@@ -223,24 +196,6 @@ class SimilarsMenu(Gtk.Bin):
         else:
             return False
 
-    def __on_get_artist_id(self, artist_id, providers, provider):
-        """
-            Get similars
-            @param artist_id as str
-            @param providers as []
-            @param provider as SpotifySearch/LastFM
-        """
-        if artist_id is None:
-            if providers:
-                self.__populate(providers)
-            elif not self.__cancellable.is_cancelled():
-                self.__label.set_text(_("No results"))
-        else:
-            App().task_helper.run(provider.get_similar_artists,
-                                  artist_id, self.__cancellable,
-                                  callback=(self.__on_similar_artists,
-                                            providers))
-
     def __on_map(self, widget):
         """
             Populate widget
@@ -248,14 +203,13 @@ class SimilarsMenu(Gtk.Bin):
         """
         if self.__added:
             return
-        providers = []
-        if get_network_available("SPOTIFY"):
-            providers.append(App().spotify)
-        if App().lastfm is not None and get_network_available("LASTFM"):
-            providers.append(App().lastfm)
-        if not providers:
-            providers = [ArtistProvider()]
-        self.__populate(providers)
+        from lollypop.similars import Similars
+        similars = Similars()
+        App().task_helper.run(
+            similars.get_similar_artists,
+            [self.__artist_id],
+            self.__cancellable,
+            callback=(self.__on_get_similar_artists,))
 
     def __on_unmap(self, widget):
         """
@@ -276,7 +230,6 @@ class SimilarsMenu(Gtk.Bin):
             popover.hide()
         artist_name = row.artist_name
         if row.storage_type == StorageType.EPHEMERAL:
-            App().settings.set_value("search-spotify", GLib.Variant("b", True))
             App().lookup_action("search").activate(
                 GLib.Variant("s", artist_name))
         else:
@@ -284,16 +237,17 @@ class SimilarsMenu(Gtk.Bin):
                 sql_escape(artist_name))
             App().window.container.show_view([Type.ARTISTS], [artist_id])
 
-    def __on_similar_artists(self, artists, providers):
+    def __on_get_similar_artists(self, artists):
         """
             Add artist to view
-            @param artists as [str]
-            @param providers as []
+            @param artists as [(str, str)]
         """
         if artists:
-            (spotify_id, artist, cover_uri) = artists.pop(0)
+            self.__stack.set_visible_child(self.__listbox)
+            self.__label.hide()
+            (artist, cover_uri) = artists.pop(0)
             if artist in self.__added:
-                GLib.idle_add(self.__on_similar_artists, artists, providers)
+                GLib.idle_add(self.__on_get_similar_artists, artists)
                 return
             self.__added.append(artist)
             artist_id = App().artists.get_id_for_escaped_string(
@@ -310,9 +264,6 @@ class SimilarsMenu(Gtk.Bin):
             if row is not None:
                 row.show()
                 self.__listbox.add(row)
-            GLib.idle_add(self.__on_similar_artists, artists, providers)
-        elif not self.__cancellable.is_cancelled():
-            if self.__listbox.get_children():
-                self.__stack.set_visible_child(self.__listbox)
-                self.__label.hide()
-            self.__populate(providers)
+            GLib.idle_add(self.__on_get_similar_artists, artists)
+        else:
+            self.__label.set_text(_("No results"))

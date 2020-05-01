@@ -93,7 +93,7 @@ class ArtistsLineView(RoundedArtistsView, HorizontalScrollingHelper):
         RoundedArtistsView._on_adaptive_changed(self, window, status)
         self.__update_label(status)
 
-    def _on_artist_updated(self, scanner, artist_id, add):
+    def _on_collection_updated(self, scanner, item, scan_update):
         pass
 
     def _on_populated(self, widget):

@@ -130,7 +130,7 @@ class RadiosBannerWidget(BannerWidget):
         from lollypop.menu_radio import RadioMenu
         menu_widget = RadioMenu(None, self.view_type)
         menu_widget.show()
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)
 
     def __on_tunein_button_clicked(self, button):
         """

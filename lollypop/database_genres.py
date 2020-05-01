@@ -22,11 +22,12 @@ class GenresDatabase:
         Genres database helper
     """
 
-    def __init__(self):
+    def __init__(self, db):
         """
             Init genres database object
+            @param db as Database
         """
-        pass
+        self.__db = db
 
     def add(self, name):
         """
@@ -35,7 +36,7 @@ class GenresDatabase:
             @return inserted rowid as int
             @warning: commit needed
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             result = sql.execute("INSERT INTO genres (name) VALUES (?)",
                                  (name,))
             return result.lastrowid
@@ -46,7 +47,7 @@ class GenresDatabase:
             @param name as string
             @return genre id as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             # Escape string to fix mixed tags:
             # Alternative Rock, Aternative-Rock, alternative rock
             result = sql.execute("SELECT rowid FROM genres\
@@ -63,7 +64,7 @@ class GenresDatabase:
             @param genre_id as int
             @return str
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT name FROM genres\
                                   WHERE rowid=?", (genre_id,))
             v = result.fetchone()
@@ -97,7 +98,7 @@ class GenresDatabase:
             order += " albums.popularity DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             request = "SELECT albums.rowid\
                        FROM albums, album_genres, genres,\
                             album_artists, artists\
@@ -118,7 +119,7 @@ class GenresDatabase:
             Get all availables genres
             @return [(int, str, str)]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT DISTINCT\
                                   genres.rowid, genres.name, genres.name\
                                   FROM genres\
@@ -139,7 +140,7 @@ class GenresDatabase:
             Get all availables genres ids
             @return [id as int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT DISTINCT genres.rowid\
                                   FROM genres\
                                   WHERE EXISTS (\
@@ -159,7 +160,7 @@ class GenresDatabase:
             Return a random genre
             @return [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT genres.rowid, genres.name\
                                   FROM genres\
                                   WHERE EXISTS (\
@@ -179,7 +180,7 @@ class GenresDatabase:
             Clean genres
             @param commit as bool
         """
-        with SqlCursor(App().db, commit) as sql:
+        with SqlCursor(self.__db, commit) as sql:
             sql.execute("DELETE FROM genres WHERE genres.rowid NOT IN (\
                             SELECT album_genres.genre_id FROM album_genres)")
             sql.execute("DELETE FROM genres WHERE genres.rowid NOT IN (\

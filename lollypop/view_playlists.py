@@ -59,7 +59,8 @@ class PlaylistsView(LazyLoadingView, ViewController,
                  "_on_playlist_track_added"),
                 (App().playlists, "playlist-track-removed",
                  "_on_playlist_track_removed"),
-                (App().playlists, "playlists-changed", "_on_playlist_changed")
+                (App().playlists, "playlists-removed", "_on_playlist_removed"),
+                (App().playlists, "playlists-renamed", "_on_playlist_renamed"),
         ]
 
     def populate(self):
@@ -74,6 +75,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             track_ids = []
             if self._playlist_id == Type.LOVED:
                 for track_id in App().tracks.get_loved_track_ids(
+                        [],
                         self.storage_type):
                     if track_id not in track_ids:
                         track_ids.append(track_id)
@@ -149,7 +151,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             album = Album(track.album.id)
             album.set_tracks([track])
             self._view.add_reveal_albums([album])
-            self._view.insert_album(album, -1)
+            self._view.add_value(album)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
@@ -170,19 +172,21 @@ class PlaylistsView(LazyLoadingView, ViewController,
                                 album_row.destroy()
                                 break
 
-    def _on_playlist_changed(self, playlists, playlist_id):
+    def _on_playlist_removed(self, playlists, playlist_id):
         """
-            Update playlist
+            Go back
             @param playlists as Playlists
             @param playlist_id as int
         """
-        if playlist_id == self._playlist_id:
-            # Playlist has been removed
-            if not playlists.exists(playlist_id):
-                App().window.container.go_back()
-            else:
-                self._view.clear()
-                self.populate()
+        App().window.container.go_back()
+
+    def _on_playlist_renamed(self, playlists, playlist_id):
+        """
+            Update banner
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        self.__banner.rename(App().playlists.get_name(playlist_id))
 
 #######################
 # PRIVATE             #
@@ -228,7 +232,7 @@ class SmartPlaylistsView(PlaylistsView):
             # We need to inject skipped/storage_type
             storage_type = get_default_storage_type()
             split = request.split("ORDER BY")
-            split[0] += " AND loved != %s" % Type.NONE
+            split[0] += " AND tracks.loved != %s" % Type.NONE
             split[0] += " AND tracks.storage_type&%s " % storage_type
             track_ids = App().db.execute("ORDER BY".join(split))
             return tracks_to_albums(

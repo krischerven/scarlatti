@@ -21,6 +21,7 @@ from lollypop.view_albums_line import AlbumsPopularsLineView
 from lollypop.view_albums_line import AlbumsRandomGenresLineView
 from lollypop.view_artists_line import ArtistsRandomLineView
 from lollypop.widgets_banner_today import TodayBannerWidget
+from lollypop.helper_signals import signals_map
 
 
 class SuggestionsView(View):
@@ -28,6 +29,7 @@ class SuggestionsView(View):
         View showing suggestions to user
     """
 
+    @signals_map
     def __init__(self, storage_type, view_type):
         """
             Init view
@@ -51,6 +53,9 @@ class SuggestionsView(View):
             else:
                 self.__banner = None
             self.add_widget(self.__grid, self.__banner)
+        return [
+            (App().settings, "changed::suggestions-mask", "_on_mask_changed"),
+        ]
 
     def populate(self):
         """
@@ -62,19 +67,7 @@ class SuggestionsView(View):
             view = cls(self.storage_type, self.view_type)
             view.populate()
             self.__grid.add(view)
-        if get_network_available("SPOTIFY") and\
-                get_network_available("YOUTUBE"):
-            from lollypop.view_albums_line import AlbumsSpotifyLineView
-            spotify_view = AlbumsSpotifyLineView(_("You might like this"),
-                                                 self.storage_type,
-                                                 self.view_type)
-            spotify_view.populate(StorageType.SPOTIFY_SIMILARS)
-            self.__grid.add(spotify_view)
-            spotify_view = AlbumsSpotifyLineView(_("New albums from Spotify"),
-                                                 self.storage_type,
-                                                 self.view_type)
-            spotify_view.populate(StorageType.SPOTIFY_NEW_RELEASES)
-            self.__grid.add(spotify_view)
+        self.__add_web_views()
 
     @property
     def filtered(self):
@@ -99,6 +92,14 @@ class SuggestionsView(View):
 #######################
 # PROTECTED           #
 #######################
+    def _on_mask_changed(self, settings, value):
+        """
+            Reload web views
+            @param settings as Gio.Settings
+            @param value as str
+        """
+        self.__add_web_views()
+
     def _on_map(self, widget):
         """
             Set initial view state
@@ -111,6 +112,32 @@ class SuggestionsView(View):
 #######################
 # PRIVATE             #
 #######################
+    def __add_web_views(self):
+        """
+            Add web views
+        """
+        from lollypop.view_albums_line import AlbumsStorageTypeLineView
+        for child in self.__grid.get_children():
+            if isinstance(child, AlbumsStorageTypeLineView):
+                child.destroy()
+
+        mask = App().settings.get_value("suggestions-mask").get_int32()
+        if get_network_available("YOUTUBE"):
+            for (title, storage_type) in [
+                   (_("Suggestions from Spotify"),
+                    StorageType.SPOTIFY_SIMILARS),
+                   (_("New releases on Spotify"),
+                    StorageType.SPOTIFY_NEW_RELEASES),
+                   (_("Top albums on Deezer"),
+                    StorageType.DEEZER_CHARTS)]:
+                if not storage_type & mask:
+                    continue
+                view = AlbumsStorageTypeLineView(title,
+                                                 self.storage_type,
+                                                 self.view_type)
+                view.populate(storage_type)
+                self.__grid.add(view)
+
     def __welcome_screen(self):
         """
             Show welcome screen if view empty

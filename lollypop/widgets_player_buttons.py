@@ -19,6 +19,44 @@ from lollypop.define import App
 from lollypop.helper_signals import SignalsHelper, signals
 
 
+class PlayButton(Gtk.Button):
+    """
+        Gtk Button with a spinner
+    """
+
+    def __init__(self):
+        """
+            Init Button
+        """
+        Gtk.Button.__init__(self)
+        self.__spinner = Gtk.Spinner.new()
+        self.__spinner.show()
+        self.__image = Gtk.Image.new_from_icon_name(
+            "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
+        self.__image.show()
+        self.set_image(self.__image)
+
+    def set_loading(self, status):
+        """
+            Set button loading status
+            @param status as bool
+        """
+        if status:
+            self.set_image(self.__spinner)
+            self.__spinner.start()
+        else:
+            self.set_image(self.__image)
+            self.__spinner.stop()
+
+    @property
+    def image(self):
+        """
+            Get image
+            @return Gtk.Image
+        """
+        return self.__image
+
+
 class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
     """
         Box with playback buttons based on current player state
@@ -36,8 +74,7 @@ class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
             "media-skip-backward-symbolic", Gtk.IconSize.BUTTON)
         self.__prev_button.show()
         self.__prev_button.connect("clicked", self.__on_prev_button_clicked)
-        self.__play_button = Gtk.Button.new_from_icon_name(
-            "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
+        self.__play_button = PlayButton()
         self.__play_button.show()
         self.__play_button.connect("clicked", self.__on_play_button_clicked)
         self.__next_button = Gtk.Button.new_from_icon_name(
@@ -64,6 +101,7 @@ class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "status-changed", "_on_status_changed"),
+            (App().player, "loading-changed", "_on_loading_changed"),
             (App().player, "next-changed", "_on_next_changed"),
             (App().player, "prev-changed", "_on_prev_changed")
         ]
@@ -134,21 +172,30 @@ class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
                                                   (next_artists,
                                                    next_title))
         else:
-            self.__prev_button.set_tooltip_text("")
+            self.__next_button.set_tooltip_text("")
 
     def _on_status_changed(self, player):
         """
-            Update buttons and progress bar
+            Update play button state
             @param player as Player
         """
         if player.is_playing:
-            self.__play_button.get_image().set_from_icon_name(
+            self.__play_button.image.set_from_icon_name(
                 "media-playback-pause-symbolic", Gtk.IconSize.BUTTON)
             self.__play_button.set_tooltip_text(_("Pause"))
         else:
-            self.__play_button.get_image().set_from_icon_name(
+            self.__play_button.image.set_from_icon_name(
                 "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
             self.__play_button.set_tooltip_text(_("Play"))
+
+    def _on_loading_changed(self, player, status, track):
+        """
+            Show a spinner on play button
+            @param player as Player
+            @param status as bool
+            @param track as Track
+        """
+        self.__play_button.set_loading(status)
 
 #######################
 # PRIVATE             #

@@ -10,14 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gio
+from gi.repository import Gio
 
 import sqlite3
 from threading import Lock
 from random import shuffle
 import itertools
 
-from lollypop.define import App
+from lollypop.define import App, LOLLYPOP_DATA_PATH
 from lollypop.database_upgrade import DatabaseAlbumsUpgrade
 from lollypop.sqlcursor import SqlCursor
 from lollypop.logger import Logger
@@ -50,8 +50,8 @@ class Database:
     """
         Base database object
     """
-    __LOCAL_PATH = GLib.get_user_data_dir() + "/lollypop"
-    DB_PATH = "%s/lollypop.db" % __LOCAL_PATH
+
+    DB_PATH = "%s/lollypop.db" % LOLLYPOP_DATA_PATH
 
     # SQLite documentation:
     # In SQLite, a column with type INTEGER PRIMARY KEY
@@ -61,6 +61,7 @@ class Database:
     __create_albums = """CREATE TABLE albums (id INTEGER PRIMARY KEY,
                                               name TEXT NOT NULL,
                                               mb_album_id TEXT,
+                                              lp_album_id TEXT,
                                               no_album_artist BOOLEAN NOT NULL,
                                               year INT,
                                               timestamp INT,
@@ -75,6 +76,9 @@ class Database:
                                                name TEXT NOT NULL,
                                                sortname TEXT NOT NULL,
                                                mb_artist_id TEXT)"""
+    __create_featuring = """CREATE TABLE featuring (
+                                               artist_id INT NOT NULL,
+                                               album_id INT NOT NULL)"""
     __create_genres = """CREATE TABLE genres (id INTEGER PRIMARY KEY,
                                             name TEXT NOT NULL)"""
     __create_album_artists = """CREATE TABLE album_artists (
@@ -104,6 +108,7 @@ class Database:
                                               mtime INT NOT NULL,
                                               storage_type INT NOT NULL,
                                               mb_track_id TEXT,
+                                              lp_track_id TEXT,
                                               bpm DOUBLE
                                               )"""
     __create_track_artists = """CREATE TABLE track_artists (
@@ -130,13 +135,14 @@ class Database:
         upgrade = DatabaseAlbumsUpgrade()
         if not f.query_exists():
             try:
-                d = Gio.File.new_for_path(self.__LOCAL_PATH)
+                d = Gio.File.new_for_path(LOLLYPOP_DATA_PATH)
                 if not d.query_exists():
                     d.make_directory_with_parents()
                 # Create db schema
                 with SqlCursor(self, True) as sql:
                     sql.execute(self.__create_albums)
                     sql.execute(self.__create_artists)
+                    sql.execute(self.__create_featuring)
                     sql.execute(self.__create_genres)
                     sql.execute(self.__create_album_genres)
                     sql.execute(self.__create_album_artists)

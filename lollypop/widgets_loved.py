@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from gettext import gettext as _
 
@@ -87,29 +87,15 @@ class LovedWidget(Gtk.Bin):
             name = App().playlists.get_name(Type.LOVED)
             App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
             # Update state on Last.fm
-            if App().lastfm is not None:
-                lastfm_status = True if loved == 1 else False
-                if self.__timeout_id is not None:
-                    GLib.source_remove(self.__timeout_id)
-                self.__timeout_id = GLib.timeout_add(1000,
-                                                     self.__set_lastfm_status,
-                                                     lastfm_status)
+            status = True if loved == 1 else False
+            for scrobbler in App().ws_director.scrobblers:
+                scrobbler.set_loved(self.__object, status)
         self.__set_artwork(self.__object.loved)
         return True
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_lastfm_status(self, status):
-        """
-            Set lastfm status for track
-            @param status as int
-        """
-        self.__timeout_id = None
-        App().task_helper.run(App().lastfm.set_loved,
-                              self.__object,
-                              status)
-
     def __set_artwork(self, status):
         """
             Set artwork base on object status

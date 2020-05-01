@@ -104,9 +104,6 @@ class ArtistViewBox(AlbumsBoxView):
             Add appears on albums
             @param view as ArtistViewBox
         """
-        album_ids = []
-        for child in self.children:
-            album_ids.append(child.data.id)
         from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
         others_box = AlbumsArtistAppearsOnLineView(self._artist_ids,
                                                    self._genre_ids,
@@ -115,6 +112,6 @@ class ArtistViewBox(AlbumsBoxView):
                                                    ViewType.SCROLLED)
         others_box.set_margin_start(MARGIN)
         others_box.set_margin_end(MARGIN)
-        others_box.populate(album_ids)
+        others_box.populate()
         self.__grid.add(others_box)
         self.__others_boxes.append(others_box)

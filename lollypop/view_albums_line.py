@@ -72,14 +72,13 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
             self._box.set_min_children_per_line(len(albums))
             AlbumsBoxView.populate(self, albums)
 
-    def insert_album(self, album, position):
+    def add_value(self, album):
         """
             Add a new album
             @param album as Album
-            @param position as int
-            @param cover_uri as int
         """
-        AlbumsBoxView.insert_album(self, album, position)
+        AlbumsBoxView.add_value_unsorted(self, album)
+        self._box.set_min_children_per_line(len(self._box.get_children()))
         self.update_buttons()
 
     @property
@@ -89,7 +88,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_album_updated(self, scanner, album_id, scan_update):
+    def _on_collection_updated(self, scanner, item, scan_update):
         pass
 
     def _on_adaptive_changed(self, window, status):
@@ -152,10 +151,11 @@ class AlbumsArtistLineView(AlbumsLineView):
         def load():
             if self.__artist_id == Type.COMPILATIONS:
                 album_ids = App().albums.get_compilation_ids(
-                    self.__genre_ids, self.storage_type)
+                    self.__genre_ids, self.storage_type, True)
             else:
                 album_ids = App().albums.get_ids(
-                    [self.__artist_id], self.__genre_ids, self.storage_type)
+                    self.__genre_ids, [self.__artist_id],
+                    self.storage_type, True)
             if excluded_album_id in album_ids:
                 album_ids.remove(excluded_album_id)
             return [Album(album_id) for album_id in album_ids]
@@ -169,7 +169,7 @@ class AlbumsArtistLineView(AlbumsLineView):
 
 class AlbumsArtistAppearsOnLineView(AlbumsLineView):
     """
-        Show albums where artist is in featuring
+        Show albums where artist is in featured
     """
 
     def __init__(self,  artist_ids, genre_ids, storage_type, view_type):
@@ -182,21 +182,18 @@ class AlbumsArtistAppearsOnLineView(AlbumsLineView):
         self.__artist_ids = artist_ids
         self.__genre_ids = genre_ids
 
-    def populate(self, excluded_album_ids):
+    def populate(self):
         """
             Populate view
-            @param excluded_album_ids as [int]
         """
         def on_load(items):
             AlbumsLineView.populate(self, items)
 
         def load():
-            album_ids = []
-            for album_id in App().tracks.get_album_ids(self.__artist_ids,
-                                                       self.__genre_ids,
-                                                       self.storage_type):
-                if album_id not in excluded_album_ids:
-                    album_ids.append(album_id)
+            album_ids = App().artists.get_featured(self.__genre_ids,
+                                                   self.__artist_ids,
+                                                   self.storage_type,
+                                                   True)
             return [Album(album_id) for album_id in album_ids]
 
         self._label.set_text(_("Appears on"))
@@ -226,6 +223,7 @@ class AlbumsPopularsLineView(AlbumsLineView):
         def load():
             storage_type = get_default_storage_type()
             album_ids = App().albums.get_populars_at_the_moment(storage_type,
+                                                                False,
                                                                 self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
@@ -259,6 +257,7 @@ class AlbumsRandomGenresLineView(AlbumsLineView):
             storage_type = get_default_storage_type()
             album_ids = App().albums.get_randoms(storage_type,
                                                  genre_id,
+                                                 False,
                                                  self.ITEMS)
             return [Album(album_id) for album_id in album_ids]
 
@@ -279,16 +278,15 @@ class AlbumsSearchLineView(AlbumsLineView):
         self.__album_ids = []
         self._label.set_text(_("Albums"))
 
-    def add_album(self, album):
+    def add_value(self, album):
         """
-            Insert item
+            Add a new album
             @param album as Album
         """
         if album.id in self.__album_ids:
             return
         self.__album_ids.append(album.id)
-        AlbumsLineView.insert_album(self, album, -1)
-        self._box.set_min_children_per_line(len(self._box.get_children()))
+        AlbumsLineView.add_value(self, album)
 
     def clear(self):
         """
@@ -299,9 +297,9 @@ class AlbumsSearchLineView(AlbumsLineView):
         GLib.idle_add(self.hide)
 
 
-class AlbumsSpotifyLineView(AlbumsLineView):
+class AlbumsStorageTypeLineView(AlbumsLineView):
     """
-        Spotify album line
+        Storage type album line
     """
 
     @signals
@@ -317,7 +315,8 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         self.__cancellable = Gio.Cancellable()
         self.__storage_type = StorageType.NONE
         return [
-                (App().spotify, "match-album", "_on_album_match"),
+                (App().ws_director.collection_ws, "match-album",
+                 "_on_album_match"),
                 (App().settings, "changed::network-access",
                  "_on_network_access_changed"),
                 (App().settings, "changed::network-access-acl",
@@ -361,8 +360,7 @@ class AlbumsSpotifyLineView(AlbumsLineView):
         if count == self.ITEMS:
             return
         if self.__storage_type & storage_type:
-            self.insert_album(Album(album_id), -1)
-            self._box.set_min_children_per_line(count + 1)
+            self.add_value(Album(album_id))
             self.show()
 
     def _on_network_access_changed(self, *ignore):

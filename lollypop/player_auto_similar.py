@@ -15,11 +15,12 @@ from gi.repository import Gio
 from random import shuffle
 
 from lollypop.objects_album import Album
+from lollypop.objects_track import Track
 from lollypop.logger import Logger
-from lollypop.define import App, Repeat
-from lollypop.utils import get_network_available, sql_escape
-from lollypop.utils import get_default_storage_type
-from lollypop.utils_artist import ArtistProvider
+from lollypop.define import App, Repeat, StorageType
+from lollypop.utils import sql_escape, get_network_available
+from lollypop.utils import get_default_storage_type, emit_signal
+from lollypop.utils_album import tracks_to_albums
 
 
 class AutoSimilarPlayer:
@@ -31,7 +32,8 @@ class AutoSimilarPlayer:
         """
             Init player
         """
-        self.__cancellable = Gio.Cancellable()
+        self.__next_cancellable = Gio.Cancellable()
+        self.__radio_cancellable = Gio.Cancellable()
         self.connect("next-changed", self.__on_next_changed)
 
     def next_album(self):
@@ -39,31 +41,121 @@ class AutoSimilarPlayer:
             Get next album to add
             @return Album
         """
-        provider = ArtistProvider()
-        artists = provider.get_similar_artists(self.current_track.artists[0],
-                                               None)
-        similar_artist_ids = self.__get_artist_ids(artists)
-        if similar_artist_ids:
-            return self.__get_album_from_artists(similar_artist_ids)
+        genre_ids = App().artists.get_genre_ids(self.current_track.artist_ids,
+                                                StorageType.COLLECTION)
+        track_ids = App().tracks.get_randoms(genre_ids,
+                                             StorageType.COLLECTION,
+                                             1)
+        if track_ids:
+            return Track(track_ids[0]).album
         return None
+
+    def play_radio_from_collection(self, artist_ids):
+        """
+            Play a radio from collection for artist ids
+            @param artist_ids as [int]
+        """
+        genre_ids = App().artists.get_genre_ids(artist_ids,
+                                                StorageType.COLLECTION)
+        track_ids = App().tracks.get_randoms(genre_ids,
+                                             StorageType.COLLECTION,
+                                             False,
+                                             100)
+        albums = tracks_to_albums(
+            [Track(track_id) for track_id in track_ids], False)
+        self.play_albums(albums)
+
+    def play_radio_from_spotify(self, artist_ids):
+        """
+            Play a radio from the Spotify for artist ids
+            @param artist_ids as [int]
+        """
+        self.__play_radio_common()
+        if get_network_available("SPOTIFY") and\
+                get_network_available("YOUTUBE"):
+            from lollypop.similars_spotify import SpotifySimilars
+            similars = SpotifySimilars()
+            self.__load_similars(similars, artist_ids)
+
+    def play_radio_from_lastfm(self, artist_ids):
+        """
+            Play a radio from the Last.fm for artist ids
+            @param artist_ids as [int]
+        """
+        self.__play_radio_common()
+        if get_network_available("LASTFM") and\
+                get_network_available("YOUTUBE"):
+            from lollypop.similars_lastfm import LastFMSimilars
+            similars = LastFMSimilars()
+            self.__load_similars(similars, artist_ids)
+
+    def play_radio_from_deezer(self, artist_ids):
+        """
+            Play a radio from the Last.fm for artist ids
+            @param artist_ids as [int]
+        """
+        self.__play_radio_common()
+        if get_network_available("DEEZER") and\
+                get_network_available("YOUTUBE"):
+            from lollypop.similars_deezer import DeezerSimilars
+            similars = DeezerSimilars()
+            self.__load_similars(similars, artist_ids)
+
+    def play_radio_from_loved(self, artist_ids):
+        """
+            Play a radio from artists loved tracks
+            @param artist_ids as [int]
+        """
+        track_ids = App().tracks.get_loved_track_ids(artist_ids,
+                                                     StorageType.ALL)
+        shuffle(track_ids)
+        albums = tracks_to_albums([Track(track_id) for track_id in track_ids])
+        App().player.play_albums(albums)
+
+    def play_radio_from_populars(self, artist_ids):
+        """
+            Play a radio from artists popular tracks
+            @param artist_ids as [int]
+        """
+        track_ids = App().tracks.get_populars(artist_ids, StorageType.ALL,
+                                              False, 100)
+        shuffle(track_ids)
+        albums = tracks_to_albums([Track(track_id) for track_id in track_ids])
+        App().player.play_albums(albums)
+
+    def _on_stream_start(self, bus, message):
+        """
+            Cancel radio loading if current not a web track
+            @param bus as Gst.Bus
+            @param message as Gst.Message
+        """
+        if not self.current_track.is_web:
+            self.__radio_cancellable.cancel()
 
 #######################
 # PRIVATE             #
 #######################
-    def __populate(self, providers, cancellable):
+    def __load_similars(self, similars, artist_ids):
         """
-            Populate view with providers
-            @param providers as {}
-            @param cancellable as Gio.Cancellable
+            Load similars for artist ids
+            @param similars as Similars
+            @param artist ids as [int]
         """
-        for provider in providers.keys():
-            artist = providers[provider]
-            App().task_helper.run(provider.get_artist_id,
-                                  artist, cancellable,
-                                  callback=(self.__on_get_artist_id,
-                                            providers, provider, cancellable))
-            del providers[provider]
-            break
+        similars.connect("match-track", self.__on_match_track)
+        similars.connect("finished", self.__on_finished)
+        self.clear_albums()
+        App().task_helper.run(similars.load_similars,
+                              artist_ids,
+                              StorageType.EPHEMERAL,
+                              self.__radio_cancellable)
+
+    def __play_radio_common(self):
+        """
+            Emit signal and reset cancellable
+        """
+        emit_signal(self, "loading-changed", True, Track())
+        self.__radio_cancellable.cancel()
+        self.__radio_cancellable = Gio.Cancellable()
 
     def __get_album_from_artists(self,  similar_artist_ids):
         """
@@ -73,22 +165,23 @@ class AutoSimilarPlayer:
         """
         # Get an album
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids(similar_artist_ids, [], storage_type)
+        album_ids = App().albums.get_ids(
+            [], similar_artist_ids, storage_type, False)
         shuffle(album_ids)
         while album_ids:
             album_id = album_ids.pop(0)
             if album_id not in self.album_ids:
-                return Album(album_id)
+                return Album(album_id, [], [], False)
         return None
 
     def __get_artist_ids(self, artists):
         """
             Get valid artist ids from list
-            @param artists as [str]
+            @param artists as []
             @return [int]
         """
         similar_artist_ids = []
-        for (spotify_id, artist, cover_uri) in artists:
+        for (artist, cover_uri) in artists:
             similar_artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist.lower()))
             if similar_artist_id is not None:
@@ -96,62 +189,84 @@ class AutoSimilarPlayer:
                     similar_artist_ids.append(similar_artist_id)
         return similar_artist_ids
 
+    def __on_get_local_similar_artists(self, artists):
+        """
+            Add one album from artists to player
+            @param artists as []
+        """
+        if self.__next_cancellable.is_cancelled():
+            return
+        similar_artist_ids = self.__get_artist_ids(artists)
+        album = None
+        if similar_artist_ids:
+            album = self.__get_album_from_artists(similar_artist_ids)
+        if album is not None:
+            Logger.info("Found a similar album")
+            self.add_album(album)
+
+    def __on_get_similar_artists(self, artists):
+        """
+            Add one album from artists to player
+            @param artists as []
+        """
+        if self.__next_cancellable.is_cancelled():
+            return
+        similar_artist_ids = self.__get_artist_ids(artists)
+        album = None
+        if similar_artist_ids:
+            album = self.__get_album_from_artists(similar_artist_ids)
+        if album is None:
+            from lollypop.similars_local import LocalSimilars
+            similars = LocalSimilars()
+            App().task_helper.run(
+                similars.get_similar_artists,
+                App().player.current_track.artist_ids,
+                self.__next_cancellable,
+                callback=(self.__on_get_local_similar_artists,))
+        else:
+            Logger.info("Found a similar album")
+            self.add_album(album)
+
     def __on_next_changed(self, player):
         """
             Add a new album if playback finished and wanted by user
         """
-        self.__cancellable.cancel()
-        self.__cancellable = Gio.Cancellable()
+        self.__next_cancellable.cancel()
+        # Do not load an album if a radio is loading
+        if not self.__radio_cancellable.is_cancelled():
+            return
+        self.__next_cancellable = Gio.Cancellable()
         # Check if we need to add a new album
         if App().settings.get_enum("repeat") == Repeat.AUTO_SIMILAR and\
                 player.next_track.id is None and\
                 player.current_track.id is not None and\
                 player.current_track.id >= 0 and\
-                Gio.NetworkMonitor.get_default().get_network_available() and\
                 player.current_track.artist_ids:
-            artist_id = player.current_track.artist_ids[0]
-            artist_name = App().artists.get_name(artist_id)
-            providers = {}
-            if get_network_available("SPOTIFY"):
-                providers[App().spotify] = artist_name
-            if App().lastfm is not None and get_network_available("LASTFM"):
-                providers[App().lastfm] = artist_name
-            providers[ArtistProvider()] = artist_name
-            self.__populate(providers, self.__cancellable)
+            from lollypop.similars import Similars
+            similars = Similars()
+            App().task_helper.run(
+                similars.get_similar_artists,
+                player.current_track.artist_ids,
+                self.__next_cancellable,
+                callback=(self.__on_get_similar_artists,))
 
-    def __on_get_artist_id(self, artist_id, providers, provider, cancellable):
+    def __on_match_track(self, similars, track_id, storage_type):
         """
-            Get similars
-            @param artist_id as str
-            @param providers as {}
-            @param provider as SpotifySearch/LastFM
-            @param cancellable as Gio.Cancellable
+            Load/Play track album
+            @param similars as Similars
+            @param track_id as int
+            @param storage_type as StorageType
         """
-        if artist_id is None:
-            if providers.keys():
-                self.__populate(providers, cancellable)
-        else:
-            App().task_helper.run(provider.get_similar_artists,
-                                  artist_id, cancellable,
-                                  callback=(self.__on_similar_artists,
-                                            providers, cancellable))
-
-    def __on_similar_artists(self, artists, providers, cancellable):
-        """
-            Add one album from artist to player
-            @param artists as [str]
-            @param providers as {}
-            @param cancellable as Gio.Cancellable
-        """
-        if cancellable.is_cancelled():
-            return
-        similar_artist_ids = self.__get_artist_ids(artists)
-        album = None
-        if similar_artist_ids:
-            Logger.info("Found a similar artist: artists")
-            if self.albums:
-                album = self.__get_album_from_artists(similar_artist_ids)
-        if album is None:
-            self.__populate(providers, cancellable)
-        else:
+        track = Track(track_id)
+        album = track.album
+        if self.albums:
             self.add_album(album)
+        else:
+            self.play_album(album)
+
+    def __on_finished(self, similars):
+        """
+            Cancel radio loading
+            @param similars as Similars
+        """
+        self.__radio_cancellable.cancel()

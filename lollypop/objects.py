@@ -32,11 +32,6 @@ class Base:
         return super(Base, self).__dir__(*args, **kwargs) +\
             list(self.DEFAULTS.keys())
 
-    # Used by pickle
-    def __getstate__(self): return self.__dict__
-
-    def __setstate__(self, d): self.__dict__.update(d)
-
     def __getattr__(self, attr):
         # Lazy DB calls of attributes
         if attr in list(self.DEFAULTS.keys()):

@@ -18,9 +18,11 @@ from random import shuffle
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
+from lollypop.define import OrderBy
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available, popup_widget
-from lollypop.utils import get_font_height, get_title_for_genres_artists
+from lollypop.utils import get_title_for_genres_artists
+from lollypop.utils import remove_static
 from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -66,7 +68,7 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                     self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])
         return [
-            (App().scanner, "album-updated", "_on_album_updated"),
+            (App().scanner, "updated", "_on_collection_updated"),
             (App().player, "loading-changed", "_on_loading_changed")
         ]
 
@@ -84,11 +86,20 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                 self.show_placeholder(True)
 
         def load():
+            # No skipped albums for this views
+            if self._genre_ids and self._genre_ids[0] in [Type.POPULARS,
+                                                          Type.LITTLE,
+                                                          Type.RANDOMS,
+                                                          Type.RECENTS]:
+                skipped = False
+            else:
+                skipped = True
             album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
-                                          self.storage_type)
+                                          self.storage_type, skipped)
             albums = []
             for album_id in album_ids:
-                album = Album(album_id, self._genre_ids, self._artist_ids)
+                album = Album(album_id, self._genre_ids,
+                              self._artist_ids, True)
                 album.set_storage_type(self.storage_type)
                 albums.append(album)
             return albums
@@ -98,19 +109,21 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         elif self.__populate_wanted:
             App().task_helper.run(load, callback=(on_load,))
 
-    def insert_album(self, album, position):
+    def add_value(self, album):
         """
             Add a new album
             @param album as Album
-            @param position as int
-            @param cover_uri as int
         """
-        widget = AlbumSimpleWidget(album, self._genre_ids,
-                                   self._artist_ids, self.view_type,
-                                   get_font_height())
-        self._box.insert(widget, position)
-        widget.show()
-        widget.populate()
+        self.show_placeholder(False)
+        FlowBoxView.add_value(self, album)
+
+    def prepend_value(self, album):
+        """
+            Prepend a new album
+            @param album as Album
+        """
+        self.show_placeholder(False)
+        FlowBoxView.prepend_value(self, album)
 
     def clear(self):
         """
@@ -134,17 +147,18 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _get_child(self, value):
+    def _get_child(self, value, position=-1):
         """
             Get a child for view
             @param value as object
+            @param position as int
             @return row as SelectionListRow
         """
         if self.destroyed:
             return None
         widget = AlbumSimpleWidget(value,  self._genre_ids, self._artist_ids,
                                    self.view_type, self.font_height)
-        self._box.insert(widget, -1)
+        self._box.insert(widget, position)
         widget.show()
         return widget
 
@@ -160,27 +174,55 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
                          self.view_type, App().window.is_adaptive)
         return MenuBuilder(menu)
 
-    def _on_album_updated(self, scanner, album_id, scan_update):
+    def _sort_func(self, child1, child2):
+        """
+            Sort items
+            @param child1 as AlbumSimpleWidget
+            @param child2 as AlbumSimpleWidget
+        """
+        orderby = App().settings.get_enum("orderby")
+        if orderby == OrderBy.ARTIST:
+            artists1 = "".join(child1.data.artists)
+            artists2 = "".join(child2.data.artists)
+            if artists1 == artists2:
+                return child1.data.name > child2.data.name
+            else:
+                return artists1 > artists2
+        elif orderby == OrderBy.NAME:
+            return child1.data.name > child2.data.name
+        elif orderby == OrderBy.YEAR_DESC:
+            return child1.data.year < child2.data.year
+        elif orderby == OrderBy.POPULARITY:
+            return child1.data.popularity < child2.data.popularity
+        return False
+
+    def _on_collection_updated(self, scanner, item, scan_update):
         """
             Handles changes in collection
             @param scanner as CollectionScanner
-            @param album_id as int
+            @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
         if scan_update == ScanUpdate.ADDED:
-            album_ids = get_album_ids_for(self._genre_ids, self._artist_ids,
-                                          self.storage_type)
-            if album_id in album_ids:
-                index = album_ids.index(album_id)
-                self.insert_album(Album(album_id), index)
+            wanted = True
+            for genre_id in item.genre_ids:
+                genre_ids = remove_static(self._genre_ids)
+                if genre_ids and genre_id not in genre_ids:
+                    wanted = False
+            for artist_id in item.artist_ids:
+                artist_ids = remove_static(self._artist_ids)
+                if artist_ids and artist_id not in artist_ids:
+                    wanted = False
+            if wanted:
+                self.add_value(Album(item.album_id))
         elif scan_update == ScanUpdate.MODIFIED:
             for child in self.children:
-                if child.data.id == album_id:
+                if child.data.id == item.album_id:
                     child.data.reset_tracks()
                     break
         elif scan_update == ScanUpdate.REMOVED:
             for child in self.children:
-                if child.data.id == album_id:
+                if child.data.id == item.album_id:
                     child.destroy()
                     break
 
@@ -202,6 +244,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param track as Track
         """
         for child in self.children:
+            if child.artwork is None:
+                continue
             if child.data.id == track.album.id:
                 context = child.artwork.get_style_context()
                 if status:
@@ -247,10 +291,10 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         def play_album(status, child):
             child.artwork.get_style_context().remove_class("load-animation")
             child.data.reset_tracks()
-            App().player.play_album(child.data.get_with_skipping_allowed())
+            App().player.play_album(child.data.clone(True))
 
         if child.data.storage_type & StorageType.COLLECTION:
-            App().player.play_album(child.data.get_with_skipping_allowed())
+            App().player.play_album(child.data.clone(True))
         else:
             child.artwork.get_style_context().add_class("load-animation")
             cancellable = Gio.Cancellable.new()
@@ -303,7 +347,7 @@ class AlbumsForGenresBoxView(AlbumsBoxView):
             @param banner as AlbumsBannerWidget
             @param random as bool
         """
-        albums = [c.data for c in self._box.get_children()]
+        albums = [c.data.clone(False) for c in self._box.get_children()]
         if not albums:
             return
         if random:
@@ -328,7 +372,7 @@ class AlbumsForGenresBoxView(AlbumsBoxView):
         menu = AlbumsMenu(title, albums, App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)
 
 
 class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
@@ -357,10 +401,10 @@ class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
         def load():
             items = []
             for year in self._artist_ids:
-                items += App().albums.get_compilations_for_year(
-                    year, self.storage_type)
-                items += App().albums.get_albums_for_year(
-                    year, self.storage_type)
+                items += App().albums.get_compilation_ids_for_year(
+                    year, self.storage_type, True)
+                items += App().albums.get_ids_for_year(
+                    year, self.storage_type, True)
             return [Album(album_id, [Type.YEARS], []) for album_id in items]
 
         App().task_helper.run(load, callback=(on_load,))

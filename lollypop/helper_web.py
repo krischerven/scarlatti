@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GObject, Gio
+from gi.repository import GObject, Gio
 
 from lollypop.define import CACHE_PATH, App
 from lollypop.logger import Logger
@@ -61,11 +61,11 @@ class WebHelper(GObject.Object):
             Load URI from cache
             @return str/None
         """
+        if not self.__track.mb_track_id:
+            return None
         try:
-            # Read URI from cache
-            escaped = GLib.uri_escape_string(self.__track.uri, None, True)
             f = Gio.File.new_for_path(
-                "%s/web_%s" % (CACHE_PATH, escaped))
+                "%s/%s" % (CACHE_PATH, self.__track.mb_track_id))
             if f.query_exists():
                 (stats, content, tag) = f.load_contents()
                 return content.decode("utf-8")
@@ -78,11 +78,11 @@ class WebHelper(GObject.Object):
             Save URI to cache
             @param uri as str
         """
+        if not self.__track.mb_track_id:
+            return
         try:
-            # Read URI from cache
-            escaped = GLib.uri_escape_string(self.__track.uri, None, True)
             f = Gio.File.new_for_path(
-                "%s/web_%s" % (CACHE_PATH, escaped))
+                "%s/%s" % (CACHE_PATH, self.__track.mb_track_id))
             fstream = f.replace(None, False,
                                 Gio.FileCreateFlags.REPLACE_DESTINATION,
                                 None)

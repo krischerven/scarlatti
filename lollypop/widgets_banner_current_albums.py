@@ -10,21 +10,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, GLib
 
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ViewType, Size
-from lollypop.define import MARGIN, MARGIN_SMALL
+from lollypop.define import MARGIN
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import emit_signal, popup_widget
+from lollypop.utils import emit_signal, popup_widget, get_human_duration
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class CurrentAlbumsBannerWidget(BannerWidget):
+class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
     """
         Banner for current albums
     """
 
+    @signals_map
     def __init__(self, view):
         """
             Init banner
@@ -66,13 +68,17 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         self.__title_label.get_style_context().add_class("dim-label")
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.__duration_label = Gtk.Label.new()
+        self.__duration_label.show()
+        self.__duration_label.set_property("halign", Gtk.Align.END)
         grid = Gtk.Grid()
         grid.show()
-        grid.set_column_spacing(MARGIN_SMALL)
+        grid.set_column_spacing(MARGIN)
         grid.set_property("valign", Gtk.Align.CENTER)
         grid.set_margin_start(MARGIN)
         grid.set_margin_end(MARGIN)
         grid.add(self.__title_label)
+        grid.add(self.__duration_label)
         buttons = Gtk.Grid()
         buttons.show()
         buttons.get_style_context().add_class("linked")
@@ -83,6 +89,13 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         grid.add(buttons)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
+        return [
+            (view, "initialized", "_on_view_initialized"),
+            (App().player, "playback-added", "_on_playback_changed"),
+            (App().player, "playback-updated", "_on_playback_changed"),
+            (App().player, "playback-setted", "_on_playback_changed"),
+            (App().player, "playback-removed", "_on_playback_changed"),
+        ]
 
     def update_for_width(self, width):
         """
@@ -151,22 +164,52 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
 
+    def _on_view_initialized(self, view):
+        """
+            @param view as AlbumsListView
+        """
+        App().task_helper.run(self.__calculate_duration)
+
+    def _on_playback_changed(self, player, *ignore):
+        """
+            Update clear button state
+            @param player as Player
+        """
+        sensitive = player.albums != []
+        GLib.idle_add(self.__clear_button.set_sensitive, sensitive)
+        GLib.idle_add(self.__clear_button.set_sensitive, sensitive)
+        GLib.idle_add(self.__jump_button.set_sensitive, sensitive)
+        GLib.idle_add(self.__menu_button.set_sensitive, sensitive)
+        self.__calculate_duration()
+
 #######################
 # PRIVATE             #
 #######################
+    def __calculate_duration(self):
+        """
+            Calculate playback duration
+        """
+        duration = 0
+        for child in self.__view.children:
+            duration += child.album.duration
+        GLib.idle_add(self.__duration_label.set_text,
+                      get_human_duration(duration))
+
     def __set_internal_size(self):
         """
             Update font size
         """
+        duration_context = self.__duration_label.get_style_context()
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
+        for c in duration_context.list_classes():
+            duration_context.remove_class(c)
         if self.width <= Size.MEDIUM:
-            self.__title_label.get_style_context().add_class(
-                "text-large")
+            title_context.add_class("text-large")
         else:
-            self.__title_label.get_style_context().add_class(
-                "text-x-large")
+            duration_context.add_class("text-large")
+            title_context.add_class("text-x-large")
 
     def __on_jump_button_clicked(self, button):
         """
@@ -185,7 +228,7 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         menu = CurrentAlbumsMenu(App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)
 
     def __on_clear_button_clicked(self, button):
         """
@@ -194,7 +237,4 @@ class CurrentAlbumsBannerWidget(BannerWidget):
         """
         self.__view.clear(True)
         self.__view.populate([])
-        self.__clear_button.set_sensitive(False)
-        self.__jump_button.set_sensitive(False)
-        self.__menu_button.set_sensitive(False)
         emit_signal(App().player, "status-changed")

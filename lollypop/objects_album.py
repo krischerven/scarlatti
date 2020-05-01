@@ -11,10 +11,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from hashlib import md5
+
 from lollypop.define import App, StorageType, ScanUpdate
 from lollypop.objects_track import Track
 from lollypop.objects import Base
 from lollypop.utils import emit_signal
+from lollypop.collection_item import CollectionItem
+from lollypop.logger import Logger
 
 
 class Disc:
@@ -22,19 +26,28 @@ class Disc:
         Represent an album disc
     """
 
-    def __init__(self, album, disc_number, storage_type, allow_track_skipping):
+    def __init__(self, album, disc_number, storage_type, skipped):
         self.db = App().albums
         self.__tracks = []
         self.__album = album
         self.__storage_type = storage_type
         self.__number = disc_number
-        self.__allow_track_skipping = allow_track_skipping
+        self.__skipped = skipped
 
     def __del__(self):
         """
             Remove ref cycles
         """
         self.__album = None
+
+    # Used by pickle
+    def __getstate__(self):
+        self.db = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.db = App().albums
 
     def set_tracks(self, tracks):
         """
@@ -88,7 +101,7 @@ class Disc:
                 self.album.artist_ids,
                 self.number,
                 self.__storage_type,
-                self.__allow_track_skipping)]
+                self.__skipped)]
         return self.__tracks
 
 
@@ -102,29 +115,36 @@ class Album(Base):
                 "year": None,
                 "timestamp": 0,
                 "uri": "",
-                "duration": 0,
                 "popularity": 0,
                 "mtime": 1,
                 "synced": 0,
                 "loved": False,
                 "storage_type": 0,
-                "mb_album_id": None}
+                "mb_album_id": None,
+                "lp_album_id": None}
 
-    def __init__(self, album_id=None, genre_ids=[], artist_ids=[]):
+    def __init__(self, album_id=None, genre_ids=[], artist_ids=[],
+                 skipped=True):
         """
             Init album
             @param album_id as int
             @param genre_ids as [int]
+            @param artist_ids as [int]
+            @param skipped as bool
         """
         Base.__init__(self, App().albums)
         self.id = album_id
         self.genre_ids = genre_ids
         self._tracks = []
         self._discs = []
-        self.__allow_track_skipping = False
+        self.__skipped = skipped
         self.__one_disc = None
         # Use artist ids from db else
         if artist_ids:
+            artists = []
+            for artist_id in set(artist_ids) | set(self.artist_ids):
+                artists.append(App().artists.get_name(artist_id))
+            self.artists = artists
             self.artist_ids = artist_ids
 
     def __del__(self):
@@ -132,6 +152,15 @@ class Album(Base):
             Remove ref cycles
         """
         self.reset_tracks()
+
+    # Used by pickle
+    def __getstate__(self):
+        self.db = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.db = App().albums
 
     def set_discs(self, discs):
         """
@@ -275,13 +304,16 @@ class Album(Base):
             @param cancellable as Gio.Cancellable
             @return status as bool
         """
-        if self.storage_type & (StorageType.COLLECTION |
-                                StorageType.EXTERNAL):
-            return False
-        elif self.synced != 0 and self.synced != len(self.tracks):
-            App().spotify.load_tracks(self.mb_album_id, self.storage_type,
-                                      cancellable)
-            self.reset_tracks()
+        try:
+            if self.storage_type & (StorageType.COLLECTION |
+                                    StorageType.EXTERNAL):
+                return False
+            elif self.synced != 0 and self.synced != len(self.tracks):
+                from lollypop.search import Search
+                Search().load_tracks(self, cancellable)
+                self.reset_tracks()
+        except Exception as e:
+            Logger.warning("Album::load_tracks(): %s" % e)
         return True
 
     def set_synced(self, mask):
@@ -292,25 +324,13 @@ class Album(Base):
         self.db.set_synced(self.id, mask)
         self.synced = mask
 
-    def set_skipping_allowed(self):
+    def clone(self, skipped):
         """
-            Mark album as allowing skiiping
-            Calling reset_tracks() needed if already populated
-        """
-        self.__allow_track_skipping = True
-
-    def get_with_skipping_allowed(self):
-        """
-            Get an album clone with skipping activated
+            Clone album
+            @param skipped as bool
             @return album
         """
-        new_album = Album(self.id)
-        tracks = []
-        for track in self.tracks:
-            if track.loved != -1:
-                tracks.append(track)
-        new_album.set_tracks(tracks)
-        return new_album
+        return Album(self.id, self.genre_ids, self.artist_ids, skipped)
 
     def set_storage_type(self, storage_type):
         """
@@ -318,6 +338,23 @@ class Album(Base):
             @param storage_type as StorageType
         """
         self._storage_type = storage_type
+
+    def set_skipped(self):
+        """
+            Set album as skipped, not allowing skipped tracks
+        """
+        self.__skipped = True
+
+    @property
+    def collection_item(self):
+        """
+            Get collection item related to album
+            @return CollectionItem
+        """
+        item = CollectionItem(album_id=self.id,
+                              album_name=self.name,
+                              artist_ids=self.artist_ids)
+        return item
 
     @property
     def is_web(self):
@@ -378,7 +415,7 @@ class Album(Base):
         if self.__one_disc is None:
             tracks = self.tracks
             self.__one_disc = Disc(self, 0, self.storage_type,
-                                   self.__allow_track_skipping)
+                                   self.__skipped)
             self.__one_disc.set_tracks(tracks)
         return self.__one_disc
 
@@ -393,10 +430,38 @@ class Album(Base):
             for disc_number in disc_numbers:
                 disc = Disc(self, disc_number,
                             self.storage_type,
-                            self.__allow_track_skipping)
+                            self.__skipped)
                 if disc.tracks:
                     self._discs.append(disc)
         return self._discs
+
+    @property
+    def duration(self):
+        """
+            Get album duration and handle caching
+            @return int
+        """
+        if self._tracks:
+            track_ids = [track.lp_track_id for track in self.tracks]
+            track_str = "%s" % sorted(track_ids)
+            track_hash = md5(track_str.encode("utf-8")).hexdigest()
+            album_hash = "%s-%s" % (self.lp_album_id, track_hash)
+        else:
+            album_hash = "%s-%s-%s" % (self.lp_album_id,
+                                       self.genre_ids,
+                                       self.artist_ids)
+        duration = App().cache.get_duration(album_hash)
+        if duration is None:
+            if self._tracks:
+                duration = 0
+                for track in self._tracks:
+                    duration += track.duration
+            else:
+                duration = self.db.get_duration(self.id,
+                                                self.genre_ids,
+                                                self.artist_ids)
+            App().cache.set_duration(self.id, album_hash, duration)
+        return duration
 
 #######################
 # PRIVATE             #
@@ -413,14 +478,16 @@ class Album(Base):
             self.db.set_storage_type(self.id, StorageType.EPHEMERAL)
         self.reset("mtime")
         if save:
-            for artist_id in self.artist_ids:
-                emit_signal(App().scanner, "artist-updated",
-                            artist_id, ScanUpdate.ADDED)
-            emit_signal(App().scanner, "album-updated", self.id,
+            item = CollectionItem(artist_ids=self.artist_ids,
+                                  album_id=self.id)
+            emit_signal(App().scanner, "updated", item,
                         ScanUpdate.ADDED)
         else:
+            removed_artist_ids = []
             for artist_id in self.artist_ids:
-                emit_signal(App().scanner, "artist-updated", artist_id,
-                            ScanUpdate.REMOVED)
-            emit_signal(App().scanner, "album-updated", self.id,
+                if not App().artists.get_name(artist_id):
+                    removed_artist_ids.append(artist_id)
+            item = CollectionItem(artist_ids=removed_artist_ids,
+                                  album_id=self.id)
+            emit_signal(App().scanner, "updated", item,
                         ScanUpdate.REMOVED)

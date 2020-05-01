@@ -14,7 +14,7 @@ from gi.repository import Gio, Gtk, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN_SMALL, ViewType
+from lollypop.define import App, MARGIN_SMALL, ViewType, Type
 
 
 class PlaylistMenu(Gio.Menu):
@@ -41,6 +41,13 @@ class PlaylistMenu(Gio.Menu):
         App().add_action(save_action)
         save_action.connect("activate", self.__on_save_action_activate)
         menu.append(_("Save playlist"), "app.save_pl_action")
+        if App().ws_director.lastfm_ws is not None and\
+                playlist_id == Type.LOVED:
+            lastfm_action = Gio.SimpleAction(name="lastfm_action")
+            App().add_action(lastfm_action)
+            lastfm_action.connect("activate",
+                                  self.__on_lastfm_action_activate)
+            menu.append(_("Sync from Last.FM"), "app.lastfm_action")
         if playlist_id >= 0:
             if not App().playlists.get_track_uris(playlist_id):
                 smart_action = Gio.SimpleAction(name="smart_action")
@@ -83,6 +90,14 @@ class PlaylistMenu(Gio.Menu):
             @param GLib.Variant
         """
         App().window.container.show_smart_playlist_editor(self.__playlist_id)
+
+    def __on_lastfm_action_activate(self, action, variant):
+        """
+            Sync playlist with Last.FM
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        App().ws_director.lastfm_ws.sync_loved_tracks()
 
     def __on_remove_action_activate(self, action, variant):
         """

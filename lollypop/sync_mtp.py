@@ -537,8 +537,7 @@ class MtpSync(GObject.Object):
                             not self.__cancellable.is_cancelled():
                         sleep(1)
                     bus.disconnect_by_func(self.__on_bus_eos)
-                    pipeline.set_state(Gst.State.PAUSED)
-                    pipeline.set_state(Gst.State.READY)
+                    bus.remove_signal_watch()
                     pipeline.set_state(Gst.State.NULL)
                     convert_file.move(
                         dst, Gio.FileCopyFlags.OVERWRITE, None, None)

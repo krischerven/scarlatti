@@ -99,7 +99,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             artwork_search.show()
             # Let current animation run
             GLib.timeout_add(250, artwork_search.populate)
-            popup_widget(artwork_search, self)
+            popup_widget(artwork_search, self, None, None, None)
         else:
             App().window.container.show_view([Type.ALBUM], self.__album)
 

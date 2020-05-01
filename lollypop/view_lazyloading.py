@@ -26,7 +26,9 @@ class LazyLoadingView(View):
     """
 
     __gsignals__ = {
+        # View has been populated/depopulated, children are not populated
         "initialized": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        # All children are populated
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -112,7 +114,7 @@ class LazyLoadingView(View):
             @param value as object
             @return object
         """
-        pass
+        return None
 
     def _on_map(self, widget):
         """

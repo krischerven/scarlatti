@@ -10,18 +10,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Soup
+from gi.repository import GLib
 
 import json
-from base64 import b64encode
 
 from lollypop.define import App, GOOGLE_API_ID, Type, AUDIODB_CLIENT_ID
-from lollypop.define import SPOTIFY_CLIENT_ID, SPOTIFY_SECRET, FANARTTV_ID
+from lollypop.define import FANARTTV_ID
 from lollypop.define import StorageType
 from lollypop.utils import get_network_available, noaccents, emit_signal
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
-from lollypop.helper_task import TaskHelper
 
 
 class DownloaderArt:
@@ -167,9 +165,9 @@ class DownloaderArt:
                         if uri is not None:
                             return [uri]
         except Exception as e:
+            Logger.warning("%s %s", e, artist)
             Logger.warning(
-                "DownloaderArt::_get_audiodb_artist_artwork_uri: %s : %s"
-                % (e, artist))
+                "DownloaderArt::_get_audiodb_artist_artwork_uri: %s", data)
         return []
 
     def _get_deezer_artist_artwork_uri(self, artist, cancellable=None):
@@ -195,9 +193,9 @@ class DownloaderArt:
                 uri = decode["data"][0]["picture_xl"]
                 return [uri]
         except Exception as e:
+            Logger.warning("%s %s", e, artist)
             Logger.warning(
-                "DownloaderArt::_get_deezer_artist_artwork_uri(): %s : %s"
-                % (e, artist))
+                "DownloaderArt::_get_deezer_artist_artwork_uri(): %s", data)
         return []
 
     def _get_fanarttv_artist_artwork_uri(self, artist, cancellable=None):
@@ -223,9 +221,9 @@ class DownloaderArt:
                 for item in decode["artistbackground"]:
                     uris.append(item["url"])
         except Exception as e:
+            Logger.warning("%s %s", e, artist)
             Logger.warning(
-                "DownloaderArt::_get_fanarttv_artist_artwork_uri: %s : %s"
-                % (e, artist))
+                "DownloaderArt::_get_fanarttv_artist_artwork_uri: %s", data)
         return uris
 
     def _get_spotify_artist_artwork_uri(self, artist, cancellable=None):
@@ -243,10 +241,13 @@ class DownloaderArt:
                 artist, None, True).replace(" ", "+")
             uri = "https://api.spotify.com/v1/search?q=%s" % artist_formated +\
                   "&type=artist"
-            token = "Bearer %s" % self.__get_spotify_token(cancellable)
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 uri = None
                 decode = json.loads(data.decode("utf-8"))
@@ -256,9 +257,9 @@ class DownloaderArt:
                         uri = item["images"][0]["url"]
                         return [uri]
         except Exception as e:
+            Logger.warning("%s %s", e, artist)
             Logger.warning(
-                "DownloaderArt::_get_spotify_artist_artwork_uri(): %s : %s"
-                % (e, artist))
+                "DownloaderArt::_get_spotify_artist_artwork_uri(): %s", data)
         return []
 
     def _get_deezer_album_artwork_uri(self, artist, album, cancellable=None):
@@ -287,8 +288,9 @@ class DownloaderArt:
                         uri = item["cover_xl"]
                         return [uri]
         except Exception as e:
-            Logger.warning("DownloaderArt::__get_deezer_album_artwork_uri: %s"
-                           % e)
+            Logger.warning("%s %s %s", e, artist, album)
+            Logger.warning("DownloaderArt::__get_deezer_album_artwork_uri: %s",
+                           data)
         return []
 
     def _get_fanarttv_album_artwork_uri(self, artist, album, cancellable=None):
@@ -316,9 +318,9 @@ class DownloaderArt:
                 for cover in decode["albums"][mbid]["albumcover"]:
                     uris.append(cover["url"])
         except Exception as e:
+            Logger.warning("%s %s %s", e, artist, album)
             Logger.warning(
-                "DownloaderArt::_get_fanarttv_album_artwork_uri: %s, %s: %s" %
-                (e, artist, album))
+                "DownloaderArt::_get_fanarttv_album_artwork_uri: %s", data)
         return uris
 
     def _get_spotify_album_artwork_uri(self, artist, album, cancellable=None):
@@ -334,15 +336,17 @@ class DownloaderArt:
             return []
         artists_spotify_ids = []
         try:
-            token = self.__get_spotify_token(cancellable)
             artist_formated = GLib.uri_escape_string(
                 artist, None, True).replace(" ", "+")
             uri = "https://api.spotify.com/v1/search?q=%s" % artist_formated +\
                   "&type=artist"
-            token = "Bearer %s" % token
-            helper = TaskHelper()
-            helper.add_header("Authorization", token)
-            (status, data) = helper.load_uri_content_sync(uri, cancellable)
+            token = App().ws_director.token_ws.get_token("SPOTIFY",
+                                                         cancellable)
+            bearer = "Bearer %s" % token
+            headers = [("Authorization", bearer)]
+            (status,
+             data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]["items"]:
@@ -351,7 +355,9 @@ class DownloaderArt:
             for artist_spotify_id in artists_spotify_ids:
                 uri = "https://api.spotify.com/v1/artists/" +\
                       "%s/albums" % artist_spotify_id
-                (status, data) = helper.load_uri_content_sync(uri, cancellable)
+                (status,
+                 data) = App().task_helper.load_uri_content_sync_with_headers(
+                    uri, headers, cancellable)
                 if status:
                     decode = json.loads(data.decode("utf-8"))
                     uri = None
@@ -360,9 +366,9 @@ class DownloaderArt:
                                 noaccents(album.lower()):
                             return [item["images"][0]["url"]]
         except Exception as e:
+            Logger.warning("%s %s %s", e, artist, album)
             Logger.warning(
-                "DownloaderArt::_get_album_art_spotify_uri: %s, %s: %s" %
-                (e, artist, album))
+                "DownloaderArt::_get_album_art_spotify_uri: %s", data)
         return []
 
     def _get_itunes_album_artwork_uri(self, artist, album, cancellable=None):
@@ -392,9 +398,9 @@ class DownloaderArt:
                                                            "1024x1024")
                         return [uri]
         except Exception as e:
+            Logger.warning("%s %s %s", e, artist, album)
             Logger.warning(
-                "DownloaderArt::_get_album_art_itunes_uri: %s, %s: %s" %
-                (e, artist, album))
+                "DownloaderArt::_get_album_art_itunes_uri: %s", data)
         return []
 
     def _get_audiodb_album_artwork_uri(self, artist, album, cancellable=None):
@@ -424,14 +430,14 @@ class DownloaderArt:
                         uri = item["strAlbumThumb"]
                         return [uri]
         except Exception as e:
+            Logger.warning("%s %s %s", e, artist, album)
             Logger.warning(
-                "DownloaderArt::_get_audiodb_album_artwork_uri: %s, %s: %s" %
-                (e, artist, album))
+                "DownloaderArt::_get_audiodb_album_artwork_uri: %s", data)
         return []
 
     def _get_lastfm_album_artwork_uri(self, artist, album, cancellable=None):
         """
-            Get album artwork using Last.FM
+            Get album artwork using Last.fm
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
@@ -440,15 +446,16 @@ class DownloaderArt:
         """
         if not get_network_available("LASTFM"):
             return []
-        if App().lastfm is not None:
-            try:
-                last_album = App().lastfm.get_album(artist, album)
-                uri = last_album.get_cover_image(4)
-                return [uri]
-            except Exception as e:
-                Logger.warning(
-                    "DownloaderArt::_get_album_art_lastfm_uri: %s, %s: %s" %
-                    (e, artist, album))
+        try:
+            from lollypop.helper_web_lastfm import LastFMWebHelper
+            helper = LastFMWebHelper()
+            payload = helper.get_album_payload(album, artist, cancellable)
+            artwork_uri = payload["image"][-1]["#text"]
+            return [artwork_uri]
+        except Exception as e:
+            Logger.warning("%s %s %s", e, artist, album)
+            Logger.warning(
+                "DownloaderArt::_get_album_art_lastfm_uri: %s", payload)
         return []
 
 #######################
@@ -469,10 +476,8 @@ class DownloaderArt:
                 uri = "http://musicbrainz.org/ws/2/release-group/" +\
                       "?query=%s&fmt=json"
             string = GLib.uri_escape_string(string, None, True)
-            helper = TaskHelper()
-            helper.add_header("User-Agent",
-                              "org.gnome.Lollypop/%s" % App().version)
-            (status, data) = helper.load_uri_content_sync(uri % string,
+            (status, data) = App().task_helper.load_uri_content_sync(
+                                                          uri % string,
                                                           cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
@@ -490,34 +495,9 @@ class DownloaderArt:
                             mbid = item["id"]
                 return mbid
         except Exception as e:
-            Logger.warning("DownloaderArt::__get_musicbrainz_mbid: %s"
-                           % e)
+            Logger.warning("%s %s", e, string)
+            Logger.warning("DownloaderArt::__get_musicbrainz_mbid: %s", data)
         return None
-
-    def __get_spotify_token(self, cancellable):
-        """
-            Get a new auth token
-            @param cancellable as Gio.Cancellable
-            @return str
-        """
-        try:
-            token_uri = "https://accounts.spotify.com/api/token"
-            credentials = "%s:%s" % (SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
-            encoded = b64encode(credentials.encode("utf-8"))
-            credentials = encoded.decode("utf-8")
-            session = Soup.Session.new()
-            data = {"grant_type": "client_credentials"}
-            msg = Soup.form_request_new_from_hash("POST", token_uri, data)
-            msg.request_headers.append("Authorization",
-                                       "Basic %s" % credentials)
-            status = session.send_message(msg)
-            if status == 200:
-                body = msg.get_property("response-body")
-                data = body.flatten().get_data()
-                decode = json.loads(data.decode("utf-8"))
-                return decode["access_token"]
-        except:
-            return ""
 
     def __cache_artists_artwork(self):
         """

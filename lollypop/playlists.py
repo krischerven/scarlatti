@@ -38,9 +38,10 @@ class Playlists(GObject.GObject):
     __LOCAL_PATH = GLib.get_user_data_dir() + "/lollypop"
     _DB_PATH = "%s/playlists.db" % __LOCAL_PATH
     __gsignals__ = {
-        # Add or remove a playlist
-        "playlists-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
-        # Objects added/removed to/from playlist
+        "playlists-added": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "playlists-removed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "playlists-updated": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "playlists-renamed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "playlist-track-added": (
             GObject.SignalFlags.RUN_FIRST, None, (int, str)),
         "playlist-track-removed": (
@@ -111,7 +112,7 @@ class Playlists(GObject.GObject):
                                   VALUES (?, ?)",
                                  (name, 0))
             lastrowid = result.lastrowid
-        emit_signal(self, "playlists-changed", lastrowid)
+        emit_signal(self, "playlists-added", lastrowid)
         return lastrowid
 
     def exists(self, playlist_id):
@@ -141,7 +142,7 @@ class Playlists(GObject.GObject):
                         SET name=?\
                         WHERE rowid=?",
                         (name, playlist_id))
-        emit_signal(self, "playlists-changed", playlist_id)
+        emit_signal(self, "playlists-renamed", playlist_id)
         App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
 
     def remove(self, playlist_id):
@@ -157,7 +158,7 @@ class Playlists(GObject.GObject):
             sql.execute("DELETE FROM tracks\
                         WHERE playlist_id=?",
                         (playlist_id,))
-        emit_signal(self, "playlists-changed", playlist_id)
+        emit_signal(self, "playlists-removed", playlist_id)
         App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
 
     def clear(self, playlist_id):
@@ -289,20 +290,23 @@ class Playlists(GObject.GObject):
         limit = App().settings.get_value("view-limit").get_int32()
         storage_type = get_default_storage_type()
         if playlist_id == Type.POPULARS:
-            track_ids = App().tracks.get_rated(storage_type, limit)
-            for track in App().tracks.get_populars(storage_type, limit):
-                track_ids.append(track)
+            track_ids = App().tracks.get_populars([], storage_type,
+                                                  False, limit)
         elif playlist_id == Type.RECENTS:
             track_ids = App().tracks.get_recently_listened_to(storage_type,
+                                                              False,
                                                               limit)
         elif playlist_id == Type.LITTLE:
-            track_ids = App().tracks.get_little_played(storage_type, limit)
+            track_ids = App().tracks.get_little_played(storage_type,
+                                                       False,
+                                                       limit)
         elif playlist_id == Type.RANDOMS:
-            track_ids = App().tracks.get_randoms(storage_type, limit)
+            track_ids = App().tracks.get_randoms([], storage_type,
+                                                 False, limit)
         elif playlist_id == Type.ALL:
-            track_ids = App().tracks.get_ids(storage_type)
+            track_ids = App().tracks.get_ids(storage_type, False)
         elif playlist_id == Type.LOVED:
-            track_ids = App().tracks.get_loved_track_ids(storage_type)
+            track_ids = App().tracks.get_loved_track_ids([], storage_type)
         else:
             with SqlCursor(self) as sql:
                 result = sql.execute("SELECT music.tracks.rowid\
@@ -497,7 +501,7 @@ class Playlists(GObject.GObject):
                         SET smart_enabled=?\
                         WHERE rowid=?",
                         (smart, playlist_id))
-            emit_signal(self, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-updated", playlist_id)
 
     def set_smart_sql(self, playlist_id, request):
         """
@@ -513,7 +517,7 @@ class Playlists(GObject.GObject):
                         SET smart_sql=?\
                         WHERE rowid=?",
                         (request, playlist_id))
-            emit_signal(self, "playlists-changed", playlist_id)
+            emit_signal(self, "playlists-updated", playlist_id)
 
     def get_position(self, playlist_id, track_id):
         """
@@ -622,11 +626,12 @@ class Playlists(GObject.GObject):
             sql.execute("UPDATE playlists SET synced = synced & ~(1<<?)",
                         (index,))
 
-    def import_tracks(self, f):
+    def import_tracks(self, uri):
         """
             Import file as playlist
-            @param f as Gio.File
+            @param uri as str
         """
+        f = Gio.File.new_for_uri(uri)
         # Create playlist and get id
         basename = ".".join(f.get_basename().split(".")[:-1])
         playlist_id = self.get_id(basename)

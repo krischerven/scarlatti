@@ -42,7 +42,9 @@ class ShufflePlayer:
         # Party mode
         self.__is_party = False
         App().settings.connect("changed::shuffle", self.__set_shuffle)
-        self.connect("playback-changed", self.__on_playback_changed)
+        self.connect("playback-added", self.__on_playback_added)
+        self.connect("playback-setted", self.__on_playback_setted)
+        self.connect("playback-removed", self.__on_playback_removed)
 
     def next(self):
         """
@@ -97,7 +99,9 @@ class ShufflePlayer:
         else:
             # We want current album to continue playback
             self._albums = [self._current_playback_track.album]
-            emit_signal(self, "playback-changed")
+            emit_signal(self, "playback-setted", [])
+            emit_signal(self, "playback-added",
+                        self._current_playback_track.album)
         if self._current_playback_track.id is not None:
             self.set_next()
             self.set_prev()
@@ -108,17 +112,13 @@ class ShufflePlayer:
         """
         party_ids = App().settings.get_value("party-ids")
         storage_type = get_default_storage_type()
-        album_ids = App().albums.get_ids([], party_ids, storage_type, True)
-        # All albums are blacklisted, WTF?
-        if not album_ids:
-            album_ids = App().albums.get_ids([], party_ids,
-                                             storage_type, False)
+        album_ids = App().albums.get_ids(party_ids, [], storage_type, False)
+        emit_signal(self, "playback-setted", [])
         self._albums = []
         for album_id in album_ids:
-            album = Album(album_id, [], [])
-            album.set_skipping_allowed()
+            album = Album(album_id, [], [], False)
             self._albums.append(album)
-        emit_signal(self, "playback-changed")
+        emit_signal(self, "playback-setted", self._albums)
 
     @property
     def is_party(self):
@@ -213,7 +213,12 @@ class ShufflePlayer:
                         self.__history = []
                         repeat = App().settings.get_enum("repeat")
                         if repeat == Repeat.ALL:
-                            return self.__get_next()
+                            # Only one track in playback
+                            if self._albums and\
+                                    len(self._albums[0].tracks) > 1:
+                                return self.__get_next()
+                            else:
+                                return self.current_track
                     return track
         except Exception as e:  # Recursion error
             Logger.error("ShufflePLayer::__get_next(): %s", e)
@@ -229,6 +234,8 @@ class ShufflePlayer:
             self.__not_played_albums = list(self.__to_play_albums)
         while self.__not_played_albums:
             album = self.__not_played_albums.pop(0)
+            if not album.tracks:
+                continue
             for track in sorted(album.tracks,
                                 key=lambda *args: random()):
                 if not self.__in_shuffle_history(track):
@@ -259,15 +266,44 @@ class ShufflePlayer:
         if track not in self.__already_played_tracks[track.album.id]:
             self.__already_played_tracks[track.album.id].append(track.id)
 
-    def __on_playback_changed(self, player):
+    def __on_playback_added(self, player, album):
         """
-            Reset history
+            Update shuffle for album
             @param player as Player
+            @param album as Album
         """
-        self.__to_play_albums = list(self._albums)
-        shuffle(self.__to_play_albums)
-        self.__not_played_albums = list(self.__to_play_albums)
-        self.__history = []
-        self.__already_played_tracks = {}
-        if App().player.current_track.id is not None:
-            self.__add_to_shuffle_history(App().player.current_track)
+        if App().settings.get_value("shuffle") or self.__is_party:
+            if album not in self.__to_play_albums:
+                self.__to_play_albums.append(album)
+                shuffle(self.__to_play_albums)
+            if album not in self.__not_played_albums:
+                self.__not_played_albums.append(album)
+            if App().player.current_track.album == album:
+                self.__add_to_shuffle_history(App().player.current_track)
+
+    def __on_playback_setted(self, player, albums):
+        """
+            Update shuffle for album
+            @param player as Player
+            @param albums as [Album]
+        """
+        if App().settings.get_value("shuffle") or self.__is_party:
+            self.__to_play_albums = albums
+            if albums:
+                shuffle(self.__to_play_albums)
+            self.__not_played_albums = []
+            self.__already_played_tracks = {}
+            if App().player.current_track.album in albums:
+                self.__add_to_shuffle_history(App().player.current_track)
+
+    def __on_playback_removed(self, player, album):
+        """
+            Update shuffle for album
+            @param player as Player
+            @param album as Album
+        """
+        if App().settings.get_value("shuffle") or self.__is_party:
+            if album in self.__to_play_albums:
+                self.__to_play_albums.remove(album)
+            if album in self.__not_played_albums:
+                self.__not_played_albums.remove(album)

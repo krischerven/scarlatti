@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ViewType, Type
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import get_default_storage_type, emit_signal
+from lollypop.utils import get_network_available
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
 
@@ -43,6 +44,21 @@ class PlaybackMenu(Gio.Menu):
 #######################
 # PROTECTED           #
 #######################
+    def _set_radio_action(self, artist_ids):
+        """
+            Set radio action
+            @param artist_ids as [int]
+        """
+        radio_action = Gio.SimpleAction(name="radio_action_collection")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        menu_item = Gio.MenuItem.new(_("Play a radio"),
+                                     "app.radio_action_collection")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
     def _set_playback_actions(self):
         """
             Setup playback actions
@@ -64,6 +80,115 @@ class PlaybackMenu(Gio.Menu):
                                          "app.del_playback_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_radio_action_activate(self, action, variant, artist_ids):
+        """
+            Play a radio from storage type
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param artist_ids as [int]
+        """
+        App().player.play_radio_from_collection(artist_ids)
+
+
+class RadioPlaybackMenu(Gio.Menu):
+    """
+        Allow to play a radio from artist ids
+    """
+
+    def __init__(self, artist_ids):
+        """
+            Init menu
+            @param artist_ids as [int]
+        """
+        Gio.Menu.__init__(self)
+        section = Gio.Menu()
+        radio_action = Gio.SimpleAction(name="radio_action_collection")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        menu_item = Gio.MenuItem.new(_("Related tracks"),
+                                     "app.radio_action_collection")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        section.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action_loved")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        menu_item = Gio.MenuItem.new(_("Loved tracks"),
+                                     "app.radio_action_loved")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        section.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action_populars")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        menu_item = Gio.MenuItem.new(_("Popular tracks"),
+                                     "app.radio_action_populars")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        section.append_item(menu_item)
+        self.append_section(_("From collection"), section)
+        section = Gio.Menu()
+        radio_action = Gio.SimpleAction(name="radio_action_deezer")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        radio_action.set_enabled(get_network_available("DEEZER"))
+        menu_item = Gio.MenuItem.new(_("Deezer"),
+                                     "app.radio_action_deezer")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        section.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action_lastfm")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        radio_action.set_enabled(get_network_available("LASTFM"))
+        menu_item = Gio.MenuItem.new(_("Last.fm"),
+                                     "app.radio_action_lastfm")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        section.append_item(menu_item)
+        radio_action = Gio.SimpleAction(name="radio_action_spotify")
+        App().add_action(radio_action)
+        radio_action.connect("activate",
+                             self.__on_radio_action_activate,
+                             artist_ids)
+        radio_action.set_enabled(get_network_available("SPOTIFY"))
+        menu_item = Gio.MenuItem.new(_("Spotify"),
+                                     "app.radio_action_spotify")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        section.append_item(menu_item)
+        self.append_section(_("From the Web"), section)
+
+#######################
+# PRIVATE             #
+#######################
+    def __on_radio_action_activate(self, action, variant, artist_ids):
+        """
+            Play a radio from storage type
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param artist_ids as [int]
+        """
+        if action.get_name() == "radio_action_collection":
+            App().player.play_radio_from_collection(artist_ids)
+        elif action.get_name() == "radio_action_spotify":
+            App().player.play_radio_from_spotify(artist_ids)
+        elif action.get_name() == "radio_action_lastfm":
+            App().player.play_radio_from_lastfm(artist_ids)
+        elif action.get_name() == "radio_action_deezer":
+            App().player.play_radio_from_deezer(artist_ids)
+        elif action.get_name() == "radio_action_loved":
+            App().player.play_radio_from_loved(artist_ids)
+        elif action.get_name() == "radio_action_populars":
+            App().player.play_radio_from_populars(artist_ids)
 
 
 class PlaylistPlaybackMenu(Gio.Menu):
@@ -127,12 +252,19 @@ class ArtistPlaybackMenu(PlaybackMenu):
         self.__storage_type = storage_type
         play_action = Gio.SimpleAction(name="artist_play_action")
         App().add_action(play_action)
-        play_action.connect("activate", self.__play)
+        play_action.connect("activate", self.__on_play_action_activate)
         menu_item = Gio.MenuItem.new(_("Play this artist"),
                                      "app.artist_play_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         self._set_playback_actions()
+        if get_network_available("SPOTIFY") or\
+                get_network_available("LASTFM") or\
+                get_network_available("DEEZER"):
+            submenu = RadioPlaybackMenu([artist_id])
+            self.append_submenu(_("Play a radio"), submenu)
+        else:
+            self._set_radio_action([artist_id])
 
     @property
     def in_player(self):
@@ -140,8 +272,8 @@ class ArtistPlaybackMenu(PlaybackMenu):
             True if current object in player
             return bool
         """
-        album_ids = App().albums.get_ids([self.__artist_id], [],
-                                         self.__storage_type)
+        album_ids = App().albums.get_ids([], [self.__artist_id],
+                                         self.__storage_type, False)
         return set(App().player.album_ids) & set(album_ids) == set(album_ids)
 
 #######################
@@ -168,7 +300,7 @@ class ArtistPlaybackMenu(PlaybackMenu):
 #######################
 # PRIVATE             #
 #######################
-    def __play(self, action, variant):
+    def __on_play_action_activate(self, action, variant):
         """
             Play albums
             @param Gio.SimpleAction
@@ -227,6 +359,8 @@ class GenrePlaybackMenu(PlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
+        if App().player.current_track.album.id in album_ids:
+            App().player.skip_album()
         App().player.remove_album_by_ids(album_ids)
 
 #######################
@@ -240,11 +374,10 @@ class GenrePlaybackMenu(PlaybackMenu):
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_compilation_ids([self.__genre_id],
                                                      storage_type,
-                                                     True)
-        album_ids += App().albums.get_ids([],
-                                          [self.__genre_id],
+                                                     False)
+        album_ids += App().albums.get_ids([self.__genre_id], [],
                                           storage_type,
-                                          True)
+                                          False)
         return album_ids
 
     def __play(self, action, variant):
@@ -307,6 +440,8 @@ class DecadePlaybackMenu(PlaybackMenu):
             @param GLib.Variant
         """
         album_ids = self.__get_album_ids()
+        if App().player.current_track.album.id in album_ids:
+            App().player.skip_album()
         App().player.remove_album_by_ids(album_ids)
 
 #######################
@@ -320,10 +455,10 @@ class DecadePlaybackMenu(PlaybackMenu):
         storage_type = get_default_storage_type()
         album_ids = []
         for year in self.__years:
-            album_ids += App().albums.get_compilations_for_year(
-                year, storage_type)
-            album_ids += App().albums.get_albums_for_year(
-                year, storage_type)
+            album_ids += App().albums.get_compilation_ids_for_year(
+                year, storage_type, False)
+            album_ids += App().albums.get_ids_for_year(
+                year, storage_type, False)
         return album_ids
 
     def __play(self, action, variant):
@@ -342,21 +477,30 @@ class AlbumPlaybackMenu(PlaybackMenu):
         Contextual menu for an album
     """
 
-    def __init__(self, album):
+    def __init__(self, album, view_type):
         """
             Init album menu
             @param album as Album
+            @param view_type as ViewType
         """
         PlaybackMenu.__init__(self)
         self.__album = album
-        play_action = Gio.SimpleAction(name="album_play_action")
-        App().add_action(play_action)
-        play_action.connect("activate", self.__play)
-        menu_item = Gio.MenuItem.new(_("Play this album"),
-                                     "app.album_play_action")
-        menu_item.set_attribute_value("close", GLib.Variant("b", True))
-        self.append_item(menu_item)
-        self._set_playback_actions()
+        if not view_type & ViewType.BANNER:
+            play_action = Gio.SimpleAction(name="play_action")
+            App().add_action(play_action)
+            play_action.connect("activate", self.__on_play_action_activate)
+            menu_item = Gio.MenuItem.new(_("Play this album"),
+                                         "app.play_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            self.append_item(menu_item)
+            self._set_playback_actions()
+        if get_network_available("SPOTIFY") or\
+                get_network_available("LASTFM") or\
+                get_network_available("DEEZER"):
+            submenu = RadioPlaybackMenu(album.artist_ids)
+            self.append_submenu(_("Play a radio"), submenu)
+        else:
+            self._set_radio_action(album.artist_ids)
 
     @property
     def in_player(self):
@@ -383,12 +527,14 @@ class AlbumPlaybackMenu(PlaybackMenu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
+        if App().player.current_track.album.id == self.__album.id:
+            App().player.skip_album()
         App().player.remove_album_by_id(self.__album.id)
 
 #######################
 # PRIVATE             #
 #######################
-    def __play(self, action, variant):
+    def __on_play_action_activate(self, action, variant):
         """
             Play album
             @param Gio.SimpleAction
@@ -436,23 +582,17 @@ class TrackPlaybackMenu(PlaybackMenu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        albums = App().player.albums
-        # If album last in list, merge
-        if albums and albums[-1].id == self.__track.album.id:
-            albums[-1].append_track(self.__track)
-            App().player.set_next()
-        # Add album with only one track
+        album = Album(self.__track.album.id)
+        album.set_tracks([self.__track])
+        App().player.add_album(album)
+        if App().player.is_playing:
+            App().player.add_album(album)
         else:
-            album = Album(self.__track.album.id)
-            album.set_tracks([self.__track])
-            if App().player.is_playing:
-                App().player.add_album(album)
-            else:
-                App().player.play_album(album)
+            App().player.play_album(album)
 
     def _remove_from_playback(self, action, variant):
         """
-            Delete track id from playback
+            Delete track from playback
             @param Gio.SimpleAction
             @param GLib.Variant
         """
@@ -461,10 +601,8 @@ class TrackPlaybackMenu(PlaybackMenu):
                 if self.__track.id in album.track_ids:
                     index = album.track_ids.index(self.__track.id)
                     track = album.tracks[index]
-                    album.remove_track(track)
+                    App().player.remove_track_from_album(track, album)
                     break
-        App().player.set_next()
-        App().player.set_prev()
 
 #######################
 # PRIVATE             #

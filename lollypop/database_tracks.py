@@ -15,8 +15,8 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, StorageType, OrderBy
-from lollypop.utils import noaccents, remove_static, make_subrequest
+from lollypop.define import App, StorageType
+from lollypop.utils import noaccents, make_subrequest
 
 
 class TracksDatabase:
@@ -25,15 +25,16 @@ class TracksDatabase:
         set another one if you"re in a thread
     """
 
-    def __init__(self):
+    def __init__(self, db):
         """
             Init tracks database object
+            @param db as database
         """
-        pass
+        self.__db = db
 
     def add(self, name, uri, duration, tracknumber, discnumber, discname,
             album_id, year, timestamp, popularity, rate, loved, ltime, mtime,
-            mb_track_id, bpm, storage_type):
+            mb_track_id, lp_track_id, bpm, storage_type):
         """
             Add a new track to database
             @param name as string
@@ -51,34 +52,22 @@ class TracksDatabase:
             @param ltime as int
             @param mtime as int
             @param mb_track_id as str
+            @param lp_track_id as str
             @param bpm as double
             @return inserted rowid as int
             @warning: commit needed
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             result = sql.execute(
                 "INSERT INTO tracks (name, uri, duration, tracknumber,\
                 discnumber, discname, album_id,\
                 year, timestamp, popularity, rate, loved,\
-                ltime, mtime, mb_track_id, bpm, storage_type) VALUES\
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
-                    name,
-                    uri,
-                    duration,
-                    tracknumber,
-                    discnumber,
-                    discname,
-                    album_id,
-                    year,
-                    timestamp,
-                    popularity,
-                    rate,
-                    loved,
-                    ltime,
-                    mtime,
-                    mb_track_id,
-                    bpm,
-                    storage_type))
+                ltime, mtime, mb_track_id, lp_track_id, bpm, storage_type)\
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, uri, duration, tracknumber, discnumber,
+                 discname, album_id, year, timestamp, popularity,
+                 rate, loved, ltime, mtime, mb_track_id, lp_track_id,
+                 bpm, storage_type))
             return result.lastrowid
 
     def add_artist(self, track_id, artist_id):
@@ -88,7 +77,7 @@ class TracksDatabase:
             @param artist_id as int
             @warning: commit needed
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             artists = self.get_artist_ids(track_id)
             if artist_id not in artists:
                 sql.execute("INSERT INTO "
@@ -102,7 +91,7 @@ class TracksDatabase:
             @param genre_id as int
             @warning: commit needed
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             genres = self.get_genre_ids(track_id)
             if genre_id not in genres:
                 sql.execute("INSERT INTO\
@@ -110,16 +99,20 @@ class TracksDatabase:
                              VALUES (?, ?)",
                             (track_id, genre_id))
 
-    def get_ids(self, storage_type):
+    def get_ids(self, storage_type, skipped):
         """
             Return all internal track ids
             @param storage_type as StorageType
+            @param skipped as bool
             @return track ids as [int]
         """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE storage_type & ?\
-                                  ORDER BY album_id", (storage_type,))
+        with SqlCursor(self.__db) as sql:
+            request = "SELECT rowid FROM tracks\
+                       WHERE storage_type & ?"
+            if not skipped:
+                request += " AND loved != -1 "
+            request += " ORDER BY album_id"
+            result = sql.execute(request, (storage_type,))
             return list(itertools.chain(*result))
 
     def get_ids_for_name(self, name):
@@ -128,115 +121,11 @@ class TracksDatabase:
             @param name as str
             @return track id as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid\
                                   FROM tracks WHERE noaccents(name)=?\
                                   COLLATE NOCASE",
                                  (noaccents(name),))
-            return list(itertools.chain(*result))
-
-    def get_album_ids(self, artist_ids, genre_ids, storage_type, ignore=False):
-        """
-            Get album ids by tracks
-            @param artist_ids as [int]
-            @param genre_ids as [int]
-            @param storage_type as int
-            @param ignore as bool
-        """
-        genre_ids = remove_static(genre_ids)
-        artist_ids = remove_static(artist_ids)
-        orderby = App().settings.get_enum("orderby")
-        if artist_ids or orderby == OrderBy.ARTIST:
-            order = " ORDER BY artists.sortname\
-                     COLLATE NOCASE COLLATE LOCALIZED,\
-                     tracks.timestamp,\
-                     albums.name\
-                     COLLATE NOCASE COLLATE LOCALIZED"
-        elif orderby == OrderBy.NAME:
-            order = " ORDER BY albums.name\
-                     COLLATE NOCASE COLLATE LOCALIZED"
-        elif orderby == OrderBy.YEAR_DESC:
-            order = " ORDER BY tracks.timestamp DESC,\
-                     albums.name\
-                     COLLATE NOCASE COLLATE LOCALIZED"
-        else:
-            order = " ORDER BY albums.popularity DESC,\
-                     albums.name\
-                     COLLATE NOCASE COLLATE LOCALIZED"
-        order = " GROUP BY tracks.album_id " + order
-        with SqlCursor(App().db) as sql:
-            result = []
-            # Get albums for all artists
-            if not artist_ids and not genre_ids:
-                request = "SELECT tracks.album_id\
-                           FROM tracks, track_artists, artists, albums\
-                           WHERE tracks.rowid = track_artists.track_id AND\
-                           artists.rowid = track_artists.artist_id AND\
-                           tracks.storage_type & ? AND\
-                           album_id=tracks.album_id"
-                if ignore:
-                    request += " AND tracks.loved != -1"
-                request += order
-                result = sql.execute(request, (storage_type,))
-            # Get albums for genres
-            elif not artist_ids:
-                filters = (storage_type,)
-                filters += tuple(genre_ids)
-                request = "SELECT tracks.album_id FROM tracks,\
-                           album, track_genres, track_artists, artists\
-                           WHERE tracks.rowid = track_artists.track_id AND\
-                           artists.rowid = track_artists.artist_id  AND\
-                           album_id=tracks.album_id AND\
-                           tracks.storage_type & ? AND\
-                           track_genres.track_id=tracks.rowid AND"
-                request += make_subrequest("track_genres.genre_id=?",
-                                           "OR",
-                                           len(genre_ids))
-                if ignore:
-                    request += " AND tracks.loved != -1"
-                request += order
-                result = sql.execute(request, filters)
-            # Get albums for artist
-            elif not genre_ids:
-                filters = (storage_type,)
-                filters += tuple(artist_ids)
-                request = "SELECT tracks.album_id\
-                           FROM tracks, track_artists, artists, albums\
-                           WHERE track_artists.track_id=tracks.rowid AND\
-                           album_id=tracks.album_id AND\
-                           tracks.storage_type & ? AND\
-                           artists.rowid = track_artists.artist_id AND"
-                request += make_subrequest("artists.rowid=?",
-                                           "OR",
-                                           len(artist_ids))
-                if ignore:
-                    request += " AND tracks.loved != -1"
-                request += order
-                result = sql.execute(request, filters)
-            # Get albums for artist id and genre id
-            else:
-                filters = (storage_type,)
-                filters += tuple(artist_ids)
-                filters += tuple(genre_ids)
-                request = "SELECT tracks.album_id\
-                           FROM tracks, track_genres, albums,\
-                           track_artists, artists\
-                           WHERE track_genres.track_id=tracks.rowid AND\
-                           artists.rowid = track_artists.artist_id AND\
-                           album_id=tracks.album_id AND\
-                           tracks.storage_type & ? AND\
-                           track_artists.track_id=tracks.rowid AND"
-                request += make_subrequest("artists.rowid=?",
-                                           "OR",
-                                           len(artist_ids))
-                request += " AND "
-                request += make_subrequest("track_genres.genre_id=?",
-                                           "OR",
-                                           len(genre_ids))
-                if ignore:
-                    request += " AND tracks.loved != -1"
-                request += order
-                result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_id_by_uri(self, uri):
@@ -245,7 +134,7 @@ class TracksDatabase:
             @param uri as str
             @return track id as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid FROM tracks WHERE uri=?",
                                  (uri,))
             v = result.fetchone()
@@ -260,7 +149,7 @@ class TracksDatabase:
             @param duration as int
             @return track_id as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid FROM tracks\
                                   WHERE uri like ? AND duration=?",
                                  ("%" + basename, duration))
@@ -269,60 +158,13 @@ class TracksDatabase:
                 return v[0]
             return None
 
-    def get_id_by(self, name, album_id, artist_ids=[]):
-        """
-            Get track for name, album and artists
-            @param name as escaped str
-            @param album_id as int
-            @param artist_ids as [int]
-            @return track id as int
-        """
-        with SqlCursor(App().db) as sql:
-            if artist_ids:
-                filters = (name, album_id) + tuple(artist_ids)
-                request = "SELECT tracks.rowid FROM tracks\
-                           WHERE sql_escape(name) = ? COLLATE NOCASE\
-                           AND album_id = ?\
-                           AND EXISTS (\
-                                SELECT rowid\
-                                FROM track_artists\
-                                WHERE track_artists.track_id=tracks.rowid\
-                                AND ("
-                for artist_id in artist_ids:
-                    request += " track_artists.artist_id=? OR"
-                request += " 1=0))"
-            else:
-                filters = (name, album_id)
-                request = "SELECT tracks.rowid FROM tracks\
-                           WHERE sql_escape(name) = ? COLLATE NOCASE\
-                           AND album_id = ?"
-            result = sql.execute(request, filters)
-            v = result.fetchone()
-            if v is not None:
-                return v[0]
-            return None
-
-    def get_ids_by_artist(self, artist_id):
-        """
-            Return track id for artist
-            @param artist_id as int
-            @return [int]
-        """
-        with SqlCursor(App().db) as sql:
-            filters = (artist_id,)
-            request = "SELECT tracks.rowid FROM tracks, track_artists\
-                       WHERE track_artists.artist_id=? AND\
-                       tracks.rowid = track_artists.track_id"
-            result = sql.execute(request, filters)
-            return list(itertools.chain(*result))
-
     def get_name(self, track_id):
         """
             Get track name for track id
             @param track_id as int
             @return Name as string
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT name FROM tracks WHERE rowid=?",
                                  (track_id,))
             v = result.fetchone()
@@ -336,7 +178,7 @@ class TracksDatabase:
             @param track_id as int
             @return year as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT year FROM tracks WHERE rowid=?",
                                  (track_id,))
             v = result.fetchone()
@@ -350,7 +192,7 @@ class TracksDatabase:
             @param track_id as int
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT storage_type FROM tracks WHERE\
                                  rowid=?", (track_id,))
 
@@ -365,7 +207,7 @@ class TracksDatabase:
             @param track_id as int
             @return timestamp as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT timestamp FROM tracks WHERE rowid=?",
                                  (track_id,))
             v = result.fetchone()
@@ -380,7 +222,7 @@ class TracksDatabase:
             @param album_id as int
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT year, COUNT(year) AS occurrence\
                                   FROM tracks\
                                   WHERE tracks.album_id=?\
@@ -399,7 +241,7 @@ class TracksDatabase:
             @param album_id as int
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT timestamp,\
                                   COUNT(timestamp) AS occurrence\
                                   FROM tracks\
@@ -418,7 +260,7 @@ class TracksDatabase:
             @param track_id as int
             @return rate as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rate FROM tracks WHERE rowid=?",
                                  (track_id,))
             v = result.fetchone()
@@ -432,7 +274,7 @@ class TracksDatabase:
             @param track_id as int
             @return uri as string
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT uri FROM tracks WHERE rowid=?",
                                  (track_id,))
             v = result.fetchone()
@@ -446,7 +288,7 @@ class TracksDatabase:
             @param track_id as int
             @param uri as string
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks SET uri=?\
                          WHERE rowid=?",
                         (uri, track_id))
@@ -457,7 +299,7 @@ class TracksDatabase:
             @param track_id as int
             @param storage_type as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks SET storage_type=?\
                          WHERE rowid=?",
                         (storage_type, track_id))
@@ -468,7 +310,7 @@ class TracksDatabase:
             @param track_id as int
             @param rate as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks SET rate=?\
                          WHERE rowid=?",
                         (rate, track_id))
@@ -479,7 +321,7 @@ class TracksDatabase:
             @param track_id as int
             @return album id as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT album_id FROM tracks WHERE rowid=?",
                                  (track_id,))
             v = result.fetchone()
@@ -493,7 +335,7 @@ class TracksDatabase:
             @param track_id as int
             @return recording id as str
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT mb_track_id FROM tracks\
                                   WHERE rowid=?", (track_id,))
             v = result.fetchone()
@@ -501,15 +343,15 @@ class TracksDatabase:
                 return v[0]
             return ""
 
-    def get_id_for_mb_track_id(self, mb_track_id):
+    def get_id_for_lp_track_id(self, lp_track_id):
         """
-            Get track id for MusicBrainz recording id
-            @param MusicBrainz id as str
+            Get track id for Lollypop recording id
+            @param Lollypop id as str
             @return track id as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE mb_track_id=?", (mb_track_id,))
+                                  WHERE lp_track_id=?", (lp_track_id,))
             v = result.fetchone()
             if v is not None:
                 return v[0]
@@ -521,7 +363,7 @@ class TracksDatabase:
             @param track_id as int
             @return album name as str
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT albums.name from albums,tracks\
                                   WHERE tracks.rowid=? AND\
                                   tracks.album_id=albums.rowid", (track_id,))
@@ -536,7 +378,7 @@ class TracksDatabase:
             @param track_id as int
             @return artist ids as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT artist_id FROM track_artists\
                                   WHERE track_id=?", (track_id,))
             return list(itertools.chain(*result))
@@ -547,7 +389,7 @@ class TracksDatabase:
             @param track_id as int
             @return artist ids as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT mb_artist_id\
                                   FROM artists, track_artists\
                                   WHERE track_artists.track_id=?\
@@ -561,7 +403,7 @@ class TracksDatabase:
             @param track_id as int
             @return artists as [str]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT name FROM artists, track_artists\
                                   WHERE track_artists.track_id=?\
                                   AND track_artists.artist_id=artists.rowid",
@@ -574,7 +416,7 @@ class TracksDatabase:
             @param track_id as int
             @return genre ids as [int]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT genre_id FROM track_genres\
                                   WHERE track_id=?", (track_id,))
             return list(itertools.chain(*result))
@@ -585,7 +427,7 @@ class TracksDatabase:
             @param track_id as int
             @return [str]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT name FROM genres, track_genres\
                                   WHERE track_genres.track_id=?\
                                   AND track_genres.genre_id=genres.rowid",
@@ -597,7 +439,7 @@ class TracksDatabase:
             Get mtime for tracks
             @return dict of {uri as string: mtime as int}
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             mtimes = {}
             result = sql.execute("SELECT DISTINCT uri, mtime\
                                   FROM tracks WHERE storage_type & ?",
@@ -612,7 +454,7 @@ class TracksDatabase:
             @param album_id as int
             @param commit as bool
         """
-        with SqlCursor(App().db, commit) as sql:
+        with SqlCursor(self.__db, commit) as sql:
             sql.execute("DELETE FROM tracks WHERE album_id=?", (album_id,))
 
     def del_non_persistent(self, commit=True):
@@ -620,7 +462,7 @@ class TracksDatabase:
             Delete non persistent tracks
             @param commit as bool
         """
-        with SqlCursor(App().db, commit) as sql:
+        with SqlCursor(self.__db, commit) as sql:
             sql.execute("DELETE FROM tracks WHERE storage_type & ?",
                         (StorageType.EPHEMERAL | StorageType.EXTERNAL,))
 
@@ -629,7 +471,7 @@ class TracksDatabase:
             Delete persistent tracks
             @param commit as bool
         """
-        with SqlCursor(App().db, commit) as sql:
+        with SqlCursor(self.__db, commit) as sql:
             sql.execute("DELETE FROM tracks WHERE storage_type & ?",
                         (StorageType.COLLECTION,))
 
@@ -639,7 +481,7 @@ class TracksDatabase:
             @param uris_concerned as [uri as str]
             @return [str]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             uris = []
             if uris_concerned:
                 for uri in uris_concerned:
@@ -662,7 +504,7 @@ class TracksDatabase:
             @param track_id as int
             @return position as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT tracknumber FROM tracks\
                                   WHERE rowid=?", (track_id,))
             v = result.fetchone()
@@ -670,13 +512,28 @@ class TracksDatabase:
                 return v[0]
             return 0
 
+    def get_lp_track_id(self, track_id):
+        """
+            Get Lollypop id
+            @param track_id as int
+            @return str
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT lp_track_id FROM\
+                                  tracks where rowid=?",
+                                 (track_id,))
+            v = result.fetchone()
+            if v and v[0]:
+                return v[0]
+            return ""
+
     def get_discnumber(self, track_id):
         """
             Get disc number for track id
             @param track_id as int
             @return discnumber as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT discnumber FROM tracks\
                                   WHERE rowid=?", (track_id,))
             v = result.fetchone()
@@ -690,7 +547,7 @@ class TracksDatabase:
             @param track_id as int
             @return discname as str
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT discname FROM tracks\
                                   WHERE rowid=?", (track_id,))
             v = result.fetchone()
@@ -704,7 +561,7 @@ class TracksDatabase:
             @param track_id as int
             @return duration as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT duration FROM tracks\
                                   WHERE rowid=?", (track_id,))
             v = result.fetchone()
@@ -718,7 +575,7 @@ class TracksDatabase:
             @param track_id as int
             @param duration as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks\
                          SET duration=?\
                          WHERE rowid=?", (duration, track_id,))
@@ -729,7 +586,7 @@ class TracksDatabase:
             @param track_id as int
             @param mtime as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks SET mtime=? WHERE rowid=?",
                         (mtime, track_id))
 
@@ -737,50 +594,96 @@ class TracksDatabase:
         """
             Return True if no tracks in db
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT COUNT(1) FROM tracks  LIMIT 1")
             v = result.fetchone()
             if v is not None:
                 return v[0] == 0
             return True
 
-    def get_rated(self, storage_type, limit):
+    def get_loved_track_ids(self, artist_ids, storage_type):
         """
-            Return tracks with rate >= 4
+            Get loved track ids
             @param storage_type as StorageType
-            @param limit as int
-            @return tracks as [int]
+            @return [int]
         """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE rate >= 4 AND\
-                                  storage_type & ?\
-                                  ORDER BY popularity DESC LIMIT ?",
-                                 (storage_type, limit))
+        with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
+            request = "SELECT tracks.rowid\
+                       FROM tracks, album_artists, artists\
+                       WHERE loved=1 AND\
+                       artists.rowid=album_artists.artist_id AND\
+                       tracks.album_id=album_artists.album_id AND\
+                       storage_type & ?"
+            if artist_ids:
+                filters += tuple(artist_ids)
+                request += " AND "
+                request += make_subrequest("album_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
+            request += "GROUP BY artists.rowid, tracks.album_id\
+                        ORDER BY artists.name"
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
-    def get_populars(self, storage_type, limit):
+    def get_populars(self, artist_ids, storage_type, skipped, limit):
         """
             Return populars tracks
+            @param artist_ids as int
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
-            @return tracks as [int]
+            @return track ids as [int]
         """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE popularity!=0 AND\
-                                  mtime != 0 AND\
-                                  storage_type & ?\
-                                  ORDER BY popularity DESC LIMIT ?",
-                                 (storage_type, limit))
-            return list(itertools.chain(*result))
+        with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
+            request = "SELECT tracks.rowid FROM"
+            if artist_ids:
+                request += " tracks, track_artists "
+            else:
+                request += " tracks "
+            request += "WHERE rate >= 4 AND storage_type & ?"
+            if artist_ids:
+                filters += tuple(artist_ids)
+                request += " AND track_artists.track_id=tracks.rowid AND"
+                request += make_subrequest("track_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
+            if not skipped:
+                request += " AND loved != -1 "
+            filters += (limit,)
+            request += " ORDER BY popularity DESC LIMIT ?"
+            result = sql.execute(request, filters)
+            track_ids = list(itertools.chain(*result))
+            if len(track_ids) < limit:
+                filters = (storage_type,)
+                request = "SELECT tracks.rowid FROM"
+                if artist_ids:
+                    request += " tracks, track_artists "
+                else:
+                    request += " tracks "
+                request += "WHERE popularity!=0 AND\
+                            storage_type & ?"
+                if artist_ids:
+                    filters += tuple(artist_ids)
+                    request += " AND track_artists.track_id=tracks.rowid AND"
+                    request += make_subrequest("track_artists.artist_id=?",
+                                               "OR",
+                                               len(artist_ids))
+                if not skipped:
+                    request += " AND loved != -1 "
+                filters += (limit,)
+                request += " ORDER BY popularity DESC LIMIT ?"
+                result = sql.execute(request, filters)
+                track_ids += list(itertools.chain(*result))
+            return list(set(track_ids))
 
     def get_higher_popularity(self):
         """
             Get higher available popularity
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT popularity\
                                   FROM tracks\
                                   ORDER BY POPULARITY DESC LIMIT 1")
@@ -794,7 +697,7 @@ class TracksDatabase:
             Return avarage popularity
             @return avarage popularity as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT AVG(popularity)\
                                   FROM (SELECT popularity\
                                         FROM tracks\
@@ -810,7 +713,7 @@ class TracksDatabase:
             @param track_id as int
             @raise sqlite3.OperationalError on db update
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             result = sql.execute("SELECT popularity from tracks WHERE rowid=?",
                                  (track_id,))
             pop = result.fetchone()
@@ -828,54 +731,71 @@ class TracksDatabase:
             @param track_id as int
             @param time as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks set ltime=? WHERE rowid=?",
                         (time, track_id))
 
-    def get_little_played(self, storage_type, limit):
+    def get_little_played(self, storage_type, skipped, limit):
         """
             Return random tracks little played
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
             @return tracks as [int]
         """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT rowid\
-                                  FROM tracks\
-                                  WHERE storage_type & ?\
-                                  ORDER BY ltime, random() LIMIT ?",
-                                 (storage_type, limit))
+        with SqlCursor(self.__db) as sql:
+            request = "SELECT rowid FROM tracks WHERE storage_type & ?"
+            if not skipped:
+                request += " AND loved !=-1 "
+            request += " ORDER BY ltime, random() LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_recently_listened_to(self, storage_type, limit):
+    def get_recently_listened_to(self, storage_type, skipped, limit):
         """
             Return tracks listened recently
             @param storage_type as StorageType
+            @param skipped as bool
             @param limit as int
             @return tracks as [int]
         """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks\
-                                  WHERE ltime!=0 AND storage_type & ?\
-                                  ORDER BY ltime DESC LIMIT ?",
-                                 (storage_type, limit))
+        with SqlCursor(self.__db) as sql:
+            request = "SELECT tracks.rowid FROM tracks\
+                       WHERE ltime!=0 AND storage_type & ?"
+            if not skipped:
+                request += " AND loved != -1 "
+            request += " ORDER BY ltime DESC LIMIT ?"
+            result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
-    def get_randoms(self, storage_type, limit):
+    def get_randoms(self, genre_ids, storage_type, skipped, limit):
         """
             Return random tracks
-            @param limit as int
+            @param genre_ids as [int]
             @param storage_type as StorageType
-            @return array of track ids as int
+            @parma skipped as bool
+            @param limit as int
+            @return track ids as [int]
         """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT tracks.rowid\
-                                  FROM tracks WHERE storage_type & ?\
-                                  ORDER BY random() LIMIT ?",
-                                 (storage_type, limit))
-            tracks = list(itertools.chain(*result))
-            return tracks
+        with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
+            request = "SELECT tracks.rowid FROM tracks"
+            if genre_ids:
+                request += ",track_genres"
+            request += " WHERE storage_type & ? "
+            if not skipped:
+                request += " AND loved != -1 "
+            if genre_ids:
+                request += "AND tracks.rowid=track_genres.track_id"
+                filters += tuple(genre_ids)
+                request += " AND "
+                request += make_subrequest("track_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
+            request += " ORDER BY random() LIMIT ?"
+            filters += (limit,)
+            result = sql.execute(request, filters)
+            return list(itertools.chain(*result))
 
     def set_popularity(self, track_id, popularity):
         """
@@ -883,7 +803,7 @@ class TracksDatabase:
             @param track_id as int
             @param popularity as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks set popularity=? WHERE rowid=?",
                         (popularity, track_id))
 
@@ -893,7 +813,7 @@ class TracksDatabase:
             @param track_id  as int
             @return popularity as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT popularity FROM tracks WHERE\
                                  rowid=?", (track_id,))
             v = result.fetchone()
@@ -907,7 +827,7 @@ class TracksDatabase:
             @param track_id as int
             @return loved as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT loved FROM tracks WHERE\
                                  rowid=?", (track_id,))
 
@@ -916,26 +836,13 @@ class TracksDatabase:
                 return v[0]
             return 0
 
-    def get_loved_track_ids(self, storage_type):
-        """
-            Get loved track ids
-            @param storage_type as StorageType
-            @return [int]
-        """
-        with SqlCursor(App().db) as sql:
-            result = sql.execute("SELECT rowid FROM tracks\
-                                  WHERE loved=1 AND\
-                                  storage_type & ? ORDER BY album_id",
-                                 (storage_type,))
-            return list(itertools.chain(*result))
-
     def get_ltime(self, track_id):
         """
             Get listen time
             @param track_id  as int
             @return listen time as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT ltime FROM tracks WHERE\
                                  rowid=?", (track_id,))
             v = result.fetchone()
@@ -949,7 +856,7 @@ class TracksDatabase:
             @param track_id as int
             @return modification time as int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             request = "SELECT mtime FROM tracks\
                        WHERE tracks.rowid=?"
             result = sql.execute(request, (track_id,))
@@ -958,6 +865,16 @@ class TracksDatabase:
                 return v[0]
             return 0
 
+    def set_lp_track_id(self, track_id, lp_track_id):
+        """
+            Set lp track id
+            @param album_id as int
+            @param lp_album_id as int
+        """
+        with SqlCursor(self.__db, True) as sql:
+            sql.execute("UPDATE tracks SET lp_track_id=? WHERE rowid=?",
+                        (lp_track_id, track_id))
+
     def set_loved(self, track_id, loved):
         """
             Set track loved
@@ -965,7 +882,7 @@ class TracksDatabase:
             @param loved as int
             @warning: commit needed
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE tracks SET loved=? WHERE rowid=?",
                         (loved, track_id))
 
@@ -974,7 +891,7 @@ class TracksDatabase:
             Count tracks
             @return int
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT COUNT(1) FROM tracks\
                                   WHERE storage_type & ?",
                                  (StorageType.COLLECTION | StorageType.SAVED,))
@@ -988,7 +905,7 @@ class TracksDatabase:
             Clean database for track id
             @param commit as bool
         """
-        with SqlCursor(App().db, commit) as sql:
+        with SqlCursor(self.__db, commit) as sql:
             sql.execute("DELETE FROM track_artists\
                          WHERE track_artists.track_id NOT IN (\
                             SELECT tracks.rowid FROM tracks)")
@@ -1003,7 +920,7 @@ class TracksDatabase:
             @param storage_type as StorageType
             @return [(int, name)]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             filters = ("%" + searched + "%", storage_type)
             request = "SELECT rowid, name FROM tracks\
                        WHERE noaccents(name) LIKE ?\
@@ -1018,7 +935,7 @@ class TracksDatabase:
             @param storage_type as StorageType
             @return [(int, name)]
         """
-        with SqlCursor(App().db) as sql:
+        with SqlCursor(self.__db) as sql:
             filters = ("%" + searched + "%", storage_type)
             request = "SELECT DISTINCT tracks.rowid, artists.name\
                    FROM track_artists, tracks, artists\
@@ -1062,7 +979,7 @@ class TracksDatabase:
             Remove track
             @param track_id as int
         """
-        with SqlCursor(App().db, True) as sql:
+        with SqlCursor(self.__db, True) as sql:
             sql.execute("DELETE FROM track_genres\
                          WHERE track_id=?", (track_id,))
             sql.execute("DELETE FROM track_artists\

@@ -52,6 +52,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button = builder.get_object("play_button")
         self.__add_button = builder.get_object("add_button")
         self.__menu_button = builder.get_object("menu_button")
+        self.__widget = builder.get_object("widget")
         if view_type & ViewType.OVERLAY:
             style = "banner-button"
         else:
@@ -65,12 +66,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if view_type & ViewType.ALBUM:
             self.__artist_label.show()
             self.__artist_label.set_label(", ".join(album.artists))
+        else:
+            self.__title_label.set_opacity(0.8)
+            self.__year_label.set_opacity(0.7)
+            self.__duration_label.set_opacity(0.6)
+            self.__widget.get_style_context().add_class("album-banner")
         if album.year is not None:
             self.__year_label.set_label(str(album.year))
             self.__year_label.show()
-        duration = App().albums.get_duration(self.__album.id,
-                                             self.__album.genre_ids)
-        human_duration = get_human_duration(duration)
+        human_duration = get_human_duration(album.duration)
         self.__duration_label.set_text(human_duration)
         artist_eventbox = builder.get_object("artist_eventbox")
         artist_eventbox.connect("realize", set_cursor_type)
@@ -80,7 +84,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         year_eventbox.connect("realize", set_cursor_type)
         self.__gesture2 = GesturesHelper(
             year_eventbox, primary_press_callback=self._on_year_press)
-        self.__widget = builder.get_object("widget")
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
         self.__bottom_box = builder.get_object("bottom_box")
         self.__loved_widget = LovedWidget(album, Gtk.IconSize.INVALID)
@@ -98,7 +101,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         return [
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed"),
-                (App().player, "playback-changed", "_on_playback_changed")
+                (App().player, "playback-added", "_on_playback_changed"),
+                (App().player, "playback-updated", "_on_playback_changed"),
+                (App().player, "playback-removed", "_on_playback_changed")
         ]
 
     def update_for_width(self, width):
@@ -145,14 +150,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)
 
     def _on_play_button_clicked(self, button):
         """
             Play album
            @param button as Gtk.Button
         """
-        App().player.play_album(self.__album.get_with_skipping_allowed())
+        App().player.play_album(self.__album.clone(False))
 
     def _on_add_button_clicked(self, button):
         """
@@ -162,7 +167,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if self.__album.id in App().player.album_ids:
             App().player.remove_album_by_id(self.__album.id)
         else:
-            App().player.add_album(self.__album.get_with_skipping_allowed())
+            App().player.add_album(self.__album.clone(False))
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -173,10 +178,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if album_id == self.__album.id:
             self.__set_artwork()
 
-    def _on_playback_changed(self, player):
+    def _on_playback_changed(self, *ignore):
         """
             Update add button
-            @param player as Player
         """
         self.__update_add_button()
 

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.14"/>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="tooltip_text" translatable="yes">Search on Spotify</property>
-    <property name="icon_name">org.gnome.Lollypop-spotify-symbolic</property>
-    <property name="icon_size">3</property>
+    <property name="icon_name">view-more-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
   <object class="GtkBox" id="widget">
     <property name="visible">True</property>
@@ -53,13 +52,13 @@
         <property name="can_focus">False</property>
         <property name="margin_right">15</property>
         <child>
-          <object class="GtkToggleButton" id="spotify_button">
+          <object class="GtkButton" id="menu-button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="valign">center</property>
             <property name="image">image1</property>
-            <signal name="toggled" handler="_on_spotify_button_toggled" swapped="no"/>
+            <signal name="clicked" handler="_on_menu_button_clicked" swapped="no"/>
             <style>
               <class name="banner-button"/>
             </style>

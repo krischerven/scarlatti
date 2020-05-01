@@ -66,7 +66,7 @@
             <description></description>
         </key>
         <key type="i" name="network-access-acl">
-            <default>131068</default>
+            <default>262140</default>
             <summary>INTERNAL</summary>
             <description></description>
         </key>
@@ -85,9 +85,19 @@
             <summary>Enabled genres in party mode</summary>
             <description>ID for genres.</description>
         </key>
-        <key type="b" name="search-spotify">
+        <key type="s" name="web-search">
+            <default>"NONE"</default>
+            <summary>Search on the Web</summary>
+            <description></description>
+        </key>
+        <key type="i" name="suggestions-mask">
+            <default>0</default>
+            <summary>Shown suggestions</summary>
+            <description></description>
+        </key>
+        <key type="b" name="play-featured">
             <default>false</default>
-            <summary>Search on Spotify</summary>
+            <summary>Play featured tracks</summary>
             <description></description>
         </key>
         <key type="b" name="sync-usb-disks">
@@ -108,6 +118,11 @@
         <key type="b" name="recent-youtube-dl">
             <default>false</default>
             <summary>If true, Lollypop will not use system youtube-dl</summary>
+            <description></description>
+        </key>
+        <key type="b" name="show-year-below-name">
+            <default>false</default>
+            <summary>Show year below album name</summary>
             <description></description>
         </key>
         <key type="b" name="import-playlists">

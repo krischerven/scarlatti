@@ -18,6 +18,8 @@ from urllib.parse import urlparse
 import unicodedata
 import cairo
 import time
+import re
+from hashlib import md5
 from threading import current_thread
 from functools import wraps
 
@@ -273,6 +275,49 @@ def escape(str, ignore=["_", "-", " ", "."]):
                     c.isdigit() or c in ignore]).rstrip()
 
 
+def get_lollypop_album_id(name, artists):
+    """
+        Calculate Lollypop album id
+        @param name as str
+        @param artists as [str]
+    """
+    name = "%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name))
+    return md5(name.encode("utf-8")).hexdigest()
+
+
+def get_lollypop_track_id(name, artists, album_name):
+    """
+        Calculate Lollypop track id
+        @param name as str
+        @param artists as [str]
+        @param year as str
+        @param album_name as str
+    """
+    name = "%s_%s_%s" % (sql_escape(" ".join(artists)), sql_escape(name),
+                         sql_escape(album_name))
+    return md5(name.encode("utf-8")).hexdigest()
+
+
+def get_iso_date_from_string(string):
+    """
+        Convert any string to an iso date
+        @param string as str
+        @return str/None
+    """
+    model = ["1970", "01", "01", "00", "00", "00"]
+    try:
+        split = re.split('[-:TZ]', string)
+        length = len(split)
+        while length < 6:
+            split.append(model[length])
+            length = len(split)
+        return "%s-%s-%sT%s:%s:%sZ" % (split[0], split[1], split[2],
+                                       split[3], split[4], split[5])
+    except Exception as e:
+        Logger.error("get_iso_date_from_string(): %s -> %s", string, e)
+        return None
+
+
 def is_unity():
     """
         Return True if desktop is Unity
@@ -444,17 +489,21 @@ def get_title_for_genres_artists(genre_ids, artist_ids):
     return title_str
 
 
-def popup_widget(widget, parent, x=None, y=None):
+def popup_widget(widget, parent, x, y, state_widget):
     """
         Popup menu on widget as x, y
         @param widget as Gtk.Widget
         @param parent as Gtk.Widget
         @param x as int
         @param y as int
+        @param state_widget as Gtk.Widget
         @return Gtk.Popover/None
     """
     def on_hidden(widget, hide, popover):
         popover.popdown()
+
+    def on_unmap(popover, parent):
+        parent.unset_state_flags(Gtk.StateFlags.VISITED)
 
     if App().window.is_adaptive:
         App().window.container.show_menu(widget)
@@ -464,7 +513,14 @@ def popup_widget(widget, parent, x=None, y=None):
         popover = Popover()
         popover.add(widget)
         widget.connect("hidden", on_hidden, popover)
+        if state_widget is not None:
+            popover.connect("unmap", on_unmap, state_widget)
+            state_widget.set_state_flags(Gtk.StateFlags.VISITED, False)
         popover.set_relative_to(parent)
+        # Workaround a GTK autoscrolling issue in Gtk.ListBox
+        # Gtk autoscroll to last focused widget on popover close
+        if state_widget is not None:
+            state_widget.grab_focus()
         if x is not None and y is not None:
             rect = Gdk.Rectangle()
             rect.x = x
@@ -507,9 +563,20 @@ def profile(f):
         ret = f(*args, **kwargs)
 
         elapsed_time = time.perf_counter() - start_time
-        Logger.debug("%s::%s: execution time %d:%f" % (
+        Logger.info("%s::%s: execution time %d:%f" % (
             f.__module__, f.__name__, elapsed_time / 60, elapsed_time % 60))
 
         return ret
 
     return wrapper
+
+
+def split_list(l, n=1):
+    """
+        Split list in n parts
+        @param l as []
+        @param n as int
+    """
+    length = len(l)
+    split = [l[i * length // n: (i + 1) * length // n] for i in range(n)]
+    return [l for l in split if l]

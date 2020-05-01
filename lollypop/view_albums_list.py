@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.utils import popup_widget
+from lollypop.utils import popup_widget, emit_signal
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, StorageType
 from lollypop.controller_view import ViewController, ViewControllerType
@@ -62,21 +62,19 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
         self.__reveals += list(albums)
 
-    def insert_album(self, album, index):
+    def add_value(self, album):
         """
-            Insert album at index
+            Insert item
             @param album as Album
-            @param index as int
         """
-        children = self.children
-        if children and\
-                index < len(children) + 1 and\
-                children[index].album.id == album.id:
-            children[index].tracks_view.append_rows(album.tracks)
+        # Merge album if previous is same
+        if self.children and self.children[-1].album.id == album.id:
+            track_ids = self.children[-1].album.track_ids
+            for track in album.tracks:
+                if track.id not in track_ids:
+                    self.children[-1].tracks_view.append_row(track)
         else:
-            row = AlbumRow(album, self.__height, self.view_type)
-            row.populate()
-            self.insert_row(row, index)
+            LazyLoadingView.populate(self, [album])
 
     def insert_row(self, row, index):
         """
@@ -87,6 +85,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.insert(row, index)
+        emit_signal(self, "initialized")
 
     def populate(self, albums):
         """
@@ -109,6 +108,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         """
             Clear the view
         """
+        self.__reveals = []
         for child in self._box.get_children():
             GLib.idle_add(child.destroy)
         if clear_albums:
@@ -176,6 +176,9 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             return None
         row = AlbumRow(album, self.__height, self.view_type)
         row.connect("activated", self.__on_row_activated)
+        row.connect("destroy", lambda x: self.emit("initialized"))
+        row.tracks_view.connect("track-removed",
+                                lambda x, y: self.emit("initialized"))
         row.show()
         self._box.add(row)
         return row
@@ -257,22 +260,16 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param x as int
             @param y as int
         """
-        def on_hidden(popover, hide, row):
-            row.unset_state_flags(Gtk.StateFlags.CHECKED)
-
         row = self._box.get_row_at_y(y)
         if row is None:
             return
         from lollypop.menu_objects import AlbumMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = AlbumMenu(row.album, ViewType.ALBUM,
+        menu = AlbumMenu(row.album, ViewType.ALBUM, row.album.storage_type,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        popover = popup_widget(menu_widget, self._box, x, y)
-        if popover is not None:
-            popover.connect("hidden", on_hidden, row)
-        row.set_state_flags(Gtk.StateFlags.CHECKED, True)
+        popup_widget(menu_widget, self._box, x, y, row)
 
     def __reveal_row(self, row):
         """

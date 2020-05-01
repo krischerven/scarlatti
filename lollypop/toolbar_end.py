@@ -59,8 +59,8 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(self.__shuffle_action)
         App().add_action(self.__repeat_action)
 
-        self.__shuffle_button = builder.get_object("shuffle_button")
-        self.__shuffle_button_image = builder.get_object(
+        self.__playback_button = builder.get_object("playback_button")
+        self.__playback_button_image = builder.get_object(
             "shuffle_button_image")
         shuffle_button_action = Gio.SimpleAction.new("shuffle-button", None)
         shuffle_button_action.connect("activate",
@@ -88,20 +88,21 @@ class ToolbarEnd(Gtk.Bin):
         App().add_action(scrobbling_action)
         App().set_accels_for_action("app.scrobbling", ["<Control><Shift>s"])
 
+        self.__menu_button = builder.get_object("menu_button")
         self.__home_button = builder.get_object("home_button")
+        self.__devices_button = builder.get_object("devices_button")
+        self.__playback_button = builder.get_object("playback_button")
         self.__set_shuffle_icon()
 
         button_progress_bar = ButtonProgressBar()
         overlay = builder.get_object("overlay")
         overlay.add_overlay(button_progress_bar)
         overlay.set_overlay_pass_through(button_progress_bar, True)
-        devices_button = builder.get_object("devices_button")
         self.__devices_popover = DevicesPopover(button_progress_bar)
         self.__devices_popover.connect(
-                "hidden", self.__on_menu_hidden, devices_button)
+                "hidden", self.__on_menu_hidden, self.__devices_button)
         self.__devices_popover.connect("content-changed",
-                                       self.__on_devices_content_changed,
-                                       devices_button)
+                                       self.__on_devices_content_changed)
         self.__devices_popover.populate()
         builder.connect_signals(self)
         window.connect("adaptive-changed", self.__on_adaptive_changed)
@@ -123,6 +124,30 @@ class ToolbarEnd(Gtk.Bin):
             @return Gtk.Button
         """
         return self.__home_button
+
+    @property
+    def devices_button(self):
+        """
+            Get devices button
+            @return Gtk.Button
+        """
+        return self.__devices_button
+
+    @property
+    def playback_button(self):
+        """
+            Get playback button
+            @return Gtk.Button
+        """
+        return self.__playback_button
+
+    @property
+    def menu_button(self):
+        """
+            Get menu button
+            @return Gtk.Button
+        """
+        return self.__menu_button
 
 #######################
 # PROTECTED           #
@@ -147,7 +172,8 @@ class ToolbarEnd(Gtk.Bin):
             from lollypop.widgets_menu import MenuBuilder
             self.__playback_menu = MenuBuilder(self.__shuffle_menu)
             self.__playback_menu.show()
-            popover = popup_widget(self.__playback_menu, button)
+            popover = popup_widget(self.__playback_menu, button,
+                                   None, None, None)
             if popover is None:
                 self.__playback_menu.connect("hidden",
                                              self.__on_menu_hidden,
@@ -177,7 +203,7 @@ class ToolbarEnd(Gtk.Bin):
                 emit_signal(self.__playback_menu, "hidden", True)
             self.__app_menu = ApplicationMenu()
             self.__app_menu.show()
-            popover = popup_widget(self.__app_menu, button)
+            popover = popup_widget(self.__app_menu, button, None, None, None)
             if popover is None:
                 self.__app_menu.connect("hidden",
                                         self.__on_menu_hidden,
@@ -258,21 +284,21 @@ class ToolbarEnd(Gtk.Bin):
         shuffle = App().settings.get_value("shuffle")
         repeat = App().settings.get_enum("repeat")
         if shuffle:
-            self.__shuffle_button_image.set_from_icon_name(
+            self.__playback_button_image.set_from_icon_name(
                 "media-playlist-shuffle-symbolic",
                 Gtk.IconSize.BUTTON)
         elif repeat == Repeat.TRACK:
-            self.__shuffle_button_image.get_style_context().remove_class(
+            self.__playback_button_image.get_style_context().remove_class(
                 "selected")
-            self.__shuffle_button_image.set_from_icon_name(
+            self.__playback_button_image.set_from_icon_name(
                 "media-playlist-repeat-song-symbolic",
                 Gtk.IconSize.BUTTON)
         elif repeat == Repeat.ALL:
-            self.__shuffle_button_image.set_from_icon_name(
+            self.__playback_button_image.set_from_icon_name(
                 "media-playlist-repeat-symbolic",
                 Gtk.IconSize.BUTTON)
         else:
-            self.__shuffle_button_image.set_from_icon_name(
+            self.__playback_button_image.set_from_icon_name(
                 "media-playlist-consecutive-symbolic",
                 Gtk.IconSize.BUTTON)
 
@@ -325,8 +351,8 @@ class ToolbarEnd(Gtk.Bin):
             @param action as Gio.SimpleAction
             @param param as GLib.Variant
         """
-        self.__shuffle_button.set_active(
-            not self.__shuffle_button.get_active())
+        self.__playback_button.set_active(
+            not self.__playback_button.get_active())
 
     def __on_repeat_changed(self, settings, value):
         """
@@ -347,17 +373,16 @@ class ToolbarEnd(Gtk.Bin):
         self.__playback_menu = None
         button.set_active(False)
 
-    def __on_devices_content_changed(self, popover, count, devices_button):
+    def __on_devices_content_changed(self, popover, count):
         """
             Show/Hide device button
             @param popover as DevicesPopover
             @param count as int
-            @param devices_button as Gtk.ToggleButton
         """
         if count:
-            devices_button.show()
+            self.__devices_button.show()
         else:
-            devices_button.hide()
+            self.__devices_button.hide()
 
     def __on_adaptive_changed(self, window, status):
         """
@@ -365,7 +390,9 @@ class ToolbarEnd(Gtk.Bin):
             @param window as Window
             @param status as bool
         """
-        if status:
+        mini_revealed = App().window.miniplayer is not None and\
+            App().window.miniplayer.revealed
+        if status and not mini_revealed:
             self.__home_button.show()
         else:
             self.__home_button.hide()

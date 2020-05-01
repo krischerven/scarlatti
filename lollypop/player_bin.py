@@ -246,8 +246,7 @@ class BinPlayer:
         """
         Logger.debug("BinPlayer::_load_track(): %s" % track.uri)
         try:
-            if self._current_track.is_web:
-                emit_signal(self, "loading-changed", False, track)
+            emit_signal(self, "loading-changed", False, self._current_track)
             self._current_track = track
             # If track_uri is different, preload has happened
             # See Player.set_next()
@@ -270,15 +269,13 @@ class BinPlayer:
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        if self._current_track.is_web:
-            emit_signal(self, "loading-changed", False, self._current_track)
+        emit_signal(self, "loading-changed", False, self._current_track)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
                      self._current_track.uri)
         emit_signal(self, "current-changed")
-        for scrobbler in App().scrobblers:
-            if scrobbler.available:
-                scrobbler.playing_now(self._current_track)
+        for scrobbler in App().ws_director.scrobblers:
+            scrobbler.playing_now(self._current_track)
 
     def _on_bus_message_tag(self, bus, message):
         """
@@ -368,10 +365,11 @@ class BinPlayer:
         """
         if get_network_available():
             self.__cancellable.cancel()
-            self.__cancellable = Gio.Cancellable()
+            self.__cancellable = Gio.Cancellable.new()
             from lollypop.helper_web import WebHelper
             helper = WebHelper(track, self.__cancellable)
-            helper.connect("loaded", self.__on_web_helper_loaded, track)
+            helper.connect("loaded", self.__on_web_helper_loaded,
+                           track, self.__cancellable)
             helper.load()
         else:
             self.skip_album()
@@ -408,13 +406,16 @@ class BinPlayer:
         App().settings.set_value("volume-rate", GLib.Variant("d", self.volume))
         emit_signal(self, "volume-changed")
 
-    def __on_web_helper_loaded(self, helper, uri, track):
+    def __on_web_helper_loaded(self, helper, uri, track, cancellable):
         """
             Play track URI
             @param helper as WebHelper
             @param uri as str
             @param track as Track
+            @param cancellable as Gio.Cancellable
         """
+        if cancellable.is_cancelled():
+            return
         if uri:
             track.set_uri(uri)
             self.load(track)

@@ -121,11 +121,11 @@ class DecadesBoxView(FlowBoxView):
             return
         album_ids = []
         for year in child.data:
-            album_ids += App().albums.get_albums_for_year(
-                year, self.storage_type)
-            album_ids += App().albums.get_compilations_for_year(
-                year, self.storage_type)
-        albums = [Album(album_id) for album_id in album_ids]
+            album_ids += App().albums.get_ids_for_year(
+                year, self.storage_type, False)
+            album_ids += App().albums.get_compilation_ids_for_year(
+                year, self.storage_type, False)
+        albums = [Album(album_id, [], [], False) for album_id in album_ids]
         if albums:
             App().player.play_album_for_albums(albums[0], albums)
 
@@ -139,10 +139,10 @@ class DecadesBoxView(FlowBoxView):
             @param random as bool
         """
         album_ids = App().albums.get_ids([], [], self.storage_type,
-                                         True, OrderBy.YEAR_ASC)
+                                         False, OrderBy.YEAR_ASC)
         if not album_ids:
             return
-        albums = [Album(album_id) for album_id in album_ids]
+        albums = [Album(album_id, [], [], False) for album_id in album_ids]
         if random:
             shuffle(albums)
             App().player.play_album_for_albums(albums[0], albums)

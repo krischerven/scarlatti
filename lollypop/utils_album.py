@@ -14,9 +14,12 @@
 from lollypop.define import App, Type
 
 
-def tracks_to_albums(tracks):
+def tracks_to_albums(tracks, skipped=True):
     """
         Convert tracks list to albums list
+        @param tracks as [Track]
+        @param skipped as bool
+        @return [Album]
     """
     albums = []
     for track in tracks:
@@ -24,12 +27,14 @@ def tracks_to_albums(tracks):
             albums[-1].append_track(track, False)
         else:
             album = track.album
+            if album.loved == -1 and not skipped:
+                continue
             album.set_tracks([track], False)
             albums.append(album)
     return albums
 
 
-def get_album_ids_for(genre_ids, artist_ids, storage_type):
+def get_album_ids_for(genre_ids, artist_ids, storage_type, skipped):
     """
         Get album ids view for genres/artists
         @param genre_ids as [int]
@@ -40,25 +45,27 @@ def get_album_ids_for(genre_ids, artist_ids, storage_type):
     items = []
     limit = App().settings.get_value("view-limit").get_int32()
     if genre_ids and genre_ids[0] == Type.POPULARS:
-        items = App().albums.get_rated(storage_type)
+        items = App().albums.get_rated(storage_type, skipped, limit)
         count = limit - len(items)
-        for album in App().albums.get_populars(storage_type, count):
+        for album in App().albums.get_populars(storage_type, skipped, count):
             if album not in items:
                 items.append(album)
     elif genre_ids and genre_ids[0] == Type.LOVED:
         items = App().albums.get_loved_albums(storage_type)
     elif genre_ids and genre_ids[0] == Type.RECENTS:
-        items = App().albums.get_recents(storage_type, limit)
+        items = App().albums.get_recents(storage_type, skipped, limit)
     elif genre_ids and genre_ids[0] == Type.LITTLE:
-        items = App().albums.get_little_played(storage_type, limit)
+        items = App().albums.get_little_played(storage_type, skipped, limit)
     elif genre_ids and genre_ids[0] == Type.RANDOMS:
-        items = App().albums.get_randoms(storage_type, None, limit)
+        items = App().albums.get_randoms(storage_type, None, skipped, limit)
     elif genre_ids and genre_ids[0] == Type.COMPILATIONS:
-        items = App().albums.get_compilation_ids([], storage_type)
+        items = App().albums.get_compilation_ids([], storage_type, skipped)
     elif genre_ids and not artist_ids:
         if App().settings.get_value("show-compilations-in-album-view"):
-            items = App().albums.get_compilation_ids(genre_ids, storage_type)
-        items += App().albums.get_ids([], genre_ids, storage_type)
+            items = App().albums.get_compilation_ids(genre_ids, storage_type,
+                                                     skipped)
+        items += App().albums.get_ids(genre_ids, [], storage_type, skipped)
     else:
-        items = App().albums.get_ids(artist_ids, genre_ids, storage_type)
+        items = App().albums.get_ids(genre_ids, artist_ids,
+                                     storage_type, skipped)
     return items

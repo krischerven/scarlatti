@@ -410,15 +410,15 @@ flowboxchild:selected  {
     color: @theme_selected_fg_color;
 }
 
-.albumrow:visited {
+.albumrow:checked {
     color: @theme_fg_color;
     background-color: alpha(@theme_selected_bg_color, 0.1);
 }
-.albumrow:visited label {
+.albumrow:checked label {
     color: @theme_fg_color;
 }
 
-.albumrow:checked {
+.albumrow:visited {
 	background-color: alpha(@theme_fg_color, 0.05);
     color: @theme_fg_color;
 }
@@ -455,13 +455,13 @@ flowboxchild:selected  {
     color: @theme_selected_fg_color;
 }
 
-.trackrow:visited {
+.trackrow:checked {
     border-radius: 5px;
 	background-color: alpha(@theme_fg_color, 0.07);
     color: @theme_fg_color;
 }
 
-.trackrow:checked {
+.trackrow:visited {
     border-radius: 5px;
 	background-color: alpha(@theme_fg_color, 0.05);
     color: @theme_fg_color;
@@ -469,11 +469,17 @@ flowboxchild:selected  {
 
 
 .default-banner {
-    border-bottom-width: 1px;
-    border-color: alpha(@theme_fg_color, 0.2);
-    border-style: solid;
+    border-style: none;
     color: white;
-    background-image: linear-gradient(60deg, #29323c 0%, #485563 100%);
+    background-image: linear-gradient(60deg, shade(@theme_selected_bg_color, 0.4) 0%, shade(@theme_selected_bg_color, 0.5) 100%);
+
+}
+
+.album-banner {
+    border: 1px solid shade(@theme_bg_color, 0.7);
+    padding: 10px;
+    border-radius: 4px;
+    background-color: shade(@theme_bg_color, 0.99);
 
 }
 
@@ -502,13 +508,18 @@ flowboxchild:selected  {
     color: shade(@theme_selected_bg_color, 1.25);
 }
 
+.banner-button:visited {
+    background-color: alpha(black, 0.7);
+    opacity: 0.9;
+}
+
 .banner-button:hover {
     color: inherit;
     background-color: alpha(black, 0.8);
   	opacity: 1;
 }
 
-.banner-button-small {
+.banner-button-big {
     min-width: 42px;
 	min-height: 36px;
 	box-shadow: none;
@@ -523,11 +534,11 @@ flowboxchild:selected  {
     border: 0px solid transparent;
 }
 
-.banner-button-small:disabled {
+.banner-button-big:disabled {
     opacity: 0.5;
 }
 
-.banner-button-small:hover {
+.banner-button-big:hover {
     color: inherit;
     background-color: alpha(black, 0.8);
   	opacity: 1;
@@ -587,22 +598,6 @@ flowboxchild:selected  {
 
 .light-button:hover {
     border-color: alpha(@theme_fg_color, 0.2);
-  	opacity: 1;
-}
-
-.miniplayer-button {
-    opacity: 0.8;
-	box-shadow: none;
-	padding: 1px;
-	border-radius: 2px;
-	background-image: none;
-	border-image-source: none;
-    border: 1px solid transparent;
-    color: inherit;
-}
-
-.miniplayer-button:hover {
-    background-color: alpha(black, 0.5);
   	opacity: 1;
 }
 

@@ -57,7 +57,16 @@ class SignalsHelper():
         if not hasattr(self, "_connected"):
             self._connected = {}
             self.__signal_ids = []
+            self.__allow_duplicate = []
             self.__cached = {}
+
+    def allow_duplicate(self, callback_str):
+        """
+            Allow duplicate signal emit for callback while hidden
+            @param callback_str as str
+        """
+        callback = getattr(self, callback_str)
+        self.__allow_duplicate.append(callback)
 
     def init(self, signals):
         """
@@ -160,7 +169,7 @@ class SignalsHelper():
         """
         callback = args[-1]
         callback_args = args[:-1]
-        if self.get_mapped():
+        if self.get_mapped() or callback in self.__allow_duplicate:
             callback(obj, *callback_args)
         else:
             self.__cached[callback] = (obj, callback_args)

@@ -35,7 +35,7 @@ class ArtistArt:
         except Exception as e:
             Logger.error("ArtistArt::__init__(): %s", e)
 
-    def artist_artwork_exists(self, artist):
+    def get_artist_artwork_path(self, artist):
         """
             True if artist artwork exists
             @param artist as str
@@ -111,7 +111,7 @@ class ArtistArt:
                                                  width, height, behaviour)
                 return pixbuf
             else:
-                filepath = self.artist_artwork_exists(artist)
+                filepath = self.get_artist_artwork_path(artist)
                 if filepath is not None:
                     try:
                         pixbuf = GdkPixbuf.Pixbuf.new_from_file(filepath)

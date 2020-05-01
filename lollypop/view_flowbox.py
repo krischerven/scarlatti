@@ -56,22 +56,28 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         """
         LazyLoadingView.populate(self, items)
 
-    def add_value(self, item_id):
+    def add_value(self, value):
         """
-            Insert item
-            @param item_id as int
+            Append value
+            @param value as object
         """
-        # Setup sort on insert
         self._box.set_sort_func(self._sort_func)
-        LazyLoadingView.populate(self, [item_id])
+        LazyLoadingView.populate(self, [value])
 
-    def remove_value(self, item_id):
+    def add_value_unsorted(self, value):
+        """
+            Add value unsorted
+            @param value as object
+        """
+        LazyLoadingView.populate(self, [value])
+
+    def remove_value(self, value):
         """
             Remove value
-            @param item_id as int
+            @param value as object
         """
         for child in self._box.get_children():
-            if child.data == item_id:
+            if child.data == value:
                 child.destroy()
                 break
 
@@ -196,7 +202,7 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         menu_widget = self._get_menu_widget(child)
         if menu_widget is not None:
             menu_widget.show()
-            popup_widget(menu_widget, child.artwork)
+            popup_widget(menu_widget, child.artwork, None, None, None)
 
     def __unselect_selected(self):
         """

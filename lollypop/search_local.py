@@ -26,7 +26,7 @@ class LocalSearch(GObject.Object):
         "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
-        "search-finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     def __init__(self):
@@ -34,7 +34,6 @@ class LocalSearch(GObject.Object):
             Init search
         """
         GObject.Object.__init__(self)
-        self.__search_count = 0
 
     def get(self, search, storage_type, cancellable):
         """
@@ -43,14 +42,11 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        self.__search_count += 3
         search = noaccents(search)
-        App().task_helper.run(self.__get_artists, search, storage_type,
-                              cancellable)
-        App().task_helper.run(self.__get_albums, search, storage_type,
-                              cancellable)
-        App().task_helper.run(self.__get_tracks, search, storage_type,
-                              cancellable)
+        self.__get_artists(search, storage_type, cancellable)
+        self.__get_albums(search, storage_type, cancellable)
+        self.__get_tracks(search, storage_type, cancellable)
+        GLib.idle_add(self.emit, "finished")
 
 #######################
 # PRIVATE             #
@@ -178,9 +174,6 @@ class LocalSearch(GObject.Object):
         artist_ids = list(dict.fromkeys(artist_ids))
         for artist_id in artist_ids:
             GLib.idle_add(self.emit, "match-artist", artist_id, storage_type)
-        self.__search_count -= 1
-        if self.__search_count == 0:
-            GLib.idle_add(self.emit, "search-finished")
 
     def __get_albums(self, search, storage_type, cancellable):
         """
@@ -197,9 +190,6 @@ class LocalSearch(GObject.Object):
         album_ids = list(dict.fromkeys(album_ids))
         for album_id in album_ids:
             GLib.idle_add(self.emit, "match-album", album_id, storage_type)
-        self.__search_count -= 1
-        if self.__search_count == 0:
-            GLib.idle_add(self.emit, "search-finished")
 
     def __get_tracks(self, search, storage_type, cancellable):
         """
@@ -216,6 +206,3 @@ class LocalSearch(GObject.Object):
         track_ids = list(dict.fromkeys(track_ids))
         for track_id in track_ids:
             GLib.idle_add(self.emit, "match-track", track_id, storage_type)
-        self.__search_count -= 1
-        if self.__search_count == 0:
-            GLib.idle_add(self.emit, "search-finished")

@@ -146,14 +146,12 @@ class InformationView(View):
             widget.attach(albums_view, 2, 1, 1, 2)
             albums = []
             storage_type = get_default_storage_type()
-            for album_id in App().albums.get_ids([artist_id],
-                                                 [],
-                                                 storage_type):
+            for album_id in App().albums.get_ids([], [artist_id],
+                                                 storage_type, True):
                 albums.append(Album(album_id))
             if not albums:
                 albums = [App().player.current_track.album]
-            # Allows view to be shown without lag
-            GLib.idle_add(albums_view.populate, albums)
+            albums_view.populate(albums)
         content = self.__information_store.get_information(self.__artist_name,
                                                            ARTISTS_PATH)
         if content is None:
@@ -164,8 +162,10 @@ class InformationView(View):
                                        self.__on_artist_information,
                                        self.__artist_name)
         else:
-            self.__bio_label.set_markup(
-                GLib.markup_escape_text(content.decode("utf-8")))
+            App().task_helper.run(
+                GLib.markup_escape_text,
+                content.decode("utf-8"),
+                callback=(self.__bio_label.set_markup,))
 
 #######################
 # PROTECTED           #

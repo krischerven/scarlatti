@@ -24,16 +24,7 @@ from pickle import dump
 from signal import signal, SIGINT, SIGTERM
 from urllib.parse import urlparse
 
-
-try:
-    from lollypop.lastfm import LastFM, LibreFM
-except Exception as e:
-    print(e)
-    print("$ sudo pip3 install pylast")
-    LastFM = None
-
 from lollypop.utils import init_proxy_from_gnome, emit_signal
-from lollypop.utils import get_network_available
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
 from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
@@ -42,9 +33,10 @@ from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
 from lollypop.art import Art
 from lollypop.logger import Logger
-from lollypop.search_spotify import SpotifySearch
+from lollypop.ws_director import DirectorWebService
 from lollypop.sqlcursor import SqlCursor
 from lollypop.settings import Settings
+from lollypop.database_cache import CacheDatabase
 from lollypop.database_albums import AlbumsDatabase
 from lollypop.database_artists import ArtistsDatabase
 from lollypop.database_genres import GenresDatabase
@@ -57,7 +49,7 @@ from lollypop.objects_radio import Radio
 from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
-from lollypop.collectionscanner import CollectionScanner
+from lollypop.collection_scanner import CollectionScanner
 
 
 class Application(Gtk.Application, ApplicationActions):
@@ -102,12 +94,10 @@ class Application(Gtk.Application, ApplicationActions):
                     GLib.setenv("SSL_CERT_FILE", path, True)
                     break
         self.cursors = {}
-        self.scrobblers = []
         self.debug = False
         self.shown_sidebar_tooltip = False
         self.__window = None
         self.__fs_window = None
-        self.__spotify_timeout_id = None
         settings = Gio.Settings.new("org.gnome.desktop.interface")
         self.animations = settings.get_value("enable-animations").get_boolean()
         GLib.set_application_name("Lollypop")
@@ -178,11 +168,12 @@ class Application(Gtk.Application, ApplicationActions):
         styleContext.add_provider_for_screen(screen, cssProvider,
                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self.db = Database()
+        self.cache = CacheDatabase()
         self.playlists = Playlists()
-        self.albums = AlbumsDatabase()
-        self.artists = ArtistsDatabase()
-        self.genres = GenresDatabase()
-        self.tracks = TracksDatabase()
+        self.albums = AlbumsDatabase(self.db)
+        self.artists = ArtistsDatabase(self.db)
+        self.genres = GenresDatabase(self.db)
+        self.tracks = TracksDatabase(self.db)
         self.radios = Radios()
         self.player = Player()
         self.inhibitor = Inhibitor()
@@ -192,7 +183,8 @@ class Application(Gtk.Application, ApplicationActions):
         self.art_helper = ArtHelper()
         self.art = Art()
         self.art.update_art_size()
-        self.spotify = SpotifySearch()
+        self.ws_director = DirectorWebService()
+        self.ws_director.start()
         if not self.settings.get_value("disable-mpris"):
             from lollypop.mpris import MPRIS
             MPRIS(self)
@@ -209,31 +201,6 @@ class Application(Gtk.Application, ApplicationActions):
                 not monitor.get_network_metered() and\
                 self.settings.get_value("recent-youtube-dl"):
             self.task_helper.run(install_youtube_dl)
-        self.start_spotify()
-
-    def start_spotify(self):
-        """
-            Start spotify timeout and start a new populate
-        """
-        if Type.SUGGESTIONS not in\
-                self.settings.get_value("shown-album-lists"):
-            return
-        monitor = Gio.NetworkMonitor.get_default()
-        if not monitor.get_network_metered() and\
-                get_network_available("SPOTIFY") and\
-                self.__spotify_timeout_id is None:
-            self.spotify.start()
-            self.__spotify_timeout_id = GLib.timeout_add_seconds(
-                3600, self.spotify.start)
-
-    def stop_spotify(self):
-        """
-            Stop spotify timeout and stop current populate
-        """
-        if self.__spotify_timeout_id is not None:
-            self.spotify.stop()
-            GLib.source_remove(self.__spotify_timeout_id)
-            self.__spotify_timeout_id = None
 
     def do_startup(self):
         """
@@ -256,8 +223,7 @@ class Application(Gtk.Application, ApplicationActions):
         """
         self.__window.container.stop()
         self.__window.hide()
-        if self.spotify.is_running:
-            self.spotify.stop()
+        if not self.ws_director.stop():
             GLib.timeout_add(100, self.quit, vacuum)
             return
         if self.settings.get_value("save-state"):
@@ -266,8 +232,6 @@ class Application(Gtk.Application, ApplicationActions):
         if vacuum:
             self.__vacuum()
             self.art.clean_artwork()
-        for scrobbler in self.scrobblers:
-            scrobbler.save()
         Gio.Application.quit(self)
         if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
             import gc
@@ -275,20 +239,6 @@ class Application(Gtk.Application, ApplicationActions):
             for x in gc.garbage:
                 s = str(x)
                 print(type(x), "\n  ", s)
-
-    def load_listenbrainz(self):
-        """
-            Load listenbrainz support if needed
-        """
-        if self.settings.get_value("listenbrainz-user-token").get_string():
-            from lollypop.listenbrainz import ListenBrainz
-            for scrobbler in self.scrobblers:
-                if isinstance(scrobbler, ListenBrainz):
-                    return
-            listenbrainz = ListenBrainz()
-            self.scrobblers.append(listenbrainz)
-            self.settings.bind("listenbrainz-user-token", listenbrainz,
-                               "user_token", 0)
 
     def fullscreen(self):
         """
@@ -344,20 +294,6 @@ class Application(Gtk.Application, ApplicationActions):
             Return True if application is fullscreen
         """
         return self.__fs_window is not None
-
-    @property
-    def lastfm(self):
-        """
-            Get lastfm provider from scrobbler
-            @return LastFM/None
-        """
-        if LastFM is None:
-            return None
-        from pylast import LastFMNetwork
-        for scrobbler in self.scrobblers:
-            if isinstance(scrobbler, LastFMNetwork):
-                return scrobbler
-        return None
 
     @property
     def main_window(self):
@@ -455,8 +391,8 @@ class Application(Gtk.Application, ApplicationActions):
             self.albums.clean(False)
             self.artists.clean(False)
             self.genres.clean(False)
-            SqlCursor.commit(self.db)
             SqlCursor.remove(self.db)
+            self.cache.clean(True)
 
             from lollypop.radios import Radios
             with SqlCursor(self.db) as sql:
@@ -512,11 +448,6 @@ class Application(Gtk.Application, ApplicationActions):
             options = app_cmd_line.get_options_dict()
             if options.contains("debug"):
                 self.debug = True
-            # We are forced to enable scrobblers here if we want full debug
-            if not self.scrobblers:
-                if LastFM is not None:
-                    self.scrobblers = [LastFM(), LibreFM()]
-                self.load_listenbrainz()
             if options.contains("set-rating"):
                 value = options.lookup_value("set-rating").get_string()
                 try:

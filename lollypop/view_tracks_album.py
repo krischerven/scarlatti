@@ -64,11 +64,7 @@ class AlbumTracksView(TracksView):
             self.__populated = True
             emit_signal(self, "populated")
             if not self.children:
-                text = (_("""This album has no track."""
-                          """ Check tags, all 'album artist'"""
-                          """ tags should be in 'artist' tags"""))
-                label = Gtk.Label.new(text)
-                label.get_style_context().add_class("text-large")
+                label = Gtk.Label.new(_("All tracks skipped"))
                 label.show()
                 self._responsive_widget.insert_row(0)
                 self._responsive_widget.attach(label, 0, 0, 2, 1)
@@ -81,6 +77,8 @@ class AlbumTracksView(TracksView):
             @param position as int
         """
         self._init()
+        if not self.is_populated:
+            self.populate()
         self.__album.append_track(track)
         for key in self._tracks_widget_left.keys():
             self._add_tracks(self._tracks_widget_left[key], [track])
@@ -93,6 +91,8 @@ class AlbumTracksView(TracksView):
             @param tracks as [Track]
         """
         self._init()
+        if not self.is_populated:
+            self.populate()
         self.__album.append_tracks(tracks)
         for key in self._tracks_widget_left.keys():
             self._add_tracks(self._tracks_widget_left[key], tracks)
@@ -323,8 +323,10 @@ class AlbumTracksView(TracksView):
                     tracks.append(child.track)
                 child.set_state_flags(Gtk.StateFlags.NORMAL, True)
             # Do not update album list if in party or album already available
-            if not App().player.is_party and\
-                    not App().player.track_in_playback(track):
+            playback_track = App().player.track_in_playback(track)
+            if playback_track is not None:
+                App().player.load(playback_track)
+            elif not App().player.is_party:
                 album = Album(track.album.id, [], [])
                 album.set_tracks(tracks)
                 if not App().settings.get_value("append-albums"):

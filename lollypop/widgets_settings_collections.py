@@ -226,7 +226,8 @@ class CollectionsSettingsWidget(Gtk.Bin):
             @param history as History
         """
         if uris:
-            App().stop_spotify()
+            if App().ws_director.collection_ws is not None:
+                App().ws_director.collection_ws.stop()
             uri = uris.pop(0)
             App().scanner.del_from_db(uri, True)
             self.__progress.set_fraction((count - len(uris)) / count)
@@ -240,6 +241,7 @@ class CollectionsSettingsWidget(Gtk.Bin):
             App().albums.clean(False)
             App().artists.clean(False)
             App().genres.clean(False)
+            App().cache.clear("duration")
             SqlCursor.commit(App().db)
             SqlCursor.remove(App().db)
             App().window.container.go_home()

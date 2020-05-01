@@ -35,17 +35,35 @@ class ApplicationActions:
         App().add_action(update_action)
 
         fullscreen_action = Gio.SimpleAction.new("fullscreen", None)
-        App().player.connect("current-changed",
-                             self.__on_current_changed,
+        fullscreen_action = Gio.SimpleAction.new_stateful(
+                    "fullscreen",
+                    None,
+                    GLib.Variant.new_boolean(False))
+        App().player.connect("status-changed",
+                             self.__on_status_changed,
                              fullscreen_action)
         fullscreen_action.set_enabled(False)
-        fullscreen_action.connect("activate", self.__on_fullscreen_activate)
+        fullscreen_action.connect("change-state",
+                                  self.__on_fullscreen_change_state)
         App().add_action(fullscreen_action)
 
         equalizer_action = Gio.SimpleAction.new("equalizer", None)
         equalizer_action.connect("activate", self.__on_equalizer_activate)
         App().set_accels_for_action("app.equalizer", ["<Shift><Alt>e"])
         App().add_action(equalizer_action)
+
+        miniplayer_action = Gio.SimpleAction.new_stateful(
+                    "miniplayer",
+                    None,
+                    GLib.Variant.new_boolean(False))
+        App().player.connect("status-changed",
+                             self.__on_status_changed,
+                             miniplayer_action)
+        miniplayer_action.set_enabled(False)
+        miniplayer_action.connect("change-state",
+                                  self.__on_miniplayer_change_state)
+        App().set_accels_for_action("app.miniplayer", ["<Shift><Alt>m"])
+        App().add_action(miniplayer_action)
 
         about_action = Gio.SimpleAction.new("about", None)
         about_action.connect("activate", self.__on_about_activate)
@@ -134,8 +152,6 @@ class ApplicationActions:
         App().set_accels_for_action("app.shortcut::lyrics",
                                     ["<Shift><Alt>l"])
         App().set_accels_for_action("app.shortcut::next_album", ["<Control>n"])
-        App().set_accels_for_action("app.shortcut::current_artist",
-                                    ["<Control><Alt>a"])
         App().set_accels_for_action("app.update_db", ["<Control>u"])
         App().set_accels_for_action("app.settings(-14)", ["<Control>comma"])
         App().set_accels_for_action("app.fullscreen", ["F11", "F7"])
@@ -151,11 +167,9 @@ class ApplicationActions:
         App().set_accels_for_action("app.shortcut::volume_down",
                                     ["<Shift><Alt>Down"])
 
-    def __on_update_db_activate(self, action=None, param=None):
+    def __on_update_db_activate(self, *ignore):
         """
             Search for new music
-            @param action as Gio.SimpleAction
-            @param param as GLib.Variant
         """
         if App().window:
             App().scanner.update(ScanType.FULL)
@@ -168,48 +182,77 @@ class ApplicationActions:
         """
         dialog.destroy()
 
-    def __on_search_activate(self, action, variant):
+    def __on_search_activate(self, action, value):
         """
             @param action as Gio.SimpleAction
-            @param variant as GLib.Variant
+            @param value as GLib.Variant
         """
-        search = variant.get_string()
+        search = value.get_string()
         App().window.container.show_view([Type.SEARCH], search)
 
-    def __on_fullscreen_activate(self, action, param):
+    def __on_fullscreen_change_state(self, action, value):
         """
             Show a fullscreen window with cover and artist information
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
+        action.set_state(value)
         App().fullscreen()
 
-    def __on_equalizer_activate(self, action, param):
+    def __on_equalizer_activate(self, action, value):
         """
             Show equalizer view
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
         App().window.container.show_view([Type.EQUALIZER])
 
-    def __on_settings_activate(self, action, param):
+    def __on_miniplayer_change_state(self, action, value):
+        """
+            Show miniplayer view
+            @param action as Gio.SimpleAction
+            @param value as GLib.Variant
+        """
+        def replace_window():
+            App().window.hide()
+            App().window.show()
+            App().window.set_opacity(1)
+
+        App().window.set_opacity(0)
+        action.set_state(value)
+        if value:
+            App().window.show_miniplayer(True, True)
+            App().window.unmaximize()
+            App().window.resize(1, 1)
+        else:
+            if App().window.miniplayer is not None:
+                App().window.miniplayer.reveal(False)
+            size = App().settings.get_value("window-size")
+            maximized = App().settings.get_value("window-maximized")
+            App().window.resize(size[0], size[1])
+            if maximized:
+                GLib.idle_add(App().window.maximize)
+        # Big hack, wait unmaximize/maximize to finish
+        GLib.timeout_add(250, replace_window)
+
+    def __on_settings_activate(self, action, value):
         """
             Show settings dialog
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
         if App().window.is_adaptive:
             App().window.container.show_view([Type.SETTINGS])
         else:
             from lollypop.dialog_settings import SettingsDialog
-            dialog = SettingsDialog(param.get_int32())
+            dialog = SettingsDialog(value.get_int32())
             dialog.show()
 
-    def __on_about_activate(self, action, param):
+    def __on_about_activate(self, action, value):
         """
             Setup about dialog
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
         def get_instance(children, instance):
             for child in children:
@@ -238,32 +281,32 @@ class ApplicationActions:
             about.connect("response", self.__on_about_activate_response)
             about.show()
 
-    def __on_shortcuts_activate(self, action, param):
+    def __on_shortcuts_activate(self, action, value):
         """
             Show shorctus
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/Shortcuts.ui")
         builder.get_object("shortcuts").set_transient_for(App().window)
         builder.get_object("shortcuts").show()
 
-    def __on_current_changed(self, player, action):
+    def __on_status_changed(self, player, action):
         """
             Activate action if wanted
             @param player as Player
             @param action as Gio.SimpleAction
         """
-        action.set_enabled(not App().player.current_track.id is None)
+        action.set_enabled(not App().player.is_playing is None)
 
-    def __on_seek_action(self, action, param):
+    def __on_seek_action(self, action, value):
         """
             Seek in stream
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
-        ms = param.get_int32()
+        ms = value.get_int32()
         position = App().player.position
         seek = position + ms
         if seek < 0:
@@ -272,13 +315,13 @@ class ApplicationActions:
             seek = App().player.current_track.duration - 2
         App().player.seek(seek)
 
-    def __on_player_action(self, action, param):
+    def __on_player_action(self, action, value):
         """
             Change player state
             @param action as Gio.SimpleAction
-            @param param as GLib.Variant
+            @param value as GLib.Variant
         """
-        string = param.get_string()
+        string = value.get_string()
         if string == "play_pause":
             App().player.play_pause()
         elif string == "play":
@@ -302,11 +345,6 @@ class ApplicationActions:
             App().player.set_volume(App().player.volume - 0.1)
         elif string == "filter":
             App().window.container.show_filter()
-        elif string == "current_artist":
-            if App().player.current_track.id is not None and\
-                    App().player.current_track.id > 0:
-                artist_ids = App().player.current_track.album.artist_ids
-                App().window.container.show_artists_albums(artist_ids)
         elif string == "loved":
             track = App().player.current_track
             if track.id is not None and track.id >= 0:

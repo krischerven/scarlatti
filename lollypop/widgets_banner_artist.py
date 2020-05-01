@@ -71,7 +71,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         return [
                (App().art, "artist-artwork-changed",
                 "_on_artist_artwork_changed"),
-               (App().player, "playback-changed", "_on_playback_changed"),
+               (App().player, "playback-added", "_on_playback_changed"),
+               (App().player, "playback-updated", "_on_playback_changed"),
+               (App().player, "playback-setted", "_on_playback_changed"),
+               (App().player, "playback-removed", "_on_playback_changed"),
                (App().settings, "changed::artist-artwork",
                 "_on_artist_artwork_setting_changed")
 
@@ -147,11 +150,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                           App().window.is_adaptive)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
-        menu_ext = SimilarsMenu()
+        menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
-        menu_ext.populate(self.__artist_ids[0])
         menu_widget.append_widget(menu_ext)
-        popup_widget(menu_widget, button)
+        popup_widget(menu_widget, button, None, None, button)
 
     def _on_badge_button_release(self, eventbox, event):
         """
@@ -165,7 +167,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         artwork_search.show()
         # Let current animation run
         GLib.timeout_add(250, artwork_search.populate)
-        popup_widget(artwork_search, eventbox)
+        popup_widget(artwork_search, eventbox, None, None, None)
 
     def _on_artist_artwork_changed(self, art, prefix):
         """
@@ -179,10 +181,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                 self.__set_artwork()
                 self.__set_internal_size()
 
-    def _on_playback_changed(self, player):
+    def _on_playback_changed(self, *ignore):
         """
             Update add button
-            @param player as Player
         """
         self.__update_add_button()
 
@@ -256,8 +257,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
             Set image as +/-
         """
-        album_ids = App().albums.get_ids(self.__artist_ids, self.__genre_ids,
-                                         self.__storage_type)
+        album_ids = App().albums.get_ids(self.__genre_ids, self.__artist_ids,
+                                         self.__storage_type, False)
         add = set(App().player.album_ids) & set(album_ids) != set(album_ids)
         if add:
             # Translators: artist context

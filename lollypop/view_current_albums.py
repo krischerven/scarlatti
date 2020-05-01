@@ -43,9 +43,16 @@ class CurrentAlbumsView(View, SignalsHelper):
         self.__banner = CurrentAlbumsBannerWidget(self.__view)
         self.__banner.show()
         self.add_widget(self.__view, self.__banner)
+        self.allow_duplicate("_on_queue_changed")
+        self.allow_duplicate("_on_playback_added")
+        self.allow_duplicate("_on_playback_updated")
+        self.allow_duplicate("_on_playback_removed")
         return [
             (App().player, "queue-changed", "_on_queue_changed"),
-            (App().player, "playback-changed", "_on_playback_changed")
+            (App().player, "playback-added", "_on_playback_added"),
+            (App().player, "playback-setted", "_on_playback_setted"),
+            (App().player, "playback-updated", "_on_playback_updated"),
+            (App().player, "playback-removed", "_on_playback_removed")
         ]
 
     def populate(self):
@@ -102,16 +109,54 @@ class CurrentAlbumsView(View, SignalsHelper):
             self.__view.clear()
             self.populate()
 
-    def _on_playback_changed(self, *ignore):
+    def _on_playback_added(self, player, album):
         """
-            Clear and populate view again
+            Add album
+            @param player as Player
+            @param album as Album
         """
-        self.__view.stop()
-        self.__view.clear()
-        self.__banner.clear_button.set_sensitive(True)
-        self.__banner.jump_button.set_sensitive(True)
-        self.__banner.menu_button.set_sensitive(True)
-        self.populate()
+        self.__view.add_value(album)
+        self.show_placeholder(False)
+
+    def _on_playback_updated(self, player, album):
+        """
+            Reset album
+            @param player as Player
+            @param album as Album
+        """
+        for child in self.__view.children:
+            if child.album == album:
+                child.reset()
+                break
+
+    def _on_playback_setted(self, player, albums):
+        """
+            Add album
+            @param player as Player
+            @param albums as [Album]
+        """
+        if albums:
+            self.__view.stop()
+            self.__view.clear()
+            self.__view.populate(albums)
+            self.show_placeholder(False)
+        else:
+            self.__view.stop()
+            self.__view.clear()
+            self.show_placeholder(True)
+
+    def _on_playback_removed(self, player, album):
+        """
+            Add album
+            @param player as Player
+            @param album as Album
+        """
+        for child in self.__view.children:
+            if child.album == album:
+                child.destroy()
+                break
+        if not self.__view.children:
+            self.show_placeholder(True)
 
 #######################
 # PRIVATE             #
@@ -124,4 +169,4 @@ class CurrentAlbumsView(View, SignalsHelper):
         albums = []
         for child in self.__view.children:
             albums.append(child.album)
-        App().player.set_albums(albums)
+        App().player.set_albums(albums, False)

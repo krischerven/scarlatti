@@ -12,7 +12,8 @@
 
 from gi.repository import GLib
 
-from random import choice, shuffle
+from random import choice
+from gettext import gettext as _
 
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
@@ -53,17 +54,22 @@ class AlbumsPlayer:
             Add albums to player
             @param albums as [Album]
         """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
         try:
             for album in albums:
                 # Merge album if previous is same
                 if self._albums and self._albums[-1].id == album.id:
-                    tracks = list(set(self._albums[-1].tracks) |
-                                  set(album.tracks))
-                    self._albums[-1].set_tracks(tracks)
+                    track_ids = self._albums[-1].track_ids
+                    for track in album.tracks:
+                        if track.id not in track_ids:
+                            self._albums[-1].append_track(track)
+                    emit_signal(self, "playback-updated", self._albums[-1])
                 else:
                     self._albums.append(album)
+                    emit_signal(self, "playback-added", album)
             self.update_next_prev()
-            emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::add_albums(): %s" % e)
 
@@ -75,11 +81,9 @@ class AlbumsPlayer:
         try:
             if album not in self._albums:
                 return
-            if self._current_track.album == album:
-                self.skip_album()
             self._albums.remove(album)
             self.update_next_prev()
-            emit_signal(self, "playback-changed")
+            emit_signal(self, "playback-removed", album)
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
@@ -100,8 +104,8 @@ class AlbumsPlayer:
                 for album in self._albums:
                     if album.id == album_id:
                         self.remove_album(album)
+                        emit_signal(self, "playback-removed", album)
             self.update_next_prev()
-            emit_signal(self, "playback-changed")
         except Exception as e:
             Logger.error("Player::remove_album_by_ids(): %s" % e)
 
@@ -116,8 +120,11 @@ class AlbumsPlayer:
             self.next()
         if album.remove_track(track):
             self.remove_album(album)
-        elif not is_current_track:
-            self.update_next_prev()
+            emit_signal(self, "playback-removed", album)
+        else:
+            emit_signal(self, "playback-updated", album)
+            if not is_current_track:
+                self.update_next_prev()
 
     def play_album(self, album):
         """
@@ -125,6 +132,20 @@ class AlbumsPlayer:
             @param album as Album
         """
         self.play_album_for_albums(album, [album])
+
+    def play_albums(self, albums):
+        """
+            Play albums
+            @param album as [Album]
+        """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
+        if App().settings.get_value("shuffle"):
+            album = choice(albums)
+        else:
+            album = albums[0]
+        self.play_album_for_albums(album, albums)
 
     def play_track_for_albums(self, track, albums):
         """
@@ -136,7 +157,7 @@ class AlbumsPlayer:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         self._albums = albums
         self.load(track)
-        emit_signal(self, "playback-changed")
+        emit_signal(self, "playback-setted", list(albums))
 
     def play_album_for_albums(self, album, albums):
         """
@@ -144,41 +165,38 @@ class AlbumsPlayer:
             @param album as Album
             @param albums as [Album]
         """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
         if self.is_party:
             App().lookup_action("party").change_state(GLib.Variant("b", False))
         if App().settings.get_value("shuffle"):
             self.__play_shuffle_tracks(album, albums)
         else:
             self.__play_albums(album, albums)
-        emit_signal(self, "playback-changed")
 
-    def play_albums(self, albums):
-        """
-            Play albums
-            @param album as [Album]
-        """
-        if not albums:
-            return
-        if App().settings.get_value("shuffle"):
-            album = choice(albums)
-        else:
-            album = albums[0]
-        self.play_album_for_albums(album, albums)
-
-    def set_albums(self, albums):
+    def set_albums(self, albums, signal=True):
         """
             Set player albums
+            @param albums as [Album]
+            @param signal as bool
         """
+        if not albums:
+            App().notify.send(_("No album available"))
+            return
         self._albums = albums
+        if signal:
+            emit_signal(self, "playback-setted", list(albums))
         self.update_next_prev()
 
     def clear_albums(self):
         """
             Clear all albums
         """
+        for album in self._albums:
+            emit_signal(self, "playback-removed", album)
         self._albums = []
         self.update_next_prev()
-        emit_signal(self, "playback-changed")
 
     def skip_album(self):
         """
@@ -188,8 +206,6 @@ class AlbumsPlayer:
             # In party or shuffle, just update next track
             if self.is_party or App().settings.get_value("shuffle"):
                 self.set_next()
-                # We send this signal to update next popover
-                emit_signal(self, "queue-changed")
             elif self._current_track.id is not None:
                 index = self._albums.index(
                     self._current_playback_track.album)
@@ -206,10 +222,13 @@ class AlbumsPlayer:
                     elif repeat == Repeat.ALL:
                         next_album = self._albums[0]
                     else:
-                        self.stop()
+                        next_album = None
                 else:
                     next_album = self._albums[index + 1]
-                self.load(next_album.tracks[0])
+                if next_album is None:
+                    self.stop()
+                else:
+                    self.load(next_album.tracks[0])
         except Exception as e:
             Logger.error("Player::skip_album(): %s" % e)
 
@@ -217,14 +236,14 @@ class AlbumsPlayer:
         """
             True if track present in current playback
             @param track as Track
-            @return bool
+            @return Track/None
         """
         for album in self._albums:
             if album.id == track.album.id:
-                for track_id in album.track_ids:
-                    if track.id == track_id:
-                        return True
-        return False
+                for _track in album.tracks:
+                    if track.id == _track.id:
+                        return _track
+        return None
 
     def get_albums_for_id(self, album_id):
         """
@@ -253,25 +272,6 @@ class AlbumsPlayer:
 #######################
 # PRIVATE             #
 #######################
-    def __play_shuffle_albums(self, album, albums):
-        """
-            Start shuffle albums playback. Prepend album if not None
-            @param album as Album
-            @param albums as [albums]
-        """
-        track = None
-        if album is None:
-            album = choice(albums)
-        else:
-            self._albums = [album]
-            albums.remove(album)
-        shuffle(albums)
-        self._albums += albums
-        if album.tracks:
-            track = album.tracks[0]
-        if track is not None:
-            self.load(track)
-
     def __play_shuffle_tracks(self, album, albums):
         """
             Start shuffle tracks playback.
@@ -285,6 +285,7 @@ class AlbumsPlayer:
         else:
             track = None
         self._albums = albums
+        emit_signal(self, "playback-setted", list(albums))
         if track is not None:
             self.load(track)
         else:
@@ -303,6 +304,7 @@ class AlbumsPlayer:
         else:
             track = None
         self._albums = albums
+        emit_signal(self, "playback-setted", list(albums))
         if track is not None:
             self.load(track)
         else:

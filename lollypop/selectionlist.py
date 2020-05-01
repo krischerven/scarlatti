@@ -350,6 +350,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         child = self._get_child(value)
         child.populate()
         if self.mask & SelectionListMask.ARTISTS:
+            self.__fastscroll.clear()
             self.__fastscroll.populate()
 
     def update_value(self, object_id, name):
@@ -677,7 +678,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                 from lollypop.widgets_menu import MenuBuilder
                 menu_widget = MenuBuilder(menu)
                 menu_widget.show()
-                popup_widget(menu_widget, relative)
+                popup_widget(menu_widget, relative, None, None, None)
 
     def __on_artist_artwork_changed(self, object, value):
         """

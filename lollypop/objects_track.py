@@ -40,6 +40,7 @@ class Track(Base):
                 "loved": False,
                 "storage_type": StorageType.COLLECTION,
                 "mb_track_id": None,
+                "lp_track_id": None,
                 "mb_artist_ids": []}
 
     def __init__(self, track_id=None, album=None):
@@ -55,7 +56,7 @@ class Track(Base):
         if album is None:
             from lollypop.objects_album import Album
             self.__album = Album(self.album_id)
-            self.__album.set_tracks([self])
+            self.__album.set_tracks([self], False)
         else:
             self.__album = album
 
@@ -64,6 +65,15 @@ class Track(Base):
             Remove ref cycles
         """
         self.__album = None
+
+    # Used by pickle
+    def __getstate__(self):
+        self.db = None
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.db = App().tracks
 
     def set_album(self, album):
         """
