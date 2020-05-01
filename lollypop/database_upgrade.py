@@ -758,8 +758,11 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             Populate lp_album_id/lp_track_id
         """
         queue = LOLLYPOP_DATA_PATH + "/queue.bin"
-        f = Gio.File.new_for_path(queue)
-        f.delete(None)
+        try:
+            f = Gio.File.new_for_path(queue)
+            f.delete(None)
+        except:
+            pass
         from lollypop.database_albums import AlbumsDatabase
         from lollypop.database_tracks import TracksDatabase
         from lollypop.utils import get_lollypop_album_id, get_lollypop_track_id
