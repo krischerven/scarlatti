@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, ViewType, Size
 from lollypop.define import MARGIN
 from lollypop.widgets_banner import BannerWidget
-from lollypop.utils import emit_signal, popup_widget
+from lollypop.utils import emit_signal, popup_widget, get_human_duration
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -90,6 +90,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         return [
+            (view, "initialized", "_on_view_initialized"),
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
             (App().player, "playback-setted", "_on_playback_changed"),
@@ -163,6 +164,12 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
 
+    def _on_view_initialized(self, view):
+        """
+            @param view as AlbumsListView
+        """
+        App().task_helper.run(self.__calculate_duration)
+
     def _on_playback_changed(self, player, *ignore):
         """
             Update clear button state
@@ -177,6 +184,16 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __calculate_duration(self):
+        """
+            Calculate playback duration
+        """
+        duration = 0
+        for child in self.__view.children:
+            duration += child.album.duration
+        GLib.idle_add(self.__duration_label.set_text,
+                      get_human_duration(duration))
+
     def __set_internal_size(self):
         """
             Update font size

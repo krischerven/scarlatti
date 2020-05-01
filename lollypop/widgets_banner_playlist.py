@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from random import shuffle
 
@@ -18,13 +18,15 @@ from lollypop.utils import get_human_duration, popup_widget
 from lollypop.utils_album import tracks_to_albums
 from lollypop.define import App, ArtSize, ViewType, Size
 from lollypop.widgets_banner import BannerWidget
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class PlaylistBannerWidget(BannerWidget):
+class PlaylistBannerWidget(BannerWidget, SignalsHelper):
     """
         Banner for playlist
     """
 
+    @signals_map
     def __init__(self, playlist_id, view):
         """
             Init banner
@@ -48,11 +50,9 @@ class PlaylistBannerWidget(BannerWidget):
         self._overlay.set_overlay_pass_through(widget, True)
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
-        # In DB duration calculation
-        if playlist_id > 0 and\
-                not App().playlists.get_smart(playlist_id):
-            duration = App().playlists.get_duration(playlist_id)
-            self.__duration_label.set_text(get_human_duration(duration))
+        return [
+            (view, "initialized", "_on_view_initialized")
+        ]
 
     def update_for_width(self, width):
         """
@@ -95,6 +95,12 @@ class PlaylistBannerWidget(BannerWidget):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
+
+    def _on_view_initialized(self, view):
+        """
+            @param view as AlbumsListView
+        """
+        App().task_helper.run(self.__calculate_duration)
 
     def _on_play_button_clicked(self, button):
         """
@@ -147,6 +153,16 @@ class PlaylistBannerWidget(BannerWidget):
 #######################
 # PRIVATE             #
 #######################
+    def __calculate_duration(self):
+        """
+            Calculate playback duration
+        """
+        duration = 0
+        for child in self.__view.children:
+            duration += child.album.duration
+        GLib.idle_add(self.__duration_label.set_text,
+                      get_human_duration(duration))
+
     def __set_internal_size(self):
         """
             Update font size

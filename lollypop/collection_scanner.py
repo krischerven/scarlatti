@@ -230,6 +230,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         App().albums.set_year(item.album_id, year)
         timestamp = App().tracks.get_timestamp_for_album(item.album_id)
         App().albums.set_timestamp(item.album_id, timestamp)
+        App().cache.clear_durations(item.album_id)
 
     def update_track(self, item):
         """
@@ -279,6 +280,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().albums.clean()
             App().genres.clean()
             App().artists.clean()
+            App().cache.clear_durations(album_id)
             SqlCursor.commit(App().db)
             item = CollectionItem(album_id=album_id)
             if not App().albums.get_name(album_id):

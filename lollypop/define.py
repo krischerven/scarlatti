@@ -16,8 +16,6 @@
 from gi.repository import Gio, GLib
 
 
-LOLLYPOP_DATA_PATH = GLib.get_user_data_dir() + "/lollypop"
-
 App = Gio.Application.get_default
 
 LASTFM_API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
@@ -32,16 +30,16 @@ MARGIN = 15
 MARGIN_MEDIUM = 10
 MARGIN_SMALL = 5
 
-data_dir = GLib.get_user_data_dir()
+LOLLYPOP_DATA_PATH = GLib.get_user_data_dir() + "/lollypop"
 # All cache goes here
 CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
 # Stores for albums
-ALBUMS_PATH = data_dir + "/lollypop/albums"
-ALBUMS_WEB_PATH = data_dir + "/lollypop/albums_web"
+ALBUMS_PATH = LOLLYPOP_DATA_PATH + "/albums"
+ALBUMS_WEB_PATH = LOLLYPOP_DATA_PATH + "/albums_web"
 # Stores for artists
-ARTISTS_PATH = data_dir + "/lollypop/artists"
+ARTISTS_PATH = LOLLYPOP_DATA_PATH + "/artists"
 # Store for lyrics
-LYRICS_PATH = data_dir + "/lollypop/lyrics"
+LYRICS_PATH = LOLLYPOP_DATA_PATH + "/lyrics"
 
 
 class TimeStamp:

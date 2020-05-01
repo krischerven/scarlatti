@@ -36,6 +36,7 @@ from lollypop.logger import Logger
 from lollypop.ws_director import DirectorWebService
 from lollypop.sqlcursor import SqlCursor
 from lollypop.settings import Settings
+from lollypop.database_cache import CacheDatabase
 from lollypop.database_albums import AlbumsDatabase
 from lollypop.database_artists import ArtistsDatabase
 from lollypop.database_genres import GenresDatabase
@@ -167,6 +168,7 @@ class Application(Gtk.Application, ApplicationActions):
         styleContext.add_provider_for_screen(screen, cssProvider,
                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self.db = Database()
+        self.cache = CacheDatabase()
         self.playlists = Playlists()
         self.albums = AlbumsDatabase(self.db)
         self.artists = ArtistsDatabase(self.db)
@@ -391,6 +393,7 @@ class Application(Gtk.Application, ApplicationActions):
             self.genres.clean(False)
             SqlCursor.commit(self.db)
             SqlCursor.remove(self.db)
+            self.cache.clean(True)
 
             from lollypop.radios import Radios
             with SqlCursor(self.db) as sql:

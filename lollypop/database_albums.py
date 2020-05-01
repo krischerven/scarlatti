@@ -1131,7 +1131,7 @@ class AlbumsDatabase:
             order = " ORDER BY albums.name, albums.timestamp"
             result = []
             # Get all compilations
-            if not genre_ids or genre_ids[0] == Type.ALL:
+            if not genre_ids:
                 filters = (storage_type, Type.COMPILATIONS)
                 request = "SELECT DISTINCT albums.rowid\
                            FROM albums, album_artists\
@@ -1162,7 +1162,7 @@ class AlbumsDatabase:
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
-    def get_duration(self, album_id, genre_ids):
+    def get_duration(self, album_id, genre_ids, artist_ids):
         """
             Album duration in seconds
             @param album_id as int
@@ -1170,8 +1170,24 @@ class AlbumsDatabase:
             @return album duration as int
         """
         genre_ids = remove_static(genre_ids)
+        artist_ids = remove_static(artist_ids)
         with SqlCursor(self.__db) as sql:
-            if genre_ids and genre_ids[0] > 0:
+            if not genre_ids and not artist_ids:
+                filters = (album_id,)
+                request = "SELECT SUM(duration)\
+                           FROM tracks\
+                           WHERE tracks.album_id=?"
+            elif artist_ids:
+                filters = (album_id,)
+                filters += tuple(artist_ids)
+                request = "SELECT SUM(duration)\
+                           FROM tracks, track_artists\
+                           WHERE tracks.album_id=?\
+                           AND track_artists.track_id = tracks.rowid AND"
+                request += make_subrequest("track_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
+            elif genre_ids:
                 filters = (album_id,)
                 filters += tuple(genre_ids)
                 request = "SELECT SUM(duration)\
@@ -1181,10 +1197,22 @@ class AlbumsDatabase:
                 request += make_subrequest("track_genres.genre_id=?",
                                            "OR",
                                            len(genre_ids))
-                result = sql.execute(request, filters)
             else:
-                result = sql.execute("SELECT SUM(duration) FROM tracks\
-                                      WHERE album_id=?", (album_id,))
+                filters = (album_id,)
+                filters += tuple(genre_ids)
+                filters += tuple(artist_ids)
+                request = "SELECT SUM(duration)\
+                           FROM tracks, track_genres, track_artists\
+                           WHERE tracks.album_id=?\
+                           AND track_genres.track_id = tracks.rowid\
+                           AND track_artists.track_id = tracks.rowid AND"
+                request += make_subrequest("track_genres.genre_id=?",
+                                           "OR",
+                                           len(genre_ids))
+                request += make_subrequest("track_artists.artist_id=?",
+                                           "OR",
+                                           len(artist_ids))
+            result = sql.execute(request, filters)
             v = result.fetchone()
             if v and v[0] is not None:
                 return v[0]
