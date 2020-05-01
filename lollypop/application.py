@@ -393,6 +393,7 @@ class Application(Gtk.Application, ApplicationActions):
             self.genres.clean(False)
             SqlCursor.commit(self.db)
             SqlCursor.remove(self.db)
+            self.cache.clean(True)
 
             from lollypop.radios import Radios
             with SqlCursor(self.db) as sql:

@@ -17,6 +17,7 @@ from threading import Lock
 
 from lollypop.define import CACHE_PATH
 from lollypop.sqlcursor import SqlCursor
+from lollypop.database import Database
 from lollypop.logger import Logger
 
 
@@ -103,6 +104,16 @@ class CacheDatabase:
         """
         with SqlCursor(self, True) as sql:
             sql.execute("DELETE FROM ?", (table,))
+
+    def clean(self, commit=True):
+        """
+            Clean cache
+            @param commit as bool
+        """
+        with SqlCursor(self, commit) as sql:
+            sql.execute('ATTACH DATABASE "%s" AS music' % Database.DB_PATH)
+            sql.execute("DELETE FROM duration WHERE duration.album_id NOT IN (\
+                            SELECT albums.rowid FROM music.albums)")
 
     def get_cursor(self):
         """
