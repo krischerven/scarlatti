@@ -84,3 +84,11 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         volume = self.__volume.get_value()
         if player.volume != volume:
             self.__volume.set_value(player.volume)
+
+    def _mute_volume(self, event_box, event_button):
+        """
+            Mute the volume
+            @param event_box as Gtk.EventBox
+            @param event_button as Gdk.EventButton
+        """
+        self.__volume.set_value(0)
