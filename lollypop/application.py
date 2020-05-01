@@ -391,7 +391,6 @@ class Application(Gtk.Application, ApplicationActions):
             self.albums.clean(False)
             self.artists.clean(False)
             self.genres.clean(False)
-            SqlCursor.commit(self.db)
             SqlCursor.remove(self.db)
             self.cache.clean(True)
 

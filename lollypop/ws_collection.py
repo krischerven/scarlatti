@@ -131,5 +131,4 @@ class CollectionWebService(SaveWebHelper,
             App().tracks.clean(False)
             App().albums.clean(False)
             App().artists.clean(False)
-        SqlCursor.commit(App().db)
         SqlCursor.remove(App().db)
