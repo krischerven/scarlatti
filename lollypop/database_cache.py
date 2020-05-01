@@ -87,6 +87,23 @@ class CacheDatabase:
             Logger.error("DatabaseCache::get_duration(): %s", e)
         return None
 
+    def clear_durations(self, album_id):
+        """
+            Clear durations for album_id
+            @param album_id as int
+        """
+        with SqlCursor(self, True) as sql:
+            sql.execute("DELETE FROM duration WHERE album_id=?",
+                        (album_id,))
+
+    def clear_table(self, table):
+        """
+            Clear table
+            @param table as str
+        """
+        with SqlCursor(self, True) as sql:
+            sql.execute("DELETE FROM ?", (table,))
+
     def get_cursor(self):
         """
             Return a new sqlite cursor
