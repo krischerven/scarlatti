@@ -441,20 +441,25 @@ class Album(Base):
             Get album duration and handle caching
             @return int
         """
-        if not self._tracks:
-            album_hash = "%s-%s-%s" % (self.lp_album_id,
-                                       self.genre_ids,
-                                       self.artist_ids)
-        else:
+        if self._tracks:
             track_ids = [track.lp_track_id for track in self.tracks]
             track_str = "%s" % sorted(track_ids)
             track_hash = md5(track_str.encode("utf-8")).hexdigest()
             album_hash = "%s-%s" % (self.lp_album_id, track_hash)
+        else:
+            album_hash = "%s-%s-%s" % (self.lp_album_id,
+                                       self.genre_ids,
+                                       self.artist_ids)
         duration = App().cache.get_duration(album_hash)
         if duration is None:
-            duration = self.db.get_duration(self.id,
-                                            self.genre_ids,
-                                            self.artist_ids)
+            if self._tracks:
+                duration = 0
+                for track in self._tracks:
+                    duration += track.duration
+            else:
+                duration = self.db.get_duration(self.id,
+                                                self.genre_ids,
+                                                self.artist_ids)
             App().cache.set_duration(self.id, album_hash, duration)
         return duration
 
