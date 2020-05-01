@@ -151,8 +151,7 @@ class InformationView(View):
                 albums.append(Album(album_id))
             if not albums:
                 albums = [App().player.current_track.album]
-            # Allows view to be shown without lag
-            GLib.idle_add(albums_view.populate, albums)
+            albums_view.populate(albums)
         content = self.__information_store.get_information(self.__artist_name,
                                                            ARTISTS_PATH)
         if content is None:
@@ -163,8 +162,10 @@ class InformationView(View):
                                        self.__on_artist_information,
                                        self.__artist_name)
         else:
-            self.__bio_label.set_markup(
-                GLib.markup_escape_text(content.decode("utf-8")))
+            App().task_helper.run(
+                GLib.markup_escape_text,
+                content.decode("utf-8"),
+                callback=(self.__bio_label.set_markup,))
 
 #######################
 # PROTECTED           #
