@@ -98,13 +98,20 @@ class AlbumRow(Gtk.ListBoxRow):
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label.set_property("halign", Gtk.Align.START)
         self.__title_label.get_style_context().add_class("dim-label")
-        button = Gtk.Button.new_from_icon_name("list-remove-symbolic",
-                                               Gtk.IconSize.BUTTON)
-        if self.__view_type & ViewType.PLAYBACK:
-            button.set_tooltip_text(_("Remove from playback"))
+        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
+            button = Gtk.Button.new_from_icon_name("list-remove-symbolic",
+                                                   Gtk.IconSize.BUTTON)
+            if self.__view_type & ViewType.PLAYBACK:
+                button.set_tooltip_text(_("Remove from playback"))
+            else:
+                button.set_tooltip_text(_("Remove from playlist"))
+            button.connect("clicked", self.__on_remove_clicked)
         else:
-            button.set_tooltip_text(_("Remove from playlist"))
-        button.connect("clicked", self.__on_button_clicked)
+            button = Gtk.Button.new_from_icon_name(
+                    "media-playback-start-symbolic",
+                    Gtk.IconSize.MENU)
+            button.set_tooltip_text(_("Play this album"))
+            button.connect("clicked", self.__on_play_clicked)
         button.set_relief(Gtk.ReliefStyle.NONE)
         button.get_style_context().add_class("menu-button")
         button.set_property("valign", Gtk.Align.CENTER)
@@ -351,7 +358,7 @@ class AlbumRow(Gtk.ListBoxRow):
         else:
             emit_signal(self, "populated")
 
-    def __on_button_clicked(self, button):
+    def __on_remove_clicked(self, button):
         """
             Remove album from playback/playlist
             @param button as Gtk.Button
@@ -372,3 +379,12 @@ class AlbumRow(Gtk.ListBoxRow):
             if view is not None:
                 view.remove_from_playlist(self.__album)
             self.destroy()
+
+    def __on_play_clicked(self, button):
+        """
+            Play album
+            @param button as Gtk.Button
+        """
+        if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
+            return True
+        App().player.play_album(self.__album)
