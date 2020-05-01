@@ -168,10 +168,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         """
             @param view as AlbumsListView
         """
-        duration = 0
-        for child in view.children:
-            duration += child.album.duration
-        self.__duration_label.set_text(get_human_duration(duration))
+        App().task_helper.run(self.__calculate_duration)
 
     def _on_playback_changed(self, player, *ignore):
         """
@@ -187,6 +184,16 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __calculate_duration(self):
+        """
+            Calculate playback duration
+        """
+        duration = 0
+        for child in self.__view.children:
+            duration += child.album.duration
+        GLib.idle_add(self.__duration_label.set_text,
+                      get_human_duration(duration))
+
     def __set_internal_size(self):
         """
             Update font size
