@@ -46,8 +46,9 @@ class SearchMenu(Gio.Menu):
             return
 
         web_search = App().settings.get_value("web-search")
-        if get_network_available(web_search.get_string()):
-            search_action.set_state(web_search)
+        if web_search.get_string() != "NONE":
+            if get_network_available(web_search.get_string()):
+                search_action.set_state(web_search)
         search_action.connect("change-state",
                               self.__on_search_change_state)
 
