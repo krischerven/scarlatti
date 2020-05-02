@@ -16,6 +16,7 @@ gi.require_version("GstAudio", "1.0")
 gi.require_version("GstPbutils", "1.0")
 gi.require_version("TotemPlParser", "1.0")
 from gi.repository import Gtk, Gio, GLib, Gdk, Gst, GstPbutils
+from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_TYPE
 Gst.init(None)
 GstPbutils.pb_utils_init()
 
@@ -499,7 +500,7 @@ class Application(Gtk.Application, ApplicationActions):
                         uri = GLib.filename_to_uri(
                             "%s/%s" % (GLib.get_current_dir(), uri))
                         f = Gio.File.new_for_uri(uri)
-                    info = f.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
+                    info = f.query_info(FILE_ATTRIBUTE_STANDARD_TYPE,
                                         Gio.FileQueryInfoFlags.NONE)
                     if is_audio(info):
                         audio_uris.append(uri)

@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from gi.repository import Gio, GLib
+from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_TYPE
 
 from lollypop.define import App, ScanType
 from lollypop.utils_file import is_audio
@@ -83,7 +84,7 @@ class Inotify:
                 self.__monitors[changed_uri] == monitor:
             return
         # Ignore non audio/dir
-        info = changed_file.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
+        info = changed_file.query_info(FILE_ATTRIBUTE_STANDARD_TYPE,
                                        Gio.FileQueryInfoFlags.NONE)
         if changed_file.query_exists() and\
                 not is_audio(info) and\
