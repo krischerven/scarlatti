@@ -241,7 +241,7 @@ class CollectionsSettingsWidget(Gtk.Bin):
             App().albums.clean(False)
             App().artists.clean(False)
             App().genres.clean(False)
-            App().cache.clear("duration")
+            App().cache.clear_table("duration")
             SqlCursor.commit(App().db)
             SqlCursor.remove(App().db)
             App().window.container.go_home()
