@@ -178,6 +178,8 @@ class AlbumRow(Gtk.ListBoxRow):
         """
             Get a new track view
         """
+        if self.__artwork is None:
+            return
         self.__tracks_view.destroy()
         self.__tracks_view = self.__get_new_tracks_view()
         self.__tracks_view.populate()
