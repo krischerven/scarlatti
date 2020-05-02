@@ -499,16 +499,14 @@ class Application(Gtk.Application, ApplicationActions):
                         uri = GLib.filename_to_uri(
                             "%s/%s" % (GLib.get_current_dir(), uri))
                         f = Gio.File.new_for_uri(uri)
-                    if is_audio(f):
+                    info = f.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
+                                        Gio.FileQueryInfoFlags.NONE)
+                    if is_audio(info):
                         audio_uris.append(uri)
-                    elif is_pls(f):
+                    elif is_pls(info):
                         playlist_uris.append(uri)
-                    else:
-                        info = f.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
-                                            Gio.FileQueryInfoFlags.NONE,
-                                            None)
-                        if info.get_file_type() == Gio.FileType.DIRECTORY:
-                            audio_uris.append(uri)
+                    elif info.get_file_type() == Gio.FileType.DIRECTORY:
+                        audio_uris.append(uri)
                 if playlist_uris:
                     self.__parse_uris(playlist_uris, audio_uris)
                 else:

@@ -510,7 +510,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Get file type using Gio (slower)
             if file_type == FileType.UNKNOWN:
                 f = Gio.File.new_for_uri(uri)
-                info = f.query_info("standard::content-type",
+                info = f.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
                                     Gio.FileQueryInfoFlags.NONE)
                 if is_pls(info):
                     file_type = FileType.PLS

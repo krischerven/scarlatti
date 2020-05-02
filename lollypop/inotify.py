@@ -83,8 +83,10 @@ class Inotify:
                 self.__monitors[changed_uri] == monitor:
             return
         # Ignore non audio/dir
+        info = changed_file.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
+                                       Gio.FileQueryInfoFlags.NONE)
         if changed_file.query_exists() and\
-                not is_audio(changed_file) and\
+                not is_audio(info) and\
                 changed_file.query_file_type(Gio.FileQueryInfoFlags.NONE,
                                              None) != Gio.FileType.DIRECTORY:
             return
