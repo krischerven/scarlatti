@@ -83,14 +83,14 @@ class Inotify:
         if changed_uri in self.__monitors.keys() and\
                 self.__monitors[changed_uri] == monitor:
             return
-        # Ignore non audio/dir
-        info = changed_file.query_info(FILE_ATTRIBUTE_STANDARD_TYPE,
-                                       Gio.FileQueryInfoFlags.NONE)
-        if changed_file.query_exists() and\
-                not is_audio(info) and\
-                changed_file.query_file_type(Gio.FileQueryInfoFlags.NONE,
-                                             None) != Gio.FileType.DIRECTORY:
-            return
+
+        if changed_file.query_exists():
+            # Ignore non audio
+            info = changed_file.query_info(FILE_ATTRIBUTE_STANDARD_TYPE,
+                                           Gio.FileQueryInfoFlags.NONE)
+            if info.get_file_type() != Gio.FileType.DIRECTORY and\
+                    is_audio(info):
+                return
 
         # Stop collection scanner and wait
         if App().scanner.is_locked():
