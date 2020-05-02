@@ -42,7 +42,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
                                  ViewType.OVERLAY)
         ViewController.__init__(self, ViewControllerType.ALBUM)
         SizeAllocationHelper.__init__(self)
-        self._playlist_id = playlist_id
+        self.__playlist_id = playlist_id
         # We remove SCROLLED because we want to be the scrolled view
         self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
         self._view.set_scrolled(self.scrolled)
@@ -61,33 +61,17 @@ class PlaylistsView(LazyLoadingView, ViewController,
                  "_on_playlist_track_removed"),
                 (App().playlists, "playlists-removed", "_on_playlist_removed"),
                 (App().playlists, "playlists-renamed", "_on_playlist_renamed"),
+                (App().playlists, "playlists-updated", "_on_playlist_updated")
         ]
 
     def populate(self):
         """
             Populate view
         """
-        def on_load(albums):
-            self._view.add_reveal_albums(albums)
-            self._view.populate(albums)
-
-        def load():
-            track_ids = []
-            if self._playlist_id == Type.LOVED:
-                for track_id in App().tracks.get_loved_track_ids(
-                        [],
-                        self.storage_type):
-                    if track_id not in track_ids:
-                        track_ids.append(track_id)
-            else:
-                for track_id in App().playlists.get_track_ids(
-                        self._playlist_id):
-                    if track_id not in track_ids:
-                        track_ids.append(track_id)
-            return tracks_to_albums(
-                [Track(track_id) for track_id in track_ids])
-
-        App().task_helper.run(load, callback=(on_load,))
+        if App().playlists.get_smart(self.__playlist_id):
+            self.__populate_smart()
+        else:
+            self.__populate()
 
     def pause(self):
         """
@@ -104,7 +88,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             tracks = object.tracks
         else:
             tracks = [object]
-        App().playlists.remove_tracks(self._playlist_id, tracks)
+        App().playlists.remove_tracks(self.__playlist_id, tracks)
 
     @property
     def args(self):
@@ -112,7 +96,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             Get default args for __class__
             @return {}
         """
-        return {"playlist_id": self._playlist_id,
+        return {"playlist_id": self.__playlist_id,
                 "view_type": self.view_type}
 
     @property
@@ -146,7 +130,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             @param playlist_id as int
             @param uri as str
         """
-        if playlist_id == self._playlist_id:
+        if playlist_id == self.__playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
@@ -160,7 +144,7 @@ class PlaylistsView(LazyLoadingView, ViewController,
             @param playlist_id as int
             @param uri as str
         """
-        if playlist_id == self._playlist_id:
+        if playlist_id == self.__playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
             children = self._view.children
             for album_row in children:
@@ -171,6 +155,15 @@ class PlaylistsView(LazyLoadingView, ViewController,
                             if len(children) == 1:
                                 album_row.destroy()
                                 break
+
+    def _on_playlist_updated(self, playlists, playlist_id):
+        """
+            Reload view
+            @param playlists as Playlists
+            @param playlist_id as int
+        """
+        self._view.clear()
+        self.populate()
 
     def _on_playlist_removed(self, playlists, playlist_id):
         """
@@ -191,34 +184,33 @@ class PlaylistsView(LazyLoadingView, ViewController,
 #######################
 # PRIVATE             #
 #######################
-    def __on_dnd_finished(self, dnd_helper):
+    def __populate(self):
         """
-            Save playlist if needed
-            @param dnd_helper as DNDHelper
+            Populate view
         """
-        if self._playlist_id >= 0:
-            uris = []
-            for child in self._view.children:
-                for track in child.album.tracks:
-                    uris.append(track.uri)
-            App().playlists.clear(self._playlist_id)
-            App().playlists.add_uris(self._playlist_id, uris)
+        def on_load(albums):
+            self._view.add_reveal_albums(albums)
+            self._view.populate(albums)
 
+        def load():
+            track_ids = []
+            if self.__playlist_id == Type.LOVED:
+                for track_id in App().tracks.get_loved_track_ids(
+                        [],
+                        self.storage_type):
+                    if track_id not in track_ids:
+                        track_ids.append(track_id)
+            else:
+                for track_id in App().playlists.get_track_ids(
+                        self.__playlist_id):
+                    if track_id not in track_ids:
+                        track_ids.append(track_id)
+            return tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
 
-class SmartPlaylistsView(PlaylistsView):
-    """
-        View showing smart playlists
-    """
+        App().task_helper.run(load, callback=(on_load,))
 
-    def __init__(self, playlist_id, view_type):
-        """
-            Init PlaylistView
-            @parma playlist_id as int
-            @param view_type as ViewType
-        """
-        PlaylistsView.__init__(self, playlist_id, view_type)
-
-    def populate(self):
+    def __populate_smart(self):
         """
             Populate view
         """
@@ -228,7 +220,7 @@ class SmartPlaylistsView(PlaylistsView):
             self._view.populate(albums)
 
         def load():
-            request = App().playlists.get_smart_sql(self._playlist_id)
+            request = App().playlists.get_smart_sql(self.__playlist_id)
             # We need to inject skipped/storage_type
             storage_type = get_default_storage_type()
             split = request.split("ORDER BY")
@@ -240,3 +232,16 @@ class SmartPlaylistsView(PlaylistsView):
 
         self.banner.spinner.start()
         App().task_helper.run(load, callback=(on_load,))
+
+    def __on_dnd_finished(self, dnd_helper):
+        """
+            Save playlist if needed
+            @param dnd_helper as DNDHelper
+        """
+        if self.__playlist_id >= 0:
+            uris = []
+            for child in self._view.children:
+                for track in child.album.tracks:
+                    uris.append(track.uri)
+            App().playlists.clear(self.__playlist_id)
+            App().playlists.add_uris(self.__playlist_id, uris)

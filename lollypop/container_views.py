@@ -203,9 +203,6 @@ class ViewsContainer:
         if playlist_id is None:
             from lollypop.view_playlists_manager import PlaylistsManagerView
             view = PlaylistsManagerView(view_type)
-        elif App().playlists.get_smart(playlist_id):
-            from lollypop.view_playlists import SmartPlaylistsView
-            view = SmartPlaylistsView(playlist_id, view_type)
         else:
             from lollypop.view_playlists import PlaylistsView
             view_type |= ViewType.DND
