@@ -222,6 +222,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         if lp_album_id != item.lp_album_id:
             App().art.move_artwork(item.lp_album_id, lp_album_id)
             App().albums.set_lp_album_id(item.album_id, lp_album_id)
+            item.lp_album_id = lp_album_id
         # Update album genres
         for genre_id in item.genre_ids:
             App().albums.add_genre(item.album_id, genre_id)

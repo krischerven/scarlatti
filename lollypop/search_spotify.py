@@ -98,10 +98,12 @@ class SpotifySearch(SpotifyWebHelper, SaveWebHelper):
                     uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
+                # We want to share the same item as lp_album_id may change
+                album_item = album.collection_item
                 for track in decode["tracks"]["items"]:
                     lollypop_payload = self.lollypop_track_payload(track)
                     self.save_track_payload_to_db(lollypop_payload,
-                                                  album.collection_item,
+                                                  album_item,
                                                   album.storage_type,
                                                   False,
                                                   cancellable)

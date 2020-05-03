@@ -232,6 +232,7 @@ class Album(Base):
         """
         self._tracks = []
         self._discs = []
+        self.reset("lp_album_id")
 
     def disc_names(self, disc):
         """
@@ -353,7 +354,8 @@ class Album(Base):
         """
         item = CollectionItem(album_id=self.id,
                               album_name=self.name,
-                              artist_ids=self.artist_ids)
+                              artist_ids=self.artist_ids,
+                              lp_album_id=self.lp_album_id)
         return item
 
     @property
