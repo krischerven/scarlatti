@@ -139,6 +139,7 @@ class Album(Base):
         self._discs = []
         self.__skipped = skipped
         self.__one_disc = None
+        self.__tracks_storage_type = self.storage_type
         # Use artist ids from db else
         if artist_ids:
             artists = []
@@ -338,7 +339,7 @@ class Album(Base):
             Set storage type
             @param storage_type as StorageType
         """
-        self._storage_type = storage_type
+        self.__tracks_storage_type = storage_type
 
     def set_skipped(self):
         """
@@ -416,7 +417,7 @@ class Album(Base):
         """
         if self.__one_disc is None:
             tracks = self.tracks
-            self.__one_disc = Disc(self, 0, self.storage_type,
+            self.__one_disc = Disc(self, 0, self.__tracks_storage_type,
                                    self.__skipped)
             self.__one_disc.set_tracks(tracks)
         return self.__one_disc
@@ -431,7 +432,7 @@ class Album(Base):
             disc_numbers = self.db.get_discs(self.id)
             for disc_number in disc_numbers:
                 disc = Disc(self, disc_number,
-                            self.storage_type,
+                            self.__tracks_storage_type,
                             self.__skipped)
                 if disc.tracks:
                     self._discs.append(disc)
