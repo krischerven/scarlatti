@@ -61,7 +61,8 @@ def get_album_ids_for(genre_ids, artist_ids, storage_type, skipped):
     elif genre_ids and genre_ids[0] == Type.COMPILATIONS:
         items = App().albums.get_compilation_ids([], storage_type, skipped)
     elif genre_ids and not artist_ids:
-        if App().settings.get_value("show-compilations-in-album-view"):
+        if Type.WEB in genre_ids or\
+                App().settings.get_value("show-compilations-in-album-view"):
             items = App().albums.get_compilation_ids(genre_ids, storage_type,
                                                      skipped)
         items += App().albums.get_ids(genre_ids, [], storage_type, skipped)
