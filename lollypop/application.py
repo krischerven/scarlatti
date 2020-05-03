@@ -530,7 +530,7 @@ class Application(Gtk.Application, ApplicationActions):
             @param uris as ([str], [str])
         """
         if playlist_uris:
-            self.__parse_uri(playlist_uris, audio_uris)
+            self.__parse_uris(playlist_uris, audio_uris)
         else:
             to_scan_uris = []
             for uri in audio_uris:
