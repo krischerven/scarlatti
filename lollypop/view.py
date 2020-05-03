@@ -15,13 +15,13 @@ from gi.repository import Gtk, GLib
 from gettext import gettext as _
 
 from lollypop.define import ViewType, App, MARGIN_SMALL, Type
-from lollypop.adaptive import AdaptiveView
+from lollypop.helper_adaptive import AdaptiveHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_filtering import FilteringHelper
 from lollypop.logger import Logger
 
 
-class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
+class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
     """
         Generic view
     """
@@ -34,7 +34,7 @@ class View(Gtk.Grid, AdaptiveView, FilteringHelper, SignalsHelper):
             @param view_type as ViewType
         """
         Gtk.Grid.__init__(self)
-        AdaptiveView.__init__(self)
+        AdaptiveHelper.__init__(self)
         FilteringHelper.__init__(self)
         self.__storage_type = storage_type
         self.__view_type = view_type

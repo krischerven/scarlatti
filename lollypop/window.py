@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib
 from lollypop.define import App, ScanType, AdaptiveSize
 from lollypop.container import Container
 from lollypop.toolbar import Toolbar
-from lollypop.adaptive import AdaptiveWindow
+from lollypop.window_adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger

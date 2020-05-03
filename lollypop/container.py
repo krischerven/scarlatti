@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, GObject
 
 from lollypop.define import App, Type
 from lollypop.view import View
-from lollypop.adaptive import AdaptiveStack
+from lollypop.container_stack import StackContainer
 from lollypop.container_notification import NotificationContainer
 from lollypop.container_scanner import ScannerContainer
 from lollypop.container_playlists import PlaylistsContainer
@@ -50,7 +50,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         self._sidebar_two = None
         self.__paned_position_id = None
         self.__focused_view = None
-        self._stack = AdaptiveStack()
+        self._stack = StackContainer()
         self._stack.get_style_context().add_class("view")
         self._stack.show()
         self.__progress = ProgressBar()
