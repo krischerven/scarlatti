@@ -175,4 +175,5 @@ class ArtistArt:
                 GLib.get_user_data_dir() + "/lollypop/info-backup")
             old_src.move(old_dst, Gio.FileCopyFlags.OVERWRITE, None, None)
         except Exception as e:
-            Logger.error("ArtistArt::__migrate_old_dir(): %s", e)
+            Logger.error(
+                "ArtistArt::__migrate_old_dir(): %s -> %s", e, old_path)
