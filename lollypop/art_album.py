@@ -274,6 +274,7 @@ class AlbumArt:
                     new_path = "%s/%s.jpg" % (store, new_lp_album_id)
                     new = Gio.File.new_for_path(new_path)
                     old.move(new, Gio.FileCopyFlags.OVERWRITE, None, None)
+                    break
         except Exception as e:
             Logger.error("AlbumArt::move_artwork(): %s" % e)
 
