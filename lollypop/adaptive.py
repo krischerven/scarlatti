@@ -21,7 +21,7 @@ from lollypop.define import LOLLYPOP_DATA_PATH, AdaptiveSize, Size
 
 class AdaptiveView:
     """
-        AdaptiveStack children
+        Adaptive support for View
     """
 
     def __init__(self):
