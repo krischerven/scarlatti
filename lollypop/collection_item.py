@@ -17,7 +17,7 @@ class CollectionItem:
     """
 
     def __init__(self, track_id=None, album_id=None, new_album=False,
-                 genres="", genre_ids=[], new_genre_ids=[], artist_ids=[],
+                 genres=None, genre_ids=[], new_genre_ids=[], artist_ids=[],
                  new_artist_ids=[], album_artist_ids=[],
                  new_album_artist_ids=[], album_name="", track_name="",
                  album_artists="", artists="", aa_sortnames="", a_sortnames="",
