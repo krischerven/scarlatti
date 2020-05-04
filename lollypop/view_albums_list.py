@@ -114,6 +114,14 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         self.set_property("halign", Gtk.Align.CENTER)
         self.__width = width
 
+    def jump_to_current(self):
+        """
+            Scroll to album
+        """
+        y = self.__get_current_ordinate()
+        if y is not None:
+            self.scrolled.get_vadjustment().set_value(y)
+
     def do_get_preferred_width(self):
         if self.__width == 0:
             return LazyLoadingView.do_get_preferred_width(self)
@@ -246,6 +254,18 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __get_current_ordinate(self):
+        """
+            If current track in widget, return it ordinate,
+            @return y as int
+        """
+        y = None
+        for child in self._box.get_children():
+            if child.album == App().player.current_track.album:
+                child.reveal(True)
+                y = child.translate_coordinates(self._box, 0, 0)[1]
+        return y
+
     def __popup_menu(self, x, y):
         """
             Popup menu for album
