@@ -298,7 +298,7 @@ class ApplicationActions:
             @param player as Player
             @param action as Gio.SimpleAction
         """
-        action.set_enabled(not App().player.is_playing is None)
+        action.set_enabled(player.current_track.id is not None)
 
     def __on_seek_action(self, action, value):
         """
