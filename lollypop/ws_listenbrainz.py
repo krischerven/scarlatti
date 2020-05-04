@@ -179,6 +179,7 @@ class ListenBrainzWebService(GObject.GObject):
                 "track_name": track.title,
                 "release_name": track.album_name,
                 "additional_info": {
+                    "listening_from": "Lollypop",
                     "artist_mbids": [
                         mbid for mbid in track.mb_artist_ids if mbid
                     ],
