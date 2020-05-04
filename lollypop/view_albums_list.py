@@ -96,14 +96,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             GLib.idle_add(child.destroy)
         LazyLoadingView.populate(self, albums)
 
-    def jump_to_current(self):
-        """
-            Scroll to album
-        """
-        y = self.__get_current_ordinate()
-        if y is not None:
-            self.scrolled.get_vadjustment().set_value(y)
-
     def clear(self, clear_albums=False):
         """
             Clear the view
@@ -278,18 +270,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         style_context = row.get_style_context()
         if style_context.has_class("drag-down"):
             row.reveal(True)
-
-    def __get_current_ordinate(self):
-        """
-            If current track in widget, return it ordinate,
-            @return y as int
-        """
-        y = None
-        for child in self._box.get_children():
-            if child.album.id == App().player.current_track.album.id:
-                child.reveal(True)
-                y = child.translate_coordinates(self._box, 0, 0)[1]
-        return y
 
     def __on_dnd_insert(self, dnd_helper, row, index):
         """
