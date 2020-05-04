@@ -172,8 +172,12 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             Update artwork and labels
             @param player as Player
         """
+        if player.current_track.id is None:
+            self.__on_artwork(None)
+            return
+
         same_artwork = self.__previous_artwork_id ==\
-            App().player.current_track.album.id and not self.__per_track_cover
+            player.current_track.album.id and not self.__per_track_cover
         if same_artwork:
             return
         self.__previous_artwork_id = App().player.current_track.album.id
@@ -257,9 +261,9 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             Set artwork
             @param surface as str
         """
+        self.__background.set_from_surface(surface)
         if surface is None:
             self.__background.get_style_context().add_class("black")
         else:
             self.__background.get_style_context().remove_class("black")
-            self.__background.set_from_surface(surface)
             del surface
