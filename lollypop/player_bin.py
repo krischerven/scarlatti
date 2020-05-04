@@ -101,6 +101,7 @@ class BinPlayer:
             @param force as bool
         """
         self._current_track = Track()
+        self._current_playback_track = Track()
         self._prev_track = Track()
         self._next_track = Track()
         emit_signal(self, "current-changed")
