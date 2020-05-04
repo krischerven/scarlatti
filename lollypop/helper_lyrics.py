@@ -215,9 +215,10 @@ class LyricsHelper:
             @param methods as []
             @param callback as function
         """
-        title = self.__get_title(track, True)
-        artist = self.__get_artist(track, True)
-        uri = "https://lyrics.wikia.com/wiki/%s:%s" % (artist, title)
+        title = self.__get_title(track, False)
+        artist = self.__get_artist(track, False).lower()
+        string = "%s:%s" % (artist, title)
+        uri = "https://lyrics.wikia.com/wiki/%s" % string.replace(" ", "_")
         helper = TaskHelper()
         helper.load_uri_content(uri,
                                 self.__cancellable,
