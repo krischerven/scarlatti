@@ -36,6 +36,7 @@ GNOME Project:
 Martins D. Okoi:
     Description in appdata
     </property>
+    <property name="translator-credits">https://hosted.weblate.org/projects/gnumdk/lollypop</property>
     <property name="logo_icon_name">org.gnome.Lollypop</property>
     <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">
