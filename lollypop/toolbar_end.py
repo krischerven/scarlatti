@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.pop_devices import DevicesPopover
 from lollypop.define import App, Repeat, Type
-from lollypop.utils import popup_widget, emit_signal
+from lollypop.utils import popup_widget, emit_signal, get_network_available
 from lollypop.progressbar import ButtonProgressBar
 
 
@@ -251,7 +251,9 @@ class ToolbarEnd(Gtk.Bin):
             App().player.set_next()
 
         party_ids = App().settings.get_value("party-ids")
-        all_ids = App().genres.get_ids() + [Type.WEB]
+        all_ids = App().genres.get_ids()
+        if get_network_available("YOUTUBE"):
+            all_ids += [Type.WEB]
         all_selected = len(set(all_ids) & set(party_ids)) == len(all_ids) or\
             not party_ids
         action = Gio.SimpleAction.new_stateful(
