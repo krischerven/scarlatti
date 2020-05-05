@@ -64,6 +64,14 @@ class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
             self.__grid.add(self.__tracks_view)
 
     @property
+    def name(self):
+        """
+            Get name
+            @return str
+        """
+        return self.__album.name
+
+    @property
     def is_populated(self):
         """
             True if populated

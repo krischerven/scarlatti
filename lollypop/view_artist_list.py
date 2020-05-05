@@ -75,10 +75,13 @@ class ArtistViewList(LazyLoadingView):
             Get filtered children
             @return [Gtk.Widget]
         """
-        filtered = self.children
-        for box in self.__others_boxes:
-            for child in box.children:
+        filtered = []
+        for child in self.__list.get_children():
+            if isinstance(child, AlbumView):
                 filtered.append(child)
+                filtered += child.filtered
+            else:
+                filtered += child.children
         return filtered
 
     @property

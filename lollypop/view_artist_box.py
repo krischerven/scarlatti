@@ -66,6 +66,14 @@ class ArtistViewBox(AlbumsBoxView):
         return filtered
 
     @property
+    def scroll_shift(self):
+        """
+            Get scroll shift for y axes
+            @return int
+        """
+        return self.__banner.height + MARGIN
+
+    @property
     def args(self):
         """
             Get default args for __class__
@@ -75,14 +83,6 @@ class ArtistViewBox(AlbumsBoxView):
                 "artist_ids": self._artist_ids,
                 "storage_type": self.storage_type,
                 "view_type": self.view_type}
-
-    @property
-    def scroll_shift(self):
-        """
-            Get scroll shift for y axes
-            @return int
-        """
-        return self.__banner.height + MARGIN
 
 #######################
 # PROTECTED           #

@@ -483,6 +483,11 @@ flowboxchild:selected  {
 
 }
 
+.album-banner * {
+    background-color: shade(@theme_bg_color, 0.99);
+    color: @theme_fg_color;
+}
+
 .banner-button {
     opacity: 0.8;
 	box-shadow: none;
