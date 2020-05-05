@@ -35,7 +35,7 @@ class FastScroll(Gtk.ScrolledWindow):
         self.__main_scrolled = scrolled
         self.__leave_timeout_id = None
         self.get_style_context().add_class("no-border")
-        self.set_margin_end(10)
+        self.set_margin_end(15)
         self.set_vexpand(True)
         self.set_policy(Gtk.PolicyType.NEVER,
                         Gtk.PolicyType.NEVER)
@@ -103,6 +103,7 @@ class FastScroll(Gtk.ScrolledWindow):
         label.set_markup('<span font="Monospace"><b>%s</b></span>' % "▼")
         label.show()
         self.__grid.add(label)
+        self.__on_value_changed()
 
 #######################
 # PRIVATE             #
@@ -212,10 +213,9 @@ class FastScroll(Gtk.ScrolledWindow):
         adj.set_value(adj.get_value() + (event.delta_y * 50))
         return True
 
-    def __on_value_changed(self, adj):
+    def __on_value_changed(self, *ignore):
         """
             Show a popover with current letter
-            @param adj as Gtk.Adjustement
         """
         if self.__chars:
             self.show()
