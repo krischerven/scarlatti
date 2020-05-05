@@ -14,7 +14,7 @@ from lollypop.utils_album import tracks_to_albums
 from lollypop.objects_track import Track
 from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.define import App, ViewType, Size, StorageType
+from lollypop.define import App, ViewType, Size, StorageType, MARGIN
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
 
@@ -71,6 +71,27 @@ class CurrentAlbumsView(View, SignalsHelper):
             self.show_placeholder(False)
         else:
             self.show_placeholder(True)
+
+    @property
+    def filtered(self):
+        """
+            Get filtered children
+            @return [Gtk.Widget]
+        """
+        filtered = []
+        for child in self.__view.children:
+            filtered.append(child)
+            for subchild in child.children:
+                filtered.append(subchild)
+        return filtered
+
+    @property
+    def scroll_shift(self):
+        """
+            Get scroll shift for y axes
+            @return int
+        """
+        return self.__banner.height + MARGIN
 
     @property
     def args(self):
