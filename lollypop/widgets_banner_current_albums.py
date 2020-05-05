@@ -189,6 +189,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         """
             Calculate playback duration
         """
+        GLib.idle_add(self.__duration_label.set_text, "")
         duration = 0
         for child in self.__view.children:
             duration += child.album.duration
