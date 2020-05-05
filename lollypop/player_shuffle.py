@@ -82,12 +82,7 @@ class ShufflePlayer:
             Play a new random track if not already playing
             @param party as bool
         """
-        if party == self.__is_party:
-            return
-        self.__is_party = party
-
-        if party:
-            self.set_party_ids()
+        def start_party():
             if self._albums:
                 # Start a new song if not playing
                 if self._current_playback_track.id is None or\
@@ -96,6 +91,13 @@ class ShufflePlayer:
                     self.load(track)
                 elif not self.is_playing:
                     self.play()
+
+        if party == self.__is_party:
+            return
+        self.__is_party = party
+
+        if party:
+            App().task_helper.run(self.set_party_ids, callback=(start_party,))
         else:
             # We want current album to continue playback
             self._albums = [self._current_playback_track.album]

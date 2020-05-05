@@ -220,52 +220,51 @@ class ToolbarEnd(Gtk.Bin):
         """
             Init party submenu with current ids
         """
-        def on_change_state(action, value, genre_id):
+        def update_party_ids(party_ids, value, genre_id):
+            if value:
+                if genre_id not in party_ids:
+                    party_ids.append(genre_id)
+            else:
+                if genre_id in party_ids:
+                    party_ids.remove(genre_id)
+
+        def on_change_state(action, value, genre_id, all_ids, party_ids):
             action.set_state(value)
-            ids = list(App().settings.get_value("party-ids"))
-            all_ids = App().genres.get_ids() + [Type.WEB]
-            # Select all
             if genre_id is None:
-                # Update others
                 for genre_id in all_ids:
                     action = App().lookup_action("genre_%s" % genre_id)
-                    if action.get_state() != value:
-                        action.set_state(value)
-                ids = []
-            # Party id added
-            elif value:
-                ids.append(genre_id)
-            # Party id removed
-            elif ids and len(ids) > 1:
-                ids.remove(genre_id)
-            # Initial value
+                    action.set_state(value)
+                    update_party_ids(party_ids, value, genre_id)
             else:
-                ids = list(all_ids)
-                ids.remove(genre_id)
-            all_selected = len(set(all_ids) & set(ids)) == len(all_ids) or\
-                not ids
+                update_party_ids(party_ids, value, genre_id)
+            all_selected = len(all_ids) == len(party_ids)
             App().lookup_action("all_party_ids").set_state(
                 GLib.Variant("b", all_selected))
-            App().settings.set_value("party-ids", GLib.Variant("ai", ids))
-            App().player.set_party_ids()
-            App().player.set_next()
+            App().settings.set_value("party-ids",
+                                     GLib.Variant("ai", party_ids))
+            App().task_helper.run(App().player.set_party_ids,
+                                  callback=(
+                                    lambda x: App().player.set_next(),))
 
-        party_ids = App().settings.get_value("party-ids")
+        party_ids = list(App().settings.get_value("party-ids"))
         all_ids = App().genres.get_ids()
         if get_network_available("YOUTUBE"):
-            all_ids += [Type.WEB]
-        all_selected = len(set(all_ids) & set(party_ids)) == len(all_ids) or\
-            not party_ids
+            all_ids.append(Type.WEB)
+        elif Type.WEB in party_ids:
+            party_ids.remove(Type.WEB)
+        all_selected = party_ids and len(party_ids) == len(all_ids)
         action = Gio.SimpleAction.new_stateful(
                     "all_party_ids",
                     None,
                     GLib.Variant.new_boolean(all_selected))
-        action.connect("change-state", on_change_state, None)
+        action.connect("change-state", on_change_state, None,
+                       all_ids, party_ids)
         App().add_action(action)
         item = Gio.MenuItem.new(_("All genres"), "app.all_party_ids")
         self.__party_submenu.append_item(item)
         genres = App().genres.get()
-        genres.append((Type.WEB, _("Web"), _("Web")))
+        if get_network_available("YOUTUBE"):
+            genres += (Type.WEB, _("Web"), _("Web"))
         for (genre_id, name, sortname) in genres:
             in_party_ids = not party_ids or genre_id in party_ids
             action_name = "genre_%s" % genre_id
@@ -273,7 +272,8 @@ class ToolbarEnd(Gtk.Bin):
                 action_name,
                 None,
                 GLib.Variant.new_boolean(in_party_ids))
-            action.connect("change-state", on_change_state, genre_id)
+            action.connect("change-state", on_change_state, genre_id,
+                           all_ids, party_ids)
             App().add_action(action)
             menu_str = name if len(name) < 20 else name[0:20] + "…"
             item = Gio.MenuItem.new(menu_str, "app.%s" % action_name)
