@@ -18,7 +18,8 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
                               FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,\
                               FILE_ATTRIBUTE_STANDARD_IS_SYMLINK,\
                               FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,\
-                              FILE_ATTRIBUTE_TIME_MODIFIED
+                              FILE_ATTRIBUTE_TIME_MODIFIED,\
+                              FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE
 
 from gettext import gettext as _
 from time import time
@@ -511,7 +512,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Get file type using Gio (slower)
             if file_type == FileType.UNKNOWN:
                 f = Gio.File.new_for_uri(uri)
-                info = f.query_info(Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
+                info = f.query_info(FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
                                     Gio.FileQueryInfoFlags.NONE)
                 if is_pls(info):
                     file_type = FileType.PLS

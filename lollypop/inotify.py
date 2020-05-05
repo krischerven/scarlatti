@@ -11,7 +11,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from gi.repository import Gio, GLib
-from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_TYPE
+from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_TYPE,\
+    FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE
 
 from lollypop.define import App, ScanType
 from lollypop.utils_file import is_audio
@@ -86,8 +87,10 @@ class Inotify:
 
         if changed_file.query_exists():
             # Ignore non audio
-            info = changed_file.query_info(FILE_ATTRIBUTE_STANDARD_TYPE,
-                                           Gio.FileQueryInfoFlags.NONE)
+            info = changed_file.query_info(
+                FILE_ATTRIBUTE_STANDARD_TYPE |
+                FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE,
+                Gio.FileQueryInfoFlags.NONE)
             if info.get_file_type() != Gio.FileType.DIRECTORY and\
                     is_audio(info):
                 return
