@@ -82,7 +82,7 @@ class ShufflePlayer:
             Play a new random track if not already playing
             @param party as bool
         """
-        def start_party():
+        def start_party(*ignore):
             if self._albums:
                 # Start a new song if not playing
                 if self._current_playback_track.id is None or\
