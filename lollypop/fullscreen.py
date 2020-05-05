@@ -22,7 +22,7 @@ from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.objects_radio import Radio
 from lollypop.container import Container
-from lollypop.adaptive import AdaptiveWindow
+from lollypop.window_adaptive import AdaptiveWindow
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
