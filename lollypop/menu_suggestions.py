@@ -15,6 +15,7 @@ from gi.repository import Gio, GLib
 from gettext import gettext as _
 
 from lollypop.define import App, StorageType
+from lollypop.utils import get_network_available
 
 
 class SuggestionsMenu(Gio.Menu):
@@ -41,6 +42,7 @@ class SuggestionsMenu(Gio.Menu):
         action.connect("change-state",
                        self.__on_change_state,
                        StorageType.SPOTIFY_NEW_RELEASES)
+        action.set_enabled(get_network_available("SPOTIFY"))
         App().add_action(action)
         menu_item = Gio.MenuItem.new(_("New releases on Spotify"),
                                      "app.spotify_new_releases")
@@ -52,6 +54,7 @@ class SuggestionsMenu(Gio.Menu):
         action.connect("change-state",
                        self.__on_change_state,
                        StorageType.SPOTIFY_SIMILARS)
+        action.set_enabled(get_network_available("SPOTIFY"))
         App().add_action(action)
         menu_item = Gio.MenuItem.new(_("Suggestions from Spotify"),
                                      "app.spotify_similars")
@@ -63,6 +66,7 @@ class SuggestionsMenu(Gio.Menu):
         action.connect("change-state",
                        self.__on_change_state,
                        StorageType.DEEZER_CHARTS)
+        action.set_enabled(get_network_available("DEEZER"))
         App().add_action(action)
         menu_item = Gio.MenuItem.new(_("Top albums on Deezer"),
                                      "app.deezer_charts")
