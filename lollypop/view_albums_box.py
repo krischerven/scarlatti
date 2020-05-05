@@ -52,18 +52,13 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
                 (youtube_dl, env) = get_youtube_dl()
-                if not Gio.NetworkMonitor.get_default(
-                        ).get_network_available():
-                    self._empty_message = _("Network not available")
-                    self.show_placeholder(True)
-                    self.__populate_wanted = False
-                elif youtube_dl is None:
+                if youtube_dl is None:
                     self._empty_message = _("Missing youtube-dl command")
                     self.show_placeholder(True)
                     self.__populate_wanted = False
                 elif not get_network_available("YOUTUBE"):
                     self._empty_message =\
-                        _("You need to enable YouTube in network settings")
+                        _("Network unavailable or disabled in settings")
                     self.show_placeholder(True)
                     self.__populate_wanted = False
             self._empty_icon_name = get_icon_name(genre_ids[0])

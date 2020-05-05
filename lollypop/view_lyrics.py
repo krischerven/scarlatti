@@ -164,7 +164,8 @@ class LyricsView(View, SignalsHelper):
             if content:
                 self.__lyrics_label.set_text(content.decode("utf-8"))
             elif not get_network_available():
-                self.__lyrics_label.set_text(_("Network not available"))
+                self.__lyrics_label.set_text(
+                    _("Network unavailable or disabled in settings"))
             else:
                 self.__lyrics_helper.get_lyrics_from_web(track,
                                                          self.__on_lyrics,
