@@ -172,7 +172,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
             Get name
             @return str
         """
-        if self.__view_type & ViewType.ALBUM:
+        if self.__view_type & (ViewType.ALBUM | ViewType.ARTIST):
             return self.__album.name
         else:
             return "%s %s" % (self.__album.name, self.__album.artists)
