@@ -112,6 +112,11 @@ class DNDHelper(GObject.Object):
             album_row = dest_row.get_ancestor(AlbumRow)
             if album_row is None:
                 return
+            # Destroy src_rows from album before split
+            for row in src_rows:
+                if isinstance(row, TrackRow):
+                    if row.get_ancestor(AlbumRow) == album_row:
+                        album_row.tracks_view.remove_row(row.track)
             indexes.append(album_row.get_index())
             split_album_row = self.__split_album_row(album_row,
                                                      dest_row,
@@ -223,9 +228,7 @@ class DNDHelper(GObject.Object):
                     empty = album_row.album.remove_track(row.track)
                     if empty:
                         album_row.destroy()
-                    row.destroy()
-            else:
-                row.destroy()
+            row.destroy()
 
     def __unmark_all_rows(self):
         """
