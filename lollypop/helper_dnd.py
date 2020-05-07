@@ -263,10 +263,11 @@ class DNDHelper(GObject.Object):
         """
         if album_row is not None:
             listbox = album_row.listbox
-            (tx, ty) = listbox.translate_coordinates(self.__listbox, 0, 0)
-            track_row = listbox.get_row_at_y(y - ty)
-            if track_row is not None:
-                return (listbox, track_row)
+            t = listbox.translate_coordinates(self.__listbox, 0, 0)
+            if t is not None:
+                track_row = listbox.get_row_at_y(y - t[1])
+                if track_row is not None:
+                    return (listbox, track_row)
         return (None, None)
 
     def __autoscroll(self, scrolled, y):
