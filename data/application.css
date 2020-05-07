@@ -86,24 +86,12 @@ flowboxchild:selected  {
     min-height: 2px;
 }
 
-.typeahead-indicator
-{
-    background-color: alpha(#ed333b, 0.3);
-}
-
-.typeahead-indicator:selected
-{
-    background-color: #ed333b;
-}
-
 .typeahead {
-    background-color: #ed333b;
-    color: white;
+    background-color: alpha(red, 0.1);
 }
 
-.typeahead *{
-    background-color: #ed333b;
-    color: white;
+.typeahead.trackrow {
+    background-color: alpha(red, 0.1);
 }
 
 .progress-bottom {
