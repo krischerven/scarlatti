@@ -248,7 +248,11 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 context.remove_class(c)
 
         if self.width <= Size.SMALL:
-            art_size = None
+            # For album, we show artist name and we need place
+            if self.view_type & ViewType.ALBUM:
+                art_size = None
+            else:
+                art_size = ArtSize.MEDIUM
             icon_size = Gtk.IconSize.BUTTON
             cls_title = "text-medium"
             cls_others = "text-medium"
