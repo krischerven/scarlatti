@@ -256,6 +256,8 @@ class Application(Gtk.Application, ApplicationActions):
             self.__fs_window.show()
             self.__fs_window.connect("destroy", on_destroy)
             self.__window.hide()
+        else:
+            self.__fs_window.destroy()
 
     @property
     def proxy_host(self):
