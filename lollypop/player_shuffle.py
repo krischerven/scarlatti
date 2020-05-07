@@ -205,15 +205,19 @@ class ShufflePlayer:
             if App().settings.get_value("shuffle") or self.__is_party:
                 if self._albums:
                     track = self.__get_tracks_random()
-                    # All track dones
+                    # All tracks done
                     # Try to get another one track after reseting history
                     if track.id is None:
                         self.__to_play_albums = list(self._albums)
                         shuffle(self.__to_play_albums)
                         self.__not_played_albums = list(
                             self.__not_played_albums)
-                        self.__history = []
                         repeat = App().settings.get_enum("repeat")
+                        # Do not reset history if a new album is going to
+                        # be added
+                        if repeat not in [Repeat.AUTO_SIMILAR,
+                                          Repeat.AUTO_RANDOM]:
+                            self.__history = []
                         if repeat == Repeat.ALL:
                             # Only one track in playback
                             if self._albums and\
