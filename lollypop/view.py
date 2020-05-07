@@ -18,7 +18,6 @@ from lollypop.define import ViewType, App, MARGIN_SMALL, Type
 from lollypop.helper_adaptive import AdaptiveHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_filtering import FilteringHelper
-from lollypop.logger import Logger
 
 
 class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
@@ -143,34 +142,6 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
         """
         self.__scrolled = scrolled
         self.__view_type |= ViewType.SCROLLED
-
-    def activate_child(self):
-        """
-            Activated typeahead row
-        """
-        try:
-            if App().player.is_party:
-                App().lookup_action("party").change_state(
-                    GLib.Variant("b", False))
-            # Search typeahead chil
-            typeahead_child = None
-            for child in self.filtered:
-                style_context = child.get_style_context()
-                if style_context.has_class("typeahead"):
-                    typeahead_child = child
-                    break
-            App().window.container.type_ahead.entry.set_text("")
-            if typeahead_child is not None:
-                # It's a FlowBox child
-                if hasattr(typeahead_child, "data"):
-                    typeahead_child.activate()
-                # It's a track row
-                else:
-                    track = typeahead_child.track
-                    App().player.add_album(track.album)
-                    App().player.load(track.album.get_track(track.id))
-        except Exception as e:
-            Logger.error("View::activate_child: %s" % e)
 
     def set_populated_scrolled_position(self, position):
         """

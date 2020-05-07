@@ -91,6 +91,14 @@ class PlaylistsView(LazyLoadingView, ViewController,
         App().playlists.remove_tracks(self.__playlist_id, tracks)
 
     @property
+    def view(self):
+        """
+            Get album view
+            @return AlbumsListView
+        """
+        return self._view
+
+    @property
     def args(self):
         """
             Get default args for __class__

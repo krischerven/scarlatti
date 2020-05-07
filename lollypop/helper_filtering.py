@@ -12,8 +12,10 @@
 
 from gi.repository import GLib, Gtk
 
-from lollypop.define import ViewType
+from lollypop.define import ViewType, App
 from lollypop.utils import noaccents
+from lollypop.utils_album import tracks_to_albums
+from lollypop.logger import Logger
 
 
 class FilteringHelper():
@@ -83,6 +85,64 @@ class FilteringHelper():
                 style_context.add_class("typeahead")
                 GLib.idle_add(self._scroll_to_child, child)
                 break
+
+    def activate_child(self):
+        """
+            Activated typeahead row
+        """
+        def reset_party_mode():
+            if App().player.is_party:
+                App().lookup_action("party").change_state(
+                    GLib.Variant("b", False))
+
+        try:
+            # Search typeahead child
+            typeahead_child = None
+            for child in self.filtered:
+                style_context = child.get_style_context()
+                if style_context.has_class("typeahead"):
+                    typeahead_child = child
+                    break
+            if typeahead_child is None:
+                return
+            from lollypop.view_current_albums import CurrentAlbumsView
+            from lollypop.view_playlists import PlaylistsView
+            # Play child without reseting player
+            if isinstance(self, CurrentAlbumsView):
+                if hasattr(typeahead_child, "album"):
+                    album = typeahead_child.album
+                    if album.tracks:
+                        track = album.tracks[0]
+                        App().player.load(track)
+                elif hasattr(typeahead_child, "track"):
+                    App().player.load(typeahead_child.track)
+            # Play playlist
+            elif isinstance(self, PlaylistsView):
+                reset_party_mode()
+                tracks = []
+                for album_row in self.view.children:
+                    for track in album_row.album.tracks:
+                        tracks.append(track)
+                if tracks:
+                    albums = tracks_to_albums(tracks)
+                    if hasattr(typeahead_child, "album"):
+                        if typeahead_child.album.tracks:
+                            App().player.play_track_for_albums(
+                                typeahead_child.album.tracks[0], albums)
+                    elif hasattr(typeahead_child, "track"):
+                        App().player.play_track_for_albums(
+                            typeahead_child.track, albums)
+            elif hasattr(typeahead_child, "data"):
+                reset_party_mode()
+                typeahead_child.activate()
+            elif hasattr(typeahead_child, "track"):
+                reset_party_mode()
+                track = typeahead_child.track
+                App().player.add_album(track.album)
+                App().player.load(track.album.get_track(track.id))
+            App().window.container.type_ahead.entry.set_text("")
+        except Exception as e:
+            Logger.error("View::activate_child: %s" % e)
 
     @property
     def filtered(self):
