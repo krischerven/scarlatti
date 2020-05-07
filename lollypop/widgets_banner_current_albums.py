@@ -33,6 +33,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
             @param view as AlbumsListView
         """
         BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
+        self.__duration_task = False
         self.__view = view
         self.__clear_button = Gtk.Button.new_from_icon_name(
             "edit-clear-all-symbolic",
@@ -90,7 +91,8 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         return [
-            (view, "initialized", "_on_view_initialized"),
+            (view, "initialized", "_on_view_updated"),
+            (view, "updated", "_on_view_updated"),
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
             (App().player, "playback-setted", "_on_playback_changed"),
@@ -164,11 +166,16 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
 
-    def _on_view_initialized(self, view):
+    def _on_view_updated(self, view):
         """
             @param view as AlbumsListView
         """
-        App().task_helper.run(self.__calculate_duration)
+        if self.__view.children:
+            self.__duration_task = True
+            App().task_helper.run(self.__calculate_duration)
+        else:
+            self.__duration_task = False
+            self.__duration_label.set_text(get_human_duration(0))
 
     def _on_playback_changed(self, player, *ignore):
         """
@@ -192,6 +199,8 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         GLib.idle_add(self.__duration_label.set_text, "")
         duration = 0
         for child in self.__view.children:
+            if not self.__duration_task:
+                return
             duration += child.album.duration
         GLib.idle_add(self.__duration_label.set_text,
                       get_human_duration(duration))
