@@ -270,7 +270,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             Scrobble track, update last played time and increment popularity
             @param track as Track
         """
-        if track.id is None:
+        if track.id is None or isinstance(track, Radio):
             return
         # Track has been played
         # for at least half its duration, or for 4 minutes
