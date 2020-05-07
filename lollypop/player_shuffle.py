@@ -158,6 +158,7 @@ class ShufflePlayer:
             return
         # Add track to shuffle history if needed
         if App().settings.get_value("shuffle") or self.__is_party:
+            self.__add_to_shuffle_history(self._current_playback_track)
             if self.__history:
                 next = self.__history.next
                 prev = self.__history.prev
@@ -210,8 +211,7 @@ class ShufflePlayer:
                     if track.id is None:
                         self.__to_play_albums = list(self._albums)
                         shuffle(self.__to_play_albums)
-                        self.__not_played_albums = list(
-                            self.__not_played_albums)
+                        self.__already_played_tracks = {}
                         repeat = App().settings.get_enum("repeat")
                         # Do not reset history if a new album is going to
                         # be added
@@ -219,14 +219,9 @@ class ShufflePlayer:
                                           Repeat.AUTO_RANDOM]:
                             self.__history = []
                         if repeat == Repeat.ALL:
-                            # Only one track in playback
-                            if self._albums and\
-                                    len(self._albums[0].tracks) > 1:
-                                return self.__get_next()
-                            else:
-                                return self.current_track
+                            return self.__get_next()
                     return track
-        except Exception as e:  # Recursion error
+        except Exception as e:
             Logger.error("ShufflePLayer::__get_next(): %s", e)
         return Track()
 
@@ -245,7 +240,6 @@ class ShufflePlayer:
             for track in sorted(album.tracks,
                                 key=lambda *args: random()):
                 if not self.__in_shuffle_history(track):
-                    self.__add_to_shuffle_history(track)
                     return track
             self.__to_play_albums.remove(album)
         if self.__to_play_albums:
