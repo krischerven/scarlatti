@@ -211,13 +211,13 @@ class ShufflePlayer:
                     if track.id is None:
                         self.__to_play_albums = list(self._albums)
                         shuffle(self.__to_play_albums)
-                        self.__already_played_tracks = {}
                         repeat = App().settings.get_enum("repeat")
                         # Do not reset history if a new album is going to
                         # be added
                         if repeat not in [Repeat.AUTO_SIMILAR,
                                           Repeat.AUTO_RANDOM]:
                             self.__history = []
+                            self.__already_played_tracks = {}
                         if repeat == Repeat.ALL:
                             return self.__get_next()
                     return track
