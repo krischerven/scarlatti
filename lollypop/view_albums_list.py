@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 from lollypop.utils import popup_widget, emit_signal
 from lollypop.view_lazyloading import LazyLoadingView
@@ -85,7 +85,7 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
         row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.insert(row, index)
-        emit_signal(self, "initialized")
+        emit_signal(self, "updated")
 
     def populate(self, albums):
         """
@@ -93,16 +93,17 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param albums as [Album]
         """
         for child in self._box.get_children():
-            GLib.idle_add(child.destroy)
+            self._box.remove(child)
         LazyLoadingView.populate(self, albums)
 
     def clear(self, clear_albums=False):
         """
             Clear the view
         """
+        self.stop()
         self.__reveals = []
         for child in self._box.get_children():
-            GLib.idle_add(child.destroy)
+            self._box.remove(child)
         if clear_albums:
             App().player.clear_albums()
 
@@ -176,9 +177,8 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             return None
         row = AlbumRow(album, self.__height, self.view_type)
         row.connect("activated", self.__on_row_activated)
-        row.connect("destroy", lambda x: self.emit("initialized"))
-        row.tracks_view.connect("track-removed",
-                                lambda x, y: self.emit("initialized"))
+        row.connect("destroy", self.__on_row_updated)
+        row.tracks_view.connect("track-removed", self.__on_row_updated)
         row.show()
         self._box.add(row)
         return row
@@ -299,6 +299,12 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param index as int
         """
         self.insert_row(row, index)
+
+    def __on_row_updated(self, *ignore):
+        """
+            Emit updated signal
+        """
+        emit_signal(self, "updated")
 
     def __on_row_activated(self, row, track):
         """

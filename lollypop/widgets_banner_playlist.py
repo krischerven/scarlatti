@@ -34,6 +34,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
             @param view as AlbumsListView
         """
         BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
+        self.__duration_task = False
         self.__playlist_id = playlist_id
         self.__view = view
         builder = Gtk.Builder()
@@ -51,7 +52,8 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
         return [
-            (view, "initialized", "_on_view_initialized"),
+            (view, "initialized", "_on_view_updated"),
+            (view, "updated", "_on_view_updated"),
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
             (App().player, "playback-setted", "_on_playback_changed"),
@@ -100,11 +102,16 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
 
-    def _on_view_initialized(self, view):
+    def _on_view_updated(self, view):
         """
             @param view as AlbumsListView
         """
-        App().task_helper.run(self.__calculate_duration)
+        if self.__view.children:
+            self.__duration_task = True
+            App().task_helper.run(self.__calculate_duration)
+        else:
+            self.__duration_task = False
+            self.__duration_label.set_text(get_human_duration(0))
 
     def _on_play_button_clicked(self, button):
         """
@@ -170,6 +177,8 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         """
         duration = 0
         for child in self.__view.children:
+            if not self.__duration_task:
+                return
             duration += child.album.duration
         GLib.idle_add(self.__duration_label.set_text,
                       get_human_duration(duration))

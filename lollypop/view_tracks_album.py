@@ -98,6 +98,16 @@ class AlbumTracksView(TracksView):
             self._add_tracks(self._tracks_widget_left[key], tracks)
             return
 
+    def remove_row(self, track):
+        """
+            Remove row for track
+            @param track as Track
+        """
+        self.__album.remove_track(track)
+        for child in self.children:
+            if child.track == track:
+                child.destroy()
+
     def set_playing_indicator(self):
         """
             Set playing indicator

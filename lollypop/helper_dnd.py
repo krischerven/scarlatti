@@ -112,6 +112,11 @@ class DNDHelper(GObject.Object):
             album_row = dest_row.get_ancestor(AlbumRow)
             if album_row is None:
                 return
+            # Destroy src_rows from album before split
+            for row in src_rows:
+                if isinstance(row, TrackRow):
+                    if row.get_ancestor(AlbumRow) == album_row:
+                        album_row.tracks_view.remove_row(row.track)
             indexes.append(album_row.get_index())
             split_album_row = self.__split_album_row(album_row,
                                                      dest_row,
@@ -223,9 +228,7 @@ class DNDHelper(GObject.Object):
                     empty = album_row.album.remove_track(row.track)
                     if empty:
                         album_row.destroy()
-                    row.destroy()
-            else:
-                row.destroy()
+            row.destroy()
 
     def __unmark_all_rows(self):
         """
@@ -263,10 +266,11 @@ class DNDHelper(GObject.Object):
         """
         if album_row is not None:
             listbox = album_row.listbox
-            (tx, ty) = listbox.translate_coordinates(self.__listbox, 0, 0)
-            track_row = listbox.get_row_at_y(y - ty)
-            if track_row is not None:
-                return (listbox, track_row)
+            t = listbox.translate_coordinates(self.__listbox, 0, 0)
+            if t is not None:
+                track_row = listbox.get_row_at_y(y - t[1])
+                if track_row is not None:
+                    return (listbox, track_row)
         return (None, None)
 
     def __autoscroll(self, scrolled, y):
