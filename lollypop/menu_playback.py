@@ -540,7 +540,7 @@ class AlbumPlaybackMenu(PlaybackMenu):
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        App().player.play_album(self.__album)
+        App().player.play_album(self.__album.clone(True))
 
 
 class TrackPlaybackMenu(PlaybackMenu):
