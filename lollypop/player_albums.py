@@ -82,8 +82,8 @@ class AlbumsPlayer:
             if album not in self._albums:
                 return
             self._albums.remove(album)
-            self.update_next_prev()
             emit_signal(self, "playback-removed", album)
+            self.update_next_prev()
         except Exception as e:
             Logger.error("Player::remove_album(): %s" % e)
 
