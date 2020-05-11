@@ -117,38 +117,6 @@ class ToolbarEnd(Gtk.Bin):
         """
         return self.__devices_popover
 
-    @property
-    def home_button(self):
-        """
-            Get home button
-            @return Gtk.Button
-        """
-        return self.__home_button
-
-    @property
-    def devices_button(self):
-        """
-            Get devices button
-            @return Gtk.Button
-        """
-        return self.__devices_button
-
-    @property
-    def playback_button(self):
-        """
-            Get playback button
-            @return Gtk.Button
-        """
-        return self.__playback_button
-
-    @property
-    def menu_button(self):
-        """
-            Get menu button
-            @return Gtk.Button
-        """
-        return self.__menu_button
-
 #######################
 # PROTECTED           #
 #######################

@@ -77,18 +77,11 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         """
         def show_buttons(show):
             if show:
-                if self.is_adaptive:
-                    self.toolbar.end.home_button.show()
-                self.toolbar.end.menu_button.show()
-                self.toolbar.end.playback_button.show()
-                self.toolbar.end.devices_button.show()
-                self.toolbar.playback.back_button.show()
+                self.toolbar.end.show()
+                self.toolbar.playback.show()
             else:
-                self.toolbar.end.home_button.hide()
-                self.toolbar.end.menu_button.hide()
-                self.toolbar.end.playback_button.hide()
-                self.toolbar.end.devices_button.hide()
-                self.toolbar.playback.back_button.hide()
+                self.toolbar.end.hide()
+                self.toolbar.playback.hide()
 
         def on_revealed(miniplayer, revealed):
             miniplayer.set_vexpand(revealed)
