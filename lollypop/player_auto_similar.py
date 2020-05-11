@@ -233,7 +233,7 @@ class AutoSimilarPlayer:
         """
         self.__next_cancellable.cancel()
         # Do not load an album if a radio is loading
-        if not self.__radio_cancellable.is_cancelled():
+        if not self.__radio_cancellable.is_cancelled() or not self._albums:
             return
         self.__next_cancellable = Gio.Cancellable()
         # Check if we need to add a new album

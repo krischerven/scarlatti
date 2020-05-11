@@ -45,6 +45,8 @@ class AutoRandomPlayer:
         """
             Add a new album if playback finished and wanted by user
         """
+        if not self._albums:
+            return
         if App().settings.get_enum("repeat") != Repeat.AUTO_RANDOM or\
                 player.next_track.id is not None:
             return

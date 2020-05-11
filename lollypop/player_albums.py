@@ -193,9 +193,8 @@ class AlbumsPlayer:
         """
             Clear all albums
         """
-        for album in self._albums:
-            emit_signal(self, "playback-removed", album)
         self._albums = []
+        emit_signal(self, "playback-setted", [])
         self.update_next_prev()
 
     def skip_album(self):

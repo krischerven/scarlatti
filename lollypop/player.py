@@ -84,6 +84,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             @param track as Track
         """
         if isinstance(track, Radio):
+            self.clear_albums()
             RadioPlayer.load(self, track)
         elif TransitionsPlayer.load(self, track):
             pass
