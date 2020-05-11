@@ -170,6 +170,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__buttons_widget.update()
         self.__label_widget.update()
         self.__progress_widget.update()
+        self.__update_progress_visibility()
         self.__setup_artwork_type()
         if self.__timeout_id is None:
             try:
@@ -257,6 +258,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             @param player as Player
         """
         self.__update_background()
+        self.__update_progress_visibility()
 
 #######################
 # PRIVATE             #
@@ -277,6 +279,18 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             context.add_class("small-cover-frame")
         self.__artwork_widget.set_behaviour(behaviour)
         self.__artwork_widget.update()
+
+    def __update_progress_visibility(self):
+        """
+            Update progress bar visibility
+        """
+        if App().player.current_track.id is not None:
+            if isinstance(App().player.current_track, Radio):
+                self.__progress_widget.hide()
+            else:
+                self.__progress_widget.show()
+        else:
+            self.__progress_widget.hide()
 
     def __update_background(self, album_artwork=False):
         """
