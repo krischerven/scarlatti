@@ -19,6 +19,7 @@ from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.objects_radio import Radio
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import emit_signal
 
@@ -111,6 +112,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             @param reveal as bool
         """
         if reveal:
+            self.__update_progress_visibility()
             self.__revealer.set_reveal_child(True)
             emit_signal(self, "revealed", True)
             self.__progress_widget.update()
@@ -226,6 +228,18 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __update_progress_visibility(self):
+        """
+            Update progress bar visibility
+        """
+        if App().player.current_track.id is not None:
+            if isinstance(App().player.current_track, Radio):
+                self.__progress_widget.hide()
+            else:
+                self.__progress_widget.show()
+        else:
+            self.__progress_widget.hide()
+
     def __set_widgets_position(self):
         """
             Add label widget to wanted UI part
