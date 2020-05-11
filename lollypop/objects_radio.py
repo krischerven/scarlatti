@@ -12,6 +12,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
+from hashlib import md5
 
 from lollypop.define import App, Type, StorageType
 from lollypop.objects import Base
@@ -21,13 +22,13 @@ class RadioAlbum:
     """
         Fake album
     """
-    def __init__(self, radio):
+    def __init__(self, radio_id):
         """
             Init album
-            @param radio as Radio
+            @param radio_id as int
         """
-        self.id = radio.id
-        self.name = radio.name
+        self.id = radio_id
+        self.name = App().radios.get_name(radio_id)
         self.storage_type = StorageType.COLLECTION
         self.artists = [_("Radio")]
         self.artist_ids = [Type.RADIOS]
@@ -38,8 +39,9 @@ class RadioAlbum:
         self.mb_album_id = None
         self.loved = False
         self.synced = False
-        self.tracks = [radio]
-        self.track_ids = [radio.id]
+        self.tracks = []
+        self.track_ids = []
+        self.lp_album_id = md5(self.name.encode("utf-8")).hexdigest()
 
 
 class Radio(Base):
@@ -58,7 +60,7 @@ class Radio(Base):
         Base.__init__(self, App().radios)
         self.id = self.album_id = radio_id
         self.storage_type = StorageType.COLLECTION
-        self.album = RadioAlbum(self)
+        self.album = RadioAlbum(radio_id)
         self.artists = self.genres = self.album_artists = [_("Radio")]
         self.path = self.discname = ""
         self.artist_ids = self.genre_ids = [Type.RADIOS]
@@ -69,6 +71,7 @@ class Radio(Base):
         self.loved = self.last = False
         self.mb_artist_ids = []
         self.is_web = self.is_http = True
+        self.lp_track_id = md5(self.album_name.encode("utf-8")).hexdigest()
 
     def set_name(self, name):
         """
