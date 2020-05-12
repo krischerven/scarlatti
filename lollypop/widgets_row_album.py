@@ -367,6 +367,7 @@ class AlbumRow(Gtk.ListBoxRow):
         """
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
+        self.destroy()
         if self.__view_type & ViewType.PLAYBACK:
             if self.__album.id in App().player.album_ids:
                 if App().player.current_track.album == self.__album:
@@ -380,7 +381,6 @@ class AlbumRow(Gtk.ListBoxRow):
             view = self.get_ancestor(PlaylistsView)
             if view is not None:
                 view.remove_from_playlist(self.__album)
-            self.destroy()
 
     def __on_play_clicked(self, button):
         """

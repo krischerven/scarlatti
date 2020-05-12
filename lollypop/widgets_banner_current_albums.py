@@ -92,7 +92,6 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.set_overlay_pass_through(grid, True)
         return [
             (view, "initialized", "_on_view_updated"),
-            (view, "updated", "_on_view_updated"),
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
             (App().player, "playback-setted", "_on_playback_changed"),
@@ -187,7 +186,8 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         GLib.idle_add(self.__clear_button.set_sensitive, sensitive)
         GLib.idle_add(self.__jump_button.set_sensitive, sensitive)
         GLib.idle_add(self.__menu_button.set_sensitive, sensitive)
-        self.__calculate_duration()
+        self.__duration_task = True
+        App().task_helper.run(self.__calculate_duration)
 
 #######################
 # PRIVATE             #
@@ -202,6 +202,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
             if not self.__duration_task:
                 return
             duration += child.album.duration
+        self.__duration_task = False
         GLib.idle_add(self.__duration_label.set_text,
                       get_human_duration(duration))
 

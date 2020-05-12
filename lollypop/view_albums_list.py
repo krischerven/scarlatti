@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.utils import popup_widget, emit_signal
+from lollypop.utils import popup_widget
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, StorageType
 from lollypop.widgets_row_album import AlbumRow
@@ -90,7 +90,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         row.connect("activated", self.__on_row_activated)
         row.show()
         self._box.insert(row, index)
-        emit_signal(self, "updated")
 
     def populate(self, albums):
         """
@@ -182,8 +181,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             return None
         row = AlbumRow(album, self.__height, self.view_type)
         row.connect("activated", self.__on_row_activated)
-        row.connect("destroy", self.__on_row_updated)
-        row.tracks_view.connect("track-removed", self.__on_row_updated)
         row.show()
         self._box.add(row)
         return row
@@ -304,12 +301,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             @param index as int
         """
         self.insert_row(row, index)
-
-    def __on_row_updated(self, *ignore):
-        """
-            Emit updated signal
-        """
-        emit_signal(self, "updated")
 
     def __on_row_activated(self, row, track):
         """

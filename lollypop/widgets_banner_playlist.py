@@ -53,7 +53,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         builder.connect_signals(self)
         return [
             (view, "initialized", "_on_view_updated"),
-            (view, "updated", "_on_view_updated"),
+            (view.dnd_helper, "dnd-finished", "_on_view_updated"),
             (App().player, "duration-changed", "_on_view_updated"),
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
