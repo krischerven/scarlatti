@@ -411,10 +411,9 @@ class MPRIS(Server):
             self.__metadata["xesam:url"] = GLib.Variant(
                 "s",
                 App().player.current_track.uri)
-            self.__rating = App().player.current_track.get_rate()
             self.__metadata["xesam:userRating"] = GLib.Variant(
                 "d",
-                self.__rating / 5)
+                App().player.current_track.rate / 5)
             cover_path = App().art.get_album_cache_path(
                     App().player.current_track.album,
                     ArtSize.MPRIS, ArtSize.MPRIS)

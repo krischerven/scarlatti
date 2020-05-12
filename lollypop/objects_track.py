@@ -27,6 +27,7 @@ class Track(Base):
                 "artist_ids": [],
                 "genre_ids": [],
                 "popularity": 0,
+                "rate": 0,
                 "album_name": "",
                 "artists": [],
                 "genres": [],

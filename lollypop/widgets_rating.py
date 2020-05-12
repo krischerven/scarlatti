@@ -91,7 +91,7 @@ class RatingWidget(Gtk.Bin):
             @param event as Gdk.Event (can be None)
         """
         user_rating = True
-        rate = self.__object.get_rate()
+        rate = self.__object.rate
         # -1 for compatiblity with previous release
         if rate in [0, -1]:
             rate = self.__object.get_popularity()
@@ -122,7 +122,7 @@ class RatingWidget(Gtk.Bin):
             @param event as Gdk.Event
         """
         user_rating = True
-        rate = self.__object.get_rate()
+        rate = self.__object.rate
         # -1 for compatiblity with previous release
         if rate in [0, -1]:
             rate = self.__object.get_popularity()

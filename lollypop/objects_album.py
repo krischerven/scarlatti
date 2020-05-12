@@ -116,6 +116,7 @@ class Album(Base):
                 "timestamp": 0,
                 "uri": "",
                 "popularity": 0,
+                "rate": 0,
                 "mtime": 1,
                 "synced": 0,
                 "loved": False,
