@@ -120,7 +120,7 @@ class ShufflePlayer:
         for album_id in album_ids:
             album = Album(album_id, [], [], False)
             self._albums.append(album)
-        emit_signal(self, "playback-setted", self._albums)
+        emit_signal(self, "playback-setted", list(self._albums))
 
     @property
     def is_party(self):
