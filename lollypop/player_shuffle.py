@@ -110,6 +110,8 @@ class ShufflePlayer:
         """
             Set party mode ids
         """
+        if not self.__is_party:
+            return
         party_ids = App().settings.get_value("party-ids")
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_ids(party_ids, [], storage_type, False)
