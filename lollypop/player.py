@@ -22,18 +22,15 @@ from lollypop.player_bin import BinPlayer
 from lollypop.player_queue import QueuePlayer
 from lollypop.player_linear import LinearPlayer
 from lollypop.player_shuffle import ShufflePlayer
-from lollypop.player_radio import RadioPlayer
 from lollypop.player_transitions import TransitionsPlayer
-from lollypop.radios import Radios
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
-from lollypop.objects_radio import Radio
 from lollypop.define import App, Type, LOLLYPOP_DATA_PATH
 from lollypop.utils import emit_signal
 
 
 class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
-             AutoSimilarPlayer, QueuePlayer, RadioPlayer, LinearPlayer,
+             AutoSimilarPlayer, QueuePlayer, LinearPlayer,
              ShufflePlayer, TransitionsPlayer):
     """
         Player object used to manage playback and playlists
@@ -73,7 +70,6 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         QueuePlayer.__init__(self)
         LinearPlayer.__init__(self)
         ShufflePlayer.__init__(self)
-        RadioPlayer.__init__(self)
         TransitionsPlayer.__init__(self)
         self.__stop_after_track_id = None
         App().settings.connect("changed::repeat", self.update_next_prev)
@@ -83,10 +79,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             Stop current track, load track id and play it
             @param track as Track
         """
-        if isinstance(track, Radio):
-            self.clear_albums()
-            RadioPlayer.load(self, track)
-        elif TransitionsPlayer.load(self, track):
+        if TransitionsPlayer.load(self, track):
             pass
         else:
             BinPlayer.load(self, track)
@@ -145,18 +138,9 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                 self.set_queue(load(open(LOLLYPOP_DATA_PATH +
                                          "/queue.bin", "rb")))
                 albums = load(open(LOLLYPOP_DATA_PATH + "/Albums.bin", "rb"))
-                playlist_ids = load(open(LOLLYPOP_DATA_PATH +
-                                         "/playlist_ids.bin", "rb"))
                 (is_playing, was_party) = load(open(LOLLYPOP_DATA_PATH +
                                                     "/player.bin", "rb"))
-                if playlist_ids and playlist_ids[0] == Type.RADIOS:
-                    radios = Radios()
-                    track = Track()
-                    name = radios.get_name(self._current_playback_track.id)
-                    uri = radios.get_uri(self._current_playback_track.id)
-                    track.set_radio(name, uri)
-                    self.load(track)
-                elif self._current_playback_track.uri:
+                if self._current_playback_track.uri:
                     if albums:
                         if was_party:
                             App().lookup_action("party").change_state(
@@ -197,8 +181,6 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
         if self._current_playback_track.id is None:
             return
-        if isinstance(self.current_track, Radio):
-            return
         try:
             if App().settings.get_value("shuffle") or self.is_party:
                 prev_track = ShufflePlayer.prev(self)
@@ -215,8 +197,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
         if self._current_playback_track.id is None:
             return
-        if isinstance(self.current_track, Radio) or\
-                self._current_track.id == self.__stop_after_track_id:
+        if self._current_track.id == self.__stop_after_track_id:
             self._next_track = Track()
             return
         try:
@@ -271,7 +252,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
             Scrobble track, update last played time and increment popularity
             @param track as Track
         """
-        if track.id is None or isinstance(track, Radio):
+        if track.id is None:
             return
         # Track has been played
         # for at least half its duration, or for 4 minutes

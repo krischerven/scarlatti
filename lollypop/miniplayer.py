@@ -19,7 +19,6 @@ from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.helper_size_allocation import SizeAllocationHelper
-from lollypop.objects_radio import Radio
 from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import emit_signal
 
@@ -233,10 +232,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
             Update progress bar visibility
         """
         if App().player.current_track.id is not None:
-            if isinstance(App().player.current_track, Radio):
-                self.__progress_widget.hide()
-            else:
-                self.__progress_widget.show()
+            self.__progress_widget.show()
         else:
             self.__progress_widget.hide()
 

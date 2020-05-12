@@ -16,15 +16,13 @@ from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, Type, Size, StorageType
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
-from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_banner_playlist import PlaylistBannerWidget
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class PlaylistsView(LazyLoadingView, ViewController,
-                    SignalsHelper, SizeAllocationHelper):
+class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
     """
         View showing playlists
     """
@@ -40,7 +38,6 @@ class PlaylistsView(LazyLoadingView, ViewController,
                                  view_type |
                                  ViewType.SCROLLED |
                                  ViewType.OVERLAY)
-        ViewController.__init__(self, ViewControllerType.ALBUM)
         SizeAllocationHelper.__init__(self)
         self.__playlist_id = playlist_id
         # We remove SCROLLED because we want to be the scrolled view

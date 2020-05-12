@@ -28,7 +28,7 @@ from urllib.parse import urlparse
 from lollypop.utils import init_proxy_from_gnome, emit_signal
 from lollypop.application_actions import ApplicationActions
 from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
-from lollypop.define import Type, LOLLYPOP_DATA_PATH, ScanType, StorageType
+from lollypop.define import LOLLYPOP_DATA_PATH, ScanType, StorageType
 from lollypop.database import Database
 from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
@@ -46,8 +46,6 @@ from lollypop.notification import NotificationManager
 from lollypop.playlists import Playlists
 from lollypop.objects_track import Track
 from lollypop.objects_album import Album
-from lollypop.objects_radio import Radio
-from lollypop.radios import Radios
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
 from lollypop.collection_scanner import CollectionScanner
@@ -175,7 +173,6 @@ class Application(Gtk.Application, ApplicationActions):
         self.artists = ArtistsDatabase(self.db)
         self.genres = GenresDatabase(self.db)
         self.tracks = TracksDatabase(self.db)
-        self.radios = Radios()
         self.player = Player()
         self.inhibitor = Inhibitor()
         self.scanner = CollectionScanner()
@@ -365,13 +362,6 @@ class Application(Gtk.Application, ApplicationActions):
                  open(LOLLYPOP_DATA_PATH + "/player.bin", "wb"))
             dump(self.player.queue,
                  open(LOLLYPOP_DATA_PATH + "/queue.bin", "wb"))
-            # Save current playlist
-            if isinstance(self.player.current_track, Radio):
-                playlist_ids = [Type.RADIOS]
-            else:
-                playlist_ids = []
-            dump(playlist_ids,
-                 open(LOLLYPOP_DATA_PATH + "/playlist_ids.bin", "wb"))
             if self.player.current_track.id is not None:
                 position = self.player.position
             else:
@@ -397,16 +387,11 @@ class Application(Gtk.Application, ApplicationActions):
             SqlCursor.remove(self.db)
             self.cache.clean(True)
 
-            from lollypop.radios import Radios
             with SqlCursor(self.db) as sql:
                 sql.isolation_level = None
                 sql.execute("VACUUM")
                 sql.isolation_level = ""
             with SqlCursor(self.playlists) as sql:
-                sql.isolation_level = None
-                sql.execute("VACUUM")
-                sql.isolation_level = ""
-            with SqlCursor(Radios()) as sql:
                 sql.isolation_level = None
                 sql.execute("VACUUM")
                 sql.isolation_level = ""
@@ -538,13 +523,7 @@ class Application(Gtk.Application, ApplicationActions):
             for uri in audio_uris:
                 parsed = urlparse(uri)
                 if parsed.scheme in ["http", "https"]:
-                    from lollypop.objects_radio import Radio
-                    radio = Radio(Type.RADIOS)
-                    radio.set_name(uri)
-                    radio.set_uri(uri)
-                    self.player.load(radio)
-                    break
-                    # Lollypop does not support radio playlists
+                    pass
                 else:
                     to_scan_uris.append(uri)
             self.scanner.update(ScanType.EXTERNAL, to_scan_uris)

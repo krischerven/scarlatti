@@ -14,7 +14,6 @@ from gi.repository import Gtk, GLib
 
 
 from lollypop.utils import set_cursor_type, popup_widget
-from lollypop.objects_radio import Radio
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.define import App, ArtBehaviour, StorageType, MARGIN_SMALL
@@ -100,8 +99,6 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         """
         if App().window.is_adaptive or not self.__artwork.get_visible():
             return
-        if isinstance(App().player.current_track, Radio):
-            return
         if App().player.current_track.id is not None:
             self.__popup_menu()
 
@@ -114,11 +111,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         """
         if App().window.is_adaptive or not self.__artwork.get_visible():
             return
-        if isinstance(App().player.current_track, Radio):
-            from lollypop.pop_tunein import TuneinPopover
-            popover = TuneinPopover()
-            popover.populate()
-        elif App().player.current_track.id is not None:
+        if App().player.current_track.id is not None:
             from lollypop.pop_information import InformationPopover
             popover = InformationPopover()
             popover.populate()

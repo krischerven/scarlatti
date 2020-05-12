@@ -11,9 +11,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from lollypop.radios import Radios
 from lollypop.logger import Logger
-from lollypop.define import App, Type
+from lollypop.define import App
 from lollypop.utils import emit_signal
 
 
@@ -67,15 +66,9 @@ class Base:
             return 0
 
         popularity = 0
-        if self.id >= 0:
-            avg_popularity = self.db.get_avg_popularity()
-            if avg_popularity > 0:
-                popularity = self.db.get_popularity(self.id)
-        elif self.id == Type.RADIOS:
-            radios = Radios()
-            avg_popularity = radios.get_avg_popularity()
-            if avg_popularity > 0:
-                popularity = radios.get_popularity(self._radio_id)
+        avg_popularity = self.db.get_avg_popularity()
+        if avg_popularity > 0:
+            popularity = self.db.get_popularity(self.id)
         return popularity * 5 / avg_popularity + 0.5
 
     def set_popularity(self, new_rate):
@@ -86,49 +79,19 @@ class Base:
         if self.id is None:
             return
         try:
-            if self.id >= 0:
-                avg_popularity = self.db.get_avg_popularity()
-                popularity = int((new_rate * avg_popularity / 5) + 0.5)
-                best_popularity = self.db.get_higher_popularity()
-                if new_rate == 5:
-                    popularity = (popularity + best_popularity) / 2
-                self.db.set_popularity(self.id, popularity)
-            elif self.id == Type.RADIOS:
-                radios = Radios()
-                avg_popularity = radios.get_avg_popularity()
-                popularity = int((new_rate * avg_popularity / 5) + 0.5)
-                best_popularity = self.db.get_higher_popularity()
-                if new_rate == 5:
-                    popularity = (popularity + best_popularity) / 2
-                radios.set_popularity(self._radio_id, popularity)
+            avg_popularity = self.db.get_avg_popularity()
+            popularity = int((new_rate * avg_popularity / 5) + 0.5)
+            best_popularity = self.db.get_higher_popularity()
+            if new_rate == 5:
+                popularity = (popularity + best_popularity) / 2
+            self.db.set_popularity(self.id, popularity)
         except Exception as e:
             Logger.error("Base::set_popularity(): %s" % e)
-
-    def get_rate(self):
-        """
-            Get rate
-            @return int
-        """
-        if self.id is None:
-            return 0
-
-        rate = 0
-        if self.id >= 0:
-            rate = self.db.get_rate(self.id)
-        elif self.id == Type.RADIOS:
-            radios = Radios()
-            rate = radios.get_rate(self._radio_id)
-        return rate
 
     def set_rate(self, rate):
         """
             Set rate
             @param rate as int between -1 and 5
         """
-        if self.id == Type.RADIOS:
-            radios = Radios()
-            radios.set_rate(self._radio_id, rate)
-            emit_signal(App().player, "rate-changed", self._radio_id, rate)
-        else:
-            self.db.set_rate(self.id, rate)
-            emit_signal(App().player, "rate-changed", self.id, rate)
+        self.db.set_rate(self.id, rate)
+        emit_signal(App().player, "rate-changed", self.id, rate)

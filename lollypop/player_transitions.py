@@ -15,7 +15,6 @@ from gi.repository import Gst, GLib, GstAudio
 from time import sleep
 
 from lollypop.define import App
-from lollypop.objects_radio import Radio
 
 
 class TransitionsPlayer:
@@ -41,8 +40,7 @@ class TransitionsPlayer:
         """
         if self.crossfading and\
            self._current_track.id is not None and\
-           self.is_playing and\
-           not isinstance(track, Radio):
+           self.is_playing:
             transition_duration = App().settings.get_value(
                     "transitions-duration").get_int32()
             self.__do_crossfade(transition_duration, track)

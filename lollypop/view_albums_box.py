@@ -25,11 +25,10 @@ from lollypop.utils import get_title_for_genres_artists
 from lollypop.utils import remove_static
 from lollypop.utils_file import get_youtube_dl
 from lollypop.utils_album import get_album_ids_for
-from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
+class AlbumsBoxView(FlowBoxView, SignalsHelper):
     """
         Show albums in a box
     """
@@ -44,7 +43,6 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, storage_type, view_type)
-        ViewController.__init__(self, ViewControllerType.ALBUM)
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         self._storage_type = storage_type
@@ -64,7 +62,8 @@ class AlbumsBoxView(FlowBoxView, ViewController, SignalsHelper):
             self._empty_icon_name = get_icon_name(genre_ids[0])
         return [
             (App().scanner, "updated", "_on_collection_updated"),
-            (App().player, "loading-changed", "_on_loading_changed")
+            (App().player, "loading-changed", "_on_loading_changed"),
+            (App().art, "album-artwork-changed", "_on_artwork_changed")
         ]
 
     def populate(self, albums=[]):

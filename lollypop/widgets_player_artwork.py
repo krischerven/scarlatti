@@ -14,7 +14,6 @@ from gi.repository import Gtk
 
 from lollypop.define import App, ArtBehaviour
 from lollypop.objects_album import Album
-from lollypop.objects_radio import Radio
 from lollypop.helper_signals import SignalsHelper, signals
 
 
@@ -40,7 +39,6 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().art, "album-artwork-changed", "_on_album_artwork_changed"),
-            (App().art, "radio-artwork-changed", "_on_radio_artwork_changed")
         ]
 
     def set_art_size(self, width, height):
@@ -85,15 +83,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             @param callback as function
         """
         scale_factor = self.get_scale_factor()
-        if isinstance(App().player.current_track, Radio):
-            App().art_helper.set_radio_artwork(
-                App().player.current_track.name,
-                width,
-                height,
-                scale_factor,
-                behaviour,
-                callback)
-        elif App().player.current_track.id is not None:
+        if App().player.current_track.id is not None:
             if self.__per_track_cover:
                 behaviour |= ArtBehaviour.NO_CACHE
                 album = Album(App().player.current_track.album.id)
@@ -133,16 +123,6 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             self.set_artwork(self.__width, self.__height,
                              self.__on_artwork, self.__behaviour)
 
-    def _on_radio_artwork_changed(self, art, name):
-        """
-            Update logo for name
-            @param art as Art
-            @param name as str
-        """
-        if App().player.current_track.album_artist == name:
-            self.set_artwork(self.__width, self.__height,
-                             self.__on_artwork, self.__behaviour)
-
 #######################
 # PRIVATE             #
 #######################
@@ -156,10 +136,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             context_style.add_class("cover-background")
             if self.__behaviour & ArtBehaviour.ROUNDED:
                 context_style.add_class("rounded")
-            if isinstance(App().player.current_track, Radio):
-                icon_name = "audio-input-microphone-symbolic"
-            else:
-                icon_name = "folder-music-symbolic"
+            icon_name = "folder-music-symbolic"
             self.set_from_icon_name(icon_name, Gtk.IconSize.INVALID)
             self.set_pixel_size(self.__width / 3)
             self.set_size_request(self.__width, self.__height)

@@ -54,6 +54,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         return [
             (view, "initialized", "_on_view_updated"),
             (view, "updated", "_on_view_updated"),
+            (App().player, "duration-changed", "_on_view_updated"),
             (App().player, "playback-added", "_on_playback_changed"),
             (App().player, "playback-updated", "_on_playback_changed"),
             (App().player, "playback-setted", "_on_playback_changed"),
@@ -102,9 +103,9 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_internal_size()
 
-    def _on_view_updated(self, view):
+    def _on_view_updated(self, *ignore):
         """
-            @param view as AlbumsListView
+            Update duration
         """
         if self.__view.children:
             self.__duration_task = True

@@ -14,7 +14,6 @@ from gi.repository import GLib, Gtk
 
 from gettext import gettext as _
 
-from lollypop.objects_radio import Radio
 from lollypop.define import App
 from lollypop.helper_signals import SignalsHelper, signals
 
@@ -139,10 +138,9 @@ class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
             self.__prev_button.set_sensitive(False)
             self.__next_button.set_sensitive(False)
         else:
-            is_radio = isinstance(App().player.current_track, Radio)
             self.__play_button.set_sensitive(True)
-            self.__prev_button.set_sensitive(not is_radio)
-            self.__next_button.set_sensitive(not is_radio)
+            self.__prev_button.set_sensitive(True)
+            self.__next_button.set_sensitive(True)
 
     def _on_prev_changed(self, player):
         """

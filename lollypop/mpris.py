@@ -21,7 +21,6 @@ from random import randint
 from lollypop.logger import Logger
 from lollypop.define import App, ArtSize, Repeat, Notifications
 from lollypop.objects_track import Track
-from lollypop.objects_radio import Radio
 
 
 class Server:
@@ -416,12 +415,7 @@ class MPRIS(Server):
             self.__metadata["xesam:userRating"] = GLib.Variant(
                 "d",
                 self.__rating / 5)
-            if isinstance(App().player.current_track, Radio):
-                cover_path = App().art.get_radio_cache_path(
-                    App().player.current_track.name,
-                    ArtSize.MPRIS, ArtSize.MPRIS)
-            else:
-                cover_path = App().art.get_album_cache_path(
+            cover_path = App().art.get_album_cache_path(
                     App().player.current_track.album,
                     ArtSize.MPRIS, ArtSize.MPRIS)
             if cover_path is not None:

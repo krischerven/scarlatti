@@ -116,8 +116,6 @@ class ViewsContainer:
                     view = self._get_view_albums_years(data, storage_type)
             elif item_ids[0] == Type.PLAYLISTS:
                 view = self._get_view_playlists(data)
-            elif item_ids[0] == Type.RADIOS:
-                view = self._get_view_radios()
             elif item_ids[0] == Type.EQUALIZER:
                 from lollypop.view_equalizer import EqualizerView
                 view = EqualizerView()
@@ -359,17 +357,6 @@ class ViewsContainer:
         view_type = ViewType.SCROLLED
         from lollypop.view_albums_box import AlbumsDeviceBoxView
         view = AlbumsDeviceBoxView(index, view_type)
-        view.populate()
-        return view
-
-    def _get_view_radios(self):
-        """
-            Get radios view
-            @return RadiosView
-        """
-        view_type = ViewType.SCROLLED
-        from lollypop.view_radios import RadiosView
-        view = RadiosView(view_type)
         view.populate()
         return view
 

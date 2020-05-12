@@ -173,13 +173,7 @@ class LyricsHelper:
             @return str
         """
         # Update lyrics
-        title = ""
-        if isinstance(track, Radio):
-            split = " ".join(track.artists).split(" - ")
-            if len(split) > 1:
-                title = split[1]
-        else:
-            title = track.name
+        title = track.name
         if escape:
             return GLib.uri_escape_string(title, None, False)
         else:

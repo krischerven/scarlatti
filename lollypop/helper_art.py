@@ -73,31 +73,6 @@ class ArtHelper(GObject.Object):
                                         callback,
                                         *args))
 
-    def set_radio_artwork(self, radio, width, height, scale_factor,
-                          effect, callback, *args):
-        """
-            Set artwork for album id
-            @param radio as str
-            @param width as int
-            @param height as int
-            @param scale_factor as int
-            @param effect as ArtBehaviour
-            @param callback as function
-        """
-        App().task_helper.run(App().art.get_radio_artwork,
-                              radio,
-                              width,
-                              height,
-                              scale_factor,
-                              effect,
-                              callback=(self._on_get_artwork_pixbuf,
-                                        width,
-                                        height,
-                                        scale_factor,
-                                        effect,
-                                        callback,
-                                        *args))
-
     def set_artist_artwork(self, name, width, height, scale_factor,
                            effect, callback, *args):
         """

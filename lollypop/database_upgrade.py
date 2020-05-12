@@ -19,7 +19,6 @@ from gettext import gettext as _
 from lollypop.sqlcursor import SqlCursor
 from lollypop.utils import translate_artist_name
 from lollypop.database_history import History
-from lollypop.radios import Radios
 from lollypop.define import App, Type, StorageType, LOLLYPOP_DATA_PATH
 from lollypop.logger import Logger
 from lollypop.helper_task import TaskHelper
@@ -140,7 +139,6 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             18: self.__upgrade_18,
             19: self.__upgrade_19,
             20: self.__upgrade_20,
-            21: self.__upgrade_21,
             22: self.__upgrade_22,
             23: self.__upgrade_23,
             24: "ALTER TABLE albums ADD album_id TEXT",
@@ -481,14 +479,6 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                                    ltime,\
                                    persistent FROM backup")
             sql.execute("DROP TABLE backup")
-
-    def __upgrade_21(self, db):
-        """
-            Add rate to radios
-        """
-        with SqlCursor(Radios()) as sql:
-            sql.execute("ALTER TABLE radios ADD rate\
-                         INT NOT NULL DEFAULT -1")
 
     def __upgrade_22(self, db):
         """

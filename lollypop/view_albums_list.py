@@ -15,16 +15,17 @@ from gi.repository import Gtk
 from lollypop.utils import popup_widget, emit_signal
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, StorageType
-from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.helper_gestures import GesturesHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
+class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
     """
         View showing albums
     """
 
+    @signals_map
     def __init__(self, genre_ids, artist_ids, view_type):
         """
             Init widget
@@ -33,7 +34,6 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, StorageType.ALL, view_type)
-        ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__width = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
@@ -54,6 +54,11 @@ class AlbumsListView(LazyLoadingView, ViewController, GesturesHelper):
             self.__dnd_helper = DNDHelper(self._box, view_type)
             self.__dnd_helper.connect("dnd-insert", self.__on_dnd_insert)
         self.add_widget(self._box)
+        return [
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "duration-changed", "_on_duration_changed"),
+            (App().art, "album-artwork-changed", "_on_artwork_changed")
+        ]
 
     def add_reveal_albums(self, albums):
         """

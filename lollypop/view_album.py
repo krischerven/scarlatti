@@ -15,12 +15,11 @@ from gi.repository import Gtk
 from lollypop.define import App, ViewType, MARGIN, ScanUpdate
 from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
-from lollypop.controller_view import ViewController, ViewControllerType
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
+class AlbumView(LazyLoadingView, SignalsHelper):
     """
         Show artist albums and tracks
     """
@@ -34,7 +33,6 @@ class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, storage_type, view_type)
-        ViewController.__init__(self, ViewControllerType.ALBUM)
         self.__tracks_view = None
         self.__album = album
         self.__others_boxes = []
@@ -47,7 +45,9 @@ class AlbumView(LazyLoadingView, ViewController, SignalsHelper):
         self.add_widget(self.__grid, self.__banner)
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),
-            (App().scanner, "updated", "_on_collection_updated")
+            (App().scanner, "updated", "_on_collection_updated"),
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "duration-changed", "_on_duration_changed"),
         ]
 
     def populate(self):

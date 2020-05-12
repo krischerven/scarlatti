@@ -15,7 +15,6 @@ from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, Notifications
 from lollypop.utils import is_gnome
-from lollypop.objects_radio import Radio
 
 
 class NotificationManager:
@@ -54,14 +53,9 @@ class NotificationManager:
                 App().is_fullscreen:
             return
 
-        if isinstance(track, Radio):
-            cover_path = App().art.get_radio_cache_path(track.name,
-                                                        ArtSize.BIG,
-                                                        ArtSize.BIG)
-        else:
-            cover_path = App().art.get_album_cache_path(track.album,
-                                                        ArtSize.BIG,
-                                                        ArtSize.BIG)
+        cover_path = App().art.get_album_cache_path(track.album,
+                                                    ArtSize.BIG,
+                                                    ArtSize.BIG)
         if cover_path is None:
             icon = Gio.Icon.new_for_string("org.gnome.Lollypop-symbolic")
         else:

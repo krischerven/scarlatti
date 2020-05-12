@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Pango
 
 from lollypop.logger import Logger
 from lollypop.selectionlist import SelectionList
@@ -18,7 +18,7 @@ from lollypop.define import App, Type, SelectionListMask, StorageType, ViewType
 from lollypop.shown import ShownLists
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.view import View
-from lollypop.utils import emit_signal, get_default_storage_type
+from lollypop.utils import emit_signal, get_default_storage_type, get_icon_name
 
 
 class NoneView(View):
@@ -237,7 +237,34 @@ class ListsContainer:
         elif selected_id == Type.WEB:
             view = self._get_view_albums([selected_id], [], StorageType.SAVED)
         elif selected_id == Type.RADIOS:
-            view = self._get_view_radios()
+            message = """Radio support has been removed, sorry for that.
+            For a better radio player, use Shortwave:
+            """
+            view = View(StorageType.ALL, ViewType.DEFAULT)
+            image = Gtk.Image.new_from_icon_name(get_icon_name(Type.RADIOS),
+                                                 Gtk.IconSize.INVALID)
+            image.set_pixel_size(256)
+            image.set_property("expand", True)
+            style = image.get_style_context()
+            style.add_class("dim-label")
+            label = Gtk.Label()
+            style = label.get_style_context()
+            style.add_class("dim-label")
+            style.add_class("text-xx-large")
+            label.set_markup("%s" % GLib.markup_escape_text(message))
+            label.set_line_wrap_mode(Pango.WrapMode.WORD)
+            label.set_line_wrap(True)
+            button = Gtk.LinkButton.new(
+                "https://flathub.org/apps/details/de.haeckerfelix.Shortwave")
+            grid = Gtk.Grid()
+            grid.set_valign(Gtk.Align.CENTER)
+            grid.set_row_spacing(20)
+            grid.set_orientation(Gtk.Orientation.VERTICAL)
+            grid.add(image)
+            grid.add(label)
+            grid.add(button)
+            view.add_widget(grid)
+            view.show_all()
         elif selected_id == Type.YEARS:
             view = self._get_view_albums_decades(storage_type)
         elif selected_id == Type.GENRES:

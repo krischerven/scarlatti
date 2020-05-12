@@ -21,7 +21,6 @@ from lollypop.define import GstPlayFlags, App
 from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
-from lollypop.objects_radio import Radio
 from lollypop.utils import emit_signal, get_network_available
 
 
@@ -88,12 +87,8 @@ class BinPlayer:
         """
             Change player state to PAUSED
         """
-        if isinstance(App().player.current_track, Radio):
-            self._playbin.set_state(Gst.State.NULL)
-            emit_signal(self, "status-changed")
-        else:
-            self._playbin.set_state(Gst.State.PAUSED)
-            emit_signal(self, "status-changed")
+        self._playbin.set_state(Gst.State.PAUSED)
+        emit_signal(self, "status-changed")
 
     def stop(self):
         """
@@ -329,9 +324,7 @@ class BinPlayer:
             If we are current bus, try to restart playback
             Else stop playback
         """
-        if isinstance(App().player.current_track, Radio):
-            self._load_track(App().player.current_track)
-        elif self._playbin.get_bus() == bus:
+        if self._playbin.get_bus() == bus:
             if self._next_track.id is None:
                 self.stop()
             else:
@@ -345,8 +338,6 @@ class BinPlayer:
         """
         try:
             Logger.debug("Player::__on_stream_about_to_finish(): %s" % playbin)
-            if isinstance(App().player.current_track, Radio):
-                return
             # Don't do anything if crossfade on, track already scrobbled
             # See TransitionsPlayer
             if not self.crossfading:

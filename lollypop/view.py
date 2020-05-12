@@ -127,7 +127,7 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             message = new_text\
                 if new_text is not None\
                 else self._empty_message
-            from lollypop.placeholder import Placeholder
+            from lollypop.widgets_placeholder import Placeholder
             self.__placeholder = Placeholder(message, self._empty_icon_name)
             self.__placeholder.show()
             self.__stack.add(self.__placeholder)

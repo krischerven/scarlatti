@@ -20,7 +20,6 @@ from lollypop.widgets_player_progress import ProgressPlayerWidget
 from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
-from lollypop.objects_radio import Radio
 from lollypop.container import Container
 from lollypop.window_adaptive import AdaptiveWindow
 from lollypop.logger import Logger
@@ -285,10 +284,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             Update progress bar visibility
         """
         if App().player.current_track.id is not None:
-            if isinstance(App().player.current_track, Radio):
-                self.__progress_widget.hide()
-            else:
-                self.__progress_widget.show()
+            self.__progress_widget.show()
         else:
             self.__progress_widget.hide()
 
@@ -309,18 +305,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
                           ArtBehaviour.DARKER)
             # We don't want this for background, stored for album cover
             behaviour &= ~ArtBehaviour.ROUNDED
-            if isinstance(App().player.current_track, Radio):
-                if self.__background_id == App().player.current_track.name:
-                    return
-                App().art_helper.set_radio_artwork(
-                                    App().player.current_track.name,
-                                    allocation.width,
-                                    allocation.height,
-                                    self.get_scale_factor(),
-                                    behaviour | ArtBehaviour.BLUR_MAX,
-                                    self.__on_artwork,
-                                    False)
-            elif not album_artwork and\
+            if not album_artwork and\
                     App().settings.get_value("artist-artwork"):
                 if App().player.current_track.album.artists:
                     artist = App().player.current_track.album.artists[0]

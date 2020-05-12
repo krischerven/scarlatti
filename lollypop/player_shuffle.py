@@ -14,7 +14,6 @@ from random import shuffle, random
 
 from lollypop.define import Repeat, App
 from lollypop.objects_track import Track
-from lollypop.objects_radio import Radio
 from lollypop.objects_album import Album
 from lollypop.list import LinkedList
 from lollypop.utils import emit_signal, get_default_storage_type
@@ -85,8 +84,7 @@ class ShufflePlayer:
         def start_party(*ignore):
             if self._albums:
                 # Start a new song if not playing
-                if self._current_playback_track.id is None or\
-                        isinstance(self._current_playback_track, Radio):
+                if self._current_playback_track.id is None:
                     track = self.__get_tracks_random()
                     self.load(track)
                 elif not self.is_playing:
