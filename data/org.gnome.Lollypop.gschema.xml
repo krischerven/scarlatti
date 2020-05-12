@@ -31,7 +31,7 @@
     </enum>
     <schema path="/org/gnome/Lollypop/" id="org.gnome.Lollypop" gettext-domain="lollypop">
         <key type="ai" name="window-size">
-            <default>[768, 600]</default>
+            <default>[851, 600]</default>
             <summary>Window size</summary>
             <description>Window size (width and height).</description>
         </key>

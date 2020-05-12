@@ -221,8 +221,8 @@ class Size:
     PHONE = 360  # Librem Phone
     SMALL = 500
     MEDIUM = 720
-    NORMAL = 1000
-    BIG = 1300
+    NORMAL = 850
+    BIG = 1000
 
 
 class OrderBy:

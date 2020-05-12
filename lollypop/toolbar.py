@@ -108,7 +108,10 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             width = self.__toolbar_playback.get_preferred_width()[1]
             width += self.__toolbar_end.get_preferred_width()[1]
             available = allocation.width - width
-            title_width = available / 2.5
+            if allocation.width < Size.BIG:
+                title_width = available / 3
+            else:
+                title_width = available / 2.5
             self.__toolbar_title.set_width(title_width)
             self.__toolbar_info.set_width((available - title_width) / 2)
 
