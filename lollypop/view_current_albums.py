@@ -12,14 +12,13 @@
 
 from lollypop.utils_album import tracks_to_albums
 from lollypop.objects_track import Track
-from lollypop.view import View
 from lollypop.view_albums_list import AlbumsListView
-from lollypop.define import App, ViewType, Size, StorageType, MARGIN
+from lollypop.define import App, ViewType, Size, MARGIN
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
 
 
-class CurrentAlbumsView(View, SignalsHelper):
+class CurrentAlbumsView(AlbumsListView, SignalsHelper):
     """
         Popover showing Albums View
     """
@@ -30,19 +29,17 @@ class CurrentAlbumsView(View, SignalsHelper):
             Init view
             @param view_type as ViewType
         """
-        View.__init__(self, StorageType.ALL,
-                      view_type | ViewType.SCROLLED | ViewType.OVERLAY)
-        view_type |= ViewType.PLAYBACK
-        self.__view = AlbumsListView([], [], view_type)
-        self.__view.show()
-        self.__view.set_scrolled(self.scrolled)
-        self.__view.set_width(Size.MEDIUM)
+        AlbumsListView.__init__(self, [], [],
+                                view_type |
+                                ViewType.SCROLLED |
+                                ViewType.OVERLAY |
+                                ViewType.PLAYBACK)
+        self.box.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
-            self.__view.dnd_helper.connect("dnd-finished",
-                                           self.__on_dnd_finished)
-        self.__banner = CurrentAlbumsBannerWidget(self.__view)
+            self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
+        self.__banner = CurrentAlbumsBannerWidget(self)
         self.__banner.show()
-        self.add_widget(self.__view, self.__banner)
+        self.add_widget(self.box, self.__banner)
         self.allow_duplicate("_on_queue_changed")
         self.allow_duplicate("_on_playback_added")
         self.allow_duplicate("_on_playback_updated")
@@ -66,8 +63,8 @@ class CurrentAlbumsView(View, SignalsHelper):
             albums = App().player.albums
         if albums:
             if len(albums) == 1:
-                self.__view.add_reveal_albums(albums)
-            self.__view.populate(albums)
+                self.add_reveal_albums(albums)
+            AlbumsListView.populate(self, albums)
             self.show_placeholder(False)
         else:
             self.show_placeholder(True)
@@ -79,7 +76,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             @return [Gtk.Widget]
         """
         filtered = []
-        for child in self.__view.children:
+        for child in self.children:
             filtered.append(child)
             for subchild in child.children:
                 filtered.append(subchild)
@@ -112,7 +109,7 @@ class CurrentAlbumsView(View, SignalsHelper):
         """
         queue = App().player.queue
         if queue:
-            for row in self.__view.children:
+            for row in self.children:
                 if row.revealed:
                     for subrow in row.children:
                         if subrow.track.id not in queue:
@@ -126,8 +123,8 @@ class CurrentAlbumsView(View, SignalsHelper):
                             row.destroy()
                         break
         else:
-            self.__view.stop()
-            self.__view.clear()
+            self.stop()
+            self.clear()
             self.populate()
 
     def _on_playback_added(self, player, album):
@@ -136,7 +133,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param player as Player
             @param album as Album
         """
-        self.__view.add_value(album)
+        self.add_value(album)
         self.show_placeholder(False)
 
     def _on_playback_updated(self, player, album):
@@ -145,7 +142,7 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param player as Player
             @param album as Album
         """
-        for child in self.__view.children:
+        for child in self.children:
             if child.album == album:
                 child.reset()
                 break
@@ -157,13 +154,13 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param albums as [Album]
         """
         if albums:
-            self.__view.stop()
-            self.__view.clear()
-            self.__view.populate(albums)
+            self.stop()
+            self.clear()
+            AlbumsListView.populate(self, albums)
             self.show_placeholder(False)
         else:
-            self.__view.stop()
-            self.__view.clear()
+            self.stop()
+            self.clear()
             self.show_placeholder(True)
 
     def _on_playback_removed(self, player, album):
@@ -172,12 +169,42 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param player as Player
             @param album as Album
         """
-        for child in self.__view.children:
+        for child in self.children:
             if child.album == album:
                 child.destroy()
                 break
-        if not self.__view.children:
+        if not self.children:
             self.show_placeholder(True)
+
+    def _on_row_activated(self, row, track):
+        """
+            Start playback
+            @param row as AlbumRow
+            @param track_id as int
+        """
+        App().player.load(track)
+
+    def _on_row_destroy(self, row):
+        """
+            Remove album from playback
+            @param row as AlbumRow
+        """
+        if row.album.id in App().player.album_ids:
+            if App().player.current_track.album == row.album:
+                App().player.skip_album()
+            App().player.remove_album(row.album)
+        else:
+            App().player.add_album(row.album)
+
+    def _on_track_removed(self, row, track):
+        """
+            Remove track from playback
+            @param row as AlbumRow
+            @param track as Track
+        """
+        row.album.remove_track(track)
+        if not row.children:
+            row.destroy()
 
 #######################
 # PRIVATE             #
@@ -188,6 +215,6 @@ class CurrentAlbumsView(View, SignalsHelper):
             @param dnd_helper as DNDHelper
         """
         albums = []
-        for child in self.__view.children:
+        for child in self.children:
             albums.append(child.album)
         App().player.set_albums(albums, False)

@@ -51,6 +51,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.set_overlay_pass_through(widget, True)
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
+        self.connect("destroy", self.__on_destroy)
         return [
             (view, "initialized", "_on_view_updated"),
             (view.dnd_helper, "dnd-finished", "_on_view_updated"),
@@ -206,3 +207,10 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
             @param duration as int
         """
         self.__duration_label.set_text(get_human_duration(duration))
+
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle
+            @param widget as Gtk.Widget
+        """
+        self.__view = None

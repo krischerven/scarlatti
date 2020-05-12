@@ -12,8 +12,7 @@
 
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import get_default_storage_type
-from lollypop.view_lazyloading import LazyLoadingView
-from lollypop.define import App, ViewType, MARGIN, Type, Size, StorageType
+from lollypop.define import App, ViewType, MARGIN, Type, Size
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.widgets_banner_playlist import PlaylistBannerWidget
@@ -22,7 +21,7 @@ from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
+class PlaylistsView(AlbumsListView, SignalsHelper, SizeAllocationHelper):
     """
         View showing playlists
     """
@@ -34,23 +33,18 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
             @parma playlist_id as int
             @param view_type as ViewType
         """
-        LazyLoadingView.__init__(self, StorageType.ALL,
-                                 view_type |
-                                 ViewType.SCROLLED |
-                                 ViewType.OVERLAY)
+        AlbumsListView.__init__(self, [], [], view_type |
+                                ViewType.SCROLLED |
+                                ViewType.OVERLAY)
         SizeAllocationHelper.__init__(self)
         self.__playlist_id = playlist_id
-        # We remove SCROLLED because we want to be the scrolled view
-        self._view = AlbumsListView([], [], view_type & ~ViewType.SCROLLED)
-        self._view.set_scrolled(self.scrolled)
-        self._view.set_width(Size.MEDIUM)
+        self.box.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
-            self._view.dnd_helper.connect("dnd-finished",
-                                          self.__on_dnd_finished)
-        self._view.show()
-        self.__banner = PlaylistBannerWidget(playlist_id, self._view)
+            self.dnd_helper.connect("dnd-finished",
+                                    self.__on_dnd_finished)
+        self.__banner = PlaylistBannerWidget(playlist_id, self)
         self.__banner.show()
-        self.add_widget(self._view, self.__banner)
+        self.add_widget(self.box, self.__banner)
         return [
                 (App().playlists, "playlist-track-added",
                  "_on_playlist_track_added"),
@@ -70,31 +64,6 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         else:
             self.__populate()
 
-    def pause(self):
-        """
-            pause populating
-        """
-        self._view.pause()
-
-    def remove_from_playlist(self, object):
-        """
-            Remove object from playlist
-            @param object as Album/Track
-        """
-        if isinstance(object, Album):
-            tracks = object.tracks
-        else:
-            tracks = [object]
-        App().playlists.remove_tracks(self.__playlist_id, tracks)
-
-    @property
-    def view(self):
-        """
-            Get album view
-            @return AlbumsListView
-        """
-        return self._view
-
     @property
     def args(self):
         """
@@ -111,7 +80,7 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
             @return [Gtk.Widget]
         """
         filtered = []
-        for child in self._view.children:
+        for child in self.children:
             filtered.append(child)
             for subchild in child.children:
                 filtered.append(subchild)
@@ -139,8 +108,8 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
             track = Track(App().tracks.get_id_by_uri(uri))
             album = Album(track.album.id)
             album.set_tracks([track])
-            self._view.add_reveal_albums([album])
-            self._view.add_value(album)
+            self.add_reveal_albums([album])
+            self.add_value(album)
 
     def _on_playlist_track_removed(self, playlists, playlist_id, uri):
         """
@@ -151,13 +120,12 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         """
         if playlist_id == self.__playlist_id:
             track = Track(App().tracks.get_id_by_uri(uri))
-            children = self._view.children
-            for album_row in children:
+            for album_row in self.children:
                 if album_row.album.id == track.album.id:
                     for track_row in album_row.children:
                         if track_row.track.id == track.id:
                             track_row.destroy()
-                            if len(children) == 1:
+                            if len(self.children) == 1:
                                 album_row.destroy()
                                 break
 
@@ -167,7 +135,7 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
             @param playlists as Playlists
             @param playlist_id as int
         """
-        self._view.clear()
+        self.clear()
         self.populate()
 
     def _on_playlist_removed(self, playlists, playlist_id):
@@ -186,6 +154,36 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         """
         self.__banner.rename(App().playlists.get_name(playlist_id))
 
+    def _on_row_activated(self, row, track):
+        """
+            Start playback
+            @param row as AlbumRow
+            @param track_id as int
+        """
+        if App().player.is_party:
+            App().player.load(track)
+        else:
+            albums = []
+            for album_row in self.children:
+                albums.append(album_row.album)
+            App().player.play_track_for_albums(track, albums)
+
+    def _on_row_destroy(self, row):
+        """
+            Remove album from playback
+            @param row as AlbumRow
+        """
+        App().playlists.remove_tracks(self.__playlist_id, row.album.tracks)
+
+    def _on_track_removed(self, row, track):
+        """
+            @param row as AlbumRow
+            @param track as Track
+        """
+        App().playlists.remove_tracks(self.__playlist_id, [track])
+        if not row.children:
+            row.destroy()
+
 #######################
 # PRIVATE             #
 #######################
@@ -194,8 +192,8 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
             Populate view
         """
         def on_load(albums):
-            self._view.add_reveal_albums(albums)
-            self._view.populate(albums)
+            self.add_reveal_albums(albums)
+            AlbumsListView.populate(self, albums)
 
         def load():
             track_ids = []
@@ -221,8 +219,8 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         """
         def on_load(albums):
             self.banner.spinner.stop()
-            self._view.add_reveal_albums(albums)
-            self._view.populate(albums)
+            self.add_reveal_albums(albums)
+            AlbumsListView.populate(self, albums)
 
         def load():
             request = App().playlists.get_smart_sql(self.__playlist_id)
@@ -245,7 +243,7 @@ class PlaylistsView(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         """
         if self.__playlist_id >= 0:
             uris = []
-            for child in self._view.children:
+            for child in self.children:
                 for track in child.album.tracks:
                     uris.append(track.uri)
             App().playlists.clear(self.__playlist_id)

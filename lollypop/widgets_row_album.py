@@ -29,6 +29,8 @@ class AlbumRow(Gtk.ListBoxRow):
         "activated": (GObject.SignalFlags.RUN_FIRST,
                       None, (GObject.TYPE_PYOBJECT,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "track-removed": (GObject.SignalFlags.RUN_FIRST, None,
+                          (GObject.TYPE_PYOBJECT,)),
     }
 
     def get_best_height(widget):
@@ -345,9 +347,7 @@ class AlbumRow(Gtk.ListBoxRow):
             @param row as TrackRow
         """
         row.destroy()
-        App().player.remove_track_from_album(row.track, row.track.album)
-        if len(self.children) == 0:
-            self.destroy()
+        emit_signal(self, "track-removed", row.track)
 
     def __on_tracks_view_populated(self, view):
         """
@@ -368,19 +368,6 @@ class AlbumRow(Gtk.ListBoxRow):
         if not self.get_state_flags() & Gtk.StateFlags.PRELIGHT:
             return True
         self.destroy()
-        if self.__view_type & ViewType.PLAYBACK:
-            if self.__album.id in App().player.album_ids:
-                if App().player.current_track.album == self.__album:
-                    App().player.skip_album()
-                App().player.remove_album(self.__album)
-            else:
-                App().player.add_album(self.__album)
-            self.destroy()
-        elif self.__view_type & ViewType.PLAYLISTS:
-            from lollypop.view_playlists import PlaylistsView
-            view = self.get_ancestor(PlaylistsView)
-            if view is not None:
-                view.remove_from_playlist(self.__album)
 
     def __on_play_clicked(self, button):
         """

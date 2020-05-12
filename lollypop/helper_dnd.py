@@ -326,9 +326,10 @@ class DNDHelper(GObject.Object):
             return
         y += start_y
         (listbox, row) = self.__get_row_at_y(y)
-        if row is None:
+        if row is None or row in self.__drag_begin_rows:
             return
-        if self.__drag_begin_rows and row not in self.__drag_begin_rows:
+        gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+        if self.__drag_begin_rows:
             row_height = row.get_allocated_height()
             (row_x, row_y) = row.translate_coordinates(self.__listbox,
                                                        0, 0)

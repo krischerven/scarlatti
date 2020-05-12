@@ -260,13 +260,7 @@ class TrackRow(Gtk.ListBoxRow):
             Show row menu
             @param button as Gtk.Button
         """
-        if self.__view_type & ViewType.PLAYBACK:
-            emit_signal(self, "removed")
-        elif self.__view_type & ViewType.PLAYLISTS:
-            from lollypop.view_playlists import PlaylistsView
-            view = self.get_ancestor(PlaylistsView)
-            if view is not None:
-                view.remove_from_playlist(self._track)
+        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
             emit_signal(self, "removed")
         else:
             self.popup_menu(button)

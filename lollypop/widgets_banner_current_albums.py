@@ -90,6 +90,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         grid.add(buttons)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
+        self.connect("destroy", self.__on_destroy)
         return [
             (view, "initialized", "_on_view_updated"),
             (App().player, "playback-added", "_on_playback_changed"),
@@ -249,3 +250,10 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         self.__view.clear(True)
         self.__view.populate([])
         emit_signal(App().player, "status-changed")
+
+    def __on_destroy(self, widget):
+        """
+            Remove ref cycle
+            @param widget as Gtk.Widget
+        """
+        self.__view = None

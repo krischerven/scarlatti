@@ -20,6 +20,22 @@ from lollypop.helper_gestures import GesturesHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
+class ListBox(Gtk.ListBox):
+    def __init__(self):
+        Gtk.ListBox.__init__(self)
+        self.__width = 0
+
+    def set_width(self, width):
+        self.set_property("halign", Gtk.Align.CENTER)
+        self.__width = width
+
+    def do_get_preferred_width(self):
+        if self.__width == 0:
+            return Gtk.ListBox.do_get_preferred_width(self)
+        else:
+            return (self.__width, self.__width)
+
+
 class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
     """
         View showing albums
@@ -34,14 +50,13 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             @param view_type as ViewType
         """
         LazyLoadingView.__init__(self, StorageType.ALL, view_type)
-        self.__width = 0
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__reveals = []
         # Calculate default album height based on current pango context
         # We may need to listen to screen changes
         self.__height = AlbumRow.get_best_height(self)
-        self._box = Gtk.ListBox()
+        self._box = ListBox()
         self._box.set_margin_bottom(MARGIN)
         self._box.set_margin_end(MARGIN)
         self._box.get_style_context().add_class("trackswidget")
@@ -53,7 +68,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             from lollypop.helper_dnd import DNDHelper
             self.__dnd_helper = DNDHelper(self._box, view_type)
             self.__dnd_helper.connect("dnd-insert", self.__on_dnd_insert)
-        self.add_widget(self._box)
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "duration-changed", "_on_duration_changed"),
@@ -87,7 +101,9 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             @param row as AlbumRow
             @param index as int
         """
-        row.connect("activated", self.__on_row_activated)
+        row.connect("activated", self._on_row_activated)
+        row.connect("destroy", self._on_row_destroy)
+        row.connect("track-removed", self._on_track_removed)
         row.show()
         self._box.insert(row, index)
 
@@ -111,14 +127,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         if clear_albums:
             App().player.clear_albums()
 
-    def set_width(self, width):
-        """
-            Set list width
-            @param width as int
-        """
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.__width = width
-
     def jump_to_current(self):
         """
             Scroll to album
@@ -126,12 +134,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         y = self.__get_current_ordinate()
         if y is not None:
             self.scrolled.get_vadjustment().set_value(y)
-
-    def do_get_preferred_width(self):
-        if self.__width == 0:
-            return LazyLoadingView.do_get_preferred_width(self)
-        else:
-            return (self.__width, self.__width)
 
     @property
     def args(self):
@@ -180,7 +182,9 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         if self.destroyed:
             return None
         row = AlbumRow(album, self.__height, self.view_type)
-        row.connect("activated", self.__on_row_activated)
+        row.connect("activated", self._on_row_activated)
+        row.connect("destroy", self._on_row_destroy)
+        row.connect("track-removed", self._on_track_removed)
         row.show()
         self._box.add(row)
         return row
@@ -253,6 +257,15 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         else:
             LazyLoadingView._on_populated(self, widget)
 
+    def _on_row_activated(self, row, track):
+        pass
+
+    def _on_row_destroy(self, row):
+        pass
+
+    def _on_track_removed(self, row, track):
+        pass
+
 #######################
 # PRIVATE             #
 #######################
@@ -301,22 +314,3 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             @param index as int
         """
         self.insert_row(row, index)
-
-    def __on_row_activated(self, row, track):
-        """
-            Start playback
-            @param row as AlbumRow
-            @param track_id as int
-        """
-        # In party mode, just play track_id and continue party mode
-        if App().player.is_party or self.view_type & ViewType.PLAYBACK:
-            App().player.load(track)
-        elif self.view_type & ViewType.PLAYLISTS:
-            albums = []
-            for album_row in self.children:
-                albums.append(album_row.album)
-            App().player.play_track_for_albums(track, albums)
-        else:
-            App().player.remove_album_by_id(track.album.id)
-            App().player.add_album(track.album)
-            App().player.load(track)
