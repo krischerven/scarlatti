@@ -248,7 +248,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
             @param button as Gtk.Button
         """
         self.__view.clear(True)
-        self.__view.populate([])
+        self.__view.populate()
         emit_signal(App().player, "status-changed")
 
     def __on_destroy(self, widget):
