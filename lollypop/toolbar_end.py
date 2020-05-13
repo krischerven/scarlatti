@@ -189,12 +189,18 @@ class ToolbarEnd(Gtk.Bin):
             Init party submenu with current ids
         """
         def update_party_ids(party_ids, value, genre_id):
+            all_ids = App().genres.get_ids() + [Type.WEB]
             if value:
                 if genre_id not in party_ids:
                     party_ids.append(genre_id)
+                if len(party_ids) == len(all_ids):
+                    party_ids = []
             else:
+                if not party_ids:
+                    party_ids = all_ids
                 if genre_id in party_ids:
                     party_ids.remove(genre_id)
+            return party_ids
 
         def on_change_state(action, value, genre_id, all_ids, party_ids):
             action.set_state(value)
@@ -202,10 +208,10 @@ class ToolbarEnd(Gtk.Bin):
                 for genre_id in all_ids:
                     action = App().lookup_action("genre_%s" % genre_id)
                     action.set_state(value)
-                    update_party_ids(party_ids, value, genre_id)
+                    party_ids = update_party_ids(party_ids, value, genre_id)
             else:
-                update_party_ids(party_ids, value, genre_id)
-            all_selected = len(all_ids) == len(party_ids)
+                party_ids = update_party_ids(party_ids, value, genre_id)
+            all_selected = not party_ids or len(party_ids) == len(all_ids)
             App().lookup_action("all_party_ids").set_state(
                 GLib.Variant("b", all_selected))
             App().settings.set_value("party-ids",
@@ -216,7 +222,7 @@ class ToolbarEnd(Gtk.Bin):
 
         party_ids = list(App().settings.get_value("party-ids"))
         all_ids = App().genres.get_ids() + [Type.WEB]
-        all_selected = party_ids and len(party_ids) == len(all_ids)
+        all_selected = not party_ids or len(party_ids) == len(all_ids)
         action = Gio.SimpleAction.new_stateful(
                     "all_party_ids",
                     None,
