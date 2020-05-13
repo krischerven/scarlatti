@@ -139,6 +139,7 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             18: self.__upgrade_18,
             19: self.__upgrade_19,
             20: self.__upgrade_20,
+            21: self.__upgrade_21,
             22: self.__upgrade_22,
             23: self.__upgrade_23,
             24: "ALTER TABLE albums ADD album_id TEXT",
@@ -479,6 +480,9 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                                    ltime,\
                                    persistent FROM backup")
             sql.execute("DROP TABLE backup")
+
+    def __upgrade_21(self, db):
+        pass
 
     def __upgrade_22(self, db):
         """
