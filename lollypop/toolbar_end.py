@@ -188,6 +188,18 @@ class ToolbarEnd(Gtk.Bin):
         """
             Init party submenu with current ids
         """
+        def update_actions():
+            # Update state with a thread
+            party_ids = list(App().settings.get_value("party-ids"))
+            all_ids = App().genres.get_ids() + [Type.WEB]
+            all_selected = not party_ids or len(party_ids) == len(all_ids)
+            App().lookup_action("all_party_ids").set_state(
+                GLib.Variant.new_boolean(all_selected))
+            for genre_id in all_ids:
+                in_party_ids = not party_ids or genre_id in party_ids
+                action = App().lookup_action("genre_%s" % genre_id)
+                action.set_state(GLib.Variant.new_boolean(in_party_ids))
+
         def update_party_ids(party_ids, value, genre_id):
             all_ids = App().genres.get_ids() + [Type.WEB]
             if value:
@@ -203,6 +215,8 @@ class ToolbarEnd(Gtk.Bin):
             return party_ids
 
         def on_change_state(action, value, genre_id, all_ids, party_ids):
+            party_ids = list(App().settings.get_value("party-ids"))
+            all_ids = App().genres.get_ids() + [Type.WEB]
             action.set_state(value)
             if genre_id is None:
                 for genre_id in all_ids:
@@ -220,35 +234,31 @@ class ToolbarEnd(Gtk.Bin):
                                   callback=(
                                     lambda x: App().player.set_next(),))
 
-        party_ids = list(App().settings.get_value("party-ids"))
-        all_ids = App().genres.get_ids() + [Type.WEB]
-        all_selected = not party_ids or len(party_ids) == len(all_ids)
+        # Create actions
         action = Gio.SimpleAction.new_stateful(
                     "all_party_ids",
                     None,
-                    GLib.Variant.new_boolean(all_selected))
-        action.connect("change-state", on_change_state, None,
-                       all_ids, party_ids)
+                    GLib.Variant.new_boolean(False))
+        action.connect("change-state", on_change_state)
         App().add_action(action)
         item = Gio.MenuItem.new(_("All genres"), "app.all_party_ids")
         self.__party_submenu.append_item(item)
         genres = App().genres.get()
         genres += [(Type.WEB, _("Web"), _("Web"))]
         for (genre_id, name, sortname) in genres:
-            in_party_ids = not party_ids or genre_id in party_ids
             action_name = "genre_%s" % genre_id
             action = Gio.SimpleAction.new_stateful(
                 action_name,
                 None,
-                GLib.Variant.new_boolean(in_party_ids))
-            action.connect("change-state", on_change_state, genre_id,
-                           all_ids, party_ids)
+                GLib.Variant.new_boolean(False))
+            action.connect("change-state", on_change_state, genre_id)
             if genre_id == Type.WEB:
                 action.set_enabled(get_network_available("YOUTUBE"))
             App().add_action(action)
             menu_str = name if len(name) < 20 else name[0:20] + "…"
             item = Gio.MenuItem.new(menu_str, "app.%s" % action_name)
             self.__party_submenu.append_item(item)
+        App().task_helper.run(update_actions)
 
     def __set_shuffle_icon(self):
         """
