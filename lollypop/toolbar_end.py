@@ -214,7 +214,7 @@ class ToolbarEnd(Gtk.Bin):
                     party_ids.remove(genre_id)
             return party_ids
 
-        def on_change_state(action, value, genre_id, all_ids, party_ids):
+        def on_change_state(action, value, genre_id):
             party_ids = list(App().settings.get_value("party-ids"))
             all_ids = App().genres.get_ids() + [Type.WEB]
             action.set_state(value)
@@ -239,7 +239,7 @@ class ToolbarEnd(Gtk.Bin):
                     "all_party_ids",
                     None,
                     GLib.Variant.new_boolean(False))
-        action.connect("change-state", on_change_state)
+        action.connect("change-state", on_change_state, None)
         App().add_action(action)
         item = Gio.MenuItem.new(_("All genres"), "app.all_party_ids")
         self.__party_submenu.append_item(item)
