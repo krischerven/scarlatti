@@ -190,7 +190,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             @param row as AlbumRow
         """
         if row.album.id in App().player.album_ids:
-            if App().player.current_track.album == row.album:
+            if App().player.current_track in row.album.tracks:
                 App().player.skip_album()
             App().player.remove_album(row.album)
         else:
@@ -202,6 +202,9 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             @param row as AlbumRow
             @param track as Track
         """
+        if App().player.current_track == track:
+            if App().player.next_track.id != track.id:
+                App().player.next()
         row.album.remove_track(track)
         if not row.children:
             row.destroy()
