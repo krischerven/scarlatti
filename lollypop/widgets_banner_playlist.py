@@ -54,12 +54,10 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         return [
             (view, "initialized", "_on_view_updated"),
-            (view.dnd_helper, "dnd-finished", "_on_view_updated"),
             (App().player, "duration-changed", "_on_view_updated"),
-            (App().player, "playback-added", "_on_playback_changed"),
-            (App().player, "playback-updated", "_on_playback_changed"),
-            (App().player, "playback-setted", "_on_playback_changed"),
-            (App().player, "playback-removed", "_on_playback_changed"),
+            (App().playlists, "playlist-track-added", "_on_playlist_changed"),
+            (App().playlists, "playlist-track-removed",
+             "_on_playlist_changed"),
         ]
 
     def update_for_width(self, width):
@@ -163,12 +161,15 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)
 
-    def _on_playback_changed(self, player, *ignore):
+    def _on_playlist_changed(self, playlists, playlist_id, uri):
         """
-            Update clear button state
-            @param player as Player
+            Update duration
+            @param playlists as Playlists
+            @param playlist_id as int
+            @param uri as str
         """
-        self.__calculate_duration()
+        if self.__playlist_id == playlist_id:
+            self.__calculate_duration()
 
 #######################
 # PRIVATE             #

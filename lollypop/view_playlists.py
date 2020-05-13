@@ -173,14 +173,19 @@ class PlaylistsView(AlbumsListView, SignalsHelper, SizeAllocationHelper):
             Remove album from playback
             @param row as AlbumRow
         """
-        App().playlists.remove_tracks(self.__playlist_id, row.album.tracks)
+        App().playlists.remove_tracks(self.__playlist_id,
+                                      row.album.tracks,
+                                      True)
 
     def _on_track_removed(self, row, track):
         """
             @param row as AlbumRow
             @param track as Track
         """
-        App().playlists.remove_tracks(self.__playlist_id, [track])
+        row.album.remove_track(track)
+        App().playlists.remove_tracks(self.__playlist_id,
+                                      [track],
+                                      True)
         if not row.children:
             row.destroy()
 

@@ -180,10 +180,10 @@ class Playlists(GObject.GObject):
         """
         if self.exists_track(playlist_id, uri):
             return
-        if signal:
-            emit_signal(self, "playlist-track-added", playlist_id, uri)
         with SqlCursor(self, True) as sql:
             sql.execute("INSERT INTO tracks VALUES (?, ?)", (playlist_id, uri))
+        if signal:
+            emit_signal(self, "playlist-track-added", playlist_id, uri)
 
     def add_uris(self, playlist_id, uris, signal=False):
         """
@@ -216,11 +216,11 @@ class Playlists(GObject.GObject):
         """
         if not self.exists_track(playlist_id, uri):
             return
-        if signal:
-            emit_signal(self, "playlist-track-removed", playlist_id, uri)
         with SqlCursor(self, True) as sql:
             sql.execute("DELETE FROM tracks WHERE uri=? AND playlist_id=?",
                         (uri, playlist_id))
+        if signal:
+            emit_signal(self, "playlist-track-removed", playlist_id, uri)
 
     def remove_uris(self, playlist_id, uris, signal=False):
         """
