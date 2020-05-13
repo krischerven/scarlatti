@@ -143,6 +143,7 @@ class InformationView(View):
             albums_view.set_size_request(300, -1)
             albums_view.show()
             albums_view.set_margin_start(5)
+            albums_view.add_widget(albums_view.box)
             widget.attach(albums_view, 2, 1, 1, 2)
             albums = []
             storage_type = get_default_storage_type()
