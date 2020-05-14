@@ -16,7 +16,7 @@ from gettext import gettext as _
 from time import time
 
 from lollypop.objects_track import Track
-from lollypop.define import App, Type
+from lollypop.define import App
 from lollypop.logger import Logger
 
 
@@ -92,15 +92,13 @@ class RatingWidget(Gtk.Bin):
         """
         user_rating = True
         rate = self.__object.rate
-        # -1 for compatiblity with previous release
-        if rate in [0, -1]:
+        if rate < 1:
             rate = self.__object.get_popularity()
             user_rating = False
-        if rate < 1:
             for i in range(5):
                 self._stars[i].set_opacity(0.2)
                 self._stars[i].get_style_context().remove_class("selected")
-        else:
+        if rate > 0:
             star = self.__star_from_rate(rate)
             # Select wanted star
             for idx in range(0, star):
@@ -123,8 +121,7 @@ class RatingWidget(Gtk.Bin):
         """
         user_rating = True
         rate = self.__object.rate
-        # -1 for compatiblity with previous release
-        if rate in [0, -1]:
+        if rate < 1:
             rate = self.__object.get_popularity()
             user_rating = False
         max_star = self.__star_from_rate(rate)
@@ -136,9 +133,11 @@ class RatingWidget(Gtk.Bin):
         pop = position + 1
         if event.button != 1:
             self.__object.set_popularity(pop)
+            self.__object.set_rate(0)
+            self._on_leave_notify_event(None, None)
         elif pop == 0 or pop == max_star:
             if user_rating:
-                self.__object.set_rate(Type.NONE)
+                self.__object.set_rate(0)
             else:
                 self.__object.set_popularity(0)
             self._on_leave_notify_event(None, None)
