@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from lollypop.utils_album import tracks_to_albums
+from lollypop.utils import emit_signal
 from lollypop.objects_track import Track
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.define import App, ViewType, Size, MARGIN
@@ -206,6 +207,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             if App().player.next_track.id != track.id:
                 App().player.next()
         row.album.remove_track(track)
+        emit_signal(App().player, "playback-updated", row.album)
         if not row.children:
             row.destroy()
 
