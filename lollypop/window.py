@@ -103,10 +103,14 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.__vgrid.add(self.__miniplayer)
             self.__miniplayer.set_vexpand(False)
         elif not show and self.__miniplayer is not None:
-            self.__miniplayer.destroy()
-            self.__miniplayer = None
-            self.__container.show()
-            show_buttons(True)
+            if App().lookup_action("miniplayer").get_state():
+                App().lookup_action("miniplayer").change_state(
+                    GLib.Variant("b", False))
+            else:
+                self.__miniplayer.destroy()
+                self.__miniplayer = None
+                self.__container.show()
+                show_buttons(True)
         if self.__miniplayer is not None:
             if reveal:
                 self.__miniplayer.reveal(True)
