@@ -133,14 +133,14 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
         try:
             if App().settings.get_value("save-state"):
-                self._current_playback_track = Track(
+                self._current_track = Track(
                     load(open(LOLLYPOP_DATA_PATH + "/track_id.bin", "rb")))
                 self.set_queue(load(open(LOLLYPOP_DATA_PATH +
                                          "/queue.bin", "rb")))
                 albums = load(open(LOLLYPOP_DATA_PATH + "/Albums.bin", "rb"))
                 (is_playing, was_party) = load(open(LOLLYPOP_DATA_PATH +
                                                     "/player.bin", "rb"))
-                if self._current_playback_track.uri:
+                if self._current_track.uri:
                     if albums:
                         if was_party:
                             App().lookup_action("party").change_state(
@@ -149,9 +149,9 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                             self.set_albums(albums)
                         # Load track from player albums
                         index = self.album_ids.index(
-                            self._current_playback_track.album.id)
+                            self._current_track.album.id)
                         for track in self._albums[index].tracks:
-                            if track.id == self._current_playback_track.id:
+                            if track.id == self._current_track.id:
                                 self._load_track(track)
                                 break
                     if is_playing:
@@ -179,7 +179,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Set previous track
         """
-        if self._current_playback_track.id is None:
+        if self._current_track.id is None:
             return
         try:
             if App().settings.get_value("shuffle") or self.is_party:
@@ -195,7 +195,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Play next track
         """
-        if self._current_playback_track.id is None:
+        if self._current_track.id is None:
             return
         if self._current_track.id == self.__stop_after_track_id:
             self._next_track = Track()
@@ -278,8 +278,6 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
         if self.is_in_queue(self._current_track.id):
             self.remove_from_queue(self._current_track.id)
-        else:
-            self._current_playback_track = self._current_track
         ShufflePlayer._on_stream_start(self, bus, message)
         BinPlayer._on_stream_start(self, bus, message)
         AutoSimilarPlayer._on_stream_start(self, bus, message)

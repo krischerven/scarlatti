@@ -39,13 +39,13 @@ class LinearPlayer:
             return Track()
         # User want us to repeat current track
         elif repeat == Repeat.TRACK:
-            return self._current_playback_track
-        album = self._current_playback_track.album
+            return self._current_track
+        album = self._current_track.album
         track = self.__fallback_track_if_album_missing(album)
         # Current album missing, go to fallback track
         if track is not None:
             return track
-        new_track_position = self._current_playback_track.position + 1
+        new_track_position = self._current_track.position + 1
         # next album
         if new_track_position >= len(album.track_ids):
             try:
@@ -85,13 +85,13 @@ class LinearPlayer:
             return Track()
         # User want us to repeat current track
         elif repeat == Repeat.TRACK:
-            return self._current_playback_track
-        album = self._current_playback_track.album
+            return self._current_track
+        album = self._current_track.album
         track = self.__fallback_track_if_album_missing(album)
         # Current album missing, go to fallback track
         if track is not None:
             return track
-        new_track_position = self._current_playback_track.position - 1
+        new_track_position = self._current_track.position - 1
         # Previous album
         if new_track_position < 0:
             try:

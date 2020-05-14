@@ -207,7 +207,7 @@ class AlbumsPlayer:
                 self.set_next()
             elif self._current_track.id is not None:
                 index = self._albums.index(
-                    self._current_playback_track.album)
+                    self._current_track.album)
                 if index + 1 >= len(self._albums):
                     repeat = App().settings.get_enum("repeat")
                     if repeat == Repeat.AUTO_SIMILAR:

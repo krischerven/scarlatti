@@ -52,7 +52,7 @@ class ShufflePlayer:
         """
         repeat = App().settings.get_enum("repeat")
         if repeat == Repeat.TRACK:
-            return self._current_playback_track
+            return self._current_track
         if self.shuffle_has_next:
             track = self.__history.next.value
         elif self._albums:
@@ -68,11 +68,11 @@ class ShufflePlayer:
         """
         repeat = App().settings.get_enum("repeat")
         if repeat == Repeat.TRACK:
-            return self._current_playback_track
+            return self._current_track
         if self.shuffle_has_prev:
             track = self.__history.prev.value
         else:
-            track = self._current_playback_track
+            track = self._current_track
         return track
 
     def set_party(self, party):
@@ -84,7 +84,7 @@ class ShufflePlayer:
         def start_party(*ignore):
             if self._albums:
                 # Start a new song if not playing
-                if self._current_playback_track.id is None:
+                if self._current_track.id is None:
                     track = self.__get_tracks_random()
                     self.load(track)
                 elif not self.is_playing:
@@ -98,11 +98,11 @@ class ShufflePlayer:
             App().task_helper.run(self.set_party_ids, callback=(start_party,))
         else:
             # We want current album to continue playback
-            self._albums = [self._current_playback_track.album]
+            self._albums = [self._current_track.album]
             emit_signal(self, "playback-setted", [])
             emit_signal(self, "playback-added",
-                        self._current_playback_track.album)
-        if self._current_playback_track.id is not None:
+                        self._current_track.album)
+        if self._current_track.id is not None:
             self.set_next()
             self.set_prev()
 
@@ -153,36 +153,36 @@ class ShufflePlayer:
         """
             On stream start add to shuffle history
         """
-        if self._current_playback_track.id is None or\
-                self._current_playback_track.id < 0:
+        if self._current_track.id is None or\
+                self._current_track.id < 0:
             return
         # Add track to shuffle history if needed
         if App().settings.get_value("shuffle") or self.__is_party:
-            self.__add_to_shuffle_history(self._current_playback_track)
+            self.__add_to_shuffle_history(self._current_track)
             if self.__history:
                 next = self.__history.next
                 prev = self.__history.prev
                 # Remove next track
                 if next is not None and\
-                        self._current_playback_track == next.value:
+                        self._current_track == next.value:
                     next = self.__history.next
                     next.set_prev(self.__history)
                     self.__history = next
                 # Remove previous track
                 elif prev is not None and\
-                        self._current_playback_track == prev.value:
+                        self._current_track == prev.value:
                     prev = self.__history.prev
                     prev.set_next(self.__history)
                     self.__history = prev
                 # Add a new track
-                elif self.__history.value != self._current_playback_track:
-                    new_list = LinkedList(self._current_playback_track,
+                elif self.__history.value != self._current_track:
+                    new_list = LinkedList(self._current_track,
                                           None,
                                           self.__history)
                     self.__history = new_list
             else:
                 # Initial history
-                new_list = LinkedList(self._current_playback_track)
+                new_list = LinkedList(self._current_track)
                 self.__history = new_list
 
 #######################
@@ -194,7 +194,7 @@ class ShufflePlayer:
             @param settings as Gio.Settings
             @param value as GLib.Variant
         """
-        if self._current_playback_track.id is not None:
+        if self._current_track.id is not None:
             self.set_next()
 
     def __get_next(self):

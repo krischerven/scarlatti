@@ -36,7 +36,6 @@ class BinPlayer:
         self.__cancellable = Gio.Cancellable()
         self.__codecs = Codecs()
         self._current_track = Track()
-        self._current_playback_track = Track()
         self._next_track = Track()
         self._prev_track = Track()
         self._playbin = self._playbin1 = Gst.ElementFactory.make(
@@ -96,7 +95,7 @@ class BinPlayer:
             @param force as bool
         """
         self._current_track = Track()
-        self._current_playback_track = Track()
+        self._current_track = Track()
         self._prev_track = Track()
         self._next_track = Track()
         emit_signal(self, "current-changed")
