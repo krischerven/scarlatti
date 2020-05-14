@@ -85,6 +85,7 @@ class Base:
             if new_rate == 5:
                 popularity = (popularity + best_popularity) / 2
             self.db.set_popularity(self.id, popularity)
+            self.reset("popularity")
         except Exception as e:
             Logger.error("Base::set_popularity(): %s" % e)
 
@@ -94,4 +95,5 @@ class Base:
             @param rate as int between -1 and 5
         """
         self.db.set_rate(self.id, rate)
+        self.reset("rate")
         emit_signal(App().player, "rate-changed", self.id, rate)

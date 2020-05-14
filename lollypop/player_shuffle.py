@@ -278,7 +278,10 @@ class ShufflePlayer:
                 shuffle(self.__to_play_albums)
             if album not in self.__not_played_albums:
                 self.__not_played_albums.append(album)
-            if App().player.current_track.album == album:
+            # If album already playing or
+            # if current track was last one
+            if App().player.current_track.album == album or\
+                    not self.__already_played_tracks:
                 self.__add_to_shuffle_history(App().player.current_track)
 
     def __on_playback_setted(self, player, albums):
