@@ -13,7 +13,6 @@
 from gi.repository import Gio, GLib
 
 from lollypop.logger import Logger
-from lollypop.objects_radio import Radio
 from lollypop.helper_task import TaskHelper
 from lollypop.utils import escape, get_network_available
 from lollypop.utils_file import create_dir
@@ -186,17 +185,10 @@ class LyricsHelper:
             @param escape as bool
             @return str
         """
-        # Update lyrics
-        artist = ""
-        if isinstance(track, Radio):
-            split = " ".join(track.artists).split(" - ")
-            if len(split) > 0:
-                artist = split[0]
-        else:
-            if track.artists:
-                artist = track.artists[0]
-            elif track.album_artists:
-                artist = track.album_artists[0]
+        if track.artists:
+            artist = track.artists[0]
+        elif track.album_artists:
+            artist = track.album_artists[0]
         if escape:
             return GLib.uri_escape_string(artist, None, False)
         else:
