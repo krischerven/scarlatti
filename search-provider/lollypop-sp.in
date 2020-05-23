@@ -160,9 +160,9 @@ class SearchLollypopService(Server, Gio.Application):
         self.task_helper = TaskHelper()
         self.settings = Settings.new()
         self.db = Database()
-        self.albums = AlbumsDatabase()
-        self.artists = ArtistsDatabase()
-        self.tracks = TracksDatabase()
+        self.albums = AlbumsDatabase(self.db)
+        self.artists = ArtistsDatabase(self.db)
+        self.tracks = TracksDatabase(self.db)
         self.art = Art()
         self.__bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(self.__bus,
