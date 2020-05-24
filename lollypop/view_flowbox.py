@@ -130,14 +130,6 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         """
         return strcoll(widget1.sortname, widget2.sortname)
 
-    def _on_current_changed(self, player):
-        """
-            Update children state
-            @param player as Player
-        """
-        for child in self._box.get_children():
-            child.set_selection()
-
     def _on_child_activated(self, flowbox, child):
         pass
 

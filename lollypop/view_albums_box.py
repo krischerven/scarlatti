@@ -63,6 +63,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         return [
             (App().scanner, "updated", "_on_collection_updated"),
             (App().player, "loading-changed", "_on_loading_changed"),
+            (App().player, "current-changed", "_on_current_changed"),
             (App().art, "album-artwork-changed", "_on_artwork_changed")
         ]
 
@@ -189,6 +190,14 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         elif orderby == OrderBy.POPULARITY:
             return child1.data.popularity < child2.data.popularity
         return False
+
+    def _on_current_changed(self, player):
+        """
+            Update children state
+            @param player as Player
+        """
+        for child in self._box.get_children():
+            child.set_selection()
 
     def _on_collection_updated(self, scanner, item, scan_update):
         """
