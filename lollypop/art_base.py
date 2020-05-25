@@ -98,7 +98,6 @@ class BaseArt(GObject.GObject):
         if value < 50 or value > 400:
             value = 200
         ArtSize.BIG = value
-        ArtSize.BANNER = int(ArtSize.BIG * 150 / 200)
         ArtSize.MEDIUM = int(ArtSize.BIG * 100 / 200)
         ArtSize.SMALL = int(ArtSize.BIG * 50 / 200)
 
