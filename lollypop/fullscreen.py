@@ -16,6 +16,7 @@ from datetime import datetime
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, AdaptiveSize
+from lollypop.define import MARGIN_BIG
 from lollypop.widgets_player_progress import ProgressPlayerWidget
 from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
@@ -106,11 +107,11 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             self.__overlay_grid.attach(self.__label_widget, 0, 2, 2, 1)
             self.__overlay_grid.attach(self.__progress_widget, 0, 3, 2, 1)
             self.__overlay_grid.attach(eventbox, 2, 2, 1, 3)
-            self.__progress_widget.set_margin_start(50)
-            eventbox.set_margin_end(50)
+            eventbox.set_margin_end(MARGIN_BIG)
             eventbox.set_property("valign", Gtk.Align.END)
             eventbox.set_property("halign", Gtk.Align.END)
-            self.__label_widget.set_margin_start(50)
+            self.__artwork_widget.set_margin_end(MARGIN_BIG)
+            self.__artwork_widget.set_margin_bottom(MARGIN_BIG)
             self.__label_widget.set_property("valign", Gtk.Align.END)
             self.__artwork_widget.set_property("valign", Gtk.Align.END)
         else:
