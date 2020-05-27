@@ -33,6 +33,9 @@ class BinPlayer:
         """
             Init playbin
         """
+        # In the case of gapless playback, both 'about-to-finish'
+        # and 'eos' can occur during the same stream.
+        self.__track_in_pipe = False
         self.__cancellable = Gio.Cancellable()
         self.__codecs = Codecs()
         self._current_track = Track()
@@ -239,6 +242,7 @@ class BinPlayer:
             @param track as Track
             @return False if track not loaded
         """
+        self.__track_in_pipe = True
         Logger.debug("BinPlayer::_load_track(): %s" % track.uri)
         try:
             emit_signal(self, "loading-changed", False, self._current_track)
@@ -264,6 +268,7 @@ class BinPlayer:
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
+        self.__track_in_pipe = False
         emit_signal(self, "loading-changed", False, self._current_track)
         self._start_time = time()
         Logger.debug("Player::_on_stream_start(): %s" %
@@ -323,6 +328,8 @@ class BinPlayer:
             If we are current bus, try to restart playback
             Else stop playback
         """
+        if self.__track_in_pipe:
+            return
         if self._playbin.get_bus() == bus:
             if self._next_track.id is None:
                 self.stop()
