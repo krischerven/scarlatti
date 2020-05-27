@@ -1,6 +1,6 @@
 project('lollypop',
   version: '1.3.0',
-  meson_version: '>= 0.40.0'
+  meson_version: '>= 0.46.0'
 )
 revision = run_command('bin/revision.sh').stdout().strip()
 if revision == ''
@@ -8,12 +8,12 @@ if revision == ''
 endif
 
 i18n = import('i18n')
-python = import('python3')
+py_mod = import('python')
 project_id = 'org.gnome.Lollypop'
 
 message('Looking for dependencies')
-python_bin = python.find_python()
-if not python_bin.found()
+py_installation = py_mod.find_installation('python3')
+if not py_installation.found()
     error('No valid python3 binary found')
 else
     message('Found python3 binary')
@@ -26,7 +26,7 @@ dependency('libsoup-2.4')
 dependency('glib-2.0')
 dependency('pygobject-3.0', version: '>= 3.29.1')
 
-python_dir = join_paths(get_option('prefix'), python.sysconfig_path('purelib'))
+python_dir = join_paths(get_option('prefix'), py_installation.get_install_dir())
 LIBEXEC_DIR = join_paths(get_option('prefix'), get_option('libexecdir'))
 DATA_DIR = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
 bindir = join_paths(get_option('prefix'), get_option('bindir'))
@@ -36,11 +36,11 @@ conf.set('PACKAGE_URL', 'https://wiki.gnome.org/Apps/Lollypop')
 conf.set('DATA_DIR', DATA_DIR)
 conf.set('LOCALE_DIR', join_paths(get_option('prefix'), get_option('datadir'), 'locale'))
 conf.set('PYTHON_DIR', python_dir)
-#conf.set('PYTHON_EXEC_DIR', join_paths(get_option('prefix'), python.sysconfig_path('stdlib')))
+#conf.set('PYTHON_EXEC_DIR', join_paths(get_option('prefix'), py_installation.get_path('stdlib')))
 conf.set('libexecdir', LIBEXEC_DIR)
 conf.set('VERSION', meson.project_version())
 conf.set('REVISION', revision)
-conf.set('PYTHON', python_bin.path())
+conf.set('PYTHON', py_installation.get_variable('BINDIR'))
 
 subdir('data')
 subproject('po')
