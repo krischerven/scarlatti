@@ -40,7 +40,6 @@ conf.set('PYTHON_DIR', python_dir)
 conf.set('libexecdir', LIBEXEC_DIR)
 conf.set('VERSION', meson.project_version())
 conf.set('REVISION', revision)
-conf.set('PYTHON', py_installation.get_variable('BINDIR'))
 
 subdir('data')
 subproject('po')
