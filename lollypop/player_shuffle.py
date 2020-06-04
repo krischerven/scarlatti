@@ -194,6 +194,7 @@ class ShufflePlayer:
             @param settings as Gio.Settings
             @param value as GLib.Variant
         """
+        self.__on_playback_setted(self, self.albums)
         if self._current_track.id is not None:
             self.set_next()
 
