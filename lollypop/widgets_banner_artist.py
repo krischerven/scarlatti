@@ -144,6 +144,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
+        from lollypop.menu_artwork import ArtworkMenu
         menu = ArtistMenu(self.__artist_ids[0],
                           self.__storage_type,
                           self.view_type,
@@ -153,6 +154,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
         menu_widget.append_widget(menu_ext)
+        #if App().window.is_adaptive == True:
+        menu_ext2 = ArtworkMenu(self.__artist_ids[0], self.view_type)
+        menu_ext2.show()
+        menu_widget.append_widget(menu_ext2)
         popup_widget(menu_widget, button, None, None, button)
 
     def _on_badge_button_release(self, eventbox, event):
