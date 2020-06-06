@@ -16,12 +16,9 @@ from gi.repository import Gtk, Gio, GLib, Pango
 from gettext import gettext as _
 
 from lollypop.widgets_artwork_artist import ArtistArtworkSearchWidget
-from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
-from lollypop.logger import Logger
-from lollypop.utils import sql_escape
-from lollypop.utils_file import get_youtube_dl
+from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
 
-class ArtworkMenu(Gtk.Bin):
+class ArtistArtworkMenu(Gtk.Bin):
     """
         A popover to change artwork
     """
@@ -35,6 +32,33 @@ class ArtworkMenu(Gtk.Bin):
         self.__artist_id = artist_id
         self.view_type = view_type
         self.__artwork_search = ArtistArtworkSearchWidget(self.__artist_id,
+                                                          self.view_type)
+        self.__artwork_search.show()
+        GLib.timeout_add(250, self.__artwork_search.populate)
+        self.add(self.__artwork_search)
+
+    @property
+    def submenu_name(self):
+        """
+            Get submenu name
+            @return str
+        """
+        return _("Change Artwork")
+
+class AlbumArtworkMenu(Gtk.Bin):
+    """
+        A popover to change artwork
+    """
+
+    def __init__(self, artist_id, view_type):
+        """
+            Init popover
+            @param artist_id as int
+        """
+        Gtk.Bin.__init__(self)
+        self.__artist_id = artist_id
+        self.view_type = view_type
+        self.__artwork_search = AlbumArtworkSearchWidget(self.__artist_id,
                                                           self.view_type)
         self.__artwork_search.show()
         GLib.timeout_add(250, self.__artwork_search.populate)

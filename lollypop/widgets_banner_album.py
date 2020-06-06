@@ -144,12 +144,17 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
+        from lollypop.menu_artwork import AlbumArtworkMenu
         menu = AlbumMenu(self.__album,
                          self.__storage_type,
                          self.view_type,
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
+        #if App().window.is_adaptive == True:
+        menu_ext = AlbumArtworkMenu(self.__album, self.view_type)
+        menu_ext.show()
+        menu_widget.append_widget(menu_ext)
         popup_widget(menu_widget, button, None, None, button)
 
     def _on_play_button_clicked(self, button):
