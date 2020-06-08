@@ -162,6 +162,7 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         """
         changed = LazyLoadingView._on_adaptive_changed(self, window, status)
         if changed:
+            self.__banner.set_view_type(self.view_type)
             self.__tracks_view.set_view_type(self.view_type)
         return changed
 

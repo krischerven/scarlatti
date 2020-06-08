@@ -236,13 +236,12 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             self.__placeholder.set_adaptive(status)
         if status:
             self.__view_type |= ViewType.ADAPTIVE
-            if self.__banner is not None:
-                self.__banner.add_view_type(ViewType.ADAPTIVE)
         else:
             self.__view_type &= ~ViewType.ADAPTIVE
-            if self.__banner is not None:
-                self.__banner.remove_view_type(ViewType.ADAPTIVE)
-        return view_type != self.view_type
+        changed = view_type != self.view_type
+        if changed and self.__banner is not None:
+            self.__banner.set_view_type(self.view_type)
+        return changed
 
     def _on_value_changed(self, adj):
         """
