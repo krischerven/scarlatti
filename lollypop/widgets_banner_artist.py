@@ -154,10 +154,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
         menu_widget.append_widget(menu_ext)
-        # if App().window.is_adaptive == True:
-        menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
-        menu_ext2.show()
-        menu_widget.append_widget(menu_ext2)
+        if self.view_type & ViewType.ADAPTIVE:
+            menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
+            menu_ext2.show()
+            menu_widget.append_widget(menu_ext2)
         popup_widget(menu_widget, button, None, None, button)
 
     def _on_badge_button_release(self, eventbox, event):
