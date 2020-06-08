@@ -17,7 +17,7 @@ from gettext import gettext as _
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
-from lollypop.define import App, Type, MARGIN, MARGIN_SMALL
+from lollypop.define import App, Type, ViewType, MARGIN, MARGIN_SMALL
 from lollypop.define import ArtBehaviour, ArtSize
 
 
@@ -38,7 +38,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__album = album
-        if App().window.is_adaptive and not in_menu:
+        if view_type & ViewType.ADAPTIVE and not in_menu:
             self.set_row_spacing(MARGIN)
             self.set_margin_start(MARGIN_SMALL)
             self.set_margin_end(MARGIN_SMALL)
