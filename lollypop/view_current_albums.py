@@ -211,6 +211,19 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         if not row.children:
             row.destroy()
 
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+            @param window as Window
+            @param status as bool
+            @return bool
+        """
+        changed = AlbumsListView._on_adaptive_changed(self, window, status)
+        if changed:
+            for child in self.children:
+                child.set_view_type(self.view_type)
+        return changed
+
 #######################
 # PRIVATE             #
 #######################

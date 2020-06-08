@@ -125,6 +125,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.__widget.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
+    def set_view_type(self, view_type):
+        """
+            Set view type
+            @param view_type as ViewType
+        """
+        BannerWidget.set_view_type(self, view_type)
+        self.__cover_widget.set_view_type(view_type)
+
 #######################
 # PROTECTED           #
 #######################
@@ -147,8 +155,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_artwork import AlbumArtworkMenu
         menu = AlbumMenu(self.__album,
                          self.__storage_type,
-                         self.view_type,
-                         App().window.is_adaptive)
+                         self.view_type)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         if self.view_type & ViewType.ADAPTIVE:
