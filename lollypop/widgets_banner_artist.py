@@ -154,7 +154,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
         menu_widget.append_widget(menu_ext)
-        #if App().window.is_adaptive == True:
+        # if App().window.is_adaptive == True:
         menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
         menu_ext2.show()
         menu_widget.append_widget(menu_ext2)
@@ -168,7 +168,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_artwork_artist import ArtistArtworkSearchWidget
         artwork_search = ArtistArtworkSearchWidget(self.__artist_ids[0],
-                                                   self.view_type)
+                                                   self.view_type, False)
         artwork_search.show()
         # Let current animation run
         GLib.timeout_add(250, artwork_search.populate)

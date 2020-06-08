@@ -28,7 +28,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
-    def __init__(self, artist_id, view_type):
+    def __init__(self, artist_id, view_type, in_menu=False):
         """
             Init search
             @param artist_id as int
@@ -36,7 +36,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__artist = App().artists.get_name(artist_id)
-        if view_type & ViewType.ADAPTIVE:
+        if view_type & ViewType.ADAPTIVE and not in_menu:
             self.set_row_spacing(MARGIN)
             self.set_margin_start(MARGIN_SMALL)
             self.set_margin_end(MARGIN_SMALL)

@@ -151,7 +151,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                          App().window.is_adaptive)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        #if App().window.is_adaptive == True:
+        # if App().window.is_adaptive == True:
         menu_ext = AlbumArtworkMenu(self.__album, self.view_type)
         menu_ext.show()
         menu_widget.append_widget(menu_ext)

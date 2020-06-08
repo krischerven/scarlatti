@@ -30,7 +30,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
-    def __init__(self, album, view_type):
+    def __init__(self, album, view_type, in_menu=False):
         """
             Init search
             @param album as Album
@@ -38,7 +38,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__album = album
-        if view_type & ViewType.ADAPTIVE:
+        if view_type & ViewType.ADAPTIVE and not in_menu:
             self.set_row_spacing(MARGIN)
             self.set_margin_start(MARGIN_SMALL)
             self.set_margin_end(MARGIN_SMALL)

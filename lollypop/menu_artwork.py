@@ -11,12 +11,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio, GLib, Pango
+from gi.repository import Gtk, GLib
 
 from gettext import gettext as _
 
 from lollypop.widgets_artwork_artist import ArtistArtworkSearchWidget
 from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
+
 
 class ArtistArtworkMenu(Gtk.Bin):
     """
@@ -31,8 +32,11 @@ class ArtistArtworkMenu(Gtk.Bin):
         Gtk.Bin.__init__(self)
         self.__artist_id = artist_id
         self.view_type = view_type
+        self.connect("map", self.__on_map)
+
+    def __on_map(self, widget):
         self.__artwork_search = ArtistArtworkSearchWidget(self.__artist_id,
-                                                          self.view_type)
+                                                          self.view_type, True)
         self.__artwork_search.show()
         GLib.timeout_add(250, self.__artwork_search.populate)
         self.add(self.__artwork_search)
@@ -44,6 +48,7 @@ class ArtistArtworkMenu(Gtk.Bin):
             @return str
         """
         return _("Change Artwork")
+
 
 class AlbumArtworkMenu(Gtk.Bin):
     """
@@ -58,8 +63,11 @@ class AlbumArtworkMenu(Gtk.Bin):
         Gtk.Bin.__init__(self)
         self.__artist_id = artist_id
         self.view_type = view_type
+        self.connect("map", self.__on_map)
+
+    def __on_map(self, widget):
         self.__artwork_search = AlbumArtworkSearchWidget(self.__artist_id,
-                                                          self.view_type)
+                                                         self.view_type, True)
         self.__artwork_search.show()
         GLib.timeout_add(250, self.__artwork_search.populate)
         self.add(self.__artwork_search)

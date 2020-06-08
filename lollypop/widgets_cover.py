@@ -95,7 +95,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         if self.__view_type & ViewType.ALBUM:
             from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
             artwork_search = AlbumArtworkSearchWidget(self.__album,
-                                                      self.__view_type)
+                                                      self.__view_type, False)
             artwork_search.show()
             # Let current animation run
             GLib.timeout_add(250, artwork_search.populate)
