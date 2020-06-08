@@ -50,6 +50,8 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
 
         if view_type & ViewType.SCROLLED:
             self.__scrolled = Gtk.ScrolledWindow.new()
+            self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                       Gtk.PolicyType.AUTOMATIC)
             self.__event_controller = Gtk.EventControllerMotion.new(
                 self.__scrolled)
             self.__event_controller.set_propagation_phase(
