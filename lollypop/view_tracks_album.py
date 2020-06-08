@@ -134,6 +134,15 @@ class AlbumTracksView(TracksView):
         except Exception as e:
             Logger.error("TrackView::update_duration(): %s" % e)
 
+    def set_view_type(self, view_type):
+        """
+            Update view type
+            @param view_type as ViewType
+        """
+        self._view_type = view_type
+        for child in self.children:
+            child.set_view_type(view_type)
+
     @property
     def children(self):
         """

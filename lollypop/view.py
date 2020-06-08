@@ -69,9 +69,13 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
         self.connect("realize", self._on_realize)
-        return [
-            (App().window, "adaptive-changed", "_on_adaptive_changed"),
-        ]
+        # If we want the view to be adaptive, do not follow main window
+        if self.__view_type & ViewType.ADAPTIVE:
+            return []
+        else:
+            return [
+                (App().window, "adaptive-changed", "_on_adaptive_changed"),
+            ]
 
     def add_widget(self, widget, banner=None):
         """
@@ -295,7 +299,9 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             self.__banner.update_for_width(width)
             self.__on_banner_height_changed(self.__banner,
                                             self.__banner.height)
-        self._on_adaptive_changed(App().window, App().window.is_adaptive)
+        # If we want the view to be adaptive, do not follow main window
+        if not self.__view_type & ViewType.ADAPTIVE:
+            self._on_adaptive_changed(App().window, App().window.is_adaptive)
         # Wait for stack allocation to restore scrolled position
         if self.__scrolled_position is not None:
             self.__stack.connect("size-allocate",

@@ -55,7 +55,7 @@ class AlbumView(LazyLoadingView, SignalsHelper):
             Populate the view with album
         """
         if self.__tracks_view is None:
-            self.__tracks_view = AlbumTracksView(self.__album, ViewType.ALBUM)
+            self.__tracks_view = AlbumTracksView(self.__album, self.view_type)
             self.__tracks_view.show()
             self.__tracks_view.connect("populated", self.__on_tracks_populated)
             self.__tracks_view.set_margin_start(MARGIN)
@@ -152,6 +152,18 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         """
         if self.__tracks_view is not None:
             self.__tracks_view.update_duration(track_id)
+
+    def _on_adaptive_changed(self, window, status):
+        """
+            Handle adaptive mode for views
+            @param window as Window
+            @param status as bool
+            @return bool
+        """
+        changed = LazyLoadingView._on_adaptive_changed(self, window, status)
+        if changed:
+            self.__tracks_view.set_view_type(self.view_type)
+        return changed
 
 #######################
 # PRIVATE             #
