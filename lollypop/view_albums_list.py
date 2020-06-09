@@ -116,7 +116,7 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             self._box.remove(child)
         LazyLoadingView.populate(self, albums)
 
-    def clear(self, clear_albums=False):
+    def clear(self):
         """
             Clear the view
         """
@@ -124,8 +124,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         self.__reveals = []
         for child in self._box.get_children():
             self._box.remove(child)
-        if clear_albums:
-            App().player.clear_albums()
 
     def jump_to_current(self):
         """
