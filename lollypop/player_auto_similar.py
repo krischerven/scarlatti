@@ -123,6 +123,17 @@ class AutoSimilarPlayer:
         albums = tracks_to_albums([Track(track_id) for track_id in track_ids])
         App().player.play_albums(albums)
 
+    @property
+    def radio_cancellable(self):
+        """
+            Get cancellable
+            @return Gio.Cancellable
+        """
+        return self.__radio_cancellable
+
+#######################
+# PROTECTED           #
+#######################
     def _on_stream_start(self, bus, message):
         """
             Cancel radio loading if current not a web track

@@ -247,7 +247,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
             Clear albums
             @param button as Gtk.Button
         """
-        self.__view.clear(True)
+        self.__view.clear()
         self.__view.populate()
         emit_signal(App().player, "status-changed")
 
