@@ -117,6 +117,8 @@ class ShufflePlayer:
         album_ids = App().albums.get_ids(party_ids, [], storage_type, False)
         emit_signal(self, "playback-setted", [])
         self._albums = []
+        if album_ids:
+            emit_signal(self, "loading-changed", True, Track())
         for album_id in album_ids:
             album = Album(album_id, [], [], False)
             self._albums.append(album)
