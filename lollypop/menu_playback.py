@@ -177,18 +177,20 @@ class RadioPlaybackMenu(Gio.Menu):
             @param GLib.Variant
             @param artist_ids as [int]
         """
-        if action.get_name() == "radio_action_collection":
-            App().player.play_radio_from_collection(artist_ids)
-        elif action.get_name() == "radio_action_spotify":
-            App().player.play_radio_from_spotify(artist_ids)
-        elif action.get_name() == "radio_action_lastfm":
-            App().player.play_radio_from_lastfm(artist_ids)
-        elif action.get_name() == "radio_action_deezer":
-            App().player.play_radio_from_deezer(artist_ids)
-        elif action.get_name() == "radio_action_loved":
-            App().player.play_radio_from_loved(artist_ids)
-        elif action.get_name() == "radio_action_populars":
-            App().player.play_radio_from_populars(artist_ids)
+        def play_radio():
+            if action.get_name() == "radio_action_collection":
+                App().player.play_radio_from_collection(artist_ids)
+            elif action.get_name() == "radio_action_spotify":
+                App().player.play_radio_from_spotify(artist_ids)
+            elif action.get_name() == "radio_action_lastfm":
+                App().player.play_radio_from_lastfm(artist_ids)
+            elif action.get_name() == "radio_action_deezer":
+                App().player.play_radio_from_deezer(artist_ids)
+            elif action.get_name() == "radio_action_loved":
+                App().player.play_radio_from_loved(artist_ids)
+            elif action.get_name() == "radio_action_populars":
+                App().player.play_radio_from_populars(artist_ids)
+        App().task_helper.run(play_radio)
 
 
 class PlaylistPlaybackMenu(Gio.Menu):
