@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import GLib
+
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import emit_signal
 from lollypop.objects_track import Track
@@ -70,6 +72,17 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         else:
             self.show_placeholder(True)
 
+    def clear(self):
+        """
+            Clear the view
+        """
+        if not App().player.radio_cancellable.is_cancelled():
+            App().player.radio_cancellable.cancel()
+            GLib.timeout_add(500, self.clear)
+        else:
+            AlbumsListView.clear(self)
+            App().player.clear_albums()
+
     @property
     def filtered(self):
         """
@@ -125,7 +138,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
                         break
         else:
             self.stop()
-            self.clear()
+            AlbumsListView.clear(self)
             self.populate()
 
     def _on_playback_added(self, player, album):
@@ -156,12 +169,12 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
         if albums:
             self.stop()
-            self.clear()
+            AlbumsListView.clear(self)
             AlbumsListView.populate(self, albums)
             self.show_placeholder(False)
         else:
             self.stop()
-            self.clear()
+            AlbumsListView.clear(self)
             self.show_placeholder(True)
 
     def _on_playback_removed(self, player, album):

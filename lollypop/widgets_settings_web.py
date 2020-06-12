@@ -42,6 +42,10 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
                           (builder.get_object("google_view"),
                            builder.get_object("google_error_label"),
                            None,
+                           False),
+                          (builder.get_object("lastfm_view"),
+                           builder.get_object("lastfm_error_label"),
+                           NetworkAccessACL["LASTFM"],
                            False)]
 
         # Web services access

@@ -184,5 +184,6 @@ class TokenWebService:
                                               decode["session"]["name"],
                                               self.__tokens[service])
         except:
+            self.__passwords_helper.clear(service)
             Logger.error(
                 "TokenWebService::__get_lastfm_session(): %s", decode)
