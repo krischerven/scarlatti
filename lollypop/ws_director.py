@@ -33,6 +33,8 @@ class DirectorWebService:
         self.__librefm_ws = None
         self.__listenbrainz_ws = None
         self.__spotify_timeout_id = None
+        App().settings.connect("changed::network-access",
+                               self.__on_network_access_acl_changed)
         App().settings.connect("changed::network-access-acl",
                                self.__on_network_access_acl_changed)
 
