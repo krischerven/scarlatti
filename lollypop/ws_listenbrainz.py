@@ -121,6 +121,7 @@ class ListenBrainzWebService(GObject.GObject):
         try:
             for (track, timestamp) in tracks:
                 payload = self.__get_payload(track)
+                payload[0]["listened_at"] = timestamp
                 post_data = {
                     "listen_type": "single",
                     "payload": payload
