@@ -176,7 +176,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_widget.show()
         menu_ext = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
         menu_ext.show()
-        menu_widget.append_widget(menu_ext)
+        menu_widget.append_widget(menu_ext, False)
         popup_widget(menu_widget, eventbox, None, None, None)
 
     def _on_artist_artwork_changed(self, art, prefix):
