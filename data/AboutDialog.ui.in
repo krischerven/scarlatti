@@ -24,7 +24,7 @@ Bilal Elmoussaoui
 Jordi Romera
 David Mandelberg
 </property>
-    <property name="translator_credits" translatable="yes" context="Translation credits here, put your name here!" comments="Replace me with your names">Cédric Bellegarde &lt;cedric.bellegarde@adishatz.org&gt;</property>
+    <property name="translator-credits" translatable="yes" context="Add your names here, do not remove previous names!" comments="Replace me with your names">translator1, translator2, ...</property>
     <property name="artists" translatable="yes">
 Reda Lazri:
     Lollypop icon
@@ -36,7 +36,6 @@ GNOME Project:
 Martins D. Okoi:
     Description in appdata
     </property>
-    <property name="translator-credits">https://hosted.weblate.org/projects/gnumdk/lollypop</property>
     <property name="logo_icon_name">org.gnome.Lollypop</property>
     <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">
