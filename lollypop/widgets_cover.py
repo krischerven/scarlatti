@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, Gio
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Type
 from lollypop.utils import set_cursor_type, popup_widget
@@ -100,13 +100,18 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             @param event as Gdk.Event
         """
         if self.__view_type & ViewType.ALBUM:
-            from lollypop.widgets_artwork_album import AlbumArtworkSearchWidget
-            artwork_search = AlbumArtworkSearchWidget(self.__album,
-                                                      self.__view_type, False)
-            artwork_search.show()
-            # Let current animation run
-            GLib.timeout_add(250, artwork_search.populate)
-            popup_widget(artwork_search, self, None, None, None)
+            from lollypop.widgets_menu import MenuBuilder
+            from lollypop.menu_artwork import AlbumArtworkMenu
+            menu = Gio.Menu()
+            if App().window.is_adaptive:
+                from lollypop.menu_header import AlbumMenuHeader
+                menu.append_item(AlbumMenuHeader(self.__album))
+            menu_widget = MenuBuilder(menu, False)
+            menu_widget.show()
+            menu_ext = AlbumArtworkMenu(self.__album, self.__view_type)
+            menu_ext.show()
+            menu_widget.append_widget(menu_ext, False)
+            popup_widget(menu_widget, self, None, None, None)
         else:
             App().window.container.show_view([Type.ALBUM], self.__album)
 
