@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, Gio, GLib
 
 from gettext import gettext as _
 from random import choice
@@ -166,13 +166,18 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param eventbox as Gtk.EventBox
             @param event as Gdk.Event
         """
-        from lollypop.widgets_artwork_artist import ArtistArtworkSearchWidget
-        artwork_search = ArtistArtworkSearchWidget(self.__artist_ids[0],
-                                                   self.view_type, False)
-        artwork_search.show()
-        # Let current animation run
-        GLib.timeout_add(250, artwork_search.populate)
-        popup_widget(artwork_search, eventbox, None, None, None)
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_artwork import ArtistArtworkMenu
+        menu = Gio.Menu()
+        if App().window.is_adaptive:
+            from lollypop.menu_header import ArtistMenuHeader
+            menu.append_item(ArtistMenuHeader(self.__artist_ids[0]))
+        menu_widget = MenuBuilder(menu, False)
+        menu_widget.show()
+        menu_ext = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
+        menu_ext.show()
+        menu_widget.append_widget(menu_ext)
+        popup_widget(menu_widget, eventbox, None, None, None)
 
     def _on_artist_artwork_changed(self, art, prefix):
         """
