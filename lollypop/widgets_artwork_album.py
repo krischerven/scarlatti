@@ -17,8 +17,7 @@ from gettext import gettext as _
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
-from lollypop.define import App, Type, ViewType, MARGIN, MARGIN_SMALL
-from lollypop.define import ArtBehaviour, ArtSize
+from lollypop.define import App, Type
 
 
 class AlbumArtworkSearchWidget(ArtworkSearchWidget):
@@ -38,39 +37,6 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__album = album
-        if view_type & ViewType.ADAPTIVE and not in_menu:
-            self.set_row_spacing(MARGIN)
-            self.set_margin_start(MARGIN_SMALL)
-            self.set_margin_end(MARGIN_SMALL)
-            self.set_margin_top(MARGIN)
-            self.set_margin_bottom(MARGIN)
-            button = Gtk.ModelButton.new()
-            button.set_alignment(0, 0.5)
-            button.connect("clicked",
-                           lambda x: emit_signal(self, "hidden", True))
-            button.show()
-            label = Gtk.Label.new()
-            label.show()
-            self.__artwork = Gtk.Image.new()
-            name = "<span alpha='40000'>%s</span>" % album.name
-            App().art_helper.set_album_artwork(
-                                            album,
-                                            ArtSize.SMALL,
-                                            ArtSize.SMALL,
-                                            self.__artwork.get_scale_factor(),
-                                            ArtBehaviour.CACHE |
-                                            ArtBehaviour.CROP_SQUARE,
-                                            self.__on_album_artwork)
-            self.__artwork.show()
-            label.set_markup(name)
-            grid = Gtk.Grid()
-            grid.set_column_spacing(MARGIN)
-            grid.add(self.__artwork)
-            grid.add(label)
-            button.set_image(grid)
-            button.get_style_context().add_class("padding")
-            self.insert_row(0)
-            self.attach(button, 0, 0, 1, 1)
 
     def populate(self):
         """
