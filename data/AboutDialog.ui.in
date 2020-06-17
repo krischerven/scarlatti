@@ -23,6 +23,7 @@ Manuel Kehl
 Bilal Elmoussaoui
 Jordi Romera
 David Mandelberg
+Frederick Schenk
 </property>
     <property name="translator-credits" translatable="yes" context="Add your names here, do not remove previous names!" comments="Replace me with your names">translator1, translator2, ...</property>
     <property name="artists" translatable="yes">
