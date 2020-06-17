@@ -111,7 +111,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             menu_ext = AlbumArtworkMenu(self.__album, self.__view_type)
             menu_ext.connect("hidden", self.__close_artwork_menu)
             menu_ext.show()
-            menu_widget.append_widget(menu_ext, False)
+            menu_widget.add_widget(menu_ext, False)
             self.__artwork_popup = popup_widget(menu_widget, self,
                                                 None, None, None)
         else:

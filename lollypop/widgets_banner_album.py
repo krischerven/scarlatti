@@ -162,7 +162,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             menu_ext = AlbumArtworkMenu(self.__album, self.view_type)
             menu_ext.connect("hidden", self.__close_artwork_menu)
             menu_ext.show()
-            menu_widget.append_widget(menu_ext)
+            menu_widget.add_widget(menu_ext)
         popup_widget(menu_widget, button, None, None, button)
 
     def _on_play_button_clicked(self, button):

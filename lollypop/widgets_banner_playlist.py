@@ -155,7 +155,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
             menu_widget = MenuBuilder(menu)
             menu_ext = PlaylistMenuExt(self.__playlist_id)
             menu_ext.show()
-            menu_widget.append_widget(menu_ext)
+            menu_widget.add_widget(menu_ext)
         else:
             menu_widget = MenuBuilder(menu)
         menu_widget.show()

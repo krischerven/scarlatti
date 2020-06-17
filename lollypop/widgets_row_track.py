@@ -211,7 +211,7 @@ class TrackRow(Gtk.ListBoxRow):
         if not self._track.storage_type & StorageType.EPHEMERAL:
             menu_ext = TrackMenuExt(self._track)
             menu_ext.show()
-            menu_widget.append_widget(menu_ext)
+            menu_widget.add_widget(menu_ext)
         popover = popup_widget(menu_widget, parent, x, y, self)
         if popover is None:
             menu_widget.connect("hidden", on_hidden)

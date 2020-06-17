@@ -47,7 +47,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             (App().window, "adaptive-changed", "_on_adaptive_changed")
         ]
 
-    def append_widget(self, widget, submenu=True):
+    def add_widget(self, widget, submenu=True):
         """
             Append widget to menu
             @param widget as Gtk.Widget

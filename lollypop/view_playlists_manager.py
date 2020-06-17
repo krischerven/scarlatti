@@ -212,7 +212,7 @@ class PlaylistsManagerView(FlowBoxView, SignalsHelper):
             menu_widget = MenuBuilder(menu)
             menu_ext = PlaylistMenuExt(child.data)
             menu_ext.show()
-            menu_widget.append_widget(menu_ext)
+            menu_widget.add_widget(menu_ext)
         else:
             menu_widget = MenuBuilder(menu)
         menu_widget.show()

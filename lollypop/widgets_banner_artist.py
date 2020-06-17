@@ -153,12 +153,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_widget.show()
         menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
-        menu_widget.append_widget(menu_ext)
+        menu_widget.add_widget(menu_ext)
         if self.view_type & ViewType.ADAPTIVE:
             menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
             menu_ext2.connect("hidden", self.__close_artwork_menu)
             menu_ext2.show()
-            menu_widget.append_widget(menu_ext2)
+            menu_widget.add_widget(menu_ext2)
         popup_widget(menu_widget, button, None, None, button)
 
     def _on_badge_button_release(self, eventbox, event):
@@ -178,7 +178,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
         menu_ext.connect("hidden", self.__close_artwork_menu)
         menu_ext.show()
-        menu_widget.append_widget(menu_ext, False)
+        menu_widget.add_widget(menu_ext, False)
         self.__artwork_popup = popup_widget(menu_widget,
                                             eventbox,
                                             None, None, None)
