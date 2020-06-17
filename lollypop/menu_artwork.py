@@ -29,14 +29,17 @@ class ArtistArtworkMenu(Gtk.Bin):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
-    def __init__(self, artist_id, view_type):
+    def __init__(self, artist_id, view_type, is_submenu):
         """
             Init popover
             @param artist_id as int
+            @param view_type as ViewType
+            @param is_submenu as bool
         """
         Gtk.Bin.__init__(self)
         self.__artist_id = artist_id
         self.view_type = view_type
+        self.__is_submenu = is_submenu
         self.connect("map", self.__on_map)
 
     def __on_map(self, widget):
@@ -56,7 +59,10 @@ class ArtistArtworkMenu(Gtk.Bin):
             Get submenu name
             @return str
         """
-        return _("Change Artwork")
+        if self.__is_submenu:
+            return _("Change Artwork")
+        else:
+            return None
 
 
 class AlbumArtworkMenu(Gtk.Bin):

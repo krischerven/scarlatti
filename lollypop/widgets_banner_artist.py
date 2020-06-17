@@ -155,7 +155,9 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext.show()
         menu_widget.add_widget(menu_ext)
         if self.view_type & ViewType.ADAPTIVE:
-            menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
+            menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0],
+                                          self.view_type,
+                                          True)
             menu_ext2.connect("hidden", self.__close_artwork_menu)
             menu_ext2.show()
             menu_widget.add_widget(menu_ext2)
@@ -175,10 +177,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             menu.append_item(ArtistMenuHeader(self.__artist_ids[0]))
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
-        menu_ext = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
+        menu_ext = ArtistArtworkMenu(self.__artist_ids[0],
+                                     self.view_type,
+                                     False)
         menu_ext.connect("hidden", self.__close_artwork_menu)
         menu_ext.show()
-        menu_widget.add_widget(menu_ext, False)
+        menu_widget.add_widget(menu_ext)
         self.__artwork_popup = popup_widget(menu_widget,
                                             eventbox,
                                             None, None, None)
