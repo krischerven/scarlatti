@@ -42,7 +42,6 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         self.__menu_queue = []
         self.__submenu_queue = []
         self.__widgets_queue = []
-        self.__widgets_pos = []
         self.__add_menu(menu, "main", False, scrolled)
         return [
             (App().window, "adaptive-changed", "_on_adaptive_changed")
@@ -54,7 +53,6 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param widget as Gtk.Widget
         """
         self.__widgets_queue.append(widget)
-        self.__widgets_pos.append(submenu)
         if self.__built:
             self.__add_widgets()
 
@@ -79,19 +77,15 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         while self.__widgets_queue:
             widget = self.__widgets_queue.pop(0)
-            widget_pos = self.__widgets_pos.pop(0)
             if widget.submenu_name is not None:
-                if widget_pos:
-                    self.__add_menu_container(widget.submenu_name, True, True)
-                    self.__boxes[widget.submenu_name].add(widget)
-                    button = Gtk.ModelButton.new()
-                    button.set_label(widget.submenu_name)
-                    button.get_child().set_halign(Gtk.Align.START)
-                    button.set_property("menu-name", widget.submenu_name)
-                    button.show()
-                    self.__boxes["main"].add(button)
-                else:
-                    self.__boxes["main"].add(widget)
+                self.__add_menu_container(widget.submenu_name, True, True)
+                self.__boxes[widget.submenu_name].add(widget)
+                button = Gtk.ModelButton.new()
+                button.set_label(widget.submenu_name)
+                button.get_child().set_halign(Gtk.Align.START)
+                button.set_property("menu-name", widget.submenu_name)
+                button.show()
+                self.__boxes["main"].add(button)
             else:
                 main = self.get_child_by_name("main")
                 if isinstance(main, Gtk.ScrolledWindow):
