@@ -47,7 +47,7 @@ class ArtistArtworkMenu(Gtk.Bin):
         GLib.timeout_add(250, self.__artwork_search.populate)
         self.add(self.__artwork_search)
 
-    def __close(self):
+    def __close(self, action, variant):
         emit_signal(self, "hidden", True)
 
     @property
@@ -86,7 +86,7 @@ class AlbumArtworkMenu(Gtk.Bin):
         GLib.timeout_add(250, self.__artwork_search.populate)
         self.add(self.__artwork_search)
 
-    def __close(self):
+    def __close(self, action, variant):
         emit_signal(self, "hidden", True)
 
     @property

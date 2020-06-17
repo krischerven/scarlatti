@@ -175,9 +175,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
         menu_ext = ArtistArtworkMenu(self.__artist_ids[0], self.view_type)
+        menu_ext.connect("hidden", self.__close_artwork_menu)
         menu_ext.show()
         menu_widget.append_widget(menu_ext, False)
-        popup_widget(menu_widget, eventbox, None, None, None)
+        self.__artwork_popup = popup_widget(menu_widget,
+                                            eventbox,
+                                            None, None, None)
 
     def _on_artist_artwork_changed(self, art, prefix):
         """
@@ -200,6 +203,12 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __close_artwork_menu(self, action, variant):
+        if App().window.is_adaptive:
+            App().window.container.go_back()
+        else:
+            self.__artwork_popup.destroy()
+
     def __set_artwork(self):
         """
             Set artwork
