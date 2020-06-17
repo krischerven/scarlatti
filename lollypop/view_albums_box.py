@@ -165,8 +165,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
-        menu = AlbumMenu(child.data, self.storage_type,
-                         self.view_type, App().window.is_adaptive)
+        menu = AlbumMenu(child.data, self.storage_type, self.view_type)
         return MenuBuilder(menu)
 
     def _sort_func(self, child1, child2):
@@ -372,7 +371,7 @@ class AlbumsForGenresBoxView(AlbumsBoxView):
             if child.data.storage_type & StorageType.COLLECTION:
                 albums.append(child.data)
         title = get_title_for_genres_artists(self._genre_ids, self._artist_ids)
-        menu = AlbumsMenu(title, albums, App().window.is_adaptive)
+        menu = AlbumsMenu(title, albums, self.view_type)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)

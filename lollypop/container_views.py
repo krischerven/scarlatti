@@ -299,7 +299,7 @@ class ViewsContainer:
             @param storage_type as StorageType
             @return AlbumView
         """
-        view_type = ViewType.TWO_COLUMNS | ViewType.SCROLLED |\
+        view_type = ViewType.SCROLLED |\
             ViewType.OVERLAY | ViewType.ALBUM
         from lollypop.view_album import AlbumView
         view = AlbumView(album, storage_type, view_type)

@@ -30,16 +30,15 @@ class AlbumMenu(Gio.Menu):
         Contextual menu for album
     """
 
-    def __init__(self, album, storage_type, view_type, header=False):
+    def __init__(self, album, storage_type, view_type):
         """
             Init menu model
             @param album as Album
             @param storage_type as StorageType
             @param view_type as ViewType
-            @param header as bool
         """
         Gio.Menu.__init__(self)
-        if header:
+        if view_type & ViewType.ADAPTIVE:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(album))
         self.append_section(_("Playback"),
@@ -63,15 +62,15 @@ class AlbumsMenu(Gio.Menu):
         Contextual menu for albums
     """
 
-    def __init__(self, title, albums, header=False):
+    def __init__(self, title, albums, view_type):
         """
             Init menu model
             @param title as str
             @param albums as [Album]
-            @param header as bool
+            @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
-        if header:
+        if view_type & ViewType.ADAPTIVE:
             from lollypop.menu_header import MenuHeader
             self.append_item(MenuHeader(title,
                                         "media-optical-cd-audio-symbolic"))
@@ -83,15 +82,15 @@ class TrackMenu(Gio.Menu):
         Full Contextual menu for a track
     """
 
-    def __init__(self, track, view_type, header):
+    def __init__(self, track, view_type):
         """
             Init menu model
             @param track as Track
             @param view_type as ViewType
-            @param header as bool
+
         """
         Gio.Menu.__init__(self)
-        if header:
+        if view_type & ViewType.ADAPTIVE:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(track))
         self.append_section(_("Playback"), TrackPlaybackMenu(track, view_type))

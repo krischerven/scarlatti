@@ -50,6 +50,8 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
 
         if view_type & ViewType.SCROLLED:
             self.__scrolled = Gtk.ScrolledWindow.new()
+            self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                       Gtk.PolicyType.AUTOMATIC)
             self.__event_controller = Gtk.EventControllerMotion.new(
                 self.__scrolled)
             self.__event_controller.set_propagation_phase(
@@ -69,9 +71,13 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
         self.connect("realize", self._on_realize)
-        return [
-            (App().window, "adaptive-changed", "_on_adaptive_changed"),
-        ]
+        # If we want the view to be adaptive, do not follow main window
+        if self.__view_type & ViewType.ADAPTIVE:
+            return []
+        else:
+            return [
+                (App().window, "adaptive-changed", "_on_adaptive_changed"),
+            ]
 
     def add_widget(self, widget, banner=None):
         """
@@ -232,13 +238,12 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             self.__placeholder.set_adaptive(status)
         if status:
             self.__view_type |= ViewType.ADAPTIVE
-            if self.__banner is not None:
-                self.__banner.add_view_type(ViewType.ADAPTIVE)
         else:
             self.__view_type &= ~ViewType.ADAPTIVE
-            if self.__banner is not None:
-                self.__banner.remove_view_type(ViewType.ADAPTIVE)
-        return view_type != self.view_type
+        changed = view_type != self.view_type
+        if changed and self.__banner is not None:
+            self.__banner.set_view_type(self.view_type)
+        return changed
 
     def _on_value_changed(self, adj):
         """
@@ -295,7 +300,9 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             self.__banner.update_for_width(width)
             self.__on_banner_height_changed(self.__banner,
                                             self.__banner.height)
-        self._on_adaptive_changed(App().window, App().window.is_adaptive)
+        # If we want the view to be adaptive, do not follow main window
+        if not self.__view_type & ViewType.ADAPTIVE:
+            self._on_adaptive_changed(App().window, App().window.is_adaptive)
         # Wait for stack allocation to restore scrolled position
         if self.__scrolled_position is not None:
             self.__stack.connect("size-allocate",

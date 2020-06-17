@@ -125,6 +125,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.__widget.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
+    def set_view_type(self, view_type):
+        """
+            Set view type
+            @param view_type as ViewType
+        """
+        BannerWidget.set_view_type(self, view_type)
+        self.__cover_widget.set_view_type(view_type)
+
 #######################
 # PROTECTED           #
 #######################
@@ -144,12 +152,17 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_objects import AlbumMenu
+        from lollypop.menu_artwork import AlbumArtworkMenu
         menu = AlbumMenu(self.__album,
                          self.__storage_type,
-                         self.view_type,
-                         App().window.is_adaptive)
+                         self.view_type)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
+        if self.view_type & ViewType.ADAPTIVE:
+            menu_ext = AlbumArtworkMenu(self.__album, self.view_type)
+            menu_ext.connect("hidden", self.__close_artwork_menu)
+            menu_ext.show()
+            menu_widget.append_widget(menu_ext)
         popup_widget(menu_widget, button, None, None, button)
 
     def _on_play_button_clicked(self, button):
@@ -206,6 +219,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __close_artwork_menu(self, action, variant):
+        if App().window.is_adaptive:
+            App().window.container.go_back()
+        else:
+            self.__artwork_popup.destroy()
+
     def __set_artwork(self):
         """
             Set artwork on banner
