@@ -160,6 +160,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         menu_widget.show()
         if self.view_type & ViewType.ADAPTIVE:
             menu_ext = AlbumArtworkMenu(self.__album, self.view_type)
+            menu_ext.connect("hidden", self.__close_artwork_menu)
             menu_ext.show()
             menu_widget.append_widget(menu_ext)
         popup_widget(menu_widget, button, None, None, button)
@@ -218,6 +219,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __close_artwork_menu(self, action, variant):
+        if App().window.is_adaptive:
+            App().window.container.go_back()
+        else:
+            self.__artwork_popup.destroy()
+
     def __set_artwork(self):
         """
             Set artwork on banner
