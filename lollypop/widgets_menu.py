@@ -47,12 +47,13 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             (App().window, "adaptive-changed", "_on_adaptive_changed")
         ]
 
-    def add_widget(self, widget, submenu=True):
+    def add_widget(self, widget, position=-1):
         """
             Append widget to menu
             @param widget as Gtk.Widget
+            @param position as negative int
         """
-        self.__widgets_queue.append(widget)
+        self.__widgets_queue.append((widget, position))
         if self.__built:
             self.__add_widgets()
 
@@ -76,7 +77,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             Add pending widget to menu
         """
         while self.__widgets_queue:
-            widget = self.__widgets_queue.pop(0)
+            (widget, position) = self.__widgets_queue.pop(0)
             if widget.submenu_name is not None:
                 self.__add_menu_container(widget.submenu_name, True, True)
                 self.__boxes[widget.submenu_name].add(widget)
@@ -85,13 +86,19 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.get_child().set_halign(Gtk.Align.START)
                 button.set_property("menu-name", widget.submenu_name)
                 button.show()
-                self.__boxes["main"].add(button)
+                parent = self.__boxes["main"]
+                widget = button
             else:
-                main = self.get_child_by_name("main")
-                if isinstance(main, Gtk.ScrolledWindow):
+                parent = self.get_child_by_name("main")
+                if isinstance(parent, Gtk.ScrolledWindow):
                     # scrolled -> viewport -> box
-                    main = main.get_child().get_child()
-                main.add(widget)
+                    parent = parent.get_child().get_child()
+            if position < -1:
+                position = len(parent) + position + 1
+                parent.insert_row(position)
+                parent.attach(widget, 0, position, 1, 1)
+            else:
+                parent.add(widget)
 
     def __add_menu_container(self, menu_name, submenu, scrolled):
         """
@@ -102,7 +109,8 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         box = self.get_child_by_name(menu_name)
         if box is None:
-            box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+            box = Gtk.Grid.new()
+            box.set_orientation(Gtk.Orientation.VERTICAL)
             box.connect("map", self.__on_box_map, menu_name)
             self.__boxes[menu_name] = box
             box.set_property("margin", 10)
@@ -213,6 +221,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
+        button.set_hexpand(True)
         button.set_action_name(action.get_string())
         button.set_label(text.get_string())
         button.get_child().set_halign(Gtk.Align.START)
@@ -262,6 +271,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         submenu_name = text.get_string()
         self.__add_menu(menu, submenu_name, True, True)
         button = Gtk.ModelButton.new()
+        button.set_hexpand(True)
         button.set_property("menu-name", submenu_name)
         button.set_label(text.get_string())
         button.get_child().set_halign(Gtk.Align.START)
@@ -276,6 +286,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
+        button.set_hexpand(True)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
@@ -306,6 +317,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
+        button.set_hexpand(True)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
@@ -342,6 +354,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param menu_name as str
         """
         button = Gtk.ModelButton.new()
+        button.set_hexpand(True)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
@@ -393,6 +406,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 del rounded
                 artwork.show()
         button = Gtk.ModelButton.new()
+        button.set_hexpand(True)
         button.connect("clicked", lambda x: emit_signal(self, "hidden", True))
         button.show()
         label = Gtk.Label.new()
