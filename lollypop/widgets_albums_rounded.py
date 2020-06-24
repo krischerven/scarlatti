@@ -94,6 +94,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         ctx.set_source_rgb(1, 1, 1)
         ctx.fill()
         album_ids = list(self.__album_ids)
+        album_pos = len(album_ids) - 1
+        while len(album_ids) < 4:
+            album_ids.append(album_ids[album_pos])
+            album_pos -= 1
         positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.__draw_surface(surface, ctx, positions, album_ids, set_surface)
 
