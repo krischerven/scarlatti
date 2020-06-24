@@ -55,7 +55,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             @param view_type as ViewType
         """
         RoundedFlowBoxWidget.set_view_type(self, view_type)
-        self.__cover_size = self._art_size / 2
+        if len(self._get_album_ids()) == 1:
+            self.__cover_size = self._art_size
+        else:
+            self.__cover_size = self._art_size / 2
         self._pixel_size = self._art_size / 8
 
     def set_artwork(self):
@@ -94,11 +97,15 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         ctx.set_source_rgb(1, 1, 1)
         ctx.fill()
         album_ids = list(self.__album_ids)
-        album_pos = len(album_ids) - 1
-        while len(album_ids) < 4:
-            album_ids.append(album_ids[album_pos])
-            album_pos -= 1
-        positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
+        if len(album_ids) == 1:
+            positions = [(0, 0)]
+        else:
+            positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
+        if len(album_ids) == 2:
+            album_ids.append(album_ids[1])
+            album_ids.append(album_ids[0])
+        if len(album_ids) == 3:
+            album_ids.append(album_ids[0])
         self.__draw_surface(surface, ctx, positions, album_ids, set_surface)
 
 #######################
