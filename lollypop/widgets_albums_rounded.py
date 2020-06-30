@@ -97,16 +97,27 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         ctx.set_source_rgb(1, 1, 1)
         ctx.fill()
         album_ids = list(self.__album_ids)
-        if len(album_ids) == 1:
+        album_pixbufs = []
+        for album in album_ids:
+            pixbuf = App().art.get_album_artwork(Album(album),
+                                                 self.__cover_size,
+                                                 self.__cover_size,
+                                                 self._scale_factor)
+            if pixbuf is not None:
+                album_pixbufs.append(pixbuf)
+        if len(album_pixbufs) == 1:
+            self._singlecover = True
             positions = [(0, 0)]
         else:
+            self._singlecover = False
             positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
-        if len(album_ids) == 2:
-            album_ids.append(album_ids[1])
-            album_ids.append(album_ids[0])
-        if len(album_ids) == 3:
-            album_ids.append(album_ids[0])
-        self.__draw_surface(surface, ctx, positions, album_ids, set_surface)
+        if len(album_pixbufs) == 2:
+            album_pixbufs.append(album_pixbufs[1])
+            album_pixbufs.append(album_pixbufs[0])
+        if len(album_pixbufs) == 3:
+            album_pixbufs.append(album_pixbufs[0])
+        self.__draw_surface(surface, ctx, positions,
+                            album_pixbufs, set_surface)
 
 #######################
 # PRIVATE             #
@@ -128,18 +139,19 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         del rounded
         emit_signal(self, "populated")
 
-    def __draw_surface(self, surface, ctx, positions, album_ids, set_surface):
+    def __draw_surface(self, surface, ctx, positions,
+                       album_pixbufs, set_surface):
         """
             Draw surface for first available album
             @param surface as cairo.Surface
             @param ctx as Cairo.context
             @param positions as {}
-            @param album_ids as [int]
+            @param album_pixbufs as []
             @param set_surface as bool
             @thread safe
         """
         # Workaround Gdk not being thread safe
-        def draw_pixbuf(surface, ctx, pixbuf, positions, album_ids):
+        def draw_pixbuf(surface, ctx, pixbuf, positions, album_pixbufs):
             if self.__cancellable.is_cancelled():
                 return
             (x, y) = positions.pop(0)
@@ -153,22 +165,18 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             ctx.paint()
             ctx.translate(-x, -y)
             self.__draw_surface(surface, ctx, positions,
-                                album_ids, set_surface)
+                                album_pixbufs, set_surface)
             del surface
         if self.__cancellable.is_cancelled():
             return
-        elif album_ids and len(positions) > 0:
-            album_id = album_ids.pop(0)
-            pixbuf = App().art.get_album_artwork(Album(album_id),
-                                                 self.__cover_size,
-                                                 self.__cover_size,
-                                                 self._scale_factor)
+        elif album_pixbufs and len(positions) > 0:
+            pixbuf = album_pixbufs.pop(0)
             if pixbuf is None:
                 GLib.idle_add(self.__draw_surface, surface,
-                              ctx, positions, album_ids, set_surface)
+                              ctx, positions, album_pixbufs, set_surface)
             else:
                 GLib.idle_add(draw_pixbuf, surface,
-                              ctx, pixbuf, positions, album_ids)
+                              ctx, pixbuf, positions, album_pixbufs)
         else:
             GLib.idle_add(self.__set_surface, surface)
 
