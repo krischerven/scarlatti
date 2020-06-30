@@ -185,7 +185,12 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         elif orderby == OrderBy.NAME:
             return child1.data.name > child2.data.name
         elif orderby == OrderBy.YEAR_DESC:
-            return child1.data.year < child2.data.year
+            if child1.data.year is None:
+                return False
+            elif child2.data.year is None:
+                return True
+            else:
+                return child1.data.year < child2.data.year
         elif orderby == OrderBy.POPULARITY:
             return child1.data.popularity < child2.data.popularity
         return False
