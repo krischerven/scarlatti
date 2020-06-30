@@ -275,9 +275,11 @@ class ApplicationActions:
                 about.remove(about_headerbar)
                 about.remove(about_box)
                 box.add(about_headerbar)
-            box.add(about_box)
-            box.set_hexpand(True)
-            App().window.container.show_widget(box)
+                box.add(about_box)
+                box.set_hexpand(True)
+                App().window.container.show_widget(box)
+            else:
+                App().window.container.show_widget(about)
         else:
             about.set_transient_for(App().window)
             about.connect("response", self.__on_about_activate_response)
