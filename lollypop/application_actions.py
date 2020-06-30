@@ -267,19 +267,15 @@ class ApplicationActions:
             box.show()
             about_children = about.get_children()
             about_headerbar = get_instance(about_children, Gtk.HeaderBar)
-            # Old GTK
-            if about_headerbar is not None:
-                about_box = get_instance(about_children, Gtk.Box)
-                about_headerbar.set_show_close_button(False)
-                about_headerbar.get_style_context().add_class("no-border")
-                about.remove(about_headerbar)
-                about.remove(about_box)
-                box.add(about_headerbar)
-                box.add(about_box)
-                box.set_hexpand(True)
-                App().window.container.show_widget(box)
-            else:
-                App().window.container.show_widget(about)
+            about_box = get_instance(about_children, Gtk.Box)
+            about_headerbar.set_show_close_button(False)
+            about_headerbar.get_style_context().add_class("no-border")
+            about.remove(about_headerbar)
+            about.remove(about_box)
+            box.add(about_headerbar)
+            box.add(about_box)
+            box.set_hexpand(True)
+            App().window.container.show_widget(box)
         else:
             about.set_transient_for(App().window)
             about.connect("response", self.__on_about_activate_response)
