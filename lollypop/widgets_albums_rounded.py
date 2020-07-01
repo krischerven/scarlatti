@@ -23,7 +23,7 @@ from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 
 class RoundedAlbumsWidget(RoundedFlowBoxWidget):
     """
-        Rounded widget showing cover for 4 albums
+        Rounded widget showing cover for up to 9 albums
     """
     _ALBUMS_COUNT = 10
 
