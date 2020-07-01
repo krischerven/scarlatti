@@ -25,7 +25,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
     """
         Rounded widget showing cover for 4 albums
     """
-    _ALBUMS_COUNT = 4
+    _ALBUMS_COUNT = 10
 
     def __init__(self, data, name, sortname, view_type):
         """
@@ -105,9 +105,15 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         if len(album_pixbufs) <= 1:
             self.__cover_size = self._art_size
             positions = [(0, 0)]
-        else:
+        elif 2 <= len(album_pixbufs) <= 5:
             self.__cover_size = self._art_size / 2
-            positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
+            positions = [(0, 0), (1, 0),
+                         (0, 1), (1, 1)]
+        else:
+            self.__cover_size = self._art_size / 3
+            positions = [(0, 0), (1, 0), (2, 0),
+                         (0, 1), (1, 1), (2, 1),
+                         (0, 2), (1, 2), (2, 2)]
         while album_pixbufs:
             pixbuf = album_pixbufs.pop(0)
             newpix = pixbuf.scale_simple(self.__cover_size,
@@ -115,11 +121,22 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                                          GdkPixbuf.InterpType.NEAREST)
             del pixbuf
             album_scaled_pixbufs.append(newpix)
+
         if len(album_scaled_pixbufs) == 2:
             album_scaled_pixbufs.append(album_scaled_pixbufs[1])
             album_scaled_pixbufs.append(album_scaled_pixbufs[0])
         if len(album_scaled_pixbufs) == 3:
             album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 6:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[2])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 7:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 8:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+
         self.__draw_surface(surface, ctx, positions,
                             album_scaled_pixbufs, set_surface)
 
