@@ -55,10 +55,6 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             @param view_type as ViewType
         """
         RoundedFlowBoxWidget.set_view_type(self, view_type)
-        if len(self._get_album_ids()) == 1:
-            self.__cover_size = self._art_size
-        else:
-            self.__cover_size = self._art_size / 2
         self._pixel_size = self._art_size / 8
 
     def set_artwork(self):
@@ -100,15 +96,20 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         album_pixbufs = []
         for album in album_ids:
             pixbuf = App().art.get_album_artwork(Album(album),
-                                                 self.__cover_size,
-                                                 self.__cover_size,
+                                                 self._art_size,
+                                                 self._art_size,
                                                  self._scale_factor)
             if pixbuf is not None:
                 album_pixbufs.append(pixbuf)
-        if len(album_pixbufs) == 1:
+        if len(album_pixbufs) <= 1:
+            self.__cover_size = self._art_size
             positions = [(0, 0)]
         else:
+            self.__cover_size = self._art_size / 2
             positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
+        for pixbuf in album_pixbufs:
+            # Adding scaling in next commit
+            pass
         if len(album_pixbufs) == 2:
             album_pixbufs.append(album_pixbufs[1])
             album_pixbufs.append(album_pixbufs[0])
