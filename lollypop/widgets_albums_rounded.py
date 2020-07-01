@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gdk, Gio
+from gi.repository import GLib, Gdk, GdkPixbuf, Gio
 
 import cairo
 from random import shuffle
@@ -94,6 +94,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         ctx.fill()
         album_ids = list(self.__album_ids)
         album_pixbufs = []
+        album_scaled_pixbufs = []
         for album in album_ids:
             pixbuf = App().art.get_album_artwork(Album(album),
                                                  self._art_size,
@@ -107,16 +108,20 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         else:
             self.__cover_size = self._art_size / 2
             positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
-        for pixbuf in album_pixbufs:
-            # Adding scaling in next commit
-            pass
-        if len(album_pixbufs) == 2:
-            album_pixbufs.append(album_pixbufs[1])
-            album_pixbufs.append(album_pixbufs[0])
-        if len(album_pixbufs) == 3:
-            album_pixbufs.append(album_pixbufs[0])
+        while album_pixbufs:
+            pixbuf = album_pixbufs.pop(0)
+            newpix = pixbuf.scale_simple(self.__cover_size,
+                                         self.__cover_size,
+                                         GdkPixbuf.InterpType.NEAREST)
+            del pixbuf
+            album_scaled_pixbufs.append(newpix)
+        if len(album_scaled_pixbufs) == 2:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 3:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
         self.__draw_surface(surface, ctx, positions,
-                            album_pixbufs, set_surface)
+                            album_scaled_pixbufs, set_surface)
 
 #######################
 # PRIVATE             #
