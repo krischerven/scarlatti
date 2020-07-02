@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gdk, GdkPixbuf, Gio
+from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Gio
 
 import cairo
 from random import shuffle
@@ -102,7 +102,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                                                  self._scale_factor)
             if pixbuf is not None:
                 album_pixbufs.append(pixbuf)
-        if len(album_pixbufs) <= 1:
+        if len(album_pixbufs) == 0:
+            self.__cover_size = self._art_size / 2
+            positions = [(0.5, 0.5)]
+        elif len(album_pixbufs) == 1:
             self.__cover_size = self._art_size
             positions = [(0, 0)]
         elif 2 <= len(album_pixbufs) <= 5:
@@ -121,6 +124,15 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                                          GdkPixbuf.InterpType.NEAREST)
             del pixbuf
             album_scaled_pixbufs.append(newpix)
+
+        if len(album_scaled_pixbufs) == 0:
+            theme = Gtk.IconTheme.get_default()
+            symbolic = theme.lookup_icon(self._category_icon,
+                                         self.__cover_size,
+                                         Gtk.IconLookupFlags.USE_BUILTIN)
+            if symbolic is not None:
+                pixbuf = symbolic.load_icon()
+                album_scaled_pixbufs.append(pixbuf)
 
         if len(album_scaled_pixbufs) == 2:
             album_scaled_pixbufs.append(album_scaled_pixbufs[1])

@@ -29,6 +29,7 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget):
             @param font_height as int
         """
         self.__font_height = font_height
+        self._category_icon = "x-office-calendar-symbolic"
         decade_str = "%s - %s" % (item_ids[0], item_ids[-1])
         RoundedAlbumsWidget.__init__(self, item_ids, decade_str,
                                      decade_str, view_type)
