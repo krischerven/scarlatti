@@ -28,7 +28,7 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
         """
         self.__font_height = font_height
         self.__storage_type = storage_type
-        self._category_icon = "tag-symbolic"
+        self._category_icon = "org.gnome.Lollypop-tag-symbolic"
         name = sortname = App().genres.get_name(genre_id)
         RoundedAlbumsWidget.__init__(self, genre_id, name, sortname, view_type)
         self._genre = Type.GENRES
