@@ -32,7 +32,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, SignalsHelper):
             @param font_height as int
         """
         self.__font_height = font_height
-        self._category_icon = "media-optical-symbolic"
         name = sortname = App().playlists.get_name(playlist_id)
         RoundedAlbumsWidget.__init__(self, playlist_id, name,
                                      sortname, view_type)

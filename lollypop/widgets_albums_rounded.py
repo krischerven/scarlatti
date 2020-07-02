@@ -17,7 +17,7 @@ from random import shuffle
 
 from lollypop.define import App, Type
 from lollypop.objects_album import Album
-from lollypop.utils import get_round_surface, emit_signal
+from lollypop.utils import get_round_surface, emit_signal, get_icon_name
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 
 
@@ -127,7 +127,8 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
 
         if len(album_scaled_pixbufs) == 0:
             theme = Gtk.IconTheme.get_default()
-            symbolic = theme.lookup_icon(self._category_icon,
+            category_icon = get_icon_name(self._genre)
+            symbolic = theme.lookup_icon(category_icon,
                                          self.__cover_size,
                                          Gtk.IconLookupFlags.USE_BUILTIN)
             if symbolic is not None:
