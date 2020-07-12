@@ -81,7 +81,8 @@ def is_pls(info):
     """
     if info is not None:
         if info.get_content_type() in ["audio/x-mpegurl",
-                                       "application/xspf+xml"]:
+                                       "application/xspf+xml",
+                                       "application/vnd.apple.mpegurl"]:
             return True
     return False
 
