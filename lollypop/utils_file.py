@@ -92,15 +92,11 @@ def get_mtime(info):
         Return Last modified time of a given file
         @param info as Gio.FileInfo
     """
-    # Using time::changed is not reliable making lollypop doing a full
-    # scan every two weeks (on my computer)
-    # try:
-    #    # We do not use time::modified because many tag editors
-    #    # just preserve this setting
-    #    return int(info.get_attribute_as_string("time::changed"))
-    # except:
-    #    pass
-    return int(info.get_attribute_as_string("time::modified"))
+    mtime = info.get_attribute_as_string("time::modified")
+    if mtime is None:
+        return 0
+    else:
+        return int(mtime)
 
 
 def remove_oldest(path, timestamp):
