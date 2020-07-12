@@ -24,6 +24,7 @@ from threading import current_thread
 from pickle import dump
 from signal import signal, SIGINT, SIGTERM
 from urllib.parse import urlparse
+from gettext import gettext as _
 
 from lollypop.utils import init_proxy_from_gnome, emit_signal
 from lollypop.application_actions import ApplicationActions
@@ -523,7 +524,9 @@ class Application(Gtk.Application, ApplicationActions):
             for uri in audio_uris:
                 parsed = urlparse(uri)
                 if parsed.scheme in ["http", "https"]:
-                    pass
+                    self.notify.send(
+                        "Lollypop",
+                        _("Lollypop does not support http streams"))
                 else:
                     to_scan_uris.append(uri)
             self.scanner.update(ScanType.EXTERNAL, to_scan_uris)
