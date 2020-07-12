@@ -172,7 +172,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
                                            album_id INT NOT NULL)""",
             44: self.__upgrade_44,
             45: self.__upgrade_45,
-            46: self.__upgrade_46
+            46: self.__upgrade_46,
+            47: self.__upgrade_47
         }
 
 #######################
@@ -816,3 +817,10 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
         helper = TaskHelper()
         helper.run(do_migration, dialog, label, progress)
         dialog.run()
+
+    def __upgrade_47(self, db):
+        """
+        Update the covers for playlists.
+        """
+        from lollypop.art import clean_all_cache
+        clean_all_cache()

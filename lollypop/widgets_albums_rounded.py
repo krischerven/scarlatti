@@ -10,22 +10,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, Gdk, Gio
+from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Gio
 
 import cairo
 from random import shuffle
 
 from lollypop.define import App, Type
 from lollypop.objects_album import Album
-from lollypop.utils import get_round_surface, emit_signal
+from lollypop.utils import get_round_surface, emit_signal, get_icon_name
 from lollypop.widgets_flowbox_rounded import RoundedFlowBoxWidget
 
 
 class RoundedAlbumsWidget(RoundedFlowBoxWidget):
     """
-        Rounded widget showing cover for 4 albums
+        Rounded widget showing cover for up to 9 albums
     """
-    _ALBUMS_COUNT = 4
+    _ALBUMS_COUNT = 10
 
     def __init__(self, data, name, sortname, view_type):
         """
@@ -55,10 +55,6 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             @param view_type as ViewType
         """
         RoundedFlowBoxWidget.set_view_type(self, view_type)
-        if len(self._get_album_ids()) == 1:
-            self.__cover_size = self._art_size
-        else:
-            self.__cover_size = self._art_size / 2
         self._pixel_size = self._art_size / 8
 
     def set_artwork(self):
@@ -97,16 +93,65 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         ctx.set_source_rgb(1, 1, 1)
         ctx.fill()
         album_ids = list(self.__album_ids)
-        if len(album_ids) == 1:
+        album_pixbufs = []
+        album_scaled_pixbufs = []
+        for album in album_ids:
+            pixbuf = App().art.get_album_artwork(Album(album),
+                                                 self._art_size,
+                                                 self._art_size,
+                                                 self._scale_factor)
+            if pixbuf is not None:
+                album_pixbufs.append(pixbuf)
+        if len(album_pixbufs) == 0:
+            self.__cover_size = self._art_size / 2
+            positions = [(0.5, 0.5)]
+        elif len(album_pixbufs) == 1:
+            self.__cover_size = self._art_size
             positions = [(0, 0)]
+        elif 2 <= len(album_pixbufs) <= 5:
+            self.__cover_size = self._art_size / 2
+            positions = [(0, 0), (1, 0),
+                         (0, 1), (1, 1)]
         else:
-            positions = [(0, 0), (1, 0), (0, 1), (1, 1)]
-        if len(album_ids) == 2:
-            album_ids.append(album_ids[1])
-            album_ids.append(album_ids[0])
-        if len(album_ids) == 3:
-            album_ids.append(album_ids[0])
-        self.__draw_surface(surface, ctx, positions, album_ids, set_surface)
+            self.__cover_size = self._art_size / 3
+            positions = [(0, 0), (1, 0), (2, 0),
+                         (0, 1), (1, 1), (2, 1),
+                         (0, 2), (1, 2), (2, 2)]
+        while album_pixbufs:
+            pixbuf = album_pixbufs.pop(0)
+            newpix = pixbuf.scale_simple(self.__cover_size,
+                                         self.__cover_size,
+                                         GdkPixbuf.InterpType.NEAREST)
+            del pixbuf
+            album_scaled_pixbufs.append(newpix)
+
+        if len(album_scaled_pixbufs) == 0:
+            theme = Gtk.IconTheme.get_default()
+            category_icon = get_icon_name(self._genre)
+            symbolic = theme.lookup_icon(category_icon,
+                                         self.__cover_size,
+                                         Gtk.IconLookupFlags.USE_BUILTIN)
+            if symbolic is not None:
+                pixbuf = symbolic.load_icon()
+                album_scaled_pixbufs.append(pixbuf)
+
+        if len(album_scaled_pixbufs) == 2:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 3:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 6:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[2])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 7:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+        if len(album_scaled_pixbufs) == 8:
+            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
+
+        self.__draw_surface(surface, ctx, positions,
+                            album_scaled_pixbufs, set_surface)
 
 #######################
 # PRIVATE             #
@@ -128,18 +173,19 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         del rounded
         emit_signal(self, "populated")
 
-    def __draw_surface(self, surface, ctx, positions, album_ids, set_surface):
+    def __draw_surface(self, surface, ctx, positions,
+                       album_pixbufs, set_surface):
         """
             Draw surface for first available album
             @param surface as cairo.Surface
             @param ctx as Cairo.context
             @param positions as {}
-            @param album_ids as [int]
+            @param album_pixbufs as []
             @param set_surface as bool
             @thread safe
         """
         # Workaround Gdk not being thread safe
-        def draw_pixbuf(surface, ctx, pixbuf, positions, album_ids):
+        def draw_pixbuf(surface, ctx, pixbuf, positions, album_pixbufs):
             if self.__cancellable.is_cancelled():
                 return
             (x, y) = positions.pop(0)
@@ -153,22 +199,18 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             ctx.paint()
             ctx.translate(-x, -y)
             self.__draw_surface(surface, ctx, positions,
-                                album_ids, set_surface)
+                                album_pixbufs, set_surface)
             del surface
         if self.__cancellable.is_cancelled():
             return
-        elif album_ids and len(positions) > 0:
-            album_id = album_ids.pop(0)
-            pixbuf = App().art.get_album_artwork(Album(album_id),
-                                                 self.__cover_size,
-                                                 self.__cover_size,
-                                                 self._scale_factor)
+        elif album_pixbufs and len(positions) > 0:
+            pixbuf = album_pixbufs.pop(0)
             if pixbuf is None:
                 GLib.idle_add(self.__draw_surface, surface,
-                              ctx, positions, album_ids, set_surface)
+                              ctx, positions, album_pixbufs, set_surface)
             else:
                 GLib.idle_add(draw_pixbuf, surface,
-                              ctx, pixbuf, positions, album_ids)
+                              ctx, pixbuf, positions, album_pixbufs)
         else:
             GLib.idle_add(self.__set_surface, surface)
 
