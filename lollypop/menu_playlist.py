@@ -10,11 +10,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, Gtk, GLib
+from gi.repository import Gio, Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN_SMALL, ViewType, Type
+from lollypop.define import App, MARGIN_SMALL, Type
 
 
 class PlaylistMenu(Gio.Menu):
@@ -61,17 +61,6 @@ class PlaylistMenu(Gio.Menu):
             menu.append(_("Remove playlist"), "app.remove_pl_action")
         from lollypop.menu_playback import PlaylistPlaybackMenu
         playback_menu = PlaylistPlaybackMenu(playlist_id)
-        if view_type & ViewType.BANNER:
-            show_track_number = Gio.SimpleAction.new_stateful(
-                    "show_track_number",
-                    None,
-                    GLib.Variant.new_boolean(
-                        App().settings.get_value("show-tag-tracknumber")))
-            App().add_action(show_track_number)
-            show_track_number.connect("change-state",
-                                      self.__on_show_track_number_change_state)
-            playback_menu.append(_("Show tracks number"),
-                                 "app.show_track_number")
         self.append_section(_("Playlist"), playback_menu)
         section = Gio.Menu()
         self.append_section(_("Add to"), section)
@@ -114,16 +103,6 @@ class PlaylistMenu(Gio.Menu):
         notification.show()
         App().window.container.add_overlay(notification)
         notification.set_reveal_child(True)
-
-    def __on_show_track_number_change_state(self, action, variant):
-        """
-            Update settings and reload view
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        action.set_state(variant)
-        App().settings.set_value("show-tag-tracknumber", variant)
-        App().window.container.reload_view()
 
     def __on_save_action_activate(self, action, variant):
         """

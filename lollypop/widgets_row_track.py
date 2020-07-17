@@ -47,18 +47,16 @@ class TrackRow(Gtk.ListBoxRow):
             height = min_height
         return height
 
-    def __init__(self, track, album_artist_ids, view_type, show_track_number):
+    def __init__(self, track, album_artist_ids, view_type):
         """
             Init row widgets
             @param track as Track
             @param album_artist_ids as [int]
             @param view_type as ViewType
-            @param show_track_number as bool
         """
         # We do not use Gtk.Builder for speed reasons
         Gtk.ListBoxRow.__init__(self)
         self.__view_type = view_type
-        self.__show_track_number = show_track_number
         self._track = track
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
@@ -175,23 +173,14 @@ class TrackRow(Gtk.ListBoxRow):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
-            self._num_label.show()
-        elif self.__show_track_number:
-            self._num_label.get_style_context().remove_class("queued")
-            # Just track number for albums or playlists if only one album
-            if self.__view_type & ViewType.ALBUM or\
-                    len(self._track.album.discs) == 1:
-                self._num_label.set_text(str(self._track.number))
-            # Prepend disc number
-            elif len(self._track.album.discs) > 1:
+        else:
+            if len(self._track.album.discs) > 1:
                 discnumber = App().tracks.get_discnumber(self._track.id)
                 label = "(%s)  %s" % (discnumber, self._track.number)
-                self._num_label.set_text(label)
-            self._num_label.show()
-        else:
+            else:
+                label = str(self._track.number)
+            self._num_label.set_text(label)
             self._num_label.get_style_context().remove_class("queued")
-            self._num_label.set_text("")
-            self._num_label.hide()
 
     def popup_menu(self, parent, x=None, y=None):
         """

@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib
+from gi.repository import Gio
 
 from gettext import gettext as _
 
@@ -40,26 +40,7 @@ class CurrentAlbumsMenu(Gio.Menu):
             "activate", self.__on_save_playback_action_activate)
         App().add_action(save_playback_action)
         menu.append(_("Create a new playlist"), "app.save_playback")
-        show_track_number_action = Gio.SimpleAction.new_stateful(
-                "show_track_number",
-                None,
-                GLib.Variant.new_boolean(
-                    App().settings.get_value("show-tag-tracknumber")))
-        App().add_action(show_track_number_action)
-        show_track_number_action.connect(
-            "change-state", self.__on_show_track_number_change_state)
-        menu.append(_("Show tracks number"), "app.show_track_number")
         self.append_section(_("Playing albums"), menu)
-
-    def __on_show_track_number_change_state(self, action, variant):
-        """
-            Update settings and reload view
-            @param Gio.SimpleAction
-            @param GLib.Variant
-        """
-        action.set_state(variant)
-        App().settings.set_value("show-tag-tracknumber", variant)
-        App().window.container.reload_view()
 
     def __on_save_playback_action_activate(self, action, variant):
         """
