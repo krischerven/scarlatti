@@ -18,8 +18,7 @@ from lollypop.define import AdaptiveSize, Size
 
 class AdaptiveWindow:
     """
-        Handle window resizing and window's children workflow
-        This class needs a stack and n paned
+        Handle window resizing
     """
 
     gsignals = {
