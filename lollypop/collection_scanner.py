@@ -23,6 +23,7 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
 
 from gettext import gettext as _
 from time import time
+from urllib.parse import urlparse
 from multiprocessing import cpu_count
 
 from lollypop.collection_item import CollectionItem
@@ -340,17 +341,18 @@ class CollectionScanner(GObject.GObject, TagReader):
             GLib.idle_add(App().window.container.progress.set_fraction,
                           new_fraction, self)
 
-    def __finish(self, new_track_ids):
+    def __finish(self, items):
         """
             Notify from main thread when scan finished
-            @param new_track_ids as int
+            @param items as [CollectionItem]
         """
+        track_ids = [item.track_id for item in items]
         self.__thread = None
         Logger.info("Scan finished")
         App().lookup_action("update_db").set_enabled(True)
         App().window.container.progress.set_fraction(1.0, self)
         self.stop()
-        emit_signal(self, "scan-finished", new_track_ids)
+        emit_signal(self, "scan-finished", track_ids)
         # Update max count value
         App().albums.update_max_count()
         # Update featuring
@@ -379,18 +381,24 @@ class CollectionScanner(GObject.GObject, TagReader):
             Get all tracks and dirs in uris
             @param scan_type as ScanType
             @param uris as string
-            @return (tracks [mtimes: int, uri: str], dirs as [uri: str])
+            @return ([(int, str)], [str], [str])
+                    ([(mtime, file)], [dir], [stream])
         """
         files = []
         dirs = []
+        streams = []
         walk_uris = []
         # Check collection exists
         for uri in uris:
-            f = Gio.File.new_for_uri(uri)
-            if f.query_exists():
-                walk_uris.append(uri)
+            parsed = urlparse(uri)
+            if parsed.scheme in ["http", "https"]:
+                streams.append(uri)
             else:
-                return (None, None)
+                f = Gio.File.new_for_uri(uri)
+                if f.query_exists():
+                    walk_uris.append(uri)
+                else:
+                    return (None, None, None)
 
         while walk_uris:
             uri = walk_uris.pop(0)
@@ -424,7 +432,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 Logger.error("CollectionScanner::__get_objects_for_uris(): %s"
                              % e)
         files.sort(reverse=True)
-        return (files, dirs)
+        return (files, dirs, streams)
 
     @profile
     def __scan(self, scan_type, uris):
@@ -437,7 +445,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         try:
             SqlCursor.add(App().db)
             App().art.clean_rounded()
-            (files, dirs) = self.__get_objects_for_uris(scan_type, uris)
+            (files, dirs, streams) = self.__get_objects_for_uris(
+                scan_type, uris)
             if files is None:
                 App().notify.send("Lollypop",
                                   _("Scan disabled, missing collection"))
@@ -450,7 +459,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Get mtime of all tracks to detect which has to be updated
             db_mtimes = App().tracks.get_mtimes()
             # * 2 => Scan + Save
-            self.__progress_total = len(files) * 2
+            self.__progress_total = len(files) * 2 + len(streams)
             self.__progress_count = 0
             self.__progress_fraction = 0
             # Min: 1 thread, Max: 5 threads
@@ -470,31 +479,30 @@ class CollectionScanner(GObject.GObject, TagReader):
             else:
                 storage_type = StorageType.COLLECTION
             # Start getting files and populating DB
-            track_ids = []
+            items = []
             i = 0
             while threads:
                 thread = threads[i]
                 if not thread.isAlive():
                     threads.remove(thread)
-                track_ids += self.__save_in_db(storage_type)
+                items += self.__save_in_db(storage_type)
                 if i >= len(threads) - 1:
                     i = 0
                 else:
                     i += 1
+
+            # Add streams to DB, only happening on command line/m3u files
+            items += self.__save_streams_in_db(streams, storage_type)
+
             self.__remove_old_tracks(db_uris, scan_type)
 
-            if scan_type != ScanType.EXTERNAL:
-                self.__add_monitor(dirs)
-                GLib.idle_add(self.__finish, track_ids)
-
             if scan_type == ScanType.EXTERNAL:
-                track_ids = []
-                for (mtime, uri) in files:
-                    track_id = App().tracks.get_id_by_uri(uri)
-                    track_ids.append(track_id)
                 albums = tracks_to_albums(
-                    [Track(track_id) for track_id in track_ids])
+                    [Track(item.track_id) for item in items])
                 App().player.play_albums(albums)
+            else:
+                self.__add_monitor(dirs)
+                GLib.idle_add(self.__finish, items)
             self.__tags = {}
             self.__pending_new_artist_ids = []
         except Exception as e:
@@ -575,9 +583,10 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
             Save current tags into DB
             @param storage_type as StorageType
+            @return [CollectionItem]
         """
         items = []
-        track_ids = []
+        notify_index = 0
         previous_album_id = None
         for uri in list(self.__tags.keys()):
             # Handle a stop request
@@ -587,21 +596,39 @@ class CollectionScanner(GObject.GObject, TagReader):
             tags = self.__tags[uri]
             item = self.__add2db(uri, *tags, storage_type)
             items.append(item)
-            track_ids.append(item.track_id)
             self.__progress_count += 1
             self.__update_progress(self.__progress_count,
                                    self.__progress_total,
                                    0.001)
             if previous_album_id != item.album_id:
-                self.__notify_ui(items)
-                items = []
+                self.__notify_ui(items[notify_index:])
+                notify_index = len(items)
                 previous_album_id = item.album_id
             del self.__tags[uri]
         # Handle a stop request
         if self.__thread is None:
             raise Exception("cancelled")
         self.__notify_ui(items)
-        return [item.track_id for item in items]
+        return items
+
+    def __save_streams_in_db(self, streams, storage_type):
+        """
+            Save http stream to DB
+            @param streams as [str]
+            @param storage_type as StorageType
+            @return [CollectionItem]
+        """
+        items = []
+        for uri in streams:
+            parsed = urlparse(uri)
+            item = self.__add2db(uri, parsed.path, parsed.netloc,
+                                 None, "", "", parsed.netloc,
+                                 parsed.netloc, "", False, 0, False, 0, 0, 0,
+                                 None, 0, "", "", "", "", 1, 0, 0, 0, 0, 0,
+                                 False, 0, storage_type)
+            items.append(item)
+            self.__progress_count += 1
+        return items
 
     def __notify_ui(self, items):
         """

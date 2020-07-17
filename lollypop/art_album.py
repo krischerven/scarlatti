@@ -65,7 +65,7 @@ class AlbumArt:
                     return cache_path_jpg
         except Exception as e:
             Logger.error("Art::get_album_cache_path(): %s" % e)
-            return None
+        return None
 
     def get_album_artwork_uri(self, album):
         """
@@ -196,50 +196,51 @@ class AlbumArt:
                 if optimized_blur:
                     pixbuf = self.load_behaviour(pixbuf, None,
                                                  width, height, behaviour)
-                return pixbuf
-            else:
-                # Use favorite folder artwork
-                if pixbuf is None:
-                    uri = self.get_album_artwork_uri(album)
-                    data = None
-                    if uri is not None:
-                        f = Gio.File.new_for_uri(uri)
-                        (status, data, tag) = f.load_contents(None)
-                        bytes = GLib.Bytes.new(data)
-                        stream = Gio.MemoryInputStream.new_from_bytes(bytes)
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_stream(
-                            stream, None)
-                        stream.close()
-                # Use tags artwork
-                if pixbuf is None and album.tracks and\
-                        album.storage_type & (StorageType.COLLECTION |
-                                              StorageType.EXTERNAL):
-                    try:
-                        track = choice(album.tracks)
-                        pixbuf = self.pixbuf_from_tags(track.uri)
-                    except Exception as e:
-                        Logger.error("AlbumArt::get_album_artwork(): %s", e)
 
-                # Use folder artwork
-                if pixbuf is None and\
-                        album.storage_type & (StorageType.COLLECTION |
-                                              StorageType.EXTERNAL):
-                    uri = self.get_first_album_artwork(album)
-                    # Look in album folder
-                    if uri is not None:
-                        f = Gio.File.new_for_uri(uri)
-                        (status, data, tag) = f.load_contents(None)
-                        bytes = GLib.Bytes.new(data)
-                        stream = Gio.MemoryInputStream.new_from_bytes(bytes)
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_stream(
-                            stream, None)
-                        stream.close()
-                if pixbuf is None:
-                    self.cache_album_artwork(album.id)
-                    return None
-                pixbuf = self.load_behaviour(pixbuf, cache_path_jpg,
-                                             width, height, behaviour)
-                return pixbuf
+            # Use favorite folder artwork
+            if pixbuf is None:
+                uri = self.get_album_artwork_uri(album)
+                print(uri)
+                data = None
+                if uri is not None:
+                    f = Gio.File.new_for_uri(uri)
+                    (status, data, tag) = f.load_contents(None)
+                    bytes = GLib.Bytes.new(data)
+                    stream = Gio.MemoryInputStream.new_from_bytes(bytes)
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_stream(
+                        stream, None)
+                    stream.close()
+
+            # Use tags artwork
+            if pixbuf is None and album.tracks and\
+                    album.storage_type & (StorageType.COLLECTION |
+                                          StorageType.EXTERNAL):
+                try:
+                    track = choice(album.tracks)
+                    pixbuf = self.pixbuf_from_tags(track.uri)
+                except Exception as e:
+                    Logger.error("AlbumArt::get_album_artwork(): %s", e)
+
+            # Use folder artwork
+            if pixbuf is None and\
+                    album.storage_type & (StorageType.COLLECTION |
+                                          StorageType.EXTERNAL):
+                uri = self.get_first_album_artwork(album)
+                # Look in album folder
+                if uri is not None:
+                    f = Gio.File.new_for_uri(uri)
+                    (status, data, tag) = f.load_contents(None)
+                    bytes = GLib.Bytes.new(data)
+                    stream = Gio.MemoryInputStream.new_from_bytes(bytes)
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_stream(
+                        stream, None)
+                    stream.close()
+            if pixbuf is None:
+                self.cache_album_artwork(album.id)
+                return None
+            pixbuf = self.load_behaviour(pixbuf, cache_path_jpg,
+                                         width, height, behaviour)
+            return pixbuf
         except Exception as e:
             Logger.error("AlbumArt::get_album_artwork(): %s -> %s" % (uri, e))
             return None
@@ -362,8 +363,7 @@ class AlbumArt:
             Check if album uri exists, update if not
             @param album as Album
         """
-        if not album.storage_type & (StorageType.COLLECTION |
-                                     StorageType.EXTERNAL):
+        if not album.storage_type & StorageType.COLLECTION:
             return
         d = Gio.File.new_for_uri(album.uri)
         if not d.query_exists():

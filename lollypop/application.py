@@ -16,7 +16,6 @@ gi.require_version("GstAudio", "1.0")
 gi.require_version("GstPbutils", "1.0")
 gi.require_version("TotemPlParser", "1.0")
 from gi.repository import Gtk, Gio, GLib, Gdk, Gst, GstPbutils
-from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE
 Gst.init(None)
 GstPbutils.pb_utils_init()
 
@@ -24,12 +23,11 @@ from threading import current_thread
 from pickle import dump
 from signal import signal, SIGINT, SIGTERM
 from urllib.parse import urlparse
-from gettext import gettext as _
 
 from lollypop.utils import init_proxy_from_gnome, emit_signal
 from lollypop.application_actions import ApplicationActions
-from lollypop.utils_file import is_audio, is_pls, install_youtube_dl
-from lollypop.define import LOLLYPOP_DATA_PATH, ScanType, StorageType
+from lollypop.utils_file import get_file_type, install_youtube_dl
+from lollypop.define import LOLLYPOP_DATA_PATH, ScanType, StorageType, FileType
 from lollypop.database import Database
 from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
@@ -479,22 +477,23 @@ class Application(Gtk.Application, ApplicationActions):
                 audio_uris = []
                 playlist_uris = []
                 for uri in args[1:]:
-                    try:
-                        uri = GLib.filename_to_uri(uri)
-                    except:
-                        pass
-                    f = Gio.File.new_for_uri(uri)
-                    if not f.query_exists():
-                        uri = GLib.filename_to_uri(
-                            "%s/%s" % (GLib.get_current_dir(), uri))
+                    parsed = urlparse(uri)
+                    if parsed.scheme not in ["http", "https"]:
+                        try:
+                            uri = GLib.filename_to_uri(uri)
+                        except:
+                            pass
                         f = Gio.File.new_for_uri(uri)
-                    info = f.query_info(FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-                                        Gio.FileQueryInfoFlags.NONE)
-                    if is_audio(info):
-                        audio_uris.append(uri)
-                    elif is_pls(info):
+                        # Try ./filename
+                        if not f.query_exists():
+                            uri = GLib.filename_to_uri(
+                                "%s/%s" % (GLib.get_current_dir(), uri))
+                            print(uri)
+                            f = Gio.File.new_for_uri(uri)
+                    file_type = get_file_type(uri)
+                    if file_type == FileType.PLS:
                         playlist_uris.append(uri)
-                    elif info.get_file_type() == Gio.FileType.DIRECTORY:
+                    else:
                         audio_uris.append(uri)
                 if playlist_uris:
                     self.__parse_uris(playlist_uris, audio_uris)
@@ -520,16 +519,7 @@ class Application(Gtk.Application, ApplicationActions):
         if playlist_uris:
             self.__parse_uris(playlist_uris, audio_uris)
         else:
-            to_scan_uris = []
-            for uri in audio_uris:
-                parsed = urlparse(uri)
-                if parsed.scheme in ["http", "https"]:
-                    self.notify.send(
-                        "Lollypop",
-                        _("Lollypop does not support http streams"))
-                else:
-                    to_scan_uris.append(uri)
-            self.scanner.update(ScanType.EXTERNAL, to_scan_uris)
+            self.scanner.update(ScanType.EXTERNAL, audio_uris)
 
     def __on_entry_parsed(self, parser, uri, metadata, audio_uris):
         """
