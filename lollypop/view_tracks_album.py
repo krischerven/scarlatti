@@ -211,7 +211,8 @@ class AlbumTracksView(TracksView):
         for track in tracks:
             # If user does not want to show real tracknumber and we are
             # in album view, calculate a fake tracknumber
-            if not self.__show_tag_tracknumber:
+            if not self.__show_tag_tracknumber and\
+                    self.view_type & ViewType.ALBUM:
                 track.set_number(position + 1)
             row = TrackRow(track, self.__album.artist_ids, self.view_type)
             row.show()

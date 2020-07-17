@@ -69,7 +69,6 @@ class TrackRow(Gtk.ListBoxRow):
         self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._num_label.set_width_chars(4)
         self._num_label.get_style_context().add_class("dim-label")
-        self._num_label.show()
         self.update_number_label()
         self._grid.add(self._num_label)
         self.__title_label = Gtk.Label.new(
@@ -169,6 +168,8 @@ class TrackRow(Gtk.ListBoxRow):
         """
             Update position label for row
         """
+        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
+            return
         if App().player.is_in_queue(self._track.id):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
@@ -181,6 +182,7 @@ class TrackRow(Gtk.ListBoxRow):
                 label = str(self._track.number)
             self._num_label.set_text(label)
             self._num_label.get_style_context().remove_class("queued")
+        self._num_label.show()
 
     def popup_menu(self, parent, x=None, y=None):
         """
