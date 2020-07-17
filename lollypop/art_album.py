@@ -200,7 +200,6 @@ class AlbumArt:
             # Use favorite folder artwork
             if pixbuf is None:
                 uri = self.get_album_artwork_uri(album)
-                print(uri)
                 data = None
                 if uri is not None:
                     f = Gio.File.new_for_uri(uri)

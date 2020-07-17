@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.player_plugins import PluginsPlayer
-from lollypop.define import GstPlayFlags, App
+from lollypop.define import GstPlayFlags, App, StorageType
 from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
@@ -283,15 +283,15 @@ class BinPlayer:
             @param bus as Gst.Bus
             @param message as Gst.Message
         """
-        if isinstance(self._current_track, Track):
+        if self._current_track.storage_type != StorageType.EXTERNAL:
             return
         Logger.debug("Player::__on_bus_message_tag(): %s" %
                      self._current_track.uri)
         reader = TagReader()
         tags = message.parse_tag()
         title = reader.get_title(tags, "")
-        if len(title) > 1 and self._current_track.artists != [title]:
-            self._current_track.artists = [title]
+        if len(title) > 1 and self._current_track.title != title:
+            self._current_track.set_name(title)
             emit_signal(self, "current-changed")
 
     def _on_bus_element(self, bus, message):
