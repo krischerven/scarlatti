@@ -105,10 +105,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         if len(album_pixbufs) == 0:
             self.__cover_size = self._art_size / 2
             positions = [(0.5, 0.5)]
-        elif len(album_pixbufs) == 1:
+        elif 1 <= len(album_pixbufs) <= 2:
             self.__cover_size = self._art_size
             positions = [(0, 0)]
-        elif 2 <= len(album_pixbufs) <= 5:
+        elif 3 <= len(album_pixbufs) <= 5:
             self.__cover_size = self._art_size / 2
             positions = [(0, 0), (1, 0),
                          (0, 1), (1, 1)]
@@ -135,9 +135,6 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                 pixbuf = symbolic.load_icon()
                 album_scaled_pixbufs.append(pixbuf)
 
-        if len(album_scaled_pixbufs) == 2:
-            album_scaled_pixbufs.append(album_scaled_pixbufs[1])
-            album_scaled_pixbufs.append(album_scaled_pixbufs[0])
         if len(album_scaled_pixbufs) == 3:
             album_scaled_pixbufs.append(album_scaled_pixbufs[0])
         if len(album_scaled_pixbufs) == 6:
