@@ -209,9 +209,7 @@ class WebSettingsWidget(Gtk.Bin, SignalsHelper):
             @thread safe
         """
         def on_token(token, service):
-            self.__passwords_helper.clear(service,
-                                          self.__passwords_helper.store,
-                                          service,
+            self.__passwords_helper.store(service,
                                           service,
                                           token)
             validation_token = token.replace("validation:", "")
