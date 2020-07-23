@@ -103,7 +103,7 @@ class CacheDatabase:
             @param table as str
         """
         with SqlCursor(self, True) as sql:
-            sql.execute("DELETE FROM ?", (table,))
+            sql.execute('DELETE FROM "%s"' % table)
 
     def clean(self, commit=True):
         """
