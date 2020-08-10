@@ -143,10 +143,11 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                 if self._current_track.uri:
                     if albums:
                         if was_party:
+                            # Tips: prevents player from loading albums
+                            self._is_party = True
                             App().lookup_action("party").change_state(
                                 GLib.Variant("b", True))
-                        else:
-                            self.set_albums(albums)
+                        self.set_albums(albums)
                         # Load track from player albums
                         index = self.album_ids.index(
                             self._current_track.album.id)

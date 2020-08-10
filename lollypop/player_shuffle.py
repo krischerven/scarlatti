@@ -39,7 +39,7 @@ class ShufflePlayer:
         # Tracks already played by albums
         self.__already_played_tracks = {}
         # Party mode
-        self.__is_party = False
+        self._is_party = False
         App().settings.connect("changed::shuffle", self.__set_shuffle)
         self.connect("playback-added", self.__on_playback_added)
         self.connect("playback-setted", self.__on_playback_setted)
@@ -91,9 +91,9 @@ class ShufflePlayer:
                     self.play()
             emit_signal(self, "loading-changed", False, Track())
 
-        if party == self.__is_party:
+        if party == self._is_party:
             return
-        self.__is_party = party
+        self._is_party = party
 
         if party:
             App().task_helper.run(self.set_party_ids, callback=(start_party,))
@@ -111,7 +111,7 @@ class ShufflePlayer:
         """
             Set party mode ids
         """
-        if not self.__is_party:
+        if not self._is_party:
             return
         party_ids = App().settings.get_value("party-ids")
         storage_type = get_default_storage_type()
@@ -131,7 +131,7 @@ class ShufflePlayer:
             True if party mode on
             @return bool
         """
-        return self.__is_party
+        return self._is_party
 
     @property
     def shuffle_has_next(self):
@@ -160,7 +160,7 @@ class ShufflePlayer:
                 self._current_track.id < 0:
             return
         # Add track to shuffle history if needed
-        if App().settings.get_value("shuffle") or self.__is_party:
+        if App().settings.get_value("shuffle") or self._is_party:
             self.__add_to_shuffle_history(self._current_track)
             if self.__history:
                 next = self.__history.next
@@ -207,7 +207,7 @@ class ShufflePlayer:
             @return track as Track
         """
         try:
-            if App().settings.get_value("shuffle") or self.__is_party:
+            if App().settings.get_value("shuffle") or self._is_party:
                 if self._albums:
                     track = self.__get_tracks_random()
                     # All tracks done
@@ -276,7 +276,7 @@ class ShufflePlayer:
             @param player as Player
             @param album as Album
         """
-        if App().settings.get_value("shuffle") or self.__is_party:
+        if App().settings.get_value("shuffle") or self._is_party:
             if album not in self.__to_play_albums:
                 self.__to_play_albums.append(album)
                 shuffle(self.__to_play_albums)
@@ -294,7 +294,7 @@ class ShufflePlayer:
             @param player as Player
             @param albums as [Album]
         """
-        if App().settings.get_value("shuffle") or self.__is_party:
+        if App().settings.get_value("shuffle") or self._is_party:
             self.__to_play_albums = albums
             if albums:
                 shuffle(self.__to_play_albums)
@@ -309,7 +309,7 @@ class ShufflePlayer:
             @param player as Player
             @param album as Album
         """
-        if App().settings.get_value("shuffle") or self.__is_party:
+        if App().settings.get_value("shuffle") or self._is_party:
             if album in self.__to_play_albums:
                 self.__to_play_albums.remove(album)
             if album in self.__not_played_albums:
