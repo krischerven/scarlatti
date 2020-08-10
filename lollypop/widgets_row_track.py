@@ -168,15 +168,18 @@ class TrackRow(Gtk.ListBoxRow):
         """
             Update position label for row
         """
-        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
-            return
         if App().player.is_in_queue(self._track.id):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
         else:
-            label = str(self._track.number)
-            self._num_label.set_text(label)
+            if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS) and\
+                    len(self._track.album.discs) > 1:
+                discnumber = App().tracks.get_discnumber(self._track.id)
+                label = "%s - %s" % (self._track.number, discnumber)
+            else:
+                label = str(self._track.number)
+            self._num_label.set_markup(label)
             self._num_label.get_style_context().remove_class("queued")
         self._num_label.show()
 
