@@ -334,7 +334,7 @@ class AlbumTracksView(TracksView):
             @param widget as TracksWidget
             @param track as Track
         """
-        if self.view_type & ViewType.ALBUM:
+        if self.view_type & (ViewType.ALBUM | ViewType.ARTIST):
             tracks = []
             for child in self.children:
                 if child.track.loved != -1:
