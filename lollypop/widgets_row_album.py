@@ -272,7 +272,7 @@ class AlbumRow(Gtk.ListBoxRow):
     def album(self):
         """
             Get album
-            @return row id as int
+            @return Album
         """
         return self.__album
 
