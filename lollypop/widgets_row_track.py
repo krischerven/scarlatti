@@ -175,11 +175,7 @@ class TrackRow(Gtk.ListBoxRow):
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
         else:
-            if len(self._track.album.discs) > 1:
-                discnumber = App().tracks.get_discnumber(self._track.id)
-                label = "(%s)  %s" % (discnumber, self._track.number)
-            else:
-                label = str(self._track.number)
+            label = str(self._track.number)
             self._num_label.set_text(label)
             self._num_label.get_style_context().remove_class("queued")
         self._num_label.show()
