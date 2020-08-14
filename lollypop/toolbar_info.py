@@ -139,7 +139,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         if track.id >= 0:
             from lollypop.menu_objects import TrackMenu, TrackMenuExt
             from lollypop.widgets_menu import MenuBuilder
-            menu = TrackMenu(track, ViewType.TOOLBAR, False)
+            menu = TrackMenu(track, ViewType.TOOLBAR)
             menu_widget = MenuBuilder(menu)
             menu_widget.show()
             if not track.storage_type & StorageType.EPHEMERAL:
