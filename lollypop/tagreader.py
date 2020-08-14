@@ -18,6 +18,7 @@ from gettext import gettext as _
 from lollypop.define import App
 from lollypop.logger import Logger
 from lollypop.utils import format_artist_name, get_iso_date_from_string
+from lollypop.utils import gst_map
 
 
 class Discoverer:
@@ -386,8 +387,8 @@ class TagReader:
                         i)
                     if not exists:
                         continue
-                    (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-                    if not exists:
+                    m = gst_map(sample.get_buffer())
+                    if m is None:
                         continue
                     string = m.data.decode("utf-8")
                     if string.startswith("TDOR"):
@@ -450,8 +451,8 @@ class TagReader:
             (exists, sample) = tags.get_sample_index("private-id3v2-frame", i)
             if not exists:
                 continue
-            (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-            if not exists:
+            m = gst_map(sample.get_buffer())
+            if m is None:
                 continue
             if m.data[0:4] == b"POPM":
                 # Get tag
@@ -550,8 +551,8 @@ class TagReader:
                         i)
                     if not exists:
                         continue
-                    (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-                    if not exists:
+                    m = gst_map(sample.get_buffer())
+                    if m is None:
                         continue
                     string = decode_lyrics(m.data)
                     if string is not None:
@@ -611,8 +612,8 @@ class TagReader:
                         i)
                     if not exists:
                         continue
-                    (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-                    if not exists:
+                    m = gst_map(sample.get_buffer())
+                    if m is None:
                         continue
                     prefix = (m.data[0:4])
                     if prefix not in [b"SYLT"]:

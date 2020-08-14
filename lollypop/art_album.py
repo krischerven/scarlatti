@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GdkPixbuf, Gio, Gst
+from gi.repository import GLib, GdkPixbuf, Gio
 
 from random import choice
 from gettext import gettext as _
@@ -21,7 +21,7 @@ from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.logger import Logger
 from lollypop.utils_file import is_readonly
-from lollypop.utils import emit_signal
+from lollypop.utils import emit_signal, gst_map
 from lollypop.helper_task import TaskHelper
 
 
@@ -344,9 +344,9 @@ class AlbumArt:
                     (exist, sample) = info.get_tags().get_sample_index(
                         "preview-image", 0)
             if exist:
-                (exist, mapflags) = sample.get_buffer().map(Gst.MapFlags.READ)
-            if exist:
-                bytes = GLib.Bytes.new(mapflags.data)
+                m = gst_map(sample.get_buffer())
+            if m is not None:
+                bytes = GLib.Bytes.new(m.data)
                 stream = Gio.MemoryInputStream.new_from_bytes(bytes)
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
                 stream.close()
