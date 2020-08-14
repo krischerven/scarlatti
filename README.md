@@ -41,6 +41,7 @@ It provides:
 - `meson >= 0.40`
 - `ninja`
 - `totem-plparser`
+- `python-gst`
 - `python-cairo`
 - `python-gobject`
 - `python-sqlite`
