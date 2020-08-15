@@ -204,10 +204,19 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         try:
             next_track = QueuePlayer.next(self)
             if next_track.id is None:
+                # Diverge current track to restore playback from queue
+                diverge_current_track = None
+                if self._queue_current_track is not None:
+                    diverge_current_track = self._current_track
+                    self._current_track = self._queue_current_track
                 if App().settings.get_value("shuffle") or self.is_party:
                     next_track = ShufflePlayer.next(self)
                 else:
                     next_track = LinearPlayer.next(self)
+                # Restore current track
+                if diverge_current_track is not None:
+                    self._current_track = diverge_current_track
+                    self._queue_current_track = None
             self._next_track = next_track
             emit_signal(self, "next-changed")
         except Exception as e:
