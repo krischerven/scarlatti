@@ -24,7 +24,7 @@ class QueuePlayer:
             Init queue
         """
         self.__queue = []
-        self.__queue_current_track = None
+        self._queue_current_track = None
 
     def set_queue(self, queue):
         """
@@ -124,11 +124,8 @@ class QueuePlayer:
         track_id = None
         if self.__queue:
             track_id = self.__queue[0]
-            if self.__queue_current_track is None:
-                self.__queue_current_track = self._current_track
-        elif self.__queue_current_track is not None:
-            self._current_track = self.__queue_current_track
-            self.__queue_current_track = None
+            if self._queue_current_track is None:
+                self._queue_current_track = self._current_track
         return Track(track_id)
 
     @property
