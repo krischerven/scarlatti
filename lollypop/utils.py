@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib, Gdk, GdkPixbuf, Pango, Gtk, Gst
+from gi.repository import Gio, GLib, Gdk, GdkPixbuf, Pango, Gtk
 
 from math import pi
 from gettext import gettext as _
@@ -580,20 +580,3 @@ def split_list(l, n=1):
     length = len(l)
     split = [l[i * length // n: (i + 1) * length // n] for i in range(n)]
     return [l for l in split if l]
-
-
-def gst_map(b):
-    """
-        API break. Will update code later, one 1.16 is removed from distros
-        https://gitlab.freedesktop.org/gstreamer/gst-python/-/issues/40
-    """
-    try:
-        if Gst.version().minor > 16:
-            return b.map(Gst.MapFlags.READ)
-        else:
-            (exists, m) = b.map(Gst.MapFlags.READ)
-            if exists:
-                return m
-    except Exception as e:
-        Logger.error("gst_map(): %s", e)
-    return None
