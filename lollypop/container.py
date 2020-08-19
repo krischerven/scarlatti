@@ -58,7 +58,6 @@ class Container(Gtk.Overlay, NotificationContainer,
             Handy.LeafletChildTransitionType.CROSSFADE)
         self.__widget.show()
         ListsContainer.__init__(self)
-        self._sidebar_two = None
         self.__paned_position_id = None
         self.__focused_view = None
         self._stack = StackContainer()
@@ -69,25 +68,20 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.add_overlay(self.__progress)
         search_action = App().lookup_action("search")
         search_action.connect("activate", self.__on_search_activate)
-        # self._sidebar_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-        # position = App().settings.get_value("paned-listview-width").
-        # get_int32()
-        # self._sidebar_two.set_position(position)
-        # self._sidebar_two.connect("notify::position",
-        # self.__on_paned_position)
-        # self._sidebar_two.add2(self._stack)
-        # self.__widget.attach(self._sidebar_two, 0, 0, 1, 1)
-        # position = App().settings.get_value(
-        # paned-listview-width").get_int32()
-        # self._sidebar_two.set_position(position)
-        # self._sidebar_two.show()
         self.__widget.add(self.sidebar)
         self._grid = Gtk.Grid()
         self._grid.set_size_request(400, -1)
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
         self._grid.set_column_spacing(2)
         self._grid.show()
-        self._grid.add(self._stack)
+        self.__paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+        self.__paned.show()
+        position = App().settings.get_value("paned-listview-width").get_int32()
+        self.__paned.set_position(position)
+        self.__paned.connect("notify::position", self.__on_paned_position)
+        self.__paned.add1(self.left_list)
+        self.__paned.add2(self._stack)
+        self._grid.attach(self.__paned, 0, 0, 1, 1)
         self.__widget.add(self._grid)
         self.__widget.set_visible_child(self._grid)
         self.add(self.__widget)
