@@ -109,6 +109,7 @@ class ToolbarEnd(Gtk.Bin):
                                         self.__on_container_folded)
         window.container.connect("can-go-back-changed",
                                  self.__on_can_go_back_changed)
+        self.__on_container_folded(None, "folded")
 
     @property
     def devices_popover(self):
