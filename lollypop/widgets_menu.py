@@ -44,7 +44,8 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         self.__widgets_queue = []
         self.__add_menu(menu, "main", False, scrolled)
         return [
-            (App().window, "adaptive-changed", "_on_adaptive_changed")
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded")
         ]
 
     def add_widget(self, widget, position=-1):
@@ -60,13 +61,13 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_adaptive_changed(self, window, status):
+    def _on_container_folded(self, leaflet, folded):
         """
             Destroy self if adaptive off
-            @param window as Window
-            @param status as bool
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        if not status:
+        if not App().window.folded:
             self.destroy()
 
 #######################
