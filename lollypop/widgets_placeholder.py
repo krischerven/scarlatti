@@ -28,7 +28,7 @@ class Placeholder(Gtk.Bin):
         self.__label.set_markup("%s" % GLib.markup_escape_text(text))
         self.__label.set_line_wrap_mode(Pango.WrapMode.WORD)
         self.__label.set_line_wrap(True)
-        self.set_adaptive(App().window.is_adaptive)
+        self.set_adaptive(App().window.folded)
         label_style = self.__label.get_style_context()
         label_style.add_class("dim-label")
         image = Gtk.Image.new_from_icon_name(icon_name,
@@ -48,13 +48,13 @@ class Placeholder(Gtk.Bin):
         grid.set_property("valign", Gtk.Align.CENTER)
         self.add(grid)
 
-    def set_adaptive(self, adaptive):
+    def set_folded(self, folded):
         """
             Set label size
-            @param adaptive as bool
+            @param folded as bool
         """
         style_context = self.__label.get_style_context()
-        if adaptive:
+        if folded:
             style_context.remove_class("text-xx-large")
             style_context.add_class("text-x-large")
         else:

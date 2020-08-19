@@ -41,7 +41,7 @@ class ApplicationMenu(Gtk.Bin, SignalsHelper):
         builder.connect_signals(self)
         if App().settings.get_value("background-mode"):
             builder.get_object("quit_button").show()
-        if App().window.is_adaptive:
+        if App().window.folded:
             builder.get_object("shortcuts_button").hide()
         return [
                 (App().player, "volume-changed", "_on_volume_changed")

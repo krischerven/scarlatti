@@ -237,7 +237,7 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_current_albums import CurrentAlbumsMenu
-        menu = CurrentAlbumsMenu(App().window.is_adaptive)
+        menu = CurrentAlbumsMenu(App().window.folded)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)

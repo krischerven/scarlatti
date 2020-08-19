@@ -85,7 +85,7 @@ class GenresBoxView(FlowBoxView):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_genre import GenreMenu
-        menu = GenreMenu(child.data, self.view_type, App().window.is_adaptive)
+        menu = GenreMenu(child.data, self.view_type, App().window.folded)
         return MenuBuilder(menu)
 
     def _on_child_activated(self, flowbox, child):

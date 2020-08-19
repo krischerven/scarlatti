@@ -93,7 +93,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         from lollypop.menu_artist import ArtistMenu
         from lollypop.menu_similars import SimilarsMenu
         menu = ArtistMenu(child.data, self.storage_type, self.view_type,
-                          App().window.is_adaptive)
+                          App().window.folded)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
         menu_ext = SimilarsMenu(child.data)

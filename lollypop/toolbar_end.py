@@ -105,7 +105,8 @@ class ToolbarEnd(Gtk.Bin):
                                        self.__on_devices_content_changed)
         self.__devices_popover.populate()
         builder.connect_signals(self)
-        window.connect("adaptive-changed", self.__on_adaptive_changed)
+        window.container.widget.connect("notify::folded",
+                                        self.__on_container_folded)
         window.container.connect("can-go-back-changed",
                                  self.__on_can_go_back_changed)
 
@@ -148,7 +149,7 @@ class ToolbarEnd(Gtk.Bin):
                                              button)
             else:
                 popover.connect("hidden", self.__on_menu_hidden, button)
-        elif self.__playback_menu is not None and App().window.is_adaptive:
+        elif self.__playback_menu is not None and App().window.folded:
             emit_signal(self.__playback_menu, "hidden", True)
 
     def _on_devices_button_toggled(self, button):
@@ -178,7 +179,7 @@ class ToolbarEnd(Gtk.Bin):
                                         button)
             else:
                 popover.connect("hidden", self.__on_menu_hidden, button)
-        elif self.__app_menu is not None and App().window.is_adaptive:
+        elif self.__app_menu is not None and App().window.folded:
             emit_signal(self.__app_menu, "hidden", True)
 
 #######################
@@ -367,15 +368,13 @@ class ToolbarEnd(Gtk.Bin):
         else:
             self.__devices_button.hide()
 
-    def __on_adaptive_changed(self, window, status):
+    def __on_container_folded(self, leaflet, folded):
         """
             Show/Hide home button
-            @param window as Window
-            @param status as bool
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        mini_revealed = App().window.miniplayer is not None and\
-            App().window.miniplayer.revealed
-        if status and not mini_revealed:
+        if App().window.folded:
             self.__home_button.show()
         else:
             self.__home_button.hide()

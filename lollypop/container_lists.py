@@ -45,17 +45,11 @@ class ListsContainer:
         """
         self.__left_list = None
         self.__right_list = None
-
-    def setup_lists(self):
-        """
-            Setup container lists
-        """
         self._sidebar = SelectionList(SelectionListMask.SIDEBAR)
         self._sidebar.show()
         self._sidebar.listbox.connect("row-activated",
                                       self.__on_sidebar_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
-        self._main_widget.insert_column(0)
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         self._sidebar.populate(items)
@@ -90,7 +84,7 @@ class ListsContainer:
             """
                 Hide right list on left list hidden
             """
-            if not App().window.is_adaptive:
+            if not App().window.folded:
                 self._hide_right_list()
 
         if self.__right_list is None:
@@ -186,6 +180,7 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_sidebar_activated()")
+        self.set_content_visible()
         view = None
         focus_set = False
         selected_id = self._sidebar.selected_id
@@ -215,7 +210,7 @@ class ListsContainer:
 
         storage_type = get_default_storage_type()
         if selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST] and not\
-                App().window.is_adaptive:
+                App().window.folded:
             view = NoneView()
             view.show()
         elif selected_id == Type.PLAYLISTS:
@@ -279,7 +274,7 @@ class ListsContainer:
             view.show()
             self._stack.add(view)
         # If we are in paned stack mode, show list two if wanted
-        if App().window.is_adaptive\
+        if App().window.folded\
                 and selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST]:
             self._stack.set_visible_child(self.left_list)
         elif view is not None:
@@ -297,7 +292,7 @@ class ListsContainer:
         else:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:
-                if not App().window.is_adaptive:
+                if not App().window.folded:
                     selection_list.select_first()
             else:
                 selection_list.select_ids([startup_id], True)
@@ -313,7 +308,7 @@ class ListsContainer:
         view = None
         storage_type = get_default_storage_type()
         if self.left_list.mask & SelectionListMask.GENRES:
-            if not App().window.is_adaptive:
+            if not App().window.folded:
                 view = self._get_view_albums(selected_ids, [], storage_type)
             self._show_artists_list(self.right_list, selected_ids)
             self._show_right_list()

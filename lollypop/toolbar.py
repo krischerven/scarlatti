@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, Size, AdaptiveSize
+from lollypop.define import App, Size
 from lollypop.toolbar_playback import ToolbarPlayback
 from lollypop.objects_track import Track
 from lollypop.toolbar_info import ToolbarInfo
@@ -37,7 +37,6 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         SizeAllocationHelper.__init__(self)
         self.__width = Size.MINI
         self.__timeout_id = None
-        self.__adaptive_size = AdaptiveSize.PHONE
         self.set_title("Lollypop")
         self.__toolbar_playback = ToolbarPlayback(window)
         self.__toolbar_playback.show()
@@ -52,8 +51,8 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         self.pack_end(self.__toolbar_end)
         return [
             (App().player, "current-changed", "_on_current_changed"),
-            (App().window, "adaptive-size-changed",
-             "_on_adaptive_size_changed")
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded")
         ]
 
     def do_get_preferred_width(self):
@@ -121,7 +120,7 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             @param player as Player
         """
         if player.current_track.id is not None and\
-                self.__adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
+                not App().window.folded:
             if isinstance(player.current_track, Track):
                 self.__toolbar_title.show()
             else:
@@ -131,11 +130,11 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             self.__toolbar_title.hide()
             self.__toolbar_info.hide_children()
 
-    def _on_adaptive_size_changed(self, window, adaptive_size):
+    def _on_container_folded(self, leaflet, folded):
         """
             Update internal widgets
-            @param window as Gtk.Window
-            @param adaptive_size as AdaptiveSize
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
         def show_children():
             self.__timeout_id = None
@@ -145,16 +144,14 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             GLib.source_remove(self.__timeout_id)
             self.__timeout_id = None
 
-        self.__adaptive_size = adaptive_size
-        if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
-            if App().player.current_track.id is not None:
-                if isinstance(App().player.current_track, Track):
-                    self.__toolbar_title.show()
-                # If user double click headerbar to maximize window
-                # We do not want info bar to receive click signal
-                self.__timeout_id = GLib.timeout_add(200, show_children)
-            self.__toolbar_playback.player_buttons.show()
-        else:
+        if App().window.folded:
             self.__toolbar_playback.player_buttons.hide()
             self.__toolbar_title.hide()
             self.__toolbar_info.hide_children()
+        elif App().player.current_track.id is not None:
+            if isinstance(App().player.current_track, Track):
+                self.__toolbar_title.show()
+            # If user double click headerbar to maximize window
+            # We do not want info bar to receive click signal
+            self.__timeout_id = GLib.timeout_add(200, show_children)
+            self.__toolbar_playback.player_buttons.show()

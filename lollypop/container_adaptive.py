@@ -35,7 +35,7 @@ class AdaptiveContainer:
         """
         if self._stack.history.count > 0:
             self._stack.go_back()
-        elif App().window.is_adaptive:
+        elif App().window.folded:
             visible_child = self._stack.get_visible_child()
             if visible_child == self.left_list or\
                     not self.left_list.get_visible():
@@ -59,17 +59,6 @@ class AdaptiveContainer:
         if visible_child is not None:
             visible_child.destroy_later()
         emit_signal(self, "can-go-back-changed", False)
-
-    @property
-    def can_go_back(self):
-        """
-            True if can go back
-            @return bool
-        """
-        if App().window.is_adaptive:
-            return self._stack.get_visible_child() != self._sidebar
-        else:
-            return self._stack.history.count > 0
 
 ##############
 # PROTECTED  #

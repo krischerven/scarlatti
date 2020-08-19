@@ -148,7 +148,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu = ArtistMenu(self.__artist_ids[0],
                           self.__storage_type,
                           self.view_type,
-                          App().window.is_adaptive)
+                          App().window.folded)
         menu_widget = MenuBuilder(menu, False)
         menu_widget.show()
         menu_ext = SimilarsMenu(self.__artist_ids[0])
@@ -172,7 +172,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_artwork import ArtistArtworkMenu
         menu = Gio.Menu()
-        if App().window.is_adaptive:
+        if App().window.folded:
             from lollypop.menu_header import ArtistMenuHeader
             menu.append_item(ArtistMenuHeader(self.__artist_ids[0]))
         menu_widget = MenuBuilder(menu, False)
@@ -209,7 +209,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
 # PRIVATE             #
 #######################
     def __close_artwork_menu(self, action, variant):
-        if App().window.is_adaptive:
+        if App().window.folded:
             App().window.container.go_back()
         else:
             self.__artwork_popup.destroy()

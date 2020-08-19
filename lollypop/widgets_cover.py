@@ -103,7 +103,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             from lollypop.widgets_menu import MenuBuilder
             from lollypop.menu_artwork import AlbumArtworkMenu
             menu = Gio.Menu()
-            if App().window.is_adaptive:
+            if App().window.folded:
                 from lollypop.menu_header import AlbumMenuHeader
                 menu.append_item(AlbumMenuHeader(self.__album))
             menu_widget = MenuBuilder(menu, False)
@@ -121,7 +121,7 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
 # PRIVATE             #
 #######################
     def __close_artwork_menu(self, action, variant):
-        if App().window.is_adaptive:
+        if App().window.folded:
             App().window.container.go_back()
         else:
             self.__artwork_popup.destroy()

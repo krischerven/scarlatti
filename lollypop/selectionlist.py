@@ -306,6 +306,9 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                                        lambda x: self.__popup_menu(None, x))
             self.__menu_button.show()
             self.add(self.__menu_button)
+        App().window.container.widget.connect("notify::folded",
+                                              self.__on_container_folded)
+        self.__on_container_folded(None, App().window.folded)
 
     def set_mask(self, mask):
         """
@@ -552,30 +555,6 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         if coordinates:
             self.__scrolled.get_vadjustment().set_value(coordinates[1])
 
-    def _on_adaptive_changed(self, window, status):
-        """
-            Update internals
-            @param window as Window
-            @param status as bool
-        """
-        self.__base_mask &= ~(SelectionListMask.LABEL |
-                              SelectionListMask.ELLIPSIZE)
-        if status or self.__base_mask & SelectionListMask.VIEW:
-            self.__base_mask |= (SelectionListMask.LABEL |
-                                 SelectionListMask.ELLIPSIZE)
-        elif App().settings.get_value("show-sidebar-labels"):
-            self.__base_mask |= SelectionListMask.LABEL
-        self.__set_rows_mask(self.__base_mask | self.__mask)
-
-    def _on_map(self, widget):
-        """
-            Unselect all if adaptive
-            @param widget as Gtk.Widget
-        """
-        LazyLoadingView._on_map(self, widget)
-        if App().window.is_adaptive:
-            self._box.unselect_all()
-
     def _on_primary_long_press_gesture(self, x, y):
         """
             Show row menu
@@ -669,11 +648,11 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                 from lollypop.menu_selectionlist import SelectionListMenu
                 menu = SelectionListMenu(self,
                                          self.mask,
-                                         App().window.is_adaptive)
+                                         App().window.folded)
             elif not App().settings.get_value("save-state"):
                 from lollypop.menu_selectionlist import SelectionListRowMenu
                 menu = SelectionListRowMenu(row_id,
-                                            App().window.is_adaptive)
+                                            App().window.folded)
             if menu is not None:
                 from lollypop.widgets_menu import MenuBuilder
                 menu_widget = MenuBuilder(menu)
@@ -702,7 +681,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             @param settings as Gio.Settings
             @param value as str
         """
-        self._on_adaptive_changed(App().window, App().window.is_adaptive)
+        pass
 
     def __on_initialized(self, selectionlist):
         """
@@ -715,3 +694,18 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         for row in self._box.get_selected_rows():
             GLib.idle_add(self._scroll_to_child, row)
             break
+
+    def __on_container_folded(self, leaflet, folded):
+        """
+            Update internals
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
+        """
+        self.__base_mask &= ~(SelectionListMask.LABEL |
+                              SelectionListMask.ELLIPSIZE)
+        if App().window.folded or self.__base_mask & SelectionListMask.VIEW:
+            self.__base_mask |= (SelectionListMask.LABEL |
+                                 SelectionListMask.ELLIPSIZE)
+        elif App().settings.get_value("show-sidebar-labels"):
+            self.__base_mask |= SelectionListMask.LABEL
+        self.__set_rows_mask(self.__base_mask | self.__mask)

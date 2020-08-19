@@ -220,7 +220,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 # PRIVATE             #
 #######################
     def __close_artwork_menu(self, action, variant):
-        if App().window.is_adaptive:
+        if App().window.folded:
             App().window.container.go_back()
         else:
             self.__artwork_popup.destroy()

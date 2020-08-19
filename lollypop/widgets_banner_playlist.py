@@ -149,7 +149,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         from lollypop.menu_playlist import PlaylistMenu, PlaylistMenuExt
         menu = PlaylistMenu(self.__playlist_id,
                             self.view_type,
-                            App().window.is_adaptive)
+                            App().window.folded)
         menu_widget = MenuBuilder(menu)
         if self.__playlist_id >= 0:
             menu_widget = MenuBuilder(menu)

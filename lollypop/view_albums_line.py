@@ -42,7 +42,7 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
         self._label.set_hexpand(True)
         self._label.set_property("halign", Gtk.Align.START)
         self._label.get_style_context().add_class("dim-label")
-        self.__update_label(App().window.is_adaptive)
+        self.__update_label(App().window.folded)
         self._backward_button = Gtk.Button.new_from_icon_name(
                                                         "go-previous-symbolic",
                                                         Gtk.IconSize.BUTTON)

@@ -76,7 +76,8 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             return []
         else:
             return [
-                (App().window, "adaptive-changed", "_on_adaptive_changed"),
+                (App().window.container.widget, "notify::folded",
+                 "_on_container_folded"),
             ]
 
     def add_widget(self, widget, banner=None):
@@ -226,24 +227,14 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
     def _on_view_leave(self, event_controller):
         pass
 
-    def _on_adaptive_changed(self, window, status):
+    def _on_container_folded(self, window, status):
         """
             Handle adaptive mode for views
-            @param window as Window
-            @param status as bool
-            @return bool
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        view_type = self.view_type
         if self.__placeholder is not None and self.__placeholder.is_visible():
-            self.__placeholder.set_adaptive(status)
-        if status:
-            self.__view_type |= ViewType.ADAPTIVE
-        else:
-            self.__view_type &= ~ViewType.ADAPTIVE
-        changed = view_type != self.view_type
-        if changed and self.__banner is not None:
-            self.__banner.set_view_type(self.view_type)
-        return changed
+            self.__placeholder.set_folded(App().window.folded)
 
     def _on_value_changed(self, adj):
         """
@@ -300,9 +291,6 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             self.__banner.update_for_width(width)
             self.__on_banner_height_changed(self.__banner,
                                             self.__banner.height)
-        # If we want the view to be adaptive, do not follow main window
-        if not self.__view_type & ViewType.ADAPTIVE:
-            self._on_adaptive_changed(App().window, App().window.is_adaptive)
         # Wait for stack allocation to restore scrolled position
         if self.__scrolled_position is not None:
             self.__stack.connect("size-allocate",

@@ -128,7 +128,7 @@ class PlaylistsBannerWidget(BannerWidget):
         from lollypop.widgets_menu import MenuBuilder
         menu = SelectionListMenu(self.__view,
                                  SelectionListMask.PLAYLISTS,
-                                 App().window.is_adaptive)
+                                 App().window.folded)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)

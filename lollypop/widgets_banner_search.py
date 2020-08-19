@@ -88,7 +88,7 @@ class SearchBannerWidget(BannerWidget):
         """
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_search import SearchMenu
-        menu = SearchMenu(App().window.is_adaptive)
+        menu = SearchMenu(App().window.folded)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)

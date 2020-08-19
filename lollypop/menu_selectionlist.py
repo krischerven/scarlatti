@@ -98,7 +98,7 @@ class SelectionListMenu(Gio.Menu):
             self.append_item(MenuHeader(label, icon_name))
 
         # Options
-        if not App().window.is_adaptive and\
+        if not App().window.folded and\
                 not mask & SelectionListMask.PLAYLISTS:
             options_menu = Gio.Menu()
             action = Gio.SimpleAction.new_stateful(

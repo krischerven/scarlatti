@@ -200,7 +200,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         """
         from lollypop.menu_suggestions import SuggestionsMenu
         from lollypop.widgets_menu import MenuBuilder
-        menu = SuggestionsMenu(App().window.is_adaptive)
+        menu = SuggestionsMenu(App().window.folded)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
         popup_widget(menu_widget, button, None, None, button)

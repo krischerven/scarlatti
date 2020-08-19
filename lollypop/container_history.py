@@ -88,9 +88,9 @@ class HistoryContainer:
                                      selection_ids, position))
                 break
 
-    def reset(self):
+    def clear(self):
         """
-            Reset history
+            Clear history
         """
         for (view, _class, args, sidebar_id,
              selection_ids, position) in self.__items:

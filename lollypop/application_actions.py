@@ -241,7 +241,7 @@ class ApplicationActions:
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
-        if App().window.is_adaptive:
+        if App().window.folded:
             App().window.container.show_view([Type.SETTINGS])
         else:
             from lollypop.dialog_settings import SettingsDialog
@@ -262,7 +262,7 @@ class ApplicationActions:
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/AboutDialog.ui")
         about = builder.get_object("about_dialog")
-        if App().window.is_adaptive:
+        if App().window.folded:
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
             box.show()
             about_children = about.get_children()

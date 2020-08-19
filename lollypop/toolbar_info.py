@@ -97,7 +97,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             @param x as int
             @param y as int
         """
-        if App().window.is_adaptive or not self.__artwork.get_visible():
+        if App().window.folded or not self.__artwork.get_visible():
             return
         if App().player.current_track.id is not None:
             self.__popup_menu()
@@ -109,7 +109,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             @param y as int
             @param evnet as Gdk.Event
         """
-        if App().window.is_adaptive or not self.__artwork.get_visible():
+        if App().window.folded or not self.__artwork.get_visible():
             return
         if App().player.current_track.id is not None:
             from lollypop.pop_information import InformationPopover
@@ -133,7 +133,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         """
             Show contextual menu
         """
-        if App().window.is_adaptive or not self.__artwork.get_visible():
+        if App().window.folded or not self.__artwork.get_visible():
             return
         track = App().player.current_track
         if track.id >= 0:

@@ -76,6 +76,7 @@ class AdaptiveWindow:
             @param y as int
         """
         self.__configure_timeout_id = None
+        return
         if width <= Size.MEDIUM:
             self.set_adaptive(True)
         else:

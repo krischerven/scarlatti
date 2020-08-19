@@ -250,7 +250,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         box.add(sep1)
         label = Gtk.Label.new(text.get_string())
         label.get_style_context().add_class("dim-label")
-        if App().window.is_adaptive:
+        if App().window.folded:
             label.get_style_context().add_class("padding")
         box.add(label)
         sep2 = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)

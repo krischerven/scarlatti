@@ -32,10 +32,9 @@ class StackContainer(Gtk.Stack):
     def __init__(self):
         """
             Init stack
-            @param window as AdaptiveWindow
         """
         Gtk.Stack.__init__(self)
-        self.set_transition_duration(300)
+        self.get_style_context().add_class("view")
         self.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.set_hexpand(True)
         self.set_vexpand(True)
@@ -120,6 +119,14 @@ class StackContainer(Gtk.Stack):
                     emit_signal(self, "set-selection-ids", view.selection_ids)
         except Exception as e:
             Logger.error("AdaptiveStack::load_history(): %s", e)
+
+    def clear(self):
+        """
+            Clear stack
+        """
+        for child in self.get_children():
+            child.destroy()
+        self.__history.clear()
 
     @property
     def history(self):

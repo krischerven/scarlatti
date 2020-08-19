@@ -189,7 +189,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
             Set initial orientation
             @param widget as Gtk.Widget
-            @param window as AdaptiveWindow
             @param orientation as Gtk.Orientation
         """
         if self._view_type & ViewType.SINGLE_COLUMN or\

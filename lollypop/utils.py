@@ -505,7 +505,7 @@ def popup_widget(widget, parent, x, y, state_widget):
     def on_unmap(popover, parent):
         parent.unset_state_flags(Gtk.StateFlags.VISITED)
 
-    if App().window.is_adaptive:
+    if App().window.folded:
         App().window.container.show_menu(widget)
         return None
     else:

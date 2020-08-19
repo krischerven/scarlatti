@@ -106,7 +106,7 @@ class SearchTracksView(TracksView, SignalsHelper):
         self.__label.show()
         self.__label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__label.get_style_context().add_class("dim-label")
-        self.__update_label(App().window.is_adaptive)
+        self.__update_label(App().window.folded)
         self.__label.set_hexpand(True)
         self.__label.set_property("halign", Gtk.Align.START)
         idx = 1

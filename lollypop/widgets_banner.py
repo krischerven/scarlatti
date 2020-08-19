@@ -111,7 +111,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         # If not SMALL, we add sidebar width because we want banners
         # to calculate sizing with sidebar included. Allows to prevent
         # glitch when sidebar is auto shown
-        if not App().window.is_adaptive:
+        if not App().window.folded:
             sidebar_width = App().window.container.sidebar.\
                 get_allocated_width()
             return self.__width + sidebar_width

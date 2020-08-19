@@ -10,9 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, GObject
+from gi.repository import Gtk, GLib, GObject, Handy
 
 from lollypop.define import App, Type
+from lollypop.utils import emit_signal
 from lollypop.view import View
 from lollypop.container_stack import StackContainer
 from lollypop.container_notification import NotificationContainer
@@ -21,12 +22,16 @@ from lollypop.container_playlists import PlaylistsContainer
 from lollypop.container_lists import ListsContainer
 from lollypop.container_views import ViewsContainer
 from lollypop.container_filter import FilterContainer
-from lollypop.container_adaptive import AdaptiveContainer
 from lollypop.progressbar import ProgressBar
 
 
+class Grid(Gtk.Grid):
+    def do_get_preferred_width(self):
+        return (500, 500)
+
+
 class Container(Gtk.Overlay, NotificationContainer,
-                ScannerContainer, PlaylistsContainer, AdaptiveContainer,
+                ScannerContainer, PlaylistsContainer,
                 ListsContainer, ViewsContainer, FilterContainer):
     """
         Main view management
@@ -46,12 +51,22 @@ class Container(Gtk.Overlay, NotificationContainer,
         ScannerContainer.__init__(self)
         PlaylistsContainer.__init__(self)
         ViewsContainer.__init__(self)
-        self._main_widget = None
+
+    def setup(self):
+        """
+            Setup container
+        """
+        self.__widget = Handy.Leaflet()
+        self.__widget.set_mode_transition_type(
+            Handy.LeafletModeTransitionType.SLIDE)
+        self.__widget.set_child_transition_type(
+            Handy.LeafletChildTransitionType.CROSSFADE)
+        self.__widget.show()
+        ListsContainer.__init__(self)
         self._sidebar_two = None
         self.__paned_position_id = None
         self.__focused_view = None
         self._stack = StackContainer()
-        self._stack.get_style_context().add_class("view")
         self._stack.show()
         self.__progress = ProgressBar()
         self.__progress.get_style_context().add_class("progress-bottom")
@@ -59,27 +74,28 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.add_overlay(self.__progress)
         search_action = App().lookup_action("search")
         search_action.connect("activate", self.__on_search_activate)
-        self._main_widget = Gtk.Grid()
-        self._sidebar_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-        position = App().settings.get_value("paned-listview-width").get_int32()
-        self._sidebar_two.set_position(position)
-        self._sidebar_two.connect("notify::position", self.__on_paned_position)
-        self._sidebar_two.add2(self._stack)
-        self._main_widget.attach(self._sidebar_two, 0, 0, 1, 1)
-        position = App().settings.get_value(
-            "paned-listview-width").get_int32()
-        self._sidebar_two.set_position(position)
-        self._main_widget.show()
-        self._sidebar_two.show()
-        self._grid = Gtk.Grid()
+        # self._sidebar_two = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+        # position = App().settings.get_value("paned-listview-width").
+        # get_int32()
+        # self._sidebar_two.set_position(position)
+        # self._sidebar_two.connect("notify::position",
+        # self.__on_paned_position)
+        # self._sidebar_two.add2(self._stack)
+        # self.__widget.attach(self._sidebar_two, 0, 0, 1, 1)
+        # position = App().settings.get_value(
+        # paned-listview-width").get_int32()
+        # self._sidebar_two.set_position(position)
+        # self._sidebar_two.show()
+        self.__widget.add(self.sidebar)
+        self._grid = Grid()
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
         self._grid.set_column_spacing(2)
         self._grid.show()
-        self.add(self._grid)
-        ListsContainer.__init__(self)
-        AdaptiveContainer.__init__(self)
+        self._grid.add(self._stack)
+        self.__widget.add(self._grid)
+        self.__widget.set_visible_child(self._grid)
+        self.add(self.__widget)
         FilterContainer.__init__(self)
-        self._grid.add(self._main_widget)
 
     def stop(self):
         """
@@ -119,13 +135,41 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         self.__focused_view = view
 
+    def go_back(self):
+        """
+            Go back in container stack
+        """
+        if self._stack.history.count > 0:
+            self._stack.go_back()
+        elif App().window.folded:
+            self.__widget.set_visible_child(self.sidebar)
+            self._stack.clear()
+        emit_signal(self, "can-go-back-changed", self.can_go_back)
+
+    def set_content_visible(self):
+        """
+            Set content visible
+        """
+        self.__widget.set_visible_child(self._grid)
+
     @property
-    def main_widget(self):
+    def can_go_back(self):
+        """
+            True if can go back
+            @return bool
+        """
+        if App().window.folded:
+            return self._stack.get_visible_child() != self._sidebar
+        else:
+            return self._stack.history.count > 0
+
+    @property
+    def widget(self):
         """
             Get main widget
-            @return Gtk.Grid
+            @return Handy.Leaflet
         """
-        return self._main_widget
+        return self.__widget
 
     @property
     def focused_view(self):
@@ -182,7 +226,7 @@ class Container(Gtk.Overlay, NotificationContainer,
             @param action as Gio.SimpleAction
             @param variant as GLib.Variant
         """
-        if App().window.is_adaptive:
+        if App().window.folded:
             search = variant.get_string()
             App().window.container.show_view([Type.SEARCH], search)
 
@@ -196,7 +240,7 @@ class Container(Gtk.Overlay, NotificationContainer,
             self.__paned_position_id = None
             position = paned.get_property(param.name)
             # We do not want to save position while adaptive mode is set
-            if App().window is not None and App().window.is_adaptive:
+            if App().window is not None and App().window.folded:
                 return
             App().settings.set_value("paned-listview-width",
                                      GLib.Variant("i",

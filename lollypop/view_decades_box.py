@@ -98,7 +98,7 @@ class DecadesBoxView(FlowBoxView):
         from lollypop.widgets_menu import MenuBuilder
         from lollypop.menu_decade import DecadeMenu
         menu = DecadeMenu(child.data, self.view_type,
-                          App().window.is_adaptive)
+                          App().window.folded)
         return MenuBuilder(menu)
 
     def _on_child_activated(self, flowbox, child):

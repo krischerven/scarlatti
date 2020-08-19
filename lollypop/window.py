@@ -10,18 +10,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Handy
 
 from lollypop.define import App, ScanType, AdaptiveSize
 from lollypop.container import Container
 from lollypop.toolbar import Toolbar
-from lollypop.window_adaptive import AdaptiveWindow
 from lollypop.utils import is_unity, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
 
 
-class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
+class Window(Gtk.ApplicationWindow, SignalsHelper):
     """
         Main window
     """
@@ -35,14 +34,13 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                        application=App(),
                                        title="Lollypop",
                                        icon_name="org.gnome.Lollypop")
-        AdaptiveWindow.__init__(self)
         self.__miniplayer = None
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         # Does not work with a Gtk.Gesture in GTK3
         self.connect("button-release-event", self.__on_button_release_event)
         self.connect("window-state-event", self.__on_window_state_event)
-        self.connect("adaptive-size-changed", self.__on_adaptive_size_changed)
+
         self.connect("destroy", self.__on_destroy)
         return [
             (App().player, "current-changed", "_on_current_changed")
@@ -56,8 +54,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
         self.__vgrid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__vgrid.show()
         self.__container = Container()
+        self.__container.setup()
         self.__container.show()
-        self.__container.setup_lists()
         self.__toolbar = Toolbar(self)
         self.__toolbar.show()
         if App().settings.get_value("disable-csd") or is_unity():
@@ -68,6 +66,8 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                 not App().settings.get_value("disable-csd"))
         self.__vgrid.add(self.__container)
         self.add(self.__vgrid)
+        self.__container.widget.connect("notify::folded",
+                                        self.__on_container_folded)
 
     def show_miniplayer(self, show, reveal=False):
         """
@@ -118,6 +118,14 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                 self.__miniplayer.update_artwork()
 
     @property
+    def folded(self):
+        """
+            True if window is adaptive, ie widget folded
+        """
+        return App().window.container.widget.get_fold() ==\
+            Handy.Fold.FOLDED
+
+    @property
     def miniplayer(self):
         """
             @return MiniPlayer
@@ -162,7 +170,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             @param x as int
             @param y as int
         """
-        AdaptiveWindow._on_configure_event_timeout(self, width, height, x, y)
         if App().lookup_action("miniplayer").get_state():
             return
         if not self.is_maximized():
@@ -187,10 +194,6 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
             self.move(pos[0], pos[1])
             if App().settings.get_value("window-maximized"):
                 self.maximize()
-                self.set_adaptive(False)
-            else:
-                AdaptiveWindow._on_configure_event_timeout(
-                    self, size[0], size[1], pos[0], pos[1])
         except Exception as e:
             Logger.error("Window::__setup_size_and_position(): %s", e)
 
@@ -225,16 +228,13 @@ class Window(Gtk.ApplicationWindow, AdaptiveWindow, SignalsHelper):
                                        "GDK_WINDOW_STATE_MAXIMIZED" in
                                        event.new_window_state.value_names)
 
-    def __on_adaptive_size_changed(self, window, adaptive_size):
+    def __on_container_folded(self, leaflet, folded):
         """
             show/hide miniplayer
-            @param window as Gtk.Window
-            @param adaptive_size as AdaptiveSize
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        self.show_miniplayer(adaptive_size & (AdaptiveSize.PHONE |
-                                              AdaptiveSize.SMALL |
-                                              AdaptiveSize.MEDIUM |
-                                              AdaptiveSize.NORMAL))
+        self.show_miniplayer(App().window.folded)
 
     def __on_destroy(self, widget):
         """

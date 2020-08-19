@@ -76,6 +76,7 @@ class ViewsContainer:
             @param data as object
             @param storage_type as StorageType
         """
+        self.set_content_visible()
         view = None
         if storage_type is None:
             storage_type = get_default_storage_type()

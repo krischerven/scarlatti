@@ -135,13 +135,13 @@ class TrackMenuExt(Gtk.Grid):
         hgrid = Gtk.Grid()
         rating = RatingWidget(track)
         rating.set_property("halign", Gtk.Align.START)
-        if App().window.is_adaptive:
+        if App().window.folded:
             rating.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         rating.show()
 
         loved = LovedWidget(track)
         loved.set_property("halign", Gtk.Align.START)
-        if App().window.is_adaptive:
+        if App().window.folded:
             loved.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         loved.show()
 
