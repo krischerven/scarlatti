@@ -62,6 +62,12 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.__widget.set_child_transition_type(
             Handy.LeafletChildTransitionType.CROSSFADE)
         self.__widget.show()
+        self.__sub_widget = Handy.Leaflet()
+        self.__sub_widget.set_mode_transition_type(
+            Handy.LeafletModeTransitionType.SLIDE)
+        self.__sub_widget.set_child_transition_type(
+            Handy.LeafletChildTransitionType.CROSSFADE)
+        self.__sub_widget.show()
         ListsContainer.__init__(self)
         self.__paned_position_id = None
         self.__focused_view = None
@@ -74,20 +80,15 @@ class Container(Gtk.Overlay, NotificationContainer,
         search_action = App().lookup_action("search")
         search_action.connect("activate", self.__on_search_activate)
         self.__widget.add(self.sidebar)
-        self._grid = Grid()
-        self._grid.set_orientation(Gtk.Orientation.VERTICAL)
-        self._grid.set_column_spacing(2)
-        self._grid.show()
-        self.__paned = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-        self.__paned.show()
-        position = App().settings.get_value("paned-listview-width").get_int32()
-        self.__paned.set_position(position)
-        self.__paned.connect("notify::position", self.__on_paned_position)
-        self.__paned.add1(self.left_list)
-        self.__paned.add2(self._stack)
-        self._grid.attach(self.__paned, 0, 0, 1, 1)
-        self.__widget.add(self._grid)
-        self.__widget.set_visible_child(self._grid)
+        self.__grid_view = Grid()
+        self.__grid_view.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__grid_view.set_column_spacing(2)
+        self.__grid_view.show()
+        self.__sub_widget.add(self.left_list)
+        self.__sub_widget.add(self.__grid_view)
+        self.__grid_view.attach(self._stack, 0, 0, 1, 1)
+        self.__widget.add(self.__sub_widget)
+        self.__sub_widget.set_visible_child(self.__grid_view)
         self.add(self.__widget)
         FilterContainer.__init__(self)
 
@@ -140,12 +141,6 @@ class Container(Gtk.Overlay, NotificationContainer,
             self._stack.clear()
         emit_signal(self, "can-go-back-changed", self.can_go_back)
 
-    def set_content_visible(self):
-        """
-            Set content visible
-        """
-        self.__widget.set_visible_child(self._grid)
-
     @property
     def can_go_back(self):
         """
@@ -164,6 +159,22 @@ class Container(Gtk.Overlay, NotificationContainer,
             @return Handy.Leaflet
         """
         return self.__widget
+
+    @property
+    def sub_widget(self):
+        """
+            Get sub widget
+            @return Handy.Leaflet
+        """
+        return self.__sub_widget
+
+    @property
+    def grid_view(self):
+        """
+            Get grid view
+            @return Gtk.Grid
+        """
+        return self.__grid_view
 
     @property
     def focused_view(self):

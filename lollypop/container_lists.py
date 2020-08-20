@@ -180,7 +180,7 @@ class ListsContainer:
             @param row as Gtk.ListBoxRow
         """
         Logger.debug("Container::__on_sidebar_activated()")
-        self.set_content_visible()
+        self.sub_widget.set_visible_child(self.grid_view)
         view = None
         focus_set = False
         selected_id = self._sidebar.selected_id
@@ -196,12 +196,16 @@ class ListsContainer:
             self._show_artists_list(self.left_list)
             self._hide_right_list()
             self.left_list.show()
+            self.widget.set_visible_child(self.sub_widget)
+            self.sub_widget.set_visible_child(self.left_list)
             self.set_focused_view(self.left_list)
             focus_set = True
         elif selected_id == Type.GENRES_LIST:
             self._show_genres_list(self.left_list)
             self._hide_right_list()
             self.left_list.show()
+            self.widget.set_visible_child(self.sub_widget)
+            self.sub_widget.set_visible_child(self.left_list)
             self.set_focused_view(self.left_list)
             focus_set = True
         else:

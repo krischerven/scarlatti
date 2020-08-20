@@ -76,7 +76,7 @@ class ViewsContainer:
             @param data as object
             @param storage_type as StorageType
         """
-        self.set_content_visible()
+        self.sub_widget.set_visible_child(self.grid_view)
         view = None
         if storage_type is None:
             storage_type = get_default_storage_type()

@@ -26,7 +26,7 @@ class FilterContainer:
         self.__index = 0
         self.__type_ahead = TypeAheadWidget()
         self.__type_ahead.show()
-        self._grid.add(self.__type_ahead)
+        self.grid_view.add(self.__type_ahead)
 
     def show_filter(self):
         """
