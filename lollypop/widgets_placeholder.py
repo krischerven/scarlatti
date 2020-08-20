@@ -28,7 +28,7 @@ class Placeholder(Gtk.Bin):
         self.__label.set_markup("%s" % GLib.markup_escape_text(text))
         self.__label.set_line_wrap_mode(Pango.WrapMode.WORD)
         self.__label.set_line_wrap(True)
-        self.set_adaptive(App().window.folded)
+        self.set_folded(App().window.folded)
         label_style = self.__label.get_style_context()
         label_style.add_class("dim-label")
         image = Gtk.Image.new_from_icon_name(icon_name,

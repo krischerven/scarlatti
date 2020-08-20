@@ -141,8 +141,7 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         """
         return {"genre_ids": self.__genre_ids,
                 "artist_ids": self.__artist_ids,
-                "view_type": self.view_type & ~(ViewType.ADAPTIVE |
-                                                ViewType.SMALL)}
+                "view_type": self.view_type & ~ViewType.SMALL}
 
     @property
     def dnd_helper(self):

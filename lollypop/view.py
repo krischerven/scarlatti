@@ -71,14 +71,10 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
         self.connect("map", self._on_map)
         self.connect("unmap", self._on_unmap)
         self.connect("realize", self._on_realize)
-        # If we want the view to be adaptive, do not follow main window
-        if self.__view_type & ViewType.ADAPTIVE:
-            return []
-        else:
-            return [
-                (App().window.container.widget, "notify::folded",
-                 "_on_container_folded"),
-            ]
+        return [
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded"),
+        ]
 
     def add_widget(self, widget, banner=None):
         """
@@ -227,9 +223,9 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
     def _on_view_leave(self, event_controller):
         pass
 
-    def _on_container_folded(self, window, status):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Handle adaptive mode for views
+            Handle libhandy folded status
             @param leaflet as Handy.Leaflet
             @param folded as Gparam
         """

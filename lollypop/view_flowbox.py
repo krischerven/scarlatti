@@ -133,13 +133,13 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
     def _on_child_activated(self, flowbox, child):
         pass
 
-    def _on_adaptive_changed(self, window, status):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Update artwork
-            @param window as Window
-            @param status as bool
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        if LazyLoadingView._on_adaptive_changed(self, window, status):
+        if LazyLoadingView._on_container_folded(self, leaflet, folded):
             self.pause()
             children = self._box.get_children()
             for child in children:

@@ -38,7 +38,7 @@ class AlbumMenu(Gio.Menu):
             @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
-        if view_type & ViewType.ADAPTIVE:
+        if App().window.folded:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(album))
         self.append_section(_("Playback"),
@@ -70,7 +70,7 @@ class AlbumsMenu(Gio.Menu):
             @param view_type as ViewType
         """
         Gio.Menu.__init__(self)
-        if view_type & ViewType.ADAPTIVE:
+        if App().window.folded:
             from lollypop.menu_header import MenuHeader
             self.append_item(MenuHeader(title,
                                         "media-optical-cd-audio-symbolic"))
@@ -90,7 +90,7 @@ class TrackMenu(Gio.Menu):
 
         """
         Gio.Menu.__init__(self)
-        if view_type & ViewType.ADAPTIVE:
+        if App().window.folded:
             from lollypop.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(track))
         self.append_section(_("Playback"), TrackPlaybackMenu(track, view_type))

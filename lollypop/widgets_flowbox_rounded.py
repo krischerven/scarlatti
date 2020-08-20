@@ -12,7 +12,7 @@
 
 from gi.repository import GLib, Gtk, Pango, GObject
 
-from lollypop.define import ArtSize, ViewType, MARGIN, MARGIN_MEDIUM
+from lollypop.define import ArtSize, ViewType, MARGIN, MARGIN_MEDIUM, App
 from lollypop.utils import on_query_tooltip
 
 
@@ -76,7 +76,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self.__view_type = view_type
         if self.__view_type & ViewType.SMALL:
             self._art_size = ArtSize.MEDIUM
-        elif self.__view_type & ViewType.ADAPTIVE:
+        elif App().window.folded:
             self._art_size = ArtSize.BANNER
         else:
             self._art_size = ArtSize.BIG

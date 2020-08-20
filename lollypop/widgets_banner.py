@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gdk, GObject
 
-from lollypop.define import ArtSize, ViewType, MARGIN, App, Size
+from lollypop.define import ArtSize, ViewType, MARGIN, App
 from lollypop.utils import emit_signal
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
@@ -124,8 +124,8 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Get wanted height
             @return int
         """
-        if self.width <= Size.MEDIUM:
-            height = ArtSize.MEDIUM + MARGIN * 2
+        if App().window.folded:
+            height = ArtSize.BANNER - MARGIN * 2
         else:
             height = ArtSize.BANNER + MARGIN * 2
         return height

@@ -16,7 +16,7 @@ from random import shuffle
 
 from lollypop.utils import get_human_duration, popup_widget
 from lollypop.utils_album import tracks_to_albums
-from lollypop.define import App, ArtSize, ViewType, Size
+from lollypop.define import App, ArtSize, ViewType
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -52,21 +52,16 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_label(App().playlists.get_name(playlist_id))
         builder.connect_signals(self)
         self.connect("destroy", self.__on_destroy)
+        self.__set_internal_size()
         return [
             (view, "initialized", "_on_view_updated"),
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded"),
             (App().player, "duration-changed", "_on_view_updated"),
             (App().playlists, "playlist-track-added", "_on_playlist_changed"),
             (App().playlists, "playlist-track-removed",
              "_on_playlist_changed"),
         ]
-
-    def update_for_width(self, width):
-        """
-            Update banner internals for width, call this before showing banner
-            @param width as int
-        """
-        BannerWidget.update_for_width(self, width)
-        self.__set_internal_size()
 
     def rename(self, name):
         """
@@ -94,13 +89,13 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_width_allocate(self, allocation):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Update artwork
-            @param allocation as Gtk.Allocation
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        if BannerWidget._handle_width_allocate(self, allocation):
-            self.__set_internal_size()
+        self.__set_internal_size()
 
     def _on_view_updated(self, *ignore):
         """
@@ -196,7 +191,7 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
             title_context.remove_class(c)
         for c in duration_context.list_classes():
             duration_context.remove_class(c)
-        if self.width <= Size.MEDIUM:
+        if App().window.folded:
             title_context.add_class("text-large")
         else:
             title_context.add_class("text-x-large")

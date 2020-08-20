@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Pango
 from gettext import gettext as _
 
 from lollypop.view import View
-from lollypop.define import App, ViewType, AdaptiveSize
+from lollypop.define import App, ViewType
 from lollypop.define import StorageType, LYRICS_PATH
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
@@ -115,9 +115,9 @@ class LyricsView(View, SignalsHelper):
         self.__update_lyrics_style()
         self.__information_store = InformationStore()
         return [
-                (App().window, "adaptive-size-changed",
-                 "_on_adaptive_size_changed"),
-                (App().player, "current-changed", "_on_current_changed")
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded"),
+            (App().player, "current-changed", "_on_current_changed")
         ]
 
     def populate(self, track):
@@ -209,11 +209,11 @@ class LyricsView(View, SignalsHelper):
         """
         self.populate(App().player.current_track)
 
-    def _on_adaptive_size_changed(self, window, adaptive_size):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Update internal sizing
-            @param window as Window
-            @param adaptive_size as AdaptiveSize
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
         self.__update_lyrics_style()
 
@@ -274,24 +274,16 @@ class LyricsView(View, SignalsHelper):
         for cls in context.list_classes():
             context.remove_class(cls)
         context.add_class("lyrics")
-        adaptive_size = App().window.adaptive_size
-        if adaptive_size & (AdaptiveSize.BIG | AdaptiveSize.LARGE):
-            if self.__lyrics_helper.available:
-                context.add_class("text-xx-large")
-            else:
-                context.add_class("text-x-large")
-        elif adaptive_size & AdaptiveSize.NORMAL:
-            if self.__lyrics_helper.available:
-                context.add_class("text-x-large")
-            else:
-                context.add_class("text-large")
-        elif adaptive_size & AdaptiveSize.MEDIUM:
+        if App().window.folded:
             if self.__lyrics_helper.available:
                 context.add_class("text-large")
             else:
                 context.add_class("text-medium")
-        elif self.__lyrics_helper.available:
-            context.add_class("text-medium")
+        else:
+            if self.__lyrics_helper.available:
+                context.add_class("text-x-large")
+            else:
+                context.add_class("text-large")
 
     def __on_lyrics(self, lyrics, filtered, track):
         """

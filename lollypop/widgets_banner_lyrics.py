@@ -14,8 +14,7 @@ from gi.repository import Gtk, GLib, Pango, GObject
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN, ViewType
-from lollypop.define import ArtBehaviour, Size
+from lollypop.define import App, MARGIN, ViewType, ArtBehaviour
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -66,10 +65,13 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
         self.__update()
+        self.__set_internal_size()
         return [
-                (App().player, "current-changed", "_on_current_changed"),
-                (App().art, "album-artwork-changed",
-                 "_on_album_artwork_changed")
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded"),
+            (App().art, "album-artwork-changed",
+             "_on_album_artwork_changed")
         ]
 
     def update_for_width(self, width):
@@ -79,7 +81,6 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.update_for_width(self, width)
         self.__set_artwork()
-        self.__set_internal_size()
 
     @property
     def translate_button(self):
@@ -99,7 +100,14 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
-            self.__set_internal_size()
+
+    def _on_container_folded(self, leaflet, folded):
+        """
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
+        """
+        self.__set_internal_size()
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -166,12 +174,12 @@ class LyricsBannerWidget(BannerWidget, SignalsHelper):
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self.width <= Size.MEDIUM:
+        if App().window.folded:
             self.__title_label.get_style_context().add_class(
-                "text-x-large")
+                "text-large")
         else:
             self.__title_label.get_style_context().add_class(
-                "text-xx-large")
+                "text-x-large")
 
     def __on_lyrics_button_toggled(self, button):
         """

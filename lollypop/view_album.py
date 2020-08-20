@@ -87,8 +87,7 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         """
         return {"album": self.__album,
                 "storage_type": self.storage_type,
-                "view_type": self.view_type & ~(ViewType.ADAPTIVE |
-                                                ViewType.SMALL)}
+                "view_type": self.view_type & ~ViewType.SMALL}
 
     @property
     def filtered(self):

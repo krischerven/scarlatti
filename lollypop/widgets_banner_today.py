@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Pango
 from pickle import load, dump
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, MARGIN, ViewType, StorageType, Size
+from lollypop.define import App, ArtSize, MARGIN, ViewType, StorageType
 from lollypop.define import ArtBehaviour, LOLLYPOP_DATA_PATH
 from lollypop.widgets_banner import BannerWidget
 from lollypop.widgets_cover import CoverWidget
@@ -109,7 +109,10 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         grid.set_margin_end(MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
+        self.__set_internal_size()
         return [
+                (App().window.container.widget, "notify::folded",
+                 "_on_container_folded"),
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed")
         ]
@@ -121,7 +124,6 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.update_for_width(self, width)
         self.__set_artwork()
-        self.__set_internal_size()
 
 #######################
 # PROTECTED           #
@@ -133,7 +135,14 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
-            self.__set_internal_size()
+
+    def _on_container_folded(self, leaflet, folded):
+        """
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
+        """
+        self.__set_internal_size()
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -170,21 +179,14 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self.width <= Size.SMALL:
-            art_size = None
-            cls = "text-large"
-        elif self.width <= Size.MEDIUM:
+        if App().window.folded:
             art_size = ArtSize.MEDIUM
-            cls = "text-x-large"
+            cls = "text-large"
         else:
             art_size = ArtSize.BANNER
-            cls = "text-xx-large"
+            cls = "text-x-large"
         self.__title_label.get_style_context().add_class(cls)
-        if art_size is None:
-            self.__cover_widget.hide()
-        else:
-            self.__cover_widget.show()
-            self.__cover_widget.set_art_size(art_size)
+        self.__cover_widget.set_art_size(art_size)
 
     def __on_play_button_clicked(self, button):
         """

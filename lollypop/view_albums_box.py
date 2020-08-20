@@ -136,8 +136,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         return {"genre_ids": self._genre_ids,
                 "artist_ids": self._artist_ids,
                 "storage_type": self._storage_type,
-                "view_type": self.view_type & ~(ViewType.ADAPTIVE |
-                                                ViewType.SMALL)}
+                "view_type": self.view_type & ~ViewType.SMALL}
 
 #######################
 # PROTECTED           #

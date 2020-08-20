@@ -14,17 +14,19 @@ from gi.repository import Gtk, Pango
 
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, MARGIN, ViewType, Size
+from lollypop.define import App, ArtSize, MARGIN, ViewType
 from lollypop.define import SelectionListMask
 from lollypop.utils import popup_widget
 from lollypop.widgets_banner import BannerWidget
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class PlaylistsBannerWidget(BannerWidget):
+class PlaylistsBannerWidget(BannerWidget, SignalsHelper):
     """
         Banner for playlists
     """
 
+    @signals_map
     def __init__(self, view):
         """
             Init banner
@@ -67,14 +69,11 @@ class PlaylistsBannerWidget(BannerWidget):
         grid.set_margin_end(MARGIN)
         self._overlay.add_overlay(grid)
         self._overlay.set_overlay_pass_through(grid, True)
-
-    def update_for_width(self, width):
-        """
-            Update banner internals for width, call this before showing banner
-            @param width as int
-        """
-        BannerWidget.update_for_width(self, width)
         self.__set_internal_size()
+        return [
+            (App().window.container.widget, "notify::folded",
+             "_on_container_folded"),
+        ]
 
     @property
     def height(self):
@@ -87,13 +86,13 @@ class PlaylistsBannerWidget(BannerWidget):
 #######################
 # PROTECTED           #
 #######################
-    def _handle_width_allocate(self, allocation):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Update artwork
-            @param allocation as Gtk.Allocation
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        if BannerWidget._handle_width_allocate(self, allocation):
-            self.__set_internal_size()
+        self.__set_internal_size()
 
 #######################
 # PRIVATE             #
@@ -105,7 +104,7 @@ class PlaylistsBannerWidget(BannerWidget):
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self.width <= Size.MEDIUM:
+        if App().window.folded:
             self.__title_label.get_style_context().add_class(
                 "text-large")
         else:

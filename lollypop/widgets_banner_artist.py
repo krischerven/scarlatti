@@ -68,7 +68,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.add_overlay(widget)
         self._overlay.set_overlay_pass_through(widget, True)
         self.__update_add_button()
+        self.__set_internal_size()
         return [
+               (App().window.container.widget, "notify::folded",
+                "_on_container_folded"),
                (App().art, "artist-artwork-changed",
                 "_on_artist_artwork_changed"),
                (App().player, "playback-added", "_on_playback_changed"),
@@ -87,7 +90,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.update_for_width(self, width)
         self.__set_artwork()
-        self.__set_internal_size()
 
 #######################
 # PROTECTED           #
@@ -99,7 +101,14 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
-            self.__set_internal_size()
+
+    def _on_container_folded(self, leaflet, folded):
+        """
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
+        """
+        self.__set_internal_size()
 
     def _on_artist_artwork_setting_changed(self, settings, variant):
         """
@@ -154,7 +163,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         menu_ext = SimilarsMenu(self.__artist_ids[0])
         menu_ext.show()
         menu_widget.add_widget(menu_ext)
-        if self.view_type & ViewType.ADAPTIVE:
+        if App().window.folded:
             menu_ext2 = ArtistArtworkMenu(self.__artist_ids[0],
                                           self.view_type,
                                           True)
@@ -261,21 +270,14 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         title_context = self.__title_label.get_style_context()
         for c in title_context.list_classes():
             title_context.remove_class(c)
-        if self.width <= Size.SMALL:
-            art_size = None
-            cls = "text-medium"
-        elif self.width <= Size.MEDIUM:
+        if App().window.folded:
             art_size = ArtSize.MEDIUM
             cls = "text-large"
         else:
             art_size = ArtSize.BANNER
-            cls = "text-xx-large"
+            cls = "text-x-large"
         self.__title_label.get_style_context().add_class(cls)
-        if art_size is None:
-            self.__badge_artwork.hide()
-        else:
-            self.__badge_artwork.show()
-            self.__set_badge_artwork(art_size)
+        self.__set_badge_artwork(art_size)
 
     def __update_add_button(self):
         """

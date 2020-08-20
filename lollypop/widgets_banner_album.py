@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, ArtSize, Type, ViewType, Size
+from lollypop.define import App, ArtSize, Type, ViewType
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
@@ -98,7 +98,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.add(self.__widget)
         self.__update_add_button()
+        self.__set_internal_size()
         return [
+                (App().window.container.widget, "notify::folded",
+                 "_on_container_folded"),
                 (App().art, "album-artwork-changed",
                  "_on_album_artwork_changed"),
                 (App().player, "playback-added", "_on_playback_changed"),
@@ -113,7 +116,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         BannerWidget.update_for_width(self, width)
         self.__set_artwork()
-        self.__set_internal_size()
 
     def set_selected(self, selected):
         """
@@ -143,7 +145,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         if BannerWidget._handle_width_allocate(self, allocation):
             self.__set_artwork()
-            self.__set_internal_size()
+
+    def _on_container_folded(self, leaflet, folded):
+        """
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
+        """
+        self.__set_internal_size()
 
     def _on_menu_button_clicked(self, button):
         """
@@ -158,7 +167,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                          self.view_type)
         menu_widget = MenuBuilder(menu)
         menu_widget.show()
-        if self.view_type & ViewType.ADAPTIVE:
+        if App().window.folded:
             menu_ext = AlbumArtworkMenu(self.__album, self.view_type, True)
             menu_ext.connect("hidden", self.__close_artwork_menu)
             menu_ext.show()
@@ -266,25 +275,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             for c in context.list_classes():
                 context.remove_class(c)
 
-        if self.width <= Size.SMALL:
-            # For album, we show artist name and we need place
-            if self.view_type & ViewType.ALBUM:
-                art_size = None
-            else:
-                art_size = ArtSize.MEDIUM
-            icon_size = Gtk.IconSize.BUTTON
-            cls_title = "text-medium"
-            cls_others = "text-medium"
-        elif self.width <= Size.MEDIUM:
+        if App().window.folded:
             art_size = ArtSize.MEDIUM
             icon_size = Gtk.IconSize.BUTTON
-            cls_title = "text-large"
+            cls_title = "text-medium"
             cls_others = "text-medium"
         else:
             art_size = ArtSize.BANNER
             icon_size = Gtk.IconSize.LARGE_TOOLBAR
-            cls_title = "text-xx-large"
-            cls_others = "text-x-large"
+            cls_title = "text-x-large"
+            cls_others = "text-large"
         self.__title_label.get_style_context().add_class(cls_title)
         self.__artist_label.get_style_context().add_class(cls_title)
         self.__year_label.get_style_context().add_class(cls_others)
@@ -292,9 +292,4 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
 
         self.__rating_widget.set_icon_size(icon_size)
         self.__loved_widget.set_icon_size(icon_size)
-
-        if art_size is None:
-            self.__cover_widget.hide()
-        else:
-            self.__cover_widget.show()
-            self.__cover_widget.set_art_size(art_size)
+        self.__cover_widget.set_art_size(art_size)

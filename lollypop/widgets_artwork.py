@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -142,7 +142,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self.__label = builder.get_object("label")
         self.__label.set_text(_("Select artwork"))
 
-        if self.__view_type & ViewType.ADAPTIVE:
+        if App().window.folded:
             widget.add(self._flowbox)
         else:
             scrolled = Gtk.ScrolledWindow.new()
