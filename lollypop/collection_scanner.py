@@ -67,6 +67,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         GObject.GObject.__init__(self)
         self.__thread = None
         self.__tags = {}
+        self.__items = []
         self.__pending_new_artist_ids = []
         self.__history = History()
         self.__progress_total = 1
@@ -308,7 +309,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             True if db locked
             @return bool
         """
-        return self.__thread is not None and self.__thread.isAlive()
+        return self.__thread is not None and self.__thread.is_alive()
 
     def stop(self):
         """
@@ -398,7 +399,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 if f.query_exists():
                     walk_uris.append(uri)
                 else:
-                    return (None, None, None)
+                    return ([], [], [])
 
         while walk_uris:
             uri = walk_uris.pop(0)
@@ -447,7 +448,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().art.clean_rounded()
             (files, dirs, streams) = self.__get_objects_for_uris(
                 scan_type, uris)
-            if files is None:
+            if not files:
                 App().notify.send("Lollypop",
                                   _("Scan disabled, missing collection"))
                 return
@@ -479,31 +480,32 @@ class CollectionScanner(GObject.GObject, TagReader):
             else:
                 storage_type = StorageType.COLLECTION
             # Start getting files and populating DB
-            items = []
+            self.__items = []
             i = 0
             while threads:
                 thread = threads[i]
-                if not thread.isAlive():
+                if not thread.is_alive():
                     threads.remove(thread)
-                items += self.__save_in_db(storage_type)
+                self.__items += self.__save_in_db(storage_type)
                 if i >= len(threads) - 1:
                     i = 0
                 else:
                     i += 1
 
             # Add streams to DB, only happening on command line/m3u files
-            items += self.__save_streams_in_db(streams, storage_type)
+            self.__items += self.__save_streams_in_db(streams, storage_type)
 
             self.__remove_old_tracks(db_uris, scan_type)
 
             if scan_type == ScanType.EXTERNAL:
                 albums = tracks_to_albums(
-                    [Track(item.track_id) for item in items])
+                    [Track(item.track_id) for item in self.__items])
                 App().player.play_albums(albums)
             else:
                 self.__add_monitor(dirs)
-                GLib.idle_add(self.__finish, items)
+                GLib.idle_add(self.__finish, self.__items)
             self.__tags = {}
+            self.__items = []
             self.__pending_new_artist_ids = []
         except Exception as e:
             Logger.warning("CollectionScanner::__scan(): %s", e)
@@ -570,6 +572,9 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                0.001)
                     else:
                         # Scan + Save
+                        track_id = App().tracks.get_id_by_uri(uri)
+                        item = CollectionItem(track_id=track_id)
+                        self.__items.append(item)
                         self.__progress_count += 2
                         self.__update_progress(self.__progress_count,
                                                self.__progress_total,
