@@ -25,6 +25,11 @@ from lollypop.container_filter import FilterContainer
 from lollypop.progressbar import ProgressBar
 
 
+class Grid(Gtk.Grid):
+    def do_get_preferred_width(self):
+        return 200, 800
+
+
 class Container(Gtk.Overlay, NotificationContainer,
                 ScannerContainer, PlaylistsContainer,
                 ListsContainer, ViewsContainer, FilterContainer):
@@ -69,8 +74,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         search_action = App().lookup_action("search")
         search_action.connect("activate", self.__on_search_activate)
         self.__widget.add(self.sidebar)
-        self._grid = Gtk.Grid()
-        self._grid.set_size_request(400, -1)
+        self._grid = Grid()
         self._grid.set_orientation(Gtk.Orientation.VERTICAL)
         self._grid.set_column_spacing(2)
         self._grid.show()
