@@ -229,7 +229,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         def save_position():
             self.__paned_position_id = None
             position = paned.get_property(param.name)
-            # We do not want to save position while adaptive mode is set
+            # We do not want to save position if folded
             if App().window is not None and App().window.folded:
                 return
             App().settings.set_value("paned-listview-width",
