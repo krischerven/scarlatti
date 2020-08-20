@@ -681,7 +681,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             @param settings as Gio.Settings
             @param value as str
         """
-        pass
+        self.__on_container_folded(None, App().window.folded)
 
     def __on_initialized(self, selectionlist):
         """
