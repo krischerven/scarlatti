@@ -35,12 +35,13 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
                                        title="Lollypop",
                                        icon_name="org.gnome.Lollypop")
         self.__miniplayer = None
+        self.__configure_timeout_id = None
         self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         # Does not work with a Gtk.Gesture in GTK3
         self.connect("button-release-event", self.__on_button_release_event)
         self.connect("window-state-event", self.__on_window_state_event)
-
+        self.connect("configure-event", self.__on_configure_event)
         self.connect("destroy", self.__on_destroy)
         return [
             (App().player, "current-changed", "_on_current_changed")
@@ -170,6 +171,7 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
             @param x as int
             @param y as int
         """
+        self.__configure_timeout_id = None
         if App().lookup_action("miniplayer").get_state():
             return
         if not self.is_maximized():
@@ -242,3 +244,17 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
             @param widget as Gtk.Widget
         """
         self.__toolbar = None
+
+    def __on_configure_event(self, window, event):
+        """
+            Delay event
+            @param window as Gtk.Window
+            @param event as Gdk.EventConfigure
+        """
+        if self.__configure_timeout_id:
+            GLib.source_remove(self.__configure_timeout_id)
+        (width, height) = window.get_size()
+        (x, y) = window.get_position()
+        self.__configure_timeout_id = GLib.idle_add(
+            self._on_configure_event_timeout,
+            width, height, x, y, priority=GLib.PRIORITY_LOW)
