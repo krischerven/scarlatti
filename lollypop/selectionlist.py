@@ -704,10 +704,12 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.__base_mask &= ~(SelectionListMask.LABEL |
                               SelectionListMask.ELLIPSIZE)
         self.set_size_request(-1, -1)
+        self.__set_rows_mask(self.__base_mask)
         if App().window.folded or self.__base_mask & SelectionListMask.VIEW:
             self.set_size_request(self.get_allocated_width(), -1)
             self.__base_mask |= (SelectionListMask.LABEL |
                                  SelectionListMask.ELLIPSIZE)
         elif App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
-        self.__set_rows_mask(self.__base_mask | self.__mask)
+        GLib.timeout_add(200, self.__set_rows_mask,
+                         self.__base_mask | self.__mask)
