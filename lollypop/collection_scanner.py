@@ -308,7 +308,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             True if db locked
             @return bool
         """
-        return self.__thread is not None and self.__thread.isAlive()
+        return self.__thread is not None and self.__thread.is_alive()
 
     def stop(self):
         """
@@ -483,7 +483,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             i = 0
             while threads:
                 thread = threads[i]
-                if not thread.isAlive():
+                if not thread.is_alive():
                     threads.remove(thread)
                 items += self.__save_in_db(storage_type)
                 if i >= len(threads) - 1:
