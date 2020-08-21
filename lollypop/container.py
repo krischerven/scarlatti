@@ -61,7 +61,6 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.__sub_widget = Handy.Leaflet()
         self.__sub_widget.show()
         ListsContainer.__init__(self)
-        self.__paned_position_id = None
         self.__focused_view = None
         self._stack = StackContainer()
         self._stack.show()
@@ -231,25 +230,3 @@ class Container(Gtk.Overlay, NotificationContainer,
         if App().window.folded:
             search = variant.get_string()
             App().window.container.show_view([Type.SEARCH], search)
-
-    def __on_paned_position(self, paned, param):
-        """
-            Save paned position
-            @param paned as Gtk.Paned
-            @param param as GParamSpec
-        """
-        def save_position():
-            self.__paned_position_id = None
-            position = paned.get_property(param.name)
-            # We do not want to save position if folded
-            if App().window is not None and App().window.folded:
-                return
-            App().settings.set_value("paned-listview-width",
-                                     GLib.Variant("i",
-                                                  position))
-        # We delay position saving
-        # Useful for adative mode where position get garbaged
-        if self.__paned_position_id is not None:
-            GLib.source_remove(self.__paned_position_id)
-        self.__paned_position_id = GLib.timeout_add(
-            1000, save_position)

@@ -263,11 +263,6 @@
             <summary>Show track number from tags</summary>
             <description></description>
         </key>
-        <key type="i" name="paned-listview-width">
-            <default>280</default>
-            <summary>INTERNAL</summary>
-            <description></description>
-        </key>
         <key type="as" name="devices">
             <default>[]</default>
             <summary>INTERNAL</summary>
