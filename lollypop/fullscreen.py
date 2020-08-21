@@ -15,20 +15,18 @@ from gi.repository import Gtk, Gdk, GLib, Gio, Gst
 from datetime import datetime
 from gettext import gettext as _
 
-from lollypop.define import App, ArtSize, ArtBehaviour, AdaptiveSize
+from lollypop.define import App, ArtSize, ArtBehaviour
 from lollypop.define import MARGIN_BIG
 from lollypop.widgets_player_progress import ProgressPlayerWidget
 from lollypop.widgets_player_buttons import ButtonsPlayerWidget
 from lollypop.widgets_player_artwork import ArtworkPlayerWidget
 from lollypop.widgets_player_label import LabelPlayerWidget
 from lollypop.container import Container
-from lollypop.window_adaptive import AdaptiveWindow
 from lollypop.logger import Logger
-from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
+class FullScreen(Gtk.Window, SignalsHelper):
     """
         Show a fullscreen window showing current track context
     """
@@ -39,7 +37,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
             Init window
         """
         Gtk.Window.__init__(self)
-        AdaptiveWindow.__init__(self)
         return [
                 (App().player, "current-changed", "_on_current_changed")
         ]
@@ -147,6 +144,7 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         self.__background_artwork = builder.get_object("background_artwork")
         self.__container = Container()
         self.__container.show()
+        self.__container.setup()
         self.__sidebar = Gtk.Grid()
         self.__sidebar.set_size_request(400, -1)
         self.__sidebar.set_orientation(Gtk.Orientation.VERTICAL)
@@ -187,7 +185,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         screen = Gdk.Screen.get_default()
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         self.fullscreen_on_monitor(screen, monitor)
-        self.__container.setup_lists()
         # Disable screensaver (idle)
         App().inhibitor.manual_inhibit(
                 Gtk.ApplicationInhibitFlags.IDLE |
@@ -208,16 +205,12 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
         return App().main_window.miniplayer
 
     @property
+    def folded(self):
+        return False
+
+    @property
     def toolbar(self):
         return App().main_window.toolbar
-
-    @property
-    def is_adaptive(self):
-        return True
-
-    @property
-    def adaptive_size(self):
-        return AdaptiveSize.PHONE
 
     @property
     def container(self):
@@ -248,7 +241,6 @@ class FullScreen(Gtk.Window, AdaptiveWindow, SignalsHelper):
                                                   Gtk.IconSize.BUTTON)
         else:
             self.__revealer.set_reveal_child(True)
-            emit_signal(self, "adaptive-changed", True)
             button.get_image().set_from_icon_name("pan-end-symbolic",
                                                   Gtk.IconSize.BUTTON)
 
