@@ -142,7 +142,7 @@ class ViewsContainer:
             view.show()
             self._stack.add(view)
             self._stack.set_visible_child(view)
-        emit_signal(self, "can-go-back-changed", True)
+        emit_signal(self, "can-go-back-changed", self.can_go_back)
 
     def get_view_current(self):
         """

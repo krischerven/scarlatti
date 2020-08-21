@@ -286,7 +286,7 @@ class ListsContainer:
             self._stack.set_visible_child(view)
             if not focus_set:
                 self.set_focused_view(view)
-        emit_signal(self, "can-go-back-changed", True)
+        emit_signal(self, "can-go-back-changed", self.can_go_back)
 
     def __on_sidebar_populated(self, selection_list):
         """
