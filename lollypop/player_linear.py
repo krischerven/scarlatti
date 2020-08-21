@@ -131,5 +131,5 @@ class LinearPlayer:
             if album.tracks:
                 return album.tracks[0]
             else:
-                return Track
+                return Track()
         return None

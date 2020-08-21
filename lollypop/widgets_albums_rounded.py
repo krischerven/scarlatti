@@ -89,8 +89,9 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         album_ids = list(self.__album_ids)
         album_pixbufs = []
         album_scaled_pixbufs = []
-        for album in album_ids:
-            pixbuf = App().art.get_album_artwork(Album(album),
+        while album_ids and len(album_pixbufs) != 9:
+            album_id = album_ids.pop(0)
+            pixbuf = App().art.get_album_artwork(Album(album_id),
                                                  self._art_size,
                                                  self._art_size,
                                                  self._scale_factor)
