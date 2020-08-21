@@ -283,6 +283,9 @@ class ListsContainer:
             self._stack.set_visible_child(view)
             if not focus_set:
                 self.set_focused_view(view)
+        if self.widget.get_folded():
+            self.widget.set_visible_child(self.sub_widget)
+            self.sub_widget.set_visible_child(self.grid_view)
 
     def __on_sidebar_populated(self, selection_list):
         """
