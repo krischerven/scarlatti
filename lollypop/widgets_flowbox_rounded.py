@@ -46,6 +46,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._scale_factor = self.get_scale_factor()
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("margin", MARGIN)
+        self.update_art_size()
 
     def populate(self):
         """
@@ -65,7 +66,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._label.show()
         self._artwork = Gtk.Image.new()
         self._artwork.show()
-        self.update_art_size()
         self.set_artwork()
         self._grid.add(self._artwork)
         self._grid.add(self._label)
