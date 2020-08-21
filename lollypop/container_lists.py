@@ -279,11 +279,7 @@ class ListsContainer:
         if view is not None and view not in self._stack.get_children():
             view.show()
             self._stack.add(view)
-        # If we are in paned stack mode, show list two if wanted
-        if App().window.folded\
-                and selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST]:
-            self._stack.set_visible_child(self.left_list)
-        elif view is not None:
+        if view is not None:
             self._stack.set_visible_child(view)
             if not focus_set:
                 self.set_focused_view(view)
@@ -321,6 +317,7 @@ class ListsContainer:
         else:
             view = self._get_view_artists([], selected_ids, storage_type)
             self.set_focused_view(view)
+            self.sub_widget.set_visible_child(self.grid_view)
         if view is not None:
             view.show()
             self._stack.add(view)
@@ -340,6 +337,7 @@ class ListsContainer:
         self._stack.add(view)
         self._stack.set_visible_child(view)
         self.set_focused_view(view)
+        self.sub_widget.set_visible_child(self.grid_view)
 
     def __on_list_populated(self, selection_list):
         """
