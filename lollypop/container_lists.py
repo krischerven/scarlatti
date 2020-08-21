@@ -53,6 +53,8 @@ class ListsContainer:
         self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         self._sidebar.populate(items)
+        self._stack.connect("set-sidebar-id", self.__on_set_sidebar_id)
+        self._stack.connect("set-selection-ids", self.__on_set_selection_ids)
 
     @property
     def sidebar(self):
@@ -349,3 +351,46 @@ class ListsContainer:
             @param selection_list as SelectionList
         """
         selection_list.select_pending_ids()
+
+    def __on_set_sidebar_id(self, stack, sidebar_id):
+        """
+            Set sidebar id on container
+            @param stack as ContainerStack
+            @param sidebar_id as int
+        """
+        self._sidebar.select_ids([sidebar_id], False)
+
+    def __on_set_selection_ids(self, stack, selection_ids):
+        """
+            Set sidebar id and left/right list ids
+            @param stack as ContainerStack
+            @param selection_ids as {"left": [int], "right": [int])
+        """
+        # Restore left list
+        if selection_ids["left"]:
+            if self.left_list.selected_ids != selection_ids["left"]:
+                self.left_list.show()
+                if self.left_list.count == 0:
+                    self.left_list.set_selection_pending_ids(
+                        selection_ids["left"])
+                    if App().window.container.sidebar.selected_ids[0] ==\
+                            Type.GENRES_LIST:
+                        self._show_genres_list(self.left_list)
+                    else:
+                        self._show_artists_list(self.left_list)
+                else:
+                    self.left_list.select_ids(selection_ids["left"], False)
+                    self.left_list.show()
+        else:
+            self.left_list.hide()
+            self.left_list.clear()
+        # Restore right list
+        if selection_ids["right"]:
+            if self.right_list.selected_ids != selection_ids["right"]:
+                self.right_list.set_selection_pending_ids(
+                                        selection_ids["right"])
+                self._show_artists_list(self.right_list,
+                                        selection_ids["left"])
+                self._show_right_list()
+        else:
+            self._hide_right_list()

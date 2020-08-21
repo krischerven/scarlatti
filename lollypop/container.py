@@ -60,10 +60,10 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.__widget.show()
         self.__sub_widget = Handy.Leaflet()
         self.__sub_widget.show()
-        ListsContainer.__init__(self)
         self.__focused_view = None
         self._stack = StackContainer()
         self._stack.show()
+        ListsContainer.__init__(self)
         self.__progress = ProgressBar()
         self.__progress.get_style_context().add_class("progress-bottom")
         self.__progress.set_property("valign", Gtk.Align.END)
