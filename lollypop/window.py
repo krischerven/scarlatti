@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Handy
+from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ScanType, AdaptiveSize
 from lollypop.container import Container
@@ -123,8 +123,7 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
         """
             True if window is adaptive, ie widget folded
         """
-        return App().window.container.widget.get_fold() ==\
-            Handy.Fold.FOLDED
+        return App().window.container.widget.get_folded()
 
     @property
     def miniplayer(self):

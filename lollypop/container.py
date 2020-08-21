@@ -57,16 +57,8 @@ class Container(Gtk.Overlay, NotificationContainer,
             Setup container
         """
         self.__widget = Handy.Leaflet()
-        self.__widget.set_mode_transition_type(
-            Handy.LeafletModeTransitionType.SLIDE)
-        self.__widget.set_child_transition_type(
-            Handy.LeafletChildTransitionType.CROSSFADE)
         self.__widget.show()
         self.__sub_widget = Handy.Leaflet()
-        self.__sub_widget.set_mode_transition_type(
-            Handy.LeafletModeTransitionType.SLIDE)
-        self.__sub_widget.set_child_transition_type(
-            Handy.LeafletChildTransitionType.CROSSFADE)
         self.__sub_widget.show()
         ListsContainer.__init__(self)
         self.__paned_position_id = None
