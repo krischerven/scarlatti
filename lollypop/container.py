@@ -27,7 +27,7 @@ from lollypop.progressbar import ProgressBar
 
 class Grid(Gtk.Grid):
     def do_get_preferred_width(self):
-        return 200, 800
+        return 200, 700
 
 
 class Container(Gtk.Overlay, NotificationContainer,
@@ -74,12 +74,12 @@ class Container(Gtk.Overlay, NotificationContainer,
         self.__widget.add(self.sidebar)
         self.__grid_view = Grid()
         self.__grid_view.set_orientation(Gtk.Orientation.VERTICAL)
-        self.__grid_view.set_column_spacing(2)
         self.__grid_view.show()
         self.__sub_widget.add(self.left_list)
         self.__sub_widget.add(self.__grid_view)
         self.__grid_view.attach(self._stack, 0, 0, 1, 1)
         self.__widget.add(self.__sub_widget)
+        self.__widget.set_visible_child(self.__sub_widget)
         self.__sub_widget.set_visible_child(self.__grid_view)
         self.add(self.__widget)
         FilterContainer.__init__(self)

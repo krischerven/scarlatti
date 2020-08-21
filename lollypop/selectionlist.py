@@ -269,6 +269,8 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         GesturesHelper.__init__(self, self._box)
         self.__scrolled = Gtk.ScrolledWindow()
         self.__scrolled.show()
+        self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
+                                   Gtk.PolicyType.AUTOMATIC)
         self.__scrolled.set_property("expand", True)
         self.__viewport = Gtk.Viewport()
         self.__scrolled.add(self.__viewport)
@@ -277,9 +279,8 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.connect("initialized", self.__on_initialized)
         if self.__base_mask & SelectionListMask.VIEW:
             self.__overlay = Gtk.Overlay.new()
-            self.__overlay.set_hexpand(True)
-            self.__overlay.set_vexpand(True)
             self.__overlay.show()
+            self.__overlay.set_hexpand(True)
             self.__overlay.add(self.__scrolled)
             self.__fastscroll = FastScroll(self._box,
                                            self.__scrolled)
@@ -294,8 +295,6 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             self.__overlay = None
             App().settings.connect("changed::show-sidebar-labels",
                                    self.__on_show_sidebar_labels_changed)
-            self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
-                                       Gtk.PolicyType.AUTOMATIC)
             self.add(self.__scrolled)
             self.get_style_context().add_class("sidebar")
             self.__menu_button = Gtk.Button.new_from_icon_name(
@@ -703,12 +702,11 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         """
         self.__base_mask &= ~(SelectionListMask.LABEL |
                               SelectionListMask.ELLIPSIZE)
-        self.set_size_request(-1, -1)
+        self.__scrolled.set_size_request(-1, -1)
         self.__set_rows_mask(self.__base_mask)
         if App().window.folded or self.__base_mask & SelectionListMask.VIEW:
-            self.set_size_request(self.get_allocated_width(), -1)
-            self.__base_mask |= (SelectionListMask.LABEL |
-                                 SelectionListMask.ELLIPSIZE)
+            self.__scrolled.set_size_request(300, -1)
+            self.__base_mask |= (SelectionListMask.LABEL)
         elif App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
         GLib.timeout_add(200, self.__set_rows_mask,
