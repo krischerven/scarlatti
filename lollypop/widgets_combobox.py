@@ -76,8 +76,8 @@ class ComboBox(Gtk.MenuButton):
         self.set_image(grid)
         self.__popover = Gtk.Popover.new()
         self.__popover.set_relative_to(self)
-        height = max(300, App().window.get_allocated_height() / 2)
-        self.__popover.set_size_request(300, height)
+        height = max(250, App().window.get_allocated_height() / 2)
+        self.__popover.set_size_request(250, height)
         self.__scrolled = Gtk.ScrolledWindow.new()
         self.__scrolled.show()
         self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
