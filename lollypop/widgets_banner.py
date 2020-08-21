@@ -125,7 +125,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             @return int
         """
         if App().window.folded:
-            height = ArtSize.BANNER - MARGIN * 2
+            height = ArtSize.BANNER
         else:
             height = ArtSize.BANNER + MARGIN * 2
         return height
