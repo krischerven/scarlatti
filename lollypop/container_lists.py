@@ -69,7 +69,7 @@ class ListsContainer:
             @return SelectionList
         """
         if self.__left_list is None:
-            self.__left_list = SelectionList(SelectionListMask.VIEW)
+            self.__left_list = SelectionList(SelectionListMask.FASTSCROLL)
             self.__left_list.listbox.connect("row-activated",
                                              self.__on_left_list_activated)
             self.__left_list.scrolled.set_size_request(300, -1)
@@ -96,7 +96,7 @@ class ListsContainer:
             style_context = self.__right_list_grid.get_style_context()
             style_context.add_class("left-gradient")
             style_context.add_class("opacity-transition-fast")
-            self.__right_list = SelectionList(SelectionListMask.VIEW)
+            self.__right_list = SelectionList(SelectionListMask.FASTSCROLL)
             self.__right_list.show()
             self.__right_list.scrolled.set_size_request(250, -1)
             self.__gesture = GesturesHelper(
