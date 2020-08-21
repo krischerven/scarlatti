@@ -26,10 +26,10 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
             @param view_type as ViewType
             @param font_height as int
         """
-        self.__font_height = font_height
         self.__storage_type = storage_type
         name = sortname = App().genres.get_name(genre_id)
-        RoundedAlbumsWidget.__init__(self, genre_id, name, sortname, view_type)
+        RoundedAlbumsWidget.__init__(self, genre_id, name, sortname,
+                                     view_type, font_height)
         self._genre = Type.GENRES
 
     def populate(self):
@@ -40,15 +40,6 @@ class AlbumsGenreWidget(RoundedAlbumsWidget):
             RoundedAlbumsWidget.populate(self)
         else:
             self.set_artwork()
-
-    def set_view_type(self, view_type):
-        """
-            Update view type
-            @param view_type as ViewType
-        """
-        RoundedAlbumsWidget.set_view_type(self, view_type)
-        self.set_size_request(self._art_size,
-                              self._art_size + self.__font_height)
 
     @property
     def artwork_name(self):

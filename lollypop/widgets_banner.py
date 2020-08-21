@@ -95,13 +95,6 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
         if self._artwork is not None:
             self._artwork.set_size_request(-1, self.height)
 
-    def set_view_type(self, view_type):
-        """
-            Set view type
-            @param view_type as ViewType
-        """
-        self.__view_type = view_type | ViewType.BANNER
-
     @property
     def width(self):
         """

@@ -25,21 +25,24 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
-    def __init__(self, data, name, sortname, view_type):
+    def __init__(self, data, name, sortname, view_type, font_height):
         """
             Init widget
             @param data as object
             @param name as str
             @param sortname as str
             @param view_type as ViewType
+            @param font_height as int
         """
         # We do not use Gtk.Builder for speed reasons
         Gtk.FlowBoxChild.__init__(self)
         self._artwork = None
         self._data = data
+        self._art_size = 1
         self.__name = name
         self.__sortname = sortname
-        self.set_view_type(view_type)
+        self.__view_type = view_type
+        self.__font_height = font_height
         self._scale_factor = self.get_scale_factor()
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("margin", MARGIN)
@@ -61,25 +64,39 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             "<b>" + GLib.markup_escape_text(self.__name) + "</b>")
         self._label.show()
         self._artwork = Gtk.Image.new()
-        self._artwork.set_size_request(self._art_size, self._art_size)
         self._artwork.show()
+        self.update_art_size()
         self.set_artwork()
         self._grid.add(self._artwork)
         self._grid.add(self._label)
         self.add(self._grid)
 
-    def set_view_type(self, view_type):
+    def update_art_size(self):
         """
-            Update view type
-            @param view_type as ViewType
+            Update art size based on current window state
         """
-        self.__view_type = view_type
         if self.__view_type & ViewType.SMALL:
             self._art_size = ArtSize.MEDIUM
         elif App().window.folded:
             self._art_size = ArtSize.BANNER
         else:
             self._art_size = ArtSize.BIG
+        self.set_size_request(self._art_size,
+                              self._art_size + self.__font_height * 2)
+
+    def set_artwork(self):
+        """
+            Set artwork
+        """
+        pass
+
+    def reset_artwork(self):
+        """
+            Reset widget artwork
+        """
+        self.update_art_size()
+        if self._artwork is not None:
+            self._artwork.set_from_surface(None)
 
     def do_get_preferred_width(self):
         """
@@ -95,21 +112,6 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             @param name as str
         """
         self._label.set_markup("<b>" + GLib.markup_escape_text(name) + "</b>")
-
-    def disable_artwork(self):
-        """
-            Disable widget artwork
-        """
-        if self._artwork is not None:
-            self._artwork.set_size_request(self._art_size, self._art_size)
-            self._artwork.set_from_surface(None)
-
-    def set_artwork(self):
-        """
-            Set widget artwork
-        """
-        if self._artwork is not None:
-            self._artwork.set_size_request(self._art_size, self._art_size)
 
     @property
     def name(self):

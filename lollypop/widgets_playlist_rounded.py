@@ -31,10 +31,9 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, SignalsHelper):
             @param view_type as ViewType
             @param font_height as int
         """
-        self.__font_height = font_height
         name = sortname = App().playlists.get_name(playlist_id)
         RoundedAlbumsWidget.__init__(self, playlist_id, name,
-                                     sortname, view_type)
+                                     sortname, view_type, font_height)
         self._track_ids = []
         self._genre = Type.PLAYLISTS
         return [
@@ -49,15 +48,6 @@ class PlaylistRoundedWidget(RoundedAlbumsWidget, SignalsHelper):
             RoundedAlbumsWidget.populate(self)
         else:
             self.set_artwork()
-
-    def set_view_type(self, view_type):
-        """
-            Update view type
-            @param view_type as ViewType
-        """
-        RoundedAlbumsWidget.set_view_type(self, view_type)
-        self.set_size_request(self._art_size,
-                              self._art_size + self.__font_height)
 
     @property
     def track_ids(self):

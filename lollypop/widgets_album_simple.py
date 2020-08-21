@@ -40,13 +40,24 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__artwork = None
+        self.__view_type = view_type
         self.__font_height = font_height
-        self.set_view_type(view_type)
         self.set_property("halign", Gtk.Align.CENTER)
         if view_type & ViewType.ALBUM:
             self.set_property("margin", MARGIN_MEDIUM)
         else:
             self.set_property("margin", MARGIN)
+        self.update_art_size()
+
+    def do_get_preferred_width(self):
+        """
+            Return preferred width
+            @return (int, int)
+        """
+        if self.__artwork is None:
+            return (0, 0)
+        width = Gtk.FlowBoxChild.do_get_preferred_width(self)[0]
+        return (width, width)
 
     def populate(self):
         """
@@ -92,12 +103,25 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
         else:
             self.set_artwork()
 
-    def disable_artwork(self):
+    def update_art_size(self):
         """
-            Disable widget artwork
+            Update art size based on current window state
         """
+        if self.__view_type & ViewType.SMALL:
+            self.__art_size = ArtSize.MEDIUM
+        elif App().window.folded:
+            self.__art_size = ArtSize.BANNER
+        else:
+            self.__art_size = ArtSize.BIG
+        self.set_size_request(self.__art_size,
+                              self.__art_size + self.__font_height * 2)
+
+    def reset_artwork(self):
+        """
+            Reset widget artwork
+        """
+        self.update_art_size()
         if self.__artwork is not None:
-            self.__artwork.set_size_request(self.__art_size, self.__art_size)
             self.__artwork.set_from_surface(None)
 
     def set_artwork(self):
@@ -121,31 +145,6 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
                                            ArtBehaviour.CACHE |
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
-
-    def set_view_type(self, view_type):
-        """
-            Update artwork size
-            @param view_type as ViewType
-        """
-        self.__view_type = view_type
-        if self.__view_type & ViewType.SMALL:
-            self.__art_size = ArtSize.MEDIUM
-        elif App().window.folded:
-            self.__art_size = ArtSize.BANNER
-        else:
-            self.__art_size = ArtSize.BIG
-        self.set_size_request(self.__art_size,
-                              self.__art_size + self.__font_height * 2)
-
-    def do_get_preferred_width(self):
-        """
-            Return preferred width
-            @return (int, int)
-        """
-        if self.__artwork is None:
-            return (0, 0)
-        width = Gtk.FlowBoxChild.do_get_preferred_width(self)[0]
-        return (width, width)
 
     def set_selection(self):
         """

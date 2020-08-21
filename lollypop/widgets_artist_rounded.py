@@ -32,7 +32,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             @param view_type as ViewType
             @param font_height as int
         """
-        self.__font_height = font_height
         # Get values from DB
         if isinstance(item, int):
             artist_id = item
@@ -42,7 +41,7 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             artist_name = item[1]
             artist_sortname = item[2]
         RoundedFlowBoxWidget.__init__(self, artist_id, artist_name,
-                                      artist_sortname, view_type)
+                                      artist_sortname, view_type, font_height)
 
     def populate(self):
         """
@@ -60,15 +59,6 @@ class RoundedArtistWidget(RoundedFlowBoxWidget):
             Set artist artwork
         """
         self._set_artwork()
-
-    def set_view_type(self, view_type):
-        """
-            Update view type
-            @param view_type as ViewType
-        """
-        RoundedFlowBoxWidget.set_view_type(self, view_type)
-        self.set_size_request(self._art_size,
-                              self._art_size + self.__font_height)
 
 #######################
 # PROTECTED           #

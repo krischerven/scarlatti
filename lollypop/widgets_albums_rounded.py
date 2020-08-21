@@ -27,15 +27,17 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
     """
     _ALBUMS_COUNT = 10
 
-    def __init__(self, data, name, sortname, view_type):
+    def __init__(self, data, name, sortname, view_type, font_height):
         """
             Init widget
             @param data as object
             @param name as str
             @param sortname as str
-            @param art_size as int
+            @param view_type as ViewType
+            @param font_height as int
         """
-        RoundedFlowBoxWidget.__init__(self, data, name, sortname, view_type)
+        RoundedFlowBoxWidget.__init__(self, data, name, sortname,
+                                      view_type, font_height)
         self._genre = Type.NONE
         self.__album_ids = []
         self.__cancellable = Gio.Cancellable()
@@ -48,14 +50,6 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         """
         RoundedFlowBoxWidget.populate(self)
         self._artwork.get_style_context().add_class("rounded-icon-large")
-
-    def set_view_type(self, view_type):
-        """
-            Update artwork size
-            @param view_type as ViewType
-        """
-        RoundedFlowBoxWidget.set_view_type(self, view_type)
-        self._pixel_size = self._art_size / 8
 
     def set_artwork(self):
         """

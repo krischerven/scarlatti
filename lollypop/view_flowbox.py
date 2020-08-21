@@ -139,14 +139,13 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
             @param leaflet as Handy.Leaflet
             @param folded as Gparam
         """
-        if LazyLoadingView._on_container_folded(self, leaflet, folded):
-            self.pause()
-            children = self._box.get_children()
-            for child in children:
-                child.set_view_type(self.view_type)
-                child.disable_artwork()
-                self.queue_lazy_loading(child)
-            self.lazy_loading()
+        LazyLoadingView._on_container_folded(self, leaflet, folded)
+        self.pause()
+        children = self._box.get_children()
+        for child in children:
+            child.reset_artwork()
+            self.queue_lazy_loading(child)
+        self.lazy_loading()
 
     def _on_view_leave(self, event_controller):
         """
