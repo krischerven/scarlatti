@@ -277,6 +277,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.__viewport.show()
         self.__viewport.add(self._box)
         self.connect("initialized", self.__on_initialized)
+        self.get_style_context().add_class("sidebar")
         if self.__base_mask & SelectionListMask.FASTSCROLL:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
@@ -295,7 +296,6 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             App().settings.connect("changed::show-sidebar-labels",
                                    self.__on_show_sidebar_labels_changed)
             self.add(self.__scrolled)
-            self.get_style_context().add_class("sidebar")
             self.__menu_button = Gtk.Button.new_from_icon_name(
                 "view-more-horizontal-symbolic", Gtk.IconSize.BUTTON)
             self.__menu_button.set_property("halign", Gtk.Align.CENTER)
