@@ -15,6 +15,7 @@ gi.require_version("Gst", "1.0")
 gi.require_version("GstAudio", "1.0")
 gi.require_version("GstPbutils", "1.0")
 gi.require_version("TotemPlParser", "1.0")
+gi.require_version("Handy", "1")
 from gi.repository import Gtk, Gio, GLib, Gdk, Gst, GstPbutils
 Gst.init(None)
 GstPbutils.pb_utils_init()
