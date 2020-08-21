@@ -144,8 +144,8 @@ class Container(Gtk.Overlay, NotificationContainer,
             True if can go back
             @return bool
         """
-        if App().window.folded:
-            return self._stack.get_visible_child() != self._sidebar
+        if self.__widget.get_folded():
+            return self.__widget.get_visible_child() != self._sidebar
         else:
             return self._stack.history.count > 0
 
