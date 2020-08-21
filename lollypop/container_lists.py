@@ -72,6 +72,7 @@ class ListsContainer:
             self.__left_list = SelectionList(SelectionListMask.VIEW)
             self.__left_list.listbox.connect("row-activated",
                                              self.__on_left_list_activated)
+            self.__left_list.scrolled.set_size_request(300, -1)
         return self.__left_list
 
     @property
@@ -97,6 +98,7 @@ class ListsContainer:
             style_context.add_class("opacity-transition-fast")
             self.__right_list = SelectionList(SelectionListMask.VIEW)
             self.__right_list.show()
+            self.__right_list.scrolled.set_size_request(250, -1)
             self.__gesture = GesturesHelper(
                 eventbox, primary_press_callback=self._hide_right_list)
             self.__right_list.listbox.connect("row-activated",

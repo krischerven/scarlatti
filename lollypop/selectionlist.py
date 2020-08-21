@@ -280,7 +280,6 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         if self.__base_mask & SelectionListMask.VIEW:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
-            self.__overlay.set_hexpand(True)
             self.__overlay.add(self.__scrolled)
             self.__fastscroll = FastScroll(self._box,
                                            self.__scrolled)
@@ -518,6 +517,14 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         return [row.id for row in self._box.get_selected_rows()]
 
     @property
+    def scrolled(self):
+        """
+            Get scrolled window
+            @return Gtk.ScrolledWindow
+        """
+        return self.__scrolled
+
+    @property
     def selected_id(self):
         """
             Get selected id
@@ -702,11 +709,12 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         """
         self.__base_mask &= ~(SelectionListMask.LABEL |
                               SelectionListMask.ELLIPSIZE)
-        self.__scrolled.set_size_request(-1, -1)
         self.__set_rows_mask(self.__base_mask)
+        if self.__overlay is not None:
+            self.__overlay.set_hexpand(folded)
         if App().window.folded or self.__base_mask & SelectionListMask.VIEW:
-            self.__scrolled.set_size_request(300, -1)
-            self.__base_mask |= (SelectionListMask.LABEL)
+            self.__base_mask |= (SelectionListMask.LABEL |
+                                 SelectionListMask.ELLIPSIZE)
         elif App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
         GLib.timeout_add(200, self.__set_rows_mask,
