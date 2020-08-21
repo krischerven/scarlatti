@@ -213,6 +213,9 @@ class ListsContainer:
         else:
             self.left_list.hide()
             self.left_list.clear()
+            if self.widget.get_folded():
+                self.widget.set_visible_child(self.sub_widget)
+                self.sub_widget.set_visible_child(self.grid_view)
 
         storage_type = get_default_storage_type()
         if selected_id in [Type.ARTISTS_LIST, Type.GENRES_LIST] and not\
@@ -283,9 +286,6 @@ class ListsContainer:
             self._stack.set_visible_child(view)
             if not focus_set:
                 self.set_focused_view(view)
-        if self.widget.get_folded():
-            self.widget.set_visible_child(self.sub_widget)
-            self.sub_widget.set_visible_child(self.grid_view)
 
     def __on_sidebar_populated(self, selection_list):
         """

@@ -126,7 +126,9 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
             Go back in history
         """
-        if self.__sub_widget.get_folded() and\
+        if self._stack.history.count > 0:
+            self._stack.go_back()
+        elif self.__sub_widget.get_folded() and\
                 self.__sub_widget.get_visible_child() != self.left_list:
             self.__sub_widget.set_visible_child(self.left_list)
             self._stack.clear()
@@ -134,8 +136,6 @@ class Container(Gtk.Overlay, NotificationContainer,
                 self.__widget.get_visible_child() != self.sidebar:
             self.__widget.set_visible_child(self.sidebar)
             self._stack.clear()
-        elif self._stack.history.count > 0:
-            self._stack.go_back()
         emit_signal(self, "can-go-back-changed", self.can_go_back)
 
     @property
