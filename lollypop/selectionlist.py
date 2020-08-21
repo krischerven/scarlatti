@@ -277,7 +277,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.__viewport.show()
         self.__viewport.add(self._box)
         self.connect("initialized", self.__on_initialized)
-        if self.__base_mask & SelectionListMask.VIEW:
+        if self.__base_mask & SelectionListMask.FASTSCROLL:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
             self.__overlay.add(self.__scrolled)
@@ -367,7 +367,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                 found = True
                 break
         if not found:
-            if self.__base_mask & SelectionListMask.VIEW:
+            if self.__base_mask & SelectionListMask.FASTSCROLL:
                 self.__fastscroll.clear()
             self.add_value((object_id, name, name))
 
@@ -376,7 +376,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             Update view with values
             @param [(int, str, optional str)]
         """
-        if self.mask & SelectionListMask.VIEW:
+        if self.mask & SelectionListMask.FASTSCROLL:
             self.__fastscroll.clear()
         # Remove not found items
         value_ids = set([v[0] for v in values])
@@ -419,7 +419,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.stop()
         for child in self._box.get_children():
             child.destroy()
-        if self.__base_mask & SelectionListMask.VIEW:
+        if self.__base_mask & SelectionListMask.FASTSCROLL:
             self.__fastscroll.clear()
             self.__fastscroll.clear_chars()
 
@@ -712,7 +712,8 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.__set_rows_mask(self.__base_mask)
         if self.__overlay is not None:
             self.__overlay.set_hexpand(folded)
-        if App().window.folded or self.__base_mask & SelectionListMask.VIEW:
+        if App().window.folded or\
+                self.__base_mask & SelectionListMask.FASTSCROLL:
             self.__base_mask |= (SelectionListMask.LABEL |
                                  SelectionListMask.ELLIPSIZE)
         elif App().settings.get_value("show-sidebar-labels"):
