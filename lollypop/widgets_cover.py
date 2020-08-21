@@ -65,13 +65,6 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
-    def set_view_type(self, view_type):
-        """
-            Set view type
-            @param view_type as ViewType
-        """
-        self.__view_type = view_type
-
 #######################
 # PROTECTED           #
 #######################

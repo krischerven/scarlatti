@@ -25,7 +25,7 @@ from lollypop.utils import emit_signal
 
 class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
     """
-        Mini player shown in adaptive mode
+        Mini player shown in folded window
     """
     __gsignals__ = {
         "revealed": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),

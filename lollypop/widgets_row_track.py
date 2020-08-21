@@ -208,13 +208,6 @@ class TrackRow(Gtk.ListBoxRow):
         else:
             popover.connect("hidden", on_hidden)
 
-    def set_view_type(self, view_type):
-        """
-            Set view type
-            @param view_type as ViewType
-        """
-        self.__view_type = view_type
-
     @property
     def name(self):
         """

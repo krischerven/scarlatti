@@ -201,14 +201,6 @@ class AlbumRow(Gtk.ListBoxRow):
                                            ArtBehaviour.CROP_SQUARE,
                                            self.__on_album_artwork)
 
-    def set_view_type(self, view_type):
-        """
-            Set view type
-            @param view_type as ViewType
-        """
-        self.__view_type = view_type
-        self.__tracks_view.set_view_type(view_type)
-
     @property
     def revealed(self):
         """
