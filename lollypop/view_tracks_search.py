@@ -38,7 +38,7 @@ class SearchTracksView(TracksView, SignalsHelper):
         self._tracks_widget_left[0].show()
         self._tracks_widget_right[0].show()
         return [
-            (App().window, "adaptive-changed", "_on_adaptive_changed"),
+            (App().window, "notify::folded", "_on_container_folded"),
         ]
 
     def append_row(self, track):
@@ -163,13 +163,13 @@ class SearchTracksView(TracksView, SignalsHelper):
         App().player.add_album(track.album)
         App().player.load(track.album.get_track(track.id))
 
-    def _on_adaptive_changed(self, window, status):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Update label
-            @param window as Window
-            @param status as bool
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        self.__update_label(status)
+        self.__update_label(App().window.folded)
 
 #######################
 # PRIVATE             #
