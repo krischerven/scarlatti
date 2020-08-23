@@ -121,6 +121,14 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         self.__focused_view = view
 
+    def go_home(self):
+        """
+            Go back to first page
+        """
+        self.__widget.set_visible_child(self.sidebar)
+        self._stack.clear()
+        emit_signal(self, "can-go-back-changed", False)
+
     def go_back(self):
         """
             Go back in history
