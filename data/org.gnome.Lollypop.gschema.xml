@@ -125,6 +125,11 @@
             <summary>Show year below album name</summary>
             <description></description>
         </key>
+        <key type="b" name="ignore-original-date">
+            <default>false</default>
+            <summary>Do not use original date if set</summary>
+            <description></description>
+        </key>
         <key type="b" name="import-playlists">
             <default>false</default>
             <summary>Import playlists from collections</summary>
