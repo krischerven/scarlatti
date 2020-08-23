@@ -206,21 +206,26 @@ class PlaylistPlaybackMenu(Gio.Menu):
         Gio.Menu.__init__(self)
         play_action = Gio.SimpleAction(name="playlist_play_action")
         App().add_action(play_action)
-        play_action.connect("activate", self.__play, playlist_id)
+        play_action.connect("activate", self.__on_play_action, playlist_id)
         menu_item = Gio.MenuItem.new(_("Play this playlist"),
                                      "app.playlist_play_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+        add_action = Gio.SimpleAction(name="playlist_add_action")
+        App().add_action(add_action)
+        add_action.connect("activate", self.__on_add_action, playlist_id)
+        menu_item = Gio.MenuItem.new(_("Add this playlist"),
+                                     "app.playlist_add_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
 
 #######################
 # PRIVATE             #
 #######################
-    def __play(self, action, variant, playlist_id):
+    def __get_albums(self, playlist_id):
         """
-            Play albums
-            @param Gio.SimpleAction
-            @param GLib.Variant
-            @param playlist_id as int
+            Get albums for playlist_id
+            @parma playlist_id as int
         """
         if App().playlists.get_smart(playlist_id):
             request = App().playlists.get_smart_sql(playlist_id)
@@ -235,7 +240,25 @@ class PlaylistPlaybackMenu(Gio.Menu):
         else:
             tracks = App().playlists.get_tracks(playlist_id)
             albums = tracks_to_albums(tracks)
-        App().player.play_albums(albums)
+        return albums
+
+    def __on_play_action(self, action, variant, playlist_id):
+        """
+            Play albums
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param playlist_id as int
+        """
+        App().player.play_albums(self.__get_albums(playlist_id))
+
+    def __on_add_action(self, action, variant, playlist_id):
+        """
+            Add albums to playback
+            @param Gio.SimpleAction
+            @param GLib.Variant
+            @param playlist_id as int
+        """
+        App().player.add_albums(self.__get_albums(playlist_id))
 
 
 class ArtistPlaybackMenu(PlaybackMenu):
