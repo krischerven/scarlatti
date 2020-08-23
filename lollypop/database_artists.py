@@ -121,8 +121,14 @@ class ArtistsDatabase:
             if artist_id == Type.COMPILATIONS:
                 return _("Many artists")
 
-            result = sql.execute("SELECT name from artists WHERE rowid=?",
-                                 (artist_id,))
+            if App().settings.get_value("show-artist-sort"):
+                result = sql.execute(
+                    "SELECT sortname from artists WHERE rowid=?",
+                    (artist_id,))
+            else:
+                result = sql.execute(
+                    "SELECT name from artists WHERE rowid=?",
+                    (artist_id,))
             v = result.fetchone()
             if v is not None:
                 return v[0]
