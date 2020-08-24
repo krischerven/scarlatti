@@ -76,9 +76,6 @@ class SaveWebHelper(GObject.Object):
         if album_id >= 0:
             album = Album(album_id)
             if notify:
-                self.save_artwork(album,
-                                  payload["artwork-uri"],
-                                  cancellable)
                 emit_signal(self, "match-album", album_id, storage_type)
             return album.collection_item
         item = self.__save_album(payload, storage_type)
