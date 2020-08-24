@@ -556,7 +556,6 @@ class CollectionScanner(GObject.GObject, TagReader):
                     raise Exception("cancelled")
                 try:
                     if not self.__scan_to_handle(uri):
-                        # Scan + Save
                         self.__progress_count += 2
                         continue
                     db_mtime = db_mtimes.get(uri, 0)
@@ -571,10 +570,11 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                self.__progress_total,
                                                0.001)
                     else:
-                        # Scan + Save
-                        track_id = App().tracks.get_id_by_uri(uri)
-                        item = CollectionItem(track_id=track_id)
-                        self.__items.append(item)
+                        # We want to play files, so put them in items
+                        if scan_type == ScanType.EXTERNAL:
+                            track_id = App().tracks.get_id_by_uri(uri)
+                            item = CollectionItem(track_id=track_id)
+                            self.__items.append(item)
                         self.__progress_count += 2
                         self.__update_progress(self.__progress_count,
                                                self.__progress_total,
