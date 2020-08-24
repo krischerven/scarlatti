@@ -725,6 +725,15 @@ class TagReader:
             if parent is not None:
                 uri = parent.get_uri()
         album_id = App().albums.get_id(album_name, mb_album_id, artist_ids)
+        # Check storage type did not changed, remove album then
+        if album_id is not None:
+            current_storage_type = App().albums.get_storage_type(album_id)
+            if current_storage_type != storage_type:
+                App().tracks.remove_album(album_id)
+                App().tracks.clean(False)
+                App().albums.clean(False)
+                App().artists.clean(False)
+                album_id = None
         if album_id is None:
             added = True
             album_id = App().albums.add(album_name, mb_album_id, lp_album_id,
