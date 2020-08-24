@@ -739,7 +739,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             album_mtime = track_mtime
         bpm = self.get_bpm(tags)
         year = None
-        if not App().settings.get("ignore-original-date"):
+        if not App().settings.get_value("ignore-original-date"):
             (year, timestamp) = self.get_original_year(tags)
         if year is None:
             (year, timestamp) = self.get_year(tags)
