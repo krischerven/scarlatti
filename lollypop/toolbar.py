@@ -148,8 +148,8 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             self.__toolbar_playback.player_buttons.hide()
             self.__toolbar_title.hide()
             self.__toolbar_info.hide_children()
-        elif App().player.current_track.id is not None:
-            if isinstance(App().player.current_track, Track):
+        else:
+            if App().player.current_track.id is not None:
                 self.__toolbar_title.show()
             # If user double click headerbar to maximize window
             # We do not want info bar to receive click signal
