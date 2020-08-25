@@ -22,6 +22,10 @@ class PluginsPlayer:
         Replay gain player
     """
 
+    __EQUALIZER = [55, 77, 110, 156, 220, 311, 440, 622,
+                   880, 1200, 1800, 2500, 3500, 5000, 7000,
+                   10000, 14000, 20000]
+
     def __init__(self, playbin):
         """
             Init playbin
@@ -66,8 +70,9 @@ class PluginsPlayer:
             # Equalizer
             self.__equalizer = None
             if App().settings.get_value("equalizer-enabled"):
-                self.__equalizer = Gst.ElementFactory.make("equalizer-10bands",
+                self.__equalizer = Gst.ElementFactory.make("equalizer-nbands",
                                                            None)
+                self.__equalizer.set_property("num-bands", 18)
                 audiobin.add(self.__equalizer)
                 if replay_gain:
                     audioconvert_rg.link(self.__equalizer)
@@ -106,15 +111,17 @@ class PluginsPlayer:
             self.set_equalizer(i, value)
             i += 1
 
-    def set_equalizer(self, band, value):
+    def set_equalizer(self, index, value):
         """
-            Set 10bands equalizer
-            @param band as int
+            Set band value
+            @param index as int
             @param value as int
         """
         try:
             if self.__equalizer is not None:
-                self.__equalizer.set_property("band%s" % band, value)
+                band = self.__equalizer.get_child_by_index(index)
+                band.set_property("freq", self.__EQUALIZER[index])
+                band.set_property("gain", value)
         except Exception as e:
             Logger.error("PluginsPlayer::set_equalizer():", e)
 

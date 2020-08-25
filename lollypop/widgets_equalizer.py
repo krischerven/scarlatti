@@ -20,29 +20,48 @@ from lollypop.widgets_combobox import ComboBox
 
 
 PRESETS = {
-           _("Default"): (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+           _("Default"):
+            (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
            "Separator": (),
-           _("Classical"): (0, 0, 0, 0, 0, 0, -4, -4, -4, -6),
-           _("Club"): (0, 0, 2, 3, 3, 3, 2, 0, 0, 0),
-           _("Dance"): (6, 4, 1, 0, 0, -3, -4, -4, 0, 0),
-           _("Dubstep"): (0, 4, 10, 6, 3, 0, 4, 7, 11, 7),
-           _("Full Bass"): (8, 8, 8, 4, 2, -5, -6, -6, -6, -6),
-           _("Full Treble"): (-6, -6, -6, -3, 1, 6, 9, 9, 9, 10),
-           _("Full Bass + Treble"): (4, 3, 0, -4, -3, 1, 5, 6, 7, 7),
-           _("Hip Hop"): (10, 12, 12, -2, -3, 1, 12, 0, 6, 8),
-           _("Kuduro"): (7, -12, 1, 7, -4, 10, 12, -5, 2, -12),
-           _("Laptop/Headphones"): (3, 6, 3, -2, 0, -3, -4, -4, 0, 0),
-           _("Large Hall"): (6, 6, 3, 3, 0, -3, -3, -3, 0, 0),
-           _("Live"): (-3, 0, 2, 3, 3, 3, 2, 1, 1, 1),
-           _("Party"): (4, 4, 0, 0, 0, 0, 0, 0, 4, 4),
-           _("Pop"): (-1, 3, 4, 4, 3, 0, -1, -1, -1, -1),
-           _("Psychedelic"): (12, 12, 0, 4, 0, 8, 9, 0, 3, -12),
-           _("Reggae"): (0, 0, 0, -3, 0, -4, -4, 0, 0, 0),
-           _("Rock"): (4, 3, -3, -4, -2, 2, 5, 6, 6, 6),
-           _("Soft"): (3, 1, 0, -1, 0, 2, 5, 6, 6, 7),
-           _("Ska"): (-1, -3, -3, 0, 2, 3, 5, 6, 6, 6),
-           _("Soft Rock"): (2, 2, 1, 0, -3, -3, -2, 0, 1, 5),
-           _("Techno"): (4, 3, 0, -3, -3, 0, 4, 6, 6, 5),
+           _("Acoustic"):
+            (3, 2, 2, 2, 3, 2, 2, 3, 2, 4, 2, 2, 1, 1, 4, 5, 7, 8),
+           _("Bass"):
+            (12, 12, 12, 11, 10, 8, 6, 4, 2, 0,
+             -1, -2, -3, -5, -6, -8, -8, -8),
+           _("Bass and Treble"):
+            (8, 7, 6, 4, 1, -2, -4, -3, 0, 2, 4, 6, 7, 8, 9, 9, 10, 10),
+           _("Classical"):
+            (3, 2, 1, 0, 2, 1, 2, 1, 2, 3, 1, 1, 1, 2, 4, 3, 2, 1),
+           _("Club"):
+            (0, 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 4, 2, 1, 0, 0, 0, 0),
+           _("Dance"):
+            (11, 11, 8, 8, 8, 5, 5, 0, 0, 0, 0, -5, -5, -5, -8, -8, 0, 0),
+           _("Disco"):
+            (3, 3, 1, 1, 3, 1, 1, 1, 2, 6, 5, 4, 3, 2, 2, 2, 2, 1),
+           _("Drum'n'Bass"):
+            (3, 4, 3, 2, 2, 1, 0, 0, 1, 3, 5, 3, 2, 1, 2, 2, 1, 2),
+           _("Heavy Metal"):
+            (4, 3, 2, 3, 6, 6, 6, 6, 6, 5, 4, 3, 3, 3, 2, 2, 2, 1),
+           _("Jazz"):
+            (0, 1, 2, 2, 3, 1, 2, 0, 0, 2, 1, 2, 4, 3, 3, 2, 1, 0),
+           _("Latin"):
+            (0, -2, -1, 0, 1, 1, 2, 2, 3, 4, 1, 2, 2, 2, 3, 2, 1, 1),
+           _("Metal"):
+            (4, 5, 5, 3, 0, -1, -2, -1, 0, 1, 1, 1, 1, 0, -1, -1, -1, -1),
+           _("New Age"):
+            (3, 1, 3, 2, 2, 2, 3, 2, 0, 2, 4, 1, 3, 2, 4, 2, 1, 1),
+           _("Party"):
+            (7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7),
+           _("Pop"):
+            (1, -1, -3, 0, 1, 2, 3, 1, 1, 2, 0, -1, -2, 0, 1, 2, 2, 2),
+           _("Reggae"):
+            (0, 0, 0, -1, -3, -5, -8, -4, 0, 3, 4, 4, 4, 3, 1, 0, 0, 0),
+           _("Rock"):
+            (3, -3, -2, -2, -2, -2, -2, -2, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5),
+           _("Techno"):
+            (6, 7, 7, 6, 4, 2, -1, -3, -2, 0, 2, 3, 4, 4, 4, 3, 2, 1),
+           _("Vocal"):
+            (2, -1, -1, -1, 2, 2, 4, 3, 4, 4, 3, 2, 0, 0, 0, 0, -1, -1)
 }
 
 
@@ -72,9 +91,10 @@ class EqualizerWidget(Gtk.Bin):
             builder.get_object("equalizer_checkbox").set_active(True)
         else:
             self.__combobox.set_sensitive(False)
-        for i in range(0, 10):
+        for i in range(0, 18):
             scale = builder.get_object("scale%s" % i)
-            scale.set_value(equalizer[i])
+            if i < len(equalizer):
+                scale.set_value(equalizer[i])
             setattr(self, "__scale%s" % i, scale)
             scale.connect("value-changed", self.__on_scale_value_changed, i)
             scale.set_sensitive(enabled_equalizer)
@@ -114,7 +134,7 @@ class EqualizerWidget(Gtk.Bin):
             plugin.build_audiofilter()
         App().player.reload_track()
         self.__combobox.set_sensitive(active)
-        for i in range(0, 10):
+        for i in range(0, 18):
             attr = getattr(self, "__scale%s" % i)
             attr.set_sensitive(active)
 
@@ -145,7 +165,7 @@ class EqualizerWidget(Gtk.Bin):
         """
         self.__timeout_id = None
         preset = []
-        for i in range(0, 10):
+        for i in range(0, 18):
             attr = getattr(self, "__scale%s" % i)
             preset.append(attr.get_value())
         App().settings.set_value("equalizer", GLib.Variant("ad", preset))
