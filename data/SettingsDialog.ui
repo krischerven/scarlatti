@@ -382,10 +382,12 @@ and with different artists</property>
                 <property name="activatable-widget">artist-artwork_boolean</property>
                 <property name="subtitle" translatable="yes">Search artwork in background</property>
                 <child>
-                  <object class="GtkSwitch" id="show_artist_artwork_button2">
+                  <object class="GtkSwitch" id="DATA_button">
+                    <property name="name">DATA</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -405,12 +407,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">YouTube</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="youtube_playback_button">
+                  <object class="GtkSwitch" id="YOUTUBE_button">
+                    <property name="name">YOUTUBE</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -424,18 +428,20 @@ and with different artists</property>
           <object class="HdyPreferencesGroup">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="title" translatable="yes">Search</property>
+            <property name="title" translatable="yes">Search (artwork, songs, ...)</property>
             <child>
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Last.FM</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="lastfm_search_button">
+                  <object class="GtkSwitch" id="LASTFM_button">
+                    <property name="name">LASTFM</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -445,12 +451,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Libre.fm</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="librefm_search_button">
+                  <object class="GtkSwitch" id="LIBREFM_button">
+                    <property name="name">LIBREFM</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -460,12 +468,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Deezer</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="deezer_search_button">
+                  <object class="GtkSwitch" id="DEEZER_button">
+                    <property name="name">DEEZER</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -475,12 +485,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">AudioDB</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="audiodb_search_button">
+                  <object class="GtkSwitch" id="AUDIODB_button">
+                    <property name="name">AUDIODB</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -490,12 +502,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Spotify</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="spotify_search_button">
+                  <object class="GtkSwitch" id="SPOTIFY_button">
+                    <property name="name">SPOTIFY</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -505,12 +519,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">FANART.TV</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="fanarttv_search_button">
+                  <object class="GtkSwitch" id="FANARTTV_button">
+                    <property name="name">FANARTTV</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -520,12 +536,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">ITunes</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="itunes_search_button">
+                  <object class="GtkSwitch" id="ITUNES_button">
+                    <property name="name">ITUNES</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -535,12 +553,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Google</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="google_search_button">
+                  <object class="GtkSwitch" id="GOOGLE_button">
+                    <property name="name">GOOGLE</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -550,12 +570,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Startpage</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="startpage_button">
+                  <object class="GtkSwitch" id="STARTPAGE_button">
+                    <property name="name">STARTPAGE</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -565,12 +587,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">DuckDuckGo</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="duckduckgo_search_button">
+                  <object class="GtkSwitch" id="DUCKDUCKGO_button">
+                    <property name="name">DUCKDUCKGO</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -580,12 +604,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Wikipedia</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="wikipedia_search_button">
+                  <object class="GtkSwitch" id="WIKIPEDIA_button">
+                    <property name="name">WIKIPEDIA</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -595,12 +621,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">MusicBrainz</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="musicbrainz_search_button">
+                  <object class="GtkSwitch" id="MUSICBRAINZ_button">
+                    <property name="name">MUSICBRAINZ</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -620,12 +648,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Wikia</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="wikia_search_button">
+                  <object class="GtkSwitch" id="WIKIA_button">
+                    <property name="name">WIKIA</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>
@@ -635,12 +665,14 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Genius</property>
-                <property name="activatable-widget">youtube_playback_button</property>
+                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
-                  <object class="GtkSwitch" id="Genius_search_button,">
+                  <object class="GtkSwitch" id="GENIUS_button">
+                    <property name="name">GENIUS</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
                   </object>
                 </child>
               </object>

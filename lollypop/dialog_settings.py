@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Handy
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN_SMALL, ScanType
+from lollypop.define import App, MARGIN_SMALL, ScanType, NetworkAccessACL
 from lollypop.widgets_row_device import DeviceRow
 
 
@@ -66,6 +66,10 @@ class SettingsDialog:
         for device in App().settings.get_value("devices"):
             row = DeviceRow(device)
             builder.get_object("device_group").add(row)
+        acl = App().settings.get_value("network-access-acl").get_int32()
+        for key in NetworkAccessACL.keys():
+            if acl & NetworkAccessACL[key]:
+                builder.get_object("%s_button" % key).set_state(True)
         self.__settings_dialog.connect("destroy", self.__on_destroy)
 
     def show(self):
@@ -126,6 +130,21 @@ class SettingsDialog:
         """
         App().task_helper.run(App().art.clean_all_cache)
         button.set_sensitive(False)
+
+    def _on_acl_state_set(self, widget, state):
+        """
+            Save network acl state
+            @param widget as Gtk.Switch
+            @param state as bool
+        """
+        key = widget.get_name()
+        acl = App().settings.get_value("network-access-acl").get_int32()
+        if state:
+            acl |= NetworkAccessACL[key]
+        else:
+            acl &= ~NetworkAccessACL[key]
+        acl = App().settings.set_value("network-access-acl",
+                                       GLib.Variant("i", acl))
 
 #######################
 # PRIVATE             #
