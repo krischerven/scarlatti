@@ -70,6 +70,16 @@ class SettingsDialog:
         for key in NetworkAccessACL.keys():
             if acl & NetworkAccessACL[key]:
                 builder.get_object("%s_button" % key).set_state(True)
+        artists_count = App().artists.count()
+        albums_count = App().albums.count()
+        tracks_count = App().tracks.count()
+        builder.get_object("stat_artists").set_title(
+            _("Artists count: %s") % artists_count)
+        builder.get_object("stat_albums").set_title(
+            _("Albums count: %s") % albums_count)
+        builder.get_object("stat_tracks").set_title(
+            _("Tracks count: %s") % tracks_count)
+
         self.__settings_dialog.connect("destroy", self.__on_destroy)
 
     def show(self):
