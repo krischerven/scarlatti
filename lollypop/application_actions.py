@@ -25,8 +25,7 @@ class ApplicationActions:
             Init actions
         """
         self.__special_shortcuts_count = 0
-        settings_action = Gio.SimpleAction.new("settings",
-                                               GLib.VariantType("i"))
+        settings_action = Gio.SimpleAction.new("settings", None)
         settings_action.connect("activate", self.__on_settings_activate)
         App().add_action(settings_action)
 
@@ -241,12 +240,9 @@ class ApplicationActions:
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
-        if App().window.folded:
-            App().window.container.show_view([Type.SETTINGS])
-        else:
-            from lollypop.dialog_settings import SettingsDialog
-            dialog = SettingsDialog(value.get_int32())
-            dialog.show()
+        from lollypop.dialog_settings import SettingsDialog
+        dialog = SettingsDialog()
+        dialog.show()
 
     def __on_about_activate(self, action, value):
         """

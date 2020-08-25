@@ -16,7 +16,7 @@ gi.require_version("GstAudio", "1.0")
 gi.require_version("GstPbutils", "1.0")
 gi.require_version("TotemPlParser", "1.0")
 gi.require_version("Handy", "1")
-from gi.repository import Gtk, Gio, GLib, Gdk, Gst, GstPbutils
+from gi.repository import Gtk, Gio, GLib, Gdk, Gst, GstPbutils, Handy
 Gst.init(None)
 GstPbutils.pb_utils_init()
 
@@ -205,6 +205,7 @@ class Application(Gtk.Application, ApplicationActions):
             Init application
         """
         Gtk.Application.do_startup(self)
+        Handy.init()
         if self.__window is None:
             from lollypop.window import Window
             self.init()

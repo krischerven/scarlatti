@@ -16,12 +16,7 @@
      <file compressed="true" preprocess="xml-stripblanks">RadioMenu.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">RatingWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SearchBannerWidget.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">SettingsAppearance.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">SettingsBehaviour.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">SettingsCollections.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">SettingsDevices.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SettingsDialog.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">SettingsWeb.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">Shortcuts.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SmartPlaylistView.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">SmartPlaylistWidget.ui</file>

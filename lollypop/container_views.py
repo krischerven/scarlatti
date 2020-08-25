@@ -120,13 +120,6 @@ class ViewsContainer:
             elif item_ids[0] == Type.EQUALIZER:
                 from lollypop.view_equalizer import EqualizerView
                 view = EqualizerView()
-            elif item_ids[0] in [Type.SETTINGS,
-                                 Type.SETTINGS_APPEARANCE,
-                                 Type.SETTINGS_BEHAVIOUR,
-                                 Type.SETTINGS_COLLECTIONS,
-                                 Type.SETTINGS_WEB,
-                                 Type.SETTINGS_DEVICES]:
-                view = self._get_view_settings(item_ids[0])
             elif item_ids[0] == Type.ALL:
                 view = self._get_view_albums(item_ids, [], storage_type)
             elif item_ids[0] == Type.COMPILATIONS:
@@ -373,18 +366,4 @@ class ViewsContainer:
         view.populate()
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
-        return view
-
-    def _get_view_settings(self, item_id):
-        """
-            Show settings views
-            @param item_id as int
-            @return SettingsView/SettingsChildView
-        """
-        if item_id == Type.SETTINGS:
-            from lollypop.view_settings import SettingsView
-            view = SettingsView(ViewType.SCROLLED)
-        else:
-            from lollypop.view_settings import SettingsChildView
-            view = SettingsChildView(item_id, ViewType.SCROLLED)
         return view

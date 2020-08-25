@@ -218,18 +218,6 @@ class Container(Gtk.Overlay, NotificationContainer,
 ############
 # PRIVATE  #
 ############
-    def __show_settings_dialog(self):
-        """
-            Show settings dialog if view exists in stack
-        """
-        from lollypop.view_settings import SettingsChildView
-        from lollypop.view_settings import SettingsView
-        if isinstance(self.view, SettingsChildView) or\
-                isinstance(self.view, SettingsView):
-            action = App().lookup_action("settings")
-            GLib.idle_add(action.activate,
-                          GLib.Variant("i", self.view.type))
-
     def __on_search_activate(self, action, variant):
         """
             @param action as Gio.SimpleAction

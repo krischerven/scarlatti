@@ -105,7 +105,6 @@
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="action_name">app.settings</property>
-        <property name="action_target">1</property>
         <property name="text" translatable="yes">_Preferences</property>
         <signal name="clicked" handler="_emit_hidden" swapped="no"/>
       </object>
