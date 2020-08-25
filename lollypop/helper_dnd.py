@@ -91,7 +91,7 @@ class DNDHelper(GObject.Object):
             if merge_if_possible(row, next):
                 if next in children:
                     children.remove(next)
-                next.destroy()
+                self.__listbox.remove(next)
             else:
                 children.pop(0)
         GLib.timeout_add(100, self.emit, "dnd-finished")
