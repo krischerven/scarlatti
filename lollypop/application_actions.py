@@ -152,7 +152,7 @@ class ApplicationActions:
                                     ["<Shift><Alt>l"])
         App().set_accels_for_action("app.shortcut::next_album", ["<Control>n"])
         App().set_accels_for_action("app.update_db", ["<Control>u"])
-        App().set_accels_for_action("app.settings(-14)", ["<Control>comma"])
+        App().set_accels_for_action("app.settings", ["<Control>comma"])
         App().set_accels_for_action("app.fullscreen", ["F11", "F7"])
         App().set_accels_for_action("app.mini", ["<Control>m"])
         App().set_accels_for_action("app.about", ["F3"])
