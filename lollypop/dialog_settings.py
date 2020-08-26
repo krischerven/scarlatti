@@ -25,7 +25,8 @@ class SettingsDialog:
 
     __BOOLEAN = ["dark-ui", "artist-artwork", "auto-update", "background-mode",
                  "save-state", "import-playlists", "save-to-tags",
-                 "show-compilations", "transitions", "network-access"]
+                 "show-compilations", "transitions", "network-access",
+                 "recent-youtube-dl"]
 
     __RANGE = ["cover-size", "transitions-duration"]
 
@@ -135,6 +136,21 @@ class SettingsDialog:
         """
         App().task_helper.run(App().art.clean_all_cache)
         button.set_sensitive(False)
+
+    def _on_google_api_key_changed(self, entry):
+        """
+            Save Key
+            @param entry as Gtk.Entry
+        """
+        value = entry.get_text().strip()
+        App().settings.set_value("cs-api-key", GLib.Variant("s", value))
+
+    def _on_connect_button_clicked(self, button):
+        """
+            Connect to API
+            @param button as Gtk.Button
+        """
+        pass
 
     def _on_acl_state_set(self, widget, state):
         """

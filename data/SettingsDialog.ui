@@ -477,18 +477,88 @@ and with different artists</property>
             <property name="can-focus">False</property>
             <property name="title" translatable="yes">Song playback</property>
             <child>
-              <object class="HdyActionRow">
+              <object class="HdyExpanderRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">YouTube</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
+                <property name="activatable">False</property>
+                <property name="title">YouTube</property>
                 <child>
-                  <object class="GtkSwitch" id="YOUTUBE_button">
-                    <property name="name">YOUTUBE</property>
+                  <object class="HdyActionRow">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                    <property name="title" translatable="yes">Enabled</property>
+                    <property name="activatable-widget">YOUTUBE_button</property>
+                    <child>
+                      <object class="GtkSwitch" id="YOUTUBE_button">
+                        <property name="name">YOUTUBE</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="HdyActionRow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="title" translatable="yes">Use a recent version of youtube-dl</property>
+                    <property name="activatable-widget">recent-youtube-dl_boolean</property>
+                    <child>
+                      <object class="GtkSwitch" id="recent-youtube-dl_boolean">
+                        <property name="name">YOUTUBE</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="HdyActionRow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="title" translatable="yes">Google API-key</property>
+                    <child>
+                      <object class="GtkGrid">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="margin-bottom">5</property>
+                        <property name="hexpand">True</property>
+                        <property name="row-spacing">5</property>
+                        <child>
+                          <object class="GtkEntry">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="hexpand">True</property>
+                            <property name="placeholder-text" translatable="yes">AIzaSyAfXimyn-JsnPzAhhIuxYwgyMrj21Ee7e0</property>
+                            <signal name="changed" handler="_on_google_api_key_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="lastfm_button1">
+                            <property name="label" translatable="yes">Connect</property>
+                            <property name="name">YOUTUBE</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="halign">end</property>
+                            <property name="valign">center</property>
+                            <property name="hexpand">True</property>
+                            <signal name="clicked" handler="_on_connect_button_clicked" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -504,35 +574,172 @@ and with different artists</property>
             <property name="can-focus">False</property>
             <property name="title" translatable="yes">Search (artwork, songs, ...)</property>
             <child>
-              <object class="HdyActionRow">
+              <object class="HdyExpanderRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">Last.FM</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
+                <property name="activatable">False</property>
+                <property name="title">Last.FM</property>
                 <child>
-                  <object class="GtkSwitch" id="LASTFM_button">
-                    <property name="name">LASTFM</property>
+                  <object class="HdyActionRow">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                    <property name="title" translatable="yes">Enabled</property>
+                    <child>
+                      <object class="GtkSwitch" id="LASTFM_button">
+                        <property name="name">LASTFM</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="HdyActionRow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <child>
+                      <object class="GtkGrid">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <property name="margin-bottom">5</property>
+                        <property name="hexpand">True</property>
+                        <property name="row-spacing">5</property>
+                        <child>
+                          <object class="GtkButton" id="lastfm_button">
+                            <property name="label" translatable="yes">Connect</property>
+                            <property name="name">LASTFM</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="halign">end</property>
+                            <property name="valign">center</property>
+                            <property name="hexpand">True</property>
+                            <signal name="clicked" handler="_on_connect_button_clicked" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="HdyActionRow">
+              <object class="HdyExpanderRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">Libre.fm</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
+                <property name="activatable">False</property>
+                <property name="title">Libre.fm</property>
                 <child>
-                  <object class="GtkSwitch" id="LIBREFM_button">
-                    <property name="name">LIBREFM</property>
+                  <object class="HdyActionRow">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                    <property name="title" translatable="yes">Enabled</property>
+                    <child>
+                      <object class="GtkSwitch" id="LIBREFM_button">
+                        <property name="name">LIBREFM</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="HdyActionRow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <child>
+                      <object class="GtkGrid">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <property name="margin-bottom">5</property>
+                        <property name="hexpand">True</property>
+                        <property name="row-spacing">5</property>
+                        <child>
+                          <object class="GtkButton" id="librefm_button">
+                            <property name="label" translatable="yes">Connect</property>
+                            <property name="name">LIBREFM</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="halign">end</property>
+                            <property name="valign">center</property>
+                            <property name="hexpand">True</property>
+                            <signal name="clicked" handler="_on_connect_button_clicked" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyExpanderRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="activatable">False</property>
+                <property name="title">MusicBrainz</property>
+                <child>
+                  <object class="HdyActionRow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="title" translatable="yes">Enabled</property>
+                    <child>
+                      <object class="GtkSwitch" id="MUSICBRAINZ_button">
+                        <property name="name">MUSICBRAINZ</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="HdyActionRow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <child>
+                      <object class="GtkGrid">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="valign">center</property>
+                        <property name="margin-bottom">5</property>
+                        <property name="hexpand">True</property>
+                        <property name="row-spacing">5</property>
+                        <child>
+                          <object class="GtkButton" id="musicbrainz_button">
+                            <property name="label" translatable="yes">Connect</property>
+                            <property name="name">MUSICBRAINZ</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="halign">end</property>
+                            <property name="valign">center</property>
+                            <property name="hexpand">True</property>
+                            <signal name="clicked" handler="_on_connect_button_clicked" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -542,7 +749,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Deezer</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="DEEZER_button">
                     <property name="name">DEEZER</property>
@@ -559,7 +765,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">AudioDB</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="AUDIODB_button">
                     <property name="name">AUDIODB</property>
@@ -576,7 +781,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Spotify</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="SPOTIFY_button">
                     <property name="name">SPOTIFY</property>
@@ -593,7 +797,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">FANART.TV</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="FANARTTV_button">
                     <property name="name">FANARTTV</property>
@@ -610,7 +813,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">ITunes</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="ITUNES_button">
                     <property name="name">ITUNES</property>
@@ -627,7 +829,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Google</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="GOOGLE_button">
                     <property name="name">GOOGLE</property>
@@ -644,7 +845,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Startpage</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="STARTPAGE_button">
                     <property name="name">STARTPAGE</property>
@@ -661,7 +861,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">DuckDuckGo</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="DUCKDUCKGO_button">
                     <property name="name">DUCKDUCKGO</property>
@@ -678,27 +877,9 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Wikipedia</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="WIKIPEDIA_button">
                     <property name="name">WIKIPEDIA</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="title" translatable="yes">MusicBrainz</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
-                <child>
-                  <object class="GtkSwitch" id="MUSICBRAINZ_button">
-                    <property name="name">MUSICBRAINZ</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
@@ -722,7 +903,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Wikia</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="WIKIA_button">
                     <property name="name">WIKIA</property>
@@ -739,7 +919,6 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Genius</property>
-                <property name="activatable-widget">YOUTUBE_button</property>
                 <child>
                   <object class="GtkSwitch" id="GENIUS_button">
                     <property name="name">GENIUS</property>
