@@ -109,7 +109,7 @@ class SettingsDialog:
             print("coucou")
             App().window.container.reload_view()
 
-    def _on_scale_value_changed(self, widget):
+    def _on_range_changed(self, widget):
         """
             Save value
             @param widget as Gtk.Range
