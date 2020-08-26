@@ -59,7 +59,6 @@
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Show artist artwork</property>
                 <property name="activatable-widget">artist-artwork_boolean</property>
-                <property name="subtitle" translatable="yes">See Web settings for auto artwork</property>
                 <child>
                   <object class="GtkSwitch" id="artist-artwork_boolean">
                     <property name="name">artist-artwork</property>
