@@ -20,6 +20,11 @@
     <property name="can-focus">False</property>
     <property name="icon-name">edit-clear-all-symbolic</property>
   </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">list-add-symbolic</property>
+  </object>
   <object class="HdyPreferencesWindow" id="settings_dialog">
     <property name="can-focus">False</property>
     <property name="default-width">600</property>
@@ -330,6 +335,46 @@ and with different artists</property>
             <child>
               <placeholder/>
             </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-top">5</property>
+                <child>
+                  <object class="GtkButton" id="reset_button">
+                    <property name="label" translatable="yes">Reset collection</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">True</property>
+                    <property name="relief">none</property>
+                    <signal name="clicked" handler="_on_reset_button_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="add_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="halign">center</property>
+                    <property name="margin-end">15</property>
+                    <property name="image">image2</property>
+                    <signal name="clicked" handler="_on_add_button_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -341,18 +386,21 @@ and with different artists</property>
               <object class="HdyActionRow" id="stat_artists">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="icon-name">system-users-symbolic</property>
               </object>
             </child>
             <child>
               <object class="HdyActionRow" id="stat_albums">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="icon-name">media-optical-cd-audio-symbolic</property>
               </object>
             </child>
             <child>
               <object class="HdyActionRow" id="stat_tracks">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="icon-name">folder-music-symbolic</property>
               </object>
             </child>
             <child>

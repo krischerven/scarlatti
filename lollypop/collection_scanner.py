@@ -317,6 +317,20 @@ class CollectionScanner(GObject.GObject, TagReader):
         """
         self.__thread = None
 
+    def reset_database(self):
+        """
+            Reset database
+        """
+        from lollypop.app_notification import AppNotification
+        App().window.container.progress.add(self)
+        App().window.container.progress.set_fraction(0, self)
+        self.__progress_fraction = 0
+        notification = AppNotification(_("Resetting database"), [], [])
+        notification.show()
+        App().window.container.add_overlay(notification)
+        notification.set_reveal_child(True)
+        App().task_helper.run(self.__reset_database)
+
     @property
     def inotify(self):
         """
@@ -328,6 +342,37 @@ class CollectionScanner(GObject.GObject, TagReader):
 #######################
 # PRIVATE             #
 #######################
+    def __reset_database(self):
+        """
+            Reset database
+        """
+        def update_ui():
+            App().window.container.go_home()
+            App().scanner.update(ScanType.FULL)
+        App().player.stop()
+        if App().ws_director.collection_ws is not None:
+            App().ws_director.collection_ws.stop()
+        uris = App().tracks.get_uris()
+        i = 0
+        SqlCursor.add(App().db)
+        SqlCursor.add(self.__history)
+        count = len(uris)
+        for uri in uris:
+            self.del_from_db(uri, True)
+            self.__update_progress(i, count, 0.01)
+            i += 1
+        App().tracks.del_persistent(False)
+        App().tracks.clean(False)
+        App().albums.clean(False)
+        App().artists.clean(False)
+        App().genres.clean(False)
+        App().cache.clear_table("duration")
+        SqlCursor.commit(App().db)
+        SqlCursor.remove(App().db)
+        SqlCursor.commit(self.__history)
+        SqlCursor.remove(self.__history)
+        GLib.idle_add(update_ui)
+
     def __update_progress(self, current, total, allowed_diff):
         """
             Update progress bar status

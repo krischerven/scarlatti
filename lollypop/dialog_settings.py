@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib, Handy
 
 from gettext import gettext as _
 
-from lollypop.define import App, MARGIN_SMALL, ScanType, NetworkAccessACL
+from lollypop.define import App, ScanType, NetworkAccessACL
 from lollypop.widgets_row_device import DeviceRow
 
 
@@ -40,6 +40,7 @@ class SettingsDialog:
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SettingsDialog.ui")
         self.__settings_dialog = builder.get_object("settings_dialog")
+        self.__progress = builder.get_object("progress")
         for setting in self.__BOOLEAN:
             button = builder.get_object("%s_boolean" % setting)
             value = App().settings.get_value(setting)
@@ -54,12 +55,6 @@ class SettingsDialog:
             widget.set_active(value)
         builder.connect_signals(self)
         self.__music_group = builder.get_object("music_group")
-        button = Gtk.Button.new_with_label(_("Add a new folder"))
-        button.show()
-        button.set_margin_top(MARGIN_SMALL)
-        button.set_halign(Gtk.Align.CENTER)
-        button.connect("clicked", self.__on_new_button_clicked)
-        self.__music_group.add(button)
         for uri in App().settings.get_value("music-uris"):
             button = self.__get_new_chooser(uri)
             self.__music_group.add(button)
@@ -156,10 +151,7 @@ class SettingsDialog:
         acl = App().settings.set_value("network-access-acl",
                                        GLib.Variant("i", acl))
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_new_button_clicked(self, button):
+    def _on_add_button_clicked(self, button):
         """
             Add a new chooser
             @param button as Gtk.Button
@@ -167,6 +159,23 @@ class SettingsDialog:
         button = self.__get_new_chooser(None)
         self.__music_group.add(button)
 
+    def _on_reset_button_clicked(self, button):
+        """
+            Reset database
+            @param button as Gtk.Button
+        """
+        if button.get_style_context().has_class("red"):
+            button.set_label(_("Reset collection"))
+            button.set_sensitive(False)
+            button.get_style_context().remove_class("red")
+            App().scanner.reset_database()
+        else:
+            button.get_style_context().add_class("red")
+            button.set_label(_("Are you sure?"))
+
+#######################
+# PRIVATE             #
+#######################
     def __get_new_chooser(self, uri):
         """
             Get a new chooser
