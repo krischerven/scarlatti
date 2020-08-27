@@ -27,8 +27,12 @@
   </object>
   <object class="HdyPreferencesWindow" id="settings_dialog">
     <property name="can-focus">False</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-on-parent</property>
     <property name="default-width">600</property>
     <property name="default-height">650</property>
+    <property name="skip-taskbar-hint">True</property>
+    <property name="skip-pager-hint">True</property>
     <child>
       <object class="HdyPreferencesPage">
         <property name="visible">True</property>
