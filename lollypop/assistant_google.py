@@ -34,7 +34,7 @@ you need to create an API-Key for the
 
 <b>"YouTube Data API v3"</b>
 
-with is used to play songs"""),
+which is used to play songs."""),
               "uri_label": "",
               "uri": None,
               "right_button_label": "Cancel",
@@ -58,7 +58,7 @@ with is used to play songs"""),
               "title": _("Activate the API"),
               "icon_name": "folder-new-symbolic",
               "markup": _("""
-<b>Add a new project</b> in the console
+<b>Add a new project</b> in the console.
 
 After that, <b>add a new API</b> and search
 for the <b>"YouTube Data API v3"</b>.
