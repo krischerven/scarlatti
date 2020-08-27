@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, ScanType, NetworkAccessACL
 from lollypop.widgets_row_device import DeviceRow
+from lollypop.helper_passwords import PasswordsHelper
 
 
 class SettingsDialog:
@@ -77,6 +78,11 @@ class SettingsDialog:
             _("Tracks count: %s") % tracks_count)
 
         self.__settings_dialog.connect("destroy", self.__on_destroy)
+        passwords_helper = PasswordsHelper()
+        passwords_helper.get("LASTFM", self.__on_get_password,
+                             builder.get_object("lastfm_button"))
+        passwords_helper.get("LIBREFM", self.__on_get_password,
+                             builder.get_object("librefm_button"))
 
     def show(self):
         """
@@ -154,16 +160,22 @@ class SettingsDialog:
             self.__settings_dialog.show()
 
         name = button.get_name()
-        if name == "GOOGLE":
-            from lollypop.assistant_google import GoogleAssistant
-            assistant = GoogleAssistant()
-        elif name in ["LASTFM", "LIBREFM"]:
-            from lollypop.assistant_lastfm import LastfmAssistant
-            assistant = LastfmAssistant(name)
-        assistant.set_transient_for(self.__settings_dialog)
-        assistant.show()
-        assistant.connect("destroy", on_destroy)
-        self.__settings_dialog.hide()
+        if button.get_tooltip_text():
+            button.set_tooltip_text("")
+            button.set_label(_("Connect"))
+            App().ws_director.token_ws.clear_token(button.get_name(), True)
+        else:
+            if name == "GOOGLE":
+                from lollypop.assistant_google import GoogleAssistant
+                assistant = GoogleAssistant()
+            elif name in ["LASTFM", "LIBREFM"]:
+                from lollypop.assistant_lastfm import LastfmAssistant
+                assistant = LastfmAssistant(name)
+            assistant.set_transient_for(self.__settings_dialog)
+            assistant.show()
+            assistant.connect("destroy", on_destroy)
+            self.__settings_dialog.hide()
+            button.set_label(_("Disconnect"))
 
     def _on_invidious_entry_changed(self, entry):
         """
@@ -280,3 +292,15 @@ class SettingsDialog:
                 App().scanner.update(ScanType.FULL)
             elif to_scan:
                 App().scanner.update(ScanType.NEW_FILES, to_scan)
+
+    def __on_get_password(self, attributes, password, service, button):
+        """
+            Set button state
+            @param attributes as {}
+            @param password as str
+            @param service as str
+            @param button as Gtk.Button
+        """
+        if attributes is not None:
+            button.set_label(_("Disconnect"))
+            button.set_tooltip_text("%s:%s" % (attributes["login"], password))
