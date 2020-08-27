@@ -33,6 +33,7 @@ class SettingsDialog:
 
     __COMBO = ["replay-gain", "orderby"]
     __ENTRY = ["invidious-server", "cs-api-key", "listenbrainz-user-token"]
+    __LOCKED = ["data", "lyrics", "search", "playback"]
 
     def __init__(self):
         """
@@ -40,6 +41,7 @@ class SettingsDialog:
         """
         self.__timeout_id = None
         self.__choosers = []
+        self.__locked = []
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/SettingsDialog.ui")
         self.__settings_dialog = builder.get_object("settings_dialog")
@@ -60,7 +62,10 @@ class SettingsDialog:
             widget = builder.get_object("%s_combo" % setting)
             value = App().settings.get_enum(setting)
             widget.set_active(value)
-        builder.connect_signals(self)
+        for locked in self.__LOCKED:
+            widget = builder.get_object(locked)
+            self.__locked.append(widget)
+        self.__update_locked()
         self.__music_group = builder.get_object("music_group")
         for uri in App().settings.get_value("music-uris"):
             button = self.__get_new_chooser(uri)
@@ -88,6 +93,7 @@ class SettingsDialog:
                              builder.get_object("lastfm_button"))
         passwords_helper.get("LIBREFM", self.__on_get_password,
                              builder.get_object("librefm_button"))
+        builder.connect_signals(self)
 
     def show(self):
         """
@@ -114,6 +120,8 @@ class SettingsDialog:
                                       state)
         elif setting == "artist-artwork":
             App().window.container.reload_view()
+        elif setting == "network-access":
+            self.__update_locked()
 
     def _on_range_changed(self, widget):
         """
@@ -241,6 +249,14 @@ class SettingsDialog:
 #######################
 # PRIVATE             #
 #######################
+    def __update_locked(self):
+        """
+            Update locked widgets
+        """
+        network_access = App().settings.get_value("network-access")
+        for widget in self.__locked:
+            widget.set_sensitive(network_access)
+
     def __get_new_chooser(self, uri):
         """
             Get a new chooser
