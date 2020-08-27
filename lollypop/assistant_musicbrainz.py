@@ -12,32 +12,25 @@
 
 from gettext import gettext as _
 
-from lollypop.define import App, LASTFM_API_KEY
 from lollypop.assistant import Assistant
-from lollypop.helper_passwords import PasswordsHelper
 
 
-class LastfmAssistant(Assistant):
+class MusicbrainzAssistant(Assistant):
     """
-        Last.FM API assistant
+        MusicBrainz API assistant
     """
 
-    def __init__(self, service):
+    def __init__(self):
         """
             Init assistant
-            @param service as str
         """
-        if service == "LASTFM":
-            name = "Last.FM"
-        else:
-            name = "Libre.fm"
-        self.__rules = [
+        rules = [
             {
-              "title": _("Scrobbling to %s") % name,
+              "title": _("Scrobbling to ListenBrainz"),
               "icon_name": "media-playback-start-symbolic",
               "markup": _("""
-In order to send your activity to <b>%s</b>,
-you need to allow <b>Lollypop</b>.""") % name,
+In order to send your activity to <b>ListenBrainz</b>,
+you need to allow <b>Lollypop</b>."""),
               "uri_label": "",
               "uri": None,
               "right_button_label": "Cancel",
@@ -46,23 +39,22 @@ you need to allow <b>Lollypop</b>.""") % name,
               "left_button_style": "suggested-action"
             },
             {
-              "title": _("Connect to %s") % name,
+              "title": _("Connect to ListenBrainz"),
               "icon_name": "web-browser-symbolic",
               "markup": _("""
-<b>Open and login</b> to <b>%s</b>.
-Then, allow Lollypop.""") % name,
-              "uri_label": _("Access %s") % name,
-              "uri": "",
+<b>Open and login</b> to <b>ListenBrainz</b>."""),
+              "uri_label": _("Access ListenBrainz"),
+              "uri": "https://listenbrainz.org/profile",
               "right_button_label": "Back",
               "right_button_style": "",
               "left_button_label": "Next",
               "left_button_style": "suggested-action"
             },
             {
-              "title": _("Just play a track"),
+              "title": _("Copy key"),
               "icon_name": "emblem-music-symbolic",
               "markup": _("""
-<b>Finish</b> the activation by <b>playing a track</b>."""),
+<b>Finish</b> the activation by copying <b>API-Key</b> in Lollypop."""),
               "uri_label": "",
               "uri": None,
               "right_button_label": "Back",
@@ -71,29 +63,4 @@ Then, allow Lollypop.""") % name,
               "left_button_style": "suggested-action"
             },
         ]
-        Assistant.__init__(self, self.__rules)
-        App().ws_director.token_ws.clear_token(service, True)
-        App().ws_director.token_ws.get_lastfm_auth_token(
-            service, None, self.__on_token)
-
-#######################
-# PRIVATE             #
-#######################
-    def __on_token(self, token, service):
-        """
-            Store token
-            @param token as str
-            @param service as str
-        """
-        passwords_helper = PasswordsHelper()
-        passwords_helper.store(service, service, token)
-        validation_token = token.replace("validation:", "")
-        if service == "LIBREFM":
-            uri = "http://libre.fm/api/auth?api_key=%s&token=%s" % (
-                LASTFM_API_KEY, validation_token)
-        else:
-            uri = "http://www.last.fm/api/auth?api_key=%s&token=%s" % (
-                LASTFM_API_KEY, validation_token)
-        self.update_uri(uri, 1)
-        # Force web service to validate token
-        App().ws_director.token_ws.clear_token(service)
+        Assistant.__init__(self, rules)

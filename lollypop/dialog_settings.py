@@ -151,6 +151,15 @@ class SettingsDialog:
         value = entry.get_text().strip()
         App().settings.set_value("cs-api-key", GLib.Variant("s", value))
 
+    def _on_musicbrainz_api_key_changed(self, entry):
+        """
+            Save Key
+            @param entry as Gtk.Entry
+        """
+        value = entry.get_text().strip()
+        App().settings.set_value("listenbrainz-user-token",
+                                 GLib.Variant("s", value))
+
     def _on_connect_button_clicked(self, button):
         """
             Connect to API
@@ -171,6 +180,9 @@ class SettingsDialog:
             elif name in ["LASTFM", "LIBREFM"]:
                 from lollypop.assistant_lastfm import LastfmAssistant
                 assistant = LastfmAssistant(name)
+            else:
+                from lollypop.assistant_musicbrainz import MusicbrainzAssistant
+                assistant = MusicbrainzAssistant()
             assistant.set_transient_for(self.__settings_dialog)
             assistant.show()
             assistant.connect("destroy", on_destroy)
