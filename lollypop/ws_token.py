@@ -71,6 +71,11 @@ class TokenWebService:
             @thread safe
         """
         try:
+            def on_data(uri, status, data):
+                if status:
+                    decode = json.loads(data.decode("utf-8"))
+                    token = "validation:%s" % decode["token"]
+                    callback(token, service)
             if service == "LASTFM":
                 uri = "https://ws.audioscrobbler.com/2.0/"
             else:
@@ -81,15 +86,10 @@ class TokenWebService:
                 LASTFM_API_KEY, LASTFM_API_SECRET)
             encoded = md5(api_sig.encode("utf-8")).hexdigest()
             uri += "&api_sig=%s" % encoded
-            (status, data) = App().task_helper.load_uri_content_sync(
-                uri, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                token = "validation:%s" % decode["token"]
-                callback(token, service)
-        except:
+            App().task_helper.load_uri_content(uri, cancellable, on_data)
+        except Exception as e:
             Logger.error(
-                "TokenWebService::get_lastfm_auth_token(): %s", data)
+                "TokenWebService::get_lastfm_auth_token(): %s", e)
 
     def clear_token(self, service, clear_secret=False):
         """

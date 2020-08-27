@@ -543,7 +543,7 @@ and with different artists</property>
                         <child>
                           <object class="GtkButton" id="lastfm_button1">
                             <property name="label" translatable="yes">Connect</property>
-                            <property name="name">YOUTUBE</property>
+                            <property name="name">GOOGLE</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>

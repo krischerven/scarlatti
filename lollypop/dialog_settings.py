@@ -150,7 +150,20 @@ class SettingsDialog:
             Connect to API
             @param button as Gtk.Button
         """
-        pass
+        def on_destroy(assistant):
+            self.__settings_dialog.show()
+
+        name = button.get_name()
+        if name == "GOOGLE":
+            from lollypop.assistant_google import GoogleAssistant
+            assistant = GoogleAssistant()
+        elif name in ["LASTFM", "LIBREFM"]:
+            from lollypop.assistant_lastfm import LastfmAssistant
+            assistant = LastfmAssistant(name)
+        assistant.set_transient_for(self.__settings_dialog)
+        assistant.show()
+        assistant.connect("destroy", on_destroy)
+        self.__settings_dialog.hide()
 
     def _on_acl_state_set(self, widget, state):
         """
