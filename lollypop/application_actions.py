@@ -240,9 +240,12 @@ class ApplicationActions:
             @param action as Gio.SimpleAction
             @param value as GLib.Variant
         """
-        from lollypop.dialog_settings import SettingsDialog
-        dialog = SettingsDialog()
-        dialog.show()
+        def do():
+            from lollypop.dialog_settings import SettingsDialog
+            dialog = SettingsDialog()
+            dialog.show()
+        # Settings dialog is heavy to load, let action close
+        GLib.idle_add(do)
 
     def __on_about_activate(self, action, value):
         """
