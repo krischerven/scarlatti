@@ -81,7 +81,7 @@ class SettingsDialog:
             _("Albums count: %s") % albums_count)
         builder.get_object("stat_tracks").set_title(
             _("Tracks count: %s") % tracks_count)
-
+        self.__settings_dialog.set_transient_for(App().window)
         self.__settings_dialog.connect("destroy", self.__on_destroy)
         passwords_helper = PasswordsHelper()
         passwords_helper.get("LASTFM", self.__on_get_password,
