@@ -165,6 +165,14 @@ class SettingsDialog:
         assistant.connect("destroy", on_destroy)
         self.__settings_dialog.hide()
 
+    def _on_invidious_entry_changed(self, entry):
+        """
+            Update invidious server setting
+            @param entry as Gtk.entry
+        """
+        uri = entry.get_text()
+        App().settings.set_value("invidious-server", GLib.Variant("s", uri))
+
     def _on_acl_state_set(self, widget, state):
         """
             Save network acl state
