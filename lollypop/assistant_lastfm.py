@@ -62,7 +62,7 @@ Then, allow Lollypop.""") % name,
               "title": _("Just play a track"),
               "icon_name": "emblem-music-symbolic",
               "markup": _("""
-<b>Finish</b> the activation by <b>playing a track</b>."""),
+<b>Click "Finish"</b> once Lollypop has been allowed."""),
               "uri_label": "",
               "uri": None,
               "right_button_label": "Back",
@@ -72,6 +72,7 @@ Then, allow Lollypop.""") % name,
             },
         ]
         Assistant.__init__(self, self.__rules)
+        self.connect("destroy", self.__on_destroy, service)
         App().ws_director.token_ws.clear_token(service, True)
         App().ws_director.token_ws.get_lastfm_auth_token(
             service, None, self.__on_token)
@@ -79,6 +80,15 @@ Then, allow Lollypop.""") % name,
 #######################
 # PRIVATE             #
 #######################
+    def __on_destroy(self, window, service):
+        """
+            Finish key activation
+            @param window as Gtk.Window
+            @param service as str
+        """
+        App().task_helper.run(
+            App().ws_director.token_ws.get_token, service, None)
+
     def __on_token(self, token, service):
         """
             Store token
