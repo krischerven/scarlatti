@@ -32,6 +32,7 @@ class SettingsDialog:
     __RANGE = ["cover-size", "transitions-duration"]
 
     __COMBO = ["replay-gain", "orderby"]
+    __ENTRY = ["invidious-server", "cs-api-key", "listenbrainz-user-token"]
 
     def __init__(self):
         """
@@ -47,6 +48,10 @@ class SettingsDialog:
             button = builder.get_object("%s_boolean" % setting)
             value = App().settings.get_value(setting)
             button.set_state(value)
+        for setting in self.__ENTRY:
+            entry = builder.get_object("%s_entry" % setting)
+            value = App().settings.get_value(setting).get_string()
+            entry.set_text(value)
         for setting in self.__RANGE:
             widget = builder.get_object("%s_range" % setting)
             value = App().settings.get_value(setting).get_int32()
@@ -108,7 +113,6 @@ class SettingsDialog:
                 settings.set_property("gtk-application-prefer-dark-theme",
                                       state)
         elif setting == "artist-artwork":
-            print("coucou")
             App().window.container.reload_view()
 
     def _on_range_changed(self, widget):

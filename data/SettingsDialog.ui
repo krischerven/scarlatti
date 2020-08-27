@@ -529,7 +529,7 @@ and with different artists</property>
                         <property name="hexpand">True</property>
                         <property name="row-spacing">5</property>
                         <child>
-                          <object class="GtkEntry">
+                          <object class="GtkEntry" id="cs-api-key_entry">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
@@ -577,7 +577,7 @@ and with different artists</property>
                         <property name="orientation">vertical</property>
                         <property name="row-spacing">5</property>
                         <child>
-                          <object class="GtkEntry">
+                          <object class="GtkEntry" id="invidious-server_entry">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
@@ -771,7 +771,7 @@ and with different artists</property>
                         <property name="hexpand">True</property>
                         <property name="row-spacing">5</property>
                         <child>
-                          <object class="GtkEntry">
+                          <object class="GtkEntry" id="listenbrainz-user-token_entry">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
