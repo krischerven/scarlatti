@@ -197,7 +197,8 @@ class SettingsDialog:
             else:
                 from lollypop.assistant_musicbrainz import MusicbrainzAssistant
                 assistant = MusicbrainzAssistant()
-            assistant.set_transient_for(self.__settings_dialog)
+            assistant.set_transient_for(App().window)
+            assistant.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
             assistant.show()
             assistant.connect("destroy", on_destroy)
             self.__settings_dialog.hide()
