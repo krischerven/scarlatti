@@ -128,6 +128,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             self.add(self._responsive_widget)
             self._responsive_widget.show()
             return True
+        return False
 
     def _add_disc_container(self, disc_number):
         """
