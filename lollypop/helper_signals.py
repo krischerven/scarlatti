@@ -98,8 +98,8 @@ class SignalsHelper():
         """
         for (obj, signal, callback_str) in signals:
             if obj is None:
-                Logger.warning("Can't connect signal: %s -> %s",
-                               signal, callback_str)
+                Logger.debug("Can't connect signal: %s -> %s",
+                             signal, callback_str)
                 continue
             name = "%s_%s" % (obj, signal)
             if name in self._connected.keys():
