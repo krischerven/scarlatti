@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Handy
+from gi.repository import Gtk, GLib, Gdk, Handy
 
 from gettext import gettext as _
 
@@ -94,6 +94,8 @@ class SettingsDialog:
         passwords_helper.get("LIBREFM", self.__on_get_password,
                              builder.get_object("librefm_button"))
         builder.connect_signals(self)
+        self.__multi_press = Gtk.EventControllerKey.new(self.__settings_dialog)
+        self.__multi_press.connect("key-released", self.__on_key_released)
 
     def show(self):
         """
@@ -336,3 +338,14 @@ class SettingsDialog:
         if attributes is not None:
             button.set_label(_("Disconnect"))
             button.set_tooltip_text("%s:%s" % (attributes["login"], password))
+
+    def __on_key_released(self, event_controller, keyval, keycode, state):
+        """
+            Quit on escape
+            @param event_controller as Gtk.EventController
+            @param keyval as int
+            @param keycode as int
+            @param state as Gdk.ModifierType
+        """
+        if keyval == Gdk.KEY_Escape:
+            self.__settings_dialog.destroy()
