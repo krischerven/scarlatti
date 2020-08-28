@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from lollypop.define import App, ViewType, MARGIN, ScanUpdate
 from lollypop.view_tracks_album import AlbumTracksView
@@ -42,6 +42,7 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
         self.__banner = AlbumBannerWidget(self.__album, self.storage_type,
                                           self.view_type)
+        self.__banner.show()
         self.add_widget(self.__grid, self.__banner)
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),
@@ -60,7 +61,8 @@ class AlbumView(LazyLoadingView, SignalsHelper):
             self.__tracks_view.connect("populated", self.__on_tracks_populated)
             self.__tracks_view.set_margin_start(MARGIN)
             self.__tracks_view.set_margin_end(MARGIN)
-            self.__tracks_view.populate()
+            # Let the banner populate first
+            GLib.idle_add(self.__tracks_view.populate)
             self.__grid.add(self.__tracks_view)
 
     @property
@@ -162,7 +164,6 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         """
         if self.__tracks_view.is_populated:
             self.emit("populated")
-            self.__banner.show()
             if self.view_type & ViewType.OVERLAY:
                 from lollypop.view_albums_line import AlbumsArtistLineView
                 for artist_id in self.__album.artist_ids:
