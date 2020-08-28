@@ -76,8 +76,7 @@ for the <b>"YouTube Data API v3"</b>.
               "icon_name": "dialog-password-symbolic",
               "markup": _("""
 Open <b>"Credentials"</b> in the sidebar and
-<b>Create Credentials</b> calling the API
-<b>for</b> an <b>UI-based plateform</b>.
+<b>Create Credentials</b> for an<b>API-Key</b>.
 
 <b>Copy the API-Key to Lollypop</b>"""),
               "uri_label": "",
