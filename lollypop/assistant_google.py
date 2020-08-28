@@ -37,9 +37,9 @@ you need to create an API-Key for the
 which is used to play songs."""),
               "uri_label": "",
               "uri": None,
-              "right_button_label": "Cancel",
+              "right_button_label": _("Cancel"),
               "right_button_style": "",
-              "left_button_label": "Next",
+              "left_button_label": _("Next"),
               "left_button_style": "suggested-action"
             },
             {
@@ -49,9 +49,9 @@ which is used to play songs."""),
 <b>Open and log</b> in to the <b>Google Developer Console</b>"""),
               "uri_label": _("Access Google Developer Console"),
               "uri": "https://console.developers.google.com/apis/",
-              "right_button_label": "Back",
+              "right_button_label": _("Back"),
               "right_button_style": "",
-              "left_button_label": "Next",
+              "left_button_label": _("Next"),
               "left_button_style": "suggested-action"
             },
             {
@@ -66,9 +66,9 @@ for the <b>"YouTube Data API v3"</b>.
 <b>Activate that API</b> for your project"""),
               "uri_label": "",
               "uri": None,
-              "right_button_label": "Back",
+              "right_button_label": _("Back"),
               "right_button_style": "",
-              "left_button_label": "Next",
+              "left_button_label": _("Next"),
               "left_button_style": "suggested-action"
             },
             {
@@ -81,9 +81,9 @@ Open <b>"Credentials"</b> in the sidebar and
 <b>Copy the API-Key to Lollypop</b>"""),
               "uri_label": "",
               "uri": None,
-              "right_button_label": "Back",
+              "right_button_label": _("Back"),
               "right_button_style": "",
-              "left_button_label": "Finish",
+              "left_button_label": _("Finish"),
               "left_button_style": "suggested-action"
             },
         ]
