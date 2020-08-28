@@ -55,15 +55,19 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         """
             Populate the view with album
         """
-        if self.__tracks_view is None:
-            self.__tracks_view = AlbumTracksView(self.__album, self.view_type)
-            self.__tracks_view.show()
-            self.__tracks_view.connect("populated", self.__on_tracks_populated)
-            self.__tracks_view.set_margin_start(MARGIN)
-            self.__tracks_view.set_margin_end(MARGIN)
-            # Let the banner populate first
-            GLib.idle_add(self.__tracks_view.populate)
-            self.__grid.add(self.__tracks_view)
+        def do():
+            if self.__tracks_view is None:
+                self.__tracks_view = AlbumTracksView(self.__album,
+                                                     self.view_type)
+                self.__tracks_view.show()
+                self.__tracks_view.connect("populated",
+                                           self.__on_tracks_populated)
+                self.__tracks_view.set_margin_start(MARGIN)
+                self.__tracks_view.set_margin_end(MARGIN)
+                self.__tracks_view.populate()
+                self.__grid.add(self.__tracks_view)
+        # Let the banner populate first
+        GLib.idle_add(do)
 
     @property
     def name(self):
