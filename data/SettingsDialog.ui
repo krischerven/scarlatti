@@ -540,7 +540,7 @@ and with different artists</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
-                            <property name="placeholder-text" translatable="yes">AIzaSyAfXimyn-JsnPzAhhIuxYwgyMrj21Ee7e0</property>
+                            <property name="placeholder-text">AIzaSyAfXimyn-JsnPzAhhIuxYwgyMrj21Ee7e0</property>
                             <signal name="changed" handler="_on_google_api_key_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -782,7 +782,7 @@ and with different artists</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="hexpand">True</property>
-                            <property name="placeholder-text" translatable="yes">00000000-0000-0000-0000-000000000000</property>
+                            <property name="placeholder-text">00000000-0000-0000-0000-000000000000</property>
                             <signal name="changed" handler="_on_musicbrainz_api_key_changed" swapped="no"/>
                           </object>
                           <packing>
