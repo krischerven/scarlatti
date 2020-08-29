@@ -27,4 +27,4 @@ class EqualizerView(View):
         View.__init__(self, StorageType.ALL, ViewType.SCROLLED)
         widget = EqualizerWidget()
         widget.show()
-        self.add(widget)
+        self.add_widget(widget)
