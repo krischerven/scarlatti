@@ -377,6 +377,7 @@ class ToolbarEnd(Gtk.Bin):
         """
         if App().window.folded:
             self.__home_button.show()
+            self.__home_button.set_sensitive(True)
         else:
             self.__home_button.hide()
 
