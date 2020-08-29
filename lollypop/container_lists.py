@@ -300,8 +300,7 @@ class ListsContainer:
         else:
             startup_id = App().settings.get_value("startup-id").get_int32()
             if startup_id == -1:
-                if not App().window.folded:
-                    selection_list.select_first()
+                selection_list.select_first()
             else:
                 selection_list.select_ids([startup_id], True)
 
