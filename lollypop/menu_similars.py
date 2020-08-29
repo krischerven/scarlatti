@@ -169,6 +169,7 @@ class SimilarsMenu(Gtk.Bin):
         self.__stack.add(self.__label)
         self.__stack.add(self.__listbox)
         self.add(self.__stack)
+        self.set_hexpand(True)
 
     @property
     def submenu_name(self):
