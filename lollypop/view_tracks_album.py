@@ -328,7 +328,7 @@ class AlbumTracksView(TracksView):
         if self.view_type & (ViewType.ALBUM | ViewType.ARTIST):
             tracks = []
             for child in self.children:
-                if child.track.loved != -1:
+                if child.track.loved != -1 or track.id == child.track.id:
                     tracks.append(child.track)
                 child.set_state_flags(Gtk.StateFlags.NORMAL, True)
             # Do not update album list if in party or album already available
