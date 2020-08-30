@@ -230,9 +230,13 @@ class Album(Base):
 
     def reset_tracks(self):
         """
-            Reset album tracks
+            Reset album tracks, useful for tracks loaded async
         """
         self._tracks = []
+        # Needed for album switching from Spotify, Deezer multi-artists to
+        # Lollypop way of handling compilations
+        self._artists = []
+        self._artist_ids = []
         self._discs = []
         self.reset("lp_album_id")
 
