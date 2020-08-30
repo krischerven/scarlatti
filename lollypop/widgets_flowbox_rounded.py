@@ -66,6 +66,7 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
         self._label.show()
         self._artwork = Gtk.Image.new()
         self._artwork.show()
+        self._artwork.set_size_request(self._art_size, self._art_size)
         self.set_artwork()
         self._grid.add(self._artwork)
         self._grid.add(self._label)
@@ -83,6 +84,8 @@ class RoundedFlowBoxWidget(Gtk.FlowBoxChild):
             self._art_size = ArtSize.BIG
         self.set_size_request(self._art_size,
                               self._art_size + self.__font_height * 2)
+        if self._artwork is not None:
+            self._artwork.set_size_request(self._art_size, self._art_size)
 
     def set_artwork(self):
         """
