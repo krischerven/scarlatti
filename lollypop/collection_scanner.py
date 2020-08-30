@@ -143,6 +143,9 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                item.album_synced,
                                                item.album_mtime,
                                                item.storage_type)
+        if item.year is not None:
+            App().albums.set_year(item.album_id, item.year)
+            App().albums.set_timestamp(item.album_id, item.timestamp)
 
     def save_track(self, item):
         """
@@ -231,9 +234,10 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().albums.add_genre(item.album_id, genre_id)
         # Update year based on tracks
         year = App().tracks.get_year_for_album(item.album_id)
-        App().albums.set_year(item.album_id, year)
-        timestamp = App().tracks.get_timestamp_for_album(item.album_id)
-        App().albums.set_timestamp(item.album_id, timestamp)
+        if year is not None:
+            App().albums.set_year(item.album_id, year)
+            timestamp = App().tracks.get_timestamp_for_album(item.album_id)
+            App().albums.set_timestamp(item.album_id, timestamp)
         App().cache.clear_durations(item.album_id)
 
     def update_track(self, item):
