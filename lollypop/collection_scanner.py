@@ -282,9 +282,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                                    album_loved, album_pop, album_rate,
                                    album_synced)
             App().tracks.remove(track_id)
-            # Force genre for album
             genre_ids = App().tracks.get_genre_ids(track_id)
-            App().albums.set_genre_ids(album_id, genre_ids)
             App().albums.clean()
             App().genres.clean()
             App().artists.clean()
@@ -302,6 +300,9 @@ class CollectionScanner(GObject.GObject, TagReader):
                         item.genre_ids.append(genre_id)
                 emit_signal(self, "updated", item, ScanUpdate.REMOVED)
             else:
+                # Force genre for album
+                genre_ids = App().tracks.get_album_genre_ids(album_id)
+                App().albums.set_genre_ids(album_id, genre_ids)
                 emit_signal(self, "updated", item, ScanUpdate.MODIFIED)
             return (track_pop, track_rate, track_ltime, album_mtime,
                     track_loved, album_loved, album_pop, album_rate)
