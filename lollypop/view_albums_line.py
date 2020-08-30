@@ -274,7 +274,7 @@ class AlbumsSearchLineView(AlbumsLineView):
             @param storage_type as StorageType
         """
         AlbumsLineView.__init__(self, storage_type, ViewType.SEARCH |
-                                ViewType.SCROLLED)
+                                ViewType.SCROLLED | ViewType.ALBUM)
         self.__album_ids = []
         self._label.set_text(_("Albums"))
 
