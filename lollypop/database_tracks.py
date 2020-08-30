@@ -410,6 +410,19 @@ class TracksDatabase:
                                  (track_id,))
             return list(itertools.chain(*result))
 
+    def get_album_genre_ids(self, album_id):
+        """
+            Get album genre ids based on tracks
+            @param album_id as int
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT track_genres.genre_id\
+                                  FROM tracks, track_genres\
+                                  WHERE tracks.album_id=? AND\
+                                  track_genres.track_id=tracks.rowid",
+                                 (album_id,))
+            return list(itertools.chain(*result))
+
     def get_genre_ids(self, track_id):
         """
             Get genre ids
