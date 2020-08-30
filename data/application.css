@@ -218,6 +218,7 @@ flowboxchild:selected  {
 .borders-left-top {
     border-top: 1px solid shade(@theme_bg_color, 0.7);
     border-left: 1px solid shade(@theme_bg_color, 0.7);
+    border-top-left-radius: 10px;
 }
 
 .black {
