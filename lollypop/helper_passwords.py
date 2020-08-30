@@ -30,9 +30,9 @@ class PasswordsHelper:
         Secret.Service.get(Secret.ServiceFlags.NONE, None,
                            self.__on_get_secret)
 
-    def get_sync(self, service):
+    def get_token(self, service):
         """
-            Get password sync
+            Get token for service
             @param service as str
         """
         try:

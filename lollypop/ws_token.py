@@ -127,7 +127,7 @@ class TokenWebService:
         if service == "SPOTIFY":
             self.__get_spotify_token(cancellable)
         else:
-            token = self.__passwords_helper.get_sync(service)
+            token = self.__passwords_helper.get_token(service)
             self.__load_token_for_service(token, service)
 
     def __get_spotify_token(self, cancellable):
