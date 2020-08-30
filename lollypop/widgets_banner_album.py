@@ -43,6 +43,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/AlbumBannerWidget.ui")
         builder.connect_signals(self)
+        self.__labels = builder.get_object("labels")
         self.__title_label = builder.get_object("title_label")
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__artist_label = builder.get_object("artist_label")
@@ -242,6 +243,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             ArtBehaviour.BLUR_HARD |
                             ArtBehaviour.DARKER,
                             self._on_artwork)
+        if self.width < ArtSize.BANNER * 3:
+            if self.__cover_widget.get_opacity() == 1:
+                self.__cover_widget.set_opacity(0.1)
+                self.__widget.remove(self.__labels)
+                self.__widget.attach(self.__labels, 0, 0, 2, 2)
+        elif self.__cover_widget.get_opacity() != 1:
+            self.__cover_widget.set_opacity(1)
+            self.__widget.remove(self.__labels)
+            self.__widget.attach(self.__labels, 1, 0, 1, 2)
 
     def __update_add_button(self):
         """

@@ -17,7 +17,7 @@ from random import choice
 
 from lollypop.utils import set_cursor_type, on_query_tooltip, popup_widget
 from lollypop.utils_artist import add_artist_to_playback, play_artists
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Size
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -44,6 +44,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         builder.add_from_resource("/org/gnome/Lollypop/ArtistBannerWidget.ui")
         builder.connect_signals(self)
         self.__badge_artwork = builder.get_object("badge_artwork")
+        self.__labels = builder.get_object("label_event")
         self.__title_label = builder.get_object("artist")
         self.__title_label.connect("realize", set_cursor_type)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
@@ -55,9 +56,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__menu_button.hide()
         builder.get_object("artwork_event").connect(
             "realize", set_cursor_type)
-        builder.get_object("label_event").connect(
-            "realize", set_cursor_type)
-        widget = builder.get_object("widget")
+        self.__labels.connect("realize", set_cursor_type)
+        self.__widget = builder.get_object("widget")
         artists = []
         for artist_id in self.__artist_ids:
             artists.append(App().artists.get_name(artist_id))
@@ -65,8 +65,8 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             ", ".join(artists)))
         self.__show_artwork = len(artist_ids) == 1
         self.__title_label.get_style_context().add_class("text-x-large")
-        self._overlay.add_overlay(widget)
-        self._overlay.set_overlay_pass_through(widget, True)
+        self._overlay.add_overlay(self.__widget)
+        self._overlay.set_overlay_pass_through(self.__widget, True)
         self.__update_add_button()
         self.__set_internal_size()
         return [
@@ -240,6 +240,15 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
                                         self._on_artwork)
         else:
             self._artwork.get_style_context().add_class("default-banner")
+        if self.width < ArtSize.BANNER * 3:
+            if self.__badge_artwork.get_opacity() == 1:
+                self.__badge_artwork.set_opacity(0.1)
+                self.__widget.remove(self.__labels)
+                self.__widget.attach(self.__labels, 0, 0, 2, 3)
+        elif self.__badge_artwork.get_opacity() != 1:
+            self.__badge_artwork.set_opacity(1)
+            self.__widget.remove(self.__labels)
+            self.__widget.attach(self.__labels, 1, 0, 1, 3)
 
     def __set_badge_artwork(self, art_size):
         """
@@ -306,8 +315,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             @param surface as cairo.Surface
             @param art_size as int
         """
-        if self.get_allocated_width() >= Size.MEDIUM / 1.5:
-            self.__badge_artwork.show()
         if surface is None:
             self.__badge_artwork.get_style_context().add_class("circle-icon")
             self.__badge_artwork.set_size_request(art_size, art_size)
