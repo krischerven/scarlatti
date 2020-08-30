@@ -633,6 +633,11 @@ flowboxchild:selected  {
   opacity: 1;
 }
 
+.reveal-button-fullscreen {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
 @keyframes load {
   0% {
     background-color: alpha(@theme_selected_bg_color, 0);

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.37.0 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkImage" id="close_image">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">window-close-symbolic</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">window-close-symbolic</property>
   </object>
   <object class="GtkButton" id="close_btn">
-    <property name="width_request">32</property>
-    <property name="height_request">32</property>
+    <property name="width-request">32</property>
+    <property name="height-request">32</property>
     <property name="visible">True</property>
-    <property name="can_focus">True</property>
-    <property name="receives_default">True</property>
+    <property name="can-focus">True</property>
+    <property name="receives-default">True</property>
     <property name="halign">end</property>
     <property name="valign">start</property>
-    <property name="margin_left">5</property>
-    <property name="margin_right">5</property>
-    <property name="margin_end">5</property>
-    <property name="margin_top">5</property>
+    <property name="margin-left">5</property>
+    <property name="margin-right">5</property>
+    <property name="margin-end">5</property>
+    <property name="margin-top">5</property>
     <property name="image">close_image</property>
     <property name="relief">none</property>
     <signal name="clicked" handler="_on_close_button_clicked" swapped="no"/>
@@ -28,16 +28,16 @@
   </object>
   <object class="GtkImage" id="pan_image">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">pan-start-symbolic</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">pan-start-symbolic</property>
   </object>
   <object class="GtkOverlay" id="widget">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <child>
       <object class="GtkImage" id="background_artwork">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
       </object>
       <packing>
         <property name="index">-1</property>
@@ -46,15 +46,15 @@
     <child type="overlay">
       <object class="GtkGrid" id="overlay_grid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="can_default">True</property>
-        <property name="margin_bottom">20</property>
-        <property name="row_spacing">30</property>
-        <property name="column_homogeneous">True</property>
+        <property name="can-focus">False</property>
+        <property name="can-default">True</property>
+        <property name="margin-bottom">20</property>
+        <property name="row-spacing">30</property>
+        <property name="column-homogeneous">True</property>
         <child>
           <object class="GtkLabel" id="datetime">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="valign">start</property>
             <property name="vexpand">True</property>
             <attributes>
@@ -66,8 +66,8 @@
             </style>
           </object>
           <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">0</property>
+            <property name="left-attach">1</property>
+            <property name="top-attach">0</property>
           </packing>
         </child>
         <child>
@@ -78,41 +78,42 @@
     <child type="overlay">
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="halign">end</property>
-        <property name="margin_top">48</property>
+        <property name="margin-top">48</property>
         <child>
           <object class="GtkRevealer" id="revealer">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="transition_type">slide-left</property>
+            <property name="can-focus">False</property>
+            <property name="transition-type">slide-left</property>
             <child>
               <placeholder/>
             </child>
           </object>
           <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">0</property>
+            <property name="left-attach">1</property>
+            <property name="top-attach">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton">
-            <property name="width_request">32</property>
-            <property name="height_request">32</property>
+            <property name="width-request">32</property>
+            <property name="height-request">32</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
             <property name="valign">end</property>
             <property name="image">pan_image</property>
             <property name="relief">none</property>
             <signal name="clicked" handler="_on_reveal_button_clicked" swapped="no"/>
             <style>
+              <class name="reveal-button-fullscreen"/>
               <class name="banner-button"/>
             </style>
           </object>
           <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
+            <property name="left-attach">0</property>
+            <property name="top-attach">0</property>
           </packing>
         </child>
       </object>
