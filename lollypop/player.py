@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gst, GLib, GObject
+from gi.repository import GLib, GObject
 
 from pickle import load
 from time import time
@@ -88,7 +88,7 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Play previous track
         """
-        if self.position / Gst.SECOND > 2:
+        if self.position > 2000:
             self.seek(0)
             emit_signal(self, "current-changed")
             if not self.is_playing:
