@@ -13,6 +13,7 @@
 from gi.repository import Gtk, GLib, Gio, Pango
 
 from gettext import gettext as _
+import re
 
 from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL, Type
 from lollypop.define import ARTISTS_PATH
@@ -163,10 +164,8 @@ class InformationView(View):
                                        self.__on_artist_information,
                                        self.__artist_name)
         else:
-            App().task_helper.run(
-                GLib.markup_escape_text,
-                content.decode("utf-8"),
-                callback=(self.__bio_label.set_markup,))
+            App().task_helper.run(self.__to_markup, content,
+                                  callback=(self.__bio_label.set_markup,))
 
 #######################
 # PROTECTED           #
@@ -232,6 +231,24 @@ class InformationView(View):
 #######################
 # PRIVATE             #
 #######################
+    def __to_markup(self, data):
+        """
+            Transform message to markup
+            @param data as bytes
+            @return str
+        """
+        pango = ["large", "x-large", "xx-large"]
+        start = ["^===*", "^==", "^="]
+        end = ["===*$", "==$", "=$"]
+        i = 0
+        text = GLib.markup_escape_text(data.decode("utf-8"))
+        while i < len(pango):
+            text = re.sub(start[i], "<b><span size='%s'>" % pango[i],
+                          text, flags=re.M)
+            text = re.sub(end[i], "</span></b>", text, flags=re.M)
+            i += 1
+        return text
+
     def __on_wikipedia_search_list(self, items):
         """
             Populate view with items
