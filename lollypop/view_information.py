@@ -265,7 +265,8 @@ class InformationView(View):
             @param content as str
         """
         if content is not None:
-            self.__bio_label.set_text(content.decode("utf-8"))
+            App().task_helper.run(self.__to_markup, content,
+                                  callback=(self.__bio_label.set_markup,))
             self.__information_store.save_information(
                 self.__artist_name, ARTISTS_PATH, content)
 
@@ -292,8 +293,8 @@ class InformationView(View):
             self.__bio_label.set_text(
                 _("No information for %s") % self.__artist_name)
         else:
-            self.__bio_label.set_markup(
-                GLib.markup_escape_text(content.decode("utf-8")))
+            App().task_helper.run(self.__to_markup, content,
+                                  callback=(self.__bio_label.set_markup,))
             self.__information_store.save_information(self.__artist_name,
                                                       ARTISTS_PATH,
                                                       content)
