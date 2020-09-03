@@ -255,7 +255,6 @@ class Type:
     GENRES_LIST = -14
     YEARS = -15
     PLAYLISTS = -16
-    RADIOS = -17
     INFO = -18
     SMART = -19
     EQUALIZER = -20

@@ -28,7 +28,6 @@ class ShownLists:
         Type.RECENTS: _("Recently added albums"),
         Type.LITTLE: _("Seldomly played albums"),
         Type.PLAYLISTS: _("Playlists"),
-        Type.RADIOS: _("Radios"),
         Type.YEARS: _("Years"),
         Type.GENRES: _("Genres"),
         Type.GENRES_LIST: _("Genres (list)"),
