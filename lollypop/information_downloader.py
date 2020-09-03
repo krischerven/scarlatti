@@ -97,7 +97,7 @@ class InformationDownloader:
         try:
             # Try from Wikipedia first
             if get_network_available("WIKIPEDIA"):
-                from lollypop.wikipedia import WikipediaHelper
+                from lollypop.helper_web_wikipedia import WikipediaHelper
                 wikipedia = WikipediaHelper()
                 content = wikipedia.get_content_for_term(artist)
             if content is None:
