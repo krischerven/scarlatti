@@ -140,7 +140,7 @@ class InformationView(View):
                                     ArtBehaviour.CACHE,
                                     self.__on_artist_artwork)
             albums_view = AlbumsListView([], [],
-                                         ViewType.SCROLLED | ViewType.ALBUM)
+                                         ViewType.SCROLLED)
             albums_view.set_size_request(300, -1)
             albums_view.show()
             albums_view.set_margin_start(5)

@@ -104,24 +104,28 @@ class TrackRow(Gtk.ListBoxRow):
         self.__duration_label.get_style_context().add_class("dim-label")
         self.__duration_label.show()
         self._grid.add(self.__duration_label)
+        self.__action_button = None
         if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                "list-remove-symbolic",
                Gtk.IconSize.MENU)
             self.__action_button.set_tooltip_text(
                _("Remove from playlist"))
-        else:
+        elif self.__view_type & (ViewType.ALBUM | ViewType.ARTIST):
             self.__action_button = Gtk.Button.new_from_icon_name(
                "view-more-symbolic",
                Gtk.IconSize.MENU)
-        self.__action_button.show()
-        self.__action_button.connect("clicked",
-                                     self.__on_action_button_clicked)
-        self.__action_button.set_margin_end(MARGIN_SMALL)
-        self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
-        context = self.__action_button.get_style_context()
-        context.add_class("menu-button")
-        self._grid.add(self.__action_button)
+        if self.__action_button is None:
+            self.__duration_label.set_margin_end(MARGIN_SMALL)
+        else:
+            self.__action_button.show()
+            self.__action_button.connect("clicked",
+                                         self.__on_action_button_clicked)
+            self.__action_button.set_margin_end(MARGIN_SMALL)
+            self.__action_button.set_relief(Gtk.ReliefStyle.NONE)
+            context = self.__action_button.get_style_context()
+            context.add_class("menu-button")
+            self._grid.add(self.__action_button)
         self.add(self._grid)
         self.set_indicator(self._get_indicator_type())
         self.update_duration()
