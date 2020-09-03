@@ -18,7 +18,6 @@ from locale import getdefaultlocale
 from lollypop.define import App, AUDIODB_CLIENT_ID
 from lollypop.utils import get_network_available
 from lollypop.logger import Logger
-from lollypop.wikipedia import Wikipedia
 
 
 class InformationDownloader:
@@ -98,7 +97,8 @@ class InformationDownloader:
         try:
             # Try from Wikipedia first
             if get_network_available("WIKIPEDIA"):
-                wikipedia = Wikipedia()
+                from lollypop.wikipedia import WikipediaHelper
+                wikipedia = WikipediaHelper()
                 content = wikipedia.get_content_for_term(artist)
             if content is None:
                 for method in [self._get_audiodb_artist_info,

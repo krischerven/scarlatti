@@ -20,7 +20,7 @@ from lollypop.utils import escape
 from lollypop.logger import Logger
 
 
-class Wikipedia:
+class WikipediaHelper:
     """
         Helper for wikipedia search
     """
