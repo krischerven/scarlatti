@@ -221,6 +221,7 @@ class ApplicationActions:
         action.set_state(value)
         if value:
             App().window.show_miniplayer(True, True)
+            App().window.toolbar.hide_info_and_buttons(True)
             App().window.unmaximize()
             App().window.resize(1, 1)
         else:

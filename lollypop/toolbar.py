@@ -63,6 +63,31 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
         width = max(Size.PHONE, self.__width)
         return (Size.PHONE, width)
 
+    def hide_info_and_buttons(self, folded):
+        """
+            Hide information and buttons
+            @param folded as bool
+        """
+        def show_children():
+            self.__timeout_id = None
+            self.__toolbar_info.show_children()
+
+        if self.__timeout_id is not None:
+            GLib.source_remove(self.__timeout_id)
+            self.__timeout_id = None
+
+        if folded:
+            self.__toolbar_playback.player_buttons.hide()
+            self.__toolbar_title.hide()
+            self.__toolbar_info.hide_children()
+        else:
+            if App().player.current_track.id is not None:
+                self.__toolbar_title.show()
+            # If user double click headerbar to maximize window
+            # We do not want info bar to receive click signal
+            self.__timeout_id = GLib.timeout_add(200, show_children)
+            self.__toolbar_playback.player_buttons.show()
+
     @property
     def end(self):
         """
@@ -136,22 +161,4 @@ class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
             @param leaflet as Handy.Leaflet
             @param folded as Gparam
         """
-        def show_children():
-            self.__timeout_id = None
-            self.__toolbar_info.show_children()
-
-        if self.__timeout_id is not None:
-            GLib.source_remove(self.__timeout_id)
-            self.__timeout_id = None
-
-        if App().window.folded:
-            self.__toolbar_playback.player_buttons.hide()
-            self.__toolbar_title.hide()
-            self.__toolbar_info.hide_children()
-        else:
-            if App().player.current_track.id is not None:
-                self.__toolbar_title.show()
-            # If user double click headerbar to maximize window
-            # We do not want info bar to receive click signal
-            self.__timeout_id = GLib.timeout_add(200, show_children)
-            self.__toolbar_playback.player_buttons.show()
+        self.hide_info_and_buttons(App().window.folded)
