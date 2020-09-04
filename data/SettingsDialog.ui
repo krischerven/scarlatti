@@ -460,7 +460,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Background data</property>
-                <property name="activatable-widget">artist-artwork_boolean</property>
+                <property name="activatable-widget">DATA_button</property>
                 <property name="subtitle" translatable="yes">Search artwork in background</property>
                 <child>
                   <object class="GtkSwitch" id="DATA_button">
