@@ -374,7 +374,7 @@
             <description>It performs strict hard limiting with soft-knee characteristics, using a threshold of -6 dB</description>
         </key>
         <key enum="org.gnome.Lollypop.PowerManagement" name="power-management">
-            <default>'both'</default>
+            <default>'suspend'</default>
             <summary>Possibilities for powermanagement options</summary>
             <description>This option inhibits screensaver and suspend during Lollypop playback.</description>
         </key>
