@@ -43,6 +43,7 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         self.__banner = AlbumBannerWidget(self.__album, self.storage_type,
                                           self.view_type)
         self.__banner.show()
+        self.__banner.populate()
         self.add_widget(self.__grid, self.__banner)
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),
