@@ -43,11 +43,22 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         self.__view_type = view_type
         self.__storage_type = storage_type
         self.__album = album
+        return [
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "duration-changed", "_on_duration_changed"),
+        ]
+
+    def populate(self):
+        """
+            Populate widget
+        """
         self.__revealer = Gtk.Revealer.new()
         self.__revealer.show()
-        self.__banner = AlbumBannerWidget(self.__album, storage_type,
-                                          view_type)
+        self.__banner = AlbumBannerWidget(self.__album, self.__storage_type,
+                                          self.__view_type)
         self.__banner.show()
+        self.__banner.connect("populated", self.__on_banner_populated)
+        self.__banner.populate()
         self.add(self.__banner)
         self.add(self.__revealer)
         self.__gesture = GesturesHelper(self.__banner,
@@ -55,14 +66,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         self.get_style_context().add_class("album-banner")
         if App().settings.get_value("show-artist-tracks"):
             self.__populate()
-        return [
-            (App().player, "current-changed", "_on_current_changed"),
-            (App().player, "duration-changed", "_on_duration_changed"),
-            (self.__banner, "populated", "_on_banner_populated")
-        ]
-
-    def populate(self):
-        pass
 
     def do_get_preferred_width(self):
         return (200, 600)
@@ -89,7 +92,7 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             True if populated
             @return bool
         """
-        return self.__tracks_view is not None
+        return True
 
     @property
     def args(self):
@@ -123,13 +126,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_banner_populated(self, widget):
-        """
-            Emit populated signal
-            @param widget as Gtk.Widget
-        """
-        emit_signal(self, "populated")
-
     def _on_press(self, x, y, event):
         """
             Show tracks
@@ -183,3 +179,10 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         """
         if not self.__tracks_view.is_populated:
             self.__tracks_view.populate()
+
+    def __on_banner_populated(self, widget):
+        """
+            Emit populated signal
+            @param widget as Gtk.Widget
+        """
+        emit_signal(self, "populated")

@@ -39,6 +39,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
                                  ViewType.OVERLAY |
                                  ViewType.ARTIST)
         self.__boxes = []
+        self.__others_boxes = []
         self.__width = 0
         self.__boxes_count = 0
         self.__current_box = 0
@@ -49,17 +50,21 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids,
                                            storage_type, self.view_type)
         self.__banner.show()
-        self.__grid = Gtk.Grid.new()
-        self.__grid.show()
-        self.__grid.set_valign(Gtk.Align.START)
-        self.__grid.set_halign(Gtk.Align.START)
+        self.__main_grid = Gtk.Grid.new()
+        self.__main_grid.show()
+        self.__main_grid.set_orientation(Gtk.Orientation.VERTICAL)
+        self.__boxes_grid = Gtk.Grid.new()
+        self.__boxes_grid.show()
+        self.__boxes_grid.set_valign(Gtk.Align.START)
+        self.__boxes_grid.set_halign(Gtk.Align.START)
         for i in range(0, 3):
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
             box.set_valign(Gtk.Align.START)
             box.set_property("margin", MARGIN)
             self.__boxes.append(box)
-            self.__grid.add(box)
-        self.add_widget(self.__grid, self.__banner)
+            self.__boxes_grid.add(box)
+        self.__main_grid.add(self.__boxes_grid)
+        self.add_widget(self.__main_grid, self.__banner)
         self.connect("populated", self.__on_populated)
         if App().animations:
             self.__event_controller = Gtk.EventControllerMotion.new(self)
@@ -227,7 +232,6 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
             Add appears on albums
             @param view as ArtistViewBox
         """
-        return
         from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
         others_box = AlbumsArtistAppearsOnLineView(self.__artist_ids,
                                                    self.__genre_ids,
@@ -237,7 +241,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         others_box.set_margin_start(MARGIN)
         others_box.set_margin_end(MARGIN)
         others_box.populate()
-        self.__box.add(others_box)
+        self.__main_grid.add(others_box)
         self.__others_boxes.append(others_box)
 
     def __on_motion(self, event_controller, x, y):

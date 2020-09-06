@@ -101,7 +101,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.add(self.__widget)
         self.__update_add_button()
-        self.__set_internal_size()
         return [
                 (App().window.container.widget, "notify::folded",
                  "_on_container_folded"),
@@ -111,6 +110,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 (App().player, "playback-updated", "_on_playback_changed"),
                 (App().player, "playback-removed", "_on_playback_changed")
         ]
+
+    def populate(self):
+        """
+            Populate the view
+        """
+        self.__set_internal_size()
 
     def update_for_width(self, width):
         """
