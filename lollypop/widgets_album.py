@@ -161,8 +161,7 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         """
         if self.__tracks_view is None:
             self.__tracks_view = AlbumTracksView(self.__album,
-                                                 self.__view_type |
-                                                 ViewType.SINGLE_COLUMN)
+                                                 self.__view_type)
             self.__tracks_view.show()
             self.__tracks_view.set_margin_start(MARGIN)
             self.__tracks_view.set_margin_end(MARGIN)
