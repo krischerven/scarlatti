@@ -52,6 +52,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__grid = Gtk.Grid.new()
         self.__grid.show()
         self.__grid.set_valign(Gtk.Align.START)
+        self.__grid.set_halign(Gtk.Align.START)
         for i in range(0, 3):
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
             box.set_valign(Gtk.Align.START)
@@ -144,7 +145,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
             if allocation.width != self.__width:
                 self.__width = allocation.width
-                boxes_count = self.__width // 500
+                boxes_count = self.__width // 600
                 if boxes_count < 1:
                     boxes_count = 1
                 if self.__boxes_count == boxes_count:
@@ -161,8 +162,6 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
                                                      self.__artist_ids,
                                                      self.storage_type,
                                                      True)
-                    if len(album_ids) == 1:
-                        self.__grid.set_halign(Gtk.Align.START)
                     LazyLoadingView.populate(self, album_ids)
                 return True
         return False

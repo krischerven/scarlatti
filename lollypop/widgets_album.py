@@ -65,7 +65,7 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         pass
 
     def do_get_preferred_width(self):
-        return (200, 500)
+        return (200, 600)
 
     @property
     def banner(self):
