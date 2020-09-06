@@ -65,6 +65,8 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
                                         primary_press_callback=self._on_press)
         self.get_style_context().add_class("album-banner")
         if App().settings.get_value("show-artist-tracks"):
+            self.__revealer.set_transition_type(
+                Gtk.RevealerTransitionType.NONE)
             self.__populate()
 
     def do_get_preferred_width(self):
