@@ -472,7 +472,6 @@ flowboxchild:selected  {
 
 .album-banner {
     border: 1px solid shade(@theme_bg_color, 0.9);
-    padding: 10px;
     border-radius: 4px;
     background-color: shade(@theme_bg_color, 0.9999);
     transition: box-shadow 250ms linear;

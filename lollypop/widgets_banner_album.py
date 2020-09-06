@@ -13,7 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, Type, ViewType
-from lollypop.define import ArtBehaviour
+from lollypop.define import ArtBehaviour, MARGIN_MEDIUM
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import EditCoverWidget, CoverWidget
@@ -68,6 +68,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__artist_label.set_label(", ".join(album.artists))
         else:
             self.__cover_widget = CoverWidget(album, view_type)
+            self.__cover_widget.set_margin_top(MARGIN_MEDIUM)
+            self.__cover_widget.set_margin_bottom(MARGIN_MEDIUM)
             self.__title_label.set_opacity(0.8)
             self.__year_label.set_opacity(0.7)
             self.__duration_label.set_opacity(0.6)
