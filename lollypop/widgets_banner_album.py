@@ -16,7 +16,7 @@ from lollypop.define import App, ArtSize, Type, ViewType
 from lollypop.define import ArtBehaviour
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
-from lollypop.widgets_cover import CoverWidget
+from lollypop.widgets_cover import EditCoverWidget, CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
 from lollypop.utils import set_cursor_type, popup_widget
@@ -61,17 +61,17 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__play_button.get_style_context().add_class(style)
         self.__add_button.get_style_context().add_class(style)
         self.__menu_button.get_style_context().add_class(style)
-        self.__cover_widget = CoverWidget(album, view_type)
-        self.__cover_widget.show()
         self.__title_label.set_label(album.name)
         if view_type & ViewType.ALBUM:
+            self.__cover_widget = EditCoverWidget(album, view_type)
             self.__artist_label.show()
             self.__artist_label.set_label(", ".join(album.artists))
         else:
+            self.__cover_widget = CoverWidget(album, view_type)
             self.__title_label.set_opacity(0.8)
             self.__year_label.set_opacity(0.7)
             self.__duration_label.set_opacity(0.6)
-            self.__widget.get_style_context().add_class("album-banner")
+        self.__cover_widget.show()
         if album.year is not None:
             self.__year_label.set_label(str(album.year))
             self.__year_label.show()
@@ -231,6 +231,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
             Set artwork on banner
         """
+        self.emit("populated")
         if self._artwork is not None and\
                 self.view_type & ViewType.ALBUM and\
                 App().animations:
@@ -282,6 +283,11 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             icon_size = Gtk.IconSize.BUTTON
             cls_title = "text-medium"
             cls_others = "text-medium"
+        elif not self.view_type & ViewType.OVERLAY:
+            art_size = ArtSize.BANNER
+            icon_size = Gtk.IconSize.LARGE_TOOLBAR
+            cls_title = "text-large"
+            cls_others = "text-large"
         else:
             art_size = ArtSize.BANNER
             icon_size = Gtk.IconSize.LARGE_TOOLBAR

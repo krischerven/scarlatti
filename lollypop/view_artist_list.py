@@ -13,13 +13,15 @@
 from gi.repository import Gtk
 
 from lollypop.define import ViewType, MARGIN, App
+from lollypop.utils import set_cursor_type
 from lollypop.widgets_banner_artist import ArtistBannerWidget
-from lollypop.view_album import AlbumView
+from lollypop.widgets_album import AlbumWidget
 from lollypop.objects_album import Album
 from lollypop.view_lazyloading import LazyLoadingView
+from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
-class ArtistViewList(LazyLoadingView):
+class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
     """
         Show artist albums in a list with tracks
     """
@@ -36,27 +38,35 @@ class ArtistViewList(LazyLoadingView):
                                  view_type |
                                  ViewType.OVERLAY |
                                  ViewType.ARTIST)
-        self.__others_boxes = []
+        self.__boxes = []
+        self.__width = 0
+        self.__boxes_count = 0
+        self.__current_box = 0
+        self.__hovered_child = None
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
         self.__storage_type = storage_type
         self.__banner = ArtistBannerWidget(genre_ids, artist_ids,
                                            storage_type, self.view_type)
         self.__banner.show()
-        self.__list = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN * 4)
-        self.__list.show()
-        self.add_widget(self.__list, self.__banner)
+        self.__grid = Gtk.Grid.new()
+        self.__grid.show()
+        self.__grid.set_valign(Gtk.Align.START)
+        for i in range(0, 3):
+            box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
+            box.set_valign(Gtk.Align.START)
+            box.set_property("margin", MARGIN)
+            self.__boxes.append(box)
+            self.__grid.add(box)
+        self.add_widget(self.__grid, self.__banner)
         self.connect("populated", self.__on_populated)
+        if App().animations:
+            self.__event_controller = Gtk.EventControllerMotion.new(self)
+            self.__event_controller.connect("motion", self.__on_motion)
+        SizeAllocationHelper.__init__(self)
 
     def populate(self):
-        """
-            Populate list
-        """
-        album_ids = App().albums.get_ids(self.__genre_ids,
-                                         self.__artist_ids,
-                                         self.storage_type,
-                                         True)
-        LazyLoadingView.populate(self, album_ids)
+        pass
 
     @property
     def args(self):
@@ -76,12 +86,13 @@ class ArtistViewList(LazyLoadingView):
             @return [Gtk.Widget]
         """
         filtered = []
-        for child in self.__list.get_children():
-            if isinstance(child, AlbumView):
-                filtered.append(child)
-                filtered += child.filtered
-            else:
-                filtered += child.children
+        for i in range(0, self.__boxes_count):
+            for child in self.__boxes[i].get_children():
+                if isinstance(child, AlbumWidget):
+                    filtered.append(child)
+                    filtered += child.filtered
+                else:
+                    filtered += child.children
         return filtered
 
     @property
@@ -91,6 +102,14 @@ class ArtistViewList(LazyLoadingView):
             @return int
         """
         return self.__banner.height + MARGIN
+
+    @property
+    def is_populated(self):
+        """
+            True if populated
+            @return bool
+        """
+        return self.__boxes[0].get_children() != []
 
 #######################
 # PROTECTED           #
@@ -104,19 +123,112 @@ class ArtistViewList(LazyLoadingView):
         if self.destroyed:
             return None
         album = Album(album_id, self.__genre_ids, self.__artist_ids)
-        widget = AlbumView(album,
-                           self.storage_type,
-                           ViewType.ARTIST)
+        widget = AlbumWidget(album,
+                             self.storage_type,
+                             ViewType.ARTIST)
         widget.show()
         widget.set_property("valign", Gtk.Align.START)
-        self.__list.add(widget)
+        self.__boxes[self.__current_box].add(widget)
+        self.__boxes[self.__current_box].show()
+        self.__current_box += 1
+        if self.__current_box == self.__boxes_count:
+            self.__current_box = 0
         return widget
+
+    def _handle_width_allocate(self, allocation):
+        """
+            Update artwork
+            @param allocation as Gtk.Allocation
+            @return bool
+        """
+        if SizeAllocationHelper._handle_width_allocate(self, allocation):
+            if allocation.width != self.__width:
+                self.__width = allocation.width
+                boxes_count = self.__width // 500
+                if boxes_count < 1:
+                    boxes_count = 1
+                if self.__boxes_count == boxes_count:
+                    return
+                # Rework content
+                if self.is_populated:
+                    children = self.__get_children_sorted()
+                    self.__remove_children()
+                    self.__boxes_count = boxes_count
+                    self.__populate(children)
+                else:
+                    self.__boxes_count = boxes_count
+                    album_ids = App().albums.get_ids(self.__genre_ids,
+                                                     self.__artist_ids,
+                                                     self.storage_type,
+                                                     True)
+                    if len(album_ids) == 1:
+                        self.__grid.set_halign(Gtk.Align.START)
+                    LazyLoadingView.populate(self, album_ids)
+                return True
+        return False
+
+#######################
+# PRIVATE             #
+#######################
+    def __populate(self, children):
+        """
+            Populate children
+            @param children as [AlbumWidget]
+        """
+        self.__current_box = 0
+        for child in children:
+            self.__boxes[self.__current_box].show()
+            self.__boxes[self.__current_box].add(child)
+            self.__current_box += 1
+            if self.__current_box == self.__boxes_count:
+                self.__current_box = 0
+
+    def __get_children_sorted(self):
+        """
+            Get children sorted (insert order)
+            @return [Gtk.Widget]
+        """
+        children = {}
+        for i in range(0, self.__boxes_count):
+            children[i] = self.__boxes[i].get_children()
+        sorted_children = []
+        not_found = 0
+        while not_found != self.__boxes_count:
+            not_found = 0
+            for i in range(0, self.__boxes_count):
+                if children[i]:
+                    child = children[i].pop(0)
+                    sorted_children.append(child)
+                else:
+                    not_found += 1
+        return sorted_children
+
+    def __remove_children(self):
+        """
+            Remove children from boxes
+        """
+        for i in range(0, self.__boxes_count):
+            self.__boxes[i].hide()
+            children = self.__boxes[i].get_children()
+            for child in children:
+                self.__boxes[i].remove(child)
+
+    def __unselect_selected(self):
+        """
+            Unselect selected child
+        """
+        if self.__hovered_child is not None:
+            self.__hovered_child.unset_state_flags(
+                Gtk.StateFlags.VISITED)
+            set_cursor_type(self.__hovered_child.banner, "left_ptr")
+            self.__hovered_child = None
 
     def __on_populated(self, view):
         """
             Add appears on albums
             @param view as ArtistViewBox
         """
+        return
         from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
         others_box = AlbumsArtistAppearsOnLineView(self.__artist_ids,
                                                    self.__genre_ids,
@@ -126,5 +238,31 @@ class ArtistViewList(LazyLoadingView):
         others_box.set_margin_start(MARGIN)
         others_box.set_margin_end(MARGIN)
         others_box.populate()
-        self.__list.add(others_box)
+        self.__box.add(others_box)
         self.__others_boxes.append(others_box)
+
+    def __on_motion(self, event_controller, x, y):
+        """
+            Update current selected child
+            @param event_controller as Gtk.EventControllerMotion
+            @param x as int
+            @param y as int
+        """
+        hovered_child = None
+        for i in range(0, self.__boxes_count):
+            for child in self.__boxes[i].get_children():
+                (tx, ty) = child.translate_coordinates(self, 0, 0)
+                width = child.get_allocated_width()
+                height = child.get_allocated_height()
+                if x > tx and x < tx + width and y > ty and y < ty + height:
+                    hovered_child = child
+                    break
+        if hovered_child == self.__hovered_child:
+            return
+        elif hovered_child is not None:
+            hovered_child.set_state_flags(Gtk.StateFlags.VISITED, False)
+            self.__unselect_selected()
+            self.__hovered_child = hovered_child
+            set_cursor_type(hovered_child.banner)
+        else:
+            self.__unselect_selected()

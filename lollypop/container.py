@@ -97,15 +97,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         view = self._stack.get_visible_child()
         if view is not None and view.args is not None:
-            from lollypop.view_artist_box import ArtistViewBox
-            from lollypop.view_artist_list import ArtistViewList
-            show_tracks = App().settings.get_value("show-artist-tracks")
-            if view.__class__ == ArtistViewBox and show_tracks:
-                cls = ArtistViewList
-            elif view.__class__ == ArtistViewList and not show_tracks:
-                cls = ArtistViewBox
-            else:
-                cls = view.__class__
+            cls = view.__class__
             new_view = cls(**view.args)
             new_view.populate()
             new_view.show()

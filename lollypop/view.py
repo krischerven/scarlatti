@@ -232,7 +232,8 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
 
     def _on_value_changed(self, adj):
         """
-            Update margin if needed
+            Reveal banner
+            @param adj as Gtk.Adjustment
         """
         if self.__banner is not None:
             reveal = self.__should_reveal_header(adj)

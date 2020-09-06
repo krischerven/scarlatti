@@ -45,6 +45,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
     gsignals = {
         "scroll": (GObject.SignalFlags.RUN_FIRST, None, (float, float)),
         "height-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
     for signal in gsignals:
         args = gsignals[signal]
@@ -163,6 +164,7 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             banner_context.remove_class("black")
             artwork_context.add_class("default-banner")
         else:
+            self.emit("populated")
             del surface
             banner_context.remove_class("default-banner")
             banner_context.add_class("black")

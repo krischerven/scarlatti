@@ -12,13 +12,13 @@
 
 from gi.repository import Gtk, Gio
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Type
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.utils import set_cursor_type, popup_widget
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
 
-class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
+class CoverWidgetBase(SignalsHelper):
     """
         Widget showing current album cover
     """
@@ -27,20 +27,16 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
     def __init__(self, album, view_type):
         """
             Init cover widget
+            @param album as Album
             @param view_type as ViewType
         """
-        Gtk.EventBox.__init__(self)
-        GesturesHelper.__init__(self, self)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.CENTER)
-        self.__album = album
-        self.__view_type = view_type
-        self.__image_button = None
+        self._album = album
+        self._view_type = view_type
         self.__art_size = 1
-        self.__artwork = Gtk.Image.new()
-        self.__artwork.show()
-        self.add(self.__artwork)
-        self.connect("realize", set_cursor_type)
+        self._artwork = Gtk.Image.new()
+        self._artwork.show()
         return [
             (App().art, "album-artwork-changed", "_on_album_artwork_changed")
         ]
@@ -53,15 +49,15 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
         if self.__art_size == art_size:
             return
         self.__art_size = art_size
-        App().art_helper.set_frame(self.__artwork,
+        App().art_helper.set_frame(self._artwork,
                                    "small-cover-frame",
                                    self.__art_size,
                                    self.__art_size)
         App().art_helper.set_album_artwork(
-                self.__album,
+                self._album,
                 self.__art_size,
                 self.__art_size,
-                self.__artwork.get_scale_factor(),
+                self._artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
@@ -74,51 +70,20 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
             @param art as Art
             @param album_id as int
         """
-        if self.__album is None:
+        if self._album is None:
             return
-        if album_id == self.__album.id:
+        if album_id == self._album.id:
             App().art_helper.set_album_artwork(
-                self.__album,
+                self._album,
                 self.__art_size,
                 self.__art_size,
-                self.__artwork.get_scale_factor(),
+                self._artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
-
-    def _on_primary_press_gesture(self, x, y, event):
-        """
-            Show covers popover
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
-        """
-        if self.__view_type & ViewType.ALBUM:
-            from lollypop.widgets_menu import MenuBuilder
-            from lollypop.menu_artwork import AlbumArtworkMenu
-            menu = Gio.Menu()
-            if App().window.folded:
-                from lollypop.menu_header import AlbumMenuHeader
-                menu.append_item(AlbumMenuHeader(self.__album))
-            menu_widget = MenuBuilder(menu, False)
-            menu_widget.show()
-            menu_ext = AlbumArtworkMenu(self.__album, self.__view_type, False)
-            menu_ext.connect("hidden", self.__close_artwork_menu)
-            menu_ext.show()
-            menu_widget.add_widget(menu_ext, False)
-            self.__artwork_popup = popup_widget(menu_widget, self,
-                                                None, None, None)
-        else:
-            App().window.container.show_view([Type.ALBUM], self.__album)
 
 #######################
 # PRIVATE             #
 #######################
-    def __close_artwork_menu(self, action, variant):
-        if App().window.folded:
-            App().window.container.go_back()
-        else:
-            self.__artwork_popup.destroy()
-
     def __on_album_artwork(self, surface):
         """
             Set album artwork
@@ -129,8 +94,77 @@ class CoverWidget(Gtk.EventBox, SignalsHelper, GesturesHelper):
                 icon_size = Gtk.IconSize.DIALOG
             else:
                 icon_size = Gtk.IconSize.DND
-            self.__artwork.set_from_icon_name("folder-music-symbolic",
-                                              icon_size)
+            self._artwork.set_from_icon_name("folder-music-symbolic",
+                                             icon_size)
         else:
-            self.__artwork.set_from_surface(surface)
+            self._artwork.set_from_surface(surface)
             del surface
+
+
+class EditCoverWidget(Gtk.EventBox, CoverWidgetBase, GesturesHelper):
+    """
+        Widget showing current album cover (edition allowed)
+    """
+
+    def __init__(self, album, view_type):
+        """
+            Init widget
+            @param album as Album
+            @param view_type as ViewType
+        """
+        Gtk.EventBox.__init__(self)
+        CoverWidgetBase.__init__(self, album, view_type)
+        GesturesHelper.__init__(self, self)
+        self.connect("realize", set_cursor_type)
+        self.add(self._artwork)
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Show covers popover
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        if self._view_type & ViewType.ALBUM:
+            from lollypop.widgets_menu import MenuBuilder
+            from lollypop.menu_artwork import AlbumArtworkMenu
+            menu = Gio.Menu()
+            if App().window.folded:
+                from lollypop.menu_header import AlbumMenuHeader
+                menu.append_item(AlbumMenuHeader(self._album))
+            menu_widget = MenuBuilder(menu, False)
+            menu_widget.show()
+            menu_ext = AlbumArtworkMenu(self._album, self._view_type, False)
+            menu_ext.connect("hidden", self.__close_artwork_menu)
+            menu_ext.show()
+            menu_widget.add_widget(menu_ext, False)
+            self._artwork_popup = popup_widget(menu_widget, self,
+                                               None, None, None)
+
+#######################
+# PRIVATE             #
+#######################
+    def __close_artwork_menu(self, action, variant):
+        if App().window.folded:
+            App().window.container.go_back()
+        else:
+            self._artwork_popup.destroy()
+
+
+class CoverWidget(Gtk.Bin, CoverWidgetBase):
+    """
+        Widget showing current album cover
+    """
+
+    def __init__(self, album, view_type):
+        """
+            Init cover widget
+            @param album as Album
+            @param view_type as ViewType
+        """
+        Gtk.Bin.__init__(self)
+        CoverWidgetBase.__init__(self, album, view_type)
+        self.add(self._artwork)
