@@ -69,6 +69,15 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
                 Gtk.RevealerTransitionType.NONE)
             self.__populate()
 
+    def reveal_child(self):
+        """
+            Reveal tracks
+        """
+        self.__revealer.set_transition_type(
+                Gtk.RevealerTransitionType.NONE)
+        self.__populate()
+        self.__revealer.set_reveal_child(True)
+
     def do_get_preferred_width(self):
         return (200, 600)
 

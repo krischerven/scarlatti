@@ -43,6 +43,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__width = 0
         self.__boxes_count = 0
         self.__current_box = 0
+        self.__albums_count = 0
         self.__hovered_child = None
         self.__genre_ids = genre_ids
         self.__artist_ids = artist_ids
@@ -56,7 +57,6 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__boxes_grid = Gtk.Grid.new()
         self.__boxes_grid.show()
         self.__boxes_grid.set_valign(Gtk.Align.START)
-        self.__boxes_grid.set_halign(Gtk.Align.START)
         for i in range(0, 3):
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
             box.set_valign(Gtk.Align.START)
@@ -159,6 +159,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
                                                      self.__artist_ids,
                                                      self.storage_type,
                                                      True)
+                    self.__albums_count = len(album_ids)
                     LazyLoadingView.populate(self, album_ids)
                 return True
         return False
@@ -224,6 +225,8 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
             Add appears on albums
             @param view as ArtistViewBox
         """
+        if self.__albums_count == 1:
+            self.__boxes[0].get_children()[0].reveal_child()
         from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
         others_box = AlbumsArtistAppearsOnLineView(self.__artist_ids,
                                                    self.__genre_ids,
