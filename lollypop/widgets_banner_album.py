@@ -19,7 +19,7 @@ from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import EditCoverWidget, CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
-from lollypop.utils import set_cursor_type, popup_widget
+from lollypop.utils import set_cursor_type, popup_widget, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -71,6 +71,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__title_label.set_opacity(0.8)
             self.__year_label.set_opacity(0.7)
             self.__duration_label.set_opacity(0.6)
+            self.__cover_widget.connect("populated",
+                                        self.__on_cover_populated)
         self.__cover_widget.show()
         if album.year is not None:
             self.__year_label.set_label(str(album.year))
@@ -231,7 +233,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
             Set artwork on banner
         """
-        self.emit("populated")
         if self._artwork is not None and\
                 self.view_type & ViewType.ALBUM and\
                 App().animations:
@@ -301,3 +302,10 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__rating_widget.set_icon_size(icon_size)
         self.__loved_widget.set_icon_size(icon_size)
         self.__cover_widget.set_art_size(art_size)
+
+    def __on_cover_populated(self, widget):
+        """
+            Pass signal
+            @param widget as Gtk.Widget
+        """
+        emit_signal(self, "populated")

@@ -10,10 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gio, GObject
 
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
-from lollypop.utils import set_cursor_type, popup_widget
+from lollypop.utils import set_cursor_type, popup_widget, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -59,7 +59,7 @@ class CoverWidgetBase(SignalsHelper):
                 self.__art_size,
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
-                self.__on_album_artwork)
+                self._on_album_artwork)
 
 #######################
 # PROTECTED           #
@@ -81,10 +81,7 @@ class CoverWidgetBase(SignalsHelper):
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_album_artwork)
 
-#######################
-# PRIVATE             #
-#######################
-    def __on_album_artwork(self, surface):
+    def _on_album_artwork(self, surface):
         """
             Set album artwork
             @param surface as str
@@ -159,6 +156,10 @@ class CoverWidget(Gtk.Bin, CoverWidgetBase):
         Widget showing current album cover
     """
 
+    __gsignals__ = {
+        "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
     def __init__(self, album, view_type):
         """
             Init cover widget
@@ -168,3 +169,14 @@ class CoverWidget(Gtk.Bin, CoverWidgetBase):
         Gtk.Bin.__init__(self)
         CoverWidgetBase.__init__(self, album, view_type)
         self.add(self._artwork)
+
+#######################
+# PRIVATE             #
+#######################
+    def _on_album_artwork(self, surface):
+        """
+            Set album artwork
+            @param surface as str
+        """
+        emit_signal(self, "populated")
+        CoverWidgetBase._on_album_artwork(self, surface)
