@@ -109,14 +109,6 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         """
         return self.__banner.height + MARGIN
 
-    @property
-    def is_populated(self):
-        """
-            True if populated
-            @return bool
-        """
-        return self.__boxes[0].get_children() != []
-
 #######################
 # PROTECTED           #
 #######################
