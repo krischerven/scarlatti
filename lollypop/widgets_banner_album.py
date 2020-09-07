@@ -136,15 +136,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_label(self.__album.name)
         if self.view_type & ViewType.ALBUM:
             self.__cover_widget = EditCoverWidget(self.__album, self.view_type)
+            self.__artist_label.get_style_context().add_class("dim-label")
             self.__artist_label.set_label(", ".join(self.__album.artists))
         else:
             self.__artist_label.hide()
             self.__cover_widget = CoverWidget(self.__album, self.view_type)
             self.__cover_widget.set_margin_top(MARGIN_MEDIUM)
             self.__cover_widget.set_margin_bottom(MARGIN_MEDIUM)
-            self.__title_label.set_opacity(0.8)
-            self.__year_label.set_opacity(0.7)
-            self.__duration_label.set_opacity(0.6)
             self.__cover_widget.connect("populated",
                                         self.__on_cover_populated)
         self.__cover_widget.show()
@@ -291,13 +289,14 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
             Set content size based on available width
         """
+        classes = ["text-medium", "text-large", "text-x-large"]
         # Text size
         for label in [self.__title_label,
                       self.__artist_label,
                       self.__year_label,
                       self.__duration_label]:
             context = label.get_style_context()
-            for c in context.list_classes():
+            for c in classes:
                 context.remove_class(c)
 
         if App().window.folded:
