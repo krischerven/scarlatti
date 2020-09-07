@@ -2,7 +2,6 @@
 <gresources>
   <gresource prefix="/org/gnome/Lollypop">
     <file compressed="true">application.css</file>
-     <file compressed="true" preprocess="xml-stripblanks">AlbumBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">Appmenu.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ArtistBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ArtistInformation.ui</file>

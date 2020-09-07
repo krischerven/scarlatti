@@ -13,7 +13,7 @@
 from gi.repository import Gtk
 
 from lollypop.define import App, ArtSize, Type, ViewType
-from lollypop.define import ArtBehaviour, MARGIN_MEDIUM
+from lollypop.define import ArtBehaviour, MARGIN_MEDIUM, MARGIN, MARGIN_SMALL
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
 from lollypop.widgets_cover import EditCoverWidget, CoverWidget
@@ -57,20 +57,69 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         if self.__widget is not None:
             return
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/AlbumBannerWidget.ui")
-        builder.connect_signals(self)
-        self.__labels = builder.get_object("labels")
-        self.__title_label = builder.get_object("title_label")
+        self.__widget = Gtk.Grid.new()
+        self.__widget.set_margin_start(MARGIN)
+        self.__widget.set_margin_end(MARGIN_MEDIUM)
+        self.__widget.set_margin_top(MARGIN_SMALL)
+        self.__widget.set_margin_bottom(MARGIN_SMALL)
+        self.__widget.set_row_spacing(MARGIN_MEDIUM)
+        self.__widget.set_column_spacing(MARGIN_MEDIUM)
+        self.__top_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.__middle_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.__bottom_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
+        self.__labels_box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        self.__top_box.set_vexpand(True)
+        self.__middle_box.set_halign(Gtk.Align.END)
+        self.__middle_box.set_valign(Gtk.Align.CENTER)
+        self.__middle_box.set_hexpand(True)
+        self.__bottom_box.set_vexpand(True)
+        self.__year_eventbox = Gtk.EventBox.new()
+        self.__year_eventbox.set_hexpand(True)
+        self.__year_eventbox.set_halign(Gtk.Align.END)
+        self.__year_label = Gtk.Label.new()
+        self.__year_label.get_style_context().add_class("dim-label")
+        self.__year_eventbox.add(self.__year_label)
+        self.__year_eventbox.connect("realize", set_cursor_type)
+        self.__gesture_year = GesturesHelper(
+            self.__year_eventbox, primary_press_callback=self._on_year_press)
+        self.__play_button = Gtk.Button.new_from_icon_name(
+            "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
+        self.__add_button = Gtk.Button.new_from_icon_name(
+            "list-add-symbolic", Gtk.IconSize.BUTTON)
+        self.__menu_button = Gtk.Button.new_from_icon_name(
+            "view-more-symbolic", Gtk.IconSize.BUTTON)
+        self.__play_button.connect("clicked", self.__on_play_button_clicked)
+        self.__add_button.connect("clicked", self.__on_add_button_clicked)
+        self.__menu_button.connect("clicked", self.__on_menu_button_clicked)
+        self.__title_label = Gtk.Label.new()
+        self.__title_label.set_valign(Gtk.Align.END)
+        self.__title_label.set_vexpand(True)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
-        self.__artist_label = builder.get_object("artist_label")
+        self.__artist_label = Gtk.Label.new()
+        self.__artist_eventbox = Gtk.EventBox.new()
+        self.__artist_eventbox.set_valign(Gtk.Align.START)
+        self.__artist_eventbox.set_halign(Gtk.Align.START)
+        self.__artist_eventbox.add(self.__artist_label)
+        self.__artist_eventbox.connect("realize", set_cursor_type)
         self.__artist_label.connect("query-tooltip", on_query_tooltip)
-        self.__year_label = builder.get_object("year_label")
-        self.__duration_label = builder.get_object("duration_label")
-        self.__play_button = builder.get_object("play_button")
-        self.__add_button = builder.get_object("add_button")
-        self.__menu_button = builder.get_object("menu_button")
-        self.__widget = builder.get_object("widget")
+        self.__gesture_artist = GesturesHelper(
+            self.__artist_eventbox,
+            primary_press_callback=self._on_artist_press)
+        self.__duration_label = Gtk.Label.new()
+        self.__duration_label.get_style_context().add_class("dim-label")
+        self.__top_box.pack_end(self.__year_eventbox, False, True, 0)
+        self.__middle_box.add(self.__play_button)
+        self.__middle_box.add(self.__add_button)
+        self.__middle_box.add(self.__menu_button)
+        self.__middle_box.get_style_context().add_class("linked")
+        self.__bottom_box.pack_end(self.__duration_label, False, True, 0)
+        self.__labels_box.add(self.__title_label)
+        self.__labels_box.add(self.__artist_eventbox)
+        self.__widget.attach(self.__top_box, 2, 0, 1, 1)
+        self.__widget.attach(self.__middle_box, 2, 1, 1, 1)
+        self.__widget.attach(self.__bottom_box, 1, 2, 2, 1)
+        self.__widget.attach(self.__labels_box, 1, 0, 1, 2)
+        self.__widget.show_all()
         if self.view_type & ViewType.OVERLAY:
             style = "banner-button"
         else:
@@ -81,9 +130,9 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_label(self.__album.name)
         if self.view_type & ViewType.ALBUM:
             self.__cover_widget = EditCoverWidget(self.__album, self.view_type)
-            self.__artist_label.show()
             self.__artist_label.set_label(", ".join(self.__album.artists))
         else:
+            self.__artist_label.hide()
             self.__cover_widget = CoverWidget(self.__album, self.view_type)
             self.__cover_widget.set_margin_top(MARGIN_MEDIUM)
             self.__cover_widget.set_margin_bottom(MARGIN_MEDIUM)
@@ -98,16 +147,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__year_label.show()
         human_duration = get_human_duration(self.__album.duration)
         self.__duration_label.set_text(human_duration)
-        artist_eventbox = builder.get_object("artist_eventbox")
-        artist_eventbox.connect("realize", set_cursor_type)
-        self.__gesture1 = GesturesHelper(
-            artist_eventbox, primary_press_callback=self._on_artist_press)
-        year_eventbox = builder.get_object("year_eventbox")
-        year_eventbox.connect("realize", set_cursor_type)
-        self.__gesture2 = GesturesHelper(
-            year_eventbox, primary_press_callback=self._on_year_press)
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
-        self.__bottom_box = builder.get_object("bottom_box")
         self.__loved_widget = LovedWidget(self.__album, Gtk.IconSize.INVALID)
         self.__loved_widget.show()
         self.__bottom_box.pack_start(self.__loved_widget, 0, False, False)
@@ -158,43 +198,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param folded as Gparam
         """
         self.__set_internal_size()
-
-    def _on_menu_button_clicked(self, button):
-        """
-            Show album menu
-            @param button as Gtk.Button
-        """
-        from lollypop.widgets_menu import MenuBuilder
-        from lollypop.menu_objects import AlbumMenu
-        from lollypop.menu_artwork import AlbumArtworkMenu
-        menu = AlbumMenu(self.__album,
-                         self.__storage_type,
-                         self.view_type)
-        menu_widget = MenuBuilder(menu)
-        menu_widget.show()
-        if App().window.folded:
-            menu_ext = AlbumArtworkMenu(self.__album, self.view_type, True)
-            menu_ext.connect("hidden", self.__close_artwork_menu)
-            menu_ext.show()
-            menu_widget.add_widget(menu_ext, -2)
-        popup_widget(menu_widget, button, None, None, button)
-
-    def _on_play_button_clicked(self, button):
-        """
-            Play album
-           @param button as Gtk.Button
-        """
-        App().player.play_album(self.__album.clone(False))
-
-    def _on_add_button_clicked(self, button):
-        """
-            Add/Remove album
-           @param button as Gtk.Button
-        """
-        if self.__album.id in App().player.album_ids:
-            App().player.remove_album_by_id(self.__album.id)
-        else:
-            App().player.add_album(self.__album.clone(False))
 
     def _on_album_artwork_changed(self, art, album_id):
         """
@@ -319,3 +322,40 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             @param widget as Gtk.Widget
         """
         emit_signal(self, "populated")
+
+    def __on_menu_button_clicked(self, button):
+        """
+            Show album menu
+            @param button as Gtk.Button
+        """
+        from lollypop.widgets_menu import MenuBuilder
+        from lollypop.menu_objects import AlbumMenu
+        from lollypop.menu_artwork import AlbumArtworkMenu
+        menu = AlbumMenu(self.__album,
+                         self.__storage_type,
+                         self.view_type)
+        menu_widget = MenuBuilder(menu)
+        menu_widget.show()
+        if App().window.folded:
+            menu_ext = AlbumArtworkMenu(self.__album, self.view_type, True)
+            menu_ext.connect("hidden", self.__close_artwork_menu)
+            menu_ext.show()
+            menu_widget.add_widget(menu_ext, -2)
+        popup_widget(menu_widget, button, None, None, button)
+
+    def __on_play_button_clicked(self, button):
+        """
+            Play album
+           @param button as Gtk.Button
+        """
+        App().player.play_album(self.__album.clone(False))
+
+    def __on_add_button_clicked(self, button):
+        """
+            Add/Remove album
+           @param button as Gtk.Button
+        """
+        if self.__album.id in App().player.album_ids:
+            App().player.remove_album_by_id(self.__album.id)
+        else:
+            App().player.add_album(self.__album.clone(False))
