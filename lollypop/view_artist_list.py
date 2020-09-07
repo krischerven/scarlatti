@@ -57,6 +57,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__boxes_grid = Gtk.Grid.new()
         self.__boxes_grid.show()
         self.__boxes_grid.set_valign(Gtk.Align.START)
+        self.__boxes_grid.set_halign(Gtk.Align.CENTER)
         for i in range(0, 3):
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
             box.set_valign(Gtk.Align.START)
