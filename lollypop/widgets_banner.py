@@ -118,7 +118,11 @@ class BannerWidget(Gtk.Revealer, SizeAllocationHelper):
             Get wanted height
             @return int
         """
-        return ArtSize.BANNER + MARGIN * 2
+        if App().window.folded:
+            height = ArtSize.MEDIUM + MARGIN * 2
+        else:
+            height = ArtSize.BANNER + MARGIN * 2
+        return height
 
     @property
     def view_type(self):

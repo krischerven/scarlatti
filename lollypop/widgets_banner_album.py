@@ -97,6 +97,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_vexpand(True)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.__title_label.set_halign(Gtk.Align.START)
+        self.__title_label.set_xalign(0)
         self.__artist_label = Gtk.Label.new()
         self.__artist_eventbox = Gtk.EventBox.new()
         self.__artist_eventbox.set_valign(Gtk.Align.START)
@@ -104,6 +106,8 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__artist_eventbox.connect("realize", set_cursor_type)
         self.__artist_label.connect("query-tooltip", on_query_tooltip)
         self.__artist_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.__artist_label.set_halign(Gtk.Align.START)
+        self.__artist_label.set_xalign(0)
         self.__gesture_artist = GesturesHelper(
             self.__artist_eventbox,
             primary_press_callback=self._on_artist_press)
@@ -117,7 +121,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__bottom_box.pack_end(self.__duration_label, False, True, 0)
         self.__labels_box.add(self.__title_label)
         self.__labels_box.add(self.__artist_eventbox)
-        self.__labels_box.set_halign(Gtk.Align.START)
         self.__widget.attach(self.__top_box, 2, 0, 1, 1)
         self.__widget.attach(self.__middle_box, 2, 1, 1, 1)
         self.__widget.attach(self.__bottom_box, 1, 2, 2, 1)
@@ -262,19 +265,16 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             ArtBehaviour.DARKER,
                             self._on_artwork)
         if self.width < ArtSize.BANNER * 3:
-            if self.__widget.get_child_at(1, 0) == self.__labels_box:
+            if self.__widget.get_child_at(2, 0) == self.__top_box:
                 self.__widget.remove(self.__labels_box)
-                self.__widget.attach(self.__labels_box, 0, 4, 3, 1)
-                if self.view_type & ViewType.ARTIST:
-                    self.__labels_box.get_style_context().add_class(
-                        "dim-label")
-                self.__labels_box.set_halign(Gtk.Align.FILL)
-        elif self.__widget.get_child_at(0, 4) == self.__labels_box:
+                self.__widget.remove(self.__top_box)
+                self.__widget.attach(self.__top_box, 1, 1, 1, 1)
+                self.__widget.attach(self.__labels_box, 1, 0, 2, 1)
+        elif self.__widget.get_child_at(1, 0) == self.__labels_box:
             self.__widget.remove(self.__labels_box)
+            self.__widget.remove(self.__top_box)
+            self.__widget.attach(self.__top_box, 2, 0, 1, 1)
             self.__widget.attach(self.__labels_box, 1, 0, 1, 2)
-            if self.view_type & ViewType.ARTIST:
-                self.__labels_box.get_style_context().remove_class("dim-label")
-            self.__labels_box.set_halign(Gtk.Align.START)
 
     def __update_add_button(self):
         """
