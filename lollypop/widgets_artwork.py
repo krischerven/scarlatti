@@ -54,10 +54,11 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         self.__image.set_property("valign", Gtk.Align.CENTER)
         self.add(grid)
 
-    def populate(self, bytes):
+    def populate(self, bytes, art_size):
         """
             Populate images with bytes
             @param bytes as bytes
+            @param art_size as int
             @return bool if success
         """
         try:
@@ -77,8 +78,8 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                 pixbuf = App().art.load_behaviour(
                                                 pixbuf,
                                                 None,
-                                                ArtSize.BANNER * scale_factor,
-                                                ArtSize.BANNER * scale_factor,
+                                                art_size * scale_factor,
+                                                art_size * scale_factor,
                                                 ArtBehaviour.CROP)
                 stream.close()
                 self.__bytes = bytes
@@ -143,8 +144,10 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self.__label.set_text(_("Select artwork"))
 
         if App().window.folded:
+            self.__art_size = ArtSize.MEDIUM
             widget.add(self._flowbox)
         else:
+            self.__art_size = ArtSize.BANNER
             scrolled = Gtk.ScrolledWindow.new()
             scrolled.show()
             scrolled.set_size_request(700, 400)
@@ -171,14 +174,14 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             grid.set_row_spacing(5)
             image = Gtk.Image.new_from_icon_name("edit-clear-all-symbolic",
                                                  Gtk.IconSize.INVALID)
-            image.set_pixel_size(ArtSize.MEDIUM)
+            image.set_pixel_size(self.__art_size)
             context = image.get_style_context()
             context.add_class("cover-frame")
             padding = context.get_padding(Gtk.StateFlags.NORMAL)
             border = context.get_border(Gtk.StateFlags.NORMAL)
-            image.set_size_request(ArtSize.BANNER + padding.left +
+            image.set_size_request(self.__art_size + padding.left +
                                    padding.right + border.left + border.right,
-                                   ArtSize.BANNER + padding.top +
+                                   self.__art_size + padding.top +
                                    padding.bottom + border.top + border.bottom)
             image.show()
             label = Gtk.Label.new(_("Remove"))
@@ -306,7 +309,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         """
         child = ArtworkSearchChild(api, self.__view_type)
         child.show()
-        status = child.populate(content)
+        status = child.populate(content, self.__art_size)
         if status:
             child.set_name("web")
             self._flowbox.add(child)
