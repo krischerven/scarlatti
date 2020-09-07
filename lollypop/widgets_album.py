@@ -98,6 +98,14 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         return self.__album.name
 
     @property
+    def album(self):
+        """
+            Get album
+            @return Album
+        """
+        return self.__album
+
+    @property
     def is_populated(self):
         """
             True if populated

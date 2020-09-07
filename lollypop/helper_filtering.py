@@ -135,6 +135,11 @@ class FilteringHelper():
             elif hasattr(typeahead_child, "data"):
                 reset_party_mode()
                 typeahead_child.activate()
+            elif hasattr(typeahead_child, "album"):
+                reset_party_mode()
+                album = typeahead_child.album
+                App().player.add_album(album)
+                App().player.load(album.tracks[0])
             elif hasattr(typeahead_child, "track"):
                 reset_party_mode()
                 track = typeahead_child.track
