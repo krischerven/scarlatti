@@ -101,12 +101,13 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             else:
                 parent.add(widget)
 
-    def __add_menu_container(self, menu_name, submenu, scrolled):
+    def __add_menu_container(self, menu_name, submenu, scrolled, margin=10):
         """
             Add menu container
             @param menu_name as str
             @param submenu as bool
             @param scrolled as bool
+            @param margin as int
         """
         grid = self.get_child_by_name(menu_name)
         if grid is None:
@@ -114,7 +115,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             grid.set_orientation(Gtk.Orientation.VERTICAL)
             grid.connect("map", self.__on_grid_map, menu_name)
             self.__grids[menu_name] = grid
-            grid.set_property("margin", 10)
+            grid.set_property("margin", margin)
             grid.show()
             if scrolled:
                 scrolled = Gtk.ScrolledWindow()
@@ -143,12 +144,18 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param submenu as bool
             @param scrolled as bool
         """
-        self.__add_menu_container(menu_name, submenu, scrolled)
-        menu_range = list(range(0, menu.get_n_items()))
-        if submenu:
-            self.__submenu_queue.append((menu, menu_name, menu_range))
+        n_items = menu.get_n_items()
+        if n_items:
+            self.__add_menu_container(menu_name, submenu, scrolled, 10)
+            menu_range = list(range(0, n_items))
+            if submenu:
+                self.__submenu_queue.append((menu, menu_name, menu_range))
+            else:
+                self.__add_menu_items(menu, menu_name, menu_range)
         else:
-            self.__add_menu_items(menu, menu_name, menu_range)
+            self.__add_menu_container(menu_name, submenu, scrolled, 0)
+            self.__built = True
+            self.__add_widgets()
 
     def __add_menu_items(self, menu, menu_name, indexes):
         """
