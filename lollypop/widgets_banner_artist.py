@@ -241,12 +241,10 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         else:
             self._artwork.get_style_context().add_class("default-banner")
         if self.width < ArtSize.BANNER * 3:
-            if self.__badge_artwork.get_opacity() == 1:
-                self.__badge_artwork.set_opacity(0.1)
+            if self.__widget.get_child_at(1, 0) == self.__labels:
                 self.__widget.remove(self.__labels)
-                self.__widget.attach(self.__labels, 0, 0, 2, 3)
-        elif self.__badge_artwork.get_opacity() != 1:
-            self.__badge_artwork.set_opacity(1)
+                self.__widget.attach(self.__labels, 2, 2, 3, 1)
+        elif self.__widget.get_child_at(2, 2) == self.__labels:
             self.__widget.remove(self.__labels)
             self.__widget.attach(self.__labels, 1, 0, 1, 3)
 
