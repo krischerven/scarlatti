@@ -264,12 +264,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if self.width < ArtSize.BANNER * 3:
             if self.__cover_widget.get_opacity() == 1:
                 self.__cover_widget.set_opacity(0.1)
-                self.__widget.remove(self.__labels)
-                self.__widget.attach(self.__labels, 0, 0, 2, 2)
+                self.__widget.remove(self.__labels_box)
+                self.__widget.attach(self.__labels_box, 0, 0, 2, 2)
         elif self.__cover_widget.get_opacity() != 1:
             self.__cover_widget.set_opacity(1)
-            self.__widget.remove(self.__labels)
-            self.__widget.attach(self.__labels, 1, 0, 1, 2)
+            self.__widget.remove(self.__labels_box)
+            self.__widget.attach(self.__labels_box, 1, 0, 1, 2)
 
     def __update_add_button(self):
         """
