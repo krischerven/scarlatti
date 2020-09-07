@@ -48,6 +48,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                  "_on_album_artwork_changed"),
                 (App().player, "playback-added", "_on_playback_changed"),
                 (App().player, "playback-updated", "_on_playback_changed"),
+                (App().player, "playback-setted", "_on_playback_changed"),
                 (App().player, "playback-removed", "_on_playback_changed")
         ]
 
