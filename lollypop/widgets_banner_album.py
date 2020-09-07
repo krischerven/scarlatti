@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 
 from lollypop.define import App, ArtSize, Type, ViewType
 from lollypop.define import ArtBehaviour, MARGIN_MEDIUM, MARGIN, MARGIN_SMALL
@@ -95,6 +95,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_valign(Gtk.Align.END)
         self.__title_label.set_vexpand(True)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
+        self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__artist_label = Gtk.Label.new()
         self.__artist_eventbox = Gtk.EventBox.new()
         self.__artist_eventbox.set_valign(Gtk.Align.START)
@@ -102,6 +103,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__artist_eventbox.add(self.__artist_label)
         self.__artist_eventbox.connect("realize", set_cursor_type)
         self.__artist_label.connect("query-tooltip", on_query_tooltip)
+        self.__artist_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__gesture_artist = GesturesHelper(
             self.__artist_eventbox,
             primary_press_callback=self._on_artist_press)
