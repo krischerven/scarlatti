@@ -40,69 +40,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         BannerWidget.__init__(self, view_type)
         self.__album = album
         self.__storage_type = storage_type
-        builder = Gtk.Builder()
-        builder.add_from_resource("/org/gnome/Lollypop/AlbumBannerWidget.ui")
-        builder.connect_signals(self)
-        self.__labels = builder.get_object("labels")
-        self.__title_label = builder.get_object("title_label")
-        self.__title_label.connect("query-tooltip", on_query_tooltip)
-        self.__artist_label = builder.get_object("artist_label")
-        self.__artist_label.connect("query-tooltip", on_query_tooltip)
-        self.__year_label = builder.get_object("year_label")
-        self.__duration_label = builder.get_object("duration_label")
-        self.__play_button = builder.get_object("play_button")
-        self.__add_button = builder.get_object("add_button")
-        self.__menu_button = builder.get_object("menu_button")
-        self.__widget = builder.get_object("widget")
-        if view_type & ViewType.OVERLAY:
-            style = "banner-button"
-        else:
-            style = "menu-button"
-        self.__play_button.get_style_context().add_class(style)
-        self.__add_button.get_style_context().add_class(style)
-        self.__menu_button.get_style_context().add_class(style)
-        self.__title_label.set_label(album.name)
-        if view_type & ViewType.ALBUM:
-            self.__cover_widget = EditCoverWidget(album, view_type)
-            self.__artist_label.show()
-            self.__artist_label.set_label(", ".join(album.artists))
-        else:
-            self.__cover_widget = CoverWidget(album, view_type)
-            self.__cover_widget.set_margin_top(MARGIN_MEDIUM)
-            self.__cover_widget.set_margin_bottom(MARGIN_MEDIUM)
-            self.__title_label.set_opacity(0.8)
-            self.__year_label.set_opacity(0.7)
-            self.__duration_label.set_opacity(0.6)
-            self.__cover_widget.connect("populated",
-                                        self.__on_cover_populated)
-        self.__cover_widget.show()
-        if album.year is not None:
-            self.__year_label.set_label(str(album.year))
-            self.__year_label.show()
-        human_duration = get_human_duration(album.duration)
-        self.__duration_label.set_text(human_duration)
-        artist_eventbox = builder.get_object("artist_eventbox")
-        artist_eventbox.connect("realize", set_cursor_type)
-        self.__gesture1 = GesturesHelper(
-            artist_eventbox, primary_press_callback=self._on_artist_press)
-        year_eventbox = builder.get_object("year_eventbox")
-        year_eventbox.connect("realize", set_cursor_type)
-        self.__gesture2 = GesturesHelper(
-            year_eventbox, primary_press_callback=self._on_year_press)
-        self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
-        self.__bottom_box = builder.get_object("bottom_box")
-        self.__loved_widget = LovedWidget(album, Gtk.IconSize.INVALID)
-        self.__loved_widget.show()
-        self.__bottom_box.pack_start(self.__loved_widget, 0, False, False)
-        self.__rating_widget = RatingWidget(album, Gtk.IconSize.INVALID)
-        self.__rating_widget.show()
-        self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
-        if view_type & ViewType.OVERLAY:
-            self._overlay.add_overlay(self.__widget)
-            self._overlay.set_overlay_pass_through(self.__widget, True)
-        else:
-            self.add(self.__widget)
-        self.__update_add_button()
+        self.__widget = None
         return [
                 (App().window.container.widget, "notify::folded",
                  "_on_container_folded"),
@@ -117,6 +55,71 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
             Populate the view
         """
+        if self.__widget is not None:
+            return
+        builder = Gtk.Builder()
+        builder.add_from_resource("/org/gnome/Lollypop/AlbumBannerWidget.ui")
+        builder.connect_signals(self)
+        self.__labels = builder.get_object("labels")
+        self.__title_label = builder.get_object("title_label")
+        self.__title_label.connect("query-tooltip", on_query_tooltip)
+        self.__artist_label = builder.get_object("artist_label")
+        self.__artist_label.connect("query-tooltip", on_query_tooltip)
+        self.__year_label = builder.get_object("year_label")
+        self.__duration_label = builder.get_object("duration_label")
+        self.__play_button = builder.get_object("play_button")
+        self.__add_button = builder.get_object("add_button")
+        self.__menu_button = builder.get_object("menu_button")
+        self.__widget = builder.get_object("widget")
+        if self.view_type & ViewType.OVERLAY:
+            style = "banner-button"
+        else:
+            style = "menu-button"
+        self.__play_button.get_style_context().add_class(style)
+        self.__add_button.get_style_context().add_class(style)
+        self.__menu_button.get_style_context().add_class(style)
+        self.__title_label.set_label(self.__album.name)
+        if self.view_type & ViewType.ALBUM:
+            self.__cover_widget = EditCoverWidget(self.__album, self.view_type)
+            self.__artist_label.show()
+            self.__artist_label.set_label(", ".join(self.__album.artists))
+        else:
+            self.__cover_widget = CoverWidget(self.__album, self.view_type)
+            self.__cover_widget.set_margin_top(MARGIN_MEDIUM)
+            self.__cover_widget.set_margin_bottom(MARGIN_MEDIUM)
+            self.__title_label.set_opacity(0.8)
+            self.__year_label.set_opacity(0.7)
+            self.__duration_label.set_opacity(0.6)
+            self.__cover_widget.connect("populated",
+                                        self.__on_cover_populated)
+        self.__cover_widget.show()
+        if self.__album.year is not None:
+            self.__year_label.set_label(str(self.__album.year))
+            self.__year_label.show()
+        human_duration = get_human_duration(self.__album.duration)
+        self.__duration_label.set_text(human_duration)
+        artist_eventbox = builder.get_object("artist_eventbox")
+        artist_eventbox.connect("realize", set_cursor_type)
+        self.__gesture1 = GesturesHelper(
+            artist_eventbox, primary_press_callback=self._on_artist_press)
+        year_eventbox = builder.get_object("year_eventbox")
+        year_eventbox.connect("realize", set_cursor_type)
+        self.__gesture2 = GesturesHelper(
+            year_eventbox, primary_press_callback=self._on_year_press)
+        self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
+        self.__bottom_box = builder.get_object("bottom_box")
+        self.__loved_widget = LovedWidget(self.__album, Gtk.IconSize.INVALID)
+        self.__loved_widget.show()
+        self.__bottom_box.pack_start(self.__loved_widget, 0, False, False)
+        self.__rating_widget = RatingWidget(self.__album, Gtk.IconSize.INVALID)
+        self.__rating_widget.show()
+        self.__bottom_box.pack_start(self.__rating_widget, 0, True, True)
+        if self.view_type & ViewType.OVERLAY:
+            self._overlay.add_overlay(self.__widget)
+            self._overlay.set_overlay_pass_through(self.__widget, True)
+        else:
+            self.add(self.__widget)
+        self.__update_add_button()
         self.__set_internal_size()
 
     def update_for_width(self, width):
