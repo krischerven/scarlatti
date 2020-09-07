@@ -38,7 +38,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         """
         Gtk.Stack.__init__(self)
         self.__built = False
-        self.__boxes = {}
+        self.__grids = {}
         self.__menu_queue = []
         self.__submenu_queue = []
         self.__widgets_queue = []
@@ -81,18 +81,18 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             (widget, position) = self.__widgets_queue.pop(0)
             if widget.submenu_name is not None:
                 self.__add_menu_container(widget.submenu_name, True, True)
-                self.__boxes[widget.submenu_name].add(widget)
+                self.__grids[widget.submenu_name].add(widget)
                 button = Gtk.ModelButton.new()
                 button.set_label(widget.submenu_name)
                 button.get_child().set_halign(Gtk.Align.START)
                 button.set_property("menu-name", widget.submenu_name)
                 button.show()
-                parent = self.__boxes["main"]
+                parent = self.__grids["main"]
                 widget = button
             else:
                 parent = self.get_child_by_name("main")
                 if isinstance(parent, Gtk.ScrolledWindow):
-                    # scrolled -> viewport -> box
+                    # scrolled -> viewport -> grid
                     parent = parent.get_child().get_child()
             if position < -1:
                 position = len(parent) + position + 1
@@ -108,23 +108,23 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             @param submenu as bool
             @param scrolled as bool
         """
-        box = self.get_child_by_name(menu_name)
-        if box is None:
-            box = Gtk.Grid.new()
-            box.set_orientation(Gtk.Orientation.VERTICAL)
-            box.connect("map", self.__on_box_map, menu_name)
-            self.__boxes[menu_name] = box
-            box.set_property("margin", 10)
-            box.show()
+        grid = self.get_child_by_name(menu_name)
+        if grid is None:
+            grid = Gtk.Grid.new()
+            grid.set_orientation(Gtk.Orientation.VERTICAL)
+            grid.connect("map", self.__on_grid_map, menu_name)
+            self.__grids[menu_name] = grid
+            grid.set_property("margin", 10)
+            grid.show()
             if scrolled:
                 scrolled = Gtk.ScrolledWindow()
                 scrolled.set_policy(Gtk.PolicyType.NEVER,
                                     Gtk.PolicyType.AUTOMATIC)
                 scrolled.show()
-                scrolled.add(box)
+                scrolled.add(grid)
                 self.add_named(scrolled, menu_name)
             else:
-                self.add_named(box, menu_name)
+                self.add_named(grid, menu_name)
             if submenu:
                 button = Gtk.ModelButton.new()
                 button.get_style_context().add_class("padding")
@@ -133,7 +133,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.set_label(menu_name)
                 button.get_child().set_halign(Gtk.Align.START)
                 button.show()
-                box.add(button)
+                grid.add(button)
 
     def __add_menu(self, menu, menu_name, submenu, scrolled):
         """
@@ -235,7 +235,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         if target is not None:
             button.set_action_target_value(target)
         button.show()
-        self.__boxes[menu_name].add(button)
+        self.__grids[menu_name].add(button)
 
     def __add_section(self, text, menu, menu_name):
         """
@@ -259,7 +259,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         sep2.set_hexpand(True)
         box.add(sep2)
         box.show_all()
-        self.__boxes[menu_name].add(box)
+        self.__grids[menu_name].add(box)
         self.__add_menu(menu, menu_name, False, False)
 
     def __add_submenu(self, text, menu, menu_name):
@@ -277,7 +277,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button.set_label(text.get_string())
         button.get_child().set_halign(Gtk.Align.START)
         button.show()
-        self.__boxes[menu_name].add(button)
+        self.__grids[menu_name].add(button)
 
     def __add_header(self, text, icon_name, menu_name):
         """
@@ -308,7 +308,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         grid.add(close_image)
         button.set_image(grid)
         button.get_style_context().add_class("padding")
-        self.__boxes[menu_name].add(button)
+        self.__grids[menu_name].add(button)
 
     def __add_album_header(self, text, album_id, menu_name):
         """
@@ -345,7 +345,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
                 self.__on_artwork,
                 artwork)
-        self.__boxes[menu_name].add(button)
+        self.__grids[menu_name].add(button)
 
     def __add_artist_header(self, text, artist_id, menu_name):
         """
@@ -384,7 +384,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 ArtBehaviour.ROUNDED,
                 self.__on_artwork,
                 artwork)
-        self.__boxes[menu_name].add(button)
+        self.__grids[menu_name].add(button)
 
     def __add_rounded_header(self, text, artwork_name, menu_name):
         """
@@ -432,7 +432,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 "ROUNDED",
                 ArtSize.BANNER, ArtSize.BANNER,
                 callback=(on_load_from_cache, artwork))
-        self.__boxes[menu_name].add(button)
+        self.__grids[menu_name].add(button)
 
     def __on_artwork(self, surface, artwork):
         """
@@ -447,7 +447,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
             artwork.set_from_surface(surface)
         artwork.show()
 
-    def __on_box_map(self, widget, menu_name):
+    def __on_grid_map(self, widget, menu_name):
         """
             On map, set stack order
             @param widget as Gtk.Widget
