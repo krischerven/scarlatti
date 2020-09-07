@@ -61,6 +61,7 @@
       <object class="GtkEventBox" id="artwork_event">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="halign">start</property>
         <property name="valign">center</property>
         <signal name="button-release-event" handler="_on_badge_button_release" swapped="no"/>
         <child>

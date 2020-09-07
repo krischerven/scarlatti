@@ -30,7 +30,7 @@ class CoverWidgetBase(SignalsHelper):
             @param album as Album
             @param view_type as ViewType
         """
-        self.set_property("halign", Gtk.Align.CENTER)
+        self.set_property("halign", Gtk.Align.START)
         self.set_property("valign", Gtk.Align.CENTER)
         self._album = album
         self._view_type = view_type

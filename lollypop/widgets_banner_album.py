@@ -63,7 +63,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__widget.set_margin_end(MARGIN_MEDIUM)
         self.__widget.set_margin_top(MARGIN_SMALL)
         self.__widget.set_margin_bottom(MARGIN_SMALL)
-        self.__widget.set_row_spacing(MARGIN_MEDIUM)
+        self.__widget.set_row_spacing(MARGIN_SMALL)
         self.__widget.set_column_spacing(MARGIN_MEDIUM)
         self.__top_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
         self.__middle_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0)
@@ -100,7 +100,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__artist_label = Gtk.Label.new()
         self.__artist_eventbox = Gtk.EventBox.new()
         self.__artist_eventbox.set_valign(Gtk.Align.START)
-        self.__artist_eventbox.set_halign(Gtk.Align.START)
         self.__artist_eventbox.add(self.__artist_label)
         self.__artist_eventbox.connect("realize", set_cursor_type)
         self.__artist_label.connect("query-tooltip", on_query_tooltip)
@@ -118,6 +117,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__bottom_box.pack_end(self.__duration_label, False, True, 0)
         self.__labels_box.add(self.__title_label)
         self.__labels_box.add(self.__artist_eventbox)
+        self.__labels_box.set_halign(Gtk.Align.START)
         self.__widget.attach(self.__top_box, 2, 0, 1, 1)
         self.__widget.attach(self.__middle_box, 2, 1, 1, 1)
         self.__widget.attach(self.__bottom_box, 1, 2, 2, 1)
@@ -262,14 +262,19 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             ArtBehaviour.DARKER,
                             self._on_artwork)
         if self.width < ArtSize.BANNER * 3:
-            if self.__cover_widget.get_opacity() == 1:
-                self.__cover_widget.set_opacity(0.1)
+            if self.__widget.get_child_at(1, 0) == self.__labels_box:
                 self.__widget.remove(self.__labels_box)
-                self.__widget.attach(self.__labels_box, 0, 0, 2, 2)
-        elif self.__cover_widget.get_opacity() != 1:
-            self.__cover_widget.set_opacity(1)
+                self.__widget.attach(self.__labels_box, 0, 4, 3, 1)
+                if self.view_type & ViewType.ARTIST:
+                    self.__labels_box.get_style_context().add_class(
+                        "dim-label")
+                self.__labels_box.set_halign(Gtk.Align.FILL)
+        elif self.__widget.get_child_at(0, 4) == self.__labels_box:
             self.__widget.remove(self.__labels_box)
             self.__widget.attach(self.__labels_box, 1, 0, 1, 2)
+            if self.view_type & ViewType.ARTIST:
+                self.__labels_box.get_style_context().remove_class("dim-label")
+            self.__labels_box.set_halign(Gtk.Align.START)
 
     def __update_add_button(self):
         """
