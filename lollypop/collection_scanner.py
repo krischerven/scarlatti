@@ -213,8 +213,11 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().albums.set_artist_ids(item.album_id, item.album_artist_ids)
         # Set artist ids based on content
         else:
-            new_album_artist_ids = App().albums.calculate_artist_ids(
-                item.album_id, self.__disable_compilations)
+            if item.compilation:
+                new_album_artist_ids = [Type.COMPILATIONS]
+            else:
+                new_album_artist_ids = App().albums.calculate_artist_ids(
+                    item.album_id, self.__disable_compilations)
             App().albums.set_artist_ids(item.album_id, new_album_artist_ids)
             # We handle artists already created by any previous save_track()
             item.new_album_artist_ids = []
@@ -680,7 +683,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                                  None, "", "", parsed.netloc,
                                  parsed.netloc, "", False, 0, False, 0, 0, 0,
                                  None, 0, "", "", "", "", 1, 0, 0, 0, 0, 0,
-                                 False, 0, storage_type)
+                                 False, 0, False, storage_type)
             items.append(item)
             self.__progress_count += 1
         return items
@@ -788,6 +791,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         if album_mtime == 0:
             album_mtime = track_mtime
         bpm = self.get_bpm(tags)
+        compilation = self.get_compilation(tags)
         year = None
         if not App().settings.get_value("ignore-original-date"):
             (year, timestamp) = self.get_original_year(tags)
@@ -810,7 +814,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                 album_synced, album_rate, album_pop, discnumber, year,
                 timestamp, mb_album_id, mb_track_id, mb_artist_id,
                 mb_album_artist_id, tracknumber, track_pop, track_rate, bpm,
-                track_mtime, track_ltime, track_loved, duration)
+                track_mtime, track_ltime, track_loved, duration, compilation)
 
     def __add2db(self, uri, name, artists,
                  genres, a_sortnames, aa_sortnames, album_artists, album_name,
@@ -818,7 +822,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                  album_pop, discnumber, year, timestamp, mb_album_id,
                  mb_track_id, mb_artist_id, mb_album_artist_id,
                  tracknumber, track_pop, track_rate, bpm, track_mtime,
-                 track_ltime, track_loved, duration,
+                 track_ltime, track_loved, duration, compilation,
                  storage_type=StorageType.COLLECTION):
         """
             Add new file to DB
@@ -856,6 +860,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                               track_ltime=track_ltime,
                               track_loved=track_loved,
                               duration=duration,
+                              compilation=compilation,
                               storage_type=storage_type)
         self.save_album(item)
         self.save_track(item)

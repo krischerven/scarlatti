@@ -311,6 +311,27 @@ class TagReader:
             discnumber = 0
         return discnumber
 
+    def get_compilation(self, tags):
+        """
+            Return True if album is a compilation
+            @param tags as Gst.TagList
+            @return bool
+        """
+        size = tags.get_tag_size("private-id3v2-frame")
+        for i in range(0, size):
+            (exists, sample) = tags.get_sample_index(
+                "private-id3v2-frame",
+                i)
+            if not exists:
+                continue
+            (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
+            if not exists:
+                continue
+            string = m.data.decode("utf-8")
+            if string.startswith("TCMP"):
+                return string[-1] == "1"
+        return False
+
     def get_tracknumber(self, tags, filename):
         """
             Return track number for tags

@@ -28,6 +28,7 @@ class CollectionItem:
                  album_mtime=0, duration=0, tracknumber=0,
                  discnumber=1, discname="", track_mtime=0, track_pop=0,
                  track_rate=0, track_loved=False, track_ltime=0, bpm=0,
+                 compilation=False,
                  storage_type=0):
         """
             Init item
@@ -70,6 +71,7 @@ class CollectionItem:
             @param track_loved as bool
             @param track_ltime as int
             @param bpm as int
+            @param compilation as bool
             @param storage_type as StorageType
         """
         self.track_id = track_id
@@ -111,4 +113,5 @@ class CollectionItem:
         self.track_loved = track_loved
         self.track_ltime = track_ltime
         self.bpm = bpm
+        self.compilation = compilation
         self.storage_type = storage_type
