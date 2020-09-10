@@ -373,7 +373,7 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="tooltip-text" translatable="yes">You need to reset database</property>
+                <property name="tooltip-text" translatable="yes">You need to reset collection</property>
                 <property name="title" translatable="yes">Show compilations</property>
                 <property name="activatable-widget">show-compilations_boolean</property>
                 <property name="subtitle" translatable="yes">A compilation is an album without any "Album artist tag"
@@ -412,7 +412,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Import advanced tags</property>
-                <property name="tooltip-text" translatable="yes">You need to reset database</property>
+                <property name="tooltip-text" translatable="yes">You need to reset collection</property>
                 <property name="activatable-widget">import-advanced-artist-tags_boolean</property>
                 <property name="subtitle" translatable="yes">Performers, composers, …</property>
                 <child>
