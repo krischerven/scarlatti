@@ -38,6 +38,7 @@ It provides:
 - `appstream-glib`
 - `gir1.2-gstreamer-1.0 (Debian)`
 - `python3`
+- `libhandy1`
 - `meson >= 0.40`
 - `ninja`
 - `totem-plparser`
