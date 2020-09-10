@@ -215,6 +215,11 @@
             <summary>Handle compilations</summary>
             <description></description>
         </key>
+        <key type="b" name="show-advanced-artist-tags">
+            <default>true</default>
+            <summary>Handle performers, compositors, ...</summary>
+            <description></description>
+        </key>
         <key type="b" name="show-compilations-in-album-view">
             <default>false</default>
             <summary>Show compilations in albums view</summary>

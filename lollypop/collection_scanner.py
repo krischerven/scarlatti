@@ -768,11 +768,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         if version != "":
             title += " (%s)" % version
         artists = self.get_artists(tags)
-        composers = self.get_composers(tags)
-        performers = self.get_performers(tags)
-        remixers = self.get_remixers(tags)
-        if remixers != "":
-            artists += ";%s" % remixers
         a_sortnames = self.get_artist_sortnames(tags)
         aa_sortnames = self.get_album_artist_sortnames(tags)
         album_artists = self.get_album_artists(tags)
@@ -800,15 +795,17 @@ class CollectionScanner(GObject.GObject, TagReader):
         # If no artists tag, use album artist
         if artists == "":
             artists = album_artists
-        # if artists is always null, no album artists too,
-        # use composer/performer
+        if App().settings.get_value("show-advanced-artist-tags"):
+            composers = self.get_composers(tags)
+            conductors = self.get_conductors(tags)
+            performers = self.get_performers(tags)
+            remixers = self.get_remixers(tags)
+            artists += ";%s" % performers if performers != "" else ""
+            artists += ";%s" % conductors if conductors != "" else ""
+            artists += ";%s" % composers if composers != "" else ""
+            artists += ";%s" % remixers if remixers != "" else ""
         if artists == "":
-            artists = performers
-            album_artists = composers
-            if artists == "":
-                artists = album_artists
-            if artists == "":
-                artists = _("Unknown")
+            artists = _("Unknown")
         return (title, artists, genres, a_sortnames, aa_sortnames,
                 album_artists, album_name, discname, album_loved, album_mtime,
                 album_synced, album_rate, album_pop, discnumber, year,

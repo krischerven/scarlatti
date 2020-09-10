@@ -106,6 +106,22 @@ class TagReader:
                 composers.append(read)
         return "; ".join(composers)
 
+    def get_conductors(self, tags):
+        """
+            Return conductors for tags
+            @param tags as Gst.TagList
+            @return string like "conductor1;conductor2;..."
+        """
+        if tags is None:
+            return _("Unknown")
+        conductors = []
+        for i in range(tags.get_tag_size("conductor")):
+            (exists, read) = tags.get_string_index("conductor", i)
+            # We need to check tag is not just spaces
+            if exists and read.strip(" "):
+                conductors.append(read)
+        return "; ".join(conductors)
+
     def get_mb_id(self, tags, name):
         """
             Get MusicBrainz ID
