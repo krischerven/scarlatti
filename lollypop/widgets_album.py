@@ -201,6 +201,9 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         """
         if not self.__tracks_view.is_populated:
             self.__tracks_view.populate()
+        else:
+            self.__revealer.set_transition_type(
+                Gtk.RevealerTransitionType.SLIDE_DOWN)
 
     def __on_banner_populated(self, widget):
         """
