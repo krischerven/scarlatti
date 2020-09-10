@@ -215,8 +215,8 @@
             <summary>Handle compilations</summary>
             <description></description>
         </key>
-        <key type="b" name="show-advanced-artist-tags">
-            <default>true</default>
+        <key type="b" name="import-advanced-artist-tags">
+            <default>false</default>
             <summary>Handle performers, compositors, ...</summary>
             <description></description>
         </key>

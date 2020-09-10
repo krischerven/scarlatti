@@ -120,24 +120,6 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">Auto update music</property>
-                <property name="activatable-widget">auto-update_boolean</property>
-                <property name="subtitle" translatable="yes">Update music if files added to collection</property>
-                <child>
-                  <object class="GtkSwitch" id="auto-update_boolean">
-                    <property name="name">auto-update</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Continue playback when closed</property>
                 <property name="activatable-widget">background-mode_boolean</property>
                 <property name="subtitle" translatable="yes">Play music in background</property>
@@ -174,50 +156,12 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">Import playlists</property>
-                <property name="activatable-widget">import-playlists_boolean</property>
-                <property name="subtitle" translatable="yes">Search for playlists in your collection</property>
-                <child>
-                  <object class="GtkSwitch" id="import-playlists_boolean">
-                    <property name="name">import-playlists</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Save changes to file</property>
                 <property name="activatable-widget">save-to-tags_boolean</property>
                 <property name="subtitle" translatable="yes">Save artwork and rating to files</property>
                 <child>
                   <object class="GtkSwitch" id="save-to-tags_boolean">
                     <property name="name">save-to-tags</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="tooltip-text" translatable="yes">You need to reset database</property>
-                <property name="title" translatable="yes">Show compilations</property>
-                <property name="activatable-widget">show-compilations_boolean</property>
-                <property name="subtitle" translatable="yes">A compilation is an album without any "Album artist tag"
-and with different artists</property>
-                <child>
-                  <object class="GtkSwitch" id="show-compilations_boolean">
-                    <property name="name">show-compilations</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
@@ -378,6 +322,88 @@ and with different artists</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="HdyPreferencesGroup">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="title" translatable="yes">Import settings</property>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Auto update music</property>
+                <property name="activatable-widget">auto-update_boolean</property>
+                <property name="subtitle" translatable="yes">Update music if files added to collection</property>
+                <child>
+                  <object class="GtkSwitch" id="auto-update_boolean">
+                    <property name="name">auto-update</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="tooltip-text" translatable="yes">You need to reset database</property>
+                <property name="title" translatable="yes">Show compilations</property>
+                <property name="activatable-widget">show-compilations_boolean</property>
+                <property name="subtitle" translatable="yes">A compilation is an album without any "Album artist tag"
+and with different artists</property>
+                <child>
+                  <object class="GtkSwitch" id="show-compilations_boolean">
+                    <property name="name">show-compilations</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Import playlists</property>
+                <property name="activatable-widget">import-playlists_boolean</property>
+                <property name="subtitle" translatable="yes">Search for playlists in your collection</property>
+                <child>
+                  <object class="GtkSwitch" id="import-playlists_boolean">
+                    <property name="name">import-playlists</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Import advanced tags</property>
+                <property name="tooltip-text" translatable="yes">You need to reset database</property>
+                <property name="activatable-widget">import-advanced-artist-tags_boolean</property>
+                <property name="subtitle" translatable="yes">Performers, composers, …</property>
+                <child>
+                  <object class="GtkSwitch" id="import-advanced-artist-tags_boolean">
+                    <property name="name">import-playlists</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
                 </child>
               </object>
             </child>

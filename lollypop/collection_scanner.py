@@ -795,7 +795,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         # If no artists tag, use album artist
         if artists == "":
             artists = album_artists
-        if App().settings.get_value("show-advanced-artist-tags"):
+        if App().settings.get_value("import-advanced-artist-tags"):
             composers = self.get_composers(tags)
             conductors = self.get_conductors(tags)
             performers = self.get_performers(tags)
