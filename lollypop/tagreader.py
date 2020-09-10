@@ -317,6 +317,8 @@ class TagReader:
             @param tags as Gst.TagList
             @return bool
         """
+        if tags is None:
+            return False
         size = tags.get_tag_size("private-id3v2-frame")
         for i in range(0, size):
             (exists, sample) = tags.get_sample_index(
@@ -330,6 +332,14 @@ class TagReader:
             string = m.data.decode("utf-8")
             if string.startswith("TCMP"):
                 return string[-1] == "1"
+        size = tags.get_tag_size("extended-comment")
+        for i in range(0, size):
+            (exists, sample) = tags.get_string_index(
+                "extended-comment",
+                i)
+            if not exists or not sample.startswith("COMPILATION="):
+                continue
+            return sample[12]
         return False
 
     def get_tracknumber(self, tags, filename):
