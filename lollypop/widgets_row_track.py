@@ -58,12 +58,14 @@ class TrackRow(Gtk.ListBoxRow):
         Gtk.ListBoxRow.__init__(self)
         self.__view_type = view_type
         self._track = track
+        self.set_property("margin", MARGIN_SMALL)
         self._grid = Gtk.Grid()
         self._grid.set_property("valign", Gtk.Align.CENTER)
         self._grid.set_column_spacing(5)
         self._grid.show()
         self._indicator = IndicatorWidget(self, view_type)
         self._indicator.show()
+        self._indicator.set_valign(Gtk.Align.CENTER)
         self._grid.add(self._indicator)
         self._num_label = Gtk.Label.new()
         self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
@@ -71,9 +73,7 @@ class TrackRow(Gtk.ListBoxRow):
         self._num_label.get_style_context().add_class("dim-label")
         self.update_number_label()
         self._grid.add(self._num_label)
-        self.__title_label = Gtk.Label.new(
-            GLib.markup_escape_text(self._track.name))
-        self.__title_label.set_use_markup(True)
+        self.__title_label = Gtk.Label.new()
         self.__title_label.set_property("has-tooltip", True)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__title_label.set_property("hexpand", True)
@@ -83,22 +83,14 @@ class TrackRow(Gtk.ListBoxRow):
         self.__title_label.show()
         self._grid.add(self.__title_label)
         featuring_artist_ids = track.get_featuring_artist_ids(album_artist_ids)
+        markup = GLib.markup_escape_text(self._track.name)
         if featuring_artist_ids:
             artists = []
             for artist_id in featuring_artist_ids:
                 artists.append(App().artists.get_name(artist_id))
-            artists_label = Gtk.Label.new(GLib.markup_escape_text(
-                ", ".join(artists)))
-            artists_label.set_use_markup(True)
-            artists_label.set_property("has-tooltip", True)
-            artists_label.connect("query-tooltip", on_query_tooltip)
-            artists_label.set_property("hexpand", True)
-            artists_label.set_property("halign", Gtk.Align.END)
-            artists_label.set_ellipsize(Pango.EllipsizeMode.END)
-            artists_label.set_opacity(0.3)
-            artists_label.set_margin_end(5)
-            artists_label.show()
-            self._grid.add(artists_label)
+            markup += "\n<span size='x-small' alpha='40000'>%s</span>" %\
+                GLib.markup_escape_text(", ".join(artists))
+        self.__title_label.set_markup(markup)
         duration = ms_to_string(self._track.duration)
         self.__duration_label = Gtk.Label.new(duration)
         self.__duration_label.get_style_context().add_class("dim-label")
