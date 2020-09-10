@@ -66,6 +66,25 @@
             <child>
               <object class="HdyActionRow">
                 <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes"></property>
+                <property name="title" translatable="yes">Single column mode</property>
+                <property name="activatable-widget">force-single-column_boolean</property>
+                <property name="subtitle" translatable="yes">Only show a single column for tracks</property>
+                <child>
+                  <object class="GtkSwitch" id="force-single-column_boolean">
+                    <property name="name">force-single-column</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Show artist artwork</property>
                 <property name="activatable-widget">artist-artwork_boolean</property>
@@ -398,7 +417,7 @@ and with different artists</property>
                 <property name="subtitle" translatable="yes">Performers, composers, …</property>
                 <child>
                   <object class="GtkSwitch" id="import-advanced-artist-tags_boolean">
-                    <property name="name">import-playlists</property>
+                    <property name="name">import-advanced-artist-tags</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
