@@ -67,6 +67,10 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__main_grid.add(self.__boxes_grid)
         self.add_widget(self.__main_grid, self.__banner)
         self.connect("populated", self.__on_populated)
+        if App().settings.get_value("force-single-column"):
+            self.__column_width = 1200
+        else:
+            self.__column_width = 600
         if App().animations:
             self.__event_controller = Gtk.EventControllerMotion.new(self)
             self.__event_controller.connect("motion", self.__on_motion)
@@ -143,7 +147,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         if SizeAllocationHelper._handle_width_allocate(self, allocation):
             if allocation.width != self.__width:
                 self.__width = allocation.width
-                boxes_count = self.__width // 600
+                boxes_count = self.__width // self.__column_width
                 if boxes_count < 1:
                     boxes_count = 1
                 if self.__boxes_count == boxes_count:

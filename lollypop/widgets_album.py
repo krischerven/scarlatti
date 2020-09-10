@@ -43,6 +43,10 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         self.__view_type = view_type
         self.__storage_type = storage_type
         self.__album = album
+        if App().settings.get_value("force-single-column"):
+            self.__column_width = 1200
+        else:
+            self.__column_width = 600
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "duration-changed", "_on_duration_changed"),
@@ -79,7 +83,7 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         self.__revealer.set_reveal_child(True)
 
     def do_get_preferred_width(self):
-        return (200, 600)
+        return (200, self.__column_width)
 
     @property
     def banner(self):
