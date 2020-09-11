@@ -262,7 +262,7 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
             @param y as int
         """
         hovered_child = None
-        for i in range(0, self.__boxes_count):
+        for i in range(0, len(self.__boxes)):
             for child in self.__boxes[i].get_children():
                 (tx, ty) = child.translate_coordinates(self, 0, 0)
                 width = child.get_allocated_width()
