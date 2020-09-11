@@ -79,7 +79,7 @@ class CoverWidgetBase(SignalsHelper):
                 self.__art_size,
                 self._artwork.get_scale_factor(),
                 ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE,
-                self.__on_album_artwork)
+                self._on_album_artwork)
 
     def _on_album_artwork(self, surface):
         """
