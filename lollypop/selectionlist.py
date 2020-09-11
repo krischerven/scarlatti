@@ -710,9 +710,9 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             @param leaflet as Handy.Leaflet
             @param folded as Gparam
         """
+        folded = App().window.folded
         self.__base_mask &= ~SelectionListMask.LABEL
         self.__scrolled.set_hexpand(folded)
-        if App().window.folded or\
-                App().settings.get_value("show-sidebar-labels"):
+        if folded or App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
         self.__set_rows_mask(self.__base_mask | self.__mask)
