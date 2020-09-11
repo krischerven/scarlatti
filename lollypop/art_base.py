@@ -81,12 +81,9 @@ class BaseArt(GObject.GObject):
                                           GdkPixbuf.InterpType.BILINEAR)
             del _pixbuf
         if behaviour & ArtBehaviour.CACHE and cache_path is not None:
-            if cache_path.endswith(".jpg"):
-                pixbuf.savev(cache_path, "jpeg", ["quality"],
-                             [str(App().settings.get_value(
-                                 "cover-quality").get_int32())])
-            else:
-                pixbuf.savev(cache_path, "png", [None], [None])
+            pixbuf.savev(cache_path, "jpeg", ["quality"],
+                         [str(App().settings.get_value(
+                             "cover-quality").get_int32())])
         return pixbuf
 
     def update_art_size(self):
