@@ -1026,13 +1026,18 @@ class AlbumsDatabase:
         artist_ids = remove_static(artist_ids)
         if orderby is None:
             orderby = App().settings.get_enum("orderby")
-        if artist_ids or orderby == OrderBy.ARTIST:
+        if orderby == OrderBy.ARTIST_YEAR:
             order = " ORDER BY artists.sortname\
                      COLLATE NOCASE COLLATE LOCALIZED,\
                      albums.timestamp,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
-        elif orderby == OrderBy.NAME:
+        elif orderby == OrderBy.ARTIST_TITLE:
+            order = " ORDER BY artists.sortname\
+                     COLLATE NOCASE COLLATE LOCALIZED,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
+        elif orderby == OrderBy.TITLE:
             order = " ORDER BY albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.YEAR_DESC:

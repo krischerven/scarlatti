@@ -227,12 +227,12 @@ class Size:
 
 
 class OrderBy:
-    ARTIST = 0
-    NAME = 1
-    YEAR_DESC = 2
-    POPULARITY = 3
-    YEAR_ASC = 4  # Not available for user
-    GENRE = 5
+    ARTIST_YEAR = 0
+    ARTIST_TITLE = 1
+    TITLE = 2
+    YEAR_DESC = 3
+    POPULARITY = 4
+    YEAR_ASC = 5
 
 
 # Order is important

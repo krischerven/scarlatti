@@ -24,10 +24,11 @@
        <value nick="all" value="4"/>
     </enum>
     <enum id="org.gnome.Lollypop.OrderBy">
-       <value nick="artist" value="0"/>
-       <value nick="album" value="1"/>
-       <value nick="year" value="2"/>
-       <value nick="popularity" value="3"/>
+       <value nick="artist_year" value="0"/>
+       <value nick="artist_title" value="1"/>
+       <value nick="title" value="2"/>
+       <value nick="year" value="3"/>
+       <value nick="popularity" value="4"/>
     </enum>
     <schema path="/org/gnome/Lollypop/" id="org.gnome.Lollypop" gettext-domain="lollypop">
         <key type="ai" name="window-size">
@@ -389,7 +390,7 @@
             <description></description>
         </key>
         <key enum="org.gnome.Lollypop.OrderBy" name="orderby">
-            <default>'artist'</default>
+            <default>'artist_year'</default>
             <summary>Order albums by</summary>
             <description></description>
         </key>

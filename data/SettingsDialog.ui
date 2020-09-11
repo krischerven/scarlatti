@@ -67,7 +67,6 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes"></property>
                 <property name="title" translatable="yes">Single column mode</property>
                 <property name="activatable-widget">force-single-column_boolean</property>
                 <property name="subtitle" translatable="yes">Only show a single column for tracks</property>
@@ -203,8 +202,9 @@
                     <property name="halign">end</property>
                     <property name="valign">center</property>
                     <items>
-                      <item id="artist" translatable="yes">Artist</item>
-                      <item id="album" translatable="yes">Name</item>
+                      <item id="artist_year" translatable="yes">Artist - year</item>
+                      <item id="artist_title" translatable="yes">Aritst - title</item>
+                      <item id="title" translatable="yes">Title</item>
                       <item id="year" translatable="yes">Year</item>
                       <item id="popularity" translatable="yes">Popularity</item>
                     </items>
@@ -411,8 +411,8 @@ and with different artists</property>
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">Import advanced tags</property>
                 <property name="tooltip-text" translatable="yes">You need to reset collection</property>
+                <property name="title" translatable="yes">Import advanced tags</property>
                 <property name="activatable-widget">import-advanced-artist-tags_boolean</property>
                 <property name="subtitle" translatable="yes">Performers, composers, …</property>
                 <child>
