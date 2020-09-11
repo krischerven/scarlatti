@@ -59,17 +59,6 @@ class DNDHelper(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
-    def __get_album_row_for_track(self, track_row):
-        """
-            Get album row for track row
-            @param track_row as TrackRow
-            @return AlbumRow
-        """
-        for row in self.__listbox.get_children():
-            if track_row in row.children:
-                return row
-        return None
-
     def __update_album_rows(self, start_index, end_index):
         """
             Merge album rows and update track position for indexes
@@ -225,8 +214,8 @@ class DNDHelper(GObject.Object):
             if isinstance(row, TrackRow):
                 album_row = row.get_ancestor(AlbumRow)
                 if album_row is not None:
-                    empty = album_row.album.remove_track(row.track)
-                    if empty:
+                    album_row.album.remove_track(row.track)
+                    if album_row.album.id is None:
                         album_row.destroy()
             row.destroy()
 

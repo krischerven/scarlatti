@@ -219,14 +219,16 @@ class Album(Base):
 
     def remove_track(self, track):
         """
-            Remove track from album
+            Remove track from album, album id is None if empty
             @param track as Track
-            @return True if album empty
         """
         for _track in self.tracks:
             if track.id == _track.id:
                 self._tracks.remove(_track)
-        return len(self._tracks) == 0
+        empty = len(self._tracks) == 0
+        if empty:
+            # We don't the album to load tracks anymore
+            self.id = None
 
     def reset_tracks(self):
         """
