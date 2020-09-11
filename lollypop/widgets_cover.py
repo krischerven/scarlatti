@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, Gio, GObject
 
-from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
+from lollypop.define import App, ArtSize, ArtBehaviour, ViewType, Type
 from lollypop.utils import set_cursor_type, popup_widget, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
@@ -120,7 +120,7 @@ class EditCoverWidget(Gtk.EventBox, CoverWidgetBase, GesturesHelper):
 #######################
     def _on_primary_press_gesture(self, x, y, event):
         """
-            Show covers popover
+            Show artwork popover
             @param x as int
             @param y as int
             @param event as Gdk.Event
@@ -149,6 +149,36 @@ class EditCoverWidget(Gtk.EventBox, CoverWidgetBase, GesturesHelper):
             App().window.container.go_back()
         else:
             self._artwork_popup.destroy()
+
+
+class BrowsableCoverWidget(Gtk.EventBox, CoverWidgetBase, GesturesHelper):
+    """
+        Widget showing current album cover
+    """
+
+    def __init__(self, album, view_type):
+        """
+            Init cover widget
+            @param album as Album
+            @param view_type as ViewType
+        """
+        Gtk.EventBox.__init__(self)
+        CoverWidgetBase.__init__(self, album, view_type)
+        self.add(self._artwork)
+        GesturesHelper.__init__(self, self)
+        self.connect("realize", set_cursor_type)
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_primary_press_gesture(self, x, y, event):
+        """
+            Browse to album
+            @param x as int
+            @param y as int
+            @param event as Gdk.Event
+        """
+        App().window.container.show_view([Type.ALBUM], self._album)
 
 
 class CoverWidget(Gtk.Bin, CoverWidgetBase):

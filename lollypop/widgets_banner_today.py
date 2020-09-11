@@ -18,7 +18,7 @@ from gettext import gettext as _
 from lollypop.define import App, ArtSize, MARGIN, ViewType, StorageType
 from lollypop.define import ArtBehaviour, LOLLYPOP_DATA_PATH
 from lollypop.widgets_banner import BannerWidget
-from lollypop.widgets_cover import CoverWidget
+from lollypop.widgets_cover import BrowsableCoverWidget
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import get_default_storage_type, popup_widget
@@ -77,7 +77,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_xalign(0.0)
         self.__title_label.set_vexpand(True)
         self.__title_label.set_margin_start(MARGIN)
-        self.__cover_widget = CoverWidget(self.__album, view_type)
+        self.__cover_widget = BrowsableCoverWidget(self.__album, view_type)
         self.__cover_widget.show()
         play_button = Gtk.Button.new()
         play_button.show()
