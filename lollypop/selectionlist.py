@@ -244,6 +244,9 @@ class SelectionListRow(Gtk.ListBoxRow):
         emit_signal(self, "populated")
 
 
+# TODO: There is no reason today to share a common class for sidebar and lists
+# Code cleanup needed, will simplify things!
+# Historical because previously, sidebar was a sidebar + a list
 class SelectionList(LazyLoadingView, GesturesHelper):
     """
         A list for artists/genres
@@ -271,13 +274,13 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.__scrolled.show()
         self.__scrolled.set_policy(Gtk.PolicyType.NEVER,
                                    Gtk.PolicyType.AUTOMATIC)
-        self.__scrolled.set_property("expand", True)
         self.__viewport = Gtk.Viewport()
         self.__scrolled.add(self.__viewport)
         self.__viewport.show()
         self.__viewport.add(self._box)
         self.connect("initialized", self.__on_initialized)
         self.get_style_context().add_class("sidebar")
+        self.__scrolled.set_vexpand(True)
         if base_mask & SelectionListMask.FASTSCROLL:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
@@ -310,7 +313,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         else:
             self.__base_mask |= SelectionListMask.LABEL
             self.__base_mask |= SelectionListMask.ELLIPSIZE
-            self.__set_rows_mask(self.__base_mask)
+            self.__set_rows_mask(self.__base_mask | self.__mask)
 
     def set_mask(self, mask):
         """
@@ -608,10 +611,6 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         """
         for row in self._box.get_children():
             row.set_mask(mask)
-        if mask & SelectionListMask.ELLIPSIZE:
-            self.__scrolled.set_hexpand(True)
-        else:
-            self.__scrolled.set_hexpand(False)
 
     def __sort_func(self, row_a, row_b):
         """
@@ -711,10 +710,8 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             @param leaflet as Handy.Leaflet
             @param folded as Gparam
         """
-        self.__base_mask &= ~(SelectionListMask.LABEL |
-                              SelectionListMask.ELLIPSIZE)
-        if self.__overlay is not None:
-            self.__overlay.set_hexpand(folded)
+        self.__base_mask &= ~SelectionListMask.LABEL
+        self.__scrolled.set_hexpand(folded)
         if App().window.folded or\
                 App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL

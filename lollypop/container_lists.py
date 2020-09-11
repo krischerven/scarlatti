@@ -50,7 +50,6 @@ class ListsContainer:
         self._sidebar.listbox.connect("row-activated",
                                       self.__on_sidebar_activated)
         self._sidebar.connect("populated", self.__on_sidebar_populated)
-        self._sidebar.set_mask(SelectionListMask.SIDEBAR)
         items = ShownLists.get(SelectionListMask.SIDEBAR)
         self._sidebar.populate(items)
         self._stack.connect("set-sidebar-id", self.__on_set_sidebar_id)
