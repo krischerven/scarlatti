@@ -53,7 +53,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
                 f = Gio.File.new_for_uri(uri)
                 (status, content, tag) = f.load_contents()
                 if status:
-                    status = child.populate(content)
+                    status = child.populate(content, self._art_size)
                 if status:
                     self._flowbox.add(child)
         except Exception as e:

@@ -144,10 +144,10 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self.__label.set_text(_("Select artwork"))
 
         if App().window.folded:
-            self.__art_size = ArtSize.MEDIUM
+            self._art_size = ArtSize.MEDIUM
             widget.add(self._flowbox)
         else:
-            self.__art_size = ArtSize.BANNER
+            self._art_size = ArtSize.BANNER
             scrolled = Gtk.ScrolledWindow.new()
             scrolled.show()
             scrolled.set_size_request(700, 400)
@@ -174,14 +174,14 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             grid.set_row_spacing(5)
             image = Gtk.Image.new_from_icon_name("edit-clear-all-symbolic",
                                                  Gtk.IconSize.INVALID)
-            image.set_pixel_size(self.__art_size)
+            image.set_pixel_size(self._art_size)
             context = image.get_style_context()
             context.add_class("cover-frame")
             padding = context.get_padding(Gtk.StateFlags.NORMAL)
             border = context.get_border(Gtk.StateFlags.NORMAL)
-            image.set_size_request(self.__art_size + padding.left +
+            image.set_size_request(self._art_size + padding.left +
                                    padding.right + border.left + border.right,
-                                   self.__art_size + padding.top +
+                                   self._art_size + padding.top +
                                    padding.bottom + border.top + border.bottom)
             image.show()
             label = Gtk.Label.new(_("Remove"))
@@ -309,7 +309,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         """
         child = ArtworkSearchChild(api, self.__view_type)
         child.show()
-        status = child.populate(content, self.__art_size)
+        status = child.populate(content, self._art_size)
         if status:
             child.set_name("web")
             self._flowbox.add(child)
