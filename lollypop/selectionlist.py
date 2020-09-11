@@ -278,7 +278,7 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         self.__viewport.add(self._box)
         self.connect("initialized", self.__on_initialized)
         self.get_style_context().add_class("sidebar")
-        if self.__base_mask & SelectionListMask.FASTSCROLL:
+        if base_mask & SelectionListMask.FASTSCROLL:
             self.__overlay = Gtk.Overlay.new()
             self.__overlay.show()
             self.__overlay.add(self.__scrolled)
@@ -286,7 +286,6 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                                            self.__scrolled)
             self.__overlay.add_overlay(self.__fastscroll)
             self.add(self.__overlay)
-            self.__base_mask |= SelectionListMask.LABEL
             App().settings.connect("changed::artist-artwork",
                                    self.__on_artist_artwork_changed)
             App().art.connect("artist-artwork-changed",
@@ -304,9 +303,14 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                                        lambda x: self.__popup_menu(None, x))
             self.__menu_button.show()
             self.add(self.__menu_button)
-        App().window.container.widget.connect("notify::folded",
-                                              self.__on_container_folded)
-        self.__on_container_folded(None, App().window.folded)
+        if base_mask & SelectionListMask.SIDEBAR:
+            App().window.container.widget.connect("notify::folded",
+                                                  self.__on_container_folded)
+            self.__on_container_folded(None, App().window.folded)
+        else:
+            self.__base_mask |= SelectionListMask.LABEL
+            self.__base_mask |= SelectionListMask.ELLIPSIZE
+            self.__set_rows_mask(self.__base_mask)
 
     def set_mask(self, mask):
         """
@@ -709,14 +713,9 @@ class SelectionList(LazyLoadingView, GesturesHelper):
         """
         self.__base_mask &= ~(SelectionListMask.LABEL |
                               SelectionListMask.ELLIPSIZE)
-        self.__set_rows_mask(self.__base_mask)
         if self.__overlay is not None:
             self.__overlay.set_hexpand(folded)
         if App().window.folded or\
-                self.__base_mask & SelectionListMask.FASTSCROLL:
-            self.__base_mask |= (SelectionListMask.LABEL |
-                                 SelectionListMask.ELLIPSIZE)
-        elif App().settings.get_value("show-sidebar-labels"):
+                App().settings.get_value("show-sidebar-labels"):
             self.__base_mask |= SelectionListMask.LABEL
-        GLib.timeout_add(200, self.__set_rows_mask,
-                         self.__base_mask | self.__mask)
+        self.__set_rows_mask(self.__base_mask | self.__mask)
