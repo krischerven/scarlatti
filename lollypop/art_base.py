@@ -81,9 +81,12 @@ class BaseArt(GObject.GObject):
                                           GdkPixbuf.InterpType.BILINEAR)
             del _pixbuf
         if behaviour & ArtBehaviour.CACHE and cache_path is not None:
-            pixbuf.savev(cache_path, "jpeg", ["quality"],
-                         [str(App().settings.get_value(
-                             "cover-quality").get_int32())])
+            if cache_path.endswith(".jpg"):
+                pixbuf.savev(cache_path, "jpeg", ["quality"],
+                             [str(App().settings.get_value(
+                                 "cover-quality").get_int32())])
+            else:
+                pixbuf.savev(cache_path, "png", [None], [None])
         return pixbuf
 
     def update_art_size(self):
@@ -104,7 +107,7 @@ class BaseArt(GObject.GObject):
             @param filename as str
         """
         try:
-            filepath = ALBUMS_PATH + "/" + filename + ".jpg"
+            filepath = "%s/%s.%s" % (ALBUMS_PATH, filename, self._ext)
             f = Gio.File.new_for_path(filepath)
             if f.query_exists():
                 f.delete()

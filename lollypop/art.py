@@ -51,6 +51,10 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
         create_dir(ALBUMS_PATH)
         create_dir(ALBUMS_WEB_PATH)
         create_dir(ARTISTS_PATH)
+        if App().settings.get_value("cover-quality").get_int32() == 100:
+            self._ext = "png"
+        else:
+            self._ext = "jpg"
 
     def add_artwork_to_cache(self, name, surface, prefix):
         """

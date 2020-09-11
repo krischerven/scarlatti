@@ -37,6 +37,7 @@ class AlbumArt:
         """
             Init album art
         """
+        self._ext = "jpg"
         self.__favorite = App().settings.get_value(
             "favorite-cover").get_string()
         if not self.__favorite:
@@ -52,17 +53,18 @@ class AlbumArt:
             @return cover path as string or None if no cover
         """
         try:
-            cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                                  album.lp_album_id,
-                                                  width,
-                                                  height)
-            f = Gio.File.new_for_path(cache_path_jpg)
+            cache_filepath = "%s/%s_%s_%s.%s" % (CACHE_PATH,
+                                                 album.lp_album_id,
+                                                 width,
+                                                 height,
+                                                 self._ext)
+            f = Gio.File.new_for_path(cache_filepath)
             if f.query_exists():
-                return cache_path_jpg
+                return cache_filepath
             else:
                 self.get_album_artwork(album, width, height, 1)
                 if f.query_exists():
-                    return cache_path_jpg
+                    return cache_filepath
         except Exception as e:
             Logger.error("Art::get_album_cache_path(): %s" % e)
         return None
@@ -185,14 +187,14 @@ class AlbumArt:
         else:
             w = width
             h = height
-        cache_path_jpg = "%s/%s_%s_%s.jpg" % (CACHE_PATH, album.lp_album_id,
-                                              w, h)
+        cache_filepath = "%s/%s_%s_%s.%s" % (CACHE_PATH, album.lp_album_id,
+                                             w, h, self._ext)
         pixbuf = None
         try:
             # Look in cache
-            f = Gio.File.new_for_path(cache_path_jpg)
+            f = Gio.File.new_for_path(cache_filepath)
             if not behaviour & ArtBehaviour.NO_CACHE and f.query_exists():
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path_jpg)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_filepath)
                 if optimized_blur:
                     pixbuf = self.load_behaviour(pixbuf, None,
                                                  width, height, behaviour)
@@ -237,7 +239,7 @@ class AlbumArt:
             if pixbuf is None:
                 self.cache_album_artwork(album.id)
                 return None
-            pixbuf = self.load_behaviour(pixbuf, cache_path_jpg,
+            pixbuf = self.load_behaviour(pixbuf, cache_filepath,
                                          width, height, behaviour)
             return pixbuf
         except Exception as e:
