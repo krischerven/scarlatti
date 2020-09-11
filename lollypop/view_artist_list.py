@@ -58,12 +58,6 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         self.__boxes_grid.show()
         self.__boxes_grid.set_valign(Gtk.Align.START)
         self.__boxes_grid.set_halign(Gtk.Align.CENTER)
-        for i in range(0, 3):
-            box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
-            box.set_valign(Gtk.Align.START)
-            box.set_property("margin", MARGIN)
-            self.__boxes.append(box)
-            self.__boxes_grid.add(box)
         self.__main_grid.add(self.__boxes_grid)
         self.add_widget(self.__main_grid, self.__banner)
         self.connect("populated", self.__on_populated)
@@ -131,8 +125,9 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
                              ViewType.ARTIST)
         widget.show()
         widget.set_property("valign", Gtk.Align.START)
-        self.__boxes[self.__current_box].add(widget)
-        self.__boxes[self.__current_box].show()
+        box = self.__get_box_at_index(self.__current_box)
+        box.add(widget)
+        box.show()
         self.__current_box += 1
         if self.__current_box == self.__boxes_count:
             self.__current_box = 0
@@ -172,6 +167,20 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __get_box_at_index(self, index):
+        """
+            Get album box at index, add new ones if index out of range
+            @param index as int
+            @return Gtk.Box
+        """
+        while len(self.__boxes) <= index:
+            box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
+            box.set_valign(Gtk.Align.START)
+            box.set_property("margin", MARGIN)
+            self.__boxes.append(box)
+            self.__boxes_grid.add(box)
+        return self.__boxes[index]
+
     def __populate(self, children):
         """
             Populate children
@@ -179,8 +188,9 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         """
         self.__current_box = 0
         for child in children:
-            self.__boxes[self.__current_box].show()
-            self.__boxes[self.__current_box].add(child)
+            box = self.__get_box_at_index(self.__current_box)
+            box.show()
+            box.add(child)
             self.__current_box += 1
             if self.__current_box == self.__boxes_count:
                 self.__current_box = 0
