@@ -349,7 +349,7 @@ class TagReader:
             prefix = m.data[0:4]
             if prefix in [b"TCMP"]:
                 string = self.__get_string_from_bytes(m.data, 0)
-                return string[-1] == "1"
+                return string and string[-1] == "1"
         size = tags.get_tag_size("extended-comment")
         for i in range(0, size):
             (exists, sample) = tags.get_string_index(
