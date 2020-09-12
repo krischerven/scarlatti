@@ -346,8 +346,9 @@ class TagReader:
             (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
             if not exists:
                 continue
-            string = self.__get_string_from_bytes(m.data, 0)
-            if string.startswith("TCMP"):
+            prefix = m.data[0:4]
+            if prefix in [b"TCMP"]:
+                string = self.__get_string_from_bytes(m.data, 0)
                 return string[-1] == "1"
         size = tags.get_tag_size("extended-comment")
         for i in range(0, size):
