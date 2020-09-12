@@ -17,6 +17,7 @@ from gettext import gettext as _
 
 from lollypop.define import App
 from lollypop.logger import Logger
+from lollypop.utils_file import decodeUnicode, splitUnicode
 from lollypop.utils import format_artist_name, get_iso_date_from_string
 
 
@@ -345,7 +346,7 @@ class TagReader:
             (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
             if not exists:
                 continue
-            string = m.data.decode("utf-8")
+            string = self.__get_string_from_bytes(m.data)
             if string.startswith("TCMP"):
                 return string[-1] == "1"
         size = tags.get_tag_size("extended-comment")
@@ -567,14 +568,10 @@ class TagReader:
             @return lyrics as str
         """
         def decode_lyrics(bytes):
-            from lollypop.utils_file import decodeUnicode, splitUnicode
             try:
                 prefix = bytes[0:4]
                 if prefix in [b"USLT"]:
-                    frame = bytes[10:]
-                    encoding = frame[0:1]
-                    (d, t) = splitUnicode(frame[4:], encoding)
-                    return decodeUnicode(t, encoding)
+                    return self.__get_string_from_bytes(bytes)
             except Exception as e:
                 Logger.warning("TagReader::get_lyrics(): %s", e)
             return None
@@ -638,7 +635,6 @@ class TagReader:
         """
         def decode_lyrics(bytes_list, encoding):
             lyrics = []
-            from lollypop.utils_file import decodeUnicode, splitUnicode
             try:
                 for frame in bytes_list:
                     (l, t) = splitUnicode(frame, encoding)
@@ -790,3 +786,18 @@ class TagReader:
         elif App().albums.get_uri(album_id) != uri:
             App().albums.set_uri(album_id, uri)
         return (added, album_id)
+
+    def __get_string_from_bytes(self, bytes):
+        """
+            Get tag string from frame
+            @param bytes as bytes
+            @return str
+        """
+        try:
+            frame = bytes[10:]
+            encoding = frame[0:1]
+            (d, t) = splitUnicode(frame[4:], encoding)
+            return decodeUnicode(t, encoding)
+        except Exception as e:
+            Logger.error("TagReader::__get_string_from_bytes(): %s", e)
+        return ""

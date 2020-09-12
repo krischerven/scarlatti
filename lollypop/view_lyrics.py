@@ -143,7 +143,8 @@ class LyricsView(View, SignalsHelper):
                 if self.__lyrics_timeout_id is not None:
                     GLib.source_remove(self.__lyrics_timeout_id)
                     self.__lyrics_timeout_id = None
-                if track.storage_type & StorageType.COLLECTION:
+                if track.storage_type & (StorageType.COLLECTION |
+                                         StorageType.EXTERNAL):
                     from lollypop.tagreader import TagReader, Discoverer
                     tagreader = TagReader()
                     discoverer = Discoverer()
