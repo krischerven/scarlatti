@@ -162,7 +162,7 @@ class BaseWebHelper(GObject.Object):
                 if best != self.__BAD_SCORE:
                     youtube_id = dic[best]
         except:
-            Logger.warning("YouTubeHelper::__on_get_youtube_id(): %s", content)
+            Logger.warning("BaseWebHelper::__on_get_youtube_id(): %s", content)
         self.__emit_uri_loaded(youtube_id, track, cancellable, methods)
 
     def __on_get_youtube_id_start(self, uri, status, content, track,
@@ -205,7 +205,7 @@ class BaseWebHelper(GObject.Object):
                 youtube_id = dic[best]
         except Exception as e:
             print("$ sudo pip3 install beautifulsoup4")
-            Logger.warning("YouTubeHelper::__get_youtube_id_start(): %s", e)
+            Logger.warning("BaseWebHelper::__get_youtube_id_start(): %s", e)
         self.__emit_uri_loaded(youtube_id, track, cancellable, methods)
 
     def __on_get_youtube_id_duckduck(self, uri, status, content, track,
@@ -248,5 +248,5 @@ class BaseWebHelper(GObject.Object):
                 youtube_id = dic[best]
         except Exception as e:
             print("$ sudo pip3 install beautifulsoup4")
-            Logger.warning("YouTubeHelper::__get_youtube_id_duckduck(): %s", e)
+            Logger.warning("BaseWebHelper::__get_youtube_id_duckduck(): %s", e)
         self.__emit_uri_loaded(youtube_id, track, cancellable, methods)
