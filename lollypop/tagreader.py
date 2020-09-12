@@ -346,7 +346,7 @@ class TagReader:
             (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
             if not exists:
                 continue
-            string = self.__get_string_from_bytes(m.data)
+            string = self.__get_string_from_bytes(m.data, 0)
             if string.startswith("TCMP"):
                 return string[-1] == "1"
         size = tags.get_tag_size("extended-comment")
@@ -437,10 +437,10 @@ class TagReader:
                     (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                     if not exists:
                         continue
-                    string = m.data.decode("utf-8")
-                    if string.startswith("TDOR"):
-                        split = string.split("\x00")
-                        date = get_iso_date_from_string(split[-1])
+                    prefix = m.data[0:4]
+                    if prefix in [b"TDOR", b"TORY"]:
+                        string = self.__get_string_from_bytes(m.data, 0)
+                        date = get_iso_date_from_string(string)
                         datetime = GLib.DateTime.new_from_iso8601(date, None)
                         return (datetime.get_year(), datetime.to_unix())
             except:
@@ -571,7 +571,7 @@ class TagReader:
             try:
                 prefix = bytes[0:4]
                 if prefix in [b"USLT"]:
-                    return self.__get_string_from_bytes(bytes)
+                    return self.__get_string_from_bytes(bytes, 4)
             except Exception as e:
                 Logger.warning("TagReader::get_lyrics(): %s", e)
             return None
@@ -787,16 +787,17 @@ class TagReader:
             App().albums.set_uri(album_id, uri)
         return (added, album_id)
 
-    def __get_string_from_bytes(self, bytes):
+    def __get_string_from_bytes(self, bytes, shift):
         """
             Get tag string from frame
             @param bytes as bytes
+            @param shift as int (ex: 4 for lyrics, to skip lang)
             @return str
         """
         try:
             frame = bytes[10:]
             encoding = frame[0:1]
-            (d, t) = splitUnicode(frame[4:], encoding)
+            (d, t) = splitUnicode(frame[shift:], encoding)
             return decodeUnicode(t, encoding)
         except Exception as e:
             Logger.error("TagReader::__get_string_from_bytes(): %s", e)
