@@ -203,7 +203,7 @@
                     <property name="valign">center</property>
                     <items>
                       <item id="artist_year" translatable="yes">Artist - year</item>
-                      <item id="artist_title" translatable="yes">Aritst - title</item>
+                      <item id="artist_title" translatable="yes">Artist - title</item>
                       <item id="title" translatable="yes">Title</item>
                       <item id="year" translatable="yes">Year</item>
                       <item id="popularity" translatable="yes">Popularity</item>
