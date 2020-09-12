@@ -355,11 +355,13 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             @param value as (int, str, optional str)
         """
         self._box.set_sort_func(self.__sort_func)
-        child = self._get_child(value)
-        child.populate()
-        if self.mask & SelectionListMask.ARTISTS:
-            self.__fastscroll.clear()
-            self.__fastscroll.populate()
+        ids = [row.id for row in self._box.get_children()]
+        if value[0] not in ids:
+            child = self._get_child(value)
+            child.populate()
+            if self.mask & SelectionListMask.ARTISTS:
+                self.__fastscroll.clear()
+                self.__fastscroll.populate()
 
     def update_value(self, object_id, name):
         """
