@@ -193,12 +193,37 @@ class AutoSimilarPlayer:
         """
         similar_artist_ids = []
         for (artist, cover_uri) in artists:
+            if self.__next_cancellable.is_cancelled():
+                return []
             similar_artist_id = App().artists.get_id_for_escaped_string(
                 sql_escape(artist.lower()))
             if similar_artist_id is not None:
                 if App().artists.has_albums(similar_artist_id):
                     similar_artist_ids.append(similar_artist_id)
         return similar_artist_ids
+
+    def __on_get_artist_ids(self, similar_artist_ids, remote):
+        """
+            Get one albums from artist ids
+            @param similar_artist_ids as [int]
+            @param remote as bool
+        """
+        if self.__next_cancellable.is_cancelled():
+            return
+        album = None
+        if similar_artist_ids:
+            album = self.__get_album_from_artists(similar_artist_ids)
+        if album is not None:
+            Logger.info("Found a similar album")
+            self.add_album(album)
+        elif remote:
+            from lollypop.similars_local import LocalSimilars
+            similars = LocalSimilars()
+            App().task_helper.run(
+                similars.get_similar_artists,
+                App().player.current_track.artist_ids,
+                self.__next_cancellable,
+                callback=(self.__on_get_local_similar_artists,))
 
     def __on_get_local_similar_artists(self, artists):
         """
@@ -207,13 +232,8 @@ class AutoSimilarPlayer:
         """
         if self.__next_cancellable.is_cancelled():
             return
-        similar_artist_ids = self.__get_artist_ids(artists)
-        album = None
-        if similar_artist_ids:
-            album = self.__get_album_from_artists(similar_artist_ids)
-        if album is not None:
-            Logger.info("Found a similar album")
-            self.add_album(album)
+        App().task_helper.run(self.__get_artist_ids, artists,
+                              callback=(self.__on_get_artist_ids, False))
 
     def __on_get_similar_artists(self, artists):
         """
@@ -222,21 +242,8 @@ class AutoSimilarPlayer:
         """
         if self.__next_cancellable.is_cancelled():
             return
-        similar_artist_ids = self.__get_artist_ids(artists)
-        album = None
-        if similar_artist_ids:
-            album = self.__get_album_from_artists(similar_artist_ids)
-        if album is None:
-            from lollypop.similars_local import LocalSimilars
-            similars = LocalSimilars()
-            App().task_helper.run(
-                similars.get_similar_artists,
-                App().player.current_track.artist_ids,
-                self.__next_cancellable,
-                callback=(self.__on_get_local_similar_artists,))
-        else:
-            Logger.info("Found a similar album")
-            self.add_album(album)
+        App().task_helper.run(self.__get_artist_ids, artists,
+                              callback=(self.__on_get_artist_ids, True))
 
     def __on_next_changed(self, player):
         """
