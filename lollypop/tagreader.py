@@ -439,7 +439,7 @@ class TagReader:
                     if not exists:
                         continue
                     prefix = m.data[0:4]
-                    if prefix in [b"TDOR", b"TORY"]:
+                    if prefix in [b"TDOR"]:
                         string = self.__get_string_from_bytes(m.data, 0)
                         date = get_iso_date_from_string(string)
                         datetime = GLib.DateTime.new_from_iso8601(date, None)
