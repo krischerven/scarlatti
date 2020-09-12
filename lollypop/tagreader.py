@@ -788,6 +788,9 @@ class TagReader:
             App().albums.set_uri(album_id, uri)
         return (added, album_id)
 
+#######################
+# PRIVATE             #
+#######################
     def __get_string_from_bytes(self, bytes, shift):
         """
             Get tag string from frame
