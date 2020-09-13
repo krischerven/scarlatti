@@ -19,6 +19,8 @@ from lollypop.define import App
 from lollypop.logger import Logger
 from lollypop.utils_file import decodeUnicode, splitUnicode
 from lollypop.utils import format_artist_name, get_iso_date_from_string
+from lollypop.tag_frame_text import FrameTextTag
+from lollypop.tag_frame_lang import FrameLangTag
 
 
 class Discoverer:
@@ -346,9 +348,11 @@ class TagReader:
             (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
             if not exists:
                 continue
-            prefix = m.data[0:4]
-            if prefix in [b"TCMP"]:
-                string = self.__get_string_from_bytes(m.data, 0)
+            frame = FrameTextTag(m.data)
+            if frame.key == "TCMP":
+                string = frame.string
+                if not string:
+                    Logger.debug(tags.to_string())
                 return string and string[-1] == "1"
         size = tags.get_tag_size("extended-comment")
         for i in range(0, size):
@@ -438,10 +442,11 @@ class TagReader:
                     (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                     if not exists:
                         continue
-                    prefix = m.data[0:4]
-                    if prefix in [b"TDOR"]:
-                        string = self.__get_string_from_bytes(m.data, 0)
-                        date = get_iso_date_from_string(string)
+                    frame = FrameTextTag(m.data)
+                    if frame.key == "TDOR":
+                        if not frame.string:
+                            Logger.debug(tags.to_string())
+                        date = get_iso_date_from_string(frame.string)
                         datetime = GLib.DateTime.new_from_iso8601(date, None)
                         return (datetime.get_year(), datetime.to_unix())
             except:
@@ -570,9 +575,9 @@ class TagReader:
         """
         def decode_lyrics(bytes):
             try:
-                prefix = bytes[0:4]
-                if prefix in [b"USLT"]:
-                    return self.__get_string_from_bytes(bytes, 4)
+                frame = FrameLangTag(bytes)
+                if frame.key == "USLT":
+                    return frame.string
             except Exception as e:
                 Logger.warning("TagReader::get_lyrics(): %s", e)
             return None
@@ -791,18 +796,3 @@ class TagReader:
 #######################
 # PRIVATE             #
 #######################
-    def __get_string_from_bytes(self, bytes, shift):
-        """
-            Get tag string from frame
-            @param bytes as bytes
-            @param shift as int (ex: 4 for lyrics, to skip lang)
-            @return str
-        """
-        try:
-            frame = bytes[10:]
-            encoding = frame[0:1]
-            (d, t) = splitUnicode(frame[shift:], encoding)
-            return decodeUnicode(t, encoding)
-        except Exception as e:
-            Logger.error("TagReader::__get_string_from_bytes(): %s", e)
-        return ""
