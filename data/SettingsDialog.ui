@@ -926,7 +926,7 @@ and with different artists</property>
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="title" translatable="yes">ITunes</property>
+                <property name="title" translatable="yes">iTunes</property>
                 <child>
                   <object class="GtkSwitch" id="ITUNES_button">
                     <property name="name">ITUNES</property>
