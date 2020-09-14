@@ -262,5 +262,5 @@ class LyricsHelper:
                 callback(lyrics, *args)
                 return
             except Exception as e:
-                Logger.warning("LyricsView::__on_lyrics_downloaded(): %s", e)
+                Logger.warning("LyricsHelper::__on_lyrics_downloaded(): %s", e)
         self.__get_lyrics_from_web(track, methods, callback, *args)

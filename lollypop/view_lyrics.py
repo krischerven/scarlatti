@@ -301,6 +301,7 @@ class LyricsView(View, SignalsHelper):
                 self.__lyrics_label.set_text(_("No lyrics found ") + "😓")
             else:
                 name = track.name.lower()
+                track = Track(track.id)
                 for _filter in self.__FILTERS:
                     name = name.replace(_filter, "")
                 track.set_name(name)
