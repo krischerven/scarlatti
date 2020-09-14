@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib
 
-from lollypop.define import App, ScanType, AdaptiveSize
+from lollypop.define import App, ScanType
 from lollypop.container import Container
 from lollypop.toolbar import Toolbar
 from lollypop.utils import is_unity, emit_signal
@@ -174,9 +174,6 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
         if App().lookup_action("miniplayer").get_state():
             return
         if not self.is_maximized():
-            # Keep a minimal height
-            if height < AdaptiveSize.SMALL:
-                height = AdaptiveSize.SMALL
             App().settings.set_value("window-size",
                                      GLib.Variant("ai", [width, height]))
         App().settings.set_value("window-position", GLib.Variant("ai", [x, y]))

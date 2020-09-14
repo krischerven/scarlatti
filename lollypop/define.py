@@ -207,16 +207,6 @@ class ReplayGain:
     ALBUM = 1
 
 
-class AdaptiveSize:
-    NONE = 1 << 0
-    PHONE = 1 << 1
-    SMALL = 1 << 2
-    MEDIUM = 1 << 3
-    NORMAL = 1 << 4
-    BIG = 1 << 5
-    LARGE = 1 << 6
-
-
 class Size:
     MINI = 250
     PHONE = 360  # Librem Phone
