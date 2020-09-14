@@ -121,7 +121,8 @@ class DirectorWebService:
         show_album_lists = App().settings.get_value("shown-album-lists")
         if Type.SUGGESTIONS not in show_album_lists:
             return
-        start = acl & NetworkAccessACL["YOUTUBE"]
+        start = acl & NetworkAccessACL["YOUTUBE"] and\
+            acl & NetworkAccessACL["DATA"]
         if start and self.__collection_ws is None:
             from lollypop.ws_collection import CollectionWebService
             self.__collection_ws = CollectionWebService()
