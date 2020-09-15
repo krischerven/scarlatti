@@ -59,6 +59,14 @@ class NotificationContainer:
             self.__notification.show()
             self.__notification.set_reveal_child(True)
 
+    def dismiss_notification(self):
+        """
+            Get current notification
+            @return AppNotification
+        """
+        if self.__notification is not None:
+            self.__notification.destroy()
+
 ############
 # PRIVATE  #
 ############

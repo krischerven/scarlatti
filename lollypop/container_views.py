@@ -68,6 +68,7 @@ class ViewsContainer:
         self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         emit_signal(self, "can-go-back-changed", False)
         App().enable_special_shortcuts(False)
+        self.dismiss_notification()
 
     def show_view(self, item_ids, data=None, storage_type=None):
         """
@@ -76,6 +77,7 @@ class ViewsContainer:
             @param data as object
             @param storage_type as StorageType
         """
+        self.dismiss_notification()
         self.sub_widget.set_visible_child(self.grid_view)
         view = None
         if storage_type is None:
