@@ -13,6 +13,7 @@
 from gi.repository import Gio
 
 from gettext import gettext as _
+from time import time
 from random import shuffle
 
 from lollypop.view_flowbox import FlowBoxView
@@ -42,11 +43,11 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, storage_type, view_type)
+        self.__time = time() + 10
         self._genre_ids = genre_ids
         self._artist_ids = artist_ids
         self._storage_type = storage_type
         self.__populate_wanted = True
-        self.__notification_shown = False
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
                 (youtube_dl, env) = get_youtube_dl()
@@ -174,7 +175,9 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        if scan_update == ScanUpdate.ADDED and not self.__notification_shown:
+        # On first update, ignore notifications for 10 seconds
+        # Next, ignore notifications for 120 seconds
+        if scan_update == ScanUpdate.ADDED and time() > self.__time:
             wanted = True
             for genre_id in item.genre_ids:
                 genre_ids = remove_static(self._genre_ids)
@@ -185,7 +188,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
                 if artist_ids and artist_id not in artist_ids:
                     wanted = False
             if wanted:
-                self.__notification_shown = True
+                self.__time = time() + 120
                 App().window.container.show_notification(
                     _("New albums available"),
                     [_("Refresh")],

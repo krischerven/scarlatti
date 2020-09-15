@@ -12,6 +12,7 @@
 
 from random import shuffle
 from gettext import gettext as _
+from time import time
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, OrderBy, ScanUpdate
@@ -34,7 +35,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, storage_type, view_type)
-        self.__notification_shown = False
+        self.__time = time() + 10
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return [
@@ -145,8 +146,10 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        if scan_update == ScanUpdate.ADDED and not self.__notification_shown:
-            self.__notification_shown = True
+        # On first update, ignore notifications for 10 seconds
+        # Next, ignore notifications for 120 seconds
+        if scan_update == ScanUpdate.ADDED and time() > self.__time:
+            self.__time = time() + 120
             App().window.container.show_notification(
                     _("New artists available"),
                     [_("Refresh")],
