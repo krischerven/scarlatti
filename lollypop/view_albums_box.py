@@ -18,7 +18,6 @@ from random import shuffle
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.widgets_album_simple import AlbumSimpleWidget
 from lollypop.define import App, Type, ViewType, ScanUpdate, StorageType
-from lollypop.define import OrderBy
 from lollypop.objects_album import Album
 from lollypop.utils import get_icon_name, get_network_available, popup_widget
 from lollypop.utils import get_title_for_genres_artists
@@ -47,6 +46,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         self._artist_ids = artist_ids
         self._storage_type = storage_type
         self.__populate_wanted = True
+        self.__notification_shown = False
         if genre_ids and genre_ids[0] < 0:
             if genre_ids[0] == Type.WEB:
                 (youtube_dl, env) = get_youtube_dl()
@@ -110,15 +110,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
             @param album as Album
         """
         self.show_placeholder(False)
-        FlowBoxView.add_value(self, album)
-
-    def prepend_value(self, album):
-        """
-            Prepend a new album
-            @param album as Album
-        """
-        self.show_placeholder(False)
-        FlowBoxView.prepend_value(self, album)
+        FlowBoxView.add_value_unsorted(self, album)
 
     def clear(self):
         """
@@ -167,42 +159,6 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
         menu = AlbumMenu(child.data, self.storage_type, self.view_type)
         return MenuBuilder(menu)
 
-    def _sort_func(self, child1, child2):
-        """
-            Sort items
-            @param child1 as AlbumSimpleWidget
-            @param child2 as AlbumSimpleWidget
-        """
-        orderby = App().settings.get_enum("orderby")
-        if orderby == OrderBy.ARTIST_YEAR:
-            artists1 = "".join(child1.data.artists)
-            artists2 = "".join(child2.data.artists)
-            if artists1 == artists2:
-                return child1.data.year is not None and\
-                    child2.data.year is not None and\
-                    child1.data.year > child2.data.year
-            else:
-                return artists1 > artists2
-        if orderby == OrderBy.ARTIST_LIST:
-            artists1 = "".join(child1.data.artists)
-            artists2 = "".join(child2.data.artists)
-            if artists1 == artists2:
-                return child1.data.name > child2.data.name
-            else:
-                return artists1 > artists2
-        elif orderby == OrderBy.NAME:
-            return child1.data.name > child2.data.name
-        elif orderby == OrderBy.YEAR_DESC:
-            if child1.data.year is None:
-                return False
-            elif child2.data.year is None:
-                return True
-            else:
-                return child1.data.year < child2.data.year
-        elif orderby == OrderBy.POPULARITY:
-            return child1.data.popularity < child2.data.popularity
-        return False
-
     def _on_current_changed(self, player):
         """
             Update children state
@@ -218,7 +174,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        if scan_update == ScanUpdate.ADDED:
+        if scan_update == ScanUpdate.ADDED and not self.__notification_shown:
             wanted = True
             for genre_id in item.genre_ids:
                 genre_ids = remove_static(self._genre_ids)
@@ -229,12 +185,11 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
                 if artist_ids and artist_id not in artist_ids:
                     wanted = False
             if wanted:
-                self.add_value(Album(item.album_id))
-        elif scan_update == ScanUpdate.MODIFIED:
-            for child in self.children:
-                if child.data.id == item.album_id:
-                    child.data.reset_tracks()
-                    break
+                self.__notification_shown = True
+                App().window.container.show_notification(
+                    _("New albums available"),
+                    [_("Refresh")],
+                    [App().window.container.reload_view])
         elif scan_update == ScanUpdate.REMOVED:
             for child in self.children:
                 if child.data.id == item.album_id:

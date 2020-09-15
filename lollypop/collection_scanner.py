@@ -68,6 +68,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.__thread = None
         self.__tags = {}
         self.__items = []
+        self.__notified_ids = []
         self.__pending_new_artist_ids = []
         self.__history = History()
         self.__progress_total = 1
@@ -520,6 +521,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             count = max(1, min(5, cpu_count() // 2))
             split_files = split_list(files, count)
             self.__tags = {}
+            self.__notified_ids = []
             self.__pending_new_artist_ids = []
             threads = []
             for files in split_files:
@@ -644,8 +646,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @return [CollectionItem]
         """
         items = []
-        notify_index = 0
-        previous_album_id = None
         for uri in list(self.__tags.keys()):
             # Handle a stop request
             if self.__thread is None:
@@ -658,15 +658,13 @@ class CollectionScanner(GObject.GObject, TagReader):
             self.__update_progress(self.__progress_count,
                                    self.__progress_total,
                                    0.001)
-            if previous_album_id != item.album_id:
-                self.__notify_ui(items[notify_index:])
-                notify_index = len(items)
-                previous_album_id = item.album_id
+            if item.album_id not in self.__notified_ids:
+                self.__notified_ids.append(item.album_id)
+                self.__notify_ui(item)
             del self.__tags[uri]
         # Handle a stop request
         if self.__thread is None:
             raise Exception("cancelled")
-        self.__notify_ui(items)
         return items
 
     def __save_streams_in_db(self, streams, storage_type):
@@ -688,17 +686,16 @@ class CollectionScanner(GObject.GObject, TagReader):
             self.__progress_count += 1
         return items
 
-    def __notify_ui(self, items):
+    def __notify_ui(self, item):
         """
-            Notify UI based on current items
-            @param items as [CollectionItem]
+            Notify UI for item
+            @param items as CollectionItem
         """
         SqlCursor.commit(App().db)
-        for item in items:
-            if item.new_album:
-                emit_signal(self, "updated", item, ScanUpdate.ADDED)
-            else:
-                emit_signal(self, "updated", item, ScanUpdate.MODIFIED)
+        if item.new_album:
+            emit_signal(self, "updated", item, ScanUpdate.ADDED)
+        else:
+            emit_signal(self, "updated", item, ScanUpdate.MODIFIED)
 
     def __remove_old_tracks(self, uris, scan_type):
         """

@@ -18,7 +18,7 @@ from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
 from lollypop.logger import Logger
 from lollypop.utils import set_cursor_type, emit_signal
-from lollypop.define import App, Type, ViewType
+from lollypop.define import App, ViewType
 from lollypop.view_tracks import TracksView
 
 
@@ -288,29 +288,6 @@ class AlbumTracksView(TracksView):
         """
         if self.__album.is_web:
             TracksView._on_loading_changed(self, player, status, track)
-
-    def _on_album_updated(self, scanner, album_id):
-        """
-            On album modified, disable it
-            @param scanner as CollectionScanner
-            @param album_id as int
-        """
-        if self.__album.id != album_id:
-            return
-        removed = False
-        for dic in [self._tracks_widget_left, self._tracks_widget_right]:
-            for widget in dic.values():
-                for child in widget.get_children():
-                    if child.track.album.id == Type.NONE:
-                        removed = True
-        if removed:
-            for dic in [self._tracks_widget_left, self._tracks_widget_right]:
-                for widget in dic.values():
-                    for child in widget.get_children():
-                        child.destroy()
-            self.__discs = list(self.__discs)
-            self.__set_duration()
-            self.populate()
 
     def __on_track_row_removed(self, row):
         """

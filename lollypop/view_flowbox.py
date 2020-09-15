@@ -62,14 +62,15 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
             @param value as object
         """
         self._box.set_sort_func(self._sort_func)
-        LazyLoadingView.populate(self, [value])
+        self.add_value_unsorted(value)
 
     def add_value_unsorted(self, value):
         """
             Add value unsorted
             @param value as object
         """
-        LazyLoadingView.populate(self, [value])
+        child = self._get_child(value)
+        child.populate()
 
     def remove_value(self, value):
         """
@@ -125,8 +126,8 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
     def _sort_func(self, widget1, widget2):
         """
             Sort function
-            @param widget1 as RoundedArtistWidget
-            @param widget2 as RoundedArtistWidget
+            @param widget1 as Gtk.Widget
+            @param widget2 as Gtk.Widget
         """
         return strcoll(widget1.sortname, widget2.sortname)
 

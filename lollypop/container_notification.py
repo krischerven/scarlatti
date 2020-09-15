@@ -30,6 +30,7 @@ class NotificationContainer:
         """
             Init container
         """
+        self.__notification = None
         notification_flag = App().settings.get_value(
             "notification-flag").get_int32()
         network_access_acl = App().settings.get_value(
@@ -40,6 +41,23 @@ class NotificationContainer:
         if not notification_flag & self.__BACKGROUND_DATA and\
                 not network_access_acl & NetworkAccessACL["DATA"]:
             self.__show_background_data()
+
+    def show_notification(self, title, buttons, actions):
+        """
+            Show a notification
+            @param title as str
+            @param buttons as [str]
+            @param actions as [function]
+        """
+        # Do not show multiple notifications
+        if self.__notification is None:
+            from lollypop.app_notification import AppNotification
+            self.__notification = AppNotification(title, buttons, actions)
+            self.__notification.connect("destroy",
+                                        self.__on_notification_destroy)
+            self.add_overlay(self.__notification)
+            self.__notification.show()
+            self.__notification.set_reveal_child(True)
 
 ############
 # PRIVATE  #
@@ -66,22 +84,17 @@ class NotificationContainer:
             App().settings.set_value("network-access-acl",
                                      GLib.Variant("i", network_access_acl))
 
-        from lollypop.app_notification import AppNotification
-        notification = AppNotification(
+        self.show_notification(
             _("Automatically download albums and artists artwork?"),
             [_("Yes")],
             [enable_data])
-        self.add_overlay(notification)
-        notification.show()
-        notification.set_reveal_child(True)
         self.__set_gsettings_value(self.__BACKGROUND_DATA)
 
     def __show_donation(self):
         """
             Show a notification telling user to donate a little
         """
-        from lollypop.app_notification import AppNotification
-        notification = AppNotification(
+        self.show_notification(
             _("Please consider a donation to the project"),
             [_("PayPal"), _("Patreon")],
             [lambda: Gtk.show_uri_on_window(
@@ -92,7 +105,7 @@ class NotificationContainer:
                 App().window,
                 "https://www.patreon.com/gnumdk",
                 Gdk.CURRENT_TIME)])
-        self.add_overlay(notification)
-        notification.show()
-        notification.set_reveal_child(True)
         self.__set_gsettings_value(self.__DONATION)
+
+    def __on_notification_destroy(self, notification):
+        self.__notification = None

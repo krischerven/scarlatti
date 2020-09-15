@@ -11,6 +11,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from random import shuffle
+from gettext import gettext as _
 
 from lollypop.view_flowbox import FlowBoxView
 from lollypop.define import App, Type, ViewType, OrderBy, ScanUpdate
@@ -33,6 +34,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param view_type as ViewType
         """
         FlowBoxView.__init__(self, storage_type, view_type)
+        self.__notification_shown = False
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return [
@@ -143,16 +145,17 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
             @param item as CollectionItem
             @param scan_update as ScanUpdate
         """
-        for artist_id in item.new_album_artist_ids:
-            if scan_update == ScanUpdate.ADDED:
-                artist_name = App().artists.get_name(artist_id)
-                sortname = App().artists.get_sortname(artist_id)
-                self.add_value((artist_id, artist_name, sortname))
-            elif scan_update == ScanUpdate.REMOVED:
-                for child in self._box.get_children():
-                    if child.data == artist_id:
-                        child.destroy()
-                        break
+        if scan_update == ScanUpdate.ADDED and not self.__notification_shown:
+            self.__notification_shown = True
+            App().window.container.show_notification(
+                    _("New artists available"),
+                    [_("Refresh")],
+                    [App().window.container.reload_view])
+        elif scan_update == ScanUpdate.REMOVED:
+            for child in self._box.get_children():
+                if child.data in item.new_album_artist_ids:
+                    child.destroy()
+                    break
 
 #######################
 # PRIVATE             #

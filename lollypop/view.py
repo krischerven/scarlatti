@@ -249,9 +249,6 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
             elif self.view_type & ViewType.SCROLLED:
                 self.scrolled.get_vscrollbar().set_margin_top(0)
 
-    def _on_album_updated(self, scanner, album_id, added):
-        pass
-
     def _on_map(self, widget):
         """
             Set initial view state
