@@ -174,7 +174,16 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
             @param child2 as AlbumSimpleWidget
         """
         orderby = App().settings.get_enum("orderby")
-        if orderby == OrderBy.ARTIST:
+        if orderby == OrderBy.ARTIST_YEAR:
+            artists1 = "".join(child1.data.artists)
+            artists2 = "".join(child2.data.artists)
+            if artists1 == artists2:
+                return child1.data.year is not None and\
+                    child2.data.year is not None and\
+                    child1.data.year > child2.data.year
+            else:
+                return artists1 > artists2
+        if orderby == OrderBy.ARTIST_LIST:
             artists1 = "".join(child1.data.artists)
             artists2 = "".join(child2.data.artists)
             if artists1 == artists2:

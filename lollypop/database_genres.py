@@ -81,10 +81,15 @@ class GenresDatabase:
         """
         orderby = App().settings.get_enum("orderby")
         order = " ORDER BY genres.name, "
-        if orderby == OrderBy.ARTIST:
+        if orderby == OrderBy.ARTIST_YEAR:
             order += " artists.sortname\
                      COLLATE NOCASE COLLATE LOCALIZED,\
                      albums.timestamp,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED"
+        elif orderby == OrderBy.ARTIST_TITLE:
+            order += " artists.sortname\
+                     COLLATE NOCASE COLLATE LOCALIZED,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.NAME:

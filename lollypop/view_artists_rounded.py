@@ -206,7 +206,7 @@ class RoundedArtistsViewWithBanner(RoundedArtistsView):
             @param random as bool
         """
         album_ids = App().albums.get_ids([], [], self.storage_type,
-                                         False, OrderBy.ARTIST)
+                                         False, OrderBy.ARTIST_YEAR)
         if not album_ids:
             return
         albums = [Album(album_id) for album_id in album_ids]
