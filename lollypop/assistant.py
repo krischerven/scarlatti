@@ -10,14 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, Handy
 
 from gettext import gettext as _
 
 from lollypop.define import App, MARGIN
 
 
-class Assistant(Gtk.Window):
+class Assistant(Handy.Window):
     """
         Dialog showing an assistant
         rules:
@@ -41,7 +41,7 @@ class Assistant(Gtk.Window):
             Init assistant
             @param rules as {}
         """
-        Gtk.Window.__init__(self)
+        Handy.Window.__init__(self)
         self.__rules = rules
         self.__right_button = Gtk.Button.new()
         self.__right_button.show()
@@ -56,8 +56,11 @@ class Assistant(Gtk.Window):
         self.__stack = Gtk.Stack.new()
         self.__stack.show()
         self.__stack.set_property("margin", MARGIN)
-        self.set_titlebar(self.__headerbar)
-        self.add(self.__stack)
+        box = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
+        box.show()
+        box.add(self.__headerbar)
+        box.add(self.__stack)
+        self.add(box)
         for rule in rules:
             page = self.__get_page(rule["icon_name"],
                                    rule["markup"],
