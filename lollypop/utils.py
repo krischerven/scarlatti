@@ -318,20 +318,6 @@ def get_iso_date_from_string(string):
         return None
 
 
-def is_unity():
-    """
-        Return True if desktop is Unity
-    """
-    return GLib.getenv("XDG_CURRENT_DESKTOP") == "Unity"
-
-
-def is_gnome():
-    """
-        Return True if desktop is Gnome
-    """
-    return GLib.getenv("XDG_CURRENT_DESKTOP") in ["ubuntu:GNOME", "GNOME"]
-
-
 def format_artist_name(name):
     """
         Return formated artist name

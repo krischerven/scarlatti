@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Handy
 
 from lollypop.define import App, Size
 from lollypop.toolbar_playback import ToolbarPlayback
@@ -22,7 +22,7 @@ from lollypop.helper_size_allocation import SizeAllocationHelper
 from lollypop.helper_signals import SignalsHelper, signals
 
 
-class Toolbar(Gtk.HeaderBar, SizeAllocationHelper, SignalsHelper):
+class Toolbar(Handy.HeaderBar, SizeAllocationHelper, SignalsHelper):
     """
         Lollypop toolbar
     """

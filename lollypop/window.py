@@ -10,17 +10,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, GLib, Handy
 
 from lollypop.define import App, ScanType
 from lollypop.container import Container
 from lollypop.toolbar import Toolbar
-from lollypop.utils import is_unity, emit_signal
+from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.logger import Logger
 
 
-class Window(Gtk.ApplicationWindow, SignalsHelper):
+class Window(Handy.ApplicationWindow, SignalsHelper):
     """
         Main window
     """
@@ -30,10 +30,10 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
         """
             Init window
         """
-        Gtk.ApplicationWindow.__init__(self,
-                                       application=App(),
-                                       title="Lollypop",
-                                       icon_name="org.gnome.Lollypop")
+        Handy.ApplicationWindow.__init__(self,
+                                         application=App(),
+                                         title="Lollypop",
+                                         icon_name="org.gnome.Lollypop")
         self.__miniplayer = None
         self.__configure_timeout_id = None
         self.set_auto_startup_notification(False)
@@ -59,12 +59,8 @@ class Window(Gtk.ApplicationWindow, SignalsHelper):
         self.__container.show()
         self.__toolbar = Toolbar(self)
         self.__toolbar.show()
-        if App().settings.get_value("disable-csd") or is_unity():
-            self.__vgrid.add(self.__toolbar)
-        else:
-            self.set_titlebar(self.__toolbar)
-            self.__toolbar.set_show_close_button(
-                not App().settings.get_value("disable-csd"))
+        self.__vgrid.add(self.__toolbar)
+        self.__toolbar.set_show_close_button(True)
         self.__vgrid.add(self.__container)
         self.add(self.__vgrid)
         self.__container.widget.connect("notify::folded",

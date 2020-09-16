@@ -14,7 +14,6 @@ from gi.repository import Gdk, GLib, Gio
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, Notifications
-from lollypop.utils import is_gnome
 
 
 class NotificationManager:
@@ -27,7 +26,6 @@ class NotificationManager:
             Init notification object with lollypop infos
         """
         self.__notification_timeout_id = None
-        self.__is_gnome = is_gnome()
         App().player.connect("current-changed", self.__on_current_changed)
         self.__notification = Gio.Notification.new("")
         self.__action = Gio.Notification.new("")

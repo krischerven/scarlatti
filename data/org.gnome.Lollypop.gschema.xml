@@ -201,11 +201,6 @@
             <summary>Use dark GTK theme</summary>
             <description></description>
         </key>
-         <key type="b" name="disable-csd">
-            <default>false</default>
-            <summary>Disable use of client side window decorations (headerbar)</summary>
-            <description></description>
-        </key>
          <key type="b" name="disable-scrobbling">
             <default>false</default>
             <summary>Disable scrobbling usage</summary>
