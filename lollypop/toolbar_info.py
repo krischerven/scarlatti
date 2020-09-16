@@ -47,6 +47,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         self.__artwork = ArtworkPlayerWidget(ArtBehaviour.CROP_SQUARE |
                                              ArtBehaviour.CACHE)
         self.__artwork.set_property("has-tooltip", True)
+        self.__artwork.set_margin_top(1)
         horizontal_box.pack_start(self.__artwork, False, False, 0)
         horizontal_box.pack_start(self.__label, False, False, 0)
         self.set_margin_start(MARGIN_SMALL)
@@ -173,5 +174,5 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             Calculate art size
             @param toolbar as ToolbarInfos
         """
-        art_size = self.get_allocated_height() - 2
+        art_size = self.get_allocated_height() - 1
         self.__artwork.set_art_size(art_size, art_size)
