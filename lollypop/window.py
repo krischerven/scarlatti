@@ -228,6 +228,9 @@ class Window(Handy.ApplicationWindow, SignalsHelper):
             @param leaflet as Handy.Leaflet
             @param folded as Gparam
         """
+        emit_signal(self.__container,
+                    "can-go-back-changed",
+                    self.__container.can_go_back)
         self.show_miniplayer(App().window.folded)
 
     def __on_destroy(self, widget):
