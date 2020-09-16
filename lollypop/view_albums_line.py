@@ -91,14 +91,14 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
     def _on_collection_updated(self, scanner, item, scan_update):
         pass
 
-    def _on_adaptive_changed(self, window, status):
+    def _on_container_folded(self, leaflet, folded):
         """
-            Update label
-            @param window as Window
-            @param status as bool
+            Handle libhandy folded status
+            @param leaflet as Handy.Leaflet
+            @param folded as Gparam
         """
-        AlbumsBoxView._on_adaptive_changed(self, window, status)
-        self.__update_label(status)
+        AlbumsBoxView._on_container_folded(self, leaflet, folded)
+        self.__update_label(folded)
 
     def _on_populated(self, widget):
         """
@@ -111,13 +111,13 @@ class AlbumsLineView(AlbumsBoxView, HorizontalScrollingHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __update_label(self, is_adaptive):
+    def __update_label(self, folded):
         """
             Update label style based on current adaptive state
-            @param is_adaptive as bool
+            @param folded as bool
         """
         style_context = self._label.get_style_context()
-        if is_adaptive:
+        if folded:
             style_context.remove_class("text-x-large")
         else:
             style_context.add_class("text-x-large")
