@@ -89,6 +89,8 @@ class ShufflePlayer:
                     self.load(track)
                 elif not self.is_playing:
                     self.play()
+                else:
+                    self.set_next()
             emit_signal(self, "loading-changed", False, Track())
 
         if party == self._is_party:
