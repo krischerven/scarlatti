@@ -27,7 +27,7 @@ class PasswordsHelper:
             Init helper
         """
         self.__secret = None
-        Secret.Service.get(Secret.ServiceFlags.NONE, None,
+        Secret.Service.get(Secret.ServiceFlags.LOAD_COLLECTIONS, None,
                            self.__on_get_secret)
 
     def get_token(self, service):
@@ -240,6 +240,7 @@ class PasswordsHelper:
         """
         try:
             self.__secret = source.get_finish(result)
+            self.__secret.unlock(self.__secret.get_collections())
         except Exception as e:
             self.__secret = -1
             Logger.error("PasswordsHelper::__on_get_secret(): %s" % e)
