@@ -208,8 +208,8 @@ class InformationView(View):
             @param event as Gdk.Event
         """
         if get_network_available("WIKIPEDIA"):
-            from lollypop.wikipedia import Wikipedia
-            wikipedia = Wikipedia()
+            from lollypop.helper_web_wikipedia import WikipediaHelper
+            wikipedia = WikipediaHelper()
             self.__stack.set_visible_child_name("select")
             App().task_helper.run(wikipedia.get_search_list,
                                   self.__artist_name,
@@ -222,8 +222,8 @@ class InformationView(View):
             @param row as Gtk.ListBoxRow
         """
         self.__stack.set_visible_child_name("main")
-        from lollypop.wikipedia import Wikipedia
-        wikipedia = Wikipedia()
+        from lollypop.helper_web_wikipedia import WikipediaHelper
+        wikipedia = WikipediaHelper()
         App().task_helper.run(wikipedia.get_content_for_page_id,
                               row.page_id, row.locale,
                               callback=(self.__on_wikipedia_get_content,))
