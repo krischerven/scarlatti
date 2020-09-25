@@ -50,11 +50,12 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
         self.__width = width
         self.__height = height
 
-    def update(self):
+    def update(self, force=False):
         """
             Update artwork
+            @param force as bool
         """
-        same_artwork = self.__previous_artwork_id ==\
+        same_artwork = not force and self.__previous_artwork_id ==\
             App().player.current_track.album.id and not self.__per_track_cover
         if same_artwork:
             return

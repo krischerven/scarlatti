@@ -61,18 +61,11 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
         buttons_widget.show()
         buttons_widget.update()
         buttons_widget.set_property("valign", Gtk.Align.CENTER)
-        self.__artwork_widget = ArtworkPlayerWidget(
-            ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE)
+        self.__artwork_widget = ArtworkPlayerWidget(ArtBehaviour.CROP_SQUARE)
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
-        if App().lookup_action("miniplayer").get_state():
-            self.set_size_request(ArtSize.MEDIUM + MARGIN * 2, -1)
-            self.__artwork_widget.set_art_size(ArtSize.MEDIUM,
-                                               ArtSize.MEDIUM)
-        else:
-            self.set_size_request(ArtSize.MINIPLAYER + MARGIN, -1)
-            self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
-                                               ArtSize.MINIPLAYER)
+        self.__artwork_widget.get_style_context().add_class(
+                "transparent-cover-frame")
         self.__label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN)
         self.__label_box.show()
         self.__label_widget = LabelPlayerWidget(False, 9)
@@ -119,7 +112,9 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             self.__revealer.set_reveal_child(True)
             emit_signal(self, "revealed", True)
             self.__progress_widget.update()
-            self.__artwork_widget.update()
+            size = min(ArtSize.BIG, self.width // 2)
+            self.__artwork_widget.set_art_size(size, size)
+            self.__artwork_widget.update(True)
             if App().lookup_action("miniplayer").get_state():
                 self.__artwork_button.set_from_icon_name(
                     "view-fullscreen-symbolic", Gtk.IconSize.BUTTON)
@@ -203,9 +198,13 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             # We use parent height because we may be collapsed
             parent = self.get_parent()
             if parent is None:
-                height = allocation.height
+                height = self.height
             else:
                 height = parent.get_allocated_height()
+            if self.__revealer.get_reveal_child():
+                size = min(ArtSize.FULLSCREEN, self.width // 2)
+                self.__artwork_widget.set_art_size(size, size)
+                self.__artwork_widget.update(True)
             self.__artwork_widget.set_artwork(
                 allocation.width + 100, height + 100,
                 self.__on_artwork,

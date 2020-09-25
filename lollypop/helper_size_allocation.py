@@ -31,6 +31,22 @@ class SizeAllocationHelper:
         else:
             self.connect("size-allocate", self.__on_size_allocate)
 
+    @property
+    def width(self):
+        """
+            Get widget width
+            @return int
+        """
+        return self.__width
+
+    @property
+    def height(self):
+        """
+            Get widget height
+            @return int
+        """
+        return self.__height
+
 #######################
 # PROTECTED           #
 #######################

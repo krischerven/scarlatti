@@ -285,6 +285,13 @@ flowboxchild:selected  {
     box-shadow: 1px 1px 10px 4px alpha(@theme_selected_bg_color, 0.5);
 }
 
+.transparent-cover-frame {
+    border-radius: 2px;
+    border: 1px solid alpha(black, 0.2);
+    background-color: alpha(white, 0.5);
+    padding: 2px;
+}
+
 .circle-icon {
     border: 1px solid alpha(black, 0.2);
     background-color: shade(@theme_bg_color, 1.5);

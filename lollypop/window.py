@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib, Handy
 
-from lollypop.define import App, ScanType
+from lollypop.define import App, ScanType, ArtSize
 from lollypop.container import Container
 from lollypop.toolbar import Toolbar
 from lollypop.utils import emit_signal
@@ -43,6 +43,7 @@ class Window(Handy.ApplicationWindow, SignalsHelper):
         self.connect("window-state-event", self.__on_window_state_event)
         self.connect("configure-event", self.__on_configure_event)
         self.connect("destroy", self.__on_destroy)
+        self.set_size_request(ArtSize.MINIPLAYER, ArtSize.MINIPLAYER)
         return [
             (App().player, "current-changed", "_on_current_changed")
         ]
