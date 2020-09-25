@@ -22,7 +22,7 @@ from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
                               FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE
 
 from gettext import gettext as _
-from time import time
+from time import time, sleep
 from urllib.parse import urlparse
 from multiprocessing import cpu_count
 
@@ -499,7 +499,6 @@ class CollectionScanner(GObject.GObject, TagReader):
             @thread safe
         """
         try:
-            SqlCursor.add(App().db)
             App().art.clean_rounded()
             (files, dirs, streams) = self.__get_objects_for_uris(
                 scan_type, uris)
@@ -535,19 +534,14 @@ class CollectionScanner(GObject.GObject, TagReader):
                 storage_type = StorageType.EXTERNAL
             else:
                 storage_type = StorageType.COLLECTION
-            # Start getting files and populating DB
-            self.__items = []
-            i = 0
             while threads:
-                thread = threads[i]
+                sleep(1)
+                thread = threads[0]
                 if not thread.is_alive():
                     threads.remove(thread)
-                self.__items += self.__save_in_db(storage_type)
-                if i >= len(threads) - 1:
-                    i = 0
-                else:
-                    i += 1
 
+            SqlCursor.add(App().db)
+            self.__items = self.__save_in_db(storage_type)
             # Add streams to DB, only happening on command line/m3u files
             self.__items += self.__save_streams_in_db(streams, storage_type)
 
