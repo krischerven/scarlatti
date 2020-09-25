@@ -112,7 +112,7 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             self.__revealer.set_reveal_child(True)
             emit_signal(self, "revealed", True)
             self.__progress_widget.update()
-            size = min(ArtSize.BIG, self.width // 2)
+            size = min(ArtSize.FULLSCREEN, self.width // 2)
             self.__artwork_widget.set_art_size(size, size)
             self.__artwork_widget.update(True)
             if App().lookup_action("miniplayer").get_state():
