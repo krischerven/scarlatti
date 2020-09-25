@@ -12,7 +12,7 @@
 
 from gi.repository import Gio, GLib, Gtk
 
-from lollypop.define import App, ScanType, Type
+from lollypop.define import App, ScanType, Type, ArtSize
 
 
 class ApplicationActions:
@@ -223,12 +223,14 @@ class ApplicationActions:
             App().window.show_miniplayer(True, True)
             App().window.toolbar.hide_info_and_buttons(True)
             App().window.unmaximize()
+            App().window.set_size_request(ArtSize.MINIPLAYER, -1)
             App().window.resize(1, 1)
         else:
             if App().window.miniplayer is not None:
                 App().window.miniplayer.reveal(False)
             size = App().settings.get_value("window-size")
             maximized = App().settings.get_value("window-maximized")
+            App().window.set_size_request(-1, -1)
             App().window.resize(size[0], size[1])
             if maximized:
                 GLib.idle_add(App().window.maximize)

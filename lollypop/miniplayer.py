@@ -66,7 +66,7 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
         if App().lookup_action("miniplayer").get_state():
-            self.set_size_request(ArtSize.MEDIUM + MARGIN, -1)
+            self.set_size_request(ArtSize.MEDIUM + MARGIN * 2, -1)
             self.__artwork_widget.set_art_size(ArtSize.MEDIUM,
                                                ArtSize.MEDIUM)
             self.__artwork_widget.set_opacity(0.5)
