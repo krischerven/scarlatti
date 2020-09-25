@@ -84,9 +84,11 @@ class Window(Handy.ApplicationWindow, SignalsHelper):
             miniplayer.set_vexpand(revealed)
             show_buttons(not revealed)
             if revealed:
+                self.__toolbar.hide()
                 self.__container.hide()
                 emit_signal(self.__container, "can-go-back-changed", False)
             else:
+                self.__toolbar.show()
                 self.__container.show()
                 emit_signal(self.__container, "can-go-back-changed",
                             self.__container.can_go_back)

@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject, GLib
+from gi.repository import Gtk, GObject, GLib, Handy
 
 from lollypop.helper_art import ArtBehaviour
 from lollypop.define import App, ArtSize, MARGIN_SMALL, MARGIN
@@ -23,7 +23,7 @@ from lollypop.helper_signals import SignalsHelper, signals
 from lollypop.utils import emit_signal
 
 
-class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
+class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
     """
         Mini player shown in folded window
     """
@@ -36,7 +36,7 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         """
             Init mini player
         """
-        Gtk.Overlay.__init__(self)
+        Handy.WindowHandle.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__previous_artwork_id = None
         self.__per_track_cover = App().settings.get_value(
@@ -66,10 +66,12 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
         if App().lookup_action("miniplayer").get_state():
+            self.set_size_request(ArtSize.MEDIUM + MARGIN, -1)
             self.__artwork_widget.set_art_size(ArtSize.MEDIUM,
                                                ArtSize.MEDIUM)
             self.__artwork_widget.set_opacity(0.5)
         else:
+            self.set_size_request(ArtSize.MINIPLAYER + MARGIN, -1)
             self.__artwork_widget.set_art_size(ArtSize.MINIPLAYER,
                                                ArtSize.MINIPLAYER)
         self.__label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN)
@@ -99,8 +101,11 @@ class MiniPlayer(Gtk.Overlay, SizeAllocationHelper, SignalsHelper):
         self.__revealer.add(self.__revealer_box)
         self.__revealer_box.pack_start(self.__artwork_widget, False, True, 0)
         self.__revealer_box.pack_end(self.__progress_widget, False, True, 0)
-        self.add(self.__background)
-        self.add_overlay(self.__box)
+        overlay = Gtk.Overlay.new()
+        overlay.show()
+        overlay.add(self.__background)
+        overlay.add_overlay(self.__box)
+        self.add(overlay)
         return [
             (App().player, "current-changed", "_on_current_changed")
         ]
