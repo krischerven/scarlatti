@@ -261,7 +261,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @param uri as str
             @param backup as bool
             @return (popularity, ltime, mtime,
-                     loved album, album_popularity)
+                     loved album, album_popularity, album_rate)
         """
         try:
             track_id = App().tracks.get_id_by_uri(uri)
@@ -312,6 +312,7 @@ class CollectionScanner(GObject.GObject, TagReader):
                     track_loved, album_loved, album_pop, album_rate)
         except Exception as e:
             Logger.error("CollectionScanner::del_from_db: %s" % e)
+        return (0, 0, 0, 0, False, False, 0, 0)
 
     def is_locked(self):
         """
