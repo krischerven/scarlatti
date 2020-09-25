@@ -183,8 +183,9 @@ class Album(Base):
             for track in tracks:
                 new_track = Track(track.id, self)
                 self._tracks.append(new_track)
-        else:
-            # Create a new album for current tracks
+        # Album tracks already belong to self
+        # Detach those tracks
+        elif self._tracks:
             new_album = Album(self.id, self.genre_ids, self.artist_ids)
             new_tracks = []
             for track in self._tracks:
@@ -192,6 +193,8 @@ class Album(Base):
                     track.set_album(new_album)
                     new_tracks.append(track)
             new_album._tracks = new_tracks
+            self._tracks = tracks
+        else:
             self._tracks = tracks
 
     def append_track(self, track, clone=True):
@@ -409,10 +412,17 @@ class Album(Base):
             Get album tracks
             @return [Track]
         """
-        if not self._tracks and self.id is not None:
-            for disc in self.discs:
-                self._tracks += disc.tracks
-        return self._tracks
+        if self.id is not None:
+            return []
+        if self._tracks:
+            return self._tracks
+        tracks = []
+        for disc in self.discs:
+            tracks += disc.tracks
+        # Already cached by another thread
+        if not self._tracks:
+            self._tracks = tracks
+        return tracks
 
     @property
     def one_disc(self):
@@ -433,15 +443,20 @@ class Album(Base):
             Get albums discs
             @return [Disc]
         """
+        if self._discs:
+            return self._discs
+        discs = []
+        disc_numbers = self.db.get_discs(self.id)
+        for disc_number in disc_numbers:
+            disc = Disc(self, disc_number,
+                        self.__tracks_storage_type,
+                        self.__skipped)
+            if disc.tracks:
+                discs.append(disc)
+        # Already cached by another thread
         if not self._discs:
-            disc_numbers = self.db.get_discs(self.id)
-            for disc_number in disc_numbers:
-                disc = Disc(self, disc_number,
-                            self.__tracks_storage_type,
-                            self.__skipped)
-                if disc.tracks:
-                    self._discs.append(disc)
-        return self._discs
+            self._discs = discs
+        return discs
 
     @property
     def duration(self):
