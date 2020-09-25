@@ -147,14 +147,13 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
                     boxes_count = 1
                 if self.__boxes_count == boxes_count:
                     return
+                self.__boxes_count = boxes_count
                 # Rework content
                 if self.is_populated:
                     children = self.__get_children_sorted()
                     self.__remove_children()
-                    self.__boxes_count = boxes_count
                     self.__populate(children)
                 else:
-                    self.__boxes_count = boxes_count
                     album_ids = App().albums.get_ids(self.__genre_ids,
                                                      self.__artist_ids,
                                                      self.storage_type,
@@ -200,14 +199,15 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
             Get children sorted (insert order)
             @return [Gtk.Widget]
         """
+        boxes_count = len(self.__boxes)
         children = {}
-        for i in range(0, self.__boxes_count):
+        for i in range(0, boxes_count):
             children[i] = self.__boxes[i].get_children()
         sorted_children = []
         not_found = 0
-        while not_found != self.__boxes_count:
+        while not_found != boxes_count:
             not_found = 0
-            for i in range(0, self.__boxes_count):
+            for i in range(0, boxes_count):
                 if children[i]:
                     child = children[i].pop(0)
                     sorted_children.append(child)
@@ -219,7 +219,8 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
         """
             Remove children from boxes
         """
-        for i in range(0, self.__boxes_count):
+        boxes_count = len(self.__boxes)
+        for i in range(0, boxes_count):
             self.__boxes[i].hide()
             children = self.__boxes[i].get_children()
             for child in children:
