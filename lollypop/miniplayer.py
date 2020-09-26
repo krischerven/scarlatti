@@ -70,6 +70,7 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
                 "transparent-cover-frame")
         self.__label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN)
         self.__label_box.show()
+        self.__label_box.set_property("margin", MARGIN_SMALL)
         self.__label_widget = LabelPlayerWidget(False, 9)
         self.__label_widget.show()
         self.__label_widget.update()
