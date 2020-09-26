@@ -412,7 +412,7 @@ class Album(Base):
             Get album tracks
             @return [Track]
         """
-        if self.id is not None:
+        if self.id is None:
             return []
         if self._tracks:
             return self._tracks
