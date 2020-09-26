@@ -74,6 +74,8 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
         self.__label_widget = LabelPlayerWidget(False, 9)
         self.__label_widget.show()
         self.__label_widget.update()
+        self.__label_widget.set_margin_start(MARGIN_SMALL)
+        self.__label_widget.set_margin_end(MARGIN_SMALL)
         self.__artwork_button = Gtk.Image.new()
         self.__artwork_button.show()
         self.__label_box.pack_start(self.__artwork_button, False, False, 0)
