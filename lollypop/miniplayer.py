@@ -93,7 +93,6 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
         self.__box.pack_start(bottom_box, False, False, 0)
         bottom_box.pack_start(button, True, True, 0)
         bottom_box.pack_end(buttons_widget, False, False, 0)
-        bottom_box.set_size_request(-1, 68)
         self.__revealer.add(self.__revealer_box)
         self.__revealer_box.pack_start(self.__artwork_widget, False, True, 0)
         self.__revealer_box.pack_end(self.__progress_widget, False, True, 0)
