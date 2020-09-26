@@ -61,9 +61,11 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
         buttons_widget.show()
         buttons_widget.update()
         buttons_widget.set_property("valign", Gtk.Align.CENTER)
+        buttons_widget.set_margin_end(MARGIN_SMALL)
         self.__artwork_widget = ArtworkPlayerWidget(ArtBehaviour.CROP_SQUARE)
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
+        self.__artwork_widget.set_property("margin", MARGIN_SMALL)
         self.__artwork_widget.get_style_context().add_class(
                 "transparent-cover-frame")
         self.__label_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, MARGIN)
@@ -82,6 +84,7 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
         button.set_property("valign", Gtk.Align.CENTER)
         button.connect("clicked", self.__on_button_clicked)
         button.set_image(self.__label_box)
+        button.set_margin_start(MARGIN_SMALL)
         self.__background = Gtk.Image()
         self.__background.show()
         # Assemble UI
