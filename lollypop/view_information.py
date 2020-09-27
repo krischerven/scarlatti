@@ -16,7 +16,7 @@ from gettext import gettext as _
 import re
 
 from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type
-from lollypop.define import ARTISTS_PATH
+from lollypop.define import ARTISTS_PATH, ArtSize
 from lollypop.objects_album import Album
 from lollypop.helper_art import ArtBehaviour
 from lollypop.information_store import InformationStore
@@ -249,8 +249,8 @@ class InformationView(View, SignalsHelper):
         """
         App().art_helper.set_artist_artwork(
                                     self.__artist_name,
-                                    180,
-                                    180,
+                                    ArtSize.MEDIUM,
+                                    ArtSize.MEDIUM,
                                     self.__artist_artwork.get_scale_factor(),
                                     ArtBehaviour.ROUNDED |
                                     ArtBehaviour.CROP_SQUARE |

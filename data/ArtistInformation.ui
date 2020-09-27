@@ -11,23 +11,12 @@
   <object class="GtkGrid" id="widget">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
+    <property name="margin-start">5</property>
+    <property name="margin-end">5</property>
     <property name="row-spacing">15</property>
     <property name="column-spacing">15</property>
     <child>
-      <object class="GtkImage" id="artist_artwork">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="valign">start</property>
-        <property name="margin-right">5</property>
-        <property name="stock">gtk-missing-image</property>
-      </object>
-      <packing>
-        <property name="left-attach">0</property>
-        <property name="top-attach">1</property>
-      </packing>
-    </child>
-    <child>
-      <!-- n-columns=3 n-rows=3 -->
+      <!-- n-columns=3 n-rows=1 -->
       <object class="GtkGrid" id="header">
         <property name="can-focus">False</property>
         <property name="halign">center</property>
@@ -48,7 +37,7 @@
             </style>
           </object>
           <packing>
-            <property name="left-attach">1</property>
+            <property name="left-attach">2</property>
             <property name="top-attach">0</property>
           </packing>
         </child>
@@ -69,30 +58,21 @@
             </child>
           </object>
           <packing>
-            <property name="left-attach">0</property>
+            <property name="left-attach">1</property>
             <property name="top-attach">0</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkImage" id="artist_artwork">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="valign">start</property>
+            <property name="stock">gtk-missing-image</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">0</property>
+          </packing>
         </child>
       </object>
       <packing>
@@ -218,9 +198,12 @@
         </child>
       </object>
       <packing>
-        <property name="left-attach">1</property>
+        <property name="left-attach">0</property>
         <property name="top-attach">1</property>
       </packing>
+    </child>
+    <child>
+      <placeholder/>
     </child>
     <child>
       <placeholder/>
