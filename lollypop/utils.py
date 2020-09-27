@@ -448,6 +448,8 @@ def get_icon_name(object_id):
         icon = "org.gnome.Lollypop-tag-list-symbolic"
     elif object_id == Type.WEB:
         icon = "goa-panel-symbolic"
+    elif object_id == Type.INFO:
+        icon = "dialog-information-symbolic"
     return icon
 
 

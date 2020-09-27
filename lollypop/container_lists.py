@@ -231,6 +231,8 @@ class ListsContainer:
             view = self.get_view_current()
         elif selected_id == Type.SEARCH:
             view = self.get_view_search()
+        elif selected_id == Type.INFO:
+            view = self._get_view_info()
         elif selected_id == Type.SUGGESTIONS:
             view = self._get_view_suggestions(storage_type)
         elif selected_id in [Type.POPULARS,

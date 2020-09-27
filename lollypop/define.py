@@ -245,7 +245,6 @@ class Type:
     GENRES_LIST = -14
     YEARS = -15
     PLAYLISTS = -16
-    INFO = -18
     SMART = -19
     EQUALIZER = -20
     DEVICE_ALBUMS = -27
@@ -253,8 +252,9 @@ class Type:
     ALBUM = -29
     SEPARATOR = -100
     CURRENT = -101
-    SEARCH = -102
-    LYRICS = -103
+    INFO = -102
+    SEARCH = -103
+    LYRICS = -104
 
 
 LATIN1_ENCODING = b"\x00"

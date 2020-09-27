@@ -357,9 +357,8 @@ class ViewsContainer:
             Get view for information
             @return InformationView
         """
-        view_type = ViewType.SCROLLED
-        from lollypop.view_information import InformationView
-        view = InformationView(view_type, True)
+        from lollypop.view_information_stack import InformationViewStack
+        view = InformationViewStack()
         view.populate()
         view.set_margin_top(MARGIN_SMALL)
         view.set_margin_start(MARGIN_SMALL)
