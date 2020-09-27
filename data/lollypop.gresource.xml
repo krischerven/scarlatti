@@ -4,7 +4,6 @@
     <file compressed="true">application.css</file>
      <file compressed="true" preprocess="xml-stripblanks">Appmenu.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ArtistBannerWidget.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">ArtistInformation.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ArtworkSearch.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">DeviceWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">EqualizerWidget.ui</file>

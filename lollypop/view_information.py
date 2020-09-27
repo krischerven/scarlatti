@@ -15,16 +15,16 @@ from gi.repository import Gtk, GLib, Gio, Pango
 from gettext import gettext as _
 import re
 
-from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type
-from lollypop.define import ARTISTS_PATH, ArtSize
+from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import ARTISTS_PATH
 from lollypop.objects_album import Album
-from lollypop.helper_art import ArtBehaviour
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
 from lollypop.utils import set_cursor_type, get_network_available
 from lollypop.utils import get_default_storage_type
 from lollypop.helper_gestures import GesturesHelper
+from lollypop.widgets_banner_artist import ArtistBannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -77,7 +77,8 @@ class InformationView(View, SignalsHelper):
             @param view_type as ViewType
             @param minimal as bool
         """
-        View.__init__(self, get_default_storage_type(), view_type)
+        View.__init__(self, get_default_storage_type(),
+                      view_type | ViewType.OVERLAY)
         self.__information_store = InformationStore()
         self.__cancellable = Gio.Cancellable()
         self.__minimal = minimal
@@ -94,71 +95,56 @@ class InformationView(View, SignalsHelper):
             Show information for artists
             @param artist_id as int
         """
-        builder = Gtk.Builder()
-        builder.add_from_resource(
-            "/org/gnome/Lollypop/ArtistInformation.ui")
-        builder.connect_signals(self)
-        self.__scrolled = builder.get_object("scrolled")
-        widget = builder.get_object("widget")
-        self.add(widget)
-        self.__stack = builder.get_object("stack")
-        self.__listbox = builder.get_object("listbox")
-        self.__artist_label = builder.get_object("artist_label")
-        title_label = builder.get_object("title_label")
-        self.__artist_artwork = builder.get_object("artist_artwork")
-        bio_eventbox = builder.get_object("bio_eventbox")
-        artist_label_eventbox = builder.get_object("artist_label_eventbox")
-        bio_eventbox.connect("realize", set_cursor_type)
-        artist_label_eventbox.connect("realize", set_cursor_type)
-        self.__gesture1 = GesturesHelper(
-            bio_eventbox,
-            primary_press_callback=self._on_info_label_press)
-        self.__gesture2 = GesturesHelper(
-            artist_label_eventbox,
-            primary_press_callback=self._on_artist_label_press)
-        self.__bio_label = builder.get_object("bio_label")
-        if artist_id is None and App().player.current_track.id is not None:
-            builder.get_object("header").show()
-            if App().player.current_track.album.artist_ids[0] ==\
-                    Type.COMPILATIONS:
-                artist_id = App().player.current_track.artist_ids[0]
-            else:
-                artist_id = App().player.current_track.album.artist_ids[0]
-            title_label.set_text(App().player.current_track.title)
-        self.__artist_name = App().artists.get_name(artist_id)
-        if self.__minimal:
-            self.__bio_label.set_margin_start(MARGIN)
-            self.__bio_label.set_margin_end(MARGIN)
-            self.__bio_label.set_margin_top(MARGIN)
-            self.__bio_label.set_margin_bottom(MARGIN)
-            self.__artist_artwork.hide()
-        else:
-            self.__artist_artwork.set_margin_start(MARGIN_SMALL)
-            builder.get_object("header").show()
-            self.__artist_label.set_text(self.__artist_name)
-            self.__artist_label.show()
-            title_label.show()
-            self.__set_artwork()
+        banner = None
+        artist_ids = App().player.current_track.artist_ids\
+            if artist_id is None else [artist_id]
+        self.__artist_name = App().artists.get_name(artist_ids[0])
+        if not self.__minimal:
+            storage_type = App().player.current_track.storage_type
+            banner = ArtistBannerWidget([], artist_ids,
+                                        storage_type, ViewType.NO_ACTIONS)
+            banner.show()
             self.__albums_view = AlbumsListView([], [],
                                                 ViewType.SCROLLED)
             self.__albums_view.set_size_request(300, -1)
             self.__albums_view.show()
-            self.__albums_view.set_margin_start(5)
             self.__albums_view.add_widget(self.__albums_view.box)
-            widget.attach(self.__albums_view, 2, 1, 1, 2)
             albums = []
             storage_type = get_default_storage_type()
-            for album_id in App().albums.get_ids([], [artist_id],
+            for album_id in App().albums.get_ids([], artist_ids,
                                                  storage_type, True):
                 albums.append(Album(album_id))
             if not albums:
                 albums = [App().player.current_track.album]
             self.__albums_view.populate(albums)
-            self._on_container_folded()
+        self.__stack = Gtk.Stack.new()
+        self.__stack.show()
+        self.__listbox = Gtk.ListBox.new()
+        self.__listbox.show()
+        eventbox = Gtk.EventBox.new()
+        eventbox.show()
+        eventbox.connect("realize", set_cursor_type)
+        self.__label = Gtk.Label.new()
+        self.__label.show()
+        self.__label.set_justify(Gtk.Justification.FILL)
+        self.__label.set_line_wrap(True)
+        self.__label.set_line_wrap_mode(Pango.WrapMode.WORD)
+        self.__label.set_property("margin", MARGIN_SMALL)
+        eventbox.add(self.__label)
+        widget = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, MARGIN)
+        widget.show()
+        self.add_widget(widget, banner)
+        widget.add(eventbox)
+        if not self.__minimal:
+            widget.add(self.__albums_view)
+        self.__gesture1 = GesturesHelper(
+            eventbox,
+            primary_press_callback=self._on_info_label_press)
+        self._on_container_folded()
         content = self.__information_store.get_information(self.__artist_name,
                                                            ARTISTS_PATH)
         if content is None:
-            self.__bio_label.set_text(_("Loading information"))
+            self.__label.set_text(_("Loading information"))
             from lollypop.information_downloader import InformationDownloader
             downloader = InformationDownloader()
             downloader.get_information(self.__artist_name,
@@ -166,7 +152,7 @@ class InformationView(View, SignalsHelper):
                                        self.__artist_name)
         else:
             App().task_helper.run(self.__to_markup, content,
-                                  callback=(self.__bio_label.set_markup,))
+                                  callback=(self.__label.set_markup,))
 
 #######################
 # PROTECTED           #
@@ -184,22 +170,6 @@ class InformationView(View, SignalsHelper):
             @param button as Gtk.Button
         """
         self.__stack.set_visible_child_name("main")
-
-    def _on_artist_label_press(self, x, y, event):
-        """
-            Go to artist view
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
-        """
-        popover = self.get_ancestor(Gtk.Popover)
-        if popover is not None:
-            popover.popdown()
-        if App().player.current_track.id is None:
-            return
-        GLib.idle_add(App().window.container.show_view,
-                      [Type.ARTISTS],
-                      App().player.current_track.album.artist_ids)
 
     def _on_info_label_press(self, x, y, event):
         """
@@ -234,29 +204,13 @@ class InformationView(View, SignalsHelper):
             Handle libhandy folded status
         """
         if App().window.folded:
-            self.__artist_artwork.hide()
             self.__albums_view.hide()
         else:
-            self.__artist_artwork.show()
             self.__albums_view.show()
 
 #######################
 # PRIVATE             #
 #######################
-    def __set_artwork(self):
-        """
-            Set artist artwork
-        """
-        App().art_helper.set_artist_artwork(
-                                    self.__artist_name,
-                                    ArtSize.MEDIUM,
-                                    ArtSize.MEDIUM,
-                                    self.__artist_artwork.get_scale_factor(),
-                                    ArtBehaviour.ROUNDED |
-                                    ArtBehaviour.CROP_SQUARE |
-                                    ArtBehaviour.CACHE,
-                                    self.__on_artist_artwork)
-
     def __to_markup(self, data):
         """
             Transform message to markup
@@ -292,7 +246,7 @@ class InformationView(View, SignalsHelper):
         """
         if content is not None:
             App().task_helper.run(self.__to_markup, content,
-                                  callback=(self.__bio_label.set_markup,))
+                                  callback=(self.__label.set_markup,))
             self.__information_store.save_information(
                 self.__artist_name, ARTISTS_PATH, content)
 
@@ -316,11 +270,11 @@ class InformationView(View, SignalsHelper):
         if artist_name != self.__artist_name:
             return
         if content is None:
-            self.__bio_label.set_text(
+            self.__label.set_text(
                 _("No information for %s") % self.__artist_name)
         else:
             App().task_helper.run(self.__to_markup, content,
-                                  callback=(self.__bio_label.set_markup,))
+                                  callback=(self.__label.set_markup,))
             self.__information_store.save_information(self.__artist_name,
                                                       ARTISTS_PATH,
                                                       content)
