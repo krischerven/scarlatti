@@ -166,10 +166,11 @@ class InformationView(View, SignalsHelper):
         """
             Handle libhandy folded status
         """
-        if App().window.folded:
-            self.__albums_view.hide()
-        else:
-            self.__albums_view.show()
+        if not self.__minimal:
+            if App().window.folded:
+                self.__albums_view.hide()
+            else:
+                self.__albums_view.show()
 
 #######################
 # PRIVATE             #
