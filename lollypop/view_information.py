@@ -126,6 +126,7 @@ class InformationView(View, SignalsHelper):
         self.__label.set_line_wrap(True)
         self.__label.set_line_wrap_mode(Pango.WrapMode.WORD)
         self.__label.set_property("margin", MARGIN_SMALL)
+        self.__label.set_valign(Gtk.Align.START)
         widget = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, MARGIN)
         widget.show()
         self.__stack = Gtk.Stack.new()
