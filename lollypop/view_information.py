@@ -105,7 +105,7 @@ class InformationView(View, SignalsHelper):
             self.__banner.connect("search", self.__on_banner_search)
             self.__albums_view = AlbumsListView([], [],
                                                 ViewType.SCROLLED)
-            self.__albums_view.set_size_request(300, -1)
+            self.__albums_view.set_size_request(350, -1)
             self.__albums_view.set_halign(Gtk.Align.END)
             self.__albums_view.show()
             self.__albums_view.add_widget(self.__albums_view.box)
