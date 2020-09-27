@@ -24,6 +24,7 @@ class ApplicationActions:
         """
             Init actions
         """
+        self.__restore_mini_player = False
         self.__special_shortcuts_count = 0
         settings_action = Gio.SimpleAction.new("settings", None)
         settings_action.connect("activate", self.__on_settings_activate)
@@ -220,13 +221,18 @@ class ApplicationActions:
         App().window.set_opacity(0)
         action.set_state(value)
         if value:
+            self.__restore_mini_player = App().window.miniplayer is not None
             App().window.show_miniplayer(True, True)
             App().window.toolbar.hide_info_and_buttons(True)
             App().window.unmaximize()
             App().window.resize(1, 1)
         else:
-            if App().window.miniplayer is not None:
+            if self.__restore_mini_player:
                 App().window.miniplayer.reveal(False)
+            else:
+                App().window.miniplayer.reveal(False)
+                App().window.show_miniplayer(False)
+                App().window.toolbar.hide_info_and_buttons(False)
             size = App().settings.get_value("window-size")
             maximized = App().settings.get_value("window-maximized")
             App().window.resize(size[0], size[1])
