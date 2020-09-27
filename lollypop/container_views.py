@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import App, Type, ViewType, MARGIN_SMALL, StorageType
+from lollypop.define import App, Type, ViewType, StorageType
 from lollypop.utils import emit_signal, get_default_storage_type
 
 
@@ -360,6 +360,4 @@ class ViewsContainer:
         from lollypop.view_information_stack import InformationViewStack
         view = InformationViewStack()
         view.populate()
-        view.set_margin_top(MARGIN_SMALL)
-        view.set_margin_start(MARGIN_SMALL)
         return view
