@@ -168,8 +168,12 @@ class InformationView(View, SignalsHelper):
         """
         if not self.__minimal:
             if App().window.folded:
+                if not self.view_type & ViewType.SMALL:
+                    self.__label.get_style_context().remove_class("text-large")
                 self.__albums_view.hide()
             else:
+                if not self.view_type & ViewType.SMALL:
+                    self.__label.get_style_context().add_class("text-large")
                 self.__albums_view.show()
 
 #######################

@@ -28,7 +28,8 @@ class InformationPopover(Popover):
         Popover.__init__(self)
         self.__minimal = minimal
         self.__width = 10
-        self.__view = InformationView(ViewType.SCROLLED, minimal)
+        self.__view = InformationView(ViewType.SCROLLED |
+                                      ViewType.SMALL, minimal)
         self.__view.show()
         self.connect("map", self.__on_map)
         self.get_style_context().add_class("padding")
