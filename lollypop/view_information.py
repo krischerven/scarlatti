@@ -212,6 +212,7 @@ class InformationView(View, SignalsHelper):
             @param status as bool
         """
         if status:
+            self.__label.set_text(_("Loading information"))
             if get_network_available("WIKIPEDIA"):
                 from lollypop.helper_web_wikipedia import WikipediaHelper
                 wikipedia = WikipediaHelper()
@@ -288,7 +289,7 @@ class InformationView(View, SignalsHelper):
             @param row as Gtk.ListBoxRow
         """
         self.__show_main_widget()
-        self.__banner.button.toggled()
+        self.__banner.button.set_active(False)
         from lollypop.helper_web_wikipedia import WikipediaHelper
         wikipedia = WikipediaHelper()
         App().task_helper.run(wikipedia.get_content_for_page_id,
