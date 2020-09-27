@@ -21,10 +21,9 @@ from lollypop.objects_album import Album
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
-from lollypop.utils import set_cursor_type, get_network_available
+from lollypop.utils import get_network_available
 from lollypop.utils import get_default_storage_type
-from lollypop.helper_gestures import GesturesHelper
-from lollypop.widgets_banner_artist import ArtistBannerWidget
+from lollypop.widgets_banner_information import InformationBannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
 
@@ -95,15 +94,15 @@ class InformationView(View, SignalsHelper):
             Show information for artists
             @param artist_id as int
         """
-        banner = None
+        self.__banner = None
         artist_ids = App().player.current_track.artist_ids\
             if artist_id is None else [artist_id]
         self.__artist_name = App().artists.get_name(artist_ids[0])
         if not self.__minimal:
             storage_type = App().player.current_track.storage_type
-            banner = ArtistBannerWidget([], artist_ids,
-                                        storage_type, ViewType.NO_ACTIONS)
-            banner.show()
+            self.__banner = InformationBannerWidget(artist_ids[0])
+            self.__banner.show()
+            self.__banner.connect("search", self.__on_banner_search)
             self.__albums_view = AlbumsListView([], [],
                                                 ViewType.SCROLLED)
             self.__albums_view.set_size_request(300, -1)
@@ -117,29 +116,26 @@ class InformationView(View, SignalsHelper):
             if not albums:
                 albums = [App().player.current_track.album]
             self.__albums_view.populate(albums)
-        self.__stack = Gtk.Stack.new()
-        self.__stack.show()
         self.__listbox = Gtk.ListBox.new()
         self.__listbox.show()
-        eventbox = Gtk.EventBox.new()
-        eventbox.show()
-        eventbox.connect("realize", set_cursor_type)
+        self.__listbox.get_style_context().add_class("trackswidget")
+        self.__listbox.connect("row-activated", self.__on_row_activated)
         self.__label = Gtk.Label.new()
         self.__label.show()
         self.__label.set_justify(Gtk.Justification.FILL)
         self.__label.set_line_wrap(True)
         self.__label.set_line_wrap_mode(Pango.WrapMode.WORD)
         self.__label.set_property("margin", MARGIN_SMALL)
-        eventbox.add(self.__label)
         widget = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, MARGIN)
         widget.show()
-        self.add_widget(widget, banner)
-        widget.add(eventbox)
+        self.__stack = Gtk.Stack.new()
+        self.__stack.show()
+        self.__stack.add_named(self.__label, "main")
+        self.__stack.add_named(self.__listbox, "select")
+        self.add_widget(widget, self.__banner)
+        widget.add(self.__stack)
         if not self.__minimal:
             widget.add(self.__albums_view)
-        self.__gesture1 = GesturesHelper(
-            eventbox,
-            primary_press_callback=self._on_info_label_press)
         self._on_container_folded()
         content = self.__information_store.get_information(self.__artist_name,
                                                            ARTISTS_PATH)
@@ -163,41 +159,6 @@ class InformationView(View, SignalsHelper):
             @param widget as Gtk.Widget
         """
         self.__cancellable.cancel()
-
-    def _on_previous_button_clicked(self, button):
-        """
-            Go back to main view
-            @param button as Gtk.Button
-        """
-        self.__stack.set_visible_child_name("main")
-
-    def _on_info_label_press(self, x, y, event):
-        """
-            Show information cache (for edition)
-            @param x as int
-            @param y as int
-            @param event as Gdk.Event
-        """
-        if get_network_available("WIKIPEDIA"):
-            from lollypop.helper_web_wikipedia import WikipediaHelper
-            wikipedia = WikipediaHelper()
-            self.__stack.set_visible_child_name("select")
-            App().task_helper.run(wikipedia.get_search_list,
-                                  self.__artist_name,
-                                  callback=(self.__on_wikipedia_search_list,))
-
-    def _on_row_activated(self, listbox, row):
-        """
-            Update artist information
-            @param listbox as Gtk.ListBox
-            @param row as Gtk.ListBoxRow
-        """
-        self.__stack.set_visible_child_name("main")
-        from lollypop.helper_web_wikipedia import WikipediaHelper
-        wikipedia = WikipediaHelper()
-        App().task_helper.run(wikipedia.get_content_for_page_id,
-                              row.page_id, row.locale,
-                              callback=(self.__on_wikipedia_get_content,))
 
     def _on_container_folded(self, *ignore):
         """
@@ -228,6 +189,30 @@ class InformationView(View, SignalsHelper):
             text = re.sub(end[i], "</span></b>", text, flags=re.M)
             i += 1
         return text
+
+    def __on_banner_search(self, banner, status):
+        """
+            Search for artist
+            @param banner as InformationBannerwidget
+            @param status as bool
+        """
+        if status:
+            if get_network_available("WIKIPEDIA"):
+                from lollypop.helper_web_wikipedia import WikipediaHelper
+                wikipedia = WikipediaHelper()
+                self.__stack.get_visible_child().hide()
+                self.__stack.get_child_by_name("select").show()
+                self.__stack.set_visible_child_name("select")
+                App().task_helper.run(
+                    wikipedia.get_search_list,
+                    self.__artist_name,
+                    callback=(self.__on_wikipedia_search_list,))
+            else:
+                self.__banner.button.toggled()
+        else:
+            self.__stack.get_visible_child().hide()
+            self.__stack.get_child_by_name("main").show()
+            self.__stack.set_visible_child_name("main")
 
     def __on_wikipedia_search_list(self, items):
         """
@@ -278,3 +263,18 @@ class InformationView(View, SignalsHelper):
             self.__information_store.save_information(self.__artist_name,
                                                       ARTISTS_PATH,
                                                       content)
+
+    def __on_row_activated(self, listbox, row):
+        """
+            Update artist information
+            @param listbox as Gtk.ListBox
+            @param row as Gtk.ListBoxRow
+        """
+        self.__stack.get_child_by_name("main").show()
+        self.__stack.set_visible_child_name("main")
+        self.__banner.button.toggled()
+        from lollypop.helper_web_wikipedia import WikipediaHelper
+        wikipedia = WikipediaHelper()
+        App().task_helper.run(wikipedia.get_content_for_page_id,
+                              row.page_id, row.locale,
+                              callback=(self.__on_wikipedia_get_content,))

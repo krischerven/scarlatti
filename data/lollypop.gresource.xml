@@ -8,6 +8,7 @@
      <file compressed="true" preprocess="xml-stripblanks">DeviceWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">EqualizerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">FullScreen.ui</file>
+     <file compressed="true" preprocess="xml-stripblanks">InformationBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">LovedWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">PlaylistBannerWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">PlaylistPopover.ui</file>

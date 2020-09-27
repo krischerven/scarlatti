@@ -49,8 +49,6 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.connect("realize", set_cursor_type)
         self.__title_label.connect("query-tooltip", on_query_tooltip)
         self.__title_label.set_property("has-tooltip", True)
-        if view_type & ViewType.NO_ACTIONS:
-            builder.get_object("buttons").hide()
         self.__add_button = builder.get_object("add_button")
         self.__play_button = builder.get_object("play_button")
         self.__menu_button = builder.get_object("menu_button")

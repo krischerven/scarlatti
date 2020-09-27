@@ -116,7 +116,6 @@ class ViewType:
     BANNER = 1 << 13
     ARTIST = 1 << 14
     TOOLBAR = 1 << 15
-    NO_ACTIONS = 1 << 16
 
 
 NetworkAccessACL = {
