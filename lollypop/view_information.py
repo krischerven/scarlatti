@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Gio, Pango
 from gettext import gettext as _
 import re
 
-from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL
+from lollypop.define import App, ViewType, MARGIN
 from lollypop.define import ARTISTS_PATH
 from lollypop.objects_album import Album
 from lollypop.information_store import InformationStore
@@ -106,8 +106,8 @@ class InformationView(View, SignalsHelper):
             self.__albums_view = AlbumsListView([], [],
                                                 ViewType.SCROLLED)
             self.__albums_view.set_size_request(350, -1)
-            self.__albums_view.set_halign(Gtk.Align.END)
             self.__albums_view.show()
+            self.__albums_view.set_halign(Gtk.Align.END)
             self.__albums_view.add_widget(self.__albums_view.box)
             albums = []
             storage_type = get_default_storage_type()
@@ -121,14 +121,20 @@ class InformationView(View, SignalsHelper):
         self.__listbox.show()
         self.__listbox.get_style_context().add_class("trackswidget")
         self.__listbox.connect("row-activated", self.__on_row_activated)
+        self.__listbox.set_hexpand(True)
+        self.__listbox.set_halign(Gtk.Align.CENTER)
         self.__label = Gtk.Label.new()
         self.__label.show()
         self.__label.set_justify(Gtk.Justification.FILL)
         self.__label.set_line_wrap(True)
         self.__label.set_line_wrap_mode(Pango.WrapMode.WORD)
-        self.__label.set_property("margin", MARGIN_SMALL)
         self.__label.set_valign(Gtk.Align.START)
-        widget = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, MARGIN)
+        self.__label.set_margin_top(MARGIN)
+        self.__label.set_margin_bottom(MARGIN)
+        self.__label.set_margin_start(MARGIN)
+        self.__label.set_margin_end(MARGIN)
+        self.__label.set_hexpand(True)
+        widget = Gtk.Grid()
         widget.show()
         self.__stack = Gtk.Stack.new()
         self.__stack.show()
@@ -177,10 +183,14 @@ class InformationView(View, SignalsHelper):
         if not self.__minimal:
             if App().window.folded:
                 if not self.view_type & ViewType.SMALL:
+                    self.__label.set_margin_start(MARGIN)
+                    self.__label.set_margin_end(MARGIN)
                     self.__label.get_style_context().remove_class("text-large")
                 self.__albums_view.hide()
             else:
                 if not self.view_type & ViewType.SMALL:
+                    self.__label.set_margin_start(100)
+                    self.__label.set_margin_end(100)
                     self.__label.get_style_context().add_class("text-large")
                 self.__albums_view.show()
 
