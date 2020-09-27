@@ -62,10 +62,12 @@ class InformationViewStack(View, SignalsHelper):
             self.show_placeholder(False)
             from lollypop.view_information import InformationView
             current_child = self.__stack.get_visible_child()
-            self.__view = InformationView(ViewType.SCROLLED, False)
-            self.__view.show()
-            self.__view.populate()
-            self.__stack.add(self.__view)
-            self.__stack.set_visible_child(self.__view)
-            if current_child is not None:
-                GLib.timeout_add(500, current_child.destroy)
+            if current_child is None or current_child.artist_name !=\
+                    App().player.current_track.artists[0]:
+                self.__view = InformationView(ViewType.SCROLLED, False)
+                self.__view.show()
+                self.__view.populate()
+                self.__stack.add(self.__view)
+                self.__stack.set_visible_child(self.__view)
+                if current_child is not None:
+                    GLib.timeout_add(500, current_child.destroy)

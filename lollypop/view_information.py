@@ -152,6 +152,14 @@ class InformationView(View, SignalsHelper):
             App().task_helper.run(self.__to_markup, content,
                                   callback=(self.__label.set_markup,))
 
+    @property
+    def artist_name(self):
+        """
+            Get view artist
+            @return artist_name as str
+        """
+        return self.__artist_name
+
 #######################
 # PROTECTED           #
 #######################
