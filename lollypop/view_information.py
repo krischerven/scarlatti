@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Gio, Pango
 from gettext import gettext as _
 import re
 
-from lollypop.define import App, ArtSize, ViewType, MARGIN, MARGIN_SMALL, Type
+from lollypop.define import App, ViewType, MARGIN, MARGIN_SMALL, Type
 from lollypop.define import ARTISTS_PATH
 from lollypop.objects_album import Album
 from lollypop.helper_art import ArtBehaviour
@@ -25,6 +25,7 @@ from lollypop.view import View
 from lollypop.utils import set_cursor_type, get_network_available
 from lollypop.utils import get_default_storage_type
 from lollypop.helper_gestures import GesturesHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -64,11 +65,12 @@ class ArtistRow(Gtk.ListBoxRow):
         return self.__page_id
 
 
-class InformationView(View):
+class InformationView(View, SignalsHelper):
     """
         View with artist information
     """
 
+    @signals_map
     def __init__(self, view_type, minimal=False):
         """
             Init artist infos
@@ -80,6 +82,12 @@ class InformationView(View):
         self.__cancellable = Gio.Cancellable()
         self.__minimal = minimal
         self.__artist_name = ""
+        if minimal:
+            return []
+        else:
+            return [
+                (App().window, "notify::folded", "_on_container_folded"),
+            ]
 
     def populate(self, artist_id=None):
         """
@@ -130,22 +138,14 @@ class InformationView(View):
             self.__artist_label.set_text(self.__artist_name)
             self.__artist_label.show()
             title_label.show()
-            App().art_helper.set_artist_artwork(
-                                    self.__artist_name,
-                                    ArtSize.SMALL * 3,
-                                    ArtSize.SMALL * 3,
-                                    self.__artist_artwork.get_scale_factor(),
-                                    ArtBehaviour.ROUNDED |
-                                    ArtBehaviour.CROP_SQUARE |
-                                    ArtBehaviour.CACHE,
-                                    self.__on_artist_artwork)
-            albums_view = AlbumsListView([], [],
-                                         ViewType.SCROLLED)
-            albums_view.set_size_request(300, -1)
-            albums_view.show()
-            albums_view.set_margin_start(5)
-            albums_view.add_widget(albums_view.box)
-            widget.attach(albums_view, 2, 1, 1, 2)
+            self.__set_artwork()
+            self.__albums_view = AlbumsListView([], [],
+                                                ViewType.SCROLLED)
+            self.__albums_view.set_size_request(300, -1)
+            self.__albums_view.show()
+            self.__albums_view.set_margin_start(5)
+            self.__albums_view.add_widget(self.__albums_view.box)
+            widget.attach(self.__albums_view, 2, 1, 1, 2)
             albums = []
             storage_type = get_default_storage_type()
             for album_id in App().albums.get_ids([], [artist_id],
@@ -153,7 +153,8 @@ class InformationView(View):
                 albums.append(Album(album_id))
             if not albums:
                 albums = [App().player.current_track.album]
-            albums_view.populate(albums)
+            self.__albums_view.populate(albums)
+            self._on_container_folded()
         content = self.__information_store.get_information(self.__artist_name,
                                                            ARTISTS_PATH)
         if content is None:
@@ -228,9 +229,34 @@ class InformationView(View):
                               row.page_id, row.locale,
                               callback=(self.__on_wikipedia_get_content,))
 
+    def _on_container_folded(self, *ignore):
+        """
+            Handle libhandy folded status
+        """
+        if App().window.folded:
+            self.__artist_artwork.hide()
+            self.__albums_view.hide()
+        else:
+            self.__artist_artwork.show()
+            self.__albums_view.show()
+
 #######################
 # PRIVATE             #
 #######################
+    def __set_artwork(self):
+        """
+            Set artist artwork
+        """
+        App().art_helper.set_artist_artwork(
+                                    self.__artist_name,
+                                    180,
+                                    180,
+                                    self.__artist_artwork.get_scale_factor(),
+                                    ArtBehaviour.ROUNDED |
+                                    ArtBehaviour.CROP_SQUARE |
+                                    ArtBehaviour.CACHE,
+                                    self.__on_artist_artwork)
+
     def __to_markup(self, data):
         """
             Transform message to markup
