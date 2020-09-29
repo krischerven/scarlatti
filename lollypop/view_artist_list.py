@@ -91,7 +91,8 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
             @return [Gtk.Widget]
         """
         filtered = []
-        for i in range(0, self.__boxes_count):
+        boxes_count = len(self.__boxes)
+        for i in range(0, boxes_count):
             for child in self.__boxes[i].get_children():
                 if isinstance(child, AlbumWidget):
                     filtered.append(child)
