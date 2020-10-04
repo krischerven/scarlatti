@@ -502,7 +502,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             App().art.clean_rounded()
             (files, dirs, streams) = self.__get_objects_for_uris(
                 scan_type, uris)
-            if not files:
+            if len(uris) != len(streams) and not files:
                 App().notify.send("Lollypop",
                                   _("Scan disabled, missing collection"))
                 return
