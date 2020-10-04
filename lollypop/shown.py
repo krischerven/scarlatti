@@ -38,7 +38,7 @@ class ShownLists:
         Type.ARTISTS_LIST: _("Artists (list)"),
         Type.SEARCH: _("Search"),
         Type.CURRENT: _("Playing albums"),
-        Type.INFO: _("Current artist"),
+        Type.INFO: _("Information"),
         Type.COMPILATIONS: _("Compilations"),
     }
 
