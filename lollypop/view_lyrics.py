@@ -229,23 +229,29 @@ class LyricsView(View, SignalsHelper):
         (previous, current, next) =\
             self.__lyrics_helper.get_lyrics_for_timestamp(timestamp + 200)
         lyrics = ""
-        for line in previous[:-1]:
-            if line.strip():
-                escaped = GLib.markup_escape_text(line)
-                lyrics += "<span alpha='20000'>%s</span>" % escaped + "\n"
-        lyrics += "\n"
-        for line in previous[-1:]:
-            if line.strip():
-                escaped = GLib.markup_escape_text(line)
-                lyrics += "<span alpha='35000'>%s</span>" % escaped + "\n"
+        if previous:
+            opacity = 20
+            delta = 50 // len(previous)
+            for line in previous:
+                if line.strip():
+                    escaped = GLib.markup_escape_text(line)
+                    lyrics += "<span alpha='{}%'>{}\n</span>".format(opacity,
+                                                                     escaped)
+                    opacity += delta
+        else:
+            opacity = 80
         for line in current:
             if line.strip():
                 escaped = GLib.markup_escape_text(line)
-                lyrics += "<span>%s</span>" % escaped + "\n"
-        for line in next:
-            if line.strip():
-                escaped = GLib.markup_escape_text(line)
-                lyrics += "<span alpha='35000'>%s</span>" % escaped + "\n"
+                lyrics += "<span size='x-large'>%s\n</span>" % escaped
+        if next:
+            delta = opacity // len(next)
+            for line in next:
+                if line.strip():
+                    escaped = GLib.markup_escape_text(line)
+                    lyrics += "<span alpha='{}%'>{}\n</span>".format(opacity,
+                                                                     escaped)
+                    opacity -= delta
         self.__lyrics_label.set_markup(lyrics, True)
         return True
 
