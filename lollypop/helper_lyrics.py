@@ -54,7 +54,10 @@ class LyricsHelper:
             if info is not None:
                 tags = info.get_tags()
                 for (lyrics, timestamp) in tagreader.get_synced_lyrics(tags):
-                    self.__timestamps[timestamp] = lyrics
+                    if timestamp in self.__timestamps.keys():
+                        self.__timestamps[timestamp] += "\n%s" % lyrics
+                    else:
+                        self.__timestamps[timestamp] = lyrics
 
     def get_lyrics_for_timestamp(self, timestamp):
         """
@@ -145,7 +148,10 @@ class LyricsHelper:
                         str_timestamp = line.split("]")[0].split("[")[1]
                         timestamp = self.__str_to_timestamp(str_timestamp)
                         lyrics = " ".join(line.split("]")[1:])
-                        self.__timestamps[timestamp] = lyrics
+                        if timestamp in self.__timestamps.keys():
+                            self.__timestamps[timestamp] += "\n%s" % lyrics
+                        else:
+                            self.__timestamps[timestamp] = lyrics
                     except:
                         continue
         except Exception as e:
