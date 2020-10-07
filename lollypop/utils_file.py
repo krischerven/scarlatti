@@ -197,25 +197,36 @@ def id3EncodingToString(encoding):
         raise ValueError("Encoding unknown: %s" % encoding)
 
 
+# From eyeD3 start
 def decodeUnicode(bites, encoding):
     codec = id3EncodingToString(encoding)
     Logger.debug("Unicode encoding: %s" % codec)
-    return bites.decode(codec)
+    if (codec.startswith("utf_16") and
+            len(bites) % 2 != 0 and bites[-1:] == b"\x00"):
+        # Catch and fix bad utf16 data, it is everywhere.
+        Logger.warning("Fixing utf16 data with extra zero bytes")
+        bites = bites[:-1]
+    return bites.decode(codec).rstrip("\x00")
 
 
 def splitUnicode(data, encoding):
     from lollypop.define import LATIN1_ENCODING, UTF_8_ENCODING
     from lollypop.define import UTF_16_ENCODING, UTF_16BE_ENCODING
-    if encoding == LATIN1_ENCODING or encoding == UTF_8_ENCODING:
-        if data.find(b"\x00") != -1:
-            (d, split) = data.split(b"\x00", 1)
-        else:
-            split = data
-    elif encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
-        if data.find(b"\x00\x00") != -1:
-            (d, split) = data.split(b"\x00\x00", 1)
-        else:
-            (d, split) = data.split(b"\xff", 1)
-        if len(split) % 2 != 0:
-            split += b"\x00"
-    return split
+    try:
+        if encoding == LATIN1_ENCODING or encoding == UTF_8_ENCODING:
+            (d, t) = data.split(b"\x00", 1)
+        elif encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
+            # Two null bytes split, but since each utf16 char is also two
+            # bytes we need to ensure we found a proper boundary.
+            if data.find(b"\x00\x00") != -1:
+                (d, t) = data.split(b"\x00\x00", 1)
+            else:
+                (d, t) = data.split(b"\xff", 1)
+            if (len(d) % 2) != 0:
+                (d, t) = data.split(b"\x00\x00\x00", 1)
+                d += b"\x00"
+    except ValueError as ex:
+        Logger.warning("Invalid 2-tuple ID3 frame data: %s", ex)
+        d, t = data, b""
+    return (d, t)
+# From eyeD3 end
