@@ -34,8 +34,8 @@ class FrameLangTag(FrameTag):
             @return str/None
         """
         try:
-            split = splitUnicode(self.frame[4:], self.encoding)
-            return decodeUnicode(split, self.encoding)
+            (d, t) = splitUnicode(self.frame[4:], self.encoding)
+            return decodeUnicode(t, self.encoding)
         except Exception as e:
             Logger.error("FrameLangTag::string: %s, %s", e, self.frame)
             return ""
