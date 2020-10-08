@@ -73,6 +73,7 @@ class ArtistViewList(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         SizeAllocationHelper.__init__(self)
         return [
             (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "duration-changed", "_on_duration_changed"),
         ]
 
     def populate(self):
@@ -178,6 +179,17 @@ class ArtistViewList(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         for i in range(0, boxes_count):
             for child in self.__boxes[i].get_children():
                 child.set_selection()
+
+    def _on_duration_changed(self, player, track_id):
+        """
+            Update track duration
+            @param player as Player
+            @param track_id as int
+        """
+        boxes_count = len(self.__boxes)
+        for i in range(0, boxes_count):
+            for child in self.__boxes[i].get_children():
+                child.set_duration(track_id)
 
 #######################
 # PRIVATE             #

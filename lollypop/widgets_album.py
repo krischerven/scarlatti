@@ -15,12 +15,11 @@ from gi.repository import Gtk, GObject
 from lollypop.define import App, ViewType, MARGIN
 from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
-from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.utils import emit_signal
 from lollypop.helper_gestures import GesturesHelper
 
 
-class AlbumWidget(Gtk.Grid, SignalsHelper):
+class AlbumWidget(Gtk.Grid):
     """
         Show artist albums and tracks
     """
@@ -29,7 +28,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
-    @signals_map
     def __init__(self, album, storage_type, view_type):
         """
             Init album widget
@@ -47,9 +45,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             self.__column_width = 1200
         else:
             self.__column_width = 600
-        return [
-            (App().player, "duration-changed", "_on_duration_changed"),
-        ]
 
     def populate(self):
         """
@@ -93,6 +88,14 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             self.unset_state_flags(Gtk.StateFlags.SELECTED)
         if self.__tracks_view is not None:
             self.__tracks_view.set_playing_indicator()
+
+    def set_duration(self, track_id):
+        """
+            Update track duration
+            @param track_id as int
+        """
+        if self.__tracks_view is not None:
+            self.__tracks_view.update_duration(track_id)
 
     def do_get_preferred_width(self):
         return (200, self.__column_width)
@@ -169,15 +172,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             @param event as Gdk.Event
         """
         self.__populate()
-
-    def _on_duration_changed(self, player, track_id):
-        """
-            Update track duration
-            @param player as Player
-            @param track_id as int
-        """
-        if self.__tracks_view is not None:
-            self.__tracks_view.update_duration(track_id)
 
 #######################
 # PRIVATE             #
