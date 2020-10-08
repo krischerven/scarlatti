@@ -482,7 +482,8 @@ flowboxchild:selected  {
 }
 
 .album-banner {
-    border: 1px solid shade(@theme_bg_color, 0.9);
+    border: 1px solid alpha(black, 0.2);
+    padding: 3px;
     border-radius: 4px;
     background-color: shade(@theme_bg_color, 0.9999);
     transition: box-shadow 250ms linear;
@@ -491,6 +492,11 @@ flowboxchild:selected  {
 .album-banner:visited {
     opacity: 0.9;
     box-shadow: 1px 1px 10px 4px alpha(@theme_selected_bg_color, 0.5);
+}
+
+.album-banner:selected {
+    padding: 0px;
+    border: 4px solid alpha(@theme_selected_bg_color, 0.5);
 }
 
 .banner-button {

@@ -163,6 +163,11 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             Update children state
             @param player as Player
         """
+        selected = self.__album.id == player.current_track.album.id
+        if selected:
+            self.set_state_flags(Gtk.StateFlags.SELECTED, False)
+        else:
+            self.unset_state_flags(Gtk.StateFlags.SELECTED)
         if self.__tracks_view is not None:
             self.__tracks_view.set_playing_indicator()
 
