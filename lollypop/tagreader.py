@@ -495,81 +495,84 @@ class TagReader:
         """
             Get popularity tag
             @param tags as Gst.TagList
-            @return value as Lollypop rating
+            @return int
         """
-        if tags is None:
-            return 0
-        size = tags.get_tag_size("private-id3v2-frame")
-        for i in range(0, size):
-            (exists, sample) = tags.get_sample_index("private-id3v2-frame", i)
-            if not exists:
-                continue
-            (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-            if not exists:
-                continue
-            if m.data[0:4] == b"POPM":
-                # Get tag
-                """
-                    Location of rating for common media players:
-                    - Plain POPM is located in m.data[11]
-                    - Media Monkey is located in m.data[19] and
-                      we are searching m.data[10:40] for "no@email"
-                    - WinAMP is located in m.data[28] and we are searching
-                      m.data[10:40] for "rating@winamp.com"
-                    - Windows Media Player is located in m.data[40] and
-                      we are searching m.data[10:40] for
-                      "Windows Media Player 9 Series"
-                    - MusicBee is located in m.data[19] and
-                      we are searching m.data[10:40] for
-                      "MusicBee"
-                """
-                # Gstreamer 1.18 API breakage
-                try:
-                    bytes = m.data[10:40].tobytes()
-                except:
-                    bytes = m.data[10:40]
-                if bytes.find(b"Windows Media Player 9 Series") >= 0:
-                    location = 40
-                    Logger.debug(
-                        "Rating type: Windows Media Player Location:"
-                        " %s Rating: %s", location, bytes[location])
-                elif bytes.find(b"rating@winamp.com") >= 0:
-                    location = 28
-                    Logger.debug(
-                        "Rating type: WinAMP Location: %s Rating: %s",
-                        location, bytes[location])
-                elif bytes.find(b"no@email") >= 0:
-                    location = 19
-                    Logger.debug(
-                        "Rating type: MediaMonkey Location: %s Rating: %s",
-                        location, bytes[location])
-                elif bytes.find(b"MusicBee") >= 0:
-                    location = 19
-                    Logger.debug(
-                        "Rating type: MusicBee Location: %s Rating: %s",
-                        location, bytes[location])
-                else:
-                    location = 11
-                    Logger.debug(
-                        "Rating type: none Location: %s Rating: %s",
-                        location, bytes[location])
-
-                popm = bytes[location]
-                if popm == 0:
-                    value = 0
-                elif popm == 1:
-                    value = 1
-                elif popm == 64:
-                    value = 2
-                elif popm == 128:
-                    value = 3
-                elif popm == 196:
-                    value = 4
-                elif popm == 255:
-                    value = 5
-                else:
-                    value = 0
-                return value
+        try:
+            if tags is None:
+                return 0
+            size = tags.get_tag_size("private-id3v2-frame")
+            for i in range(0, size):
+                (exists, sample) = tags.get_sample_index("private-id3v2-frame",
+                                                         i)
+                if not exists:
+                    continue
+                (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
+                if not exists:
+                    continue
+                if m.data[0:4] == b"POPM":
+                    # Get tag
+                    """
+                        Location of rating for common media players:
+                        - Plain POPM is located in m.data[11]
+                        - Media Monkey is located in m.data[19] and
+                          we are searching m.data[10:40] for "no@email"
+                        - WinAMP is located in m.data[28] and we are searching
+                          m.data[10:40] for "rating@winamp.com"
+                        - Windows Media Player is located in m.data[40] and
+                          we are searching m.data[10:40] for
+                          "Windows Media Player 9 Series"
+                        - MusicBee is located in m.data[19] and
+                          we are searching m.data[10:40] for
+                          "MusicBee"
+                    """
+                    # Gstreamer 1.18 API breakage
+                    try:
+                        bytes = m.data.tobytes()
+                    except:
+                        bytes = m.data
+                    if bytes.find(b"Windows Media Player 9 Series") >= 0:
+                        location = 40
+                        Logger.debug(
+                            "Rating type: Windows Media Player Location:"
+                            " %s Rating: %s", location, bytes[location])
+                    elif bytes.find(b"rating@winamp.com") >= 0:
+                        location = 28
+                        Logger.debug(
+                            "Rating type: WinAMP Location: %s Rating: %s",
+                            location, bytes[location])
+                    elif bytes.find(b"no@email") >= 0:
+                        location = 19
+                        Logger.debug(
+                            "Rating type: MediaMonkey Location: %s Rating: %s",
+                            location, bytes[location])
+                    elif bytes.find(b"MusicBee") >= 0:
+                        location = 19
+                        Logger.debug(
+                            "Rating type: MusicBee Location: %s Rating: %s",
+                            location, bytes[location])
+                    else:
+                        location = 11
+                        Logger.debug(
+                            "Rating type: none Location: %s Rating: %s",
+                            location, bytes[location])
+                    popm = bytes[location]
+                    if popm == 0:
+                        value = 0
+                    elif popm == 1:
+                        value = 1
+                    elif popm == 64:
+                        value = 2
+                    elif popm == 128:
+                        value = 3
+                    elif popm == 196:
+                        value = 4
+                    elif popm == 255:
+                        value = 5
+                    else:
+                        value = 0
+                    return value
+        except Exception as e:
+            Logger.warning("TagReader::get_popm(): %s", e)
         return 0
 
     def get_lyrics(self, tags):
