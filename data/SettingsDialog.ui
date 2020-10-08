@@ -1177,6 +1177,22 @@ and with different artists</property>
               </object>
             </child>
             <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Bing</property>
+                <child>
+                  <object class="GtkSwitch" id="BING_button">
+                    <property name="name">BING</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
               <placeholder/>
             </child>
           </object>

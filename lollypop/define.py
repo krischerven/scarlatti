@@ -136,7 +136,8 @@ NetworkAccessACL = {
     "FANARTTV": 1 << 15,
     "DUCKDUCKGO": 1 << 16,
     "LIBREFM": 1 << 17,
-    "METROLYRICS": 1 << 18
+    "METROLYRICS": 1 << 18,
+    "BING": 1 << 19
 }
 
 

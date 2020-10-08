@@ -92,6 +92,8 @@ class LyricsHelper:
         """
         self.__cancellable = Gio.Cancellable.new()
         methods = []
+        if get_network_available("BING"):
+            methods.append(self.__download_bing_lyrics)
         if get_network_available("WIKIA"):
             methods.append(self.__download_wikia_lyrics)
         if get_network_available("GENIUS"):
@@ -201,6 +203,28 @@ class LyricsHelper:
             return GLib.uri_escape_string(artist, None, False)
         else:
             return artist
+
+    def __download_bing_lyrics(self, track, methods, callback, *args):
+        """
+            Downloas lyrics from metro lyrics
+            @param track as Track
+            @param methods as []
+            @param callback as function
+        """
+        title = self.__get_title(track, False)
+        artist = self.__get_artist(track, False).lower()
+        string = "%s %s" % (artist, title)
+        uri = "https://www.bing.com/search?q=%s" % string
+        helper = TaskHelper()
+        helper.load_uri_content(uri,
+                                self.__cancellable,
+                                self.__on_lyrics_downloaded,
+                                "b_heroLyrics",
+                                "\n",
+                                track,
+                                methods,
+                                callback,
+                                *args)
 
     def __download_metro_lyrics(self, track, methods, callback, *args):
         """
