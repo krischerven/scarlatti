@@ -19,13 +19,15 @@ from lollypop.widgets_album import AlbumWidget
 from lollypop.objects_album import Album
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.helper_size_allocation import SizeAllocationHelper
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
+class ArtistViewList(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
     """
         Show artist albums in a list with tracks
     """
 
+    @signals_map
     def __init__(self, genre_ids, artist_ids, storage_type, view_type):
         """
             Init ArtistView
@@ -69,6 +71,9 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
             self.__event_controller = Gtk.EventControllerMotion.new(self)
             self.__event_controller.connect("motion", self.__on_motion)
         SizeAllocationHelper.__init__(self)
+        return [
+            (App().player, "current-changed", "_on_current_changed"),
+        ]
 
     def populate(self):
         pass
@@ -163,6 +168,16 @@ class ArtistViewList(LazyLoadingView, SizeAllocationHelper):
                     LazyLoadingView.populate(self, album_ids)
                 return True
         return False
+
+    def _on_current_changed(self, player):
+        """
+            Update children state
+            @param player as Player
+        """
+        boxes_count = len(self.__boxes)
+        for i in range(0, boxes_count):
+            for child in self.__boxes[i].get_children():
+                child.set_selection()
 
 #######################
 # PRIVATE             #

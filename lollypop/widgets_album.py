@@ -48,7 +48,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
         else:
             self.__column_width = 600
         return [
-            (App().player, "current-changed", "_on_current_changed"),
             (App().player, "duration-changed", "_on_duration_changed"),
         ]
 
@@ -72,6 +71,7 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             self.__revealer.set_transition_type(
                 Gtk.RevealerTransitionType.NONE)
             self.__populate()
+        self.set_selection()
 
     def reveal_child(self):
         """
@@ -81,6 +81,18 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
                 Gtk.RevealerTransitionType.NONE)
         self.__populate()
         self.__revealer.set_reveal_child(True)
+
+    def set_selection(self):
+        """
+            Hilight widget if currently playing
+        """
+        selected = self.__album.id == App().player.current_track.album.id
+        if selected:
+            self.set_state_flags(Gtk.StateFlags.SELECTED, False)
+        else:
+            self.unset_state_flags(Gtk.StateFlags.SELECTED)
+        if self.__tracks_view is not None:
+            self.__tracks_view.set_playing_indicator()
 
     def do_get_preferred_width(self):
         return (200, self.__column_width)
@@ -157,19 +169,6 @@ class AlbumWidget(Gtk.Grid, SignalsHelper):
             @param event as Gdk.Event
         """
         self.__populate()
-
-    def _on_current_changed(self, player):
-        """
-            Update children state
-            @param player as Player
-        """
-        selected = self.__album.id == player.current_track.album.id
-        if selected:
-            self.set_state_flags(Gtk.StateFlags.SELECTED, False)
-        else:
-            self.unset_state_flags(Gtk.StateFlags.SELECTED)
-        if self.__tracks_view is not None:
-            self.__tracks_view.set_playing_indicator()
 
     def _on_duration_changed(self, player, track_id):
         """

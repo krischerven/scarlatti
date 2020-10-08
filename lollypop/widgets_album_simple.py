@@ -148,7 +148,7 @@ class AlbumSimpleWidget(Gtk.FlowBoxChild):
 
     def set_selection(self):
         """
-            Mark widget as selected if currently playing
+            Hilight widget if currently playing
         """
         if self.__artwork is None:
             return
