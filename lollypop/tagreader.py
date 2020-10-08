@@ -523,33 +523,38 @@ class TagReader:
                       we are searching m.data[10:40] for
                       "MusicBee"
                 """
-                if m.data[10:40].find(b"Windows Media Player 9 Series") >= 0:
+                # Gstreamer 1.18 API breakage
+                try:
+                    bytes = m.data[10:40].tobytes()
+                except:
+                    bytes = m.data[10:40]
+                if bytes.find(b"Windows Media Player 9 Series") >= 0:
                     location = 40
                     Logger.debug(
                         "Rating type: Windows Media Player Location:"
-                        " %s Rating: %s", location, m.data[location])
-                elif m.data[10:40].find(b"rating@winamp.com") >= 0:
+                        " %s Rating: %s", location, bytes[location])
+                elif bytes.find(b"rating@winamp.com") >= 0:
                     location = 28
                     Logger.debug(
                         "Rating type: WinAMP Location: %s Rating: %s",
-                        location, m.data[location])
-                elif m.data[10:40].find(b"no@email") >= 0:
+                        location, bytes[location])
+                elif bytes.find(b"no@email") >= 0:
                     location = 19
                     Logger.debug(
                         "Rating type: MediaMonkey Location: %s Rating: %s",
-                        location, m.data[location])
-                elif m.data[10:40].find(b"MusicBee") >= 0:
+                        location, bytes[location])
+                elif bytes.find(b"MusicBee") >= 0:
                     location = 19
                     Logger.debug(
                         "Rating type: MusicBee Location: %s Rating: %s",
-                        location, m.data[location])
+                        location, bytes[location])
                 else:
                     location = 11
                     Logger.debug(
                         "Rating type: none Location: %s Rating: %s",
-                        location, m.data[location])
+                        location, bytes[location])
 
-                popm = m.data[location]
+                popm = bytes[location]
                 if popm == 0:
                     value = 0
                 elif popm == 1:
