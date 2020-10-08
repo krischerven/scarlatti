@@ -200,33 +200,19 @@ def id3EncodingToString(encoding):
 # From eyeD3 start
 def decodeUnicode(bites, encoding):
     codec = id3EncodingToString(encoding)
-    Logger.debug("Unicode encoding: %s" % codec)
-    if (codec.startswith("utf_16") and
-            len(bites) % 2 != 0 and bites[-1:] == b"\x00"):
-        # Catch and fix bad utf16 data, it is everywhere.
-        Logger.warning("Fixing utf16 data with extra zero bytes")
-        bites = bites[:-1]
-    return bites.decode(codec).rstrip("\x00")
+    return bites.decode(codec)
 
 
 def splitUnicode(data, encoding):
-    from lollypop.define import LATIN1_ENCODING, UTF_8_ENCODING
     from lollypop.define import UTF_16_ENCODING, UTF_16BE_ENCODING
     try:
-        if encoding == LATIN1_ENCODING or encoding == UTF_8_ENCODING:
-            (d, t) = data.split(b"\x00", 1)
-        elif encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
-            # Two null bytes split, but since each utf16 char is also two
-            # bytes we need to ensure we found a proper boundary.
-            if data.find(b"\x00\x00") != -1:
-                (d, t) = data.split(b"\x00\x00", 1)
-            else:
-                (d, t) = data.split(b"\xff", 1)
-            if (len(d) % 2) != 0:
-                (d, t) = data.split(b"\x00\x00\x00", 1)
-                d += b"\x00"
-    except ValueError as ex:
-        Logger.warning("Invalid 2-tuple ID3 frame data: %s", ex)
-        d, t = data, b""
+        (d, t) = data.split(encoding, 1)
+        # Fix invalid UTF16
+        if encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
+            if len(t) % 2 != 0:
+                t = t[1:]
+    except ValueError as e:
+        Logger.warning("splitUnicode(): %s", e)
+        (d, t) = data, b""
     return (d, t)
 # From eyeD3 end
