@@ -96,6 +96,8 @@ class LyricsHelper:
             methods.append(self.__download_wikia_lyrics)
         if get_network_available("GENIUS"):
             methods.append(self.__download_genius_lyrics)
+        if get_network_available("METROLYRICS"):
+            methods.append(self.__download_metro_lyrics)
         if methods:
             self.__get_lyrics_from_web(track, methods, callback, *args)
         else:
@@ -200,6 +202,28 @@ class LyricsHelper:
         else:
             return artist
 
+    def __download_metro_lyrics(self, track, methods, callback, *args):
+        """
+            Downloas lyrics from metro lyrics
+            @param track as Track
+            @param methods as []
+            @param callback as function
+        """
+        title = self.__get_title(track, False)
+        artist = self.__get_artist(track, False).lower()
+        string = "%s-lyrics-%s" % (title, artist)
+        uri = "https://www.metrolyrics.com/%s.html" % string.replace(" ", "-")
+        helper = TaskHelper()
+        helper.load_uri_content(uri,
+                                self.__cancellable,
+                                self.__on_lyrics_downloaded,
+                                "lyrics-body",
+                                "",
+                                track,
+                                methods,
+                                callback,
+                                *args)
+
     def __download_wikia_lyrics(self, track, methods, callback, *args):
         """
             Downloas lyrics from wikia
@@ -259,6 +283,7 @@ class LyricsHelper:
             @param methods as []
             @param callback as function
         """
+        Logger.debug("LyricsHelper::__on_lyrics_downloaded(): %s", uri)
         if status:
             try:
                 from bs4 import BeautifulSoup
