@@ -175,6 +175,8 @@ class FilteringHelper():
         """
         if self.view_type & ViewType.SCROLLED:
             view_widget = self.scrolled.get_child()
+            if view_widget is None:
+                return
             if isinstance(view_widget, Gtk.Viewport):
                 view_widget = view_widget.get_child()
             coordinates = child.translate_coordinates(
