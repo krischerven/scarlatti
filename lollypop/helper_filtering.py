@@ -175,6 +175,7 @@ class FilteringHelper():
         """
         if self.view_type & ViewType.SCROLLED:
             view_widget = self.scrolled.get_child()
+            # Filtered children may exists while view is not populated
             if view_widget is None:
                 return
             if isinstance(view_widget, Gtk.Viewport):
