@@ -634,8 +634,7 @@ class TracksDatabase:
                 request += make_subrequest("album_artists.artist_id=?",
                                            "OR",
                                            len(artist_ids))
-            request += "GROUP BY artists.rowid, tracks.album_id\
-                        ORDER BY artists.name"
+            request += "ORDER BY artists.name"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
