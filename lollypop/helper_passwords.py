@@ -221,7 +221,6 @@ class PasswordsHelper:
         """
         try:
             self.__secret = source.get_finish(result)
-            self.__secret.unlock(self.__secret.get_collections())
         except Exception as e:
             self.__secret = -1
             Logger.error("PasswordsHelper::__on_get_secret(): %s" % e)
