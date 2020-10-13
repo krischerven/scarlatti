@@ -47,7 +47,8 @@ class PasswordsHelper:
                                        Secret.SchemaFlags.NONE,
                                        SecretSchema)
             items = secret.search_sync(schema, SecretAttributes,
-                                       Secret.SearchFlags.ALL,
+                                       Secret.SearchFlags.UNLOCK |
+                                       Secret.SearchFlags.LOAD_SECRETS,
                                        None)
             if items:
                 items[0].load_secret_sync(None)
@@ -77,7 +78,8 @@ class PasswordsHelper:
                                        Secret.SchemaFlags.NONE,
                                        SecretSchema)
             self.__secret.search(schema, SecretAttributes,
-                                 Secret.SearchFlags.ALL,
+                                 Secret.SearchFlags.UNLOCK |
+                                 Secret.SearchFlags.LOAD_SECRETS,
                                  None,
                                  self.__on_secret_search,
                                  service,
@@ -142,7 +144,8 @@ class PasswordsHelper:
                                        SecretSchema)
             self.__secret.search(schema,
                                  SecretAttributes,
-                                 Secret.SearchFlags.ALL,
+                                 Secret.SearchFlags.UNLOCK |
+                                 Secret.SearchFlags.LOAD_SECRETS,
                                  None,
                                  self.__on_clear_search,
                                  callback,
@@ -183,27 +186,6 @@ class PasswordsHelper:
         except Exception as e:
             Logger.error("PasswordsHelper::__on_clear_search(): %s" % e)
 
-    def __on_load_secret(self, source, result, service, callback, *args):
-        """
-            Set userservice/password input
-            @param source as GObject.Object
-            @param result as Gio.AsyncResult
-            @param service as str
-            @param index as int
-            @param count as int
-            @param callback as function
-            @param args
-        """
-        secret = source.get_secret()
-        if secret is not None:
-            callback(source.get_attributes(),
-                     secret.get().decode('utf-8'),
-                     service,
-                     *args)
-        else:
-            Logger.error("PasswordsHelper: no secret!")
-            callback(None, None, service, *args)
-
     def __on_secret_search(self, source, result, service, callback, *args):
         """
             Set userservice/password input
@@ -217,14 +199,13 @@ class PasswordsHelper:
             if result is not None:
                 items = source.search_finish(result)
                 for item in items:
-                    item.load_secret(None,
-                                     self.__on_load_secret,
-                                     service,
-                                     callback,
-                                     *args)
-                if not items:
-                    Logger.info("PasswordsHelper: no items!")
-                    callback(None, None, service, *args)
+                    attributes = item.get_attributes()
+                    secret = item.get_secret()
+                    callback(attributes,
+                             secret.get().decode('utf-8'),
+                             service,
+                             *args)
+                    break
             else:
                 Logger.info("PasswordsHelper: no result!")
                 callback(None, None, service, *args)
