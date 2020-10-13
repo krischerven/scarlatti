@@ -84,7 +84,7 @@ class PasswordsHelper:
                                  callback,
                                  *args)
         except Exception as e:
-            Logger.error("PasswordsHelper::get(): %s" % e)
+            Logger.warning("PasswordsHelper::get(): %s" % e)
 
     def store(self, service, login, password, callback=None, *args):
         """
@@ -121,7 +121,7 @@ class PasswordsHelper:
                                   callback,
                                   *args)
         except Exception as e:
-            Logger.error("PasswordsHelper::store(): %s" % e)
+            Logger.warning("PasswordsHelper::store(): %s" % e)
 
     def clear(self, service, callback=None, *args):
         """
@@ -148,7 +148,7 @@ class PasswordsHelper:
                                  callback,
                                  *args)
         except Exception as e:
-            Logger.error("PasswordsHelper::clear(): %s" % e)
+            Logger.warning("PasswordsHelper::clear(): %s" % e)
 
 #######################
 # PRIVATE             #
