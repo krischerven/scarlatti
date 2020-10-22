@@ -104,7 +104,8 @@ class InformationView(View, SignalsHelper):
             self.__banner.show()
             self.__banner.connect("search", self.__on_banner_search)
             self.__albums_view = AlbumsListView([], [],
-                                                ViewType.SCROLLED)
+                                                ViewType.SCROLLED |
+                                                ViewType.ARTIST)
             self.__albums_view.set_size_request(350, -1)
             self.__albums_view.show()
             self.__albums_view.set_halign(Gtk.Align.END)
