@@ -13,6 +13,7 @@
 from lollypop.logger import Logger
 from lollypop.utils_file import decodeUnicode, splitUnicode
 from lollypop.tag_frame import FrameTag
+from lollypop.define import UTF_16_ENCODING, UTF_16BE_ENCODING
 
 
 class FrameLangTag(FrameTag):
@@ -34,8 +35,13 @@ class FrameLangTag(FrameTag):
             @return str/None
         """
         try:
-            (d, t) = splitUnicode(self.frame[4:], self.encoding)
-            return decodeUnicode(t, self.encoding)
+            (d, t) = splitUnicode(self.frame, self.encoding)
+            if self.encoding in [UTF_16_ENCODING, UTF_16BE_ENCODING]:
+                (start, end) = t.split(b"\x00\x00\xff", 1)
+                end = b"\xff" + end
+            else:
+                (start, end) = t.split(b"\x00", 1)
+            return decodeUnicode(end, self.encoding)
         except Exception as e:
             Logger.error("FrameLangTag::string: %s, %s", e, self.frame)
             return ""

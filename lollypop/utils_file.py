@@ -204,13 +204,8 @@ def decodeUnicode(bites, encoding):
 
 
 def splitUnicode(data, encoding):
-    from lollypop.define import UTF_16_ENCODING, UTF_16BE_ENCODING
     try:
         (d, t) = data.split(encoding, 1)
-        # Fix invalid UTF16
-        if encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
-            if len(t) % 2 != 0:
-                t = t[1:]
     except ValueError as e:
         Logger.warning("splitUnicode(): %s", e)
         (d, t) = data, b""
