@@ -178,7 +178,7 @@ class LastFMWebHelper:
         lollypop_payload["artists"] = payload["artist"]["name"]
         lollypop_payload["discnumber"] = "1"
         lollypop_payload["tracknumber"] = tracknumber
-        lollypop_payload["duration"] = payload["duration"]
+        lollypop_payload["duration"] = int(payload["duration"]) * 1000
         return lollypop_payload
 
 #######################
