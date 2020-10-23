@@ -72,7 +72,18 @@ class PluginsPlayer:
             if App().settings.get_value("equalizer-enabled"):
                 self.__equalizer = Gst.ElementFactory.make("equalizer-nbands",
                                                            None)
-                self.__equalizer.set_property("num-bands", 18)
+# GStreamer's GstIirEqualizerNBands sets up shelve filters for the first and
+# last bands as corner cases. That was causing the "inverted slider" bug.
+# As a workaround, we create two dummy bands at both ends of the spectrum.
+# This causes the actual first and last adjustable bands to be
+# implemented using band-pass filters.
+# Comment from Clementine source code, thanks Clementine devs!
+                self.__equalizer.set_property("num-bands", 18 + 2)
+                for idx in [0, 19]:
+                    band = self.__equalizer.get_child_by_index(idx)
+                    band.set_property("freq", 0)
+                    band.set_property("bandwidth", 0)
+                    band.set_property("gain", 0)
                 audiobin.add(self.__equalizer)
                 if replay_gain:
                     audioconvert_rg.link(self.__equalizer)
@@ -119,8 +130,8 @@ class PluginsPlayer:
         """
         try:
             if self.__equalizer is not None:
-                band = self.__equalizer.get_child_by_index(index)
-                band.set_property("freq", self.__EQUALIZER[index])
+                band = self.__equalizer.get_child_by_index(index + 1)
+                band.set_property("freq", self.__EQUALIZER[index + 1])
                 band.set_property("gain", value)
         except Exception as e:
             Logger.error("PluginsPlayer::set_equalizer():", e)
