@@ -84,6 +84,14 @@ class PluginsPlayer:
                     band.set_property("freq", 0)
                     band.set_property("bandwidth", 0)
                     band.set_property("gain", 0)
+                # Setup bandwidth, thanks again to Clementine project
+                last_band_freq = 0
+                for idx in range(1, 19):
+                    band = self.__equalizer.get_child_by_index(idx)
+                    freq = self.__EQUALIZER[idx - 1]
+                    bandwidth = freq - last_band_freq
+                    last_band_freq = freq
+                    band.set_property("bandwidth", bandwidth)
                 audiobin.add(self.__equalizer)
                 if replay_gain:
                     audioconvert_rg.link(self.__equalizer)
@@ -131,7 +139,7 @@ class PluginsPlayer:
         try:
             if self.__equalizer is not None:
                 band = self.__equalizer.get_child_by_index(index + 1)
-                band.set_property("freq", self.__EQUALIZER[index + 1])
+                band.set_property("freq", self.__EQUALIZER[index])
                 band.set_property("gain", value)
         except Exception as e:
             Logger.error("PluginsPlayer::set_equalizer():", e)
