@@ -586,10 +586,10 @@ class Playlists(GObject.GObject):
             name = self.get_name(playlist_id)
             # Clear cache
             App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
-            uri = self.get_sync_uri(playlist_id)
-            if uri is None:
+            playlist_uri = self.get_sync_uri(playlist_id)
+            if playlist_uri is None:
                 return
-            f = Gio.File.new_for_uri(uri)
+            f = Gio.File.new_for_uri(playlist_uri)
             if not f.query_exists() and not create:
                 return
             uris = self.get_track_uris(playlist_id)
@@ -598,8 +598,13 @@ class Playlists(GObject.GObject):
             stream = f.replace(None, False,
                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
             stream.write("#EXTM3U\n".encode("utf-8"))
+            playlist_dir_uri = playlist_uri.replace(f.get_basename(), "")
             for uri in uris:
-                string = "%s\n" % uri
+                if playlist_dir_uri in uri:
+                    filepath = uri.replace(playlist_dir_uri, "")
+                    string = "%s\n" % GLib.uri_unescape_string(filepath, None)
+                else:
+                    string = "%s\n" % uri
                 stream.write(string.encode("utf-8"))
             stream.close()
         except Exception as e:
