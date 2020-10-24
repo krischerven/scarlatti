@@ -101,9 +101,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         GLib.set_prgname("lollypop")
         self.connect("activate", self.__on_activate)
         self.connect("shutdown", lambda a: self.__save_state())
-        self.register(None)
-        if self.get_is_remote():
-            Gdk.notify_startup_complete()
         if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
             import gc
             gc.set_debug(gc.DEBUG_LEAK)

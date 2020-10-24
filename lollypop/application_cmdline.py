@@ -109,6 +109,9 @@ class ApplicationCmdline:
         if options.contains("version"):
             print(self.__version)
             exit(0)
+        self.register(None)
+        if self.get_is_remote():
+            Gdk.notify_startup_complete()
         return -1
 
     def __on_command_line(self, app, app_cmd_line):
