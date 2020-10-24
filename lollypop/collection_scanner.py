@@ -95,9 +95,11 @@ class CollectionScanner(GObject.GObject, TagReader):
         if self.is_locked() and scan_type != ScanType.EXTERNAL:
             self.stop()
             GLib.timeout_add(250, self.update, scan_type, uris)
+            return
         elif App().ws_director.collection_ws is not None and\
                 not App().ws_director.collection_ws.stop():
             GLib.timeout_add(250, self.update, scan_type, uris)
+            return
         else:
             if scan_type == ScanType.FULL:
                 uris = App().settings.get_music_uris()
@@ -499,6 +501,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             @thread safe
         """
         try:
+            self.__items = []
             App().art.clean_rounded()
             (files, dirs, streams) = self.__get_objects_for_uris(
                 scan_type, uris)
@@ -529,19 +532,18 @@ class CollectionScanner(GObject.GObject, TagReader):
                                                files, db_mtimes,
                                                scan_type)
                 threads.append(thread)
-
-            if scan_type == ScanType.EXTERNAL:
-                storage_type = StorageType.EXTERNAL
-            else:
-                storage_type = StorageType.COLLECTION
             while threads:
-                sleep(1)
+                sleep(0.1)
                 thread = threads[0]
                 if not thread.is_alive():
                     threads.remove(thread)
 
             SqlCursor.add(App().db)
-            self.__items = self.__save_in_db(storage_type)
+            if scan_type == ScanType.EXTERNAL:
+                storage_type = StorageType.EXTERNAL
+            else:
+                storage_type = StorageType.COLLECTION
+            self.__items += self.__save_in_db(storage_type)
             # Add streams to DB, only happening on command line/m3u files
             self.__items += self.__save_streams_in_db(streams, storage_type)
 

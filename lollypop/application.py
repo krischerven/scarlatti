@@ -24,12 +24,12 @@ GstPbutils.pb_utils_init()
 from threading import current_thread
 from pickle import dump
 from signal import signal, SIGINT, SIGTERM
-from urllib.parse import urlparse
 
-from lollypop.utils import init_proxy_from_gnome, emit_signal
+from lollypop.utils import init_proxy_from_gnome
 from lollypop.application_actions import ApplicationActions
-from lollypop.utils_file import get_file_type, install_youtube_dl
-from lollypop.define import LOLLYPOP_DATA_PATH, ScanType, StorageType, FileType
+from lollypop.application_cmdline import ApplicationCmdline
+from lollypop.utils_file import install_youtube_dl
+from lollypop.define import LOLLYPOP_DATA_PATH, StorageType
 from lollypop.database import Database
 from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
@@ -45,14 +45,12 @@ from lollypop.database_genres import GenresDatabase
 from lollypop.database_tracks import TracksDatabase
 from lollypop.notification import NotificationManager
 from lollypop.playlists import Playlists
-from lollypop.objects_track import Track
-from lollypop.objects_album import Album
 from lollypop.helper_task import TaskHelper
 from lollypop.helper_art import ArtHelper
 from lollypop.collection_scanner import CollectionScanner
 
 
-class Application(Gtk.Application, ApplicationActions):
+class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
     """
         Lollypop application:
             - Handle appmenu
@@ -102,35 +100,6 @@ class Application(Gtk.Application, ApplicationActions):
         self.animations = settings.get_value("enable-animations").get_boolean()
         GLib.set_application_name("Lollypop")
         GLib.set_prgname("lollypop")
-        self.add_main_option("play-ids", b"a", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.STRING, "Play ids", None)
-        self.add_main_option("debug", b"d", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Debug Lollypop", None)
-        self.add_main_option("set-rating", b"r", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.STRING, "Rate the current track",
-                             None)
-        self.add_main_option("play-pause", b"t", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Toggle playback",
-                             None)
-        self.add_main_option("stop", b"s", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Stop playback",
-                             None)
-        self.add_main_option("next", b"n", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Go to next track",
-                             None)
-        self.add_main_option("prev", b"p", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Go to prev track",
-                             None)
-        self.add_main_option("emulate-phone", b"e", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE,
-                             "Emulate a Librem phone",
-                             None)
-        self.add_main_option("version", b"v", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE,
-                             "Lollypop version",
-                             None)
-        self.connect("command-line", self.__on_command_line)
-        self.connect("handle-local-options", self.__on_handle_local_options)
         self.connect("activate", self.__on_activate)
         self.connect("shutdown", lambda a: self.__save_state())
         self.register(None)
@@ -195,6 +164,7 @@ class Application(Gtk.Application, ApplicationActions):
             dark = self.settings.get_value("dark-ui")
             settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
+        ApplicationCmdline.__init__(self)
         monitor = Gio.NetworkMonitor.get_default()
         if monitor.get_network_available() and\
                 not monitor.get_network_metered() and\
@@ -399,140 +369,6 @@ class Application(Gtk.Application, ApplicationActions):
                 sql.isolation_level = ""
         except Exception as e:
             Logger.error("Application::__vacuum(): %s" % e)
-
-    def __parse_uris(self, playlist_uris, audio_uris):
-        """
-            Parse playlist uris
-            @param playlist_uris as [str]
-            @param audio_uris as [str]
-        """
-        from gi.repository import TotemPlParser
-        playlist_uri = playlist_uris.pop(0)
-        parser = TotemPlParser.Parser.new()
-        parser.connect("entry-parsed",
-                       self.__on_entry_parsed,
-                       audio_uris)
-        parser.parse_async(playlist_uri, True, None,
-                           self.__on_parse_finished,
-                           playlist_uris, audio_uris)
-
-    def __on_handle_local_options(self, app, options):
-        """
-            Handle local options
-            @param app as Gio.Application
-            @param options as GLib.VariantDict
-        """
-        if options.contains("version"):
-            print("Lollypop %s" % self.__version)
-            exit(0)
-        return -1
-
-    def __on_command_line(self, app, app_cmd_line):
-        """
-            Handle command line
-            @param app as Gio.Application
-            @param options as Gio.ApplicationCommandLine
-        """
-        try:
-            args = app_cmd_line.get_arguments()
-            options = app_cmd_line.get_options_dict()
-            if options.contains("debug"):
-                self.debug = True
-            if options.contains("set-rating"):
-                value = options.lookup_value("set-rating").get_string()
-                try:
-                    value = min(max(0, int(value)), 5)
-                    if self.player.current_track.id is not None:
-                        self.player.current_track.set_rate(value)
-                except Exception as e:
-                    Logger.error("Application::__on_command_line(): %s", e)
-                    pass
-            elif options.contains("play-pause"):
-                self.player.play_pause()
-            elif options.contains("stop"):
-                self.player.stop()
-            elif options.contains("play-ids"):
-                try:
-                    value = options.lookup_value("play-ids").get_string()
-                    ids = value.split(";")
-                    albums = []
-                    for id in ids:
-                        if id[0:2] == "a:":
-                            album = Album(int(id[2:]))
-                            self.player.add_album(album)
-                            albums.append(album)
-                        else:
-                            track = Track(int(id[2:]))
-                            self.player.add_album(track.album)
-                            albums.append(track.album)
-                    if albums and albums[0].tracks:
-                        self.player.load(albums[0].tracks[0])
-                except Exception as e:
-                    Logger.error("Application::__on_command_line(): %s", e)
-                    pass
-            elif options.contains("next"):
-                self.player.next()
-            elif options.contains("prev"):
-                self.player.prev()
-            elif options.contains("emulate-phone"):
-                self.__window.toolbar.end.devices_popover.add_fake_phone()
-            elif len(args) > 1:
-                audio_uris = []
-                playlist_uris = []
-                for uri in args[1:]:
-                    parsed = urlparse(uri)
-                    if parsed.scheme not in ["http", "https"]:
-                        try:
-                            uri = GLib.filename_to_uri(uri)
-                        except:
-                            pass
-                        f = Gio.File.new_for_uri(uri)
-                        # Try ./filename
-                        if not f.query_exists():
-                            uri = GLib.filename_to_uri(
-                                "%s/%s" % (GLib.get_current_dir(), uri))
-                            print(uri)
-                            f = Gio.File.new_for_uri(uri)
-                    file_type = get_file_type(uri)
-                    if file_type == FileType.PLS:
-                        playlist_uris.append(uri)
-                    else:
-                        audio_uris.append(uri)
-                if playlist_uris:
-                    self.__parse_uris(playlist_uris, audio_uris)
-                else:
-                    self.__on_parse_finished(None, None, [], audio_uris)
-            elif self.__window is not None:
-                if not self.__window.is_visible():
-                    self.__window.present()
-                    emit_signal(self.player, "status-changed")
-                    emit_signal(self.player, "current-changed")
-            Gdk.notify_startup_complete()
-        except Exception as e:
-            Logger.error("Application::__on_command_line(): %s", e)
-        return 0
-
-    def __on_parse_finished(self, source, result, playlist_uris, audio_uris):
-        """
-            Play stream
-            @param source as None
-            @param result as Gio.AsyncResult
-            @param uris as ([str], [str])
-        """
-        if playlist_uris:
-            self.__parse_uris(playlist_uris, audio_uris)
-        else:
-            self.scanner.update(ScanType.EXTERNAL, audio_uris)
-
-    def __on_entry_parsed(self, parser, uri, metadata, audio_uris):
-        """
-            Add playlist entry to external files
-            @param parser as TotemPlParser.Parser
-            @param uri as str
-            @param metadata as GLib.HastTable
-            @param audio_uris as str
-        """
-        audio_uris.append(uri)
 
     def __hide_on_delete(self, widget, event):
         """
