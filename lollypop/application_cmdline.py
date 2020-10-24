@@ -28,10 +28,12 @@ class ApplicationCmdline:
         Need to be inherited by a Gtk.Application
     """
 
-    def __init__(self):
+    def __init__(self, version):
         """
             Create cmdline handler
+            @param version as str
         """
+        self.__version = version
         self.add_main_option("play-ids", b"a", GLib.OptionFlags.NONE,
                              GLib.OptionArg.STRING, "Play ids", None)
         self.add_main_option("debug", b"d", GLib.OptionFlags.NONE,
@@ -62,6 +64,14 @@ class ApplicationCmdline:
         self.connect("command-line", self.__on_command_line)
         self.connect("handle-local-options", self.__on_handle_local_options)
 
+    @property
+    def version(self):
+        """
+            Get Lollypop version
+            @return srt
+        """
+        return self.__version
+
 #######################
 # PRIVATE             #
 #######################
@@ -88,7 +98,7 @@ class ApplicationCmdline:
             @param options as GLib.VariantDict
         """
         if options.contains("version"):
-            print("Lollypop %s" % self.__version)
+            print(self.__version)
             exit(0)
         return -1
 

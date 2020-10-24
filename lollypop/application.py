@@ -68,7 +68,7 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             self,
             application_id="org.gnome.Lollypop",
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
-        self.__version = version
+        ApplicationCmdline.__init__(self, version)
         self.__data_dir = data_dir
         self.set_property("register-session", True)
         signal(SIGINT, lambda a, b: self.quit())
@@ -164,7 +164,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             dark = self.settings.get_value("dark-ui")
             settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
-        ApplicationCmdline.__init__(self)
         monitor = Gio.NetworkMonitor.get_default()
         if monitor.get_network_available() and\
                 not monitor.get_network_metered() and\
@@ -300,14 +299,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             @return bool
         """
         return self.__gtk_dark
-
-    @property
-    def version(self):
-        """
-            Get Lollypop version
-            @return srt
-        """
-        return self.__version
 
 #######################
 # PRIVATE             #
