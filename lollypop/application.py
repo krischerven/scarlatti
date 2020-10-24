@@ -92,7 +92,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
                     GLib.setenv("SSL_CERT_FILE", path, True)
                     break
         self.cursors = {}
-        self.debug = False
         self.shown_sidebar_tooltip = False
         self.__window = None
         self.__fs_window = None

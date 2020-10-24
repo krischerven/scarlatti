@@ -33,6 +33,7 @@ class ApplicationCmdline:
             Create cmdline handler
             @param version as str
         """
+        self.__debug = False
         self.__version = version
         self.add_main_option("play-ids", b"a", GLib.OptionFlags.NONE,
                              GLib.OptionArg.STRING, "Play ids", None)
@@ -71,6 +72,14 @@ class ApplicationCmdline:
             @return srt
         """
         return self.__version
+
+    @property
+    def debug(self):
+        """
+            Get debug state
+            @return bool
+        """
+        return self.__debug
 
 #######################
 # PRIVATE             #
@@ -112,7 +121,7 @@ class ApplicationCmdline:
             args = app_cmd_line.get_arguments()
             options = app_cmd_line.get_options_dict()
             if options.contains("debug"):
-                self.debug = True
+                self.__debug = True
             if options.contains("set-rating"):
                 value = options.lookup_value("set-rating").get_string()
                 try:
