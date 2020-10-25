@@ -75,7 +75,6 @@ class AlbumWidget(Gtk.Grid):
         self.__revealer.set_transition_type(
                 Gtk.RevealerTransitionType.NONE)
         self.__populate()
-        self.__revealer.set_reveal_child(True)
 
     def set_selection(self):
         """
@@ -180,17 +179,27 @@ class AlbumWidget(Gtk.Grid):
         """
             Populate the view with album
         """
-        if self.__tracks_view is None:
-            self.__tracks_view = AlbumTracksView(self.__album,
-                                                 self.__view_type)
-            self.__tracks_view.show()
-            self.__tracks_view.set_margin_start(MARGIN)
-            self.__tracks_view.set_margin_end(MARGIN)
-            self.__tracks_view.populate()
-            self.__tracks_view.connect("populated", self.__on_tracks_populated)
-            self.__revealer.add(self.__tracks_view)
-        self.__revealer.set_reveal_child(
-            not self.__revealer.get_reveal_child())
+        def reveal(*ignore):
+            self.get_style_context().remove_class("load-animation")
+            if self.__tracks_view is None:
+                self.__tracks_view = AlbumTracksView(self.__album,
+                                                     self.__view_type)
+                self.__tracks_view.show()
+                self.__tracks_view.set_margin_start(MARGIN)
+                self.__tracks_view.set_margin_end(MARGIN)
+                self.__tracks_view.populate()
+                self.__tracks_view.connect("populated",
+                                           self.__on_tracks_populated)
+                self.__revealer.add(self.__tracks_view)
+            self.__revealer.set_reveal_child(
+                not self.__revealer.get_reveal_child())
+        if self.__album.tracks:
+            reveal()
+        else:
+            self.get_style_context().add_class("load-animation")
+            App().task_helper.run(self.__album.load_tracks,
+                                  None,
+                                  callback=(reveal,))
 
     def __on_tracks_populated(self, view):
         """

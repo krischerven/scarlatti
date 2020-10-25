@@ -184,6 +184,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.__widget.set_state_flags(Gtk.StateFlags.NORMAL, True)
 
+    def update_duration(self):
+        """
+            Update duration label
+        """
+        human_duration = get_human_duration(self.__album.duration)
+        self.__duration_label.set_text(human_duration)
+
 #######################
 # PROTECTED           #
 #######################
