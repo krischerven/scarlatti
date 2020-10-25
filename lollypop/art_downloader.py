@@ -50,6 +50,23 @@ class DownloaderArt:
         self.__in_albums_download = False
         self.__in_artists_download = False
 
+    def add_artist_artwork_from_uri(self, artist, uri,
+                                    cancellable, storage_type):
+        """
+            Add artist artwork
+            @param artist as str
+            @param uri as str
+            @param cancellable as Gio.Cancellable
+            @param storage_type as int
+        """
+        def on_uri_content(uri, status, data):
+            if status:
+                App().art.add_artist_artwork(artist, data, storage_type)
+        if uri:
+            App().task_helper.load_uri_content(uri,
+                                               cancellable,
+                                               on_uri_content)
+
     def search_album_artworks(self, artist, album, cancellable):
         """
             Search album artworks
