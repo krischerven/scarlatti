@@ -179,8 +179,10 @@ class AlbumWidget(Gtk.Grid):
         """
             Populate the view with album
         """
-        def reveal(*ignore):
-            self.get_style_context().remove_class("load-animation")
+        def reveal(ignore, update_duration):
+            if update_duration:
+                self.get_style_context().remove_class("load-animation")
+                self.__banner.update_duration()
             if self.__tracks_view is None:
                 self.__tracks_view = AlbumTracksView(self.__album,
                                                      self.__view_type)
@@ -194,12 +196,12 @@ class AlbumWidget(Gtk.Grid):
             self.__revealer.set_reveal_child(
                 not self.__revealer.get_reveal_child())
         if self.__album.tracks:
-            reveal()
+            reveal(None, False)
         else:
             self.get_style_context().add_class("load-animation")
             App().task_helper.run(self.__album.load_tracks,
                                   None,
-                                  callback=(reveal,))
+                                  callback=(reveal, True))
 
     def __on_tracks_populated(self, view):
         """
