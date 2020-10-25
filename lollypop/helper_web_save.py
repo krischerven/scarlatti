@@ -81,43 +81,12 @@ class SaveWebHelper(GObject.Object):
         item = self.__save_album(payload, storage_type)
         album = Album(item.album_id)
         if notify:
-            self.save_artwork(album,
-                              payload["artwork-uri"],
-                              cancellable)
+            App().art.add_album_artwork_from_uri(album,
+                                                 payload["artwork-uri"],
+                                                 cancellable,
+                                                 storage_type)
             emit_signal(self, "match-album", album.id, storage_type)
         return item
-
-    def save_artwork(self, obj, cover_uri, cancellable):
-        """
-            Save artwork for obj
-            @param obj as Album/Track
-            @param cover_uri/mbid as str
-            @param cancellable as Gio.Cancellable
-        """
-        if not cover_uri:
-            return
-        if cancellable.is_cancelled():
-            raise Exception("Cancelled")
-        try:
-            if isinstance(obj, Album):
-                album = obj
-            else:
-                album = obj.album
-            if App().art.get_album_artwork_uri(album) is None:
-                # We need to get URI from mbid
-                if not cover_uri.startswith("http"):
-                    cover_uri = self.__get_cover_art_uri(cover_uri,
-                                                         cancellable)
-                if cover_uri is None:
-                    return
-                (status, data) = App().task_helper.load_uri_content_sync(
-                                                        cover_uri,
-                                                        cancellable)
-                if status:
-                    App().art.add_album_artwork(album, data)
-        except Exception as e:
-            Logger.error(
-                "SaveWebHelper::save_artwork(): %s", e)
 
 #######################
 # PRIVATE             #
