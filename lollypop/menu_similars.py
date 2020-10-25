@@ -15,9 +15,9 @@ from gi.repository import Gtk, Gio, GLib, Pango
 from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, ArtBehaviour, Type, StorageType
-from lollypop.logger import Logger
 from lollypop.utils import sql_escape
 from lollypop.utils_file import get_youtube_dl
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ArtistRow(Gtk.ListBoxRow):
@@ -46,8 +46,18 @@ class ArtistRow(Gtk.ListBoxRow):
         self.__artwork = Gtk.Image.new()
         self.__artwork.set_size_request(ArtSize.SMALL,
                                         ArtSize.SMALL)
-        if App().art.get_artist_artwork_path(artist_name) is not None:
-            App().art_helper.set_artist_artwork(artist_name,
+        self.set_artwork()
+        grid.add(self.__artwork)
+        grid.add(label)
+        grid.show_all()
+        self.add(grid)
+
+    def set_artwork(self):
+        """
+            Set artist artwork
+        """
+        if App().art.get_artist_artwork_path(self.__artist_name) is not None:
+            App().art_helper.set_artist_artwork(self.__artist_name,
                                                 ArtSize.SMALL,
                                                 ArtSize.SMALL,
                                                 self.get_scale_factor(),
@@ -57,10 +67,6 @@ class ArtistRow(Gtk.ListBoxRow):
                                                 self.__on_artist_artwork)
         else:
             self.__on_artist_artwork(None)
-        grid.add(self.__artwork)
-        grid.add(label)
-        grid.show_all()
-        self.add(grid)
 
     @property
     def artist_name(self):
@@ -81,31 +87,6 @@ class ArtistRow(Gtk.ListBoxRow):
 #######################
 # PRIVATE             #
 #######################
-    def __on_uri_content(self, uri, status, data):
-        """
-            Save artwork to cache and set artist artwork
-            @param uri as str
-            @param status as bool
-            @param data as bytes
-        """
-        try:
-            if not status:
-                return
-            self.__cover_data = data
-            scale_factor = self.get_scale_factor()
-            App().art.add_artist_artwork(self.__artist_name, data,
-                                         StorageType.EPHEMERAL)
-            App().art_helper.set_artist_artwork(self.__artist_name,
-                                                ArtSize.SMALL,
-                                                ArtSize.SMALL,
-                                                scale_factor,
-                                                ArtBehaviour.CROP |
-                                                ArtBehaviour.CACHE |
-                                                ArtBehaviour.ROUNDED,
-                                                self.__on_artist_artwork)
-        except Exception as e:
-            Logger.error("ArtistRow::__on_uri_content(): %s", e)
-
     def __on_artist_artwork(self, surface):
         """
             Set artist artwork
@@ -114,9 +95,10 @@ class ArtistRow(Gtk.ListBoxRow):
         if surface is None:
             # Last chance to get a cover
             if self.__cover_uri is not None:
-                App().task_helper.load_uri_content(self.__cover_uri,
-                                                   self.__cancellable,
-                                                   self.__on_uri_content)
+                App().art.add_artist_artwork_from_uri(self.__artist_name,
+                                                      self.__cover_uri,
+                                                      self.__cancellable,
+                                                      StorageType.EPHEMERAL)
                 self.__cover_uri = None
             # Cache for later usage
             else:
@@ -132,11 +114,12 @@ class ArtistRow(Gtk.ListBoxRow):
             del surface
 
 
-class SimilarsMenu(Gtk.Bin):
+class SimilarsMenu(Gtk.Bin, SignalsHelper):
     """
         A popover with similar artists
     """
 
+    @signals_map
     def __init__(self, artist_id):
         """
             Init popover
@@ -170,6 +153,9 @@ class SimilarsMenu(Gtk.Bin):
         self.__stack.add(self.__listbox)
         self.add(self.__stack)
         self.set_hexpand(True)
+        return [
+            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+        ]
 
     @property
     def submenu_name(self):
@@ -178,6 +164,20 @@ class SimilarsMenu(Gtk.Bin):
             @return str
         """
         return _("Similar artists")
+
+#######################
+# PROTECTED           #
+#######################
+    def _on_artist_artwork_changed(self, art, artist_name):
+        """
+            Reload artist artwork
+            @param art as Art
+            @param artist_name as str
+        """
+        for child in self.__listbox.get_children():
+            if child.artist_name == artist_name:
+                child.set_artwork()
+                break
 
 #######################
 # PRIVATE             #

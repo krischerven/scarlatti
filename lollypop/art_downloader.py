@@ -62,6 +62,23 @@ class DownloaderArt:
         def on_uri_content(uri, status, data):
             if status:
                 App().art.add_artist_artwork(artist, data, storage_type)
+                emit_signal(self, "artist-artwork-changed", artist)
+        if uri:
+            App().task_helper.load_uri_content(uri,
+                                               cancellable,
+                                               on_uri_content)
+
+    def add_album_artwork_from_uri(self, album, uri, cancellable):
+        """
+            Add album artwork
+            @param album as Album
+            @param uri as str
+            @param cancellable as Gio.Cancellable
+        """
+        def on_uri_content(uri, status, data):
+            if status:
+                App().art.add_album_artwork(album, data)
+                emit_signal(self, "album-artwork-changed", album.id)
         if uri:
             App().task_helper.load_uri_content(uri,
                                                cancellable,
@@ -162,7 +179,7 @@ class DownloaderArt:
             Get artist artwork using AutdioDB
             @param artist as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @thread safe
         """
         if not get_network_available("AUDIODB"):
@@ -192,7 +209,7 @@ class DownloaderArt:
             Get artist artwork using Deezer
             @param artist as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @tread safe
         """
         if not get_network_available("DEEZER"):
@@ -220,7 +237,7 @@ class DownloaderArt:
             Get artist artwork using FanartTV
             @param artist as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @thread safe
         """
         if not get_network_available("FANARTTV"):
@@ -248,7 +265,7 @@ class DownloaderArt:
             Get artist artwork using Spotify
             @param artist as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @tread safe
         """
         if not get_network_available("SPOTIFY"):
@@ -285,7 +302,7 @@ class DownloaderArt:
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @tread safe
         """
         if not get_network_available("DEEZER"):
@@ -316,7 +333,7 @@ class DownloaderArt:
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @thread safe
         """
         if not get_network_available("FANARTTV"):
@@ -346,7 +363,7 @@ class DownloaderArt:
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @tread safe
         """
         if not get_network_available("SPOTIFY"):
@@ -394,7 +411,7 @@ class DownloaderArt:
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @tread safe
         """
         if not get_network_available("ITUNES"):
@@ -426,7 +443,7 @@ class DownloaderArt:
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return uri as str
+            @return uris as [str]
             @thread safe
         """
         if not get_network_available("AUDIODB"):
@@ -458,7 +475,7 @@ class DownloaderArt:
             @param artist as str
             @param album as str
             @param cancellable as Gio.Cancellable
-            @return [str]
+            @return uris as [str]
             @tread safe
         """
         if not get_network_available("LASTFM"):
@@ -528,14 +545,10 @@ class DownloaderArt:
                 for api in self.__artist_methods.keys():
                     result = self.__artist_methods[api](artist)
                     for uri in result:
-                        (status,
-                         data) = App().task_helper.load_uri_content_sync(
-                            uri, None)
-                        if status:
-                            found = True
-                            App().art.add_artist_artwork(
-                                artist, data, StorageType.COLLECTION)
-                            break
+                        found = True
+                        self.add_artist_artwork_from_uri(
+                            artist, uri, None, StorageType.COLLECTION)
+                        break
                     # Found, do not search in another helper
                     if found:
                         break
@@ -568,13 +581,9 @@ class DownloaderArt:
                 for api in self.__album_methods.keys():
                     result = self.__album_methods[api](artist, album)
                     for uri in result:
-                        (status,
-                         data) = App().task_helper.load_uri_content_sync(uri,
-                                                                         None)
-                        if status:
-                            found = True
-                            App().art.add_album_artwork(Album(album_id), data)
-                            break
+                        self.add_album_artwork_from_uri(
+                            Album(album_id), uri, None)
+                        break
                     # Found, do not search in another helper
                     if found:
                         break
