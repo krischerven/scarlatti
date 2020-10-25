@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.0 -->
+<!-- Generated with glade 3.38.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <requires lib="libhandy" version="0.0"/>
@@ -986,6 +986,21 @@ and with different artists</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <signal name="state-set" handler="_on_acl_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Jamendo</property>
+                <child>
+                  <object class="GtkSwitch" id="JAMENDO_button">
+                    <property name="name">JAMENDO</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
                   </object>
                 </child>
               </object>

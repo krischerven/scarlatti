@@ -68,6 +68,10 @@ class SearchMenu(Gio.Menu):
             menu_item = Gio.MenuItem.new(_("Spotify"),
                                          "app.web_search('SPOTIFY')")
             section.append_item(menu_item)
+        if get_network_available("JAMENDO"):
+            menu_item = Gio.MenuItem.new(_("Jamendo"),
+                                         "app.web_search('JAMENDO')")
+            section.append_item(menu_item)
 
 #######################
 # PRIVATE             #

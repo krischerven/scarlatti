@@ -63,6 +63,10 @@ class Search(GObject.Object):
             from lollypop.search_deezer import DeezerSearch
             self.__web_search = DeezerSearch()
             self.__connect_search_signals(self.__web_search)
+        elif name == "JAMENDO":
+            from lollypop.search_jamendo import JamendoSearch
+            self.__web_search = JamendoSearch()
+            self.__connect_search_signals(self.__web_search)
 
     def load_tracks(self, album, cancellable):
         """
@@ -79,6 +83,9 @@ class Search(GObject.Object):
         elif uri.startswith("dz:"):
             from lollypop.search_deezer import DeezerSearch
             DeezerSearch().load_tracks(album, cancellable)
+        elif uri.startswith("jam:"):
+            from lollypop.search_jamendo import JamendoSearch
+            JamendoSearch().load_tracks(album, cancellable)
         # elif uri.startswith("sp:"): => compatibility
         else:
             from lollypop.search_spotify import SpotifySearch

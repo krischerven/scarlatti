@@ -334,7 +334,8 @@ class AlbumArt:
             @param uri as str
         """
         pixbuf = None
-        if uri.startswith("web:"):
+        # Internal URI are just like sp:
+        if uri.find(":/") == -1:
             return
         try:
             discoverer = Discoverer()

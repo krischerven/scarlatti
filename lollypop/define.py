@@ -126,7 +126,7 @@ NetworkAccessACL = {
     "GOOGLE": 1 << 5,
     "STARTPAGE": 1 << 6,
     "WIKIPEDIA": 1 << 7,
-    #    "TUNEIN": 1 << 8,
+    "JAMENDO": 1 << 8,
     "MUSICBRAINZ": 1 << 9,
     "ITUNES": 1 << 10,
     "DEEZER": 1 << 11,
@@ -137,7 +137,7 @@ NetworkAccessACL = {
     "DUCKDUCKGO": 1 << 16,
     "LIBREFM": 1 << 17,
     "METROLYRICS": 1 << 18,
-    "BING": 1 << 19
+    "BING": 1 << 19,
 }
 
 

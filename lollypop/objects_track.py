@@ -53,6 +53,7 @@ class Track(Base):
         Base.__init__(self, App().tracks)
         self.id = track_id
         self._uri = None
+        self.__uri_loaded = False
 
         if album is None:
             from lollypop.objects_album import Album
@@ -120,6 +121,23 @@ class Track(Base):
         """
         artist_ids = self.db.get_artist_ids(self.id)
         return list(set(artist_ids) - set(album_artist_ids))
+
+    def set_preloaded(self):
+        """
+            Mark track as preloaded
+        """
+        self.__uri_loaded = True
+
+    @property
+    def uri_loaded(self):
+        """
+            True if tracks uri is loaded
+            @return bool
+        """
+        # We already have a valid URI (jamendo for example)
+        if self.uri.startswith("http"):
+            return True
+        return self.__uri_loaded
 
     @property
     def is_web(self):

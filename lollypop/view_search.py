@@ -288,7 +288,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
     def _on_search_finished(self, search_handler, last):
         """
             Stop spinner and show placeholder if not result
-            @param search_handler as LocalSearch/SpotifySearch
+            @param search_handler as LocalSearch/WebSearch
             @param last as bool
         """
         tracks_len = len(

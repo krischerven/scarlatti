@@ -247,10 +247,7 @@ class BinPlayer:
         try:
             emit_signal(self, "loading-changed", False, self._current_track)
             self._current_track = track
-            # If track_uri is different, preload has happened
-            # See Player.set_next()
-            track_uri = App().tracks.get_uri(track.id)
-            if track.is_web and track.uri == track_uri:
+            if track.is_web and not track.uri_loaded:
                 emit_signal(self, "loading-changed", True, track)
                 self.__load_from_web(track)
                 return False
@@ -416,6 +413,7 @@ class BinPlayer:
             return
         if uri:
             track.set_uri(uri)
+            track.set_preloaded()
             self.load(track)
             App().task_helper.run(self.__update_current_duration, track)
         else:
