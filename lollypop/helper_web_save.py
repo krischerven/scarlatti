@@ -114,7 +114,7 @@ class SaveWebHelper(GObject.Object):
                                                         cover_uri,
                                                         cancellable)
                 if status:
-                    App().art.save_album_artwork(album, data)
+                    App().art.add_album_artwork(album, data)
         except Exception as e:
             Logger.error(
                 "SaveWebHelper::save_artwork(): %s", e)

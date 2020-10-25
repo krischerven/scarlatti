@@ -573,14 +573,14 @@ class DownloaderArt:
                                                                          None)
                         if status:
                             found = True
-                            App().art.save_album_artwork(Album(album_id), data)
+                            App().art.add_album_artwork(Album(album_id), data)
                             break
                     # Found, do not search in another helper
                     if found:
                         break
                 # Not found, save empty artwork
                 if not found:
-                    App().art.save_album_artwork(Album(album_id), None)
+                    App().art.add_album_artwork(Album(album_id), None)
         except Exception as e:
             Logger.error("DownloaderArt::__cache_albums_artwork: %s" % e)
         self.__in_albums_download = False

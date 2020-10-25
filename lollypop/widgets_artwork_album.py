@@ -71,7 +71,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             f = Gio.File.new_for_path(filename)
             (status, data, tag) = f.load_contents()
             if status:
-                App().task_helper.run(App().art.save_album_artwork,
+                App().task_helper.run(App().art.add_album_artwork,
                                       self.__album, data)
         except Exception as e:
             Logger.error(
@@ -118,11 +118,11 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                App().task_helper.run(App().art.save_album_artwork,
+                App().task_helper.run(App().art.add_album_artwork,
                                       self.__album, child.bytes)
             else:
                 App().art.remove_album_artwork(self.__album)
-                App().art.save_album_artwork(self.__album, None)
+                App().art.add_album_artwork(self.__album, None)
                 App().art.clean_album_cache(self.__album)
                 emit_signal(App().art, "album-artwork-changed",
                             self.__album.id)

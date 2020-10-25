@@ -246,7 +246,7 @@ class AlbumArt:
             Logger.error("AlbumArt::get_album_artwork(): %s -> %s" % (uri, e))
             return None
 
-    def save_album_artwork(self, album, data):
+    def add_album_artwork(self, album, data):
         """
             Save artwork for album
             @param data as bytes
@@ -258,9 +258,9 @@ class AlbumArt:
             elif is_readonly(album.uri):
                 self.__save_ro_album_artwork(album, data)
             else:
-                self.__save_album_artwork(album, data)
+                self.__add_album_artwork(album, data)
         except Exception as e:
-            Logger.error("AlbumArt::save_album_artwork(): %s" % e)
+            Logger.error("AlbumArt::add_album_artwork(): %s" % e)
 
     def move_artwork(self, old_lp_album_id, new_lp_album_id):
         """
@@ -410,7 +410,7 @@ class AlbumArt:
         self.clean_album_cache(album)
         self.album_artwork_update(album.id)
 
-    def __save_album_artwork(self, album, data):
+    def __add_album_artwork(self, album, data):
         """
             Save artwork for an album
             @param album as Album
@@ -425,7 +425,7 @@ class AlbumArt:
         # Save cover to tags
         if save_to_tags:
             helper = TaskHelper()
-            helper.run(self.__save_album_artwork_to_tags, album, data)
+            helper.run(self.__add_album_artwork_to_tags, album, data)
 
         # We need to remove favorite if exists
         if uri_count > 1 or save_to_tags:
@@ -450,7 +450,7 @@ class AlbumArt:
         self.clean_album_cache(album)
         self.album_artwork_update(album.id)
 
-    def __save_album_artwork_to_tags(self, album, data):
+    def __add_album_artwork_to_tags(self, album, data):
         """
             Save artwork to tags
             @param album as Album
