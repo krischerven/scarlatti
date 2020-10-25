@@ -83,8 +83,7 @@ class SaveWebHelper(GObject.Object):
         if notify:
             App().art.add_album_artwork_from_uri(album,
                                                  payload["artwork-uri"],
-                                                 cancellable,
-                                                 storage_type)
+                                                 cancellable)
             emit_signal(self, "match-album", album.id, storage_type)
         return item
 
