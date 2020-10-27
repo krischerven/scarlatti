@@ -88,7 +88,8 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
         """
             Play previous track
         """
-        if self.position > 2000:
+        if self.position > App().settings.get_value(
+                "previous-threshold").get_int32():
             self.seek(0)
             emit_signal(self, "current-changed")
             if not self.is_playing:

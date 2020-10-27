@@ -130,8 +130,9 @@ class ButtonsPlayerWidget(Gtk.Box, SignalsHelper):
             GLib.source_remove(self.__prev_button_timeout_id)
         self.__prev_button.get_image().set_from_icon_name(
             "media-skip-backward-symbolic", Gtk.IconSize.BUTTON)
-        self.__prev_button_timeout_id = GLib.timeout_add(2000,
-                                                         update_button)
+        self.__prev_button_timeout_id = GLib.timeout_add(
+            App().settings.get_value("previous-threshold").get_int32(),
+            update_button)
 
         if App().player.current_track.id is None:
             self.__play_button.set_sensitive(False)
