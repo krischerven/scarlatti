@@ -71,6 +71,11 @@
             <summary>INTERNAL</summary>
             <description></description>
         </key>
+        <key type="i" name="previous-threshold">
+            <default>4000</default>
+            <summary>Threshold used to decide if the previous track should be played or the currently running one should be restarted</summary>
+            <description></description>
+        </key>
         <key type="b" name="save-to-tags">
             <default>false</default>
             <summary>Save artwork/popularity in tags</summary>
