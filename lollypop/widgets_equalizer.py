@@ -22,6 +22,8 @@ from lollypop.widgets_combobox import ComboBox
 PRESETS = {
            _("Default"):
             (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+           _("Custom"):
+            (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
            "Separator": (),
            _("Acoustic"):
             (3, 2, 2, 2, 3, 2, 2, 3, 2, 4, 2, 2, 1, 1, 4, 5, 7, 8),
