@@ -270,7 +270,7 @@ class Playlists(GObject.GObject):
 
     def get_track_uris(self, playlist_id):
         """
-            Return availables track uris for playlist
+            Return available track uris for playlist
             @param playlist_id as int
             @return [str]
         """
@@ -279,6 +279,21 @@ class Playlists(GObject.GObject):
                                   FROM tracks\
                                   WHERE playlist_id=?", (playlist_id,))
             return list(itertools.chain(*result))
+
+    def get_smart_track_uris(self, playlist_id):
+        """
+            Return available track uris for playlist
+            @param playlist_id as int
+            @return [str]
+        """
+        request = self.get_smart_sql(playlist_id)
+        # We need to inject skipped/storage_type
+        storage_type = get_default_storage_type()
+        split = request.split("ORDER BY")
+        split[0] += " AND tracks.loved != %s" % Type.NONE
+        split[0] += " AND tracks.storage_type&%s " % storage_type
+        track_ids = App().db.execute("ORDER BY".join(split))
+        return [Track(track_id).uri for track_id in track_ids]
 
     def get_track_ids(self, playlist_id):
         """
@@ -592,7 +607,10 @@ class Playlists(GObject.GObject):
             f = Gio.File.new_for_uri(playlist_uri)
             if not f.query_exists() and not create:
                 return
-            uris = self.get_track_uris(playlist_id)
+            if self.get_smart(playlist_id):
+                uris = self.get_smart_track_uris(playlist_id)
+            else:
+                uris = self.get_track_uris(playlist_id)
             if not uris:
                 return
             stream = f.replace(None, False,

@@ -49,7 +49,6 @@ class DirectorWebService:
         else:
             network_acl = App().settings.get_value(
                 "network-access-acl").get_int32()
-        print(network_acl)
         self.__handle_collection(network_acl)
         self.__handle_lastfm(network_acl)
         self.__handle_listenbrainz(network_acl)
