@@ -618,6 +618,8 @@ class Playlists(GObject.GObject):
             stream.write("#EXTM3U\n".encode("utf-8"))
             playlist_dir_uri = playlist_uri.replace(f.get_basename(), "")
             for uri in uris:
+                if uri.startswith("web://"):
+                    continue
                 if playlist_dir_uri in uri:
                     filepath = uri.replace(playlist_dir_uri, "")
                     string = "%s\n" % GLib.uri_unescape_string(filepath, None)
