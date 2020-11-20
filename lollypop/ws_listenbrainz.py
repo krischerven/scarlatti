@@ -17,7 +17,7 @@ import json
 from pickle import load, dump
 
 from lollypop.logger import Logger
-from lollypop.define import App, LOLLYPOP_DATA_PATH
+from lollypop.define import App, LOLLYPOP_DATA_PATH, Type
 from lollypop.utils import get_network_available
 
 
@@ -174,9 +174,13 @@ class ListenBrainzWebService(GObject.GObject):
             @param track as Track
             @return payload as []
         """
+        if track.album.artist_ids[0] == Type.COMPILATIONS:
+            artist = track.artists[0]
+        else:
+            artist = track.album.artists[0]
         payload = {
             "track_metadata": {
-                "artist_name": track.artists[0],
+                "artist_name": artist,
                 "track_name": track.title,
                 "release_name": track.album_name,
                 "additional_info": {

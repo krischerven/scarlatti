@@ -19,7 +19,7 @@ from pickle import load, dump
 from lollypop.helper_passwords import PasswordsHelper
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
-from lollypop.define import LOLLYPOP_DATA_PATH, App
+from lollypop.define import LOLLYPOP_DATA_PATH, App, Type
 from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET
 
 
@@ -201,7 +201,10 @@ class LastFMWebService:
                 if token is None:
                     return
                 args = self.__get_args_for_method("track.scrobble")
-                args.append(("artist", track.artists[0]))
+                if track.album.artist_ids[0] == Type.COMPILATIONS:
+                    args.append(("artist", track.artists[0]))
+                else:
+                    args.append(("artist", track.album.artists[0]))
                 args.append(("track", track.name))
                 args.append(("album", track.album.name))
                 if track.mbid and track.mbid.find(":") == -1:
@@ -235,7 +238,10 @@ class LastFMWebService:
             if token is None:
                 return
             args = self.__get_args_for_method("track.updateNowPlaying")
-            args.append(("artist", track.artists[0]))
+            if track.album.artist_ids[0] == Type.COMPILATIONS:
+                args.append(("artist", track.artists[0]))
+            else:
+                args.append(("artist", track.album.artists[0]))
             args.append(("track", track.name))
             args.append(("album", track.album.name))
             if track.mbid and track.mbid.find(":") == -1:
