@@ -83,41 +83,44 @@ class Inotify:
         """
         if self.__disable_timeout_id is not None:
             return
-        changed_uri = changed_file.get_uri()
-        # Do not monitor our self
-        if changed_uri in self.__monitors.keys() and\
-                self.__monitors[changed_uri] == monitor:
-            return
-
-        if changed_file.query_exists():
-            # Ignore non audio
-            info = changed_file.query_info(SCAN_QUERY_INFO,
-                                           Gio.FileQueryInfoFlags.NONE)
-            if info.get_file_type() != Gio.FileType.DIRECTORY and\
-                    is_audio(info):
+        try:
+            changed_uri = changed_file.get_uri()
+            # Do not monitor our self
+            if changed_uri in self.__monitors.keys() and\
+                    self.__monitors[changed_uri] == monitor:
                 return
 
-        # Stop collection scanner and wait
-        if App().scanner.is_locked():
-            App().scanner.stop()
-            GLib.timeout_add(self.__TIMEOUT,
-                             self.__on_dir_changed,
-                             monitor,
-                             changed_file,
-                             other_file,
-                             event)
-        # Run update delayed
-        else:
-            if self.__collection_timeout_id is not None:
-                GLib.source_remove(self.__collection_timeout_id)
-            if changed_file.has_parent():
-                uris = [changed_file.get_parent().get_uri()]
+            if changed_file.query_exists():
+                # Ignore non audio
+                info = changed_file.query_info(SCAN_QUERY_INFO,
+                                               Gio.FileQueryInfoFlags.NONE)
+                if info.get_file_type() != Gio.FileType.DIRECTORY and\
+                        is_audio(info):
+                    return
+
+            # Stop collection scanner and wait
+            if App().scanner.is_locked():
+                App().scanner.stop()
+                GLib.timeout_add(self.__TIMEOUT,
+                                 self.__on_dir_changed,
+                                 monitor,
+                                 changed_file,
+                                 other_file,
+                                 event)
+            # Run update delayed
             else:
-                uris = [changed_uri]
-            self.__collection_timeout_id = GLib.timeout_add(
+                if self.__collection_timeout_id is not None:
+                    GLib.source_remove(self.__collection_timeout_id)
+                if changed_file.has_parent():
+                    uris = [changed_file.get_parent().get_uri()]
+                else:
+                    uris = [changed_uri]
+                self.__collection_timeout_id = GLib.timeout_add(
                                                  self.__TIMEOUT,
                                                  self.__run_collection_update,
                                                  uris)
+        except Exception as e:
+            Logger.error("Inotify::__on_dir_changed()", e)
 
     def __run_collection_update(self, uris=[]):
         """
