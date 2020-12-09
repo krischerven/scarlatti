@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from gi.repository import GLib
+
 import json
 
 from lollypop.logger import Logger
@@ -56,7 +58,9 @@ class LastFMSearch(LastFMWebHelper, SaveWebHelper):
             for (album, artist) in albums:
                 uri = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo"
                 uri += "&api_key=%s&artist=%s&album=%s&format=json" % (
-                    LASTFM_API_KEY, artist, album)
+                    LASTFM_API_KEY,
+                    GLib.uri_escape_string(artist, None, True),
+                    GLib.uri_escape_string(album, None, True))
                 (status, data) = App().task_helper.load_uri_content_sync(
                     uri, cancellable)
                 if status:
