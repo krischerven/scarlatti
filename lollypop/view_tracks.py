@@ -154,8 +154,10 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
             Set columns orientation
             @param orientation as Gtk.Orientation
+            @return updated as bool
         """
-        if self.__orientation == orientation:
+        if self.__orientation == orientation or\
+                self._responsive_widget is None:
             return False
         self.__orientation = orientation
         for child in self._responsive_widget.get_children():
