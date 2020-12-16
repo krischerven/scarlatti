@@ -241,8 +241,12 @@ class AlbumTracksView(TracksView):
                     label_str = _("Disc %s") % disc.number
                 disc_year = App().tracks.get_year_for_album(
                     self.__album.id, disc.number)
-                markup = "%s  <span size='small' alpha='50000'>(%s)</span>"
-                markup = markup % (label_str, disc_year)
+                if disc_year != self.__album.year:
+                    markup = "%s  <span size='small' alpha='50000'>(%s)</span>"
+                    markup = markup % (GLib.markup_escape_text(label_str),
+                                       disc_year)
+                else:
+                    markup = GLib.markup_escape_text(label_str)
                 label = Gtk.Label.new()
                 label.set_ellipsize(Pango.EllipsizeMode.END)
                 label.set_markup(markup)
