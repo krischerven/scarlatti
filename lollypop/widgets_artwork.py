@@ -238,16 +238,13 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             Return current searches
             @return str
         """
-        search = ""
-        if self.__entry.get_text() != "":
-            search = self.__entry.get_text()
-        return search
+        return self.__entry.get_text()
 
     def _search_from_downloader(self):
         """
             Load artwork from downloader
         """
-        self.__loaders -= 1
+        pass
 
     def _on_search_changed(self, entry):
         """
@@ -257,8 +254,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
         self.__timeout_id = GLib.timeout_add(1000,
-                                             self.__on_search_timeout,
-                                             entry.get_text())
+                                             self.__on_search_timeout)
 
     def _on_activate(self, flowbox, child):
         pass
@@ -275,7 +271,8 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
                                                self._cancellable,
                                                self.__on_load_uri_content,
                                                api,
-                                               uris)
+                                               uris,
+                                               self._cancellable)
         else:
             self.__loaders -= 1
             if self.__loaders == 0:
@@ -323,26 +320,28 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         """
         self._cancellable.cancel()
 
-    def __on_load_uri_content(self, uri, loaded, content, api, uris):
+    def __on_load_uri_content(self, uri, loaded, content,
+                              api, uris, cancellable):
         """
             Add loaded pixbuf
             @param uri as str
             @param loaded as bool
             @param content as bytes
-            @param uris as [str]
             @param api as str
-            @param last as bool
+            @param uris as [str]
+            @param cancellable as Gio.Cancellable
         """
         try:
             if loaded:
                 self.__add_pixbuf(content, api)
-            if uris:
+            if uris and not cancellable.is_cancelled():
                 (uri, api) = uris.pop(0)
                 App().task_helper.load_uri_content(uri,
-                                                   self._cancellable,
+                                                   cancellable,
                                                    self.__on_load_uri_content,
                                                    api,
-                                                   uris)
+                                                   uris,
+                                                   cancellable)
             else:
                 self.__loaders -= 1
         except Exception as e:
@@ -352,10 +351,9 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         if self.__loaders == 0:
             self.__spinner.stop()
 
-    def __on_search_timeout(self, string):
+    def __on_search_timeout(self):
         """
             Populate widget
-            @param string as str
         """
         self.__timeout_id = None
         self._cancellable.cancel()

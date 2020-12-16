@@ -83,9 +83,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             @return str
         """
         search = ArtworkSearchWidget._get_current_search(self)
-        if search != "":
-            pass
-        else:
+        if search.strip() == "":
             is_compilation = self.__album.artist_ids and\
                 self.__album.artist_ids[0] == Type.COMPILATIONS
             if is_compilation:
@@ -98,17 +96,25 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
             Load artwork from downloader
         """
-        is_compilation = self.__album.artist_ids and\
-            self.__album.artist_ids[0] == Type.COMPILATIONS
-        if is_compilation:
-            artist = "Compilation"
+        search = ArtworkSearchWidget._get_current_search(self)
+        if search.strip() == "":
+            is_compilation = self.__album.artist_ids and\
+                self.__album.artist_ids[0] == Type.COMPILATIONS
+            if is_compilation:
+                artist = "Compilation"
+            else:
+                artist = self.__album.artists[0]
+            App().task_helper.run(
+                    App().art.search_album_artworks,
+                    artist,
+                    self.__album.name,
+                    self._cancellable)
         else:
-            artist = self.__album.artists[0]
-        App().task_helper.run(
-                App().art.search_album_artworks,
-                artist,
-                self.__album.name,
-                self._cancellable)
+            App().task_helper.run(
+                    App().art.search_album_artworks,
+                    "",
+                    search,
+                    self._cancellable)
 
     def _on_activate(self, flowbox, child):
         """

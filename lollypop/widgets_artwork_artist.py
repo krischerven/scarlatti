@@ -60,10 +60,8 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             @return str
         """
         search = ArtworkSearchWidget._get_current_search(self)
-        if search != "":
-            pass
-        else:
-            search = self.__artist
+        if search.strip() == "":
+            return self.__artist
         return search
 
     def _search_from_downloader(self):
@@ -72,7 +70,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         App().task_helper.run(
                 App().art.search_artist_artwork,
-                self.__artist,
+                self._get_current_search(),
                 self._cancellable)
 
     def _on_activate(self, flowbox, child):
