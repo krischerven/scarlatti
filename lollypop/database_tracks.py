@@ -215,25 +215,6 @@ class TracksDatabase:
                 return v[0]
             return None
 
-    def get_year_for_album(self, album_id):
-        """
-            Get album year based on tracks
-            Use most used year by tracks
-            @param album_id as int
-            @return int
-        """
-        with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT year, COUNT(year) AS occurrence\
-                                  FROM tracks\
-                                  WHERE tracks.album_id=?\
-                                  GROUP BY year\
-                                  ORDER BY occurrence DESC\
-                                  LIMIT 1", (album_id,))
-            v = result.fetchone()
-            if v is not None:
-                return v[0]
-            return None
-
     def get_timestamp_for_album(self, album_id):
         """
             Get album timestamp based on tracks

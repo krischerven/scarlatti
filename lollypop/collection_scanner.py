@@ -113,7 +113,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             # Launch scan in a separate thread
             self.__thread = App().task_helper.run(self.__scan, scan_type, uris)
 
-    def save_album(self, item,):
+    def save_album(self, item):
         """
             Add album to DB
             @param item as CollectionItem
@@ -189,8 +189,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                                          item.discnumber,
                                          item.discname,
                                          item.album_id,
-                                         item.year,
-                                         item.timestamp,
+                                         item.original_year,
+                                         item.original_timestamp,
                                          item.track_pop,
                                          item.track_rate,
                                          item.track_loved,
@@ -238,12 +238,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         # Update album genres
         for genre_id in item.genre_ids:
             App().albums.add_genre(item.album_id, genre_id)
-        # Update year based on tracks
-        year = App().tracks.get_year_for_album(item.album_id)
-        if year is not None:
-            App().albums.set_year(item.album_id, year)
-            timestamp = App().tracks.get_timestamp_for_album(item.album_id)
-            App().albums.set_timestamp(item.album_id, timestamp)
         App().cache.clear_durations(item.album_id)
 
     def update_track(self, item):
@@ -781,11 +775,12 @@ class CollectionScanner(GObject.GObject, TagReader):
             album_mtime = track_mtime
         bpm = self.get_bpm(tags)
         compilation = self.get_compilation(tags)
-        year = None
-        if not App().settings.get_value("ignore-original-date"):
-            (year, timestamp) = self.get_original_year(tags)
+        (original_year, original_timestamp) = self.get_original_year(tags)
+        (year, timestamp) = self.get_year(tags)
         if year is None:
-            (year, timestamp) = self.get_year(tags)
+            (year, timestamp) = (original_year, original_timestamp)
+        elif original_year is None:
+            (original_year, original_timestamp) = (year, timestamp)
         # If no artists tag, use album artist
         if artists == "":
             artists = album_artists
@@ -803,14 +798,16 @@ class CollectionScanner(GObject.GObject, TagReader):
         return (title, artists, genres, a_sortnames, aa_sortnames,
                 album_artists, album_name, discname, album_loved, album_mtime,
                 album_synced, album_rate, album_pop, discnumber, year,
-                timestamp, mb_album_id, mb_track_id, mb_artist_id,
+                timestamp, original_year, original_timestamp,
+                mb_album_id, mb_track_id, mb_artist_id,
                 mb_album_artist_id, tracknumber, track_pop, track_rate, bpm,
                 track_mtime, track_ltime, track_loved, duration, compilation)
 
     def __add2db(self, uri, name, artists,
                  genres, a_sortnames, aa_sortnames, album_artists, album_name,
                  discname, album_loved, album_mtime, album_synced, album_rate,
-                 album_pop, discnumber, year, timestamp, mb_album_id,
+                 album_pop, discnumber, year, timestamp,
+                 original_year, original_timestamp, mb_album_id,
                  mb_track_id, mb_artist_id, mb_album_artist_id,
                  tracknumber, track_pop, track_rate, bpm, track_mtime,
                  track_ltime, track_loved, duration, compilation,
@@ -839,6 +836,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                               discnumber=discnumber,
                               year=year,
                               timestamp=timestamp,
+                              original_year=original_year,
+                              original_timestamp=original_timestamp,
                               mb_album_id=mb_album_id,
                               mb_track_id=mb_track_id,
                               mb_artist_id=mb_artist_id,

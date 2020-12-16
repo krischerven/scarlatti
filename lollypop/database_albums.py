@@ -49,7 +49,6 @@ class AlbumsDatabase:
             @param mtime as int
             @param storage_type as int
             @return inserted rowid as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             result = sql.execute("INSERT INTO albums\
@@ -72,7 +71,6 @@ class AlbumsDatabase:
             Add artist to track
             @param album_id as int
             @param artist_id as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             artist_ids = self.get_artist_ids(album_id)
@@ -86,7 +84,6 @@ class AlbumsDatabase:
             Add genre to album
             @param album_id as int
             @param genre_id as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             genres = self.get_genre_ids(album_id)
@@ -101,7 +98,6 @@ class AlbumsDatabase:
             Set artist id
             @param album_id as int
             @param artist_ids as [int]
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             sql.execute("DELETE FROM album_artists\
@@ -116,7 +112,6 @@ class AlbumsDatabase:
             Set album synced
             @param album_id as int
             @param synced as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE albums SET synced=? WHERE rowid=?",
@@ -147,7 +142,6 @@ class AlbumsDatabase:
             Set album loved
             @param album_id as int
             @param loved as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE albums SET loved=? WHERE rowid=?",
@@ -168,7 +162,6 @@ class AlbumsDatabase:
             Set year
             @param album_id as int
             @param year as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE albums SET year=? WHERE rowid=?",
@@ -179,7 +172,6 @@ class AlbumsDatabase:
             Set timestamp
             @param album_id as int
             @param timestamp as int
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE albums SET timestamp=? WHERE rowid=?",
@@ -190,7 +182,6 @@ class AlbumsDatabase:
             Set album uri for album id
             @param album_id as int
             @param uri as string
-            @warning: commit needed
         """
         with SqlCursor(self.__db, True) as sql:
             sql.execute("UPDATE albums SET uri=? WHERE rowid=?",
