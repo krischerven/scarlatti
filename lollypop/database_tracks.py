@@ -829,6 +829,27 @@ class TracksDatabase:
                 return v[0]
             return 0
 
+    def get_year_for_album(self, album_id, disc_number):
+        """
+            Get album year based on tracks
+            Use most used year by tracks
+            @param album_id as int
+            @param disc_number as int
+            @return int
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT year, COUNT(year) AS occurrence\
+                                  FROM tracks\
+                                  WHERE tracks.album_id=? AND\
+                                  tracks.discnumber=?\
+                                  GROUP BY year\
+                                  ORDER BY occurrence DESC\
+                                  LIMIT 1", (album_id, disc_number))
+            v = result.fetchone()
+            if v is not None:
+                return v[0]
+            return None
+
     def get_ltime(self, track_id):
         """
             Get listen time

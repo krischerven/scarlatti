@@ -235,12 +235,16 @@ class AlbumTracksView(TracksView):
             disc_names = self.__album.disc_names(disc.number)
             if show_label or disc_names:
                 if disc_names:
-                    disc_text = ", ".join(disc_names)
+                    label_str = ", ".join(disc_names)
                 elif show_label:
-                    disc_text = _("Disc %s") % disc.number
+                    label_str = _("Disc %s") % disc.number
+                disc_year = App().tracks.get_year_for_album(
+                    self.__album.id, disc.number)
+                markup = "%s  <span size='small' alpha='50000'>(%s)</span>"
+                markup = markup % (label_str, disc_year)
                 label = Gtk.Label.new()
                 label.set_ellipsize(Pango.EllipsizeMode.END)
-                label.set_text(disc_text)
+                label.set_markup(markup)
                 label.set_property("halign", Gtk.Align.START)
                 label.get_style_context().add_class("dim-label")
                 label.show()
