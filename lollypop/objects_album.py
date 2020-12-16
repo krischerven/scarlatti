@@ -141,6 +141,7 @@ class Album(Base):
         self.__skipped = skipped
         self.__one_disc = None
         self.__tracks_storage_type = self.storage_type
+        self.__original_year = None
         # Use artist ids from db else
         if artist_ids:
             artists = []
@@ -170,6 +171,14 @@ class Album(Base):
             @param discs as [Disc]
         """
         self._discs = discs
+
+    def set_original_year(self, year):
+        """
+            Set album original year
+            @param year as int
+        """
+        # Will only show discs for orignal year
+        self.__original_year = year
 
     def set_tracks(self, tracks, clone=True):
         """
@@ -377,6 +386,14 @@ class Album(Base):
                                         StorageType.EXTERNAL)
 
     @property
+    def original_year(self):
+        """
+            Get album orignal year
+            @return int
+        """
+        return self.__original_year
+
+    @property
     def tracks_count(self):
         """
             Get tracks count
@@ -446,7 +463,11 @@ class Album(Base):
         if self._discs:
             return self._discs
         discs = []
-        disc_numbers = self.db.get_discs(self.id)
+        if self.__original_year is None:
+            disc_numbers = self.db.get_discs(self.id)
+        else:
+            disc_numbers = App().tracks.get_discs_for_year(
+                self.id, self.__original_year)
         for disc_number in disc_numbers:
             disc = Disc(self, disc_number,
                         self.__tracks_storage_type,

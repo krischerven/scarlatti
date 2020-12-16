@@ -46,7 +46,7 @@ class DecadesBoxView(FlowBoxView):
             FlowBoxView.populate(self, items)
 
         def load():
-            (years, unknown) = App().albums.get_years(self.storage_type)
+            (years, unknown) = App().tracks.get_years(self.storage_type)
             decades = []
             decade = []
             current_d = None

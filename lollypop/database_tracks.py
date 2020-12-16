@@ -15,7 +15,7 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, Type
 from lollypop.utils import noaccents, make_subrequest
 
 
@@ -878,6 +878,115 @@ class TracksDatabase:
             if v is not None:
                 return v[0]
             return 0
+
+    def get_years(self, storage_type):
+        """
+            Return all tracks years and if unknown years exist
+            @param storage_type as StorageType
+            @return ([int], bool)
+        """
+        with SqlCursor(self.__db) as sql:
+            result = sql.execute("SELECT tracks.year\
+                                  FROM tracks\
+                                  WHERE storage_type & ?",
+                                 (storage_type,))
+            years = []
+            unknown = False
+            for year in list(itertools.chain(*result)):
+                if year is None:
+                    unknown = True
+                elif year not in years:
+                    years.append(year)
+            return (years, unknown)
+
+    def get_ids_for_year(self, year, storage_type, skipped, limit=-1):
+        """
+            Return albums for year
+            @param year as int
+            @param storage_type as StorageType
+            @param skipped as bool
+            @param limit as int
+            @return album ids as [int]
+        """
+        with SqlCursor(self.__db) as sql:
+            order = " ORDER BY artists.sortname\
+                     COLLATE NOCASE COLLATE LOCALIZED,\
+                     tracks.timestamp,\
+                     albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
+            if year == Type.NONE:
+                request = "SELECT DISTINCT tracks.album_id\
+                           FROM albums, tracks, album_artists, artists\
+                           WHERE albums.rowid=album_artists.album_id AND\
+                           artists.rowid=album_artists.artist_id AND\
+                           tracks.album_id=albums.rowid AND\
+                           tracks.year is null AND albums.storage_type & ?"
+                filter = (storage_type, limit)
+            else:
+                request = "SELECT DISTINCT tracks.album_id\
+                           FROM albums, tracks, album_artists, artists\
+                           WHERE albums.rowid=album_artists.album_id AND\
+                           artists.rowid=album_artists.artist_id AND\
+                           tracks.album_id=albums.rowid AND\
+                           tracks.year=? AND albums.storage_type & ?"
+                filter = (year, storage_type, limit)
+            if not skipped:
+                request += " AND albums.loved != -1"
+            request += order
+            result = sql.execute(request, filter)
+            return list(itertools.chain(*result))
+
+    def get_compilation_ids_for_year(self, year, storage_type,
+                                     skipped, limit=-1):
+        """
+            Return compilations for year
+            @param year as int
+            @param storage_type as StorageType
+            @param skipped as bool
+            @param limit as int
+            @return album ids as [int]
+        """
+        with SqlCursor(self.__db) as sql:
+            order = " ORDER BY albums.timestamp, albums.name\
+                     COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
+            if year == Type.NONE:
+                request = "SELECT DISTINCT tracks.album_id\
+                           FROM albums, album_artists, tracks\
+                           WHERE album_artists.artist_id=?\
+                           AND album_artists.album_id=albums.rowid\
+                           AND tracks.album_id=albums.rowid\
+                           AND albums.storage_type & ?\
+                           AND albums.year is null"
+                filter = (Type.COMPILATIONS, storage_type, limit)
+            else:
+                request = "SELECT DISTINCT tracks.album_id\
+                           FROM albums, album_artists, tracks\
+                           WHERE album_artists.artist_id=?\
+                           AND album_artists.album_id=albums.rowid\
+                           AND tracks.album_id=albums.rowid\
+                           AND albums.storage_type & ?\
+                           AND albums.year=?"
+                filter = (Type.COMPILATIONS, storage_type, year, limit)
+            if not skipped:
+                request += " AND albums.loved != -1"
+            request += order
+            result = sql.execute(request, filter)
+            return list(itertools.chain(*result))
+
+    def get_discs_for_year(self, album_id, year):
+        """
+            Get discs for year
+            @param album_id as int
+            @param year as int
+            @return [int]
+        """
+        with SqlCursor(self.__db) as sql:
+            request = "SELECT DISTINCT discnumber\
+                       FROM tracks WHERE album_id=? and year=?\
+                       ORDER BY discnumber"
+            filter = (album_id, year)
+            result = sql.execute(request, filter)
+            return list(itertools.chain(*result))
 
     def set_lp_track_id(self, track_id, lp_track_id):
         """

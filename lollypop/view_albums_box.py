@@ -371,14 +371,20 @@ class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
         def on_load(items):
             FlowBoxView.populate(self, items)
 
+        def get_album(album_id, year):
+            album = Album(album_id, [Type.YEARS], [])
+            album.set_original_year(year)
+            return album
+
         def load():
-            items = []
+            albums = []
             for year in self._artist_ids:
-                items += App().albums.get_compilation_ids_for_year(
+                album_ids = App().tracks.get_compilation_ids_for_year(
                     year, self.storage_type, True)
-                items += App().albums.get_ids_for_year(
+                album_ids += App().tracks.get_ids_for_year(
                     year, self.storage_type, True)
-            return [Album(album_id, [Type.YEARS], []) for album_id in items]
+                albums += [get_album(album_id, year) for album_id in album_ids]
+            return albums
 
         App().task_helper.run(load, callback=(on_load,))
 
