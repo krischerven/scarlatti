@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 -->
+<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <requires lib="libhandy" version="0.0"/>
@@ -979,6 +979,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Deezer</property>
+                <property name="activatable-widget">DEEZER_button</property>
                 <child>
                   <object class="GtkSwitch" id="DEEZER_button">
                     <property name="name">DEEZER</property>
@@ -995,6 +996,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Jamendo</property>
+                <property name="activatable-widget">JAMENDO_button</property>
                 <child>
                   <object class="GtkSwitch" id="JAMENDO_button">
                     <property name="name">JAMENDO</property>
@@ -1010,6 +1012,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">AudioDB</property>
+                <property name="activatable-widget">AUDIODB_button</property>
                 <child>
                   <object class="GtkSwitch" id="AUDIODB_button">
                     <property name="name">AUDIODB</property>
@@ -1026,6 +1029,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Spotify</property>
+                <property name="activatable-widget">SPOTIFY_button</property>
                 <child>
                   <object class="GtkSwitch" id="SPOTIFY_button">
                     <property name="name">SPOTIFY</property>
@@ -1042,6 +1046,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">FANART.TV</property>
+                <property name="activatable-widget">FANARTTV_button</property>
                 <child>
                   <object class="GtkSwitch" id="FANARTTV_button">
                     <property name="name">FANARTTV</property>
@@ -1058,6 +1063,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">iTunes</property>
+                <property name="activatable-widget">ITUNES_button</property>
                 <child>
                   <object class="GtkSwitch" id="ITUNES_button">
                     <property name="name">ITUNES</property>
@@ -1074,6 +1080,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Google</property>
+                <property name="activatable-widget">GOOGLE_button</property>
                 <child>
                   <object class="GtkSwitch" id="GOOGLE_button">
                     <property name="name">GOOGLE</property>
@@ -1090,6 +1097,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Startpage</property>
+                <property name="activatable-widget">STARTPAGE_button</property>
                 <child>
                   <object class="GtkSwitch" id="STARTPAGE_button">
                     <property name="name">STARTPAGE</property>
@@ -1106,6 +1114,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">DuckDuckGo</property>
+                <property name="activatable-widget">DUCKDUCKGO_button</property>
                 <child>
                   <object class="GtkSwitch" id="DUCKDUCKGO_button">
                     <property name="name">DUCKDUCKGO</property>
@@ -1122,6 +1131,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Wikipedia</property>
+                <property name="activatable-widget">WIKIPEDIA_button</property>
                 <child>
                   <object class="GtkSwitch" id="WIKIPEDIA_button">
                     <property name="name">WIKIPEDIA</property>
@@ -1148,6 +1158,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Wikia</property>
+                <property name="activatable-widget">WIKIA_button</property>
                 <child>
                   <object class="GtkSwitch" id="WIKIA_button">
                     <property name="name">WIKIA</property>
@@ -1164,6 +1175,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Genius</property>
+                <property name="activatable-widget">GENIUS_button</property>
                 <child>
                   <object class="GtkSwitch" id="GENIUS_button">
                     <property name="name">GENIUS</property>
@@ -1180,6 +1192,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Metro Lyrics</property>
+                <property name="activatable-widget">METROLYRICS_button</property>
                 <child>
                   <object class="GtkSwitch" id="METROLYRICS_button">
                     <property name="name">METROLYRICS</property>
@@ -1196,6 +1209,7 @@ and with different artists</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Bing</property>
+                <property name="activatable-widget">BING_button</property>
                 <child>
                   <object class="GtkSwitch" id="BING_button">
                     <property name="name">BING</property>
