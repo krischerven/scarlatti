@@ -915,24 +915,18 @@ class TracksDatabase:
                      tracks.timestamp,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
-            if year == Type.NONE:
-                request = "SELECT DISTINCT tracks.album_id, tracks.discnumber\
-                           FROM albums, tracks, album_artists, artists\
-                           WHERE albums.rowid=album_artists.album_id AND\
-                           artists.rowid=album_artists.artist_id AND\
-                           tracks.album_id=albums.rowid AND\
-                           tracks.year is null AND albums.storage_type & ?"
-                filter = (storage_type, limit)
-            else:
-                request = "SELECT DISTINCT tracks.album_id, tracks.discnumber\
-                           FROM albums, tracks, album_artists, artists\
-                           WHERE albums.rowid=album_artists.album_id AND\
-                           artists.rowid=album_artists.artist_id AND\
-                           tracks.album_id=albums.rowid AND\
-                           tracks.year=? AND albums.storage_type & ?"
-                filter = (year, storage_type, limit)
+            request = "SELECT DISTINCT tracks.album_id,\
+                       tracks.discnumber,\
+                       COUNT(*)\
+                       FROM albums, tracks, album_artists, artists\
+                       WHERE albums.rowid=album_artists.album_id AND\
+                       artists.rowid=album_artists.artist_id AND\
+                       tracks.album_id=albums.rowid AND\
+                       tracks.year=? AND albums.storage_type & ?"
+            filter = (year, storage_type, limit)
             if not skipped:
                 request += " AND albums.loved != -1"
+            request += " GROUP BY tracks.album_id"
             request += order
             result = sql.execute(request, filter)
             return list(result)
@@ -950,26 +944,19 @@ class TracksDatabase:
         with SqlCursor(self.__db) as sql:
             order = " ORDER BY albums.timestamp, albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
-            if year == Type.NONE:
-                request = "SELECT DISTINCT tracks.album_id, tracks.discnumber\
-                           FROM albums, album_artists, tracks\
-                           WHERE album_artists.artist_id=?\
-                           AND album_artists.album_id=albums.rowid\
-                           AND tracks.album_id=albums.rowid\
-                           AND albums.storage_type & ?\
-                           AND albums.year is null"
-                filter = (Type.COMPILATIONS, storage_type, limit)
-            else:
-                request = "SELECT DISTINCT tracks.album_id, tracks.discnumber\
-                           FROM albums, album_artists, tracks\
-                           WHERE album_artists.artist_id=?\
-                           AND album_artists.album_id=albums.rowid\
-                           AND tracks.album_id=albums.rowid\
-                           AND albums.storage_type & ?\
-                           AND albums.year=?"
-                filter = (Type.COMPILATIONS, storage_type, year, limit)
+            request = "SELECT DISTINCT tracks.album_id,\
+                       tracks.discnumber,\
+                       COUNT(*)\
+                       FROM albums, album_artists, tracks\
+                       WHERE album_artists.artist_id=?\
+                       AND album_artists.album_id=albums.rowid\
+                       AND tracks.album_id=albums.rowid\
+                       AND albums.storage_type & ?\
+                       AND tracks.year=?"
+            filter = (Type.COMPILATIONS, storage_type, year, limit)
             if not skipped:
                 request += " AND albums.loved != -1"
+            request += " GROUP BY tracks.album_id"
             request += order
             result = sql.execute(request, filter)
             return list(result)
