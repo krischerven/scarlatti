@@ -59,18 +59,19 @@ class AlbumsDecadeWidget(RoundedAlbumsWidget):
             @return [int]
         """
         storage_type = get_default_storage_type()
-        album_ids = []
+        items = []
         for year in self._data:
-            album_ids += App().tracks.get_ids_for_year(year,
-                                                       storage_type, True,
-                                                       self._ALBUMS_COUNT)
-            l = len(album_ids)
-            if l < self._ALBUMS_COUNT:
-                album_ids += App().tracks.get_compilation_ids_for_year(
+            items += App().tracks.get_albums_by_disc_for_year(
                                                        year,
                                                        storage_type, True,
                                                        self._ALBUMS_COUNT)
-        return album_ids
+            l = len(items)
+            if l < self._ALBUMS_COUNT:
+                items += App().tracks.get_compilations_by_disc_for_year(
+                                                       year,
+                                                       storage_type, True,
+                                                       self._ALBUMS_COUNT)
+        return [item[0] for item in items]
 
 #######################
 # PRIVATE             #

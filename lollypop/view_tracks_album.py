@@ -230,11 +230,10 @@ class AlbumTracksView(TracksView):
         # ---------Label--------- #
         # | Column 1 | Column 2 | #
         ###########################
+        show_label = len(self.__discs) > 1
         for disc in self.__discs:
-            show_label = self.__album.original_year is not None or\
-                len(self.__discs) > 1
-            disc_names = self.__album.disc_names(disc.number)
-            if show_label or disc_names:
+            if show_label:
+                disc_names = self.__album.disc_names(disc.number)
                 if disc_names:
                     label_str = ", ".join(disc_names)
                 elif show_label:

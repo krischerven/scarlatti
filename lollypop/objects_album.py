@@ -96,12 +96,12 @@ class Disc:
         if not self.__tracks and self.album.id is not None:
             self.__tracks = [Track(track_id, self.album)
                              for track_id in self.db.get_disc_track_ids(
-                self.album.id,
-                self.album.genre_ids,
-                self.album.artist_ids,
-                self.number,
-                self.__storage_type,
-                self.__skipped)]
+                                    self.album.id,
+                                    self.album.genre_ids,
+                                    self.album.artist_ids,
+                                    self.number,
+                                    self.__storage_type,
+                                    self.__skipped)]
         return self.__tracks
 
 
@@ -109,8 +109,7 @@ class Album(Base):
     """
         Represent an album
     """
-    DEFAULTS = {"name": "",
-                "artists": [],
+    DEFAULTS = {"artists": [],
                 "artist_ids": [],
                 "year": None,
                 "timestamp": 0,
@@ -136,12 +135,13 @@ class Album(Base):
         Base.__init__(self, App().albums)
         self.id = album_id
         self.genre_ids = genre_ids
-        self._tracks = []
-        self._discs = []
+        self.__tracks = []
+        self.__discs = []
+        self.__name = None
         self.__skipped = skipped
         self.__one_disc = None
+        self.__disc_number = None
         self.__tracks_storage_type = self.storage_type
-        self.__original_year = None
         # Use artist ids from db else
         if artist_ids:
             artists = []
@@ -170,15 +170,21 @@ class Album(Base):
             Set album discs
             @param discs as [Disc]
         """
-        self._discs = discs
+        self.__discs = discs
 
-    def set_original_year(self, year):
+    def set_disc_number(self, disc_number):
         """
-            Set album original year
+            Set album disc
+            @param disc_number as int
+        """
+        self.__disc_number = disc_number
+
+    def set_year(self, year):
+        """
+            Set album year to value
             @param year as int
         """
-        # Will only show discs for orignal year
-        self.__original_year = year
+        self._year = year
 
     def set_tracks(self, tracks, clone=True):
         """
@@ -188,23 +194,23 @@ class Album(Base):
             @param clone as bool
         """
         if clone:
-            self._tracks = []
+            self.__tracks = []
             for track in tracks:
                 new_track = Track(track.id, self)
-                self._tracks.append(new_track)
+                self.__tracks.append(new_track)
         # Album tracks already belong to self
         # Detach those tracks
-        elif self._tracks:
+        elif self.__tracks:
             new_album = Album(self.id, self.genre_ids, self.artist_ids)
-            new_tracks = []
-            for track in self._tracks:
+            new__tracks = []
+            for track in self.__tracks:
                 if track not in tracks:
                     track.set_album(new_album)
-                    new_tracks.append(track)
-            new_album._tracks = new_tracks
-            self._tracks = tracks
+                    new__tracks.append(track)
+            new_album.__tracks = new__tracks
+            self.__tracks = tracks
         else:
-            self._tracks = tracks
+            self.__tracks = tracks
 
     def append_track(self, track, clone=True):
         """
@@ -214,9 +220,9 @@ class Album(Base):
             @param clone as bool
         """
         if clone:
-            self._tracks.append(Track(track.id, self))
+            self.__tracks.append(Track(track.id, self))
         else:
-            self._tracks.append(track)
+            self.__tracks.append(track)
             track.set_album(self)
 
     def append_tracks(self, tracks, clone=True):
@@ -236,8 +242,8 @@ class Album(Base):
         """
         for _track in self.tracks:
             if track.id == _track.id:
-                self._tracks.remove(_track)
-        empty = len(self._tracks) == 0
+                self.__tracks.remove(_track)
+        empty = len(self.__tracks) == 0
         if empty:
             # We don't the album to load tracks anymore
             self.id = None
@@ -246,19 +252,19 @@ class Album(Base):
         """
             Reset album tracks, useful for tracks loaded async
         """
-        self._tracks = []
-        self._discs = []
+        self.__tracks = []
+        self.__discs = []
         self.reset("artists")
         self.reset("artist_ids")
         self.reset("lp_album_id")
 
-    def disc_names(self, disc):
+    def disc_names(self, disc_number):
         """
             Disc names
-            @param disc as int
+            @param disc_number as int
             @return disc names as [str]
         """
-        return self.db.get_disc_names(self.id, disc)
+        return self.db.get_disc_names(self.id, disc_number)
 
     def set_loved(self, loved):
         """
@@ -377,6 +383,24 @@ class Album(Base):
         return item
 
     @property
+    def name(self):
+        """
+            Get album name
+            @return str
+        """
+        if self.__name is not None:
+            return self.__name
+        if self.__disc_number is None:
+            self.__name = self.db.get_name(self.id)
+        else:
+            disc_names = self.disc_names(self.__disc_number)
+            if disc_names:
+                self.__name = ", ".join(disc_names)
+            else:
+                self.__name = self.db.get_name(self.id)
+        return self.__name
+
+    @property
     def is_web(self):
         """
             True if track is a web track
@@ -386,23 +410,15 @@ class Album(Base):
                                         StorageType.EXTERNAL)
 
     @property
-    def original_year(self):
-        """
-            Get album orignal year
-            @return int
-        """
-        return self.__original_year
-
-    @property
     def tracks_count(self):
         """
             Get tracks count
             @return int
         """
-        if self._tracks:
-            return len(self._tracks)
+        if self.__tracks:
+            return len(self.__tracks)
         else:
-            return self.db.get_tracks_count(
+            return self.db.get__tracks_count(
                 self.id,
                 self.genre_ids,
                 self.artist_ids)
@@ -431,14 +447,14 @@ class Album(Base):
         """
         if self.id is None:
             return []
-        if self._tracks:
-            return self._tracks
+        if self.__tracks:
+            return self.__tracks
         tracks = []
         for disc in self.discs:
             tracks += disc.tracks
         # Already cached by another thread
-        if not self._tracks:
-            self._tracks = tracks
+        if not self.__tracks:
+            self.__tracks = tracks
         return tracks
 
     @property
@@ -460,14 +476,13 @@ class Album(Base):
             Get albums discs
             @return [Disc]
         """
-        if self._discs:
-            return self._discs
+        if self.__discs:
+            return self.__discs
         discs = []
-        if self.__original_year is None:
+        if self.__disc_number is None:
             disc_numbers = self.db.get_discs(self.id)
         else:
-            disc_numbers = App().tracks.get_discs_for_year(
-                self.id, self.__original_year)
+            disc_numbers = [self.__disc_number]
         for disc_number in disc_numbers:
             disc = Disc(self, disc_number,
                         self.__tracks_storage_type,
@@ -475,9 +490,9 @@ class Album(Base):
             if disc.tracks:
                 discs.append(disc)
         # Already cached by another thread
-        if not self._discs:
-            self._discs = discs
-        return discs
+        if not self.__discs:
+            self.__discs = discs
+        return self.__discs
 
     @property
     def duration(self):
@@ -485,7 +500,7 @@ class Album(Base):
             Get album duration and handle caching
             @return int
         """
-        if self._tracks:
+        if self.__tracks:
             track_ids = [track.lp_track_id for track in self.tracks]
             track_str = "%s" % sorted(track_ids)
             track_hash = md5(track_str.encode("utf-8")).hexdigest()
@@ -496,9 +511,9 @@ class Album(Base):
                                        self.artist_ids)
         duration = App().cache.get_duration(album_hash)
         if duration is None:
-            if self._tracks:
+            if self.__tracks:
                 duration = 0
-                for track in self._tracks:
+                for track in self.__tracks:
                     duration += track.duration
             else:
                 duration = self.db.get_duration(self.id,
