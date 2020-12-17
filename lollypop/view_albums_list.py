@@ -290,11 +290,11 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         # First check it's not a track gesture
         if row.revealed:
             for track_row in row.listbox.get_children():
-                coordinates = track_row.translate_coordinates(self, 0, 0)
+                coordinates = track_row.translate_coordinates(self._box, 0, 0)
                 if coordinates is not None and\
                         coordinates[1] < y and\
                         coordinates[1] + track_row.get_allocated_height() > y:
-                    track_row.popup_menu(row, x, y)
+                    track_row.popup_menu(self._box, x, y)
                     return
         # Then handle album gesture
         from lollypop.menu_objects import AlbumMenu
