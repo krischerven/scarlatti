@@ -236,7 +236,7 @@ class Type:
     RECENTS = -5
     LOVED = -6
     LITTLE = -7
-    ALL = -8
+    SKIPPED = -8
     # WEB is stored in DB, can't be changed
     WEB = -9
     # Stored in DB, can't be changed
@@ -252,6 +252,7 @@ class Type:
     DEVICE_ALBUMS = -27
     DEVICE_PLAYLISTS = -28
     ALBUM = -29
+    ALL = -99
     SEPARATOR = -100
     CURRENT = -101
     INFO = -102

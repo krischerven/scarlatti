@@ -70,6 +70,7 @@ class ShownPlaylists(ShownLists):
         Type.LOVED: _("Loved tracks"),
         Type.RECENTS: _("Recently played tracks"),
         Type.LITTLE: _("Seldomly played tracks"),
+        Type.SKIPPED: _("Skipped tracks"),
         Type.ALL: _("All tracks")
     }
 

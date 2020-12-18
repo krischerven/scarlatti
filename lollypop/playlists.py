@@ -318,6 +318,8 @@ class Playlists(GObject.GObject):
         elif playlist_id == Type.RANDOMS:
             track_ids = App().tracks.get_randoms([], storage_type,
                                                  False, limit)
+        elif playlist_id == Type.SKIPPED:
+            track_ids = App().tracks.get_skipped(storage_type)
         elif playlist_id == Type.ALL:
             track_ids = App().tracks.get_ids(storage_type, False)
         elif playlist_id == Type.LOVED:

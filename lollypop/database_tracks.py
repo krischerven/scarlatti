@@ -761,6 +761,18 @@ class TracksDatabase:
             result = sql.execute(request, (storage_type, limit))
             return list(itertools.chain(*result))
 
+    def get_skipped(self, storage_type):
+        """
+            Return skipped tracks
+            @param storage_type as StorageType
+            @return tracks as [int]
+        """
+        with SqlCursor(self.__db) as sql:
+            request = "SELECT rowid FROM tracks\
+                       WHERE loved=-1 AND storage_type & ?"
+            result = sql.execute(request, (storage_type,))
+            return list(itertools.chain(*result))
+
     def get_randoms(self, genre_ids, storage_type, skipped, limit):
         """
             Return random tracks
