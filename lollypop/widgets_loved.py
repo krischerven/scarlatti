@@ -86,6 +86,8 @@ class LovedWidget(Gtk.Bin):
             # Clear loved playlist artwork cache
             name = App().playlists.get_name(Type.LOVED)
             App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
+            name = App().playlists.get_name(Type.SKIPPED)
+            App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
             # Update state on Last.fm
             status = True if loved == 1 else False
             for scrobbler in App().ws_director.scrobblers:
