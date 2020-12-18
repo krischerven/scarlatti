@@ -139,7 +139,6 @@ class Album(Base):
         self.__discs = []
         self.__name = None
         self.__skipped = skipped
-        self.__one_disc = None
         self.__disc_number = None
         self.__tracks_storage_type = self.storage_type
         # Use artist ids from db else
@@ -457,18 +456,15 @@ class Album(Base):
             self.__tracks = tracks
         return tracks
 
-    @property
-    def one_disc(self):
+    def merge_discs(self):
         """
-            Get album as one disc
+            Merge album discs
             @return Disc
         """
-        if self.__one_disc is None:
-            tracks = self.tracks
-            self.__one_disc = Disc(self, 0, self.__tracks_storage_type,
-                                   self.__skipped)
-            self.__one_disc.set_tracks(tracks)
-        return self.__one_disc
+        tracks = self.tracks
+        disc = Disc(self, 0, self.__tracks_storage_type, self.__skipped)
+        disc.set_tracks(tracks)
+        self.__discs = [disc]
 
     @property
     def discs(self):

@@ -35,7 +35,6 @@ class AlbumTracksView(TracksView):
         """
         TracksView.__init__(self, view_type)
         self.__album = album
-        self.__discs = []
         self.__discs_to_load = []
         self.__populated = False
         self.__show_tag_tracknumber = App().settings.get_value(
@@ -113,7 +112,7 @@ class AlbumTracksView(TracksView):
             Set playing indicator
         """
         try:
-            for disc in self.__discs:
+            for disc in self.__album.discs:
                 self._tracks_widget_left[disc.number].update_playing(
                     App().player.current_track.id)
                 self._tracks_widget_right[disc.number].update_playing(
@@ -127,7 +126,7 @@ class AlbumTracksView(TracksView):
             @param track_id as int
         """
         try:
-            for disc in self.__discs:
+            for disc in self.__album.discs:
                 number = disc.number
                 self._tracks_widget_left[number].update_duration(track_id)
                 self._tracks_widget_right[number].update_duration(track_id)
@@ -141,7 +140,7 @@ class AlbumTracksView(TracksView):
             @return [Gtk.ListBoxRow]
         """
         rows = []
-        for disc in self.__discs:
+        for disc in self.__album.discs:
             for widget in [
                 self._tracks_widget_left[disc.number],
                 self._tracks_widget_right[disc.number]
@@ -167,7 +166,7 @@ class AlbumTracksView(TracksView):
             Get widget discs
             @return [Discs]
         """
-        return self.__discs
+        return self.__album.discs
 
     @property
     def is_populated(self):
@@ -186,12 +185,10 @@ class AlbumTracksView(TracksView):
         """
         if TracksView._init(self):
             if self.view_type & ViewType.SINGLE_COLUMN:
-                self.__discs = [self.__album.one_disc]
-            else:
-                self.__discs = self.__album.discs
-            for disc in self.__discs:
+                self.__album.merge_discs()
+            for disc in self.__album.discs:
                 self._add_disc_container(disc.number)
-            self.__discs_to_load = list(self.__discs)
+            self.__discs_to_load = list(self.__album.discs)
 
     def _add_tracks(self, widget, tracks, position=0):
         """
@@ -230,8 +227,8 @@ class AlbumTracksView(TracksView):
         # ---------Label--------- #
         # | Column 1 | Column 2 | #
         ###########################
-        show_label = len(self.__discs) > 1
-        for disc in self.__discs:
+        show_label = len(self.__album.discs) > 1
+        for disc in self.__album.discs:
             if show_label:
                 disc_names = self.__album.disc_names(disc.number)
                 if disc_names:
