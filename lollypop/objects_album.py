@@ -213,8 +213,8 @@ class Album(Base):
 
     def append_track(self, track, clone=True):
         """
-            Append track to album, do not disable clone if you know self is
-            already used
+            Append track to album.
+            Clone: always do this if track is used in UI/Player
             @param track as Track
             @param clone as bool
         """
@@ -226,8 +226,8 @@ class Album(Base):
 
     def append_tracks(self, tracks, clone=True):
         """
-            Append tracks to album, do not disable clone if you know self is
-            already used
+            Append tracks to album
+            Clone: always do this if track is used in UI/Player
             @param tracks as [Track]
             @param clone as bool
         """
