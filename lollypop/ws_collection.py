@@ -28,7 +28,7 @@ class CollectionWebService(SaveWebHelper,
     """
         Add items to collection based on current user settings
     """
-    MIN_ITEMS_PER_STORAGE_TYPE = 20
+    MIN_ITEMS_PER_STORAGE_TYPE = 10
     MAX_ITEMS_PER_STORAGE_TYPE = 50
     __METHODS = {
         StorageType.SPOTIFY_SIMILARS:
@@ -63,8 +63,7 @@ class CollectionWebService(SaveWebHelper,
             Stop db populate
             @return bool
         """
-        if not self.__cancellable.is_cancelled():
-            self.__cancellable.cancel()
+        self.__cancellable.cancel()
         return not self.__is_running
 
 #######################
