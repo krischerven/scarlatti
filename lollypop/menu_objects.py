@@ -12,10 +12,9 @@
 
 from gi.repository import Gio, Gtk, GLib
 
-from pickle import load, dump
 from gettext import gettext as _
 
-from lollypop.define import StorageType, MARGIN_SMALL, App, CACHE_PATH
+from lollypop.define import StorageType, MARGIN_SMALL, App
 from lollypop.define import ViewType
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_actions import ActionsMenu
@@ -151,12 +150,9 @@ class TrackMenuExt(Gtk.Grid):
         hgrid.add(rating)
         hgrid.show()
 
-        if not track.storage_type & StorageType.COLLECTION:
-            try:
-                escaped = GLib.uri_escape_string(track.uri, None, True)
-                uri = load(open("%s/web_%s" % (CACHE_PATH, escaped), "rb"))
-            except:
-                uri = ""
+        if track.is_web:
+            from lollypop.helper_web import WebHelper
+            helper = WebHelper(track, None)
             edit = Gtk.Entry()
             edit.set_placeholder_text(_("YouTube page address"))
             edit.set_margin_top(MARGIN_SMALL)
@@ -164,7 +160,7 @@ class TrackMenuExt(Gtk.Grid):
             edit.set_margin_end(MARGIN_SMALL)
             edit.set_margin_bottom(MARGIN_SMALL)
             edit.set_property("hexpand", True)
-            edit.set_text(uri)
+            edit.set_text(helper.uri)
             edit.connect("changed", self.__on_edit_changed, track)
             edit.show()
             self.add(edit)
@@ -190,12 +186,8 @@ class TrackMenuExt(Gtk.Grid):
         from urllib.parse import urlparse
         uri = edit.get_text()
         parsed = urlparse(uri)
-        escaped = GLib.uri_escape_string(track.uri, None, True)
         if parsed.scheme not in ["http", "https"]:
             return
-        try:
-            # CACHE URI
-            with open("%s/web_%s" % (CACHE_PATH, escaped), "wb") as f:
-                dump(uri, f)
-        except:
-            pass
+        from lollypop.helper_web import WebHelper
+        helper = WebHelper(track, None)
+        helper.save(uri)

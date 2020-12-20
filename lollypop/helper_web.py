@@ -42,6 +42,9 @@ class WebHelper(GObject.Object):
             from lollypop.helper_web_youtube import YouTubeWebHelper
             self.__helpers = [YouTubeWebHelper()]
 
+    def __del__(self):
+        self.__track = None
+
     def load(self):
         """
             Load track URI
@@ -53,6 +56,33 @@ class WebHelper(GObject.Object):
             Logger.info("%s loaded from cache", uri)
             self.__load_uri_content_with_helper(uri, None)
 
+    def save(self, uri):
+        """
+            Save URI to cache
+            @param uri as str
+        """
+        if not self.__track.lp_track_id:
+            return
+        try:
+            f = Gio.File.new_for_path(
+                "%s/%s" % (CACHE_PATH, self.__track.lp_track_id))
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION,
+                                None)
+            if fstream is not None:
+                fstream.write(uri.encode("utf-8"), None)
+                fstream.close()
+        except Exception as e:
+            Logger.error("WebHelper::save(): %s", e)
+
+    @property
+    def uri(self):
+        """
+            Get track URI
+            @return str
+        """
+        return self.__load_from_cache()
+
 #######################
 # PRIVATE             #
 #######################
@@ -61,36 +91,17 @@ class WebHelper(GObject.Object):
             Load URI from cache
             @return str/None
         """
-        if not self.__track.mb_track_id:
+        if not self.__track.lp_track_id:
             return None
         try:
             f = Gio.File.new_for_path(
-                "%s/%s" % (CACHE_PATH, self.__track.mb_track_id))
+                "%s/%s" % (CACHE_PATH, self.__track.lp_track_id))
             if f.query_exists():
                 (stats, content, tag) = f.load_contents()
                 return content.decode("utf-8")
         except Exception as e:
             Logger.error("WebHelper::__load_from_cache(): %s", e)
         return None
-
-    def __save_to_cache(self, uri):
-        """
-            Save URI to cache
-            @param uri as str
-        """
-        if not self.__track.mb_track_id:
-            return
-        try:
-            f = Gio.File.new_for_path(
-                "%s/%s" % (CACHE_PATH, self.__track.mb_track_id))
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION,
-                                None)
-            if fstream is not None:
-                fstream.write(uri.encode("utf-8"), None)
-                fstream.close()
-        except Exception as e:
-            Logger.error("WebHelper::__save_to_cache(): %s", e)
 
     def __load_uri_with_helper(self):
         """
@@ -133,6 +144,6 @@ class WebHelper(GObject.Object):
         """
         if uri:
             self.__load_uri_content_with_helper(uri, helper)
-            self.__save_to_cache(uri)
+            self.save(uri)
         else:
             emit_signal(self, "loaded", "")
