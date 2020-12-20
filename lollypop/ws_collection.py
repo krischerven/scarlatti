@@ -19,7 +19,7 @@ from lollypop.sqlcursor import SqlCursor
 from lollypop.ws_collection_spotify import SpotifyCollectionWebService
 from lollypop.ws_collection_deezer import DeezerCollectionWebService
 from lollypop.helper_web_save import SaveWebHelper
-from lollypop.define import App, StorageType
+from lollypop.define import App, StorageType, NetworkAccessACL
 
 
 class CollectionWebService(SaveWebHelper,
@@ -38,9 +38,6 @@ class CollectionWebService(SaveWebHelper,
         StorageType.DEEZER_CHARTS:
             DeezerCollectionWebService.search_charts
     }
-    __STORAGE_TYPES = [StorageType.SPOTIFY_SIMILARS,
-                       StorageType.SPOTIFY_NEW_RELEASES,
-                       StorageType.DEEZER_CHARTS]
 
     def __init__(self):
         """
@@ -81,12 +78,19 @@ class CollectionWebService(SaveWebHelper,
             Logger.info("Collection download started")
             self.__is_running = True
             self.__cancellable = Gio.Cancellable()
-            storage_types = []
+            acl_storage_types = []
+            acl = App().settings.get_value("network-access-acl").get_int32()
             mask = App().settings.get_value("suggestions-mask").get_int32()
+            if acl & NetworkAccessACL["SPOTIFY"]:
+                acl_storage_types += [StorageType.SPOTIFY_SIMILARS,
+                                      StorageType.SPOTIFY_NEW_RELEASES]
+            if acl & NetworkAccessACL["DEEZER"]:
+                acl_storage_types.append(StorageType.DEEZER_CHARTS)
             # Check if storage type needs to be updated
             # Check if albums newer than a week are enough
             timestamp = time() - 604800
-            for storage_type in self.__STORAGE_TYPES:
+            storage_types = []
+            for storage_type in acl_storage_types:
                 if not mask & storage_type:
                     continue
                 newer_albums = App().albums.get_newer_for_storage_type(
