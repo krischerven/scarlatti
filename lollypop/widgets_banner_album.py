@@ -60,7 +60,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             return
         self.__widget = Gtk.Grid.new()
         self.__widget.set_margin_start(MARGIN)
-        self.__widget.set_margin_end(MARGIN_MEDIUM)
+        self.__widget.set_margin_end(MARGIN)
         self.__widget.set_margin_top(MARGIN_SMALL)
         self.__widget.set_margin_bottom(MARGIN_SMALL)
         self.__widget.set_row_spacing(MARGIN_SMALL)
