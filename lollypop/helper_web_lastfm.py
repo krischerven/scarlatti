@@ -82,7 +82,7 @@ class LastFMWebHelper:
             @param album as str
             @param artist as str
             @param cancellable as Gio.Cancellable
-            @return {}/None
+            @return {}
         """
         artist = GLib.uri_escape_string(artist, None, True)
         album = GLib.uri_escape_string(album, None, True)
@@ -97,7 +97,7 @@ class LastFMWebHelper:
         except:
             Logger.error(
                 "LastFMWebHelper::get_album_payload(): %s", uri)
-        return None
+        return {}
 
     def get_lollypop_payload(self, mbid, cancellable):
         """
