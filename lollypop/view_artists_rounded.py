@@ -39,7 +39,7 @@ class RoundedArtistsView(FlowBoxView, SignalsHelper):
         self.connect("destroy", self.__on_destroy)
         self._empty_icon_name = get_icon_name(Type.ARTISTS)
         return [
-            (App().art, "artist-artwork-changed",
+            (App().artist_art, "artist-artwork-changed",
              "_on_artist_artwork_changed"),
             (App().scanner, "updated", "_on_collection_updated")
         ]

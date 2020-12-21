@@ -291,8 +291,8 @@ class SelectionList(LazyLoadingView, GesturesHelper):
             self.add(self.__overlay)
             App().settings.connect("changed::artist-artwork",
                                    self.__on_artist_artwork_changed)
-            App().art.connect("artist-artwork-changed",
-                              self.__on_artist_artwork_changed)
+            App().artist_art.connect("artist-artwork-changed",
+                                     self.__on_artist_artwork_changed)
         else:
             self.__overlay = None
             App().settings.connect("changed::show-sidebar-labels",

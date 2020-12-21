@@ -116,7 +116,7 @@ class TodayBannerWidget(BannerWidget, SignalsHelper):
         return [
                 (App().window.container.widget, "notify::folded",
                  "_on_container_folded"),
-                (App().art, "album-artwork-changed",
+                (App().album_art, "album-artwork-changed",
                  "_on_album_artwork_changed")
         ]
 

@@ -56,12 +56,12 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             Set artwork
         """
         RoundedFlowBoxWidget.set_artwork(self)
-        if App().art.artwork_exists_in_cache(self.artwork_name,
-                                             "ROUNDED",
-                                             self._art_size,
-                                             self._art_size):
+        if App().art.exists_in_cache(self.artwork_name,
+                                     "ROUNDED",
+                                     self._art_size,
+                                     self._art_size):
             App().task_helper.run(
-                App().art.get_artwork_from_cache,
+                App().art.get_from_cache,
                 self.artwork_name, "ROUNDED",
                 self._art_size, self._art_size,
                 callback=(self.__on_load_from_cache,))
@@ -91,10 +91,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         album_scaled_pixbufs = []
         while album_ids and len(album_pixbufs) != 9:
             album_id = album_ids.pop(0)
-            pixbuf = App().art.get_album_artwork(Album(album_id),
-                                                 self._art_size,
-                                                 self._art_size,
-                                                 self._scale_factor)
+            pixbuf = App().album_art.get(Album(album_id),
+                                         self._art_size,
+                                         self._art_size,
+                                         self._scale_factor)
             if pixbuf is not None:
                 album_pixbufs.append(pixbuf)
         if len(album_pixbufs) == 0:
@@ -159,9 +159,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             surface, self._scale_factor, self._art_size / 4)
         del surface
         self._artwork.set_from_surface(rounded)
-        App().art.add_artwork_to_cache(self.artwork_name,
-                                       rounded,
-                                       "ROUNDED")
+        App().art.add_to_cache(self.artwork_name, rounded, "ROUNDED")
         del rounded
         emit_signal(self, "populated")
 

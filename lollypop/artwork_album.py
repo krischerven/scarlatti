@@ -10,41 +10,46 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GdkPixbuf, Gio, Gst
+from gi.repository import Gio, GdkPixbuf, GLib, Gst
 
 from random import choice
 from gettext import gettext as _
 from time import time
 
-from lollypop.tagreader import Discoverer
-from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
-from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
-from lollypop.define import StoreExtention
-from lollypop.logger import Logger
-from lollypop.utils_file import is_readonly
-from lollypop.utils import emit_signal
 from lollypop.helper_task import TaskHelper
+from lollypop.tagreader import Discoverer
+from lollypop.artwork_manager import ArtworkManager
+from lollypop.artwork_downloader_album import AlbumArtworkDownloader
+from lollypop.logger import Logger
+from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
+from lollypop.define import ArtSize, StorageType
+from lollypop.define import App, StoreExtention, ArtBehaviour
+from lollypop.utils import emit_signal
+from lollypop.utils_file import create_dir, is_readonly
 
 
-class AlbumArt:
+class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
     """
-         Manager album artwork
-         Should be inherited by a BaseArt
+        Album artwork manager
     """
 
-    _MIMES = ("jpeg", "jpg", "png", "gif")
+    __MIMES = ("jpeg", "jpg", "png", "gif")
 
     def __init__(self):
         """
-            Init album art
+            Init album artwork manager
         """
+        ArtworkManager.__init__(self)
+        AlbumArtworkDownloader.__init__(self)
+        create_dir(ALBUMS_PATH)
+        create_dir(ALBUMS_WEB_PATH)
         self.__favorite = App().settings.get_value(
             "favorite-cover").get_string()
         if not self.__favorite:
             self.__favorite = App().settings.get_default_value(
                 "favorite-cover").get_string()
 
-    def get_album_cache_path(self, album, width, height):
+    def get_cache_path(self, album, width, height):
         """
             get artwork cache path for album_id
             @param album as Album
@@ -62,14 +67,14 @@ class AlbumArt:
             if f.query_exists():
                 return cache_path
             else:
-                self.get_album_artwork(album, width, height, 1)
+                self.get(album, width, height, 1)
                 if f.query_exists():
                     return cache_path
         except Exception as e:
-            Logger.error("Art::get_album_cache_path(): %s" % e)
+            Logger.error("AlbumArtwork::get_cache_path(): %s" % e)
         return None
 
-    def get_album_artwork_uri(self, album):
+    def get_uri(self, album):
         """
             Look for artwork in dir:
             - favorite from settings first
@@ -81,7 +86,7 @@ class AlbumArt:
         if album.id is None:
             return None
         try:
-            self.__update_album_uri(album)
+            self.__update_uri(album)
             if not album.storage_type & StorageType.COLLECTION:
                 store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
                 store_path = self.add_extension(store_path)
@@ -89,7 +94,7 @@ class AlbumArt:
             else:
                 store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
                 store_path = self.add_extension(store_path)
-                if self._extension == StoreExtention.PNG:
+                if self.extension == StoreExtention.PNG:
                     uris = [
                         # Default favorite artwork
                         "%s/%s.png" % (album.uri, self.__favorite),
@@ -116,35 +121,10 @@ class AlbumArt:
                 if f.query_exists():
                     return uri
         except Exception as e:
-            Logger.error("AlbumArt::get_album_artwork_uri(): %s", e)
+            Logger.error("AlbumArtwork::get_uri(): %s", e)
         return None
 
-    def get_first_album_artwork(self, album):
-        """
-            Get first locally available artwork for album
-            @param album as Album
-            @return path or None
-        """
-        # Folders with many albums, get_album_artwork_uri()
-        if App().albums.get_uri_count(album.uri) > 1:
-            return None
-        if not album.storage_type & (StorageType.COLLECTION |
-                                     StorageType.EXTERNAL):
-            return None
-        f = Gio.File.new_for_uri(album.uri)
-        infos = f.enumerate_children("standard::name",
-                                     Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
-                                     None)
-        all_uris = []
-        for info in infos:
-            f = infos.get_child(info)
-            all_uris.append(f.get_uri())
-        for uri in filter(lambda p: p.lower().endswith(self._MIMES), all_uris):
-            return uri
-        infos.close(None)
-        return None
-
-    def get_album_artworks(self, album):
+    def get_uris(self, album):
         """
             Get locally available artworks for album
             @param album as Album
@@ -164,17 +144,16 @@ class AlbumArt:
             for info in infos:
                 f = infos.get_child(info)
                 all_uris.append(f.get_uri())
-            for uri in filter(lambda p: p.lower().endswith(self._MIMES),
+            for uri in filter(lambda p: p.lower().endswith(self.__MIMES),
                               all_uris):
                 uris.append(uri)
             infos.close(None)
         except Exception as e:
-            Logger.error("AlbumArt::get_album_artworks(): %s", e)
+            Logger.error("AlbumArtwork::get_uris(): %s", e)
         return uris
 
-    def get_album_artwork(self, album, width, height, scale_factor,
-                          behaviour=ArtBehaviour.CACHE |
-                          ArtBehaviour.CROP_SQUARE):
+    def get(self, album, width, height, scale_factor,
+            behaviour=ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE):
         """
             Return a cairo surface for album_id, covers are cached as jpg.
             @param album as Album
@@ -217,7 +196,7 @@ class AlbumArt:
                 return pixbuf
             # Use favorite folder artwork
             if pixbuf is None:
-                uri = self.get_album_artwork_uri(album)
+                uri = self.get_uri(album)
                 data = None
                 if uri is not None:
                     f = Gio.File.new_for_uri(uri)
@@ -234,15 +213,15 @@ class AlbumArt:
                                           StorageType.EXTERNAL):
                 try:
                     track = choice(album.tracks)
-                    pixbuf = self.pixbuf_from_tags(track.uri)
+                    pixbuf = self.__get_pixbuf_from_tags(track.uri)
                 except Exception as e:
-                    Logger.error("AlbumArt::get_album_artwork(): %s", e)
+                    Logger.error("AlbumArtwork::get(): %s", e)
 
             # Use folder artwork
             if pixbuf is None and\
                     album.storage_type & (StorageType.COLLECTION |
                                           StorageType.EXTERNAL):
-                uri = self.get_first_album_artwork(album)
+                uri = self.__get_first(album)
                 # Look in album folder
                 if uri is not None:
                     f = Gio.File.new_for_uri(uri)
@@ -253,7 +232,7 @@ class AlbumArt:
                         stream, None)
                     stream.close()
             if pixbuf is None:
-                self.cache_album_artwork(album.id)
+                self.download(album.id)
                 return None
             pixbuf = self.load_behaviour(pixbuf,
                                          width, height, behaviour)
@@ -261,28 +240,28 @@ class AlbumArt:
                 self.save_pixbuf(pixbuf, cache_path)
             return pixbuf
         except Exception as e:
-            Logger.error("AlbumArt::get_album_artwork(): %s -> %s" % (uri, e))
+            Logger.error("AlbumArtwork::get(): %s -> %s" % (uri, e))
             return None
 
-    def add_album_artwork(self, album, data):
+    def add(self, album, data):
         """
-            Save artwork for album
-            @param data as bytes
+            Add artwork for album as data
             @param album as Album
+            @param data as bytes
         """
         try:
             if not album.storage_type & StorageType.COLLECTION:
-                self.__save_web_album_artwork(album, data)
+                self.__save_web(album, data)
             elif is_readonly(album.uri):
-                self.__save_ro_album_artwork(album, data)
+                self.__save_ro(album, data)
             else:
-                self.__add_album_artwork(album, data)
+                self.__save(album, data)
         except Exception as e:
-            Logger.error("AlbumArt::add_album_artwork(): %s" % e)
+            Logger.error("AlbumArtwork::add(): %s" % e)
 
-    def move_artwork(self, old_lp_album_id, new_lp_album_id):
+    def move(self, old_lp_album_id, new_lp_album_id):
         """
-            Move artwork when lp_album_id changed
+            Move artwork from an old id to a new id
             @param old_lp_album_id as str
             @param new_lp_album_id s str
         """
@@ -298,34 +277,9 @@ class AlbumArt:
                     old.move(new, Gio.FileCopyFlags.OVERWRITE, None, None)
                     break
         except Exception as e:
-            Logger.error("AlbumArt::move_artwork(): %s" % e)
+            Logger.error("AlbumArtwork::move(): %s" % e)
 
-    def album_artwork_update(self, album_id):
-        """
-            Announce album cover update
-            @param album_id as int
-        """
-        if album_id is not None:
-            emit_signal(self, "album-artwork-changed", album_id)
-
-    def remove_album_artwork(self, album):
-        """
-            Remove album artwork
-            @param album as Album
-        """
-        for uri in self.get_album_artworks(album):
-            f = Gio.File.new_for_uri(uri)
-            try:
-                f.trash()
-            except Exception as e:
-                Logger.error("AlbumArt::remove_album_artwork(): %s" % e)
-                try:
-                    f.delete(None)
-                except Exception as e:
-                    Logger.error("AlbumArt::remove_album_artwork(): %s" % e)
-        self.__write_image_to_tags("", album)
-
-    def clean_album_cache(self, album, width=-1, height=-1):
+    def clean(self, album, width=-1, height=-1):
         """
             Remove cover from cache for album id
             @param album as Album
@@ -335,7 +289,7 @@ class AlbumArt:
         try:
             from pathlib import Path
             if width == -1 or height == -1:
-                if self._extension == StoreExtention.PNG:
+                if self.extension == StoreExtention.PNG:
                     extension = "png"
                 else:
                     extension = "jpg"
@@ -351,9 +305,140 @@ class AlbumArt:
                 if f.query_exists():
                     f.delete()
         except Exception as e:
-            Logger.error("AlbumArt::clean_album_cache(): %s" % e)
+            Logger.error("AlbumArtwork::clean(): %s" % e)
 
-    def pixbuf_from_tags(self, uri):
+#######################
+# PRIVATE             #
+#######################
+    def __get_first(self, album):
+        """
+            Get first locally available artwork for album
+            @param album as Album
+            @return path or None
+        """
+        # Folders with many albums, get_uri()
+        if App().albums.get_uri_count(album.uri) > 1:
+            return None
+        if not album.storage_type & (StorageType.COLLECTION |
+                                     StorageType.EXTERNAL):
+            return None
+        f = Gio.File.new_for_uri(album.uri)
+        infos = f.enumerate_children("standard::name",
+                                     Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
+                                     None)
+        all_uris = []
+        for info in infos:
+            f = infos.get_child(info)
+            all_uris.append(f.get_uri())
+        for uri in filter(
+                lambda p: p.lower().endswith(self.__MIMES), all_uris):
+            return uri
+        infos.close(None)
+        return None
+
+    def __emit_update(self, album_id):
+        """
+            Announce album cover update
+            @param album_id as int
+        """
+        if album_id is not None:
+            emit_signal(self, "album-artwork-changed", album_id)
+
+    def __update_uri(self, album):
+        """
+            Check if album uri exists, update if not
+            @param album as Album
+        """
+        if not album.storage_type & StorageType.COLLECTION:
+            return
+        d = Gio.File.new_for_uri(album.uri)
+        if not d.query_exists():
+            if album.tracks:
+                track_uri = album.tracks[0].uri
+                f = Gio.File.new_for_uri(track_uri)
+                p = f.get_parent()
+                parent_uri = "" if p is None else p.get_uri()
+                album.set_uri(parent_uri)
+
+    def __save_web(self, album, data):
+        """
+            Save artwork for a web album
+            @param album as Album
+            @param data as bytes
+        """
+        store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
+        store_path = self.add_extension(store_path)
+        if data is None:
+            f = Gio.File.new_for_path(store_path)
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
+            fstream.close()
+        else:
+            self.save_pixbuf_from_data(store_path, data)
+        self.clean(album)
+        self.__emit_update(album.id)
+
+    def __save_ro(self, album, data):
+        """
+            Save artwork for a read only album
+            @param album as Album
+            @param data as bytes
+        """
+        store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
+        store_path = self.add_extension(store_path)
+        if data is None:
+            f = Gio.File.new_for_path(store_path)
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
+            fstream.close()
+        else:
+            self.save_pixbuf_from_data(store_path, data)
+        self.clean(album)
+        self.__emit_update(album.id)
+
+    def __save(self, album, data):
+        """
+            Save artwork for an album
+            @param album as Album
+            @param data as bytes
+        """
+        store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
+        store_path = self.add_extension(store_path)
+        save_to_tags = App().settings.get_value("save-to-tags")
+        # Multiple albums at same path
+        uri_count = App().albums.get_uri_count(album.uri)
+        art_uri = album.uri + "/" + self.__favorite
+
+        # Save cover to tags
+        if save_to_tags:
+            helper = TaskHelper()
+            helper.run(self.__add_to_tags, album, data)
+
+        # We need to remove favorite if exists
+        if uri_count > 1 or save_to_tags:
+            f = Gio.File.new_for_uri(art_uri)
+            if f.query_exists():
+                f.trash()
+
+        # Name file with album information
+        if uri_count > 1:
+            art_uri = "%s/%s" % (album.uri, album.lp_album_id)
+            art_uri = self.add_extension(art_uri)
+
+        if data is None:
+            f = Gio.File.new_for_path(store_path)
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
+            fstream.close()
+        else:
+            self.save_pixbuf_from_data(store_path, data)
+        dst = Gio.File.new_for_uri(art_uri)
+        src = Gio.File.new_for_path(store_path)
+        src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
+        self.clean(album)
+        self.__emit_update(album.id)
+
+    def __get_pixbuf_from_tags(self, uri):
         """
             Return cover from tags
             @param uri as str
@@ -379,109 +464,12 @@ class AlbumArt:
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
                 stream.close()
         except Exception as e:
-            Logger.error("AlbumArt::pixbuf_from_tags(): %s" % e)
+            Logger.error("AlbumArtwork::__get_pixbuf_from_tags(): %s" % e)
         return pixbuf
 
-#######################
-# PRIVATE             #
-#######################
-    def __update_album_uri(self, album):
+    def __add_to_tags(self, album, data):
         """
-            Check if album uri exists, update if not
-            @param album as Album
-        """
-        if not album.storage_type & StorageType.COLLECTION:
-            return
-        d = Gio.File.new_for_uri(album.uri)
-        if not d.query_exists():
-            if album.tracks:
-                track_uri = album.tracks[0].uri
-                f = Gio.File.new_for_uri(track_uri)
-                p = f.get_parent()
-                parent_uri = "" if p is None else p.get_uri()
-                album.set_uri(parent_uri)
-
-    def __save_web_album_artwork(self, album, data):
-        """
-            Save artwork for a web album
-            @param album as Album
-            @param data as bytes
-        """
-        store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
-        if data is None:
-            store_path = self.add_extension(store_path)
-            f = Gio.File.new_for_path(store_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            self.save_pixbuf_from_data(store_path, data)
-        self.clean_album_cache(album)
-        self.album_artwork_update(album.id)
-
-    def __save_ro_album_artwork(self, album, data):
-        """
-            Save artwork for a read only album
-            @param album as Album
-            @param data as bytes
-        """
-        store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
-        if data is None:
-            store_path = self.add_extension(store_path)
-            f = Gio.File.new_for_path(store_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            self.save_pixbuf_from_data(store_path, data)
-        self.clean_album_cache(album)
-        self.album_artwork_update(album.id)
-
-    def __add_album_artwork(self, album, data):
-        """
-            Save artwork for an album
-            @param album as Album
-            @param data as bytes
-        """
-        store_path_no_ext = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
-        store_path = self.add_extension(store_path_no_ext)
-        save_to_tags = App().settings.get_value("save-to-tags")
-        # Multiple albums at same path
-        uri_count = App().albums.get_uri_count(album.uri)
-        art_uri = album.uri + "/" + self.__favorite
-
-        # Save cover to tags
-        if save_to_tags:
-            helper = TaskHelper()
-            helper.run(self.__add_album_artwork_to_tags, album, data)
-
-        # We need to remove favorite if exists
-        if uri_count > 1 or save_to_tags:
-            f = Gio.File.new_for_uri(art_uri)
-            if f.query_exists():
-                f.trash()
-
-        # Name file with album information
-        if uri_count > 1:
-            art_uri = "%s/%s" % (album.uri, album.lp_album_id)
-            art_uri = self.add_extension(art_uri)
-
-        if data is None:
-            f = Gio.File.new_for_path(store_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            self.save_pixbuf_from_data(store_path_no_ext, data)
-        dst = Gio.File.new_for_uri(art_uri)
-        src = Gio.File.new_for_path(store_path)
-        src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
-        self.clean_album_cache(album)
-        self.album_artwork_update(album.id)
-
-    def __add_album_artwork_to_tags(self, album, data):
-        """
-            Save artwork to tags
+            Add image data to album tags
             @param album as Album
             @param data as bytes
         """
@@ -494,7 +482,7 @@ class AlbumArt:
                                                            True,
                                                            None)
         stream.close()
-        if self._extension == StoreExtention.PNG:
+        if self.extension == StoreExtention.PNG:
             cache_path = "%s/lollypop_cover_tags.png" % CACHE_PATH
             pixbuf.savev(cache_path, "png", [None], [None])
         else:
@@ -532,10 +520,10 @@ class AlbumArt:
                 worked = True
                 break
             except Exception as e:
-                Logger.error("AlbumArt::__write_image_to_tags(): %s" % e)
+                Logger.error("AlbumArtwork::__write_image_to_tags(): %s" % e)
         if worked:
-            self.clean_album_cache(album)
-            GLib.timeout_add(2000, self.album_artwork_update, album.id)
+            self.clean(album)
+            GLib.timeout_add(2000, self.__emit_update, album.id)
         else:
             App().notify.send("Lollypop",
                               _("You need to install kid3-cli"))

@@ -10,19 +10,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GObject, Gio, GLib, GdkPixbuf
+from gi.repository import Gio, GdkPixbuf, GLib, GObject
 
 from PIL import Image, ImageFilter
 
-from lollypop.define import ArtSize, App, ArtBehaviour
-from lollypop.define import ALBUMS_PATH
-from lollypop.logger import Logger
+from lollypop.define import CACHE_PATH
+from lollypop.define import App, StoreExtention, ArtSize, ArtBehaviour
+from lollypop.utils_file import create_dir
 
 
-class BaseArt(GObject.GObject):
+class ArtworkManager(GObject.GObject):
     """
-        Base art manager
+        Common methods for artworks manager
     """
+
     __gsignals__ = {
         "artwork-cleared": (GObject.SignalFlags.RUN_FIRST, None, (str, str)),
         "album-artwork-changed": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
@@ -34,9 +35,35 @@ class BaseArt(GObject.GObject):
 
     def __init__(self):
         """
-            Init base art
+            Init artwork manager
         """
         GObject.GObject.__init__(self)
+        create_dir(CACHE_PATH)
+        App().settings.connect("changed::hd-artwork",
+                               self.__on_hd_artwork_changed)
+        self.__on_hd_artwork_changed()
+
+    def save_pixbuf(self, pixbuf, path):
+        """
+            Save pixbuf at path
+            @param pixbuf as GdkPixbuf.Pixbuf
+            @param path as str
+        """
+        if self.__extension == StoreExtention.PNG:
+            pixbuf.savev(path, "png", [None], [None])
+        else:
+            pixbuf.savev(path, "jpeg", ["quality"], ["100"])
+
+    def add_extension(self, path):
+        """
+            Add file extension to path
+            @param path as str
+            @return str
+        """
+        if self.__extension == StoreExtention.PNG:
+            return "%s.png" % path
+        else:
+            return "%s.jpg" % path
 
     def load_behaviour(self, pixbuf, width, height, behaviour):
         """
@@ -94,18 +121,6 @@ class BaseArt(GObject.GObject):
         ArtSize.MEDIUM = int(ArtSize.BIG * 100 / 200)
         ArtSize.SMALL = int(ArtSize.BIG * 50 / 200)
 
-    def clean_store(self, filename):
-        """
-            @param filename as str
-        """
-        try:
-            filepath = "%s/%s.%s" % (ALBUMS_PATH, filename, self._ext)
-            f = Gio.File.new_for_path(filepath)
-            if f.query_exists():
-                f.delete()
-        except Exception as e:
-            Logger.error("Art::clean_store(): %s" % e)
-
     def save_pixbuf_from_data(self, store_path, data,
                               width=-1, height=-1):
         """
@@ -133,6 +148,25 @@ class BaseArt(GObject.GObject):
             stream.close()
             self.save_pixbuf(pixbuf, store_path)
             del pixbuf
+
+    @property
+    def extension(self):
+        """
+            Get current artwork extension
+            @return StoreExtention
+        """
+        return self.__extension
+
+    @property
+    def extension_str(self):
+        """
+            Get current artwork extension
+            @return str
+        """
+        if self.__extension == StoreExtention.PNG:
+            return "png"
+        else:
+            return "jpg"
 
 #######################
 # PROTECTED           #
@@ -228,3 +262,11 @@ class BaseArt(GObject.GObject):
 #######################
 # PRIVATE             #
 #######################
+    def __on_hd_artwork_changed(self, *ignore):
+        """
+            Update extension value
+        """
+        if App().settings.get_value("hd-artwork"):
+            self.__extension = StoreExtention.PNG
+        else:
+            self.__extension = StoreExtention.JPG

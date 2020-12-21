@@ -434,7 +434,7 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button.set_image(grid)
         button.get_style_context().add_class("padding")
         App().task_helper.run(
-                App().art.get_artwork_from_cache,
+                App().art.get_from_cache,
                 artwork_name,
                 "ROUNDED",
                 ArtSize.BANNER, ArtSize.BANNER,

@@ -10,74 +10,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GdkPixbuf, Gdk, GLib
+from gi.repository import Gio, GdkPixbuf, Gdk
 
 from hashlib import md5
 
-from lollypop.art_base import BaseArt
-from lollypop.art_album import AlbumArt
-from lollypop.art_artist import ArtistArt
-from lollypop.art_downloader import DownloaderArt
+from lollypop.artwork_manager import ArtworkManager
 from lollypop.logger import Logger
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.define import ARTISTS_PATH, TimeStamp
-from lollypop.define import App, StoreExtention
 from lollypop.utils import emit_signal
-from lollypop.utils_file import create_dir, remove_oldest
+from lollypop.utils_file import remove_oldest
 
 
-class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
+class Artwork(ArtworkManager):
     """
-        Global artwork manager
+        Artwork manager
     """
 
     def __init__(self):
         """
-            Init artwork
+            Init artwork manager
         """
-        BaseArt.__init__(self)
-        AlbumArt.__init__(self)
-        ArtistArt.__init__(self)
-        DownloaderArt.__init__(self)
-        # Move old store
-        # FIXME: Remove this later
-        store = Gio.File.new_for_path(
-            GLib.get_user_data_dir() + "/lollypop/store")
-        if store.query_exists():
-            new_store = Gio.File.new_for_path(ALBUMS_PATH)
-            if not new_store.query_exists():
-                store.move(new_store, Gio.FileCopyFlags.OVERWRITE, None, None)
-        create_dir(CACHE_PATH)
-        create_dir(ALBUMS_PATH)
-        create_dir(ALBUMS_WEB_PATH)
-        create_dir(ARTISTS_PATH)
-        App().settings.connect("changed::hd-artwork",
-                               self.__on_hd_artwork_changed)
-        self.__on_hd_artwork_changed()
+        ArtworkManager.__init__(self)
 
-    def save_pixbuf(self, pixbuf, path):
-        """
-            Save pixbuf at path
-            @param pixbuf as GdkPixbuf.Pixbuf
-            @param path as str
-        """
-        if self._extension == StoreExtention.PNG:
-            pixbuf.savev(path, "png", [None], [None])
-        else:
-            pixbuf.savev(path, "jpeg", ["quality"], ["100"])
-
-    def add_extension(self, path):
-        """
-            Add file extension to path
-            @param path as str
-            @return str
-        """
-        if self._extension == StoreExtention.PNG:
-            return "%s.png" % path
-        else:
-            return "%s.jpg" % path
-
-    def add_artwork_to_cache(self, name, surface, prefix):
+    def add_to_cache(self, name, surface, prefix):
         """
             Add artwork to cache
             @param name as str
@@ -98,7 +54,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
         except Exception as e:
             Logger.error("Art::add_artwork_to_cache(): %s" % e)
 
-    def remove_artwork_from_cache(self, name, prefix):
+    def remove_from_cache(self, name, prefix):
         """
             Remove artwork from cache
             @param name as str
@@ -107,14 +63,10 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
         try:
             from glob import glob
             encoded = md5(name.encode("utf-8")).hexdigest()
-            if self._extension == StoreExtention.PNG:
-                extension = "png"
-            else:
-                extension = "jpg"
             search = "%s/@%s@%s_*.%s" % (CACHE_PATH,
                                          prefix,
                                          encoded,
-                                         extension)
+                                         self.extension_str)
             pathes = glob(search)
             for path in pathes:
                 f = Gio.File.new_for_path(path)
@@ -123,7 +75,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
         except Exception as e:
             Logger.error("Art::remove_artwork_from_cache(): %s" % e)
 
-    def get_artwork_from_cache(self, name, prefix, width, height):
+    def get_from_cache(self, name, prefix, width, height):
         """
             Get artwork from cache
             @param name as str
@@ -145,7 +97,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
             Logger.warning("Art::get_artwork_from_cache(): %s" % e)
             return None
 
-    def artwork_exists_in_cache(self, name, prefix, width, height):
+    def exists_in_cache(self, name, prefix, width, height):
         """
             True if artwork exists in cache
             @param name as str
@@ -180,10 +132,7 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
         """
         try:
             from pathlib import Path
-            if self._extension == StoreExtention.PNG:
-                extension = "png"
-            else:
-                extension = "jpg"
+            extension = self.extension_str
             for p in Path(CACHE_PATH).glob("@ROUNDED*@*.%s" % extension):
                 p.unlink()
         except Exception as e:
@@ -195,20 +144,8 @@ class Art(BaseArt, AlbumArt, ArtistArt, DownloaderArt):
         """
         try:
             from pathlib import Path
-            if self._extension == StoreExtention.PNG:
-                extension = "png"
-            else:
-                extension = "jpg"
+            extension = self.extension_str
             for p in Path(CACHE_PATH).glob("*.%s" % extension):
                 p.unlink()
         except Exception as e:
             Logger.error("Art::clean_all_cache(): %s", e)
-
-    def __on_hd_artwork_changed(self, *ignore):
-        """
-            Update extension value
-        """
-        if App().settings.get_value("hd-artwork"):
-            self._extension = StoreExtention.PNG
-        else:
-            self._extension = StoreExtention.JPG

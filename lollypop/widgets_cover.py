@@ -38,7 +38,8 @@ class CoverWidgetBase(SignalsHelper):
         self._artwork = Gtk.Image.new()
         self._artwork.show()
         return [
-            (App().art, "album-artwork-changed", "_on_album_artwork_changed")
+            (App().album_art, "album-artwork-changed",
+             "_on_album_artwork_changed")
         ]
 
     def set_art_size(self, art_size):

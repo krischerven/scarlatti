@@ -143,7 +143,7 @@ class Playlists(GObject.GObject):
                         WHERE rowid=?",
                         (name, playlist_id))
         emit_signal(self, "playlists-renamed", playlist_id)
-        App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
+        App().art.remove_from_cache("playlist_" + name, "ROUNDED")
 
     def remove(self, playlist_id):
         """
@@ -159,7 +159,7 @@ class Playlists(GObject.GObject):
                         WHERE playlist_id=?",
                         (playlist_id,))
         emit_signal(self, "playlists-removed", playlist_id)
-        App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
+        App().art.remove_from_cache("playlist_" + name, "ROUNDED")
 
     def clear(self, playlist_id):
         """
@@ -528,7 +528,7 @@ class Playlists(GObject.GObject):
         """
         name = self.get_name(playlist_id)
         # Clear cache
-        App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
+        App().art.remove_from_cache("playlist_" + name, "ROUNDED")
         with SqlCursor(self, True) as sql:
             sql.execute("UPDATE playlists\
                         SET smart_sql=?\
@@ -602,7 +602,7 @@ class Playlists(GObject.GObject):
         try:
             name = self.get_name(playlist_id)
             # Clear cache
-            App().art.remove_artwork_from_cache("playlist_" + name, "ROUNDED")
+            App().art.remove_from_cache("playlist_" + name, "ROUNDED")
             playlist_uri = self.get_sync_uri(playlist_id)
             if playlist_uri is None:
                 return

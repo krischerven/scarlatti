@@ -16,9 +16,10 @@ from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
 from lollypop.define import App, ArtSize, StorageType
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class ArtistArtworkSearchWidget(ArtworkSearchWidget):
+class ArtistArtworkSearchWidget(ArtworkSearchWidget, SignalsHelper):
     """
         Search for artist artwork
     """
@@ -27,6 +28,7 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
+    @signals_map
     def __init__(self, artist_id, view_type, in_menu=False):
         """
             Init search
@@ -35,6 +37,17 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__artist = App().artists.get_name(artist_id)
+        return [
+            (App().artist_art, "uri-artwork-found", "_on_uri_artwork_found")
+        ]
+
+    @property
+    def art(self):
+        """
+            Get related artwork
+            @return ArtworkManager
+        """
+        return App().artist_art
 
 #######################
 # PROTECTED           #
@@ -48,8 +61,8 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             f = Gio.File.new_for_path(filename)
             (status, data, tag) = f.load_contents()
             if status:
-                App().art.add_artist_artwork(self.__artist, data,
-                                             StorageType.COLLECTION)
+                App().artist_art.add(self.__artist, data,
+                                     StorageType.COLLECTION)
         except Exception as e:
             Logger.error(
                 "ArtistArtworkSearchWidget::_save_from_filename(): %s" % e)
@@ -64,13 +77,22 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
             return self.__artist
         return search
 
-    def _search_from_downloader(self):
+    def _search_for_artwork(self):
         """
-            Load artwork from downloader
+            Search artwork on the web
         """
+        ArtworkSearchWidget._search_for_artwork(self)
+        self._loaders = 3
+        search = self._get_current_search()
+        App().task_helper.run(App().artist_art.search_artwork_from_google,
+                              search,
+                              self._cancellable)
+        App().task_helper.run(App().artist_art.search_artwork_from_startpage,
+                              search,
+                              self._cancellable)
         App().task_helper.run(
-                App().art.search_artist_artwork,
-                self._get_current_search(),
+                App().artist_art.search,
+                search,
                 self._cancellable)
 
     def _on_activate(self, flowbox, child):
@@ -81,11 +103,11 @@ class ArtistArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                App().task_helper.run(App().art.add_artist_artwork,
+                App().task_helper.run(App().artist_art.add,
                                       self.__artist, child.bytes,
                                       StorageType.COLLECTION)
             else:
-                App().task_helper.run(App().art.add_artist_artwork,
+                App().task_helper.run(App().artist_art.add,
                                       self.__artist, None,
                                       StorageType.COLLECTION)
             emit_signal(self, "hidden", True)

@@ -71,7 +71,7 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         return [
             (App().player, "current-changed", "_on_current_changed"),
             (App().player, "duration-changed", "_on_duration_changed"),
-            (App().art, "album-artwork-changed", "_on_artwork_changed")
+            (App().album_art, "album-artwork-changed", "_on_artwork_changed")
         ]
 
     def add_reveal_albums(self, albums):

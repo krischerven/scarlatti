@@ -10,36 +10,39 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GdkPixbuf, Gio
+from gi.repository import Gio, GdkPixbuf, GLib
 
 from hashlib import md5
 
-from lollypop.define import ArtBehaviour, ArtSize
-from lollypop.define import CACHE_PATH, ARTISTS_PATH, StoreExtention
+from lollypop.artwork_manager import ArtworkManager
+from lollypop.artwork_downloader_artist import ArtistArtworkDownloader
 from lollypop.logger import Logger
+from lollypop.define import CACHE_PATH
+from lollypop.define import ARTISTS_PATH, ArtBehaviour, ArtSize
+from lollypop.define import StoreExtention
 from lollypop.utils import emit_signal
 
 
-class ArtistArt:
+class ArtistArtwork(ArtworkManager, ArtistArtworkDownloader):
     """
-         Manage artist artwork
-         Should be inherited by a BaseArt
+        Artist artwork manager
     """
 
     def __init__(self):
         """
-            Init artist artwork
+            Init artist artwork manager
         """
-        pass
+        ArtworkManager.__init__(self)
+        ArtistArtworkDownloader.__init__(self)
 
-    def get_artist_artwork_path(self, artist):
+    def get_path(self, artist):
         """
-            True if artist artwork exists
+            Get artwork path for artist
             @param artist as str
             @return str/None
         """
-        encoded = self.encode_artist_name(artist)
-        if self._extension == StoreExtention.PNG:
+        encoded = self.__encode(artist)
+        if self.extension == StoreExtention.PNG:
             extensions = ["png", "jpg"]
         else:
             extensions = ["jpg", "png"]
@@ -49,7 +52,7 @@ class ArtistArt:
                 return cache_path
         return None
 
-    def add_artist_artwork(self, artist, data, storage_type):
+    def add(self, artist, data, storage_type):
         """
             Add artist artwork to store
             @param artist as str
@@ -57,8 +60,8 @@ class ArtistArt:
             @param storage_type as StorageType
             @thread safe
         """
-        self.uncache_artist_artwork(artist)
-        encoded = self.encode_artist_name(artist)
+        self.__uncache(artist)
+        encoded = self.__encode(artist)
         cache_path = "%s/%s" % (ARTISTS_PATH, encoded)
         cache_path = self.add_extension(cache_path)
         if data is None:
@@ -74,8 +77,8 @@ class ArtistArt:
             self.save_pixbuf(pixbuf, cache_path)
         emit_signal(self, "artist-artwork-changed", artist)
 
-    def get_artist_artwork(self, artist, width, height, scale_factor,
-                           behaviour=ArtBehaviour.CACHE):
+    def get(self, artist, width, height, scale_factor,
+            behaviour=ArtBehaviour.CACHE):
         """
             Return a cairo surface for album_id
             @param artist as str
@@ -101,7 +104,7 @@ class ArtistArt:
         else:
             w = width
             h = height
-        filename = self.encode_artist_name(artist)
+        filename = self.__encode(artist)
         cache_path = "%s/%s_%s_%s" % (CACHE_PATH, filename, w, h)
         cache_path = self.add_extension(cache_path)
         pixbuf = None
@@ -115,14 +118,14 @@ class ArtistArt:
                                                  width, height, behaviour)
                 return pixbuf
             else:
-                cache_path = self.get_artist_artwork_path(artist)
-                if cache_path is not None:
+                artwork_path = self.get_path(artist)
+                if artwork_path is not None:
                     try:
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path)
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(artwork_path)
                     except:
                         return None
                 else:
-                    self.cache_artist_artwork(artist)
+                    self.download(artist)
                     return None
                 pixbuf = self.load_behaviour(pixbuf,
                                              width, height, behaviour)
@@ -130,33 +133,32 @@ class ArtistArt:
                     self.save_pixbuf(pixbuf, cache_path)
             return pixbuf
         except Exception as e:
-            Logger.error("ArtistArt::get_artist_artwork(): %s" % e)
+            Logger.error("ArtistArtwork::get(): %s" % e)
             return None
 
-    def encode_artist_name(self, artist):
+#######################
+# PRIVATE             #
+#######################
+    def __encode(self, artist):
         """
             Get a uniq string for artist
             @param artist as str
         """
         return md5(artist.encode("utf-8")).hexdigest()
 
-    def uncache_artist_artwork(self, artist):
+    def __uncache(self, artist):
         """
             Remove artwork from cache
             @param artist as str
         """
         try:
             from pathlib import Path
-            if self._extension == StoreExtention.PNG:
+            if self.extension == StoreExtention.PNG:
                 extension = "png"
             else:
                 extension = "jpg"
-            search = "%s*.%s" % (self.encode_artist_name(artist), extension)
+            search = "%s*.%s" % (self.__encode(artist), extension)
             for p in Path(CACHE_PATH).glob(search):
                 p.unlink()
         except Exception as e:
-            Logger.error("ArtistArt::uncache_artist_artwork(): %s" % e)
-
-#######################
-# PRIVATE             #
-#######################
+            Logger.error("ArtistArtwork::__uncache(): %s" % e)

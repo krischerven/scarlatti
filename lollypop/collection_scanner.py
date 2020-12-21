@@ -232,7 +232,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         lp_album_id = get_lollypop_album_id(item.album_name,
                                             item.album_artists)
         if lp_album_id != item.lp_album_id:
-            App().art.move_artwork(item.lp_album_id, lp_album_id)
+            App().album_art.move(item.lp_album_id, lp_album_id)
             App().albums.set_lp_album_id(item.album_id, lp_album_id)
             item.lp_album_id = lp_album_id
         # Update album genres

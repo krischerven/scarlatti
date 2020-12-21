@@ -33,7 +33,9 @@ from lollypop.define import LOLLYPOP_DATA_PATH, StorageType
 from lollypop.database import Database
 from lollypop.player import Player
 from lollypop.inhibitor import Inhibitor
-from lollypop.art import Art
+from lollypop.artwork import Artwork
+from lollypop.artwork_album import AlbumArtwork
+from lollypop.artwork_artist import ArtistArtwork
 from lollypop.logger import Logger
 from lollypop.ws_director import DirectorWebService
 from lollypop.sqlcursor import SqlCursor
@@ -145,8 +147,10 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         self.notify = NotificationManager()
         self.task_helper = TaskHelper()
         self.art_helper = ArtHelper()
-        self.art = Art()
+        self.art = Artwork()
         self.art.update_art_size()
+        self.album_art = AlbumArtwork()
+        self.artist_art = ArtistArtwork()
         self.ws_director = DirectorWebService()
         self.ws_director.start()
         if not self.settings.get_value("disable-mpris"):

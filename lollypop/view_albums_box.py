@@ -65,7 +65,7 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
             (App().scanner, "updated", "_on_collection_updated"),
             (App().player, "loading-changed", "_on_loading_changed"),
             (App().player, "current-changed", "_on_current_changed"),
-            (App().art, "album-artwork-changed", "_on_artwork_changed")
+            (App().album_art, "album-artwork-changed", "_on_artwork_changed")
         ]
 
     def populate(self, albums=[]):

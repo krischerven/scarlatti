@@ -38,7 +38,8 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             "allow-per-track-cover")
         return [
             (App().player, "current-changed", "_on_current_changed"),
-            (App().art, "album-artwork-changed", "_on_album_artwork_changed"),
+            (App().album_art, "album-artwork-changed",
+             "_on_album_artwork_changed"),
         ]
 
     def set_art_size(self, width, height):
@@ -88,9 +89,9 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             if self.__per_track_cover:
                 behaviour |= ArtBehaviour.NO_CACHE
                 album = Album(App().player.current_track.album.id)
-                App().art.clean_album_cache(album,
-                                            width * scale_factor,
-                                            height * scale_factor)
+                App().album_art.clean(album,
+                                      width * scale_factor,
+                                      height * scale_factor)
                 album.set_tracks([App().player.current_track])
             else:
                 album = App().player.current_track.album

@@ -18,9 +18,10 @@ from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.widgets_artwork import ArtworkSearchWidget, ArtworkSearchChild
 from lollypop.define import App, Type
+from lollypop.helper_signals import SignalsHelper, signals_map
 
 
-class AlbumArtworkSearchWidget(ArtworkSearchWidget):
+class AlbumArtworkSearchWidget(ArtworkSearchWidget, SignalsHelper):
     """
         Search for album artwork
     """
@@ -29,6 +30,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         "hidden": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
+    @signals_map
     def __init__(self, album, view_type, in_menu=False):
         """
             Init search
@@ -37,6 +39,17 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         ArtworkSearchWidget.__init__(self, view_type)
         self.__album = album
+        return [
+                (App().album_art, "uri-artwork-found", "_on_uri_artwork_found")
+        ]
+
+    @property
+    def art(self):
+        """
+            Get related artwork
+            @return ArtworkManager
+        """
+        return App().album_art
 
     def populate(self):
         """
@@ -45,7 +58,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         try:
             ArtworkSearchWidget.populate(self)
             # First load local files
-            uris = App().art.get_album_artworks(self.__album)
+            uris = App().album_art.get_uris(self.__album)
             # Direct load, not using loopback because not many items
             for uri in uris:
                 child = ArtworkSearchChild(_("Local"), self.view_type)
@@ -71,7 +84,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             f = Gio.File.new_for_path(filename)
             (status, data, tag) = f.load_contents()
             if status:
-                App().task_helper.run(App().art.add_album_artwork,
+                App().task_helper.run(App().album_art.add,
                                       self.__album, data)
         except Exception as e:
             Logger.error(
@@ -92,11 +105,22 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
                 search = "%s+%s" % (self.__album.artists[0], self.__album.name)
         return search
 
-    def _search_from_downloader(self):
+#######################
+# PROTECTED           #
+#######################
+    def _search_for_artwork(self):
         """
-            Load artwork from downloader
+            Search artwork on the web
         """
-        search = ArtworkSearchWidget._get_current_search(self)
+        ArtworkSearchWidget._search_for_artwork(self)
+        self._loaders = 3
+        search = self._get_current_search()
+        App().task_helper.run(App().album_art.search_artwork_from_google,
+                              search,
+                              self._cancellable)
+        App().task_helper.run(App().album_art.search_artwork_from_startpage,
+                              search,
+                              self._cancellable)
         if search.strip() == "":
             is_compilation = self.__album.artist_ids and\
                 self.__album.artist_ids[0] == Type.COMPILATIONS
@@ -105,13 +129,13 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
             else:
                 artist = self.__album.artists[0]
             App().task_helper.run(
-                    App().art.search_album_artworks,
+                    App().album_art.search,
                     artist,
                     self.__album.name,
                     self._cancellable)
         else:
             App().task_helper.run(
-                    App().art.search_album_artworks,
+                    App().album_art.search,
                     "",
                     search,
                     self._cancellable)
@@ -124,14 +148,13 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget):
         """
         try:
             if isinstance(child, ArtworkSearchChild):
-                App().task_helper.run(App().art.add_album_artwork,
+                App().task_helper.run(App().album_art.add,
                                       self.__album, child.bytes)
             else:
-                App().art.remove_album_artwork(self.__album)
-                App().art.add_album_artwork(self.__album, None)
-                App().art.clean_album_cache(self.__album)
-                emit_signal(App().art, "album-artwork-changed",
-                            self.__album.id)
+                App().task_helper.run(App().album_art.add,
+                                      self.__album, None)
+                App().album_art.add(self.__album, None)
+                App().album_art.clean(self.__album)
             emit_signal(self, "hidden", True)
         except Exception as e:
             Logger.error("AlbumArtworkSearchWidget::_on_activate(): %s", e)

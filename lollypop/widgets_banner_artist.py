@@ -72,7 +72,7 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
         return [
                (App().window.container.widget, "notify::folded",
                 "_on_container_folded"),
-               (App().art, "artist-artwork-changed",
+               (App().artist_art, "artist-artwork-changed",
                 "_on_artist_artwork_changed"),
                (App().player, "playback-added", "_on_playback_changed"),
                (App().player, "playback-updated", "_on_playback_changed"),

@@ -56,7 +56,7 @@ class ArtistRow(Gtk.ListBoxRow):
         """
             Set artist artwork
         """
-        if App().art.get_artist_artwork_path(self.__artist_name) is not None:
+        if App().artist_art.get_path(self.__artist_name) is not None:
             App().art_helper.set_artist_artwork(self.__artist_name,
                                                 ArtSize.SMALL,
                                                 ArtSize.SMALL,
@@ -95,14 +95,14 @@ class ArtistRow(Gtk.ListBoxRow):
         if surface is None:
             # Last chance to get a cover
             if self.__cover_uri is not None:
-                App().art.add_artist_artwork_from_uri(self.__artist_name,
-                                                      self.__cover_uri,
-                                                      self.__cancellable,
-                                                      StorageType.EPHEMERAL)
+                App().artist_art.add_from_uri(self.__artist_name,
+                                              self.__cover_uri,
+                                              self.__cancellable,
+                                              StorageType.EPHEMERAL)
                 self.__cover_uri = None
             # Cache for later usage
             else:
-                App().art.cache_artist_artwork(self.__artist_name)
+                App().artist_art.download(self.__artist_name)
             self.__artwork.get_style_context().add_class("circle-icon")
             self.__artwork.set_from_icon_name("avatar-default-symbolic",
                                               Gtk.IconSize.INVALID)
@@ -154,7 +154,8 @@ class SimilarsMenu(Gtk.Bin, SignalsHelper):
         self.add(self.__stack)
         self.set_hexpand(True)
         return [
-            (App().art, "artist-artwork-changed", "_on_artist_artwork_changed")
+            (App().artist_art, "artist-artwork-changed",
+             "_on_artist_artwork_changed")
         ]
 
     @property

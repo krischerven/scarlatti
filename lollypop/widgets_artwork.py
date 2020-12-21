@@ -17,7 +17,6 @@ from gettext import gettext as _
 from lollypop.logger import Logger
 from lollypop.utils import emit_signal
 from lollypop.define import App, ArtSize, ArtBehaviour
-from lollypop.helper_signals import SignalsHelper, signals_map
 
 
 class ArtworkSearchChild(Gtk.FlowBoxChild):
@@ -54,10 +53,11 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         self.__image.set_property("valign", Gtk.Align.CENTER)
         self.add(grid)
 
-    def populate(self, bytes, art_size):
+    def populate(self, bytes, art_manager, art_size):
         """
             Populate images with bytes
             @param bytes as bytes
+            @param art_manager as ArtworkManager
             @param art_size as int
             @return bool if success
         """
@@ -75,9 +75,8 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                                           pixbuf.get_width(),
                                           pixbuf.get_height())
                 self.__label.set_text(text)
-                pixbuf = App().art.load_behaviour(
+                pixbuf = art_manager.load_behaviour(
                                                 pixbuf,
-                                                None,
                                                 art_size * scale_factor,
                                                 art_size * scale_factor,
                                                 ArtBehaviour.CROP)
@@ -92,7 +91,7 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
                 del surface
                 return True
         except Exception as e:
-            Logger.error("ArtworkSearch::__get_image: %s" % e)
+            Logger.error("ArtworkSearchChild::__get_image: %s" % e)
         return False
 
     @property
@@ -104,12 +103,11 @@ class ArtworkSearchChild(Gtk.FlowBoxChild):
         return self.__bytes
 
 
-class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
+class ArtworkSearchWidget(Gtk.Grid):
     """
         Search for artwork
     """
 
-    @signals_map
     def __init__(self, view_type):
         """
             Init widget
@@ -119,8 +117,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         self.__view_type = view_type
         self.__timeout_id = None
         self.__uri_artwork_id = None
-        self.__uris = []
-        self.__loaders = 0
+        self._loaders = 0
         self._cancellable = Gio.Cancellable()
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/ArtworkSearch.ui")
@@ -159,9 +156,6 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             widget.add(scrolled)
         self.add(widget)
         self.connect("unmap", self.__on_unmap)
-        return [
-                (App().art, "uri-artwork-found", "_on_uri_artwork_found")
-        ]
 
     def populate(self):
         """
@@ -191,7 +185,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             grid.set_property("valign", Gtk.Align.CENTER)
             grid.set_property("halign", Gtk.Align.CENTER)
             self._flowbox.add(grid)
-            self.__search_for_artwork()
+            self._search_for_artwork()
         except Exception as e:
             Logger.error("ArtworkSearchWidget::populate(): %s", e)
 
@@ -212,6 +206,14 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
+    def _search_for_artwork(self):
+        """
+            Search artwork on the web
+        """
+        self._loaders = 0
+        self._cancellable = Gio.Cancellable()
+        self.__spinner.start()
+
     def _save_from_filename(self, filename):
         pass
 
@@ -239,12 +241,6 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
             @return str
         """
         return self.__entry.get_text()
-
-    def _search_from_downloader(self):
-        """
-            Load artwork from downloader
-        """
-        pass
 
     def _on_search_changed(self, entry):
         """
@@ -274,30 +270,13 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
                                                uris,
                                                self._cancellable)
         else:
-            self.__loaders -= 1
-            if self.__loaders == 0:
+            self._loaders -= 1
+            if self._loaders == 0:
                 self.__spinner.stop()
 
 #######################
 # PRIVATE             #
 #######################
-    def __search_for_artwork(self):
-        """
-            Search artwork on the web
-        """
-        self.__uris = []
-        self.__loaders = 3
-        self._cancellable = Gio.Cancellable()
-        search = self._get_current_search()
-        self.__spinner.start()
-        self._search_from_downloader()
-        App().task_helper.run(App().art.search_artwork_from_google,
-                              search,
-                              self._cancellable)
-        App().task_helper.run(App().art.search_artwork_from_startpage,
-                              search,
-                              self._cancellable)
-
     def __add_pixbuf(self, content, api):
         """
             Add content to view
@@ -306,7 +285,7 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         """
         child = ArtworkSearchChild(api, self.__view_type)
         child.show()
-        status = child.populate(content, self._art_size)
+        status = child.populate(content, self.art, self._art_size)
         if status:
             child.set_name("web")
             self._flowbox.add(child)
@@ -343,12 +322,12 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
                                                    uris,
                                                    cancellable)
             else:
-                self.__loaders -= 1
+                self._loaders -= 1
         except Exception as e:
-            self.__loaders -= 1
+            self._loaders -= 1
             Logger.warning(
                 "ArtworkSearchWidget::__on_load_uri_content(): %s", e)
-        if self.__loaders == 0:
+        if self._loaders == 0:
             self.__spinner.stop()
 
     def __on_search_timeout(self):
@@ -361,4 +340,4 @@ class ArtworkSearchWidget(Gtk.Grid, SignalsHelper):
         for child in self._flowbox.get_children():
             if child.get_name() == "web":
                 child.destroy()
-        GLib.timeout_add(500, self.__search_for_artwork)
+        GLib.timeout_add(500, self._search_for_artwork)

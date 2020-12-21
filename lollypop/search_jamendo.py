@@ -66,11 +66,8 @@ class JamendoSearch(SaveWebHelper, JamendoWebHelper):
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for artist in decode["results"]:
-                    App().art.add_artist_artwork_from_uri(
-                                                 artist["name"],
-                                                 artist["image"],
-                                                 cancellable,
-                                                 storage_type)
+                    App().art.add_from_uri(artist["name"], artist["image"],
+                                           cancellable, storage_type)
                     for album in artist["albums"]:
                         album["artist_name"] = artist["name"]
                         payload = self.lollypop_album_payload(album)

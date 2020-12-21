@@ -59,7 +59,7 @@ class ArtHelper(GObject.Object):
             @param effect as ArtBehaviour
             @param callback as function
         """
-        App().task_helper.run(App().art.get_album_artwork,
+        App().task_helper.run(App().album_art.get,
                               album,
                               width,
                               height,
@@ -84,7 +84,7 @@ class ArtHelper(GObject.Object):
             @param effect as ArtBehaviour
             @param callback as function
         """
-        App().task_helper.run(App().art.get_artist_artwork,
+        App().task_helper.run(App().artist_art.get,
                               name,
                               width,
                               height,

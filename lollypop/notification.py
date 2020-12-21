@@ -51,7 +51,7 @@ class NotificationManager:
                 App().is_fullscreen:
             return
 
-        cover_path = App().art.get_album_cache_path(track.album,
+        cover_path = App().album_art.get_cache_path(track.album,
                                                     ArtSize.BIG,
                                                     ArtSize.BIG)
         if cover_path is None:
