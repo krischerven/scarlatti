@@ -312,7 +312,7 @@ class AlbumArtworkDownloader(ArtworkDownloader):
                     result = self.__methods[api](artist, album)
                     for uri in result:
                         self.add_from_uri(
-                            Album(album_id), uri, self.__cancellable)
+                            Album(album_id), uri, self.cancellable)
                         break
                     # Found, do not search in another helper
                     if found:
