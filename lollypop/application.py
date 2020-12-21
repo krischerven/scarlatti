@@ -197,6 +197,8 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         if wait < 1000 and not self.ws_director.stop():
             GLib.timeout_add(wait, self.quit, vacuum, wait + 100)
             return
+        self.album_art.cancellable.cancel()
+        self.artist_art.cancellable.cancel()
         if self.settings.get_value("save-state"):
             self.__window.container.stack.save_history()
         # Then vacuum db
