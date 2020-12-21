@@ -160,7 +160,8 @@ class TrackMenuExt(Gtk.Grid):
             edit.set_margin_end(MARGIN_SMALL)
             edit.set_margin_bottom(MARGIN_SMALL)
             edit.set_property("hexpand", True)
-            edit.set_text(helper.uri)
+            if helper.uri is not None:
+                edit.set_text(helper.uri)
             edit.connect("changed", self.__on_edit_changed, track)
             edit.show()
             self.add(edit)
