@@ -107,6 +107,10 @@ class ArtistArtworkDownloader(ArtworkDownloader):
                 uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
+                if "artists" not in decode.keys() or decode["artists"] is None:
+                    Logger.warning(
+                        "Can't find %s on AutdioDB" % artist)
+                    return []
                 for item in decode["artists"]:
                     for key in ["strArtistFanart", "strArtistThumb"]:
                         uri = item[key]
@@ -137,6 +141,10 @@ class ArtistArtworkDownloader(ArtworkDownloader):
             if status:
                 artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
+                if not decode["data"]:
+                    Logger.warning(
+                        "Can't find %s on Deezer" % artist)
+                    return []
                 for item in decode["data"]:
                     uri = item["picture_xl"]
                     uris.append(uri)
@@ -164,6 +172,10 @@ class ArtistArtworkDownloader(ArtworkDownloader):
                 uri % (mbid, FANARTTV_ID), cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
+                if "artistbackground" not in decode.keys():
+                    Logger.warning(
+                        "Can't find %s on FanartTV" % artist)
+                    return []
                 for item in decode["artistbackground"]:
                     uris.append(item["url"])
         except Exception as e:
@@ -196,6 +208,10 @@ class ArtistArtworkDownloader(ArtworkDownloader):
             if status:
                 artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
+                if "artists" not in decode.keys():
+                    Logger.warning(
+                        "Can't find %s on Spotify" % artist)
+                    return []
                 for item in decode["artists"]["items"]:
                     uri = item["images"][0]["url"]
                     uris.append(uri)

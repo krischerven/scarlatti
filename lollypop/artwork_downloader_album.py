@@ -111,6 +111,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             if status:
                 artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
+                if not decode["data"]:
+                    Logger.warning(
+                        "Can't find %s - %s on Deezer" % (artist, album))
+                    return []
                 for item in decode["data"]:
                     item_artist = noaccents(item["artist"]["name"].lower())
                     if artist and artist != item_artist:
@@ -144,6 +148,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
                 uri % (mbid, FANARTTV_ID), cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
+                if "albums" not in decode.keys():
+                    Logger.warning(
+                        "Can't find %s - %s on FanartTV" % (artist, album))
+                    return []
                 for cover in decode["albums"][mbid]["albumcover"]:
                     uris.append(cover["url"])
         except Exception as e:
@@ -180,6 +188,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
                 artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
                 artist_spotify_id = None
+                if "artists" not in decode.keys():
+                    Logger.warning(
+                        "Can't find %s - %s on Spotify" % (artist, album))
+                    return []
                 for item in decode["artists"]["items"]:
                     item_artist = noaccents(item["name"].lower())
                     if artist == item_artist:
@@ -194,6 +206,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
                 uri, headers, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
+                if "items" not in decode.keys():
+                    Logger.warning(
+                        "Can't find %s - %s on Spotify" % (artist, album))
+                    return []
                 for item in decode["items"]:
                     if noaccents(item["name"].lower()) ==\
                             noaccents(album.lower()):
@@ -225,6 +241,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             if status:
                 artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
+                if "results" not in decode.keys():
+                    Logger.warning(
+                        "Can't find %s - %s on iTunes" % (artist, album))
+                    return []
                 for item in decode["results"]:
                     item_artist = noaccents(item["artistName"].lower())
                     if artist and artist != item_artist:
@@ -258,6 +278,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
                 uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
+                if "album" not in decode.keys() or decode["album"] is None:
+                    Logger.warning(
+                        "Can't find %s - %s on AudioDB" % (artist, album))
+                    return []
                 if decode["album"]:
                     artist = noaccents(artist.lower())
                     for item in decode["album"]:
@@ -285,6 +309,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             from lollypop.helper_web_lastfm import LastFMWebHelper
             helper = LastFMWebHelper()
             payload = helper.get_album_payload(album, artist, cancellable)
+            if "image" not in payload.keys():
+                Logger.warning(
+                    "Can't find %s - %s on AudioDB" % (artist, album))
+                return []
             artwork_uri = payload["image"][-1]["#text"]
             return [artwork_uri]
         except Exception as e:

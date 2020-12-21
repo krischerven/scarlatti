@@ -84,6 +84,7 @@ class ArtworkDownloader:
             @param mbid_type as str ("artist" or "album")
             @param string as str
             @param cancellable as Gio.Cancellable
+            @return str
         """
         try:
             if mbid_type == "artist":
@@ -99,12 +100,20 @@ class ArtworkDownloader:
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 if mbid_type == "artist":
+                    if "artist" not in decode.keys():
+                        Logger.warning("Can't find %s on MusicBrainz" % string)
+                        return None
                     for item in decode["artists"]:
                         return item["id"]
                 else:
                     mbid = None
                     # Get album id or EP id if missing
+                    if "release-groups" not in decode.keys():
+                        Logger.warning("Can't find %s on MusicBrainz" % string)
+                        return None
                     for item in decode["release-groups"]:
+                        if "primary-type" not in item.keys():
+                            continue
                         if item["primary-type"] == "Album":
                             mbid = item["id"]
                             break
