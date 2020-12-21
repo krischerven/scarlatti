@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gio, GLib
+from gi.repository import GLib
 
 # from lollypop.utils import get_network_available
 from lollypop.define import NetworkAccessACL, App, Type
@@ -42,9 +42,7 @@ class DirectorWebService:
         """
             Start all web services
         """
-        monitor = Gio.NetworkMonitor.get_default()
-        if monitor.get_network_metered() or\
-                not App().settings.get_value("network-access"):
+        if not App().settings.get_value("network-access"):
             network_acl = 0
         else:
             network_acl = App().settings.get_value(

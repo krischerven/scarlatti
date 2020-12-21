@@ -75,11 +75,13 @@ class ListenBrainzWebService(GObject.GObject):
             @param track as Track
             @param timestamp as int
         """
+        monitor = Gio.NetworkMonitor.get_default()
         if not App().settings.get_value(
                 "listenbrainz-user-token").get_string():
             return
         elif App().settings.get_value("disable-scrobbling") or\
-                not get_network_available():
+                not get_network_available() or\
+                monitor.get_network_metered():
             self.__queue.append((track, timestamp))
         elif track.id is not None and track.id >= 0:
             App().task_helper.run(self.__listen, track, timestamp)

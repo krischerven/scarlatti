@@ -73,8 +73,10 @@ class LastFMWebService:
             @param track as Track
             @param timestamp as int
         """
+        monitor = Gio.NetworkMonitor.get_default()
         if App().settings.get_value("disable-scrobbling") or\
-                not get_network_available():
+                not get_network_available() or\
+                monitor.get_network_metered():
             self.__queue.append((track, timestamp))
         elif track.id is not None and track.id >= 0:
             App().task_helper.run(self.__listen, track, timestamp)
@@ -84,8 +86,10 @@ class LastFMWebService:
             Submit a playing now notification for a track
             @param track as Track
         """
+        monitor = Gio.NetworkMonitor.get_default()
         if App().settings.get_value("disable-scrobbling") or\
-                not get_network_available():
+                not get_network_available() or\
+                monitor.get_network_metered():
             return
         if track.id is not None and track.id >= 0:
             App().task_helper.run(self.__playing_now, track)

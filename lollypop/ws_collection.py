@@ -74,6 +74,9 @@ class CollectionWebService(SaveWebHelper,
             Populate DB in a background task
         """
         try:
+            monitor = Gio.NetworkMonitor.get_default()
+            if monitor.get_network_metered():
+                return
             Logger.info("Collection download started")
             self.__is_running = True
             self.__cancellable = Gio.Cancellable()
