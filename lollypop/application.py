@@ -181,15 +181,17 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             self.__window.show()
             self.player.restore_state()
 
-    def quit(self, vacuum=False):
+    def quit(self, vacuum=False, wait=100):
         """
             Quit Lollypop
             @param vacuum as bool
+            @param wait as int
         """
         self.__window.container.stop()
         self.__window.hide()
-        if not self.ws_director.stop():
-            GLib.timeout_add(100, self.quit, vacuum)
+        # Force stop after some tries
+        if wait < 1000 and not self.ws_director.stop():
+            GLib.timeout_add(wait, self.quit, vacuum, wait + 100)
             return
         if self.settings.get_value("save-state"):
             self.__window.container.stack.save_history()
