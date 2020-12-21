@@ -167,8 +167,8 @@
             <description></description>
         </key>
         <key type="s" name="favorite-cover">
-            <default>"cover.jpg"</default>
-            <summary>Favorite cover file</summary>
+            <default>"cover"</default>
+            <summary>Favorite cover filename without extension</summary>
             <description>Restart needed</description>
         </key>
         <key type="i" name="db-version">
@@ -279,10 +279,10 @@
             <summary>INTERNAL</summary>
             <description></description>
         </key>
-        <key type="i" name="cover-quality">
-            <default>90</default>
-            <summary>JPG cover quality</summary>
-            <description>0-100</description>
+        <key type="b" name="hd-artwork">
+            <default>false</default>
+            <summary>Enable PNG artwork cache</summary>
+            <description></description>
         </key>
         <key type="b" name="force-single-column">
             <default>false</default>

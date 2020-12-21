@@ -19,6 +19,7 @@ from time import time
 from lollypop.tagreader import Discoverer
 from lollypop.define import App, ArtSize, ArtBehaviour, StorageType
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
+from lollypop.define import StoreExtention
 from lollypop.logger import Logger
 from lollypop.utils_file import is_readonly
 from lollypop.utils import emit_signal
@@ -37,7 +38,6 @@ class AlbumArt:
         """
             Init album art
         """
-        self._ext = "jpg"
         self.__favorite = App().settings.get_value(
             "favorite-cover").get_string()
         if not self.__favorite:
@@ -53,18 +53,18 @@ class AlbumArt:
             @return cover path as string or None if no cover
         """
         try:
-            cache_filepath = "%s/%s_%s_%s.%s" % (CACHE_PATH,
-                                                 album.lp_album_id,
-                                                 width,
-                                                 height,
-                                                 self._ext)
-            f = Gio.File.new_for_path(cache_filepath)
+            cache_path = "%s/%s_%s_%s" % (CACHE_PATH,
+                                          album.lp_album_id,
+                                          width,
+                                          height)
+            cache_path = self.add_extension(cache_path)
+            f = Gio.File.new_for_path(cache_path)
             if f.query_exists():
-                return cache_filepath
+                return cache_path
             else:
                 self.get_album_artwork(album, width, height, 1)
                 if f.query_exists():
-                    return cache_filepath
+                    return cache_path
         except Exception as e:
             Logger.error("Art::get_album_cache_path(): %s" % e)
         return None
@@ -83,18 +83,34 @@ class AlbumArt:
         try:
             self.__update_album_uri(album)
             if not album.storage_type & StorageType.COLLECTION:
-                store_path = "%s/%s.jpg" % (ALBUMS_WEB_PATH, album.lp_album_id)
+                store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
+                store_path = self.add_extension(store_path)
                 uris = [GLib.filename_to_uri(store_path)]
             else:
-                store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
-                uris = [
-                    # Default favorite artwork
-                    "%s/%s" % (album.uri, self.__favorite),
-                    # Used when album.uri is readonly or for Web
-                    GLib.filename_to_uri(store_path),
-                    # Used when having muliple albums in same folder
-                    "%s/%s.jpg" % (album.uri, album.lp_album_id)
-                ]
+                store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
+                store_path = self.add_extension(store_path)
+                if self._extension == StoreExtention.PNG:
+                    uris = [
+                        # Default favorite artwork
+                        "%s/%s.png" % (album.uri, self.__favorite),
+                        "%s/%s.jpg" % (album.uri, self.__favorite),
+                        # Used when album.uri is readonly or for Web
+                        GLib.filename_to_uri(store_path),
+                        # Used when having muliple albums in same folder
+                        "%s/%s.png" % (album.uri, album.lp_album_id),
+                        "%s/%s.jpg" % (album.uri, album.lp_album_id)
+                    ]
+                else:
+                    uris = [
+                        # Default favorite artwork
+                        "%s/%s.jpg" % (album.uri, self.__favorite),
+                        "%s/%s.png" % (album.uri, self.__favorite),
+                        # Used when album.uri is readonly or for Web
+                        GLib.filename_to_uri(store_path),
+                        # Used when having muliple albums in same folder
+                        "%s/%s.jpg" % (album.uri, album.lp_album_id),
+                        "%s/%s.png" % (album.uri, album.lp_album_id)
+                    ]
             for uri in uris:
                 f = Gio.File.new_for_uri(uri)
                 if f.query_exists():
@@ -187,18 +203,18 @@ class AlbumArt:
         else:
             w = width
             h = height
-        cache_filepath = "%s/%s_%s_%s.%s" % (CACHE_PATH, album.lp_album_id,
-                                             w, h, self._ext)
+        cache_path = "%s/%s_%s_%s" % (CACHE_PATH, album.lp_album_id, w, h)
+        cache_path = self.add_extension(cache_path)
         pixbuf = None
         try:
             # Look in cache
-            f = Gio.File.new_for_path(cache_filepath)
+            f = Gio.File.new_for_path(cache_path)
             if not behaviour & ArtBehaviour.NO_CACHE and f.query_exists():
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_filepath)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path)
                 if optimized_blur:
-                    pixbuf = self.load_behaviour(pixbuf, None,
+                    pixbuf = self.load_behaviour(pixbuf,
                                                  width, height, behaviour)
-
+                return pixbuf
             # Use favorite folder artwork
             if pixbuf is None:
                 uri = self.get_album_artwork_uri(album)
@@ -239,8 +255,10 @@ class AlbumArt:
             if pixbuf is None:
                 self.cache_album_artwork(album.id)
                 return None
-            pixbuf = self.load_behaviour(pixbuf, cache_filepath,
+            pixbuf = self.load_behaviour(pixbuf,
                                          width, height, behaviour)
+            if behaviour & ArtBehaviour.CACHE:
+                self.save_pixbuf(pixbuf, cache_path)
             return pixbuf
         except Exception as e:
             Logger.error("AlbumArt::get_album_artwork(): %s -> %s" % (uri, e))
@@ -270,10 +288,12 @@ class AlbumArt:
         """
         try:
             for store in [ALBUMS_WEB_PATH, ALBUMS_PATH]:
-                old_path = "%s/%s.jpg" % (store, old_lp_album_id)
+                old_path = "%s/%s" % (store, old_lp_album_id)
+                old_path = self.add_extension(old_path)
                 old = Gio.File.new_for_path(old_path)
                 if old.query_exists():
-                    new_path = "%s/%s.jpg" % (store, new_lp_album_id)
+                    new_path = "%s/%s" % (store, new_lp_album_id)
+                    new_path = self.add_extension(new_path)
                     new = Gio.File.new_for_path(new_path)
                     old.move(new, Gio.FileCopyFlags.OVERWRITE, None, None)
                     break
@@ -315,14 +335,19 @@ class AlbumArt:
         try:
             from pathlib import Path
             if width == -1 or height == -1:
-                for p in Path(CACHE_PATH).glob("%s*.jpg" % album.lp_album_id):
+                if self._extension == StoreExtention.PNG:
+                    extension = "png"
+                else:
+                    extension = "jpg"
+                for p in Path(CACHE_PATH).glob(
+                        "%s*.%s" % (album.lp_album_id, extension)):
                     p.unlink()
             else:
-                filename = "%s/%s_%s_%s.jpg" % (CACHE_PATH,
-                                                album.lp_album_id,
-                                                width,
-                                                height)
-                f = Gio.File.new_for_path(filename)
+                cache_path = "%s/%s_%s_%s" % (CACHE_PATH,
+                                              album.lp_album_id,
+                                              width,
+                                              height)
+                f = Gio.File.new_for_path(self.add_extension(cache_path))
                 if f.query_exists():
                     f.delete()
         except Exception as e:
@@ -382,8 +407,9 @@ class AlbumArt:
             @param album as Album
             @param data as bytes
         """
-        store_path = "%s/%s.jpg" % (ALBUMS_WEB_PATH, album.lp_album_id)
+        store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
         if data is None:
+            store_path = self.add_extension(store_path)
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)
@@ -399,8 +425,9 @@ class AlbumArt:
             @param album as Album
             @param data as bytes
         """
-        store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
+        store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
         if data is None:
+            store_path = self.add_extension(store_path)
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)
@@ -416,7 +443,8 @@ class AlbumArt:
             @param album as Album
             @param data as bytes
         """
-        store_path = "%s/%s.jpg" % (ALBUMS_PATH, album.lp_album_id)
+        store_path_no_ext = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
+        store_path = self.add_extension(store_path_no_ext)
         save_to_tags = App().settings.get_value("save-to-tags")
         # Multiple albums at same path
         uri_count = App().albums.get_uri_count(album.uri)
@@ -435,7 +463,8 @@ class AlbumArt:
 
         # Name file with album information
         if uri_count > 1:
-            art_uri = "%s/%s.jpg" % (album.uri, album.lp_album_id)
+            art_uri = "%s/%s" % (album.uri, album.lp_album_id)
+            art_uri = self.add_extension(art_uri)
 
         if data is None:
             f = Gio.File.new_for_path(store_path)
@@ -443,7 +472,7 @@ class AlbumArt:
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)
             fstream.close()
         else:
-            self.save_pixbuf_from_data(store_path, data)
+            self.save_pixbuf_from_data(store_path_no_ext, data)
         dst = Gio.File.new_for_uri(art_uri)
         src = Gio.File.new_for_path(store_path)
         src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
@@ -465,16 +494,18 @@ class AlbumArt:
                                                            True,
                                                            None)
         stream.close()
-        pixbuf.savev("%s/lollypop_cover_tags.jpg" % CACHE_PATH,
-                     "jpeg", ["quality"], [str(App().settings.get_value(
-                                           "cover-quality").get_int32())])
-        self.__write_image_to_tags("%s/lollypop_cover_tags.jpg" %
-                                   CACHE_PATH, album)
+        if self._extension == StoreExtention.PNG:
+            cache_path = "%s/lollypop_cover_tags.png" % CACHE_PATH
+            pixbuf.savev(cache_path, "png", [None], [None])
+        else:
+            cache_path = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
+            pixbuf.savev(cache_path, "jpeg", ["quality"], [100])
+        self.__write_image_to_tags(cache_path, album)
 
-    def __write_image_to_tags(self, path, album):
+    def __write_image_to_tags(self, cache_path, album):
         """
             Save album at path to album tags
-            @param path as str
+            @param cache_path as str
             @param album as Album
         """
         files = []
@@ -484,10 +515,9 @@ class AlbumArt:
             if f.query_exists():
                 files.append(f.get_path())
         worked = False
-        cover = "%s/lollypop_cover_tags.jpg" % CACHE_PATH
-        arguments = [["kid3-cli", "-c", "set picture:'%s' ''" % cover],
+        arguments = [["kid3-cli", "-c", "set picture:'%s' ''" % cache_path],
                      ["flatpak-spawn", "--host", "kid3-cli",
-                      "-c", "set picture:'%s' ''" % cover]]
+                      "-c", "set picture:'%s' ''" % cache_path]]
         for argv in arguments:
             argv += files
             try:

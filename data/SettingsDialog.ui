@@ -102,6 +102,23 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="title" translatable="yes">High quality artwork</property>
+                <property name="activatable-widget">artist-artwork_boolean</property>
+                <child>
+                  <object class="GtkSwitch" id="hd-artwork_boolean">
+                    <property name="name">hd-artwork</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Artwork size</property>
                 <child>
                   <object class="GtkSpinButton" id="cover-size_range">

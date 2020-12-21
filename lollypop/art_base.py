@@ -38,10 +38,9 @@ class BaseArt(GObject.GObject):
         """
         GObject.GObject.__init__(self)
 
-    def load_behaviour(self, pixbuf, cache_path, width, height, behaviour):
+    def load_behaviour(self, pixbuf, width, height, behaviour):
         """
             Load behaviour on pixbuf
-            @param cache_path as str
             @param width as int
             @param height as int
             @param behaviour as ArtBehaviour
@@ -80,13 +79,6 @@ class BaseArt(GObject.GObject):
                                           height,
                                           GdkPixbuf.InterpType.BILINEAR)
             del _pixbuf
-        if behaviour & ArtBehaviour.CACHE and cache_path is not None:
-            if cache_path.endswith(".jpg"):
-                pixbuf.savev(cache_path, "jpeg", ["quality"],
-                             [str(App().settings.get_value(
-                                 "cover-quality").get_int32())])
-            else:
-                pixbuf.savev(cache_path, "png", [None], [None])
         return pixbuf
 
     def update_art_size(self):
@@ -114,17 +106,18 @@ class BaseArt(GObject.GObject):
         except Exception as e:
             Logger.error("Art::clean_store(): %s" % e)
 
-    def save_pixbuf_from_data(self, path, data, width=-1, height=-1):
+    def save_pixbuf_from_data(self, store_path, data,
+                              width=-1, height=-1):
         """
             Save a pixbuf at path from data
-            @param path as str
+            @param store path as str
             @param data as bytes
             @param width as int
             @param height as int
         """
         # Create an empty file
         if data is None:
-            f = Gio.File.new_for_path(path)
+            f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
                                 Gio.FileCreateFlags.REPLACE_DESTINATION,
                                 None)
@@ -138,9 +131,7 @@ class BaseArt(GObject.GObject):
                                              height,
                                              GdkPixbuf.InterpType.BILINEAR)
             stream.close()
-            pixbuf.savev(path, "jpeg", ["quality"],
-                         [str(App().settings.get_value(
-                             "cover-quality").get_int32())])
+            self.save_pixbuf(pixbuf, store_path)
             del pixbuf
 
 #######################

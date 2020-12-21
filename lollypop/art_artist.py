@@ -14,10 +14,10 @@ from gi.repository import GLib, GdkPixbuf, Gio
 
 from hashlib import md5
 
-from lollypop.define import ArtBehaviour, ArtSize, App
-from lollypop.define import CACHE_PATH, ARTISTS_PATH
+from lollypop.define import ArtBehaviour, ArtSize
+from lollypop.define import CACHE_PATH, ARTISTS_PATH, StoreExtention
 from lollypop.logger import Logger
-from lollypop.utils import emit_signal, escape, get_default_storage_type
+from lollypop.utils import emit_signal
 
 
 class ArtistArt:
@@ -30,11 +30,7 @@ class ArtistArt:
         """
             Init artist artwork
         """
-        self._ext = "jpg"
-        try:
-            self.__migrate_old_dir()
-        except Exception as e:
-            Logger.error("ArtistArt::__init__(): %s", e)
+        pass
 
     def get_artist_artwork_path(self, artist):
         """
@@ -43,9 +39,14 @@ class ArtistArt:
             @return str/None
         """
         encoded = self.encode_artist_name(artist)
-        filepath = "%s/%s.jpg" % (ARTISTS_PATH, encoded)
-        if GLib.file_test(filepath, GLib.FileTest.EXISTS):
-            return filepath
+        if self._extension == StoreExtention.PNG:
+            extensions = ["png", "jpg"]
+        else:
+            extensions = ["jpg", "png"]
+        for extension in extensions:
+            cache_path = "%s/%s.%s" % (ARTISTS_PATH, encoded, extension)
+            if GLib.file_test(cache_path, GLib.FileTest.EXISTS):
+                return cache_path
         return None
 
     def add_artist_artwork(self, artist, data, storage_type):
@@ -58,9 +59,10 @@ class ArtistArt:
         """
         self.uncache_artist_artwork(artist)
         encoded = self.encode_artist_name(artist)
-        filepath = "%s/%s.jpg" % (ARTISTS_PATH, encoded)
+        cache_path = "%s/%s" % (ARTISTS_PATH, encoded)
+        cache_path = self.add_extension(cache_path)
         if data is None:
-            f = Gio.File.new_for_path(filepath)
+            f = Gio.File.new_for_path(cache_path)
             fstream = f.replace(None, False,
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)
             fstream.close()
@@ -69,13 +71,13 @@ class ArtistArt:
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
             stream.close()
-            pixbuf.savev(filepath, "jpeg", ["quality"], ["100"])
+            self.save_pixbuf(pixbuf, cache_path)
         emit_signal(self, "artist-artwork-changed", artist)
 
     def get_artist_artwork(self, artist, width, height, scale_factor,
                            behaviour=ArtBehaviour.CACHE):
         """
-            Return a cairo surface for album_id, covers are cached as jpg.
+            Return a cairo surface for album_id
             @param artist as str
             @param width as int
             @param height as int
@@ -100,30 +102,32 @@ class ArtistArt:
             w = width
             h = height
         filename = self.encode_artist_name(artist)
-        cache_filepath = "%s/%s_%s_%s.%s" % (CACHE_PATH, filename,
-                                             w, h, self._ext)
+        cache_path = "%s/%s_%s_%s" % (CACHE_PATH, filename, w, h)
+        cache_path = self.add_extension(cache_path)
         pixbuf = None
         try:
             # Look in cache
-            f = Gio.File.new_for_path(cache_filepath)
+            f = Gio.File.new_for_path(cache_path)
             if not behaviour & ArtBehaviour.NO_CACHE and f.query_exists():
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_filepath)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path)
                 if optimized_blur:
-                    pixbuf = self.load_behaviour(pixbuf, None,
+                    pixbuf = self.load_behaviour(pixbuf,
                                                  width, height, behaviour)
                 return pixbuf
             else:
-                filepath = self.get_artist_artwork_path(artist)
-                if filepath is not None:
+                cache_path = self.get_artist_artwork_path(artist)
+                if cache_path is not None:
                     try:
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filepath)
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(cache_path)
                     except:
                         return None
                 else:
                     self.cache_artist_artwork(artist)
                     return None
-                pixbuf = self.load_behaviour(pixbuf, cache_filepath,
+                pixbuf = self.load_behaviour(pixbuf,
                                              width, height, behaviour)
+                if behaviour & ArtBehaviour.CACHE:
+                    self.save_pixbuf(pixbuf, cache_path)
             return pixbuf
         except Exception as e:
             Logger.error("ArtistArt::get_artist_artwork(): %s" % e)
@@ -143,7 +147,11 @@ class ArtistArt:
         """
         try:
             from pathlib import Path
-            search = "%s*.jpg" % self.encode_artist_name(artist)
+            if self._extension == StoreExtention.PNG:
+                extension = "png"
+            else:
+                extension = "jpg"
+            search = "%s*.%s" % (self.encode_artist_name(artist), extension)
             for p in Path(CACHE_PATH).glob(search):
                 p.unlink()
         except Exception as e:
@@ -152,30 +160,3 @@ class ArtistArt:
 #######################
 # PRIVATE             #
 #######################
-    def __migrate_old_dir(self):
-        """
-            Migrate old data dir
-        """
-        try:
-            old_path = GLib.get_user_data_dir() + "/lollypop/info"
-            old_src = Gio.File.new_for_path(old_path)
-            if not old_src.query_exists():
-                return
-            storage_type = get_default_storage_type()
-            for (artist_id, artist, *ignore) in App().artists.get(
-                    [], storage_type):
-                for ext in ["jpg", "txt"]:
-                    src_path = "%s/%s.%s" % (old_path, escape(artist), ext)
-                    src = Gio.File.new_for_path(src_path)
-                    if not src.query_exists():
-                        continue
-                    encoded = self.encode_artist_name(artist)
-                    dst_path = "%s/%s.%s" % (ARTISTS_PATH, encoded, ext)
-                    dst = Gio.File.new_for_path(dst_path)
-                    src.copy(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
-            old_dst = Gio.File.new_for_path(
-                GLib.get_user_data_dir() + "/lollypop/info-backup")
-            old_src.move(old_dst, Gio.FileCopyFlags.OVERWRITE, None, None)
-        except Exception as e:
-            Logger.error(
-                "ArtistArt::__migrate_old_dir(): %s -> %s", e, old_path)

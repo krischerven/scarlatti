@@ -141,6 +141,11 @@ NetworkAccessACL = {
 }
 
 
+class StoreExtention:
+    JPG = 0
+    PNG = 1
+
+
 class LoadingState:
     NONE = 0
     RUNNING = 1

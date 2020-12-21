@@ -28,7 +28,7 @@ class SettingsDialog:
                  "save-state", "import-playlists", "save-to-tags",
                  "show-compilations", "transitions", "network-access",
                  "recent-youtube-dl", "import-advanced-artist-tags",
-                 "force-single-column"]
+                 "force-single-column", "hd-artwork"]
 
     __RANGE = ["cover-size", "transitions-duration"]
 
