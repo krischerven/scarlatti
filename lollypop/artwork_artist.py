@@ -21,6 +21,7 @@ from lollypop.define import CACHE_PATH
 from lollypop.define import ARTISTS_PATH, ArtBehaviour, ArtSize
 from lollypop.define import StoreExtention
 from lollypop.utils import emit_signal
+from lollypop.utils_file import create_dir
 
 
 class ArtistArtwork(ArtworkManager, ArtistArtworkDownloader):
@@ -34,6 +35,7 @@ class ArtistArtwork(ArtworkManager, ArtistArtworkDownloader):
         """
         ArtworkManager.__init__(self)
         ArtistArtworkDownloader.__init__(self)
+        create_dir(ARTISTS_PATH)
 
     def get_path(self, artist):
         """

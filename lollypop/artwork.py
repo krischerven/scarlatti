@@ -19,7 +19,7 @@ from lollypop.logger import Logger
 from lollypop.define import CACHE_PATH, ALBUMS_WEB_PATH, ALBUMS_PATH
 from lollypop.define import ARTISTS_PATH, TimeStamp
 from lollypop.utils import emit_signal
-from lollypop.utils_file import remove_oldest
+from lollypop.utils_file import remove_oldest, create_dir
 
 
 class Artwork(ArtworkManager):
@@ -32,6 +32,7 @@ class Artwork(ArtworkManager):
             Init artwork manager
         """
         ArtworkManager.__init__(self)
+        create_dir(CACHE_PATH)
 
     def add_to_cache(self, name, surface, prefix):
         """
