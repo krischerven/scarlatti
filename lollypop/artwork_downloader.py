@@ -148,8 +148,9 @@ class ArtworkDownloader:
             emit_signal(self, "uri-artwork-found", results)
         except Exception as e:
             emit_signal(self, "uri-artwork-found", None)
-            Logger.error("DownloaderArt::__on_load_google_content(): %s: %s"
-                         % (e, content))
+            Logger.error(
+                "ArtworkDownloader::__on_load_google_content(): %s: %s"
+                % (e, content))
 
     def __on_load_startpage_content(self, uri, loaded, content):
         """
@@ -184,5 +185,5 @@ class ArtworkDownloader:
             search_in_data(lines)
         except Exception as e:
             emit_signal(self, "uri-artwork-found", None)
-            Logger.error("DownloaderArt::__on_load_startpage_content(): %s"
+            Logger.error("ArtworkDownloader::__on_load_startpage_content(): %s"
                          % e)

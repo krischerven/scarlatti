@@ -368,13 +368,7 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         """
         store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
         store_path = self.add_extension(store_path)
-        if data is None:
-            f = Gio.File.new_for_path(store_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            self.save_pixbuf_from_data(store_path, data)
+        self.save_pixbuf_from_data(store_path, data)
         self.clean(album)
         self.__emit_update(album.id)
 
@@ -386,13 +380,7 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         """
         store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
         store_path = self.add_extension(store_path)
-        if data is None:
-            f = Gio.File.new_for_path(store_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            self.save_pixbuf_from_data(store_path, data)
+        self.save_pixbuf_from_data(store_path, data)
         self.clean(album)
         self.__emit_update(album.id)
 
@@ -407,31 +395,22 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         save_to_tags = App().settings.get_value("save-to-tags")
         # Multiple albums at same path
         uri_count = App().albums.get_uri_count(album.uri)
-        art_uri = album.uri + "/" + self.__favorite
-
+        art_uri = "%s/%s" % (album.uri, self.__favorite)
+        art_uri = self.add_extension(art_uri)
         # Save cover to tags
         if save_to_tags:
             helper = TaskHelper()
             helper.run(self.__add_to_tags, album, data)
-
         # We need to remove favorite if exists
         if uri_count > 1 or save_to_tags:
             f = Gio.File.new_for_uri(art_uri)
             if f.query_exists():
                 f.trash()
-
         # Name file with album information
         if uri_count > 1:
             art_uri = "%s/%s" % (album.uri, album.lp_album_id)
             art_uri = self.add_extension(art_uri)
-
-        if data is None:
-            f = Gio.File.new_for_path(store_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            self.save_pixbuf_from_data(store_path, data)
+        self.save_pixbuf_from_data(store_path, data)
         dst = Gio.File.new_for_uri(art_uri)
         src = Gio.File.new_for_path(store_path)
         src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)

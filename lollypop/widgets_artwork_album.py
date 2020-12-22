@@ -146,15 +146,16 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget, SignalsHelper):
             @param flowbox as Gtk.FlowBox
             @param child as ArtworkSearchChild
         """
+        def reset_artwork():
+            App().album_art.add(self.__album, None)
+            App().album_art.clean(self.__album)
+
         try:
             if isinstance(child, ArtworkSearchChild):
                 App().task_helper.run(App().album_art.add,
                                       self.__album, child.bytes)
             else:
-                App().task_helper.run(App().album_art.add,
-                                      self.__album, None)
-                App().album_art.add(self.__album, None)
-                App().album_art.clean(self.__album)
+                App().task_helper.run(reset_artwork)
             emit_signal(self, "hidden", True)
         except Exception as e:
             Logger.error("AlbumArtworkSearchWidget::_on_activate(): %s", e)

@@ -66,17 +66,7 @@ class ArtistArtwork(ArtworkManager, ArtistArtworkDownloader):
         encoded = self.__encode(artist)
         cache_path = "%s/%s" % (ARTISTS_PATH, encoded)
         cache_path = self.add_extension(cache_path)
-        if data is None:
-            f = Gio.File.new_for_path(cache_path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        else:
-            bytes = GLib.Bytes.new(data)
-            stream = Gio.MemoryInputStream.new_from_bytes(bytes)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
-            stream.close()
-            self.save_pixbuf(pixbuf, cache_path)
+        self.save_pixbuf_from_data(cache_path, data)
         emit_signal(self, "artist-artwork-changed", artist)
 
     def get(self, artist, width, height, scale_factor,
