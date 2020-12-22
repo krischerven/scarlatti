@@ -133,6 +133,7 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             Set artwork
             @param surface as str
         """
+        self.set_size_request(self.__width, self.__height)
         context_style = self.get_style_context()
         if surface is None:
             context_style.add_class("cover-background")
@@ -141,7 +142,6 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             icon_name = "folder-music-symbolic"
             self.set_from_icon_name(icon_name, Gtk.IconSize.INVALID)
             self.set_pixel_size(self.__width / 3)
-            self.set_size_request(self.__width, self.__height)
         else:
             context_style.remove_class("cover-background")
             if self.__behaviour & ArtBehaviour.ROUNDED:
