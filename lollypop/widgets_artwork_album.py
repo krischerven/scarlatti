@@ -66,7 +66,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget, SignalsHelper):
                 f = Gio.File.new_for_uri(uri)
                 (status, content, tag) = f.load_contents()
                 if status:
-                    status = child.populate(content, self._art_size)
+                    status = child.populate(content, self.art, self._art_size)
                 if status:
                     self._flowbox.add(child)
         except Exception as e:
@@ -114,7 +114,7 @@ class AlbumArtworkSearchWidget(ArtworkSearchWidget, SignalsHelper):
         """
         ArtworkSearchWidget._search_for_artwork(self)
         self._loaders = 3
-        search = self._get_current_search()
+        search = ArtworkSearchWidget._get_current_search(self)
         App().task_helper.run(App().album_art.search_artwork_from_google,
                               search,
                               self._cancellable)

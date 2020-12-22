@@ -310,7 +310,7 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             payload = helper.get_album_payload(album, artist, cancellable)
             if "image" in payload.keys() and payload["image"]:
                 artwork_uri = payload["image"][-1]["#text"]
-            uris.append(artwork_uri)
+                uris.append(artwork_uri)
         except Exception as e:
             Logger.error("Last.FM: %s %s %s", e, artist, album)
         if not uris:
