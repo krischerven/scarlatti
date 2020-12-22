@@ -231,7 +231,6 @@ class InformationView(View, SignalsHelper):
             @param status as bool
         """
         if status:
-            self.__label.set_text(_("Loading information"))
             if get_network_available("WIKIPEDIA"):
                 from lollypop.helper_web_wikipedia import WikipediaHelper
                 wikipedia = WikipediaHelper()
