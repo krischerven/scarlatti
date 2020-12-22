@@ -112,10 +112,7 @@ class ArtistArtwork(ArtworkManager, ArtistArtworkDownloader):
             else:
                 artwork_path = self.get_path(artist)
                 if artwork_path is not None:
-                    try:
-                        pixbuf = GdkPixbuf.Pixbuf.new_from_file(artwork_path)
-                    except:
-                        return None
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(artwork_path)
                 else:
                     self.download(artist)
                     return None
@@ -125,7 +122,7 @@ class ArtistArtwork(ArtworkManager, ArtistArtworkDownloader):
                     self.save_pixbuf(pixbuf, cache_path)
             return pixbuf
         except Exception as e:
-            Logger.error("ArtistArtwork::get(): %s" % e)
+            Logger.warning("ArtistArtwork::get(): %s" % e)
             return None
 
 #######################

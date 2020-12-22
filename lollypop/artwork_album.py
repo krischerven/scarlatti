@@ -240,7 +240,7 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
                 self.save_pixbuf(pixbuf, cache_path)
             return pixbuf
         except Exception as e:
-            Logger.error("AlbumArtwork::get(): %s -> %s" % (uri, e))
+            Logger.warning("AlbumArtwork::get(): %s -> %s" % (uri, e))
             return None
 
     def add(self, album, data):
@@ -249,6 +249,7 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
             @param album as Album
             @param data as bytes
         """
+        self.uncache(album)
         try:
             if not album.storage_type & StorageType.COLLECTION:
                 self.__save_web(album, data)
@@ -279,7 +280,7 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         except Exception as e:
             Logger.error("AlbumArtwork::move(): %s" % e)
 
-    def clean(self, album, width=-1, height=-1):
+    def uncache(self, album, width=-1, height=-1):
         """
             Remove cover from cache for album id
             @param album as Album
@@ -369,7 +370,6 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         store_path = "%s/%s" % (ALBUMS_WEB_PATH, album.lp_album_id)
         store_path = self.add_extension(store_path)
         self.save_pixbuf_from_data(store_path, data)
-        self.clean(album)
         self.__emit_update(album.id)
 
     def __save_ro(self, album, data):
@@ -381,7 +381,6 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         store_path = "%s/%s" % (ALBUMS_PATH, album.lp_album_id)
         store_path = self.add_extension(store_path)
         self.save_pixbuf_from_data(store_path, data)
-        self.clean(album)
         self.__emit_update(album.id)
 
     def __save(self, album, data):
@@ -411,10 +410,18 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
             art_uri = "%s/%s" % (album.uri, album.lp_album_id)
             art_uri = self.add_extension(art_uri)
         self.save_pixbuf_from_data(store_path, data)
-        dst = Gio.File.new_for_uri(art_uri)
-        src = Gio.File.new_for_path(store_path)
-        src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
-        self.clean(album)
+        # Keep file in store if empty
+        if data is None:
+            dst = Gio.File.new_for_uri(art_uri)
+            if dst.query_exists():
+                try:
+                    dst.delete(None)
+                except:
+                    pass
+        else:
+            dst = Gio.File.new_for_uri(art_uri)
+            src = Gio.File.new_for_path(store_path)
+            src.move(dst, Gio.FileCopyFlags.OVERWRITE, None, None)
         self.__emit_update(album.id)
 
     def __get_pixbuf_from_tags(self, uri):

@@ -49,12 +49,7 @@ class ArtworkManager(GObject.GObject):
             @param pixbuf as GdkPixbuf.Pixbuf
             @param path as str
         """
-        if pixbuf is None:
-            f = Gio.File.new_for_path(path)
-            fstream = f.replace(None, False,
-                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
-            fstream.close()
-        elif self.__extension == StoreExtention.PNG:
+        if self.__extension == StoreExtention.PNG:
             pixbuf.savev(path, "png", [None], [None])
         else:
             pixbuf.savev(path, "jpeg", ["quality"], ["100"])
@@ -135,8 +130,13 @@ class ArtworkManager(GObject.GObject):
             @param width as int
             @param height as int
         """
-        pixbuf = None
-        if data is not None:
+        if data is None:
+            print(store_path)
+            f = Gio.File.new_for_path(store_path)
+            fstream = f.replace(None, False,
+                                Gio.FileCreateFlags.REPLACE_DESTINATION, None)
+            fstream.close()
+        else:
             bytes = GLib.Bytes.new(data)
             stream = Gio.MemoryInputStream.new_from_bytes(bytes)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream(stream, None)
@@ -145,9 +145,7 @@ class ArtworkManager(GObject.GObject):
                                              height,
                                              GdkPixbuf.InterpType.BILINEAR)
             stream.close()
-        self.save_pixbuf(pixbuf, store_path)
-        if pixbuf is not None:
-            del pixbuf
+            self.save_pixbuf(pixbuf, store_path)
 
     @property
     def extension(self):
