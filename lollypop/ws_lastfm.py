@@ -19,7 +19,7 @@ from pickle import load, dump
 from lollypop.helper_passwords import PasswordsHelper
 from lollypop.logger import Logger
 from lollypop.utils import get_network_available
-from lollypop.define import LOLLYPOP_DATA_PATH, App, Type
+from lollypop.define import LOLLYPOP_DATA_PATH, App
 from lollypop.define import LASTFM_API_KEY, LASTFM_API_SECRET
 
 
