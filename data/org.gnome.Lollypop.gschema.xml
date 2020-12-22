@@ -284,6 +284,11 @@
             <summary>Enable PNG artwork cache</summary>
             <description></description>
         </key>
+        <key type="b" name="flatpak-access-migration">
+            <default>false</default>
+            <summary>INTERNAL</summary>
+            <description></description>
+        </key>
         <key type="b" name="force-single-column">
             <default>false</default>
             <summary>Force single column mode</summary>
