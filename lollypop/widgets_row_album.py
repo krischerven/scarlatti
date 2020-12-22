@@ -85,7 +85,10 @@ class AlbumRow(Gtk.ListBoxRow):
         App().art_helper.set_frame(self.__artwork, "small-cover-frame",
                                    ArtSize.SMALL, ArtSize.SMALL)
         self.set_sensitive(True)
-        self.set_property("has-tooltip", True)
+        # Issue with gtk3-3.24.24, tooltip is flashing when in
+        # information popover
+        self.set_property("has-tooltip",
+                          self.get_ancestor(Gtk.Popover) is None)
         self.connect("query-tooltip", self.__on_query_tooltip)
         if self.__album.artists:
             artists = GLib.markup_escape_text(", ".join(self.__album.artists))
