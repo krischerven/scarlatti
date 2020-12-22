@@ -64,7 +64,7 @@ you need to allow <b>Lollypop</b>."""),
 #######################
     def __on_destroy(self, window):
         """
-            Finish key activation
+            Launch settings
             @param window as Gtk.Window
         """
         App().lookup_action("settings").activate(None)
