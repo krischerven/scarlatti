@@ -25,7 +25,6 @@ class FlatpakAssistant(Assistant):
     def __init__(self):
         """
             Init assistant
-            @param service as str
         """
         self.__rules = [
             {
