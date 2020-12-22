@@ -103,10 +103,7 @@ class InformationView(View, SignalsHelper):
             self.__banner = InformationBannerWidget(artist_ids[0])
             self.__banner.show()
             self.__banner.connect("search", self.__on_banner_search)
-            self.__albums_view = AlbumsListView([], [],
-                                                ViewType.SCROLLED |
-                                                ViewType.ARTIST)
-            self.__albums_view.set_size_request(350, -1)
+            self.__albums_view = AlbumsListView([], [], ViewType.ARTIST)
             self.__albums_view.show()
             self.__albums_view.set_halign(Gtk.Align.END)
             self.__albums_view.add_widget(self.__albums_view.box)
@@ -135,6 +132,7 @@ class InformationView(View, SignalsHelper):
         self.__label.set_margin_start(MARGIN)
         self.__label.set_margin_end(MARGIN)
         self.__label.set_hexpand(True)
+        self.__label.set_size_request(300, -1)
         widget = Gtk.Grid()
         widget.show()
         self.__stack = Gtk.Stack.new()
