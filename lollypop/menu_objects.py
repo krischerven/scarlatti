@@ -15,7 +15,7 @@ from gi.repository import Gio, Gtk, GLib
 from gettext import gettext as _
 
 from lollypop.define import StorageType, MARGIN_SMALL, App
-from lollypop.define import ViewType
+from lollypop.define import ViewType, Type
 from lollypop.menu_playlists import PlaylistsMenu
 from lollypop.menu_actions import ActionsMenu
 from lollypop.menu_playback import TrackPlaybackMenu, AlbumPlaybackMenu
@@ -53,7 +53,21 @@ class AlbumMenu(Gio.Menu):
             section.append_submenu(_("Devices"), SyncAlbumsMenu([album]))
         if section.get_n_items() != 0:
             self.append_section(_("Add to"), section)
-        self.append_section(_("Others"), ActionsMenu(album))
+        actions_menu = ActionsMenu(album)
+        # Allow user to show album if not in album view
+        if not view_type & ViewType.ALBUM:
+            show_album_action = Gio.SimpleAction(name="show_album_action")
+            App().add_action(show_album_action)
+            show_album_action.connect(
+                "activate",
+                lambda x, y:
+                App().window.container.show_view(
+                   [Type.ALBUM], album, storage_type))
+            menu_item = Gio.MenuItem.new(_("Show album"),
+                                         "app.show_album_action")
+            menu_item.set_attribute_value("close", GLib.Variant("b", True))
+            actions_menu.prepend_item(menu_item)
+        self.append_section(_("Others"), actions_menu)
 
 
 class AlbumsMenu(Gio.Menu):
