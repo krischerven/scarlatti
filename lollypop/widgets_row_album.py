@@ -320,9 +320,7 @@ class AlbumRow(Gtk.ListBoxRow):
         if layout_title.is_ellipsized() or layout_artist.is_ellipsized():
             artist = GLib.markup_escape_text(self.__artist_label.get_text())
             title = GLib.markup_escape_text(self.__title_label.get_text())
-            # Workaround a recent issue in GTK+ 3.24.11
-            # self.set_tooltip_markup("<b>%s</b>\n%s" % (artist, title))
-            self.set_tooltip_markup("<b>%s</b> - %s" % (artist, title))
+            self.set_tooltip_markup("<b>%s</b>\n%s" % (artist, title))
         else:
             self.set_tooltip_text("")
 
