@@ -586,6 +586,7 @@ class TagReader:
                 frame = FrameLangTag(bytes)
                 if frame.key == "USLT":
                     return frame.string
+                Logger.warning("No USLT")
             except Exception as e:
                 Logger.warning("TagReader::get_lyrics(): %s", e)
             return None
@@ -595,6 +596,7 @@ class TagReader:
                 (exists, sample) = tags.get_string_index("lyrics", 0)
                 if exists:
                     return sample
+                Logger.warning("No lyrics-frame")
             except Exception as e:
                 Logger.error("TagReader::get_mp4(): %s" % e)
             return ""
@@ -607,9 +609,11 @@ class TagReader:
                         "private-id3v2-frame",
                         i)
                     if not exists:
+                        Logger.warning("No private-id3v2-frame")
                         continue
                     (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                     if not exists:
+                        Logger.warning("No buffer")
                         continue
                     string = decode_lyrics(m.data)
                     if string is not None:
@@ -626,6 +630,7 @@ class TagReader:
                         "extended-comment",
                         i)
                     if not exists or not sample.startswith("LYRICS="):
+                        Logger.warning("No extended-comment")
                         continue
                     return sample[7:]
             except Exception as e:
