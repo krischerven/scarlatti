@@ -17,6 +17,7 @@ from lollypop.widgets_tracks import TracksWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.define import App, ViewType, IndicatorType
 from lollypop.define import Size
+from lollypop.utils import emit_signal
 from lollypop.helper_size_allocation import SizeAllocationHelper
 
 
@@ -28,6 +29,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
     __gsignals__ = {
         "activated": (GObject.SignalFlags.RUN_FIRST,
                       None, (GObject.TYPE_PYOBJECT,)),
+        "selected": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
         "populated": (GObject.SignalFlags.RUN_FIRST, None, ()),
         "track-removed": (GObject.SignalFlags.RUN_FIRST, None,
                           (GObject.TYPE_PYOBJECT,)),
@@ -180,6 +182,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
             Allow selection on boxes
         """
+        emit_signal(self, "selected", True)
         for box in self.boxes:
             if box.get_selection_mode() == Gtk.SelectionMode.MULTIPLE:
                 continue
@@ -189,6 +192,7 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
             Disallow selection on boxes
         """
+        emit_signal(self, "selected", False)
         for box in self.boxes:
             if box.get_selection_mode() == Gtk.SelectionMode.NONE:
                 continue

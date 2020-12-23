@@ -526,6 +526,11 @@ flowboxchild:selected  {
   	opacity: 1;
 }
 
+.banner-button:selected {
+    border-color: @theme_selected_bg_color;
+    color: @theme_selected_bg_color;
+}
+
 .banner-button-big {
     min-width: 42px;
 	min-height: 36px;
@@ -578,6 +583,11 @@ flowboxchild:selected  {
     color: inherit;
     border-color: alpha(@theme_fg_color, 0.1);
   	opacity: 1;
+}
+
+.menu-button:selected {
+    border-color: @theme_selected_bg_color;
+    color: @theme_selected_bg_color;
 }
 
 .light-button {

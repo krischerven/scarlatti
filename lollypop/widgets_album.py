@@ -192,6 +192,8 @@ class AlbumWidget(Gtk.Grid):
                 self.__tracks_view.populate()
                 self.__tracks_view.connect("populated",
                                            self.__on_tracks_populated)
+                self.__tracks_view.connect("selected",
+                                           self.__on_track_selected)
                 self.__revealer.add(self.__tracks_view)
             self.__revealer.set_reveal_child(
                 not self.__revealer.get_reveal_child())
@@ -213,6 +215,14 @@ class AlbumWidget(Gtk.Grid):
         else:
             self.__revealer.set_transition_type(
                 Gtk.RevealerTransitionType.SLIDE_DOWN)
+
+    def __on_track_selected(self, view, selected):
+        """
+            Mark banner as filtered
+            @param view as TracksView
+            @param selected as bool
+        """
+        self.__banner.set_selected(selected)
 
     def __on_banner_populated(self, widget):
         """

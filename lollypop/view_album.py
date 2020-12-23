@@ -63,6 +63,8 @@ class AlbumView(LazyLoadingView, SignalsHelper):
                 self.__tracks_view.show()
                 self.__tracks_view.connect("populated",
                                            self.__on_tracks_populated)
+                self.__tracks_view.connect("selected",
+                                           self.__on_track_selected)
                 self.__tracks_view.set_margin_start(MARGIN)
                 self.__tracks_view.set_margin_end(MARGIN)
                 self.__tracks_view.populate()
@@ -185,3 +187,11 @@ class AlbumView(LazyLoadingView, SignalsHelper):
                     self.__others_boxes.append(others_box)
         else:
             self.__tracks_view.populate()
+
+    def __on_track_selected(self, view, selected):
+        """
+            Mark banner as filtered
+            @param view as TracksView
+            @param selected as bool
+        """
+        self.__banner.set_selected(selected)
