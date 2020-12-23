@@ -354,7 +354,9 @@ class Album(Base):
             @param skipped as bool
             @return album
         """
-        return Album(self.id, self.genre_ids, self.artist_ids, skipped)
+        album = Album(self.id, self.genre_ids, self.artist_ids, skipped)
+        album.set_tracks(self.tracks)
+        return album
 
     def set_storage_type(self, storage_type):
         """

@@ -221,25 +221,6 @@ def get_network_available(acl_name=""):
     return False
 
 
-def do_shift_selection(listbox, row):
-    """
-        Do a shift selection on a listbox
-    """
-    # Get last selected row
-    start_row = None
-    children = listbox.get_children()
-    selected_rows = listbox.get_selected_rows()
-    if selected_rows:
-        start_row = selected_rows[-1]
-    elif children:
-        start_row = children[0]
-    if start_row is not None:
-        start_index = children.index(start_row)
-        end_index = children.index(row)
-        for i in range(start_index, end_index):
-            listbox.select_row(children[i])
-
-
 def noaccents(string):
     """
         Return string without accents lowered
@@ -500,8 +481,9 @@ def popup_widget(widget, parent, x, y, state_widget):
         popover.add(widget)
         widget.connect("hidden", on_hidden, popover)
         if state_widget is not None:
-            popover.connect("unmap", on_unmap, state_widget)
-            state_widget.set_state_flags(Gtk.StateFlags.VISITED, False)
+            if not state_widget.get_state_flags() & Gtk.StateFlags.VISITED:
+                popover.connect("unmap", on_unmap, state_widget)
+                state_widget.set_state_flags(Gtk.StateFlags.VISITED, False)
         popover.set_relative_to(parent)
         # Workaround a GTK autoscrolling issue in Gtk.ListBox
         # Gtk autoscroll to last focused widget on popover close

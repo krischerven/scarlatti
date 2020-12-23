@@ -291,6 +291,9 @@ class AlbumTracksView(TracksView):
             @param status as bool
             @param track as Track
         """
+        for child in self.children:
+            child.get_parent().unselect_row(child)
+        self._disallow_selection()
         if self.__album.is_web:
             TracksView._on_loading_changed(self, player, status, track)
 
@@ -328,6 +331,23 @@ class AlbumTracksView(TracksView):
                 App().player.load(track)
         else:
             emit_signal(self, "activated", track)
+
+    def _on_row_selected(self, listbox, row):
+        """
+            Update album tracks
+            @param listbox as Gtk.ListBox
+            @param row as Gtk.ListBoxRow
+        """
+        TracksView._on_row_selected(self, listbox, row)
+        selected_rows = []
+        for child in self.children:
+            if child.is_selected():
+                selected_rows.append(child)
+        if selected_rows:
+            tracks = [row.track for row in selected_rows]
+            self.__album.set_tracks(tracks)
+        else:
+            self.__album.reset_tracks()
 
 #######################
 # PRIVATE             #

@@ -198,7 +198,10 @@ class TrackRow(Gtk.ListBoxRow):
             menu_ext = TrackMenuExt(self._track)
             menu_ext.show()
             menu_widget.add_widget(menu_ext)
-        popover = popup_widget(menu_widget, parent, x, y, self)
+        if self.is_selected():
+            popover = popup_widget(menu_widget, parent, x, y, None)
+        else:
+            popover = popup_widget(menu_widget, parent, x, y, self)
         if popover is None:
             menu_widget.connect("hidden", on_hidden)
         else:

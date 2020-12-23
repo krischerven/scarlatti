@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, GLib
 
 
 from lollypop.widgets_tracks import TracksWidget
@@ -137,10 +137,22 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         """
         self._tracks_widget_left[disc_number] = TracksWidget(self._view_type)
         self._tracks_widget_right[disc_number] = TracksWidget(self._view_type)
-        self._tracks_widget_left[disc_number].connect("activated",
-                                                      self._on_activated)
-        self._tracks_widget_right[disc_number].connect("activated",
-                                                       self._on_activated)
+        self._tracks_widget_left[disc_number].connect(
+            "activated", self._on_activated)
+        self._tracks_widget_right[disc_number].connect(
+            "activated", self._on_activated)
+        self._tracks_widget_left[disc_number].connect(
+            "do-selection", self.__on_do_selection)
+        self._tracks_widget_right[disc_number].connect(
+            "do-selection", self.__on_do_selection)
+        self._tracks_widget_left[disc_number].connect(
+            "do-shift-selection", self.__on_do_shift_selection)
+        self._tracks_widget_right[disc_number].connect(
+            "do-shift-selection", self.__on_do_shift_selection)
+        self._tracks_widget_left[disc_number].connect(
+            "row-selected", self._on_row_selected)
+        self._tracks_widget_right[disc_number].connect(
+            "row-selected", self._on_row_selected)
 
     def _add_tracks(self, widget, tracks, position=0):
         """
@@ -164,6 +176,25 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             self._responsive_widget.remove(child)
         return True
 
+    def _allow_selection(self):
+        """
+            Allow selection on boxes
+        """
+        for box in self.boxes:
+            if box.get_selection_mode() == Gtk.SelectionMode.MULTIPLE:
+                continue
+            box.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
+
+    def _disallow_selection(self):
+        """
+            Disallow selection on boxes
+        """
+        for box in self.boxes:
+            if box.get_selection_mode() == Gtk.SelectionMode.NONE:
+                continue
+            box.set_selection_mode(Gtk.SelectionMode.NONE)
+            box.set_activate_on_single_click(True)
+
     def _on_loading_changed(self, player, status, track):
         """
             Update row loading status
@@ -177,12 +208,18 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             else:
                 row.set_indicator()
 
+    def _on_row_selected(self, listbox, row):
+        """
+            Update selection state
+            @param listbox as Gtk.ListBox
+            @param row as Gtk.ListBoxRow
+        """
+        for child in self.children:
+            if child.is_selected():
+                return
+        self._disallow_selection()
+
     def _on_activated(self, widget, track):
-        """
-            Handle playback
-            @param widget as TracksWidget
-            @param track as Track
-        """
         pass
 
 #######################
@@ -203,3 +240,47 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             # We need to listen to parent allocation as currently, we have
             # no children
             SizeAllocationHelper.__init__(self, True)
+
+    def __on_do_selection(self, listbox, row):
+        """
+            Do shift selection
+            @param listbox as Gtk.ListBox
+            @param row as Gtk.ListBoxrow
+        """
+        if row is None:
+            self._disallow_selection()
+        else:
+            self._allow_selection()
+            if row.is_selected():
+                # Let current selection event terminate
+                GLib.timeout_add(100, listbox.unselect_row, row)
+            else:
+                listbox.select_row(row)
+
+    def __on_do_shift_selection(self, listbox, row):
+        """
+            Do shift selection
+            @param listbox as Gtk.ListBox
+            @param row as Gtk.ListBoxrow
+        """
+        self._allow_selection()
+        is_selected = row.is_selected()
+        start_idx = end_idx = -1
+        idx = 0
+        for children in self.children:
+            if children.is_selected() and not is_selected:
+                start_idx = idx
+            elif not children.is_selected() and is_selected:
+                start_idx = idx
+            if children == row:
+                end_idx = idx
+                break
+            idx += 1
+        if start_idx == -1:
+            start_idx = 0
+        for child in self.children[start_idx:end_idx + 1]:
+            if is_selected:
+                GLib.timeout_add(100,
+                                 children.get_parent().unselect_row, child)
+            else:
+                children.get_parent().select_row(child)

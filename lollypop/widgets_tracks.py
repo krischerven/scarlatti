@@ -12,8 +12,8 @@
 
 from gi.repository import GObject, Gtk, Gdk
 
-from lollypop.define import App, ViewType
-from lollypop.utils import do_shift_selection, emit_signal
+from lollypop.define import App
+from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
 
@@ -25,7 +25,11 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
 
     __gsignals__ = {
         "activated": (GObject.SignalFlags.RUN_FIRST,
-                      None, (GObject.TYPE_PYOBJECT,))
+                      None, (GObject.TYPE_PYOBJECT,)),
+        "do-selection": (GObject.SignalFlags.RUN_FIRST,
+                         None, (GObject.TYPE_PYOBJECT,)),
+        "do-shift-selection": (GObject.SignalFlags.RUN_FIRST,
+                               None, (GObject.TYPE_PYOBJECT,))
     }
 
     @signals_map
@@ -80,7 +84,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         row = self.get_row_at_y(y)
         if row is None:
             return
-        row.popup_menu(self, x, y)
+        emit_signal(self, "do-selection", row)
 
     def _on_primary_press_gesture(self, x, y, event):
         """
@@ -92,24 +96,18 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         row = self.get_row_at_y(y)
         if row is None:
             return
-        if event.state & Gdk.ModifierType.CONTROL_MASK and\
-                self.__view_type & ViewType.DND:
-            self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-        elif event.state & Gdk.ModifierType.SHIFT_MASK:
-            if self.__view_type & ViewType.DND:
-                self.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
-                do_shift_selection(self, row)
-            elif App().player.is_in_queue(row.track.id):
-                App().player.remove_from_queue(row.track.id, True)
-            else:
-                App().player.append_to_queue(row.track.id, True)
+        if event.state & Gdk.ModifierType.SHIFT_MASK:
+            emit_signal(self, "do-shift-selection", row)
+        elif event.state & Gdk.ModifierType.CONTROL_MASK or\
+                self.get_selection_mode() == Gtk.SelectionMode.MULTIPLE:
+            emit_signal(self, "do-selection", row)
         elif event.state & Gdk.ModifierType.MOD1_MASK:
-            self.set_selection_mode(Gtk.SelectionMode.NONE)
+            emit_signal(self, "do-selection", None)
             App().player.clear_albums()
             App().player.load(row.track)
         else:
-            self.set_selection_mode(Gtk.SelectionMode.NONE)
             emit_signal(self, "activated", row.track)
+            emit_signal(self, "do-selection", None)
 
     def _on_secondary_press_gesture(self, x, y, event):
         """
