@@ -54,6 +54,10 @@ class ArtistArtworkMenu(Gtk.Bin):
         emit_signal(self, "hidden", True)
 
     @property
+    def section_name(self):
+        return None
+
+    @property
     def submenu_name(self):
         """
             Get submenu name
@@ -95,6 +99,10 @@ class AlbumArtworkMenu(Gtk.Bin):
 
     def __close(self, action, variant):
         emit_signal(self, "hidden", True)
+
+    @property
+    def section(self):
+        return None
 
     @property
     def submenu_name(self):

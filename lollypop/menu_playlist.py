@@ -164,6 +164,10 @@ class PlaylistMenuExt(Gtk.Grid):
         self.add(entry)
 
     @property
+    def section(self):
+        return None
+
+    @property
     def submenu_name(self):
         return None
 

@@ -88,6 +88,8 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 button.set_property("menu-name", widget.submenu_name)
                 button.show()
                 parent = self.__grids["main"]
+                if widget.section is not None:
+                    self.__add_section(widget.section, "main")
                 widget = button
             else:
                 parent = self.get_child_by_name("main")
@@ -196,7 +198,8 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                 submenu = menu.get_item_link(i, "submenu")
                 if link is not None:
                     self.__menu_queue.append((menu, menu_name, indexes))
-                    self.__add_section(label, link, menu_name)
+                    self.__add_section(label, menu_name)
+                    self.__add_menu(link, menu_name, False, False)
                 elif submenu is not None:
                     self.__add_submenu(label, submenu, menu_name)
                     GLib.idle_add(self.__add_menu_items, menu,
@@ -244,11 +247,10 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         button.show()
         self.__grids[menu_name].add(button)
 
-    def __add_section(self, text, menu, menu_name):
+    def __add_section(self, text, menu_name):
         """
             Add section to menu
             @param text as as GLib.Variant
-            @param menu as Gio.Menu
             @param menu_name as str
         """
         box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 4)
@@ -267,7 +269,6 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
         box.add(sep2)
         box.show_all()
         self.__grids[menu_name].add(box)
-        self.__add_menu(menu, menu_name, False, False)
 
     def __add_submenu(self, text, menu, menu_name):
         """

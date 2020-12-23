@@ -56,7 +56,7 @@ class PasswordsHelper:
                 if value is not None:
                     return value.get_text()
         except Exception as e:
-            Logger.error("PasswordsHelper::get_sync(): %s" % e)
+            Logger.error("PasswordsHelper::get_token(): %s" % e)
         return None
 
     def get(self, service, callback, *args):

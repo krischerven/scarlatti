@@ -159,6 +159,14 @@ class SimilarsMenu(Gtk.Bin, SignalsHelper):
         ]
 
     @property
+    def section(self):
+        """
+            Get section
+            @return GLib.Variant
+        """
+        return GLib.Variant("s", _("Others"))
+
+    @property
     def submenu_name(self):
         """
             Get submenu name

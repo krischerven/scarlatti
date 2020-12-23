@@ -68,7 +68,7 @@ class ArtistMenu(Gio.Menu):
             self.append_section(_("Playback"),
                                 ArtistPlaybackMenu(artist_id, storage_type))
         menu = Gio.Menu()
-        self.append_section(_("Artist"), menu)
+        self.append_section(_("Add to"), menu)
         storage_type = get_default_storage_type()
         album_ids = App().albums.get_ids([], [artist_id], storage_type, False)
         albums = [Album(album_id) for album_id in album_ids]
