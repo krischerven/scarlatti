@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from lollypop.tagreader import TagReader, Discoverer
 from lollypop.player_plugins import PluginsPlayer
-from lollypop.define import GstPlayFlags, App, StorageType
+from lollypop.define import GstPlayFlags, App, StorageType, Repeat
 from lollypop.codecs import Codecs
 from lollypop.logger import Logger
 from lollypop.objects_track import Track
@@ -344,8 +344,11 @@ class BinPlayer:
             # Don't do anything if crossfade on, track already scrobbled
             # See TransitionsPlayer
             if not self.crossfading:
-                self._on_track_finished(App().player.current_track)
-                if self._next_track.id is not None:
+                self._on_track_finished(self.current_track)
+                repeat = App().settings.get_enum("repeat")
+                if repeat == Repeat.TRACK:
+                    self._load_track(self.current_track)
+                elif self._next_track.id is not None:
                     self._load_track(self._next_track)
         except Exception as e:
             Logger.error("BinPlayer::_on_stream_about_to_finish(): %s", e)

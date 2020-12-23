@@ -33,13 +33,9 @@ class LinearPlayer:
             Next track for current album or next album
             @return track as Track
         """
-        repeat = App().settings.get_enum("repeat")
         # No album in playback
         if not self.albums:
             return Track()
-        # User want us to repeat current track
-        elif repeat == Repeat.TRACK:
-            return self._current_track
         album = self._current_track.album
         track = self.__fallback_track_if_album_missing(album)
         # Current album missing, go to fallback track
@@ -59,6 +55,7 @@ class LinearPlayer:
                         new_pos = idx
                         break
                 if new_pos == 0:
+                    repeat = App().settings.get_enum("repeat")
                     if repeat == Repeat.ALL:
                         pos = 0
                     else:
@@ -79,13 +76,9 @@ class LinearPlayer:
             Prev track base on.current_track context
             @return track as Track
         """
-        repeat = App().settings.get_enum("repeat")
         # No album in playback
         if not self._albums:
             return Track()
-        # User want us to repeat current track
-        elif repeat == Repeat.TRACK:
-            return self._current_track
         album = self._current_track.album
         track = self.__fallback_track_if_album_missing(album)
         # Current album missing, go to fallback track
@@ -105,6 +98,7 @@ class LinearPlayer:
                         new_pos = idx
                         break
                 if new_pos == albums_count - 1:
+                    repeat = App().settings.get_enum("repeat")
                     if repeat == Repeat.ALL:
                         pos = new_pos
                     else:

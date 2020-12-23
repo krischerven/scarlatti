@@ -50,9 +50,6 @@ class ShufflePlayer:
             Next shuffle track
             @return Track
         """
-        repeat = App().settings.get_enum("repeat")
-        if repeat == Repeat.TRACK:
-            return self._current_track
         if self.shuffle_has_next:
             track = self.__history.next.value
         elif self._albums:
@@ -66,9 +63,6 @@ class ShufflePlayer:
             Prev track based on history
             @return Track
         """
-        repeat = App().settings.get_enum("repeat")
-        if repeat == Repeat.TRACK:
-            return self._current_track
         if self.shuffle_has_prev:
             track = self.__history.prev.value
         else:
