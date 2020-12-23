@@ -126,11 +126,6 @@
             <summary>If true, Lollypop will not use system youtube-dl</summary>
             <description></description>
         </key>
-        <key type="b" name="show-year-below-name">
-            <default>false</default>
-            <summary>Show year below album name</summary>
-            <description></description>
-        </key>
         <key type="b" name="ignore-original-date">
             <default>false</default>
             <summary>Do not use original date if set</summary>
