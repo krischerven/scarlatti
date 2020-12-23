@@ -371,7 +371,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Add/Remove album
            @param button as Gtk.Button
         """
-        if self.__album.id in App().player.album_ids:
-            App().player.remove_album_by_id(self.__album.id)
+        albums = App().player.get_albums_for_id(self.__album.id)
+        if albums:
+            for album in albums:
+                for track in self.__album.tracks:
+                    album.remove_track(track)
+                    if album.id is None:
+                        App().player.remove_album(album)
+                        break
         else:
             App().player.add_album(self.__album.clone(False))
