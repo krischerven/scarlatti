@@ -287,12 +287,19 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
             Set image as +/-
         """
-        if self.__album.id in App().player.album_ids:
-            self.__add_button.get_image().set_from_icon_name(
-                "list-remove-symbolic", Gtk.IconSize.BUTTON)
-        else:
+        albums = App().player.get_albums_for_id(self.__album.id)
+        missing = False if albums else True
+        for album in albums:
+            for track in self.__album.tracks:
+                if track.id not in album.track_ids:
+                    missing = True
+                    break
+        if missing:
             self.__add_button.get_image().set_from_icon_name(
                 "list-add-symbolic", Gtk.IconSize.BUTTON)
+        else:
+            self.__add_button.get_image().set_from_icon_name(
+                "list-remove-symbolic", Gtk.IconSize.BUTTON)
 
     def __set_internal_size(self):
         """
@@ -371,13 +378,21 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Add/Remove album
            @param button as Gtk.Button
         """
+        add = self.__add_button.get_image().get_icon_name()[0] ==\
+            "list-add-symbolic"
         albums = App().player.get_albums_for_id(self.__album.id)
         if albums:
-            for album in albums:
+            if add:
                 for track in self.__album.tracks:
-                    album.remove_track(track)
-                    if album.id is None:
-                        App().player.remove_album(album)
-                        break
+                    albums[0].append_track(track)
+                emit_signal(App().player, "playback-updated", albums[0])
+            else:
+                for album in albums:
+                    for track in self.__album.tracks:
+                        album.remove_track(track)
+                        if album.id is None:
+                            App().player.remove_album(album)
+                            break
+                emit_signal(App().player, "playback-updated", album)
         else:
             App().player.add_album(self.__album.clone(False))
