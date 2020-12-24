@@ -348,7 +348,12 @@ class TagReader:
             (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
             if not exists:
                 continue
-            frame = FrameTextTag(m.data)
+            # Gstreamer 1.18 API breakage
+            try:
+                bytes = m.data.tobytes()
+            except:
+                bytes = m.data
+            frame = FrameTextTag(bytes)
             if frame.key == "TCMP":
                 string = frame.string
                 if not string:
@@ -442,7 +447,12 @@ class TagReader:
                     (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                     if not exists:
                         continue
-                    frame = FrameTextTag(m.data)
+                    # Gstreamer 1.18 API breakage
+                    try:
+                        bytes = m.data.tobytes()
+                    except:
+                        bytes = m.data
+                    frame = FrameTextTag(bytes)
                     if frame.key == "TDOR":
                         if not frame.string:
                             Logger.debug(tags.to_string())
@@ -509,27 +519,27 @@ class TagReader:
                 (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                 if not exists:
                     continue
-                if m.data[0:4] == b"POPM":
+                # Gstreamer 1.18 API breakage
+                try:
+                    bytes = m.data.tobytes()
+                except:
+                    bytes = m.data
+                if bytes[0:4] == b"POPM":
                     # Get tag
                     """
                         Location of rating for common media players:
-                        - Plain POPM is located in m.data[11]
-                        - Media Monkey is located in m.data[19] and
-                          we are searching m.data[10:40] for "no@email"
-                        - WinAMP is located in m.data[28] and we are searching
-                          m.data[10:40] for "rating@winamp.com"
-                        - Windows Media Player is located in m.data[40] and
-                          we are searching m.data[10:40] for
+                        - Plain POPM is located in bytes[11]
+                        - Media Monkey is located in bytes[19] and
+                          we are searching bytes[10:40] for "no@email"
+                        - WinAMP is located in bytes[28] and we are searching
+                          bytes[10:40] for "rating@winamp.com"
+                        - Windows Media Player is located in bytes[40] and
+                          we are searching bytes[10:40] for
                           "Windows Media Player 9 Series"
-                        - MusicBee is located in m.data[19] and
-                          we are searching m.data[10:40] for
+                        - MusicBee is located in bytes[19] and
+                          we are searching bytes[10:40] for
                           "MusicBee"
                     """
-                    # Gstreamer 1.18 API breakage
-                    try:
-                        bytes = m.data.tobytes()
-                    except:
-                        bytes = m.data
                     if bytes.find(b"Windows Media Player 9 Series") >= 0:
                         location = 40
                         Logger.debug(
@@ -586,7 +596,6 @@ class TagReader:
                 frame = FrameLangTag(bytes)
                 if frame.key == "USLT":
                     return frame.string
-                Logger.warning("No USLT")
             except Exception as e:
                 Logger.warning("TagReader::get_lyrics(): %s", e)
             return None
@@ -596,7 +605,6 @@ class TagReader:
                 (exists, sample) = tags.get_string_index("lyrics", 0)
                 if exists:
                     return sample
-                Logger.warning("No lyrics-frame")
             except Exception as e:
                 Logger.error("TagReader::get_mp4(): %s" % e)
             return ""
@@ -609,13 +617,16 @@ class TagReader:
                         "private-id3v2-frame",
                         i)
                     if not exists:
-                        Logger.warning("No private-id3v2-frame")
                         continue
                     (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                     if not exists:
-                        Logger.warning("No buffer")
                         continue
-                    string = decode_lyrics(m.data)
+                    # Gstreamer 1.18 API breakage
+                    try:
+                        bytes = m.data.tobytes()
+                    except:
+                        bytes = m.data
+                    string = decode_lyrics(bytes)
                     if string is not None:
                         return string
             except Exception as e:
@@ -630,7 +641,6 @@ class TagReader:
                         "extended-comment",
                         i)
                     if not exists or not sample.startswith("LYRICS="):
-                        Logger.warning("No extended-comment")
                         continue
                     return sample[7:]
             except Exception as e:
@@ -676,10 +686,15 @@ class TagReader:
                     (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
                     if not exists:
                         continue
-                    prefix = (m.data[0:4])
+                    # Gstreamer 1.18 API breakage
+                    try:
+                        bytes = m.data.tobytes()
+                    except:
+                        bytes = m.data
+                    prefix = (bytes[0:4])
                     if prefix not in [b"SYLT"]:
                         continue
-                    frame = m.data[10:]
+                    frame = bytes[10:]
                     encoding = frame[0:1]
                     string = decode_lyrics(frame.split(b"\n"), encoding)
                     if string is not None:
