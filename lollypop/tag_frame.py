@@ -10,6 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from lollypop.logger import Logger
+
 
 class FrameTag:
     """
@@ -23,7 +25,8 @@ class FrameTag:
         """
         try:
             self.__key = bytes[0:4].decode("utf-8")
-        except:
+        except Exception as e:
+            Logger.error("FrameTag::__init__(self): %s" % e)
             self.__key = "None"
         self.__bytes = bytes
 
