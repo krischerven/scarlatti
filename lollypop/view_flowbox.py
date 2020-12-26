@@ -89,6 +89,14 @@ class FlowBoxView(LazyLoadingView, GesturesHelper):
         for child in self._box.get_children():
             child.destroy()
 
+    def destroy(self):
+        """
+            Force destroying the box
+            Help freeing memory, no idea why
+        """
+        self._box.destroy()
+        LazyLoadingView.destroy(self)
+
     @property
     def font_height(self):
         """

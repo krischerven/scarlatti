@@ -117,7 +117,6 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             newpix = pixbuf.scale_simple(self.__cover_size,
                                          self.__cover_size,
                                          GdkPixbuf.InterpType.NEAREST)
-            del pixbuf
             album_scaled_pixbufs.append(newpix)
 
         if len(album_scaled_pixbufs) == 0:
@@ -157,10 +156,8 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             return
         rounded = get_round_surface(
             surface, self._scale_factor, self._art_size / 4)
-        del surface
         self._artwork.set_from_surface(rounded)
         App().art.add_to_cache(self.artwork_name, rounded, "ROUNDED")
-        del rounded
         emit_signal(self, "populated")
 
     def __draw_surface(self, surface, ctx, positions,
@@ -183,14 +180,12 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
             y *= self.__cover_size
             subsurface = Gdk.cairo_surface_create_from_pixbuf(
                 pixbuf, self._scale_factor, None)
-            del pixbuf
             ctx.translate(x, y)
             ctx.set_source_surface(subsurface, 0, 0)
             ctx.paint()
             ctx.translate(-x, -y)
             self.__draw_surface(surface, ctx, positions,
                                 album_pixbufs, set_surface)
-            del surface
         if self.__cancellable.is_cancelled():
             return
         elif album_pixbufs and len(positions) > 0:

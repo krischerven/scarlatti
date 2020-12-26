@@ -81,31 +81,24 @@ class ArtworkManager(GObject.GObject):
 
         # Handle blur
         if behaviour & ArtBehaviour.BLUR:
-            _pixbuf = pixbuf
-            pixbuf = _pixbuf.scale_simple(width,
-                                          height,
-                                          GdkPixbuf.InterpType.NEAREST)
-            del _pixbuf
+            pixbuf = pixbuf.scale_simple(width,
+                                         height,
+                                         GdkPixbuf.InterpType.NEAREST)
             pixbuf = self._get_blur(pixbuf, 25)
         elif behaviour & ArtBehaviour.BLUR_HARD:
-            _pixbuf = pixbuf
-            pixbuf = _pixbuf.scale_simple(width,
-                                          height,
-                                          GdkPixbuf.InterpType.NEAREST)
+            pixbuf = pixbuf.scale_simple(width,
+                                         height,
+                                         GdkPixbuf.InterpType.NEAREST)
             pixbuf = self._get_blur(pixbuf, 50)
         elif behaviour & ArtBehaviour.BLUR_MAX:
-            _pixbuf = pixbuf
-            pixbuf = _pixbuf.scale_simple(width,
-                                          height,
-                                          GdkPixbuf.InterpType.NEAREST)
-            del _pixbuf
+            pixbuf = pixbuf.scale_simple(width,
+                                         height,
+                                         GdkPixbuf.InterpType.NEAREST)
             pixbuf = self._get_blur(pixbuf, 100)
         else:
-            _pixbuf = pixbuf
-            pixbuf = _pixbuf.scale_simple(width,
-                                          height,
-                                          GdkPixbuf.InterpType.BILINEAR)
-            del _pixbuf
+            pixbuf = pixbuf.scale_simple(width,
+                                         height,
+                                         GdkPixbuf.InterpType.BILINEAR)
         return pixbuf
 
     def update_art_size(self):
@@ -195,7 +188,6 @@ class ArtworkManager(GObject.GObject):
                                               offset / 2,
                                               width,
                                               height - offset)
-        del pixbuf
         return new_pixbuf
 
     def _crop_pixbuf_square(self, pixbuf):
@@ -220,7 +212,6 @@ class ArtworkManager(GObject.GObject):
                                               diff / 2,
                                               width,
                                               height - diff)
-        del pixbuf
         return new_pixbuf
 
     def _get_blur(self, pixbuf, gaussian):

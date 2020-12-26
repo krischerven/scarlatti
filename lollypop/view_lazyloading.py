@@ -13,6 +13,7 @@
 from gi.repository import GLib, GObject
 
 from time import time
+import gc
 
 from lollypop.define import LoadingState, App
 from lollypop.logger import Logger
@@ -179,6 +180,7 @@ class LazyLoadingView(View):
                 else:
                     GLib.idle_add(
                         App().window.container.type_ahead.entry.grab_focus)
+            gc.collect()
             Logger.debug("LazyLoadingView::lazy_loading(): %s",
                          time() - self.__start_time)
 

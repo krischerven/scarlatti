@@ -96,7 +96,6 @@ class CoverWidgetBase(SignalsHelper):
                                              icon_size)
         else:
             self._artwork.set_from_surface(surface)
-            del surface
 
 
 class EditCoverWidget(Gtk.EventBox, CoverWidgetBase, GesturesHelper):

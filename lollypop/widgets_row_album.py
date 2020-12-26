@@ -303,7 +303,6 @@ class AlbumRow(Gtk.ListBoxRow):
                                               Gtk.IconSize.BUTTON)
         else:
             self.__artwork.set_from_surface(surface)
-            del surface
         self.show_all()
         # TracksView will emit populated
         if not self.revealed:

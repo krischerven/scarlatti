@@ -147,4 +147,3 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             if self.__behaviour & ArtBehaviour.ROUNDED:
                 context_style.remove_class("rounded")
             self.set_from_surface(surface)
-            del surface

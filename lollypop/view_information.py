@@ -281,7 +281,6 @@ class InformationView(View, SignalsHelper):
             self.__artist_artwork.hide()
         else:
             self.__artist_artwork.set_from_surface(surface)
-            del surface
 
     def __on_artist_information(self, content, artist_name):
         """

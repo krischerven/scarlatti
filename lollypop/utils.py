@@ -94,13 +94,11 @@ def get_round_surface(surface, scale_factor, radius):
     height = surface.get_height()
     if isinstance(surface, GdkPixbuf.Pixbuf):
         pixbuf = surface
-        del surface
         width = width // scale_factor
         height = height // scale_factor
         radius = radius // scale_factor
         surface = Gdk.cairo_surface_create_from_pixbuf(
             pixbuf, scale_factor, None)
-        del pixbuf
     rounded = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     ctx = cairo.Context(rounded)
     degrees = pi / 180
@@ -114,7 +112,6 @@ def get_round_surface(surface, scale_factor, radius):
     ctx.set_source_surface(surface, 0, 0)
     ctx.clip()
     ctx.paint()
-    del surface
     return rounded
 
 

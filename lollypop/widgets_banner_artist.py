@@ -323,4 +323,3 @@ class ArtistBannerWidget(BannerWidget, SignalsHelper):
             self.__badge_artwork.get_style_context().remove_class(
                 "circle-icon")
             self.__badge_artwork.set_from_surface(surface)
-            del surface

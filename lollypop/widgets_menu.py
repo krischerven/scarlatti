@@ -408,11 +408,9 @@ class MenuBuilder(Gtk.Stack, SignalsHelper):
                     pixbuf.scale_simple(ArtSize.MEDIUM, ArtSize.MEDIUM,
                                         GdkPixbuf.InterpType.BILINEAR),
                     scale_factor, None)
-                del pixbuf
                 rounded = get_round_surface(surface, scale_factor,
                                             ArtSize.MEDIUM / 4)
                 artwork.set_from_surface(rounded)
-                del rounded
                 artwork.show()
         button = Gtk.ModelButton.new()
         button.set_hexpand(True)
