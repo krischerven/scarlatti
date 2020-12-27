@@ -175,8 +175,8 @@ class TrackRow(Gtk.ListBoxRow):
             if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
                 discs = App().albums.get_discs(self._track.album.id)
                 if len(discs) > 1:
-                    label = "%s - %s" % (self._track.number,
-                                         self._track.discnumber)
+                    label = "%s: %s" % (self._track.discnumber,
+                                        self._track.number)
                 else:
                     label = "%s" % self._track.number
             else:
