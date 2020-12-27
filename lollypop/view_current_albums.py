@@ -40,7 +40,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         self.box.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
-        self.__banner = CurrentAlbumsBannerWidget(self)
+        self.__banner = CurrentAlbumsBannerWidget(self, view_type)
         self.__banner.show()
         self.add_widget(self.box, self.__banner)
         self.allow_duplicate("_on_queue_changed")
@@ -106,12 +106,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
 
     @property
     def args(self):
-        """
-            Get default args for __class__
-            @return {}
-        """
-        return {"view_type": self.view_type & ~(ViewType.SCROLLED |
-                                                ViewType.SMALL)}
+        return None
 
 #######################
 # PROTECTED           #

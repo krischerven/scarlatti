@@ -45,6 +45,7 @@ class AdaptiveHelper:
             Allow animations in stack
         """
         def do_destroy():
+            print(self)
             self.destroy()
         self.stop()
         if self.args is not None:

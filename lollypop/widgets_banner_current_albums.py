@@ -27,12 +27,13 @@ class CurrentAlbumsBannerWidget(BannerWidget, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self, view):
+    def __init__(self, view, view_type):
         """
             Init banner
             @param view as AlbumsListView
+            @param view_type as ViewType
         """
-        BannerWidget.__init__(self, view.args["view_type"] | ViewType.OVERLAY)
+        BannerWidget.__init__(self, view_type | ViewType.OVERLAY)
         self.__duration_task = False
         self.__view = view
         self.__clear_button = Gtk.Button.new_from_icon_name(
