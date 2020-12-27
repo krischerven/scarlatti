@@ -133,6 +133,14 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         if y is not None:
             self.scrolled.get_vadjustment().set_value(y)
 
+    def destroy(self):
+        """
+            Force destroying the box
+            Help freeing memory, no idea why
+        """
+        self._box.destroy()
+        LazyLoadingView.destroy(self)
+
     @property
     def args(self):
         """
