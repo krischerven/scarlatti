@@ -45,7 +45,8 @@ class AutoSimilarPlayer:
                                                 StorageType.COLLECTION)
         track_ids = App().tracks.get_randoms(genre_ids,
                                              StorageType.COLLECTION,
-                                             1)
+                                             1,
+                                             100)
         if track_ids:
             return Track(track_ids[0]).album
         return None
