@@ -50,7 +50,7 @@ class LastFMWebService:
             self.__queue = load(
                 open(LOLLYPOP_DATA_PATH + "/%s_queue.bin" % self.__name, "rb"))
         except Exception as e:
-            Logger.info("LastFMWebService::__init__(): %s", e)
+            Logger.info("LastFMWebService::start(): %s", e)
             self.__queue = []
 
     def stop(self):

@@ -52,7 +52,7 @@ class ListenBrainzWebService(GObject.GObject):
             self.__queue = load(
                 open(LOLLYPOP_DATA_PATH + "/%s_queue.bin" % self.__name, "rb"))
         except Exception as e:
-            Logger.info("ListenBrainzWebService::__init__(): %s", e)
+            Logger.info("ListenBrainzWebService::start(): %s", e)
             self.__queue = []
 
     def stop(self):
