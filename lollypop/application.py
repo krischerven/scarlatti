@@ -184,15 +184,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             self.__window.setup()
             self.__window.show()
             self.player.restore_state()
-            if GLib.file_test("/app", GLib.FileTest.EXISTS) and\
-                    not self.settings.get_value("flatpak-access-migration"):
-                from lollypop.assistant_flatpak import FlatpakAssistant
-                assistant = FlatpakAssistant()
-                assistant.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
-                assistant.set_transient_for(self.__window)
-                GLib.timeout_add(1000, assistant.show)
-                self.settings.set_value("flatpak-access-migration",
-                                        GLib.Variant("b", True))
 
     def quit(self, vacuum=False, wait=100):
         """

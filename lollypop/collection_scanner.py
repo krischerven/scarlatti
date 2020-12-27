@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib, GObject, Gio
+from gi.repository import GLib, GObject, Gio, Gtk
 
 from gi.repository.Gio import FILE_ATTRIBUTE_STANDARD_NAME, \
                               FILE_ATTRIBUTE_STANDARD_TYPE, \
@@ -500,6 +500,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             (files, dirs, streams) = self.__get_objects_for_uris(
                 scan_type, uris)
             if len(uris) != len(streams) and not files:
+                self.__flatpak_migration()
                 App().notify.send("Lollypop",
                                   _("Scan disabled, missing collection"))
                 return
@@ -855,3 +856,17 @@ class CollectionScanner(GObject.GObject, TagReader):
         self.save_album(item)
         self.save_track(item)
         return item
+
+    def __flatpak_migration(self):
+        """
+            https://github.com/flathub/org.gnome.Lollypop/pull/108
+        """
+        if GLib.file_test("/app", GLib.FileTest.EXISTS) and\
+                not App().settings.get_value("flatpak-access-migration"):
+            from lollypop.assistant_flatpak import FlatpakAssistant
+            assistant = FlatpakAssistant()
+            assistant.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+            assistant.set_transient_for(App().window)
+            GLib.timeout_add(1000, assistant.show)
+            App().settings.set_value("flatpak-access-migration",
+                                     GLib.Variant("b", True))
