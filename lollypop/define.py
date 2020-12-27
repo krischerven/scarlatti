@@ -108,7 +108,7 @@ class ViewType:
     PLAYLISTS = 1 << 5
     ALBUM = 1 << 6
     SMALL = 1 << 7
-    # ADAPTIVE = 1 << 8
+    QUEUE = 1 << 8
     SCROLLED = 1 << 9
     OVERLAY = 1 << 10
     FULLSCREEN = 1 << 11

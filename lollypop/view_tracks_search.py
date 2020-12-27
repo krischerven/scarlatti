@@ -29,8 +29,6 @@ class SearchTracksView(TracksView, SignalsHelper):
     def __init__(self):
         """
             Init view
-            @param album as Album
-            @param view_type as ViewType
         """
         TracksView.__init__(self, ViewType.SEARCH)
         self.__track_ids = []

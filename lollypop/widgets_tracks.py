@@ -12,7 +12,7 @@
 
 from gi.repository import GObject, Gtk, Gdk
 
-from lollypop.define import App, ViewType
+from lollypop.define import App
 from lollypop.utils import emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.helper_gestures import GesturesHelper
@@ -98,9 +98,7 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             return
         if event.state & Gdk.ModifierType.SHIFT_MASK:
             emit_signal(self, "do-shift-selection", row)
-        elif event.state & Gdk.ModifierType.CONTROL_MASK or (
-                self.get_selection_mode() == Gtk.SelectionMode.MULTIPLE and
-                not self.__view_type & ViewType.DND):
+        elif event.state & Gdk.ModifierType.CONTROL_MASK:
             emit_signal(self, "do-selection", row)
         elif event.state & Gdk.ModifierType.MOD1_MASK:
             emit_signal(self, "do-selection", None)
@@ -117,7 +115,10 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
             @param y as int
             @param event as Gdk.Event
         """
-        self._on_primary_long_press_gesture(x, y)
+        row = self.get_row_at_y(y)
+        if row is None:
+            return
+        row.popup_menu(self, x, y)
 
 #######################
 # PRIVATE             #

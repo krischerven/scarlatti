@@ -16,24 +16,9 @@ from lollypop.utils import popup_widget
 from lollypop.view_lazyloading import LazyLoadingView
 from lollypop.define import App, ViewType, MARGIN, StorageType
 from lollypop.widgets_row_album import AlbumRow
+from lollypop.widgets_listbox import ListBox
 from lollypop.helper_gestures import GesturesHelper
 from lollypop.helper_signals import SignalsHelper, signals_map
-
-
-class ListBox(Gtk.ListBox):
-    def __init__(self):
-        Gtk.ListBox.__init__(self)
-        self.__width = 0
-
-    def set_width(self, width):
-        self.set_property("halign", Gtk.Align.CENTER)
-        self.__width = width
-
-    def do_get_preferred_width(self):
-        if self.__width == 0:
-            return Gtk.ListBox.do_get_preferred_width(self)
-        else:
-            return (self.__width, self.__width)
 
 
 class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):

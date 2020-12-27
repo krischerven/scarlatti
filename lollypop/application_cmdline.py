@@ -178,7 +178,6 @@ class ApplicationCmdline:
                         if not f.query_exists():
                             uri = GLib.filename_to_uri(
                                 "%s/%s" % (GLib.get_current_dir(), uri))
-                            print(uri)
                             f = Gio.File.new_for_uri(uri)
                     file_type = get_file_type(uri)
                     if file_type == FileType.PLS:

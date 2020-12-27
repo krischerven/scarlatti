@@ -10,12 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
-from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import emit_signal
 from lollypop.objects_track import Track
+from lollypop.widgets_row_track import TrackRow
 from lollypop.view_albums_list import AlbumsListView
+from lollypop.view_tracks_queue import QueueTracksView
 from lollypop.define import App, ViewType, Size, MARGIN
 from lollypop.helper_signals import SignalsHelper, signals_map
 from lollypop.widgets_banner_current_albums import CurrentAlbumsBannerWidget
@@ -40,15 +41,22 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         self.box.set_width(Size.MEDIUM)
         if view_type & ViewType.DND:
             self.dnd_helper.connect("dnd-finished", self.__on_dnd_finished)
-        self.__banner = CurrentAlbumsBannerWidget(self, view_type)
+        self.__banner = CurrentAlbumsBannerWidget(self)
         self.__banner.show()
-        self.add_widget(self.box, self.__banner)
-        self.allow_duplicate("_on_queue_changed")
+        # Queue
+        self.__queue_widget = QueueTracksView()
+        self.__queue_widget.show()
+        self.__queue_widget.populate()
+        grid = Gtk.Grid()
+        grid.set_orientation(Gtk.Orientation.VERTICAL)
+        grid.show()
+        grid.add(self.__queue_widget)
+        grid.add(self.box)
+        self.add_widget(grid, self.__banner)
         self.allow_duplicate("_on_playback_added")
         self.allow_duplicate("_on_playback_updated")
         self.allow_duplicate("_on_playback_removed")
         return [
-            (App().player, "queue-changed", "_on_queue_changed"),
             (App().player, "playback-added", "_on_playback_added"),
             (App().player, "playback-setted", "_on_playback_setted"),
             (App().player, "playback-updated", "_on_playback_updated"),
@@ -59,11 +67,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
             Populate view
         """
-        if App().player.queue:
-            tracks = [Track(track_id) for track_id in App().player.queue]
-            albums = tracks_to_albums(tracks)
-        else:
-            albums = App().player.albums
+        albums = App().player.albums
         if albums:
             if len(albums) == 1:
                 self.add_reveal_albums(albums)
@@ -111,30 +115,6 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
 #######################
 # PROTECTED           #
 #######################
-    def _on_queue_changed(self, *ignore):
-        """
-            Clean view and reload if empty
-        """
-        queue = App().player.queue
-        if queue:
-            for row in self.children:
-                if row.revealed:
-                    for subrow in row.children:
-                        if subrow.track.id not in queue:
-                            subrow.destroy()
-                            break
-                count = len(row.album.tracks)
-                for track in row.album.tracks:
-                    if track.id not in queue:
-                        row.album.remove_track(track)
-                        if count == 1:
-                            row.destroy()
-                        break
-        else:
-            self.stop()
-            AlbumsListView.clear(self)
-            self.populate()
-
     def _on_playback_added(self, player, album):
         """
             Add album
@@ -188,7 +168,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
             Start playback
             @param row as AlbumRow
-            @param track_id as int
+            @param track as Track
         """
         App().player.load(track)
 
@@ -221,6 +201,15 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
+    def __add_queue(self):
+        """
+            Add player queue
+        """
+        for track_id in App().player.queue:
+            row = TrackRow(Track(track_id), [], self.view_type)
+            row.show()
+            self.__queue_widget.add(row)
+
     def __on_dnd_finished(self, dnd_helper):
         """
             Save playlist if needed

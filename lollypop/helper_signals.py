@@ -66,7 +66,8 @@ class SignalsHelper():
             @param callback_str as str
         """
         callback = getattr(self, callback_str)
-        self.__allow_duplicate.append(callback)
+        if callback not in self.__allow_duplicate:
+            self.__allow_duplicate.append(callback)
 
     def init(self, signals):
         """

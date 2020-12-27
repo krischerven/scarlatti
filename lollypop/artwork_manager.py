@@ -124,7 +124,6 @@ class ArtworkManager(GObject.GObject):
             @param height as int
         """
         if data is None:
-            print(store_path)
             f = Gio.File.new_for_path(store_path)
             fstream = f.replace(None, False,
                                 Gio.FileCreateFlags.REPLACE_DESTINATION, None)

@@ -63,10 +63,11 @@ class TrackRow(Gtk.ListBoxRow):
         self._grid.set_property("valign", Gtk.Align.CENTER)
         self._grid.set_column_spacing(5)
         self._grid.show()
-        self._indicator = IndicatorWidget(self, view_type)
-        self._indicator.show()
-        self._indicator.set_valign(Gtk.Align.CENTER)
-        self._grid.add(self._indicator)
+        if not view_type & ViewType.QUEUE:
+            self._indicator = IndicatorWidget(self, view_type)
+            self._indicator.show()
+            self._indicator.set_valign(Gtk.Align.CENTER)
+            self._grid.add(self._indicator)
         self._num_label = Gtk.Label.new()
         self._num_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._num_label.set_width_chars(4)
@@ -97,7 +98,8 @@ class TrackRow(Gtk.ListBoxRow):
         self.__duration_label.show()
         self._grid.add(self.__duration_label)
         self.__action_button = None
-        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
+        if self.__view_type & (
+                ViewType.PLAYBACK | ViewType.PLAYLISTS):
             self.__action_button = Gtk.Button.new_from_icon_name(
                "list-remove-symbolic",
                Gtk.IconSize.MENU)
@@ -119,7 +121,8 @@ class TrackRow(Gtk.ListBoxRow):
             context.add_class("menu-button")
             self._grid.add(self.__action_button)
         self.add(self._grid)
-        self.set_indicator(self._get_indicator_type())
+        if not view_type & ViewType.QUEUE:
+            self.set_indicator(self._get_indicator_type())
         self.update_duration()
         self.get_style_context().add_class("trackrow")
 
@@ -248,7 +251,8 @@ class TrackRow(Gtk.ListBoxRow):
             Show row menu
             @param button as Gtk.Button
         """
-        if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
+        if self.__view_type & (
+                ViewType.PLAYBACK | ViewType.QUEUE | ViewType.PLAYLISTS):
             emit_signal(self, "removed")
         else:
             self.popup_menu(button)
