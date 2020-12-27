@@ -68,7 +68,7 @@ class SettingsDialog:
             self.__locked.append(widget)
         self.__update_locked()
         self.__music_group = builder.get_object("music_group")
-        for uri in App().settings.get_value("music-uris"):
+        for uri in App().settings.get_music_uris():
             button = self.__get_new_chooser(uri)
             self.__music_group.add(button)
         for device in App().settings.get_value("devices"):
