@@ -371,11 +371,9 @@ class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
         def on_load(items):
             FlowBoxView.populate(self, items)
 
-        def get_album(album_id, disc_number, count, year):
+        def get_album(album_id, disc_number, disc_name, year):
             album = Album(album_id, [Type.YEARS], [])
-            # If count > 1, it's an album with multiple discs
-            # Else it's a disc from a discography
-            if count == 1:
+            if disc_name != "":
                 album.set_disc_number(disc_number)
                 album.set_year(year)
             return album

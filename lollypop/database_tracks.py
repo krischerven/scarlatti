@@ -928,8 +928,8 @@ class TracksDatabase:
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
             request = "SELECT DISTINCT tracks.album_id,\
-                       tracks.discnumber,\
-                       COUNT(*)\
+                       discnumber,\
+                       discname\
                        FROM albums, tracks, album_artists, artists\
                        WHERE albums.rowid=album_artists.album_id AND\
                        artists.rowid=album_artists.artist_id AND\
@@ -957,8 +957,8 @@ class TracksDatabase:
             order = " ORDER BY albums.timestamp, albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
             request = "SELECT DISTINCT tracks.album_id,\
-                       tracks.discnumber,\
-                       COUNT(*)\
+                       discnumber,\
+                       discname\
                        FROM albums, album_artists, tracks\
                        WHERE album_artists.artist_id=?\
                        AND album_artists.album_id=albums.rowid\

@@ -502,11 +502,13 @@ class Album(Base):
             track_ids = [track.lp_track_id for track in self.tracks]
             track_str = "%s" % sorted(track_ids)
             track_hash = md5(track_str.encode("utf-8")).hexdigest()
-            album_hash = "%s-%s" % (self.lp_album_id, track_hash)
+            album_hash = "%s-%s-%s" % (
+                self.lp_album_id, track_hash, self.__disc_number)
         else:
-            album_hash = "%s-%s-%s" % (self.lp_album_id,
-                                       self.genre_ids,
-                                       self.artist_ids)
+            album_hash = "%s-%s-%s-%s" % (self.lp_album_id,
+                                          self.genre_ids,
+                                          self.artist_ids,
+                                          self.__disc_number)
         duration = App().cache.get_duration(album_hash)
         if duration is None:
             if self.__tracks:
@@ -516,7 +518,8 @@ class Album(Base):
             else:
                 duration = self.db.get_duration(self.id,
                                                 self.genre_ids,
-                                                self.artist_ids)
+                                                self.artist_ids,
+                                                self.__disc_number)
             App().cache.set_duration(self.id, album_hash, duration)
         return duration
 
