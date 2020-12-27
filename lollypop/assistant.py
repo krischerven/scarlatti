@@ -100,8 +100,12 @@ class Assistant(Handy.Window):
             self.__headerbar.set_title(self.__rules[index]["title"])
             self.__left_button.set_label(
                 self.__rules[index]["left_button_label"])
-            self.__right_button.set_label(
-                self.__rules[index]["right_button_label"])
+            if self.__rules[index]["right_button_label"] is None:
+                self.__right_button.hide()
+            else:
+                self.__right_button.show()
+                self.__right_button.set_label(
+                    self.__rules[index]["right_button_label"])
             if self.__rules[index]["left_button_style"] is not None:
                 self.__left_button.get_style_context().add_class(
                     self.__rules[index]["left_button_style"])

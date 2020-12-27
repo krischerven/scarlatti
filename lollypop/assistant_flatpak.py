@@ -35,7 +35,7 @@ In order to be able to access your collection,
 you need to allow <b>Lollypop</b>."""),
               "uri_label": "",
               "uri": None,
-              "right_button_label": _("Cancel"),
+              "right_button_label": None,
               "right_button_style": "",
               "left_button_label": _("Next"),
               "left_button_style": "suggested-action"
@@ -57,6 +57,7 @@ you need to allow <b>Lollypop</b>."""),
             },
         ]
         Assistant.__init__(self, self.__rules)
+        self.resize(500, 100)
         self.connect("destroy", self.__on_destroy)
 
 #######################
