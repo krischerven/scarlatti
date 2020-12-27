@@ -33,7 +33,7 @@ class QueueTracksView(Gtk.Bin, GesturesHelper, SignalsHelper):
             Init view
         """
         Gtk.Bin.__init__(self)
-        label = Gtk.Label.new(_("Actually in queue"))
+        label = Gtk.Label.new(_("Currently in queue"))
         label.show()
         label.get_style_context().add_class("dim-label")
         label.get_style_context().add_class("large")
