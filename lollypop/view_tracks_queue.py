@@ -40,7 +40,7 @@ class QueueTracksView(Gtk.Bin, GesturesHelper, SignalsHelper):
         self.__box = ListBox()
         self.__box.show()
         self.__box.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.__box.set_width(Size.MEDIUM - MARGIN * 2)
+        self.__box.set_width(Size.SMALL)
         self.__box.connect("row-activated", self.__on_row_activated)
         self.__grid = Gtk.Grid()
         self.__grid.set_orientation(Gtk.Orientation.VERTICAL)
