@@ -193,8 +193,8 @@ class ArtistArtworkDownloader(ArtworkDownloader):
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["artists"]["items"]:
-                    uri = item["images"][0]["url"]
-                    uris.append(uri)
+                    image_uri = item["images"][0]["url"]
+                    uris.append(image_uri)
         except:
             Logger.error("Spotify: %s", uri)
         return uris
