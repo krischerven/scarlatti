@@ -100,19 +100,10 @@ class ArtworkDownloader:
             if status:
                 decode = json.loads(data.decode("utf-8"))
                 if mbid_type == "artist":
-                    if "artist" not in decode.keys():
-                        Logger.warning(
-                            "Can't find '%s' on MusicBrainz" % string)
-                        return None
                     for item in decode["artists"]:
                         return item["id"]
                 else:
                     mbid = None
-                    # Get album id or EP id if missing
-                    if "release-groups" not in decode.keys():
-                        Logger.warning(
-                            "Can't find '%s' on MusicBrainz" % string)
-                        return None
                     for item in decode["release-groups"]:
                         if "primary-type" not in item.keys():
                             continue
@@ -122,8 +113,8 @@ class ArtworkDownloader:
                         elif item["primary-type"] == "EP" and mbid is None:
                             mbid = item["id"]
                 return mbid
-        except Exception as e:
-            Logger.warning("ArtworkDownloader::_get_musicbrainz_mbid: %s", e)
+        except:
+            Logger.warning("MusicBrainz: %s", uri)
         return None
 
 #######################

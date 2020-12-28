@@ -16,7 +16,7 @@ import json
 
 from lollypop.define import App, Type, AUDIODB_CLIENT_ID
 from lollypop.define import FANARTTV_ID
-from lollypop.utils import get_network_available, noaccents, emit_signal
+from lollypop.utils import get_network_available, emit_signal
 from lollypop.logger import Logger
 from lollypop.objects_album import Album
 from lollypop.artwork_downloader import ArtworkDownloader
@@ -109,19 +109,12 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             if status:
-                artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
                 for item in decode["data"]:
-                    item_artist = noaccents(item["artist"]["name"].lower())
-                    if artist and artist != item_artist:
-                        continue
                     uri = item["cover_xl"]
                     uris.append(uri)
-        except Exception as e:
-            Logger.error("Deezer: %s %s %s", e, artist, album)
-            uris = []
-        if not uris:
-            Logger.warning("Can't find '%s - %s' on Deezer" % (artist, album))
+        except:
+            Logger.error("Deezer: %s", uri)
         return uris
 
     def __get_fanarttv_album_artwork_uri(self, artist, album,
@@ -141,20 +134,16 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             mbid = self._get_musicbrainz_mbid("album", search, cancellable)
             if mbid is None:
                 return []
-            uri = "http://webservice.fanart.tv/v3/music/albums/%s?api_key=%s"
+            uri = "http://webservice.fanart.tv/v3/music/albums/%s?api_key=%s"\
+                % (mbid, FANARTTV_ID)
             (status, data) = App().task_helper.load_uri_content_sync(
-                uri % (mbid, FANARTTV_ID), cancellable)
+                uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                if "albums" in decode.keys():
-                    for cover in decode["albums"][mbid]["albumcover"]:
-                        uris.append(cover["url"])
-        except Exception as e:
-            Logger.error("FanartTV: %s %s %s", e, artist, album)
-            uris = []
-        if not uris:
-            Logger.warning(
-                "Can't find '%s - %s' on FanartTV" % (artist, album))
+                for cover in decode["albums"][mbid]["albumcover"]:
+                    uris.append(cover["url"])
+        except:
+            Logger.error("FanartTV: %s", uri)
         return uris
 
     def __get_spotify_album_artwork_uri(self, artist, album, cancellable=None):
@@ -172,9 +161,9 @@ class AlbumArtworkDownloader(ArtworkDownloader):
         uris = []
         try:
             artist_formated = GLib.uri_escape_string(
-                artist, None, True).replace(" ", "+")
+                "%s %s" % (artist, album), None, True).replace(" ", "+")
             uri = "https://api.spotify.com/v1/search?q=%s" % artist_formated +\
-                  "&type=artist"
+                  "&type=album"
             token = App().ws_director.token_ws.get_token("SPOTIFY",
                                                          cancellable)
             bearer = "Bearer %s" % token
@@ -183,41 +172,11 @@ class AlbumArtworkDownloader(ArtworkDownloader):
              data) = App().task_helper.load_uri_content_sync_with_headers(
                     uri, headers, cancellable)
             if status:
-                artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
-                artist_spotify_id = None
-                if "artists" not in decode.keys() or\
-                        "items" not in decode["artists"].keys():
-                    Logger.warning(
-                        "Can't find '%s - %s' on Spotify" % (artist, album))
-                    return []
-                for item in decode["artists"]["items"]:
-                    item_artist = noaccents(item["name"].lower())
-                    if artist == item_artist:
-                        artist_spotify_id = item["id"]
-                        break
-            if artist_spotify_id is None:
-                return []
-            uri = "https://api.spotify.com/v1/artists/" +\
-                  "%s/albums" % artist_spotify_id
-            (status,
-             data) = App().task_helper.load_uri_content_sync_with_headers(
-                uri, headers, cancellable)
-            if status:
-                decode = json.loads(data.decode("utf-8"))
-                if "items" in decode.keys():
-                    for item in decode["items"]:
-                        if "images" not in item.keys() or\
-                                not item["images"]:
-                            continue
-                        if noaccents(item["name"].lower()) ==\
-                                noaccents(album.lower()):
-                            uris.append(item["images"][0]["url"])
-        except Exception as e:
-            Logger.error("Spotify: %s %s %s", e, artist, album)
-            uris = []
-        if not uris:
-            Logger.warning("Can't find '%s - %s' on Spotify" % (artist, album))
+                for item in decode["albums"]["items"]:
+                    uris.append(item["images"][0]["url"])
+        except:
+            Logger.error("Spotify: %s", uri)
         return uris
 
     def __get_itunes_album_artwork_uri(self, artist, album, cancellable=None):
@@ -240,20 +199,13 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             (status, data) = App().task_helper.load_uri_content_sync(
                 uri, cancellable)
             if status:
-                artist = noaccents(artist.lower())
                 decode = json.loads(data.decode("utf-8"))
                 if "results" in decode.keys():
                     for item in decode["results"]:
-                        item_artist = noaccents(item["artistName"].lower())
-                        if artist and artist != item_artist:
-                            continue
                         uris.append(item["artworkUrl60"].replace(
                             "60x60", "1024x1024"))
-        except Exception as e:
-            Logger.error("Itunes: %s %s %s", e, artist, album)
-            uris = []
-        if not uris:
-            Logger.warning("Can't find '%s - %s' on iTunes" % (artist, album))
+        except:
+            Logger.error("Itunes: %s", uri)
         return uris
 
     def __get_audiodb_album_artwork_uri(self, artist, album, cancellable=None):
@@ -278,18 +230,10 @@ class AlbumArtworkDownloader(ArtworkDownloader):
                 uri, cancellable)
             if status:
                 decode = json.loads(data.decode("utf-8"))
-                if "album" in decode.keys() and decode["album"]:
-                    artist = noaccents(artist.lower())
-                    for item in decode["album"]:
-                        item_artist = noaccents(item["strArtist"].lower())
-                        if artist and artist != item_artist:
-                            continue
-                        uris.append(item["strAlbumThumb"])
-        except Exception as e:
-            Logger.error("AudioDB: %s %s %s", e, artist, album)
-            uris = []
-        if not uris:
-            Logger.warning("Can't find '%s - %s' on AudioDB" % (artist, album))
+                for item in decode["album"]:
+                    uris.append(item["strAlbumThumb"])
+        except:
+            Logger.error("AudioDB: %s", uri)
         return uris
 
     def __get_lastfm_album_artwork_uri(self, artist, album, cancellable=None):
@@ -311,11 +255,9 @@ class AlbumArtworkDownloader(ArtworkDownloader):
             if "image" in payload.keys() and payload["image"]:
                 artwork_uri = payload["image"][-1]["#text"]
                 uris.append(artwork_uri)
-        except Exception as e:
-            Logger.error("Last.FM: %s %s %s", e, artist, album)
-        if not uris:
-            Logger.warning("Can't find '%s - %s' on Last.FM" % (artist, album))
-        return []
+        except:
+            Logger.error("Last.FM: %s - %s", artist, album)
+        return uris
 
     def __download_queue(self):
         """
