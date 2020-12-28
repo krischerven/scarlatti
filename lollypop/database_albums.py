@@ -1182,6 +1182,7 @@ class AlbumsDatabase:
                 request += make_subrequest("track_genres.genre_id=?",
                                            "OR",
                                            len(genre_ids))
+                request += " AND "
                 request += make_subrequest("track_artists.artist_id=?",
                                            "OR",
                                            len(artist_ids))
