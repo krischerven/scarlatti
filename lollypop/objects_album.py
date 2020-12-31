@@ -371,6 +371,16 @@ class Album(Base):
         """
         self.__skipped = True
 
+    def merge_discs(self):
+        """
+            Merge album discs
+            @return Disc
+        """
+        tracks = self.tracks
+        disc = Disc(self, 0, self.__tracks_storage_type, self.__skipped)
+        disc.set_tracks(tracks)
+        self.__discs = [disc]
+
     @property
     def collection_item(self):
         """
@@ -457,16 +467,6 @@ class Album(Base):
         if not self.__tracks:
             self.__tracks = tracks
         return tracks
-
-    def merge_discs(self):
-        """
-            Merge album discs
-            @return Disc
-        """
-        tracks = self.tracks
-        disc = Disc(self, 0, self.__tracks_storage_type, self.__skipped)
-        disc.set_tracks(tracks)
-        self.__discs = [disc]
 
     @property
     def discs(self):
