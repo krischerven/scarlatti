@@ -48,8 +48,6 @@ class AlbumView(LazyLoadingView, SignalsHelper):
         return [
             (App().scanner, "scan-finished", "_on_scan_finished"),
             (App().scanner, "updated", "_on_collection_updated"),
-            (App().player, "current-changed", "_on_current_changed"),
-            (App().player, "duration-changed", "_on_duration_changed"),
         ]
 
     def populate(self):
@@ -143,23 +141,6 @@ class AlbumView(LazyLoadingView, SignalsHelper):
             return
         if scan_update == ScanUpdate.REMOVED:
             App().window.container.go_back()
-
-    def _on_current_changed(self, player):
-        """
-            Update children state
-            @param player as Player
-        """
-        if self.__tracks_view is not None:
-            self.__tracks_view.set_playing_indicator()
-
-    def _on_duration_changed(self, player, track_id):
-        """
-            Update track duration
-            @param player as Player
-            @param track_id as int
-        """
-        if self.__tracks_view is not None:
-            self.__tracks_view.update_duration(track_id)
 
 #######################
 # PRIVATE             #

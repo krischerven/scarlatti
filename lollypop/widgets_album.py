@@ -85,8 +85,6 @@ class AlbumWidget(Gtk.Grid):
             self.set_state_flags(Gtk.StateFlags.SELECTED, False)
         else:
             self.unset_state_flags(Gtk.StateFlags.SELECTED)
-        if self.__tracks_view is not None:
-            self.__tracks_view.set_playing_indicator()
 
     def set_duration(self, track_id):
         """

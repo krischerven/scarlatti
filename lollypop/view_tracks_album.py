@@ -16,7 +16,6 @@ from gettext import gettext as _
 
 from lollypop.widgets_row_track import TrackRow
 from lollypop.objects_album import Album
-from lollypop.logger import Logger
 from lollypop.utils import set_cursor_type, emit_signal
 from lollypop.define import App, ViewType
 from lollypop.view_tracks import TracksView
@@ -106,32 +105,6 @@ class AlbumTracksView(TracksView):
         for child in self.children:
             if child.track == track:
                 child.destroy()
-
-    def set_playing_indicator(self):
-        """
-            Set playing indicator
-        """
-        try:
-            for disc in self.__album.discs:
-                self._tracks_widget_left[disc.number].update_playing(
-                    App().player.current_track.id)
-                self._tracks_widget_right[disc.number].update_playing(
-                    App().player.current_track.id)
-        except Exception as e:
-            Logger.error("TrackView::set_playing_indicator(): %s" % e)
-
-    def update_duration(self, track_id):
-        """
-            Update track duration
-            @param track_id as int
-        """
-        try:
-            for disc in self.__album.discs:
-                number = disc.number
-                self._tracks_widget_left[number].update_duration(track_id)
-                self._tracks_widget_right[number].update_duration(track_id)
-        except Exception as e:
-            Logger.error("TrackView::update_duration(): %s" % e)
 
     @property
     def children(self):

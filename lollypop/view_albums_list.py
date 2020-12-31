@@ -55,7 +55,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             self.__dnd_helper.connect("dnd-insert", self.__on_dnd_insert)
         return [
             (App().player, "current-changed", "_on_current_changed"),
-            (App().player, "duration-changed", "_on_duration_changed"),
             (App().album_art, "album-artwork-changed", "_on_artwork_changed")
         ]
 
@@ -185,7 +184,7 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
             @param player as Player
         """
         for child in self._box.get_children():
-            child.set_playing_indicator()
+            child.set_selection()
 
     def _on_artwork_changed(self, artwork, album_id):
         """
@@ -196,15 +195,6 @@ class AlbumsListView(LazyLoadingView, SignalsHelper, GesturesHelper):
         for child in self._box.get_children():
             if child.album.id == album_id:
                 child.set_artwork()
-
-    def _on_duration_changed(self, player, track_id):
-        """
-            Update track duration
-            @param player as Player
-            @param track_id as int
-        """
-        for child in self.children:
-            child.tracks_view.update_duration(track_id)
 
     def _on_primary_long_press_gesture(self, x, y):
         """

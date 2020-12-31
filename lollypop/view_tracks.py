@@ -50,7 +50,9 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
         self.__orientation = None
         self.connect("realize", self.__on_realize)
         return [
-            (App().player, "loading-changed", "_on_loading_changed")
+            (App().player, "loading-changed", "_on_loading_changed"),
+            (App().player, "current-changed", "_on_current_changed"),
+            (App().player, "duration-changed", "_on_duration_changed"),
         ]
 
     def get_current_ordinate(self, parent):
@@ -63,19 +65,6 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
             if child.id == App().player.current_track.id:
                 return child.translate_coordinates(parent, 0, 0)[1]
         return None
-
-    def set_playing_indicator(self):
-        """
-            Set playing indicator
-        """
-        pass
-
-    def update_duration(self, track_id):
-        """
-            Update track duration
-            @param track_id as int
-        """
-        pass
 
     @property
     def children(self):
@@ -225,6 +214,29 @@ class TracksView(Gtk.Bin, SignalsHelper, SizeAllocationHelper):
 
     def _on_activated(self, widget, track):
         pass
+
+    def _on_current_changed(self, player):
+        """
+            Update children state
+            @param player as Player
+        """
+        for key in self._tracks_widget_left.keys():
+            self._tracks_widget_left[key].update_playing(
+                    App().player.current_track.id)
+        for key in self._tracks_widget_right.keys():
+            self._tracks_widget_right[key].update_playing(
+                    App().player.current_track.id)
+
+    def _on_duration_changed(self, player, track_id):
+        """
+            Update track duration
+            @param player as Player
+            @param track_id as int
+        """
+        for key in self._tracks_widget_left.keys():
+            self._tracks_widget_left[key].update_duration(track_id)
+        for key in self._tracks_widget_right.keys():
+            self._tracks_widget_right[key].update_duration(track_id)
 
 #######################
 # PRIVATE             #

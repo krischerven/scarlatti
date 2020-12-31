@@ -171,7 +171,8 @@ class TrackRow(Gtk.ListBoxRow):
             self._num_label.get_style_context().add_class("queued")
             pos = App().player.get_track_position(self._track.id)
             self._num_label.set_text(str(pos))
-        else:
+            self._num_label.show()
+        elif not self.__view_type & ViewType.SEARCH:
             if self.__view_type & (ViewType.PLAYBACK | ViewType.PLAYLISTS):
                 discs = App().albums.get_discs(self._track.album.id)
                 if len(discs) > 1:
@@ -183,7 +184,9 @@ class TrackRow(Gtk.ListBoxRow):
                 label = "%s" % self._track.number
             self._num_label.set_markup(label)
             self._num_label.get_style_context().remove_class("queued")
-        self._num_label.show()
+            self._num_label.show()
+        else:
+            self._num_label.hide()
 
     def popup_menu(self, parent, x=None, y=None):
         """

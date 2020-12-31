@@ -141,8 +141,8 @@ class AlbumRow(Gtk.ListBoxRow):
         box.pack_start(header, 0, True, True)
         box.pack_start(self.__revealer, 1, False, False)
         self.add(box)
-        self.set_playing_indicator()
         self.set_artwork()
+        self.set_selection()
 
     def reveal(self, reveal=None):
         """
@@ -163,7 +163,7 @@ class AlbumRow(Gtk.ListBoxRow):
             self.get_style_context().remove_class("albumrow-collapsed")
             self.unset_state_flags(Gtk.StateFlags.VISITED)
 
-    def set_playing_indicator(self):
+    def set_selection(self):
         """
             Show play indicator
         """
@@ -172,7 +172,6 @@ class AlbumRow(Gtk.ListBoxRow):
         selected = self.album.id == App().player.current_track.album.id and\
             App().player.current_track.id in self.album.track_ids
         if self.__revealer.get_reveal_child():
-            self.__tracks_view.set_playing_indicator()
             self.set_state_flags(Gtk.StateFlags.NORMAL, True)
         elif selected:
             self.set_state_flags(Gtk.StateFlags.VISITED, True)
