@@ -929,7 +929,8 @@ class TracksDatabase:
                      COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
             request = "SELECT DISTINCT tracks.album_id,\
                        discnumber,\
-                       discname\
+                       discname,\
+                       albums.year\
                        FROM albums, tracks, album_artists, artists\
                        WHERE albums.rowid=album_artists.album_id AND\
                        artists.rowid=album_artists.artist_id AND\
@@ -958,7 +959,8 @@ class TracksDatabase:
                      COLLATE NOCASE COLLATE LOCALIZED LIMIT ?"
             request = "SELECT DISTINCT tracks.album_id,\
                        discnumber,\
-                       discname\
+                       discname,\
+                       albums.year\
                        FROM albums, album_artists, tracks\
                        WHERE album_artists.artist_id=?\
                        AND album_artists.album_id=albums.rowid\
