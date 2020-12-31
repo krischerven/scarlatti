@@ -124,8 +124,8 @@ class AlbumRow(Gtk.ListBoxRow):
         header.set_column_spacing(MARGIN_SMALL)
         header.show()
         header.set_margin_start(MARGIN_SMALL)
-        # 2px for trackrow padding
-        header.set_margin_end(MARGIN_SMALL + 2)
+        # This to align button with row button
+        header.set_margin_end(MARGIN_SMALL * 2 + 3)
         header.set_margin_top(2)
         header.set_margin_bottom(2)
         header.attach(self.__artwork, 0, 0, 1, 2)
