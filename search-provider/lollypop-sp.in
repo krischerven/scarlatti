@@ -26,7 +26,7 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('Gst', '1.0')
 from gi.repository import Gio, Gst, GLib
 
-from lollypop.art import Art
+from lollypop.artwork import Artwork
 from lollypop.settings import Settings
 from lollypop.database import Database
 from lollypop.sqlcursor import SqlCursor
@@ -163,7 +163,7 @@ class SearchLollypopService(Server, Gio.Application):
         self.albums = AlbumsDatabase(self.db)
         self.artists = ArtistsDatabase(self.db)
         self.tracks = TracksDatabase(self.db)
-        self.art = Art()
+        self.art = Artwork()
         self.__bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(self.__bus,
                                        self.__SEARCH_BUS,
