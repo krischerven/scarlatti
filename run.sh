@@ -1,4 +1,4 @@
 rm -fr /usr/local/lib/python3.*/site-packages/lollypop/
-ninja -C build install
+ninja -C local install
 reset
 lollypop -e "$@"
