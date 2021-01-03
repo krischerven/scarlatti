@@ -294,7 +294,7 @@ class MtpSync(GObject.Object):
             emit_signal(self, "sync-progress",
                         self.__done / self.__total + 2)
         except Exception as e:
-            Logger.error("MtpSync::__sync(): %s" % e)
+            Logger.error("MtpSync::sync(): %s" % e)
         finally:
             Logger.info("Save sync db")
             if not self.__cancellable.is_cancelled():
