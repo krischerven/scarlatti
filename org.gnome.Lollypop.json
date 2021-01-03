@@ -33,7 +33,6 @@
     "x-run-args" : [
         "-e"
     ],
-
     "modules" : [
         {
             "name" : "six",
@@ -329,6 +328,9 @@
                     "type" : "git",
                     "url" : "https://gitlab.gnome.org/World/lollypop.git"
                 }
+            ],
+            "config-opts" : [
+                "-Ddevel=true"
             ]
         }
     ],

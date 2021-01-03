@@ -7,6 +7,12 @@ if revision == ''
   revision=meson.project_version()
 endif
 
+if get_option('devel').enabled()
+  appid='None'
+else
+  appid='org.gnome.Lollypop'
+endif
+
 i18n = import('i18n')
 py_mod = import('python')
 project_id = 'org.gnome.Lollypop'
@@ -40,6 +46,7 @@ conf.set('PYTHON_DIR', python_dir)
 conf.set('libexecdir', LIBEXEC_DIR)
 conf.set('VERSION', meson.project_version())
 conf.set('REVISION', revision)
+conf.set('APPID', appid)
 
 subdir('data')
 subproject('po')

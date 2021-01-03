@@ -43,7 +43,8 @@ if __name__ == "__main__":
     Gio.Resource._register(resource)
 
     from lollypop.application import Application
-    app = Application("@REVISION@", pkgdatadir)
+    app_id = None if "@APPID@" == "None" else "@APPID@"
+    app = Application("@REVISION@", pkgdatadir, app_id)
     if 'LOLLYPOP_TRACE' in os.environ:
         graphviz = GraphvizOutput()
         graphviz.output_file = 'lollypop.png'
