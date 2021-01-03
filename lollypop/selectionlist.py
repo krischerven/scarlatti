@@ -243,9 +243,6 @@ class SelectionListRow(Gtk.ListBoxRow):
         emit_signal(self, "populated")
 
 
-# TODO: There is no reason today to share a common class for sidebar and lists
-# Code cleanup needed, will simplify things!
-# Historical because previously, sidebar was a sidebar + a list
 class SelectionList(LazyLoadingView, GesturesHelper):
     """
         A list for artists/genres
