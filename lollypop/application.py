@@ -60,17 +60,19 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             - Create main window
     """
 
-    def __init__(self, version, data_dir):
+    def __init__(self, version, data_dir, app_id):
         """
             Create application
             @param version as str
             @param data_dir as str
+            @param app_id as str
         """
         Gtk.Application.__init__(
             self,
-            application_id="org.gnome.Lollypop",
+            application_id=app_id,
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
         ApplicationCmdline.__init__(self, version)
+        self.__app_id = app_id
         self.__data_dir = data_dir
         self.set_property("register-session", True)
         signal(SIGINT, lambda a, b: self.quit())
@@ -134,6 +136,15 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         styleContext = Gtk.StyleContext()
         styleContext.add_provider_for_screen(screen, cssProvider,
                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        # Devel version, load devel theme
+        if self.__app_id is None:
+            css = "*:selected{ background-color: red; }"
+            cssProvider = Gtk.CssProvider()
+            cssProvider.load_from_data(css.encode("utf-8"))
+            screen = Gdk.Screen.get_default()
+            styleContext = Gtk.StyleContext()
+            styleContext.add_provider_for_screen(
+                screen, cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
         self.db = Database()
         self.cache = CacheDatabase()
         self.playlists = Playlists()
