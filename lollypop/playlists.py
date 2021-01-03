@@ -412,6 +412,7 @@ class Playlists(GObject.GObject):
                     "sync-internal-ids").get_string()
             try:
                 data = json.loads(internal_ids)
+                data.keys()
             except:
                 data = {}
             synced_ids = []
@@ -439,6 +440,7 @@ class Playlists(GObject.GObject):
                     "sync-internal-ids").get_string()
             try:
                 data = json.loads(internal_ids)
+                data.keys()
             except:
                 data = {}
             synced_ids = []
@@ -494,6 +496,7 @@ class Playlists(GObject.GObject):
                 "sync-internal-ids").get_string()
             try:
                 data = json.loads(internal_ids)
+                data.keys()
             except:
                 data = {}
             data[str(playlist_id)] = synced
