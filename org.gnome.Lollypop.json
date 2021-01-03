@@ -30,6 +30,10 @@
         "--own-name=org.mpris.MediaPlayer2.Lollypop",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
+    "x-run-args" : [
+        "-e"
+    ],
+
     "modules" : [
         {
             "name" : "six",
@@ -302,18 +306,20 @@
             ]
         },
         {
-            "name": "libhandy",
-            "buildsystem": "meson",
-            "config-opts": [
-            "-Dglade_catalog=disabled",
-            "-Dtests=false",
-            "-Dexamples=false"
+            "name" : "libhandy",
+            "buildsystem" : "meson",
+            "config-opts" : [
+                "-Dglade_catalog=disabled",
+                "-Dtests=false",
+                "-Dexamples=false"
             ],
-            "sources": [{
-            "type" : "archive",
-                "url" : "https://download.gnome.org/sources/libhandy/1.0/libhandy-1.0.2.tar.xz",
-                "sha256" : "3ad78d0594165c7e8150f662506d386552825e693aa3679744af96bd94dc1c2d"
-            }]
+            "sources" : [
+                {
+                    "type" : "archive",
+                    "url" : "https://download.gnome.org/sources/libhandy/1.0/libhandy-1.0.2.tar.xz",
+                    "sha256" : "3ad78d0594165c7e8150f662506d386552825e693aa3679744af96bd94dc1c2d"
+                }
+            ]
         },
         {
             "name" : "lollypop",
