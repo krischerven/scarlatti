@@ -84,5 +84,6 @@ flatpak/metadata
 /flatpak/*.flatpak
 /flatpak/.flatpak-builder
 /_build
+/local
 /builddir
 .vscode/
