@@ -1,13 +1,15 @@
 include: 'https://gitlab.gnome.org/GNOME/citemplates/raw/master/flatpak/flatpak_ci_initiative.yml'
 
 variables:
-    BUNDLE: "org.gnome.Lollypop-next.flatpak"
+    BUNDLE: "lollypop-git.flatpak"
     GIT_SUBMODULE_STRATEGY: recursive
 
 flatpak:
+    image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.38'
     variables:
         MANIFEST_PATH: "org.gnome.Lollypop.json"
         FLATPAK_MODULE: "lollypop"
         RUNTIME_REPO: "https://flathub.org/repo/flathub.flatpakrepo"
+        MESON_ARGS: "-Ddevel=true"
         APP_ID: "org.gnome.Lollypop"
     extends: .flatpak
