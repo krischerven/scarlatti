@@ -382,6 +382,14 @@ class Album(Base):
         self.__discs = [disc]
 
     @property
+    def original_year(self):
+        """
+            Get disc original year
+            @return int
+        """
+        return App().tracks.get_year_for_album(self.id, self.__disc_number)
+
+    @property
     def collection_item(self):
         """
             Get collection item related to album

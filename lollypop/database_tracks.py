@@ -841,22 +841,25 @@ class TracksDatabase:
                 return v[0]
             return 0
 
-    def get_year_for_album(self, album_id, disc_number):
+    def get_year_for_album(self, album_id, disc_number=None):
         """
             Get album year based on tracks
             Use most used year by tracks
             @param album_id as int
-            @param disc_number as int
+            @param disc_number as int/None
             @return int
         """
         with SqlCursor(self.__db) as sql:
-            result = sql.execute("SELECT year, COUNT(year) AS occurrence\
-                                  FROM tracks\
-                                  WHERE tracks.album_id=? AND\
-                                  tracks.discnumber=?\
-                                  GROUP BY year\
-                                  ORDER BY occurrence DESC\
-                                  LIMIT 1", (album_id, disc_number))
+            filters = (album_id,)
+            request = "SELECT year, COUNT(year) AS occurrence FROM tracks\
+                       WHERE tracks.album_id=?"
+            if disc_number is not None:
+                filters += (disc_number,)
+                request += " AND tracks.discnumber=?"
+            request += " GROUP BY year\
+                        ORDER BY occurrence DESC\
+                        LIMIT 1"
+            result = sql.execute(request, filters)
             v = result.fetchone()
             if v is not None:
                 return v[0]

@@ -19,7 +19,7 @@
         "--device=dri",
         "--filesystem=host",
         "--filesystem=xdg-run/dconf",
-        "--filesystem=~/.config/dconf:rw",
+        "--filesystem=~/.config/dconf:ro",
         "--talk-name=org.gtk.vfs",
         "--talk-name=org.gtk.vfs.*",
         "--talk-name=org.freedesktop.Notifications",
@@ -31,7 +31,8 @@
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
     "x-run-args" : [
-        "-e"
+        "-e",
+        "-d"
     ],
     "modules" : [
         {
