@@ -10,6 +10,5 @@ flatpak:
         MANIFEST_PATH: "org.gnome.Lollypop.json"
         FLATPAK_MODULE: "lollypop"
         RUNTIME_REPO: "https://flathub.org/repo/flathub.flatpakrepo"
-        MESON_ARGS: "-Ddevel=enabled"
         APP_ID: "org.gnome.Lollypop"
     extends: .flatpak
