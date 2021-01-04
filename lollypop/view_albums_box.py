@@ -375,7 +375,6 @@ class AlbumsForYearsBoxView(AlbumsForGenresBoxView):
             album = Album(album_id, [Type.YEARS], [])
             if year != album_year:
                 album.set_disc_number(disc_number)
-                album.set_year(year)
             return album
 
         def load():

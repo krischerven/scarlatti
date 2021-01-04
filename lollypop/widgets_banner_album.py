@@ -10,7 +10,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gtk, Pango, GLib
+
+from gettext import gettext as _
 
 from lollypop.define import App, ArtSize, Type, ViewType
 from lollypop.define import ArtBehaviour, MARGIN_MEDIUM, MARGIN, MARGIN_SMALL
@@ -78,6 +80,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__year_eventbox.set_hexpand(True)
         self.__year_eventbox.set_halign(Gtk.Align.END)
         self.__year_label = Gtk.Label.new()
+        self.__year_label.set_justify(Gtk.Justification.RIGHT)
         self.__year_label.get_style_context().add_class("dim-label")
         self.__year_eventbox.add(self.__year_label)
         self.__year_eventbox.connect("realize", set_cursor_type)
@@ -122,6 +125,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__labels_box.add(self.__title_label)
         self.__labels_box.add(self.__artist_eventbox)
         self.__widget.attach(self.__top_box, 2, 0, 1, 1)
+        self.__set_album_year(True)
         self.__widget.attach(self.__middle_box, 2, 1, 1, 1)
         self.__widget.attach(self.__bottom_box, 1, 2, 2, 1)
         self.__widget.attach(self.__labels_box, 1, 0, 1, 2)
@@ -146,9 +150,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             self.__cover_widget.connect("populated",
                                         self.__on_cover_populated)
         self.__cover_widget.show()
-        if self.__album.year is not None:
-            self.__year_label.set_label(str(self.__album.year))
-            self.__year_label.show()
         human_duration = get_human_duration(self.__album.duration)
         self.__duration_label.set_text(human_duration)
         self.__widget.attach(self.__cover_widget, 0, 0, 1, 3)
@@ -255,6 +256,25 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         else:
             self.__artwork_popup.destroy()
 
+    def __set_album_year(self, full):
+        """
+            Set album year
+            @param full as int
+        """
+        if self.__album.year is not None:
+            album_year = GLib.markup_escape_text(
+                "%s" % self.__album.year)
+            original_year = GLib.markup_escape_text(
+                "%s" % self.__album.original_year)
+            if full and original_year != album_year:
+                original_str = _("Released on %s") % original_year
+                self.__year_label.set_markup(
+                    "%s\n<span size='x-small' alpha='40000'>%s</span>" %
+                    (album_year, original_str))
+            else:
+                self.__year_label.set_markup(album_year)
+            self.__year_label.show()
+
     def __set_artwork(self):
         """
             Set artwork on banner
@@ -277,11 +297,13 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 self.__widget.remove(self.__top_box)
                 self.__widget.attach(self.__top_box, 1, 1, 1, 1)
                 self.__widget.attach(self.__labels_box, 1, 0, 2, 1)
+                self.__set_album_year(False)
         elif self.__widget.get_child_at(1, 0) == self.__labels_box:
             self.__widget.remove(self.__labels_box)
             self.__widget.remove(self.__top_box)
             self.__widget.attach(self.__top_box, 2, 0, 1, 1)
             self.__widget.attach(self.__labels_box, 1, 0, 1, 2)
+            self.__set_album_year(True)
 
     def __update_add_button(self):
         """
