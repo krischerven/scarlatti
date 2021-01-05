@@ -857,12 +857,13 @@ class TracksDatabase:
                 filters += (disc_number,)
                 request += " AND tracks.discnumber=?"
             request += " GROUP BY year\
-                        ORDER BY occurrence DESC\
-                        LIMIT 1"
+                        ORDER BY occurrence DESC"
             result = sql.execute(request, filters)
-            v = result.fetchone()
-            if v is not None:
-                return v[0]
+            v = list(result)
+            # Ignore album with multiple original date
+            print(album_id, disc_number, v)
+            if len(v) == 1:
+                return v[0][0]
             return None
 
     def get_ltime(self, track_id):

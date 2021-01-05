@@ -264,13 +264,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if self.__album.year is not None:
             album_year = GLib.markup_escape_text(
                 "%s" % self.__album.year)
-            original_year = GLib.markup_escape_text(
-                "%s" % self.__album.original_year)
-            if full and original_year != album_year:
-                original_str = _("Released on %s") % original_year
-                self.__year_label.set_markup(
-                    "%s\n<span size='x-small' alpha='40000'>%s</span>" %
-                    (album_year, original_str))
+
+            if full and self.__album.original_year is not None:
+                original_year = GLib.markup_escape_text(
+                    "%s" % self.__album.original_year)
+                if original_year != album_year:
+                    original_str = _("Released on %s") % original_year
+                    self.__year_label.set_markup(
+                        "%s\n<span size='x-small' alpha='40000'>%s</span>" %
+                        (album_year, original_str))
             else:
                 self.__year_label.set_markup(album_year)
             self.__year_label.show()

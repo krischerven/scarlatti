@@ -13,7 +13,7 @@
 
 from hashlib import md5
 
-from lollypop.define import App, StorageType, ScanUpdate
+from lollypop.define import App, StorageType, ScanUpdate, Type
 from lollypop.objects_track import Track
 from lollypop.objects import Base
 from lollypop.utils import emit_signal
@@ -140,6 +140,7 @@ class Album(Base):
         self.__name = None
         self.__skipped = skipped
         self.__disc_number = None
+        self.__original_year = Type.NONE
         self.__tracks_storage_type = self.storage_type
         # Use artist ids from db else
         if artist_ids:
@@ -176,14 +177,8 @@ class Album(Base):
             Set album disc
             @param disc_number as int
         """
+        self.__original_year = Type.NONE
         self.__disc_number = disc_number
-
-    def set_year(self, year):
-        """
-            Set album year to value
-            @param year as int
-        """
-        self._year = year
 
     def set_tracks(self, tracks, clone=True):
         """
@@ -376,6 +371,7 @@ class Album(Base):
             Merge album discs
             @return Disc
         """
+        self.__original_year = None
         tracks = self.tracks
         disc = Disc(self, 0, self.__tracks_storage_type, self.__skipped)
         disc.set_tracks(tracks)
@@ -385,9 +381,12 @@ class Album(Base):
     def original_year(self):
         """
             Get disc original year
-            @return int
+            @return int/None
         """
-        return App().tracks.get_year_for_album(self.id, self.__disc_number)
+        if self.__original_year == Type.NONE:
+            self.__original_year = App().tracks.get_year_for_album(
+                self.id, self.__disc_number)
+        return self.__original_year
 
     @property
     def collection_item(self):
