@@ -167,7 +167,7 @@ class PasswordsHelper:
                 items = Secret.password_search_finish(result)
                 for item in items:
                     attributes = item.get_attributes()
-                    secret = item.get_secret()
+                    secret = item.retrieve_secret_sync()
                     callback(attributes,
                              secret.get().decode('utf-8'),
                              service,
