@@ -861,7 +861,6 @@ class TracksDatabase:
             result = sql.execute(request, filters)
             v = list(result)
             # Ignore album with multiple original date
-            print(album_id, disc_number, v)
             if len(v) == 1:
                 return v[0][0]
             return None
