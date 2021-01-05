@@ -16,7 +16,7 @@ from lollypop.helper_gestures import GesturesHelper
 from lollypop.utils import set_cursor_type
 
 
-class Label(Gtk.EventBox):
+class LabelWidget(Gtk.EventBox):
     """
         A clickable label
     """
@@ -24,6 +24,9 @@ class Label(Gtk.EventBox):
     __gsignals__ = {
         "clicked": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
+
+    __LABEL_ATTRS = ["set_label", "set_markup", "set_xalign", "set_ellipsize",
+                     "get_style_context", "set_justify"]
 
     def __init__(self):
         """
@@ -37,13 +40,15 @@ class Label(Gtk.EventBox):
             self, primary_press_callback=self._on_press)
         self.connect("realize", set_cursor_type)
 
-    @property
-    def widget(self):
+    def __getattr__(self, attr):
         """
-            Get Gtk.Label widget
-            @return widget
+            Get wanted attr
+            @param attr as str
         """
-        return self.__label
+        if attr in self.__LABEL_ATTRS:
+            return getattr(self.__label, attr)
+        else:
+            return getattr(Gtk.EventBox, attr)
 
 #######################
 # PROTECTED           #

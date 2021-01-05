@@ -18,12 +18,12 @@ from lollypop.define import App, ArtSize, Type, ViewType
 from lollypop.define import ArtBehaviour, MARGIN_MEDIUM, MARGIN, MARGIN_SMALL
 from lollypop.widgets_rating import RatingWidget
 from lollypop.widgets_loved import LovedWidget
+from lollypop.widgets_label import LabelWidget
 from lollypop.widgets_cover import EditCoverWidget, CoverWidget
 from lollypop.widgets_banner import BannerWidget
 from lollypop.utils import get_human_duration, on_query_tooltip
-from lollypop.utils import set_cursor_type, popup_widget, emit_signal
+from lollypop.utils import popup_widget, emit_signal
 from lollypop.helper_signals import SignalsHelper, signals_map
-from lollypop.helper_gestures import GesturesHelper
 
 
 class AlbumBannerWidget(BannerWidget, SignalsHelper):
@@ -76,16 +76,12 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__middle_box.set_valign(Gtk.Align.CENTER)
         self.__middle_box.set_hexpand(True)
         self.__bottom_box.set_vexpand(True)
-        self.__year_eventbox = Gtk.EventBox.new()
-        self.__year_eventbox.set_hexpand(True)
-        self.__year_eventbox.set_halign(Gtk.Align.END)
-        self.__year_label = Gtk.Label.new()
+        self.__year_label = LabelWidget()
+        self.__year_label.connect("clicked", self.__on_year_clicked)
         self.__year_label.set_justify(Gtk.Justification.RIGHT)
         self.__year_label.get_style_context().add_class("dim-label")
-        self.__year_eventbox.add(self.__year_label)
-        self.__year_eventbox.connect("realize", set_cursor_type)
-        self.__gesture_year = GesturesHelper(
-            self.__year_eventbox, primary_press_callback=self._on_year_press)
+        self.__year_label.set_halign(Gtk.Align.END)
+        self.__year_label.set_hexpand(True)
         self.__play_button = Gtk.Button.new_from_icon_name(
             "media-playback-start-symbolic", Gtk.IconSize.BUTTON)
         self.__add_button = Gtk.Button.new_from_icon_name(
@@ -102,28 +98,24 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         self.__title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__title_label.set_halign(Gtk.Align.START)
         self.__title_label.set_xalign(0)
-        self.__artist_label = Gtk.Label.new()
-        self.__artist_eventbox = Gtk.EventBox.new()
-        self.__artist_eventbox.set_valign(Gtk.Align.START)
-        self.__artist_eventbox.add(self.__artist_label)
-        self.__artist_eventbox.connect("realize", set_cursor_type)
+        self.__artist_label = LabelWidget()
+        self.__artist_label.show()
+        self.__artist_label.connect("clicked", self.__on_artist_clicked)
+        self.__artist_label.set_valign(Gtk.Align.START)
+        self.__artist_label.set_halign(Gtk.Align.START)
         self.__artist_label.connect("query-tooltip", on_query_tooltip)
         self.__artist_label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.__artist_label.set_halign(Gtk.Align.START)
         self.__artist_label.set_xalign(0)
-        self.__gesture_artist = GesturesHelper(
-            self.__artist_eventbox,
-            primary_press_callback=self._on_artist_press)
         self.__duration_label = Gtk.Label.new()
         self.__duration_label.get_style_context().add_class("dim-label")
-        self.__top_box.pack_end(self.__year_eventbox, False, True, 0)
+        self.__top_box.pack_end(self.__year_label, False, True, 0)
         self.__middle_box.add(self.__play_button)
         self.__middle_box.add(self.__add_button)
         self.__middle_box.add(self.__menu_button)
         self.__middle_box.get_style_context().add_class("linked")
         self.__bottom_box.pack_end(self.__duration_label, False, True, 0)
         self.__labels_box.add(self.__title_label)
-        self.__labels_box.add(self.__artist_eventbox)
+        self.__labels_box.add(self.__artist_label)
         self.__widget.attach(self.__top_box, 2, 0, 1, 1)
         self.__set_album_year(True)
         self.__widget.attach(self.__middle_box, 2, 1, 1, 1)
@@ -228,25 +220,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         """
         self.__update_add_button()
 
-    def _on_year_press(self, x, y, event):
-        """
-            Show year view
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
-        """
-        App().window.container.show_view([Type.YEARS], [self.__album.year])
-
-    def _on_artist_press(self, x, y, event):
-        """
-            Show artist view
-            @param x as int
-            @param y as int
-            @param event as Gdk.EventButton
-        """
-        App().window.container.show_view([Type.ARTISTS],
-                                         self.__album.artist_ids)
-
 #######################
 # PRIVATE             #
 #######################
@@ -264,17 +237,19 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
         if self.__album.year is not None:
             album_year = GLib.markup_escape_text(
                 "%s" % self.__album.year)
-
+            markup = None
             if full and self.__album.original_year is not None:
                 original_year = GLib.markup_escape_text(
                     "%s" % self.__album.original_year)
                 if original_year != album_year:
                     original_str = _("Released on %s") % original_year
-                    self.__year_label.set_markup(
-                        "%s\n<span size='x-small' alpha='40000'>%s</span>" %
-                        (album_year, original_str))
-            else:
-                self.__year_label.set_markup(album_year)
+                    markup = \
+                        "%s\n<span size='x-small' alpha='40000'>%s</span>" %\
+                        (album_year, original_str)
+            if markup is None:
+                markup = album_year
+            self.__year_label.set_markup(markup)
+            print(markup)
             self.__year_label.show()
 
     def __set_artwork(self):
@@ -420,3 +395,18 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                 emit_signal(App().player, "playback-updated", album)
         else:
             App().player.add_album(self.__album.clone(False))
+
+    def __on_year_clicked(self, label):
+        """
+            Show year view
+            @param label as LabelWidget
+        """
+        App().window.container.show_view([Type.YEARS], [self.__album.year])
+
+    def __on_artist_clicked(self, label):
+        """
+            Show artist view
+            @param label as LabelWidget
+        """
+        App().window.container.show_view([Type.ARTISTS],
+                                         self.__album.artist_ids)

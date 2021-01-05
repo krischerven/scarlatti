@@ -15,7 +15,7 @@ from gi.repository import GLib, Gtk, Pango
 from gettext import gettext as _
 
 from lollypop.widgets_row_track import TrackRow
-from lollypop.widgets_label import Label
+from lollypop.widgets_label import LabelWidget
 from lollypop.objects_album import Album
 from lollypop.utils import emit_signal
 from lollypop.define import App, ViewType
@@ -247,13 +247,6 @@ class AlbumTracksView(TracksView):
         if self.__album.is_web:
             TracksView._on_loading_changed(self, player, status, track)
 
-    def __on_track_row_removed(self, row):
-        """
-            Pass signal
-            @param row as TrackRow
-        """
-        emit_signal(self, "track-removed", row)
-
     def _on_activated(self, widget, track):
         """
             Handle playback if album or pass signal
@@ -311,11 +304,12 @@ class AlbumTracksView(TracksView):
         if disc_number in self.__disc_labels.keys():
             label = self.__disc_labels[disc_number]
         else:
-            label = Label()
-            label.widget.set_ellipsize(Pango.EllipsizeMode.END)
-            label.widget.set_property("halign", Gtk.Align.START)
-            label.widget.get_style_context().add_class("dim-label")
+            label = LabelWidget()
+            label.set_ellipsize(Pango.EllipsizeMode.END)
+            label.set_property("halign", Gtk.Align.START)
+            label.get_style_context().add_class("dim-label")
             label.connect("clicked", self.__on_label_clicked, disc_number)
+            label.set_tooltip_text(_("Play"))
             self.__disc_labels[disc_number] = label
         return label
 
@@ -339,7 +333,7 @@ class AlbumTracksView(TracksView):
                                    disc_year)
             else:
                 markup = GLib.markup_escape_text(label_str)
-            label.widget.set_markup(markup)
+            label.set_markup(markup)
             label.show()
 
     def __load_disc(self, items, disc_number, position=0):
@@ -358,10 +352,17 @@ class AlbumTracksView(TracksView):
         else:
             emit_signal(self, "populated")
 
+    def __on_track_row_removed(self, row):
+        """
+            Pass signal
+            @param row as TrackRow
+        """
+        emit_signal(self, "track-removed", row)
+
     def __on_label_clicked(self, label, disc_number):
         """
             Add disc to playback
-            @param label as Label
+            @param label as LabelWidget
             @param disc_number as int
         """
         album = Album(self.__album.id)
