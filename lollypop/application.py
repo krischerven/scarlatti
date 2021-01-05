@@ -85,16 +85,11 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         GLib.setenv("PULSE_PROP_media.role", "music", True)
         GLib.setenv("PULSE_PROP_application.icon_name",
                     "org.gnome.Lollypop", True)
-        # Ideally, we will be able to delete this once Flatpak has a solution
-        # for SSL certificate management inside of applications.
+        # Flatpak hacks
         if GLib.file_test("/app", GLib.FileTest.EXISTS):
-            paths = ["/etc/ssl/certs/ca-certificates.crt",
-                     "/etc/pki/tls/cert.pem",
-                     "/etc/ssl/cert.pem"]
-            for path in paths:
-                if GLib.file_test(path, GLib.FileTest.EXISTS):
-                    GLib.setenv("SSL_CERT_FILE", path, True)
-                    break
+            # Set /tmp for GLib, /tmp not accessible in flatpak
+            tmp = GLib.environ_getenv(GLib.get_environ(), "XDG_RUNTIME_DIR")
+            GLib.setenv("TMPDIR", "%s/app/org.gnome.Lollypop" % tmp, True)
         self.cursors = {}
         self.shown_sidebar_tooltip = False
         self.__window = None

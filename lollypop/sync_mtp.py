@@ -91,6 +91,7 @@ class MtpSyncDb:
             stream.get_output_stream().write_all(jsondb.encode("utf-8"))
             tmpfile.copy(dbfile, Gio.FileCopyFlags.OVERWRITE, None, None)
             stream.close()
+            tmpfile.delete(None)
         except Exception as e:
             Logger.error("MtpSyncDb::__save(): %s", e)
 
