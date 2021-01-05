@@ -15,8 +15,9 @@ from gi.repository import GLib, Gtk, Pango
 from gettext import gettext as _
 
 from lollypop.widgets_row_track import TrackRow
+from lollypop.widgets_label import Label
 from lollypop.objects_album import Album
-from lollypop.utils import set_cursor_type, emit_signal
+from lollypop.utils import emit_signal
 from lollypop.define import App, ViewType
 from lollypop.view_tracks import TracksView
 
@@ -35,6 +36,8 @@ class AlbumTracksView(TracksView):
         TracksView.__init__(self, view_type)
         self.__album = album
         self.__discs_to_load = []
+        self.__disc_labels = {}
+        self.__show_disc_header = False
         self.__populated = False
         self.__show_tag_tracknumber = App().settings.get_value(
             "show-tag-tracknumber")
@@ -57,6 +60,7 @@ class AlbumTracksView(TracksView):
                               tracks[:mid_tracks]))
                 items.append((self._tracks_widget_right[disc_number],
                               tracks[mid_tracks:]))
+            self.__set_disc_header(disc_number)
             self.__load_disc(items, disc_number)
         else:
             self.__populated = True
@@ -162,6 +166,7 @@ class AlbumTracksView(TracksView):
             for disc in self.__album.discs:
                 self._add_disc_container(disc.number)
             self.__discs_to_load = list(self.__album.discs)
+            self.__show_disc_header = len(self.__discs_to_load) > 1
 
     def _add_tracks(self, widget, tracks, position=0):
         """
@@ -200,43 +205,15 @@ class AlbumTracksView(TracksView):
         # ---------Label--------- #
         # | Column 1 | Column 2 | #
         ###########################
-        show_label = len(self.__album.discs) > 1
         for disc in self.__album.discs:
-            if show_label:
-                disc_names = self.__album.disc_names(disc.number)
-                if disc_names:
-                    label_str = ", ".join(disc_names)
-                elif show_label:
-                    label_str = _("Disc %s") % disc.number
-                disc_year = App().tracks.get_year_for_album(
-                    self.__album.id, disc.number)
-                if disc_year != self.__album.year:
-                    markup = "%s  <span size='small' alpha='50000'>(%s)</span>"
-                    markup = markup % (GLib.markup_escape_text(label_str),
-                                       disc_year)
-                else:
-                    markup = GLib.markup_escape_text(label_str)
-                label = Gtk.Label.new()
-                label.set_ellipsize(Pango.EllipsizeMode.END)
-                label.set_markup(markup)
-                label.set_property("halign", Gtk.Align.START)
-                label.get_style_context().add_class("dim-label")
-                label.show()
-                eventbox = Gtk.EventBox()
-                eventbox.connect("realize", set_cursor_type)
-                eventbox.set_tooltip_text(_("Play"))
-                eventbox.connect("button-press-event",
-                                 self.__on_disc_button_press_event,
-                                 disc)
-                eventbox.add(label)
-                eventbox.show()
-                if orientation == Gtk.Orientation.VERTICAL:
-                    self._responsive_widget.attach(
-                        eventbox, 0, idx, 1, 1)
-                else:
-                    self._responsive_widget.attach(
-                        eventbox, 0, idx, 2, 1)
-                idx += 1
+            label = self.__get_disc_label(disc.number)
+            if orientation == Gtk.Orientation.VERTICAL:
+                self._responsive_widget.attach(
+                    label, 0, idx, 1, 1)
+            else:
+                self._responsive_widget.attach(
+                    label, 0, idx, 2, 1)
+            idx += 1
             if orientation == Gtk.Orientation.VERTICAL:
                 self._responsive_widget.attach(
                           self._tracks_widget_left[disc.number],
@@ -325,6 +302,46 @@ class AlbumTracksView(TracksView):
 #######################
 # PRIVATE             #
 #######################
+    def __get_disc_label(self, disc_number):
+        """
+            Get disc label widget
+            @param disc_number as int
+            @return Gtk.Label
+        """
+        if disc_number in self.__disc_labels.keys():
+            label = self.__disc_labels[disc_number]
+        else:
+            label = Label()
+            label.widget.set_ellipsize(Pango.EllipsizeMode.END)
+            label.widget.set_property("halign", Gtk.Align.START)
+            label.widget.get_style_context().add_class("dim-label")
+            label.connect("clicked", self.__on_label_clicked, disc_number)
+            self.__disc_labels[disc_number] = label
+        return label
+
+    def __set_disc_header(self, disc_number):
+        """
+            Set disc header
+            @param disc_number as int
+        """
+        if self.__show_disc_header:
+            label = self.__get_disc_label(disc_number)
+            disc_names = self.__album.disc_names(disc_number)
+            if disc_names:
+                label_str = ", ".join(disc_names)
+            else:
+                label_str = _("Disc %s") % disc_number
+            disc_year = App().tracks.get_year_for_album(
+                self.__album.id, disc_number)
+            if disc_year != self.__album.year:
+                markup = "%s  <span size='small' alpha='50000'>(%s)</span>"
+                markup = markup % (GLib.markup_escape_text(label_str),
+                                   disc_year)
+            else:
+                markup = GLib.markup_escape_text(label_str)
+            label.widget.set_markup(markup)
+            label.show()
+
     def __load_disc(self, items, disc_number, position=0):
         """
             Load discs
@@ -341,13 +358,12 @@ class AlbumTracksView(TracksView):
         else:
             emit_signal(self, "populated")
 
-    def __on_disc_button_press_event(self, button, event, disc):
+    def __on_label_clicked(self, label, disc_number):
         """
             Add disc to playback
-            @param button as Gtk.Button
-            @param event as Gdk.ButtonEvent
-            @param disc as Disc
+            @param label as Label
+            @param disc_number as int
         """
-        album = Album(disc.album.id)
-        album.set_tracks(disc.tracks)
+        album = Album(self.__album.id)
+        album.set_disc_number(disc_number)
         App().player.play_album(album)

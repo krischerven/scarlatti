@@ -167,7 +167,7 @@ class AlbumView(LazyLoadingView, SignalsHelper):
                     self.__grid.add(others_box)
                     self.__others_boxes.append(others_box)
         else:
-            self.__tracks_view.populate()
+            GLib.idle_add(self.__tracks_view.populate)
 
     def __on_track_selected(self, view, selected):
         """
