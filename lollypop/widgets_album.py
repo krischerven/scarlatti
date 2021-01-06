@@ -145,9 +145,10 @@ class AlbumWidget(Gtk.Grid):
             Get filtered children
             @return [Gtk.Widget]
         """
+        filtered = []
         if self.__tracks_view is None:
             self.__populate()
-        filtered = self.__tracks_view.children
+            filtered = self.__tracks_view.children
         return filtered
 
     @property
