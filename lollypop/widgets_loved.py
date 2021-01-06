@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 from gettext import gettext as _
 
-from lollypop.define import App, Type
+from lollypop.define import App, Type, LovedFlags
 from lollypop.objects_track import Track
 
 
@@ -57,10 +57,10 @@ class LovedWidget(Gtk.Bin):
             @param widget as Gtk.EventBox
             @param event as Gdk.Event
         """
-        if self.__object.loved < 1:
-            loved = self.__object.loved + 1
+        if self.__object.loved & LovedFlags.LOVED:
+            loved = LovedFlags.NONE
         else:
-            loved = Type.NONE
+            loved = LovedFlags.LOVED
         self.__set_artwork(loved)
 
     def _on_leave_notify_event(self, widget, event):
@@ -77,10 +77,10 @@ class LovedWidget(Gtk.Bin):
             @param widget as Gtk.EventBox
             @param event as Gdk.Event
         """
-        if self.__object.loved < 1:
-            loved = self.__object.loved + 1
+        if self.__object.loved & LovedFlags.LOVED:
+            loved = LovedFlags.NONE
         else:
-            loved = Type.NONE
+            loved = LovedFlags.LOVED
         self.__object.set_loved(loved)
         if isinstance(self.__object, Track):
             # Clear loved playlist artwork cache
@@ -89,7 +89,7 @@ class LovedWidget(Gtk.Bin):
             name = App().playlists.get_name(Type.SKIPPED)
             App().art.remove_from_cache("playlist_" + name, "ROUNDED")
             # Update state on Last.fm
-            status = True if loved == 1 else False
+            status = True if loved & LovedFlags.LOVED else False
             for scrobbler in App().ws_director.scrobblers:
                 scrobbler.set_loved(self.__object, status)
         self.__set_artwork(self.__object.loved)
@@ -98,23 +98,19 @@ class LovedWidget(Gtk.Bin):
 #######################
 # PRIVATE             #
 #######################
-    def __set_artwork(self, status):
+    def __set_artwork(self, flags):
         """
             Set artwork base on object status
-            @param status as int
+            @param flags as int
         """
-        if status == 0:
-            self.set_tooltip_text(_("Allow playback"))
-            self.__artwork.set_opacity(0.2)
-            self.__artwork.set_from_icon_name("emblem-favorite-symbolic",
-                                              self.__icon_size)
-        elif status == 1:
+        print(flags)
+        if flags & LovedFlags.LOVED:
             self.set_tooltip_text(_("Like"))
             self.__artwork.set_opacity(0.8)
             self.__artwork.set_from_icon_name("emblem-favorite-symbolic",
                                               self.__icon_size)
         else:
-            self.set_tooltip_text(_("Disallow playback"))
-            self.__artwork.set_opacity(0.8)
-            self.__artwork.set_from_icon_name("media-skip-forward-symbolic",
+            self.set_tooltip_text(_("Allow playback"))
+            self.__artwork.set_opacity(0.2)
+            self.__artwork.set_from_icon_name("emblem-favorite-symbolic",
                                               self.__icon_size)

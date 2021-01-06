@@ -15,7 +15,7 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, StorageType, Type
+from lollypop.define import App, StorageType, Type, LovedFlags
 from lollypop.utils import noaccents, make_subrequest
 
 
@@ -107,12 +107,14 @@ class TracksDatabase:
             @return track ids as [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
             request = "SELECT rowid FROM tracks\
                        WHERE storage_type & ?"
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved &? "
+                filters += (LovedFlags.SKIPPED,)
             request += " ORDER BY album_id"
-            result = sql.execute(request, (storage_type,))
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_ids_for_name(self, name):
@@ -643,7 +645,8 @@ class TracksDatabase:
                                            "OR",
                                            len(artist_ids))
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved &? "
+                filters += (LovedFlags.SKIPPED,)
             filters += (limit,)
             request += " ORDER BY popularity DESC LIMIT ?"
             result = sql.execute(request, filters)
@@ -664,7 +667,8 @@ class TracksDatabase:
                                                "OR",
                                                len(artist_ids))
                 if not skipped:
-                    request += " AND loved != -1 "
+                    request += " AND not loved &? "
+                    filters += (LovedFlags.SKIPPED,)
                 filters += (limit,)
                 request += " ORDER BY popularity DESC LIMIT ?"
                 result = sql.execute(request, filters)
@@ -753,12 +757,15 @@ class TracksDatabase:
             @return tracks as [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
             request = "SELECT tracks.rowid FROM tracks\
                        WHERE ltime!=0 AND storage_type & ?"
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved &? "
+                filters += (LovedFlags.SKIPPED,)
             request += " ORDER BY ltime DESC LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
+            filters += (limit,)
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_skipped(self, storage_type):
@@ -789,7 +796,8 @@ class TracksDatabase:
                 request += ",track_genres"
             request += " WHERE storage_type & ? "
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved &? "
+                filters += (LovedFlags.SKIPPED,)
             if genre_ids:
                 request += "AND tracks.rowid=track_genres.track_id"
                 filters += tuple(genre_ids)
@@ -939,12 +947,13 @@ class TracksDatabase:
                        artists.rowid=album_artists.artist_id AND\
                        tracks.album_id=albums.rowid AND\
                        tracks.year=? AND albums.storage_type & ?"
-            filter = (year, storage_type, limit)
+            filters = (year, storage_type, limit)
             if not skipped:
-                request += " AND albums.loved != -1"
+                request += " AND not albums.loved &? "
+                filters += (LovedFlags.SKIPPED,)
             request += " GROUP BY tracks.album_id"
             request += order
-            result = sql.execute(request, filter)
+            result = sql.execute(request, filters)
             return list(result)
 
     def get_compilations_by_disc_for_year(self, year, storage_type,
@@ -970,12 +979,13 @@ class TracksDatabase:
                        AND tracks.album_id=albums.rowid\
                        AND albums.storage_type & ?\
                        AND tracks.year=?"
-            filter = (Type.COMPILATIONS, storage_type, year, limit)
+            filters = (Type.COMPILATIONS, storage_type, year, limit)
             if not skipped:
-                request += " AND albums.loved != -1"
+                request += " AND not albums.loved &? "
+                filters += (LovedFlags.SKIPPED,)
             request += " GROUP BY tracks.album_id"
             request += order
-            result = sql.execute(request, filter)
+            result = sql.execute(request, filters)
             return list(result)
 
     def set_lp_track_id(self, track_id, lp_track_id):

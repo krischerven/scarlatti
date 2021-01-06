@@ -173,7 +173,8 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
             44: self.__upgrade_44,
             45: self.__upgrade_45,
             46: self.__upgrade_46,
-            47: self.__upgrade_47
+            47: self.__upgrade_47,
+            48: self.__upgrade_48,
         }
 
 #######################
@@ -824,3 +825,15 @@ class DatabaseAlbumsUpgrade(DatabaseUpgrade):
         """
         from lollypop.art import clean_all_cache
         clean_all_cache()
+
+    def __upgrade_48(self, db):
+        """
+            Convert loved to new flags
+        """
+        with SqlCursor(db, True) as sql:
+            sql.execute("UPDATE tracks set loved=2 where loved=1")
+            sql.execute("UPDATE tracks set loved=1 where loved=0")
+            sql.execute("UPDATE tracks set loved=4 where loved=-1")
+            sql.execute("UPDATE albums set loved=2 where loved=1")
+            sql.execute("UPDATE albums set loved=1 where loved=0")
+            sql.execute("UPDATE albums set loved=4 where loved=-1")

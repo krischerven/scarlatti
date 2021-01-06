@@ -14,7 +14,7 @@ from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 
-from lollypop.define import App, ViewType, Type
+from lollypop.define import App, ViewType, Type, LovedFlags
 from lollypop.utils_album import tracks_to_albums
 from lollypop.utils import get_default_storage_type, emit_signal
 from lollypop.utils import get_network_available
@@ -526,6 +526,14 @@ class AlbumPlaybackMenu(PlaybackMenu):
             self.append_submenu(_("Play a radio"), submenu)
         else:
             self._set_radio_action(album.artist_ids)
+        action = Gio.SimpleAction.new_stateful(
+                "skip-album",
+                None,
+                GLib.Variant.new_boolean(
+                    self.__album.loved & LovedFlags.SKIPPED))
+        App().add_action(action)
+        action.connect("change-state", self.__on_loved_change_state)
+        self.append(_("Disallow playback"), "app.skip-album")
 
     @property
     def in_player(self):
@@ -559,11 +567,23 @@ class AlbumPlaybackMenu(PlaybackMenu):
 #######################
 # PRIVATE             #
 #######################
+    def __on_loved_change_state(self, action, state):
+        """
+            Update Skipped state
+            @param action as Gio.SimpleAction
+            @param state as bool
+        """
+        action.set_state(state)
+        if state:
+            self.__album.set_loved(self.__album.loved | LovedFlags.SKIPPED)
+        else:
+            self.__album.set_loved(self.__album.loved & ~LovedFlags.SKIPPED)
+
     def __on_play_action_activate(self, action, variant):
         """
             Play album
-            @param Gio.SimpleAction
-            @param GLib.Variant
+            @param action as Gio.SimpleAction
+            @param variant as GLib.Variant
         """
         App().player.play_album(self.__album.clone(True))
 
@@ -585,6 +605,14 @@ class TrackPlaybackMenu(PlaybackMenu):
             self._set_playback_actions()
             self.__set_queue_actions()
         self.__set_stop_after_action()
+        action = Gio.SimpleAction.new_stateful(
+                "skip-track",
+                None,
+                GLib.Variant.new_boolean(
+                    self.__track.loved & LovedFlags.SKIPPED))
+        App().add_action(action)
+        action.connect("change-state", self.__on_loved_change_state)
+        self.append(_("Disallow playback"), "app.skip-track")
 
     @property
     def in_player(self):
@@ -693,3 +721,15 @@ class TrackPlaybackMenu(PlaybackMenu):
         """
         App().player.remove_from_queue(self.__track.id, False)
         emit_signal(App().player, "queue-changed")
+
+    def __on_loved_change_state(self, action, state):
+        """
+            Update Skipped state
+            @param action as Gio.SimpleAction
+            @param state as bool
+        """
+        action.set_state(state)
+        if state:
+            self.__track.set_loved(self.__track.loved | LovedFlags.SKIPPED)
+        else:
+            self.__track.set_loved(self.__track.loved & ~LovedFlags.SKIPPED)

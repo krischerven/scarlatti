@@ -15,7 +15,7 @@ from time import time
 from random import shuffle
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, Type, OrderBy, StorageType
+from lollypop.define import App, Type, OrderBy, StorageType, LovedFlags
 from lollypop.logger import Logger
 from lollypop.utils import remove_static, make_subrequest
 
@@ -693,13 +693,16 @@ class AlbumsDatabase:
             @return [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
             request = "SELECT DISTINCT albums.rowid\
                        FROM albums\
                        WHERE rate>=4 AND storage_type & ?"
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += "ORDER BY popularity DESC LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
+            filters += (limit,)
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_populars(self, storage_type, skipped, limit):
@@ -711,13 +714,15 @@ class AlbumsDatabase:
             @return [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
             request = "SELECT DISTINCT albums.rowid FROM albums\
                        WHERE popularity!=0 AND storage_type & ?"
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += "ORDER BY popularity DESC LIMIT ?"
-            result = sql.execute(request,
-                                 (storage_type, limit))
+            filters += (limit,)
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_populars_at_the_moment(self, storage_type, skipped, limit):
@@ -729,15 +734,18 @@ class AlbumsDatabase:
             @return [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
             request = "SELECT DISTINCT albums.rowid\
                        FROM albums, albums_timed_popularity\
                        WHERE albums.storage_type & ? AND\
                              albums.rowid = albums_timed_popularity.album_id"
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += "ORDER BY albums_timed_popularity.popularity DESC\
                         LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
+            filters += (limit,)
+            result = sql.execute(request, filters)
             album_ids = list(itertools.chain(*result))
             if album_ids:
                 return album_ids
@@ -752,9 +760,9 @@ class AlbumsDatabase:
         with SqlCursor(self.__db) as sql:
             request = "SELECT albums.rowid\
                        FROM albums\
-                       WHERE loved=1 AND\
+                       WHERE loved & ? AND\
                        storage_type & ? ORDER BY popularity DESC"
-            result = sql.execute(request, (storage_type,))
+            result = sql.execute(request, (LovedFlags.LOVED, storage_type,))
             return list(itertools.chain(*result))
 
     def get_recents(self, storage_type, skipped, limit):
@@ -766,12 +774,15 @@ class AlbumsDatabase:
             @return [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = (storage_type,)
             request = "SELECT DISTINCT albums.rowid FROM albums\
                        WHERE albums.storage_type & ?"
             if not skipped:
-                request += " AND loved != -1 "
+                request += " AND not loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += "ORDER BY mtime DESC LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
+            filters += (limit,)
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_randoms_by_albums(self, storage_type, genre_id, skipped, limit):
@@ -785,23 +796,27 @@ class AlbumsDatabase:
         """
         with SqlCursor(self.__db) as sql:
             if genre_id is not None:
-                filter = (storage_type, genre_id, limit)
+                filters = (storage_type, genre_id)
                 request = "SELECT DISTINCT albums.rowid\
                            FROM albums, album_genres\
                            WHERE albums.storage_type & ? AND\
                                  album_genres.album_id = albums.rowid AND\
                                  album_genres.genre_id = ?"
                 if not skipped:
-                    request += " AND loved != -1 "
+                    request += " AND not loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += "ORDER BY random() LIMIT ?"
+                filters += (limit,)
             else:
-                filter = (storage_type, limit)
+                filters = (storage_type,)
                 request = "SELECT DISTINCT rowid FROM albums\
                            WHERE storage_type & ?"
                 if not skipped:
-                    request += " AND loved != -1 "
+                    request += " AND not loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += "ORDER BY random() LIMIT ?"
-            result = sql.execute(request, filter)
+                filters += (limit,)
+            result = sql.execute(request, filters)
             albums = list(itertools.chain(*result))
             return albums
 
@@ -816,7 +831,7 @@ class AlbumsDatabase:
         """
         with SqlCursor(self.__db) as sql:
             if genre_id is not None:
-                filter = (storage_type, genre_id, limit * 2, limit)
+                filters = (storage_type, genre_id)
                 request = "SELECT rowid, artist_id FROM (\
                                SELECT albums.rowid, album_artists.artist_id\
                                FROM albums, album_genres, album_artists\
@@ -825,22 +840,26 @@ class AlbumsDatabase:
                                      album_genres.album_id = albums.rowid AND\
                                      album_genres.genre_id = ?"
                 if not skipped:
-                    request += " AND loved != -1 "
+                    request += " AND not loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
+                filters += (limit * 2, limit)
                 request += "ORDER BY random() LIMIT ?)\
                             GROUP BY artist_id ORDER BY random() LIMIT ?"
             else:
-                filter = (storage_type, limit * 2, limit)
+                filters = (storage_type,)
                 request = "SELECT rowid, artist_id FROM (\
                                SELECT albums.rowid, album_artists.artist_id\
                                FROM albums, album_artists\
                                WHERE albums.rowid = album_artists.album_id AND\
                                      albums.storage_type & ?"
                 if not skipped:
-                    request += " AND loved != -1 "
+                    request += " AND not loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
+                filters += (limit * 2, limit)
                 request += "ORDER BY random() LIMIT ?)\
                             GROUP BY artist_id ORDER BY random() LIMIT ?"
             album_ids = []
-            for (album_id, artist_id) in sql.execute(request, filter):
+            for (album_id, artist_id) in sql.execute(request, filters):
                 album_ids.append(album_id)
             return album_ids
 
@@ -945,14 +964,15 @@ class AlbumsDatabase:
                                            "OR",
                                            len(artist_ids))
             if not skipped:
-                request += " AND tracks.loved != -1"
+                request += " AND not tracks.loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += " ORDER BY discnumber, tracknumber, tracks.name"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get_tracks_count(self, album_id, genre_ids, artist_ids):
         """
-            Get tracks ids for album
+            Get tracks count for album
             @param album_id as int
             @param genre_ids as [int]
             @param artist_ids as [int]
@@ -1048,13 +1068,15 @@ class AlbumsDatabase:
             result = []
             # Get albums for all artists
             if not artist_ids and not genre_ids:
+                filters = (storage_type,)
                 request = "SELECT DISTINCT albums.rowid\
                            FROM albums, album_artists, artists\
                            WHERE albums.rowid = album_artists.album_id AND\
                            albums.storage_type & ? AND\
                            artists.rowid = album_artists.artist_id"
                 if not skipped:
-                    request += " AND albums.loved != -1"
+                    request += " AND not albums.loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += order
                 result = sql.execute(request, (storage_type,))
             # Get albums for genres
@@ -1071,7 +1093,8 @@ class AlbumsDatabase:
                                            "OR",
                                            len(genre_ids))
                 if not skipped:
-                    request += " AND albums.loved != -1"
+                    request += " AND not albums.loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += order
                 result = sql.execute(request, filters)
             # Get albums for artist
@@ -1087,7 +1110,8 @@ class AlbumsDatabase:
                                            "OR",
                                            len(artist_ids))
                 if not skipped:
-                    request += " AND albums.loved != -1"
+                    request += " AND not albums.loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += order
                 result = sql.execute(request, filters)
             # Get albums for artist id and genre id
@@ -1109,7 +1133,8 @@ class AlbumsDatabase:
                                            "OR",
                                            len(genre_ids))
                 if not skipped:
-                    request += " AND albums.loved != -1"
+                    request += " AND not albums.loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += order
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
@@ -1135,7 +1160,8 @@ class AlbumsDatabase:
                            AND album_artists.artist_id=?\
                            AND album_artists.album_id=albums.rowid"
                 if not skipped:
-                    request += " AND albums.loved != -1"
+                    request += " AND not albums.loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += order
                 result = sql.execute(request, filters)
             # Get compilation for genre id
@@ -1146,14 +1172,14 @@ class AlbumsDatabase:
                            FROM albums, album_genres, album_artists\
                            WHERE album_genres.album_id=albums.rowid\
                            AND albums.storage_type & ?\
-                           AND albums.loved != -1\
                            AND album_artists.album_id=albums.rowid\
                            AND album_artists.artist_id=? AND"
                 request += make_subrequest("album_genres.genre_id=?",
                                            "OR",
                                            len(genre_ids))
                 if not skipped:
-                    request += " AND albums.loved != -1"
+                    request += " AND not albums.loved & ?"
+                    filters += (LovedFlags.SKIPPED,)
                 request += order
                 result = sql.execute(request, filters)
             return list(itertools.chain(*result))
@@ -1242,13 +1268,16 @@ class AlbumsDatabase:
             @return album ids as [int]
         """
         with SqlCursor(self.__db) as sql:
+            filters = ()
             request = "SELECT album_id FROM tracks, albums\
                        WHERE albums.storage_type & ? AND albums.rowid=album_id"
             if not skipped:
-                request += " AND albums.loved != -1"
+                request += " AND not albums.loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += " GROUP BY album_id\
                         ORDER BY SUM(ltime)/COUNT(ltime), random() LIMIT ?"
-            result = sql.execute(request, (storage_type, limit))
+            filters += (storage_type, limit)
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def search(self, searched, storage_type):

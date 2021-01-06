@@ -15,7 +15,7 @@ from gi.repository import Gtk, Pango, GLib, GObject
 from gettext import gettext as _
 
 from lollypop.define import App, ViewType, MARGIN_SMALL, IndicatorType
-from lollypop.define import StorageType
+from lollypop.define import StorageType, LovedFlags
 from lollypop.widgets_indicator import IndicatorWidget
 from lollypop.utils import ms_to_string, on_query_tooltip, popup_widget
 from lollypop.utils import emit_signal
@@ -157,7 +157,7 @@ class TrackRow(Gtk.ListBoxRow):
             if indicator_type & IndicatorType.LOVED:
                 self._indicator.set_opacity(1)
                 self._indicator.loved()
-            elif indicator_type & IndicatorType.SKIP:
+            elif indicator_type & IndicatorType.SKIPPED:
                 self._indicator.set_opacity(1)
                 self._indicator.skip()
             else:
@@ -243,10 +243,10 @@ class TrackRow(Gtk.ListBoxRow):
         indicator_type = IndicatorType.NONE
         if App().player.current_track.id == self._track.id:
             indicator_type |= IndicatorType.PLAY
-        if self._track.loved == 1:
+        if self._track.loved & LovedFlags.LOVED:
             indicator_type |= IndicatorType.LOVED
-        elif self._track.loved == -1:
-            indicator_type |= IndicatorType.SKIP
+        elif self._track.loved & LovedFlags.SKIPPED:
+            indicator_type |= IndicatorType.SKIPPED
         return indicator_type
 
 #######################

@@ -64,6 +64,12 @@ class Repeat:
     ALL = 4
 
 
+class LovedFlags:
+    NONE = 1 << 0
+    LOVED = 1 << 1
+    SKIPPED = 1 << 2
+
+
 class GstPlayFlags:
     GST_PLAY_FLAG_VIDEO = 1 << 0  # We want video output
     GST_PLAY_FLAG_AUDIO = 1 << 1  # We want audio output
@@ -157,7 +163,7 @@ class IndicatorType:
     NONE = 1 << 0
     PLAY = 1 << 1
     LOVED = 1 << 2
-    SKIP = 1 << 3
+    SKIPPED = 1 << 3
     LOADING = 1 << 4
 
 
