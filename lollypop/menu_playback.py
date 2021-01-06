@@ -283,6 +283,7 @@ class ArtistPlaybackMenu(PlaybackMenu):
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
         self._set_playback_actions()
+        self.__set_skipped_action()
         if get_network_available("SPOTIFY") or\
                 get_network_available("LASTFM") or\
                 get_network_available("DEEZER"):
@@ -325,6 +326,42 @@ class ArtistPlaybackMenu(PlaybackMenu):
 #######################
 # PRIVATE             #
 #######################
+    def __set_skipped_action(self):
+        """
+            Set skipped action
+        """
+        album_ids = App().albums.get_ids([], [self.__artist_id],
+                                         self.__storage_type, False)
+        skipped = True
+        for album_id in album_ids:
+            album = Album(album_id)
+            if not album.loved & LovedFlags.SKIPPED:
+                skipped = False
+                break
+        action = Gio.SimpleAction.new_stateful(
+                "skip-artist",
+                None,
+                GLib.Variant.new_boolean(skipped))
+        App().add_action(action)
+        action.connect("change-state", self.__on_loved_change_state)
+        self.append(_("Ignored"), "app.skip-artist")
+
+    def __on_loved_change_state(self, action, state):
+        """
+            Update Skipped state
+            @param action as Gio.SimpleAction
+            @param state as bool
+        """
+        action.set_state(state)
+        album_ids = App().albums.get_ids([], [self.__artist_id],
+                                         self.__storage_type, False)
+        for album_id in album_ids:
+            album = Album(album_id)
+            if state:
+                album.set_loved(album.loved | LovedFlags.SKIPPED)
+            else:
+                album.set_loved(album.loved & ~LovedFlags.SKIPPED)
+
     def __on_play_action_activate(self, action, variant):
         """
             Play albums
