@@ -26,7 +26,7 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('Gst', '1.0')
 from gi.repository import Gio, Gst, GLib
 
-from lollypop.artwork import Artwork
+from lollypop.artwork_album import AlbumArtwork
 from lollypop.settings import Settings
 from lollypop.database import Database
 from lollypop.sqlcursor import SqlCursor
@@ -163,7 +163,7 @@ class SearchLollypopService(Server, Gio.Application):
         self.albums = AlbumsDatabase(self.db)
         self.artists = ArtistsDatabase(self.db)
         self.tracks = TracksDatabase(self.db)
-        self.art = Artwork()
+        self.art = AlbumArtwork()
         self.__bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(self.__bus,
                                        self.__SEARCH_BUS,
@@ -195,17 +195,17 @@ class SearchLollypopService(Server, Gio.Application):
                     album = Album(int(search_id[2:]))
                     name = " ".join(album.artists) or " "
                     description = album.name
-                    surface = self.art.get_album_artwork(
+                    surface = self.art.get(
                         album, ArtSize.BIG, ArtSize.BIG, 1)
-                    gicon = self.art.get_album_cache_path(
+                    gicon = self.art.get_cache_path(
                         album, ArtSize.BIG, ArtSize.BIG)
                 else:
                     track = Track(int(search_id[2:]))
                     name = "♫ " + track.name
                     description = " ".join(track.artists) or " "
-                    surface = self.art.get_album_artwork(
+                    surface = self.art.get(
                         track.album, ArtSize.BIG, ArtSize.BIG, 1)
-                    gicon = self.art.get_album_cache_path(
+                    gicon = self.art.get_cache_path(
                         track.album, ArtSize.BIG, ArtSize.BIG)
                 if surface is not None:
                     del surface
