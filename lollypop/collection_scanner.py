@@ -770,8 +770,10 @@ class CollectionScanner(GObject.GObject, TagReader):
         discnumber = self.get_discnumber(tags)
         discname = self.get_discname(tags)
         tracknumber = self.get_tracknumber(tags, name)
-        if track_rate == 0:
-            track_rate = self.get_popm(tags)
+        # We have popm in tags, override history one
+        tag_track_rate = self.get_popm(tags)
+        if tag_track_rate > 0:
+            track_rate = tag_track_rate
         if album_mtime == 0:
             album_mtime = track_mtime
         bpm = self.get_bpm(tags)
