@@ -331,7 +331,7 @@ class CollectionScanner(GObject.GObject, TagReader):
         App().window.container.progress.add(self)
         App().window.container.progress.set_fraction(0, self)
         self.__progress_fraction = 0
-        notification = AppNotification(_("Resetting database"), [], [])
+        notification = AppNotification(_("Resetting database"), [], [], 10000)
         notification.show()
         App().window.container.add_overlay(notification)
         notification.set_reveal_child(True)

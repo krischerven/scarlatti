@@ -18,12 +18,13 @@ class AppNotification(Gtk.Revealer):
         Show a notification to user with a button connected to an action
     """
 
-    def __init__(self, message, button_labels, actions):
+    def __init__(self, message, button_labels, actions, timeout=None):
         """
             Init notification
             @param message as str
             @param button_label as [str]
             @param action as [callback]
+            @param timeout as int
         """
         Gtk.Revealer.__init__(self)
         widget = Gtk.Grid()
@@ -48,6 +49,8 @@ class AppNotification(Gtk.Revealer):
         self.add(widget)
         self.set_property("halign", Gtk.Align.CENTER)
         self.set_property("valign", Gtk.Align.START)
+        if timeout is not None:
+            GLib.timeout_add(timeout, self.destroy)
 
 #######################
 # PRIVATE             #
