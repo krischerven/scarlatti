@@ -525,56 +525,16 @@ class TagReader:
                 except:
                     bytes = m.data
                 if bytes[0:4] == b"POPM":
-                    # Get tag
-                    """
-                        Location of rating for common media players:
-                        - Plain POPM is located in bytes[11]
-                        - Media Monkey is located in bytes[19] and
-                          we are searching bytes[10:40] for "no@email"
-                        - WinAMP is located in bytes[28] and we are searching
-                          bytes[10:40] for "rating@winamp.com"
-                        - Windows Media Player is located in bytes[40] and
-                          we are searching bytes[10:40] for
-                          "Windows Media Player 9 Series"
-                        - MusicBee is located in bytes[19] and
-                          we are searching bytes[10:40] for
-                          "MusicBee"
-                    """
-                    if bytes.find(b"Windows Media Player 9 Series") >= 0:
-                        location = 40
-                        Logger.debug(
-                            "Rating type: Windows Media Player Location:"
-                            " %s Rating: %s", location, bytes[location])
-                    elif bytes.find(b"rating@winamp.com") >= 0:
-                        location = 28
-                        Logger.debug(
-                            "Rating type: WinAMP Location: %s Rating: %s",
-                            location, bytes[location])
-                    elif bytes.find(b"no@email") >= 0:
-                        location = 19
-                        Logger.debug(
-                            "Rating type: MediaMonkey Location: %s Rating: %s",
-                            location, bytes[location])
-                    elif bytes.find(b"MusicBee") >= 0:
-                        location = 19
-                        Logger.debug(
-                            "Rating type: MusicBee Location: %s Rating: %s",
-                            location, bytes[location])
-                    else:
-                        location = 11
-                        Logger.debug(
-                            "Rating type: none Location: %s Rating: %s",
-                            location, bytes[location])
-                    popm = bytes[location]
+                    popm = bytes.split(b"\x00")[6][0]
                     if popm == 0:
                         value = 0
-                    elif popm == 1:
+                    elif popm >= 1 and popm < 64:
                         value = 1
-                    elif popm == 64:
+                    elif popm >= 64 and popm < 128:
                         value = 2
-                    elif popm == 128:
+                    elif popm >= 128 and popm < 196:
                         value = 3
-                    elif popm == 196:
+                    elif popm >= 196 and popm < 255:
                         value = 4
                     elif popm == 255:
                         value = 5
