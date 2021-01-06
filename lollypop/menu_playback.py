@@ -519,13 +519,6 @@ class AlbumPlaybackMenu(PlaybackMenu):
             menu_item.set_attribute_value("close", GLib.Variant("b", True))
             self.append_item(menu_item)
             self._set_playback_actions()
-        if get_network_available("SPOTIFY") or\
-                get_network_available("LASTFM") or\
-                get_network_available("DEEZER"):
-            submenu = RadioPlaybackMenu(album.artist_ids)
-            self.append_submenu(_("Play a radio"), submenu)
-        else:
-            self._set_radio_action(album.artist_ids)
         action = Gio.SimpleAction.new_stateful(
                 "skip-album",
                 None,
@@ -533,7 +526,14 @@ class AlbumPlaybackMenu(PlaybackMenu):
                     self.__album.loved & LovedFlags.SKIPPED))
         App().add_action(action)
         action.connect("change-state", self.__on_loved_change_state)
-        self.append(_("Disallow playback"), "app.skip-album")
+        self.append(_("Ignored"), "app.skip-album")
+        if get_network_available("SPOTIFY") or\
+                get_network_available("LASTFM") or\
+                get_network_available("DEEZER"):
+            submenu = RadioPlaybackMenu(album.artist_ids)
+            self.append_submenu(_("Play a radio"), submenu)
+        else:
+            self._set_radio_action(album.artist_ids)
 
     @property
     def in_player(self):
@@ -612,7 +612,7 @@ class TrackPlaybackMenu(PlaybackMenu):
                     self.__track.loved & LovedFlags.SKIPPED))
         App().add_action(action)
         action.connect("change-state", self.__on_loved_change_state)
-        self.append(_("Disallow playback"), "app.skip-track")
+        self.append(_("Ignored"), "app.skip-track")
 
     @property
     def in_player(self):
