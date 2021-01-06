@@ -21,7 +21,6 @@
      <file compressed="true" preprocess="xml-stripblanks">SmartPlaylistWidget.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">ToolbarEnd.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">TuneinPopover.ui</file>
-     <file compressed="true" preprocess="xml-stripblanks">TypeAhead.ui</file>
      <file compressed="true" preprocess="xml-stripblanks">AboutDialog.ui</file>
   </gresource>
 </gresources>

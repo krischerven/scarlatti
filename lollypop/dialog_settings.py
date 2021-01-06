@@ -95,8 +95,8 @@ class SettingsDialog:
         passwords_helper.get("LIBREFM", self.__on_get_password,
                              builder.get_object("librefm_button"))
         builder.connect_signals(self)
-        self.__multi_press = Gtk.EventControllerKey.new(self.__settings_dialog)
-        self.__multi_press.connect("key-released", self.__on_key_released)
+        self.__controller = Gtk.EventControllerKey.new(self.__settings_dialog)
+        self.__controller.connect("key-released", self.__on_key_released)
 
     def show(self):
         """
