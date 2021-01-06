@@ -249,7 +249,6 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             if markup is None:
                 markup = album_year
             self.__year_label.set_markup(markup)
-            print(markup)
             self.__year_label.show()
 
     def __set_artwork(self):
