@@ -148,7 +148,7 @@ class AlbumWidget(Gtk.Grid):
         filtered = []
         if self.__tracks_view is None:
             self.__populate()
-            filtered = self.__tracks_view.children
+        filtered = self.__tracks_view.children
         return filtered
 
     @property
@@ -178,10 +178,7 @@ class AlbumWidget(Gtk.Grid):
         """
             Populate the view with album
         """
-        def reveal(ignore, update_duration):
-            if update_duration:
-                self.get_style_context().remove_class("load-animation")
-                self.__banner.update_duration()
+        def init_tracks_view():
             if self.__tracks_view is None:
                 self.__tracks_view = AlbumTracksView(self.__album,
                                                      self.__view_type)
@@ -194,8 +191,14 @@ class AlbumWidget(Gtk.Grid):
                 self.__tracks_view.connect("selected",
                                            self.__on_track_selected)
                 self.__revealer.add(self.__tracks_view)
+
+        def reveal(ignore, update_duration):
+            if update_duration:
+                self.get_style_context().remove_class("load-animation")
+                self.__banner.update_duration()
             self.__revealer.set_reveal_child(
                 not self.__revealer.get_reveal_child())
+        init_tracks_view()
         if self.__album.tracks:
             reveal(None, False)
         else:
