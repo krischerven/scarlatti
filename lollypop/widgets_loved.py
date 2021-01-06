@@ -103,7 +103,6 @@ class LovedWidget(Gtk.Bin):
             Set artwork base on object status
             @param flags as int
         """
-        print(flags)
         if flags & LovedFlags.LOVED:
             self.set_tooltip_text(_("Like"))
             self.__artwork.set_opacity(0.8)
