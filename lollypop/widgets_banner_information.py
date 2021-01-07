@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GLib, GObject
 
-from lollypop.utils import emit_signal, on_query_tooltip
+from lollypop.utils import emit_signal, on_query_tooltip, get_network_available
 from lollypop.define import App, ArtSize, ArtBehaviour, ViewType
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -51,6 +51,8 @@ class InformationBannerWidget(BannerWidget, SignalsHelper):
         self._overlay.add_overlay(self.__widget)
         self._overlay.set_overlay_pass_through(self.__widget, True)
         self.__set_internal_size()
+        if not get_network_available("WIKIPEDIA"):
+            self.__button.set_sensitive(False)
         return [
                (App().window.container.widget, "notify::folded",
                 "_on_container_folded"),
@@ -96,7 +98,8 @@ class InformationBannerWidget(BannerWidget, SignalsHelper):
             Emit search signal
             @param button as Gtk.ToggleButton
         """
-        emit_signal(self, "search", button.get_active())
+        if get_network_available("WIKIPEDIA"):
+            emit_signal(self, "search", button.get_active())
 
 #######################
 # PRIVATE             #
