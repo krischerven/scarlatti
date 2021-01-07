@@ -248,7 +248,7 @@ class MtpSync(GObject.Object):
             album_ids = App().albums.get_synced_ids(0)
             album_ids += App().albums.get_synced_ids(index)
             for album_id in album_ids:
-                album = Album(album_id)
+                album = Album(album_id, skipped=False)
                 tracks += album.tracks
             # New tracks for playlists
             playlist_ids = App().playlists.get_synced_ids(0)
