@@ -38,7 +38,8 @@ class ActionsMenu(Gio.Menu):
         else:
             self.__object = Track(object.id)
         self.__set_save_action()
-        if self.__object.storage_type & StorageType.COLLECTION:
+        if self.__object.storage_type & StorageType.COLLECTION and\
+                not GLib.file_test("/app", GLib.FileTest.EXISTS):
             self.__set_open_action()
 
 #######################
