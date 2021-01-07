@@ -32,12 +32,7 @@ class Discoverer:
         """
             Init tag reader
         """
-        self.init_discoverer()
 
-    def init_discoverer(self):
-        """
-            Init discover
-        """
         self._discoverer = GstPbutils.Discoverer.new(10 * Gst.SECOND)
 
     def get_info(self, uri):
@@ -56,6 +51,15 @@ class TagReader:
         Scanner tag reader
     """
 
+    __STRING = ["title", "artist", "composer", "conductor",
+                "musicbrainz-albumid", "musicbrainz-trackid",
+                "musicbrainz-artistid", "musicbrainz-albumartistid",
+                "version", "performer", "artist-sortname",
+                "album-artist-sortname", "interpreted-by", "album-artist",
+                "album", "genre", "lyrics", "publisher"]
+    __INT = ["album-disc-number", "track-number"]
+    __DOUBLE = ["beats-per-minute"]
+
     def __init__(self):
         """
             Init tag reader
@@ -71,9 +75,8 @@ class TagReader:
         """
         if tags is None:
             return GLib.path_get_basename(filepath)
-        (exists, title) = tags.get_string_index("title", 0)
-        # We need to check tag is not just spaces
-        if not exists or not title.strip(" "):
+        title = self.__get(tags, ["title"])
+        if not title:
             title = GLib.path_get_basename(filepath)
         return title
 
@@ -85,13 +88,7 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        artists = []
-        for i in range(tags.get_tag_size("artist")):
-            (exists, read) = tags.get_string_index("artist", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                artists.append(read)
-        return "; ".join(artists)
+        return self.__get(tags, ["artist"])
 
     def get_composers(self, tags):
         """
@@ -101,13 +98,7 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        composers = []
-        for i in range(tags.get_tag_size("composer")):
-            (exists, read) = tags.get_string_index("composer", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                composers.append(read)
-        return "; ".join(composers)
+        return self.__get(tags, ["composer"])
 
     def get_conductors(self, tags):
         """
@@ -117,13 +108,7 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        conductors = []
-        for i in range(tags.get_tag_size("conductor")):
-            (exists, read) = tags.get_string_index("conductor", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                conductors.append(read)
-        return "; ".join(conductors)
+        return self.__get(tags, ["conductor"])
 
     def get_mb_id(self, tags, name):
         """
@@ -134,8 +119,7 @@ class TagReader:
         """
         if tags is None or not name:
             return ""
-        (exists, mbid) = tags.get_string_index("musicbrainz-" + name, 0)
-        return mbid or ""
+        return self.__get(tags, ["musicbrainz-" + name])
 
     def get_mb_album_id(self, tags):
         """
@@ -177,8 +161,7 @@ class TagReader:
         """
         if tags is None:
             return ""
-        (exists, version) = tags.get_string_index("version", 0)
-        return version or ""
+        return self.__get(tags, ["version"])
 
     def get_performers(self, tags):
         """
@@ -188,13 +171,7 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        performers = []
-        for i in range(tags.get_tag_size("performer")):
-            (exists, read) = tags.get_string_index("performer", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                performers.append(read)
-        return "; ".join(performers)
+        return self.__get(tags, ["performer"])
 
     def get_artist_sortnames(self, tags):
         """
@@ -204,13 +181,7 @@ class TagReader:
         """
         if tags is None:
             return ""
-        sortnames = []
-        for i in range(tags.get_tag_size("artist-sortname")):
-            (exists, read) = tags.get_string_index("artist-sortname", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                sortnames.append(read)
-        return "; ".join(sortnames)
+        return self.__get(tags, ["artist-sortname"])
 
     def get_album_artist_sortnames(self, tags):
         """
@@ -220,13 +191,7 @@ class TagReader:
         """
         if tags is None:
             return ""
-        sortnames = []
-        for i in range(tags.get_tag_size("album-artist-sortname")):
-            (exists, read) = tags.get_string_index("album-artist-sortname", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                sortnames.append(read)
-        return "; ".join(sortnames)
+        return self.__get(tags, ["album-artist-sortname"])
 
     def get_remixers(self, tags):
         """
@@ -236,19 +201,10 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        remixers = []
-        for i in range(tags.get_tag_size("interpreted-by")):
-            (exists, read) = tags.get_string_index("interpreted-by", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                remixers.append(read)
+        remixers = self.__get(tags, ["interpreted-by"])
         if not remixers:
-            for i in range(tags.get_tag_size("extended-comment")):
-                (exists, read) = tags.get_string_index("extended-comment", i)
-                if exists and read.startswith("REMIXER="):
-                    remixer = read[8:]
-                    remixers.append(remixer)
-        return "; ".join(remixers)
+            remixers = self.__get_extended(tags, ["REMIXER"])
+        return remixers
 
     def get_album_artists(self, tags):
         """
@@ -258,13 +214,7 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        artists = []
-        for i in range(tags.get_tag_size("album-artist")):
-            (exists, read) = tags.get_string_index("album-artist", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                artists.append(read)
-        return "; ".join(artists)
+        return self.__get(tags, ["album-artist"])
 
     def get_album_name(self, tags):
         """
@@ -274,11 +224,10 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        (exists, album_name) = tags.get_string_index("album", 0)
-        # We need to check tag is not just spaces
-        if not exists or not album_name.strip(" "):
-            album_name = _("Unknown")
-        return album_name
+        album = self.__get(tags, ["album"])
+        if not album:
+            album = _("Unknown")
+        return album
 
     def get_genres(self, tags):
         """
@@ -288,15 +237,10 @@ class TagReader:
         """
         if tags is None:
             return _("Unknown")
-        genres = []
-        for i in range(tags.get_tag_size("genre")):
-            (exists, read) = tags.get_string_index("genre", i)
-            # We need to check tag is not just spaces
-            if exists and read.strip(" "):
-                genres.append(read)
+        genres = self.__get(tags, ["genre"])
         if not genres:
-            return _("Unknown")
-        return "; ".join(genres)
+            genres = _("Unknown")
+        return genres
 
     def get_discname(self, tags):
         """
@@ -304,18 +248,7 @@ class TagReader:
             @param tags as Gst.TagList
             @return disc name as str
         """
-        if tags is None:
-            return ""
-        discname = ""
-        for i in range(tags.get_tag_size("extended-comment")):
-            (exists, read) = tags.get_string_index("extended-comment", i)
-            if exists and read.startswith("PART"):
-                discname = "=".join(read.split("=")[1:])
-                break
-            if exists and read.startswith("DISCSUBTITLE"):
-                discname = "=".join(read.split("=")[1:])
-                break
-        return discname
+        return self.__get_extended(tags, ['PART', 'DISCSUBTITLE'])
 
     def get_discnumber(self, tags):
         """
@@ -325,8 +258,8 @@ class TagReader:
         """
         if tags is None:
             return 0
-        (exists, discnumber) = tags.get_uint_index("album-disc-number", 0)
-        if not exists:
+        discnumber = self.__get(tags, ["album-disc-number"])
+        if not discnumber:
             discnumber = 0
         return discnumber
 
@@ -338,35 +271,14 @@ class TagReader:
         """
         if tags is None:
             return False
-        size = tags.get_tag_size("private-id3v2-frame")
-        for i in range(0, size):
-            (exists, sample) = tags.get_sample_index(
-                "private-id3v2-frame",
-                i)
-            if not exists:
-                continue
-            (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-            if not exists:
-                continue
-            # Gstreamer 1.18 API breakage
-            try:
-                bytes = m.data.tobytes()
-            except:
-                bytes = m.data
-            frame = FrameTextTag(bytes)
-            if frame.key == "TCMP":
-                string = frame.string
-                if not string:
-                    Logger.debug(tags.to_string())
-                return string and string[-1] == "1"
-        size = tags.get_tag_size("extended-comment")
-        for i in range(0, size):
-            (exists, sample) = tags.get_string_index(
-                "extended-comment",
-                i)
-            if not exists or not sample.startswith("COMPILATION="):
-                continue
-            return sample[12]
+        try:
+            compilation = self.__get_private_string(tags, "TCMP", False)
+            if not compilation:
+                compilation = self.__get_extended(tags, ["COMPILATION"])
+            if compilation:
+                return bool(compilation)
+        except Exception as e:
+            Logger.error("TagReader::get_compilation(): %s" % e)
         return False
 
     def get_tracknumber(self, tags, filename):
@@ -377,10 +289,10 @@ class TagReader:
             @return track number as int
         """
         if tags is not None:
-            (exists, tracknumber) = tags.get_uint_index("track-number", 0)
+            tracknumber = self.__get(tags, ["track-number"])
         else:
-            (exists, tracknumber) = (False, 0)
-        if not exists:
+            tracknumber = None
+        if not tracknumber:
             # Guess from filename
             m = match("^([0-9]*)[ ]*-", filename)
             if m:
@@ -436,45 +348,21 @@ class TagReader:
             @return year and timestamp (int, int)
         """
         def get_id3():
+            date_string = self.__get_private_string(tags, "TDOR", False)
             try:
-                size = tags.get_tag_size("private-id3v2-frame")
-                for i in range(0, size):
-                    (exists, sample) = tags.get_sample_index(
-                        "private-id3v2-frame",
-                        i)
-                    if not exists:
-                        continue
-                    (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-                    if not exists:
-                        continue
-                    # Gstreamer 1.18 API breakage
-                    try:
-                        bytes = m.data.tobytes()
-                    except:
-                        bytes = m.data
-                    frame = FrameTextTag(bytes)
-                    if frame.key == "TDOR":
-                        if not frame.string:
-                            Logger.debug(tags.to_string())
-                        date = get_iso_date_from_string(frame.string)
-                        datetime = GLib.DateTime.new_from_iso8601(date, None)
-                        return (datetime.get_year(), datetime.to_unix())
+                date = get_iso_date_from_string(date_string)
+                datetime = GLib.DateTime.new_from_iso8601(date, None)
+                return (datetime.get_year(), datetime.to_unix())
             except:
                 pass
             return (None, None)
 
         def get_ogg():
             try:
-                size = tags.get_tag_size("extended-comment")
-                for i in range(0, size):
-                    (exists, sample) = tags.get_string_index(
-                        "extended-comment",
-                        i)
-                    if not exists or not sample.startswith("ORIGINALDATE="):
-                        continue
-                    date = get_iso_date_from_string(sample[13:])
-                    datetime = GLib.DateTime.new_from_iso8601(date, None)
-                    return (datetime.get_year(), datetime.to_unix())
+                date_string = self.__get_extended(tags, ['ORIGINALDATE'])
+                date = get_iso_date_from_string(date_string)
+                datetime = GLib.DateTime.new_from_iso8601(date, None)
+                return (datetime.get_year(), datetime.to_unix())
             except:
                 pass
             return (None, None)
@@ -492,14 +380,10 @@ class TagReader:
             @param tags as Gst.TagList
             @return int/None
         """
-        try:
-            if tags is not None:
-                (exists, bpm) = tags.get_double_index("beats-per-minute", 0)
-                if exists:
-                    return bpm
-        except:
-            pass
-        return None
+        bpm = self.__get(tags, ["beats-per-minute"])
+        if not bpm:
+            bpm = None
+        return bpm
 
     def get_popm(self, tags):
         """
@@ -524,8 +408,12 @@ class TagReader:
                     bytes = m.data.tobytes()
                 except:
                     bytes = m.data
-                if bytes[0:4] == b"POPM":
-                    popm = bytes.split(b"\x00")[6][0]
+
+                if len(bytes) > 4 and bytes[0:4] == b"POPM":
+                    try:
+                        popm = bytes.split(b"\x00")[6][0]
+                    except:
+                        popm = 0
                     if popm == 0:
                         value = 0
                     elif popm >= 1 and popm < 64:
@@ -551,61 +439,14 @@ class TagReader:
             @parma tags as Gst.TagList
             @return lyrics as str
         """
-        def decode_lyrics(bytes):
-            try:
-                frame = FrameLangTag(bytes)
-                if frame.key == "USLT":
-                    return frame.string
-            except Exception as e:
-                Logger.warning("TagReader::get_lyrics(): %s", e)
-            return None
-
         def get_mp4():
-            try:
-                (exists, sample) = tags.get_string_index("lyrics", 0)
-                if exists:
-                    return sample
-            except Exception as e:
-                Logger.error("TagReader::get_mp4(): %s" % e)
-            return ""
+            return self.__get(tags, ["lyrics"])
 
         def get_id3():
-            try:
-                size = tags.get_tag_size("private-id3v2-frame")
-                for i in range(0, size):
-                    (exists, sample) = tags.get_sample_index(
-                        "private-id3v2-frame",
-                        i)
-                    if not exists:
-                        continue
-                    (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-                    if not exists:
-                        continue
-                    # Gstreamer 1.18 API breakage
-                    try:
-                        bytes = m.data.tobytes()
-                    except:
-                        bytes = m.data
-                    string = decode_lyrics(bytes)
-                    if string is not None:
-                        return string
-            except Exception as e:
-                Logger.error("TagReader::get_id3(): %s" % e)
-            return ""
+            return self.__get_private_string(tags, "USLT", True)
 
         def get_ogg():
-            try:
-                size = tags.get_tag_size("extended-comment")
-                for i in range(0, size):
-                    (exists, sample) = tags.get_string_index(
-                        "extended-comment",
-                        i)
-                    if not exists or not sample.startswith("LYRICS="):
-                        continue
-                    return sample[7:]
-            except Exception as e:
-                Logger.error("TagReader::get_ogg(): %s" % e)
-            return ""
+            return self.__get_extended(tags, ["LYRICS"])
 
         if tags is None:
             return ""
@@ -631,36 +472,21 @@ class TagReader:
                         lyrics.append((decodeUnicode(l, encoding),
                                        int.from_bytes(t[1:4], "big")))
             except Exception as e:
-                Logger.warning("TagReader::get_synced_lyrics1(): %s", e)
+                Logger.warning(
+                        "TagReader::get_synced_lyrics.decode_lyrics(): %s", e)
             return lyrics
 
         def get_id3():
             try:
-                size = tags.get_tag_size("private-id3v2-frame")
-                for i in range(0, size):
-                    (exists, sample) = tags.get_sample_index(
-                        "private-id3v2-frame",
-                        i)
-                    if not exists:
-                        continue
-                    (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
-                    if not exists:
-                        continue
-                    # Gstreamer 1.18 API breakage
-                    try:
-                        bytes = m.data.tobytes()
-                    except:
-                        bytes = m.data
-                    prefix = (bytes[0:4])
-                    if prefix not in [b"SYLT"]:
-                        continue
-                    frame = bytes[10:]
+                b = self.__get_private_bytes(tags, "SYLT")
+                if b:
+                    frame = b[10:]
                     encoding = frame[0:1]
                     string = decode_lyrics(frame.split(b"\n"), encoding)
                     if string is not None:
                         return string
             except Exception as e:
-                Logger.error("TagReader::get_synced_lyrics2(): %s" % e)
+                Logger.warning("TagReader::get_synced_lyrics.get_id3(): %s", e)
             return ""
 
         if tags is None:
@@ -784,3 +610,106 @@ class TagReader:
 #######################
 # PRIVATE             #
 #######################
+    def __get_extended(self, tags, keys):
+        """
+            Return tag from tags following keys
+            @param tags as Gst.TagList
+            @param keys as [str]
+            @return Tag as str
+        """
+        if tags is None:
+            return ""
+        items = []
+        try:
+            for i in range(tags.get_tag_size("extended-comment")):
+                (exists, read) = tags.get_string_index("extended-comment", i)
+                for key in keys:
+                    if exists and read.startswith(key + "="):
+                        items.append("".join(read.split("=")[1:]))
+        except Exception as e:
+            Logger.error("TagReader::__get_extended(): %s", e)
+        return ";".join(items)
+
+    def __get(self, tags, keys):
+        """
+            Return tag from tags following keys
+            Only handles string/uint/double
+            @param tags as Gst.TagList
+            @param keys as [str]
+            @return Tag as str/int/double. Empty string if does not exist
+        """
+        if tags is None:
+            return ""
+        items = []
+        try:
+            for key in keys:
+                for i in range(tags.get_tag_size(key)):
+                    if key in self.__STRING:
+                        (exists, read) = tags.get_string_index(key, i)
+                        if exists and read.strip(" "):
+                            items.append(read)
+                    elif key in self.__INT:
+                        (exists, read) = tags.get_uint_index(key, i)
+                        if exists:
+                            return read
+                    elif key in self.__DOUBLE:
+                        (exists, read) = tags.get_double_index(key, i)
+                        if exists:
+                            return read
+                    else:
+                        Logger.error("Missing key" % key)
+        except Exception as e:
+            Logger.error("TagReader::__get(): %s", e)
+        return ";".join(items)
+
+    def __get_private_bytes(self, tags, key):
+        """
+            Get key from private frame
+            @param tags as Gst.TagList
+            @param key as str
+            @return frame as bytes
+        """
+        try:
+            size = tags.get_tag_size("private-id3v2-frame")
+            encoded_key = key.encode("utf-8")
+            for i in range(0, size):
+                (exists, sample) = tags.get_sample_index(
+                    "private-id3v2-frame",
+                    i)
+                if not exists:
+                    continue
+                (exists, m) = sample.get_buffer().map(Gst.MapFlags.READ)
+                if not exists:
+                    continue
+                # Gstreamer 1.18 API breakage
+                try:
+                    b = m.data.tobytes()
+                except:
+                    b = m.data
+
+                if b[0:len(encoded_key)] != encoded_key:
+                    continue
+                return b
+        except Exception as e:
+            Logger.error("TagReader::__get_private_bytes(): %s" % e)
+        return b""
+
+    def __get_private_string(self, tags, key, lang):
+        """
+            Get key from private frame
+            @param tags as Gst.TagList
+            @param key as str
+            @param lang as bool
+            @return Tag as str
+        """
+        try:
+            b = self.__get_private_bytes(tags, key)
+            if lang:
+                frame = FrameLangTag(b)
+            else:
+                frame = FrameTextTag(b)
+            if frame.key == key:
+                return frame.string
+        except Exception as e:
+            Logger.error("TagReader::__get_private(): %s" % e)
+        return ""
