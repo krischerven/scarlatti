@@ -21,7 +21,6 @@ from lollypop.objects_album import Album
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
-from lollypop.utils import get_network_available
 from lollypop.utils import get_default_storage_type
 from lollypop.widgets_banner_information import InformationBannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -231,18 +230,15 @@ class InformationView(View, SignalsHelper):
             @param status as bool
         """
         if status:
-            if get_network_available("WIKIPEDIA"):
-                from lollypop.helper_web_wikipedia import WikipediaHelper
-                wikipedia = WikipediaHelper()
-                self.__label.hide()
-                self.__listbox.show()
-                self.__stack.set_visible_child(self.__listbox)
-                App().task_helper.run(
-                    wikipedia.get_search_list,
-                    self.__artist_name,
-                    callback=(self.__on_wikipedia_search_list,))
-            else:
-                self.__banner.button.toggled()
+            from lollypop.helper_web_wikipedia import WikipediaHelper
+            wikipedia = WikipediaHelper()
+            self.__label.hide()
+            self.__listbox.show()
+            self.__stack.set_visible_child(self.__listbox)
+            App().task_helper.run(
+                wikipedia.get_search_list,
+                self.__artist_name,
+                callback=(self.__on_wikipedia_search_list,))
         else:
             self.__show_main_widget()
 
