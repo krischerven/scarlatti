@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, GLib, Handy
+from gi.repository import GLib, Handy
 
 from lollypop.define import App, Size
 from lollypop.toolbar_playback import ToolbarPlayback
@@ -33,7 +33,7 @@ class Toolbar(Handy.HeaderBar, SizeAllocationHelper, SignalsHelper):
             Init toolbar
             @param window as Window
         """
-        Gtk.HeaderBar.__init__(self)
+        Handy.HeaderBar.__init__(self)
         SizeAllocationHelper.__init__(self)
         self.__width = Size.MINI
         self.__timeout_id = None
