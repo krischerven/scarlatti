@@ -776,8 +776,8 @@ class TracksDatabase:
         """
         with SqlCursor(self.__db) as sql:
             request = "SELECT rowid FROM tracks\
-                       WHERE loved=-1 AND storage_type & ?"
-            result = sql.execute(request, (storage_type,))
+                       WHERE loved & ? AND storage_type & ?"
+            result = sql.execute(request, (LovedFlags.SKIPPED, storage_type))
             return list(itertools.chain(*result))
 
     def get_randoms(self, genre_ids, storage_type, skipped, limit):
