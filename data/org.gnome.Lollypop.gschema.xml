@@ -365,17 +365,17 @@
             <description></description>
         </key>
         <key enum="org.gnome.Lollypop.ReplayGain" name="replay-gain">
-            <default>'album'</default>
+            <default>'none'</default>
             <summary>ReplayGain state</summary>
             <description></description>
         </key>
         <key type="d" name="replay-gain-db">
-            <default>3.0</default>
+            <default>0</default>
             <summary>ReplayGain value in dB</summary>
             <description>Between -15 and 15</description>
         </key>
         <key type="b" name="replay-gain-limiter">
-            <default>true</default>
+            <default>false</default>
             <summary>Applies signal compression/limiting to raw audio data</summary>
             <description>It performs strict hard limiting with soft-knee characteristics, using a threshold of -6 dB</description>
         </key>
