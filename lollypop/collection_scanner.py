@@ -557,6 +557,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         except Exception as e:
             Logger.warning("CollectionScanner::__scan(): %s", e)
         SqlCursor.remove(App().db)
+        App().settings.set_value("flatpak-access-migration",
+                                 GLib.Variant("b", True))
 
     def __scan_to_handle(self, uri):
         """
@@ -870,5 +872,3 @@ class CollectionScanner(GObject.GObject, TagReader):
             assistant.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
             assistant.set_transient_for(App().window)
             GLib.timeout_add(1000, assistant.show)
-            App().settings.set_value("flatpak-access-migration",
-                                     GLib.Variant("b", True))
