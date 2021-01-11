@@ -149,6 +149,10 @@ class SettingsDialog:
         setting = widget.get_name()
         value = widget.get_active()
         App().settings.set_enum(setting, value)
+        if setting == "replay-gain":
+            for plugin in App().player.plugins:
+                plugin.build_audiofilter()
+            App().player.reload_track()
 
     def _on_clean_artwork_cache_clicked(self, button):
         """
