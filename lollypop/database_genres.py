@@ -13,7 +13,7 @@
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, Type, OrderBy
+from lollypop.define import App, Type, OrderBy, LovedFlags
 from lollypop.utils import get_network_available, sql_escape
 
 
@@ -104,6 +104,7 @@ class GenresDatabase:
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         with SqlCursor(self.__db) as sql:
+            filters = ()
             request = "SELECT albums.rowid\
                        FROM albums, album_genres, genres,\
                             album_artists, artists\
@@ -114,9 +115,10 @@ class GenresDatabase:
             if not get_network_available():
                 request += " AND albums.synced!=%s" % Type.NONE
             if ignore:
-                request += " AND albums.loved != -1"
+                request += " AND not albums.loved & ?"
+                filters += (LovedFlags.SKIPPED,)
             request += order
-            result = sql.execute(request)
+            result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
     def get(self):
