@@ -28,12 +28,7 @@ class PasswordsHelper:
         """
         # Initial password lookup, prevent a lock issue in Flatpak backend
         if GLib.file_test("/app", GLib.FileTest.EXISTS):
-            SecretSchema = {"service": Secret.SchemaAttributeType.STRING}
-            SecretAttributes = {"service": "LASTFM"}
-            schema = Secret.Schema.new("org.gnome.Lollypop",
-                                       Secret.SchemaFlags.NONE,
-                                       SecretSchema)
-            Secret.password_lookup_sync(schema, SecretAttributes)
+            self.get_token("LASTFM")
 
     def get_token(self, service):
         """
