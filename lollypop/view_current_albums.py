@@ -194,6 +194,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             if App().player.next_track.id != track.id:
                 App().player.next()
         row.album.remove_track(track)
+        App().player.update_next_prev()
         emit_signal(App().player, "playback-updated", row.album)
         if not row.children:
             row.destroy()
