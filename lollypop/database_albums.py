@@ -1268,7 +1268,7 @@ class AlbumsDatabase:
             @return album ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ()
+            filters = (storage_type,)
             request = "SELECT album_id FROM tracks, albums\
                        WHERE albums.storage_type & ? AND albums.rowid=album_id"
             if not skipped:
@@ -1276,7 +1276,7 @@ class AlbumsDatabase:
                 filters += (LovedFlags.SKIPPED,)
             request += " GROUP BY album_id\
                         ORDER BY SUM(ltime)/COUNT(ltime), random() LIMIT ?"
-            filters += (storage_type, limit)
+            filters += (limit,)
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
