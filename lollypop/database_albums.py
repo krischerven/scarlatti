@@ -940,6 +940,7 @@ class AlbumsDatabase:
             @param skipped as bool
             @return [int]
         """
+        print("::", skipped)
         genre_ids = remove_static(genre_ids)
         artist_ids = remove_static(artist_ids)
         with SqlCursor(self.__db) as sql:

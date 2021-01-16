@@ -350,7 +350,8 @@ class Album(Base):
             @return album
         """
         album = Album(self.id, self.genre_ids, self.artist_ids, skipped)
-        album.set_tracks(self.tracks)
+        if skipped:
+            album.set_tracks(self.tracks)
         return album
 
     def set_storage_type(self, storage_type):

@@ -263,11 +263,10 @@ class AlbumsBoxView(FlowBoxView, SignalsHelper):
 
         def play_album(status, child):
             child.artwork.get_style_context().remove_class("load-animation")
-            child.data.reset_tracks()
-            App().player.play_album(child.data.clone(True))
+            App().player.play_album(child.data.clone(False))
 
         if child.data.storage_type & StorageType.COLLECTION:
-            App().player.play_album(child.data.clone(True))
+            App().player.play_album(child.data.clone(False))
         else:
             child.artwork.get_style_context().add_class("load-animation")
             cancellable = Gio.Cancellable.new()

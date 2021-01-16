@@ -369,13 +369,15 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
             Play album
            @param button as Gtk.Button
         """
-        App().player.play_album(self.__album.clone(False))
+        selected = button.get_state_flags() & Gtk.StateFlags.SELECTED
+        App().player.play_album(self.__album.clone(selected))
 
     def __on_add_button_clicked(self, button):
         """
             Add/Remove album
            @param button as Gtk.Button
         """
+        selected = button.get_state_flags() & Gtk.StateFlags.SELECTED
         add = self.__add_button.get_image().get_icon_name()[0] ==\
             "list-add-symbolic"
         albums = App().player.get_albums_for_id(self.__album.id)
@@ -393,7 +395,7 @@ class AlbumBannerWidget(BannerWidget, SignalsHelper):
                             break
                 emit_signal(App().player, "playback-updated", album)
         else:
-            App().player.add_album(self.__album.clone(False))
+            App().player.add_album(self.__album.clone(selected))
 
     def __on_year_clicked(self, label):
         """
