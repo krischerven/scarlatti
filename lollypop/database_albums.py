@@ -1078,7 +1078,7 @@ class AlbumsDatabase:
                     request += " AND not albums.loved & ?"
                     filters += (LovedFlags.SKIPPED,)
                 request += order
-                result = sql.execute(request, (storage_type,))
+                result = sql.execute(request, filters)
             # Get albums for genres
             elif not artist_ids:
                 filters = (storage_type,)
