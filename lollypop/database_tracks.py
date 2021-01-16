@@ -604,10 +604,10 @@ class TracksDatabase:
             @return [int]
         """
         with SqlCursor(self.__db) as sql:
-            filters = (storage_type,)
+            filters = (LovedFlags.LOVED, storage_type)
             request = "SELECT tracks.rowid\
                        FROM tracks, album_artists, artists\
-                       WHERE loved=1 AND\
+                       WHERE loved=? AND\
                        artists.rowid=album_artists.artist_id AND\
                        tracks.album_id=album_artists.album_id AND\
                        storage_type & ?"
@@ -617,7 +617,7 @@ class TracksDatabase:
                 request += make_subrequest("album_artists.artist_id=?",
                                            "OR",
                                            len(artist_ids))
-            request += "ORDER BY artists.name"
+            request += " ORDER BY artists.name"
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
 
