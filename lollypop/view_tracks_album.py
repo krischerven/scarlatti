@@ -18,7 +18,7 @@ from lollypop.widgets_row_track import TrackRow
 from lollypop.widgets_label import LabelWidget
 from lollypop.objects_album import Album
 from lollypop.utils import emit_signal
-from lollypop.define import App, ViewType
+from lollypop.define import App, ViewType, LovedFlags
 from lollypop.view_tracks import TracksView
 
 
@@ -256,7 +256,9 @@ class AlbumTracksView(TracksView):
         if self.view_type & (ViewType.ALBUM | ViewType.ARTIST):
             tracks = []
             for child in self.children:
-                if child.track.loved != -1 or track.id == child.track.id:
+                if not child.track.loved & LovedFlags.SKIPPED or\
+                        track.id == child.track.id:
+                    tracks.append(child.track)
                     tracks.append(child.track)
                 child.set_state_flags(Gtk.StateFlags.NORMAL, True)
             # Do not update album list if in party or album already available
@@ -365,6 +367,6 @@ class AlbumTracksView(TracksView):
             @param label as LabelWidget
             @param disc_number as int
         """
-        album = Album(self.__album.id)
+        album = self.__album.clone(False)
         album.set_disc_number(disc_number)
         App().player.play_album(album)
