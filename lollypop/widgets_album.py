@@ -38,6 +38,7 @@ class AlbumWidget(Gtk.Grid):
         Gtk.Grid.__init__(self)
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self.__tracks_view = None
+        self.__revealer = None
         self.__view_type = view_type
         self.__storage_type = storage_type
         self.__album = album
@@ -50,23 +51,25 @@ class AlbumWidget(Gtk.Grid):
         """
             Populate widget
         """
-        self.__revealer = Gtk.Revealer.new()
-        self.__revealer.show()
-        self.__banner = AlbumBannerWidget(self.__album, self.__storage_type,
-                                          self.__view_type)
-        self.__banner.show()
-        self.__banner.connect("populated", self.__on_banner_populated)
-        self.__banner.populate()
-        self.add(self.__banner)
-        self.add(self.__revealer)
-        self.__gesture = GesturesHelper(self.__banner,
-                                        primary_press_callback=self._on_press)
-        self.get_style_context().add_class("album-banner")
-        if App().settings.get_value("show-artist-tracks"):
-            self.__revealer.set_transition_type(
-                Gtk.RevealerTransitionType.NONE)
-            self.__populate()
-        self.set_selection()
+        if self.__revealer is None:
+            self.__revealer = Gtk.Revealer.new()
+            self.__revealer.show()
+            self.__banner = AlbumBannerWidget(self.__album,
+                                              self.__storage_type,
+                                              self.__view_type)
+            self.__banner.show()
+            self.__banner.connect("populated", self.__on_banner_populated)
+            self.__banner.populate()
+            self.add(self.__banner)
+            self.add(self.__revealer)
+            self.__gesture = GesturesHelper(
+                self.__banner,  primary_press_callback=self._on_press)
+            self.get_style_context().add_class("album-banner")
+            if App().settings.get_value("show-artist-tracks"):
+                self.__revealer.set_transition_type(
+                    Gtk.RevealerTransitionType.NONE)
+                self.__populate()
+            self.set_selection()
 
     def reveal_child(self):
         """
@@ -103,6 +106,8 @@ class AlbumWidget(Gtk.Grid):
             Get banner
             @return BannerWidget
         """
+        if self.__revealer is None:
+            self.populate()
         return self.__banner
 
     @property
