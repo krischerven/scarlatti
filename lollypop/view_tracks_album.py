@@ -259,7 +259,6 @@ class AlbumTracksView(TracksView):
                 if not child.track.loved & LovedFlags.SKIPPED or\
                         track.id == child.track.id:
                     tracks.append(child.track)
-                    tracks.append(child.track)
                 child.set_state_flags(Gtk.StateFlags.NORMAL, True)
             # Do not update album list if in party or album already available
             playback_track = App().player.track_in_playback(track)
