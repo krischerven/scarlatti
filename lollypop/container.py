@@ -58,6 +58,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         self.__widget = Handy.Leaflet()
         self.__widget.show()
+        self.__widget.connect("notify::folded", self.__on_folded)
         self.__sub_widget = Handy.Leaflet()
         self.__sub_widget.show()
         self.__focused_view = None
@@ -210,6 +211,13 @@ class Container(Gtk.Overlay, NotificationContainer,
 ############
 # PRIVATE  #
 ############
+    def __on_folded(self, *ignore):
+        """
+            Reload main view if needed
+        """
+        if not App().window.folded and self.view is None:
+            self.show_view(self.sidebar.selected_ids)
+
     def __on_search_activate(self, action, variant):
         """
             @param action as Gio.SimpleAction
