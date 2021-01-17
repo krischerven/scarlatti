@@ -397,7 +397,7 @@ class AlbumArtwork(ArtworkManager, AlbumArtworkDownloader):
         art_uri = "%s/%s" % (album.uri, self.__favorite)
         art_uri = self.add_extension(art_uri)
         # Save cover to tags
-        if save_to_tags:
+        if save_to_tags and data is not None:
             helper = TaskHelper()
             helper.run(self.__add_to_tags, album, data)
         # We need to remove favorite if exists
