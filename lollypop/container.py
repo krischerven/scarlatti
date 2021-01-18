@@ -128,6 +128,7 @@ class Container(Gtk.Overlay, NotificationContainer,
         """
         if self._stack.history.count > 0:
             self._stack.go_back()
+            self.set_focused_view(self._stack.get_visible_child())
         elif self.__sub_widget.get_folded() and\
                 self.__sub_widget.get_visible_child() != self.left_list:
             self.__sub_widget.set_visible_child(self.left_list)
