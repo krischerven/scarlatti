@@ -14,7 +14,7 @@ from gettext import gettext as _
 import itertools
 
 from lollypop.sqlcursor import SqlCursor
-from lollypop.define import App, Type, StorageType, OrderBy
+from lollypop.define import App, Type, StorageType, OrderBy, LovedFlags
 from lollypop.utils import get_default_storage_type, make_subrequest
 from lollypop.utils import format_artist_name, remove_static
 
@@ -243,10 +243,11 @@ class ArtistsDatabase:
                                   WHERE album_artists.artist_id=artists.rowid\
                                   AND album_artists.album_id=albums.rowid\
                                   AND albums.storage_type & ?\
-                                  AND albums.loved != -1\
+                                  AND not albums.loved & ?\
                                   ORDER BY random() LIMIT ?\
                                   COLLATE NOCASE COLLATE LOCALIZED"
-            result = sql.execute(request, (storage_type, limit))
+            result = sql.execute(
+                request, (storage_type, LovedFlags.SKIPPED, limit))
             return [(row[0], row[1], row[2]) for row in result]
 
     def get_ids(self, genre_ids, storage_type):
@@ -379,7 +380,8 @@ class ArtistsDatabase:
                                            "OR",
                                            len(genre_ids))
             if not skipped:
-                request += " AND albums.loved != -1"
+                filters += (LovedFlags.SKIPPED,)
+                request += " AND not albums.loved & ?"
             request += order
             result = sql.execute(request, filters)
             return list(itertools.chain(*result))
