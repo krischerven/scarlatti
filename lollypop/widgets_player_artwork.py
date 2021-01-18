@@ -89,9 +89,9 @@ class ArtworkPlayerWidget(Gtk.Image, SignalsHelper):
             if self.__per_track_cover:
                 behaviour |= ArtBehaviour.NO_CACHE
                 album = Album(App().player.current_track.album.id)
-                App().album_art.clean(album,
-                                      width * scale_factor,
-                                      height * scale_factor)
+                App().album_art.uncache(album,
+                                        width * scale_factor,
+                                        height * scale_factor)
                 album.set_tracks([App().player.current_track])
             else:
                 album = App().player.current_track.album
