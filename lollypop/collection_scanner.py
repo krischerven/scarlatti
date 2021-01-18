@@ -131,7 +131,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                 self.__pending_new_artist_ids.remove(artist_id)
 
         item.lp_album_id = get_lollypop_album_id(item.album_name,
-                                                 item.album_artists)
+                                                 item.album_artists,
+                                                 item.year)
         Logger.debug("CollectionScanner::save_track(): Add album: "
                      "%s, %s" % (item.album_name, item.album_artist_ids))
         (item.new_album, item.album_id) = self.add_album(
@@ -230,7 +231,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                     self.__pending_new_artist_ids.remove(artist_id)
         # Update lp_album_id
         lp_album_id = get_lollypop_album_id(item.album_name,
-                                            item.album_artists)
+                                            item.album_artists,
+                                            item.year)
         if lp_album_id != item.lp_album_id:
             App().album_art.move(item.lp_album_id, lp_album_id)
             App().albums.set_lp_album_id(item.album_id, lp_album_id)
