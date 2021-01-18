@@ -53,18 +53,9 @@ class FullScreen(Gtk.Window, SignalsHelper):
         self.__signal1_id = self.__signal2_id = None
         self.__background_id = None
         self.set_decorated(False)
-        # Calculate cover size
-        screen = Gdk.Screen.get_default()
-        monitor = screen.get_monitor_at_window(App().main_window.get_window())
-        geometry = screen.get_monitor_geometry(monitor)
-        art_size_fs = ArtSize.FULLSCREEN / self.get_scale_factor()
-        font_size_fs = 30 / self.get_scale_factor()
-        if geometry.width > geometry.height:
-            art_size = int(art_size_fs * geometry.height / 1080)
-            font_size = int(font_size_fs * geometry.height / 1080)
-        else:
-            art_size = int(art_size_fs * geometry.width / 1920)
-            font_size = int(font_size_fs * geometry.width / 1920)
+        scale_factor = self.get_scale_factor()
+        art_size = ArtSize.FULLSCREEN / scale_factor
+        font_size = 30 / scale_factor
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/FullScreen.ui")
         builder.connect_signals(self)

@@ -34,18 +34,19 @@ class Artwork(ArtworkManager):
         ArtworkManager.__init__(self)
         create_dir(CACHE_PATH)
 
-    def add_to_cache(self, name, surface, prefix):
+    def add_to_cache(self, name, surface, prefix, scale_factor):
         """
             Add artwork to cache
             @param name as str
             @param surface as cairo.Surface
             @param prefix as str
+            @param scale_factor as int
             @thread safe
         """
         try:
             encoded = md5(name.encode("utf-8")).hexdigest()
-            width = surface.get_width()
-            height = surface.get_height()
+            width = surface.get_width() * scale_factor
+            height = surface.get_height() * scale_factor
             cache_path = "%s/@%s@%s_%s_%s" % (CACHE_PATH,
                                               prefix,
                                               encoded,

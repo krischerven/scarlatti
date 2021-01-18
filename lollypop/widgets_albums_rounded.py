@@ -157,7 +157,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         rounded = get_round_surface(
             surface, self._scale_factor, self._art_size / 4)
         self._artwork.set_from_surface(rounded)
-        App().art.add_to_cache(self.artwork_name, rounded, "ROUNDED")
+        App().art.add_to_cache(self.artwork_name,
+                               rounded,
+                               "ROUNDED",
+                               self._artwork.get_scale_factor())
         emit_signal(self, "populated")
 
     def __draw_surface(self, surface, ctx, positions,
