@@ -114,9 +114,10 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
                          (0, 2), (1, 2), (2, 2)]
         while album_pixbufs:
             pixbuf = album_pixbufs.pop(0)
-            newpix = pixbuf.scale_simple(self.__cover_size,
-                                         self.__cover_size,
-                                         GdkPixbuf.InterpType.NEAREST)
+            newpix = pixbuf.scale_simple(
+                self.__cover_size * self._scale_factor,
+                self.__cover_size * self._scale_factor,
+                GdkPixbuf.InterpType.NEAREST)
             album_scaled_pixbufs.append(newpix)
 
         if len(album_scaled_pixbufs) == 0:
@@ -160,7 +161,7 @@ class RoundedAlbumsWidget(RoundedFlowBoxWidget):
         App().art.add_to_cache(self.artwork_name,
                                rounded,
                                "ROUNDED",
-                               self._artwork.get_scale_factor())
+                               self._scale_factor)
         emit_signal(self, "populated")
 
     def __draw_surface(self, surface, ctx, positions,
