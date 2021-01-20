@@ -53,9 +53,8 @@ class FullScreen(Gtk.Window, SignalsHelper):
         self.__signal1_id = self.__signal2_id = None
         self.__background_id = None
         self.set_decorated(False)
-        scale_factor = self.get_scale_factor()
-        art_size = ArtSize.FULLSCREEN / scale_factor
-        font_size = 30 / scale_factor
+        art_size = ArtSize.FULLSCREEN
+        font_size = 30
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/FullScreen.ui")
         builder.connect_signals(self)
