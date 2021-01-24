@@ -422,7 +422,12 @@ class AlbumsDeviceBoxView(AlbumsBoxView):
 
     @property
     def args(self):
-        return None
+        """
+            Get default args for __class__
+            @return {}
+        """
+        return {"index": self.__index,
+                "view_type": self.view_type & ~ViewType.SMALL}
 
 #######################
 # PROTECTED           #
