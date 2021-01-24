@@ -17,6 +17,7 @@ from random import shuffle
 from lollypop.utils import get_human_duration, popup_widget
 from lollypop.utils_album import tracks_to_albums
 from lollypop.define import App, ArtSize, ViewType
+from lollypop.objects_track import Track
 from lollypop.widgets_banner import BannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -126,14 +127,15 @@ class PlaylistBannerWidget(BannerWidget, SignalsHelper):
             Play playlist shuffled
             @param button as Gtk.Button
         """
-        tracks = []
+        track_ids = []
         for album_row in self.__view.children:
             for track in album_row.album.tracks:
-                tracks.append(track)
-        if tracks:
-            shuffle(tracks)
-            albums = tracks_to_albums(tracks)
-            App().player.play_track_for_albums(tracks[0], albums)
+                track_ids.append(track.id)
+        if track_ids:
+            shuffle(track_ids)
+            albums = tracks_to_albums(
+                [Track(track_id) for track_id in track_ids])
+            App().player.play_track_for_albums(albums[0].tracks[0], albums)
 
     def _on_menu_button_clicked(self, button):
         """
