@@ -54,7 +54,7 @@ class ArtistArtworkMenu(Gtk.Bin):
         emit_signal(self, "hidden", True)
 
     @property
-    def section_name(self):
+    def section(self):
         return None
 
     @property
