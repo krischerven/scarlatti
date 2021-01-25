@@ -139,6 +139,10 @@ class TrackRow(Gtk.ListBoxRow):
             Show indicator
             @param indicator_type as IndicatorType
         """
+        # queued tracks do not have an indicator
+        if self.__view_type & ViewType.QUEUE:
+            return
+
         if indicator_type is None:
             indicator_type = self._get_indicator_type()
         self._indicator.clear()
