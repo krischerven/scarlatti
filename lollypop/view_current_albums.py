@@ -153,12 +153,13 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
 
     def _on_playback_removed(self, player, album):
         """
-            Add album
+            Remove row
             @param player as Player
             @param album as Album
         """
         for child in self.children:
             if child.album == album:
+                self._box.remove(child)
                 child.destroy()
                 break
         if not self.children:
