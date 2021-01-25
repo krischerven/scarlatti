@@ -116,6 +116,7 @@ class AlbumTracksView(TracksView):
             Return all rows
             @return [Gtk.ListBoxRow]
         """
+        self._init()
         rows = []
         for disc in self.__album.discs:
             for widget in [
