@@ -28,8 +28,9 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             Init box
         """
         Gtk.Box.__init__(self)
+        self.set_valign(Gtk.Align.CENTER)
         # Prevent updating progress while seeking
-        self.__seeking = False
+        self.__seeking_position = False
         # Update pogress position
         self.__timeout_id = None
         self.__time_label = Gtk.Label.new()
@@ -77,7 +78,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             Update progress bar position
             @param value as int
         """
-        if not self.__seeking:
+        if self.__seeking_position == 0:
             if value is None and App().player.get_status() != Gst.State.PAUSED:
                 value = App().player.position
             if value is not None and value >= 0:
@@ -169,7 +170,7 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
             @param x as int
             @param y as int
         """
-        self.__seeking = True
+        self.__seeking_position = self.__progress.get_value()
 
     def __on_multi_released(self, gesture, n_press, x, y):
         """
@@ -182,9 +183,11 @@ class ProgressPlayerWidget(Gtk.Box, SignalsHelper):
         if n_press != 1:
             return
         value = self.__progress.get_value()
-        App().player.seek(value)
-        self.__seeking = False
-        self.update_position(value)
+        if value != self.__seeking_position:
+            App().player.seek(value)
+            self.__seeking = False
+            self.update_position(value)
+        self.__seeking_position = 0
 
     def __on_scroll(self, event_controler, x, y):
         """
