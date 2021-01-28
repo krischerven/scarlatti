@@ -525,8 +525,8 @@ class MtpSync(GObject.Object):
             Logger.debug("MtpSync::__copy_file(): %s -> %s"
                          % (src_uri, dst_uri))
             if convertion_needed:
-                convert_uri = "file:///tmp/lollypop_convert"
-                convert_file = Gio.File.new_for_uri(convert_uri)
+                path = "{}/lollypop_convert".format(GLib.get_tmp_dir())
+                convert_file = Gio.File.new_for_path(path)
                 pipeline = self.__convert(src, convert_file)
                 # Check if encoding is finished
                 if pipeline is not None:
