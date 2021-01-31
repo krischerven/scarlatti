@@ -13,6 +13,7 @@
 from gi.repository import Gdk, Gtk, GLib, GObject
 
 from lollypop.objects_album import Album
+from lollypop.define import App
 from lollypop.utils import set_cursor_type
 from lollypop.widgets_row_album import AlbumRow
 from lollypop.widgets_row_track import TrackRow
@@ -83,6 +84,11 @@ class DNDHelper(GObject.Object):
                 self.__listbox.remove(next)
             else:
                 children.pop(0)
+        for album_row in self.__listbox.get_children():
+            if album_row.album.id == App().player.current_track.album.id:
+                for track_row in album_row.children:
+                    if track_row.track.id == App().player.current_track.id:
+                        App().player._current_track = track_row.track
         GLib.timeout_add(100, self.emit, "dnd-finished")
 
     def __do_drag_and_drop(self, src_rows, dest_row, direction):
