@@ -141,6 +141,8 @@ class ListenBrainzWebService(GObject.GObject):
                                                            self.__cancellable)
                 if data is not None:
                     Logger.debug("%s: %s", self.__uri, data)
+                else:
+                    self.__queue.append((track, timestamp))
         except Exception as e:
             Logger.error("ListenBrainzWebService::__listen(): %s" % e)
 
