@@ -226,6 +226,8 @@ class LastFMWebService:
                                                            self.__cancellable)
                 if data is not None:
                     Logger.debug("%s: %s", self.__uri, data)
+                else:
+                    self.__queue.append((track, timestamp))
         except Exception as e:
             Logger.error("LastFMWebService::__listen(): %s" % e)
 
