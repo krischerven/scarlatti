@@ -207,6 +207,8 @@ class AlbumTracksView(TracksView):
         # | Column 1 | Column 2 | #
         ###########################
         for disc in self.__album.discs:
+            if disc.number not in self._tracks_widget_left.keys():
+                continue
             label = self.__get_disc_label(disc.number)
             if orientation == Gtk.Orientation.VERTICAL:
                 self._responsive_widget.attach(
