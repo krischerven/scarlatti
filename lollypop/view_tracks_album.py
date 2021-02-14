@@ -119,10 +119,11 @@ class AlbumTracksView(TracksView):
         self._init()
         rows = []
         for disc in self.__album.discs:
-            for widget in [
-                self._tracks_widget_left[disc.number],
-                self._tracks_widget_right[disc.number]
-            ]:
+            if disc.number in self._tracks_widget_left.keys():
+                widget = self._tracks_widget_left[disc.number]
+                rows += widget.get_children()
+            if disc.number in self._tracks_widget_right.keys():
+                widget = self._tracks_widget_right[disc.number]
                 rows += widget.get_children()
         return rows
 
