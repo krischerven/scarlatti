@@ -106,12 +106,15 @@ class ApplicationCmdline:
             @param app as Gio.Application
             @param options as GLib.VariantDict
         """
-        if options.contains("version"):
-            print(self.__version)
-            exit(0)
-        self.register(None)
-        if self.get_is_remote():
-            Gdk.notify_startup_complete()
+        try:
+            if options.contains("version"):
+                print(self.__version)
+                exit(0)
+            self.register(None)
+            if self.get_is_remote():
+                Gdk.notify_startup_complete()
+        except Exception as e:
+            Logger.error("Application::__on_handle_local_options(): %s", e)
         return -1
 
     def __on_command_line(self, app, app_cmd_line):
