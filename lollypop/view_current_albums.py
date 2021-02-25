@@ -160,7 +160,6 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         for child in self.children:
             if child.album == album:
                 self._box.remove(child)
-                child.destroy()
                 break
         if not self.children:
             self.show_placeholder(True)
