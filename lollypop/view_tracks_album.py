@@ -264,11 +264,7 @@ class AlbumTracksView(TracksView):
                         track.id == child.track.id:
                     tracks.append(child.track)
                 child.set_state_flags(Gtk.StateFlags.NORMAL, True)
-            # Do not update album list if in party or album already available
-            playback_track = App().player.track_in_playback(track)
-            if playback_track is not None:
-                App().player.load(playback_track)
-            elif not App().player.is_party:
+            if not App().player.is_party:
                 album = Album(track.album.id, [], [])
                 album.set_tracks(tracks)
                 if not App().settings.get_value("append-albums"):
