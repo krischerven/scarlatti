@@ -54,7 +54,12 @@ class SmartPlaylistRow(Gtk.ListBoxRow):
             @param item as str
         """
         item = item.replace(" COLLATE NOCASE", "")
-        (t, self.__operand, *args) = item.split(" ")
+        # Sucks, search for a better way to handle this in Lollypop2
+        if item.find("NOT LIKE") != -1:
+            self.__operand = "NOT LIKE"
+            (t, *args) = item.split(" NOT LIKE ")
+        else:
+            (t, self.__operand, *args) = item.split(" ")
         value = " ".join(list(args))
         # Unquote value
         if value[0] == "'":
