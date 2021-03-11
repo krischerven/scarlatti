@@ -515,13 +515,13 @@ class DecadePlaybackMenu(PlaybackMenu):
             @return [int]
         """
         storage_type = get_default_storage_type()
-        album_ids = []
+        items = []
         for year in self.__years:
-            album_ids += App().albums.get_compilation_ids_for_year(
+            items += App().tracks.get_compilations_by_disc_for_year(
                 year, storage_type, False)
-            album_ids += App().albums.get_ids_for_year(
+            items += App().tracks.get_albums_by_disc_for_year(
                 year, storage_type, False)
-        return album_ids
+        return [item[0] for item in items]
 
     def __play(self, action, variant):
         """

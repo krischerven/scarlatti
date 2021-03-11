@@ -947,10 +947,11 @@ class TracksDatabase:
                        artists.rowid=album_artists.artist_id AND\
                        tracks.album_id=albums.rowid AND\
                        tracks.year=? AND albums.storage_type & ?"
-            filters = (year, storage_type, limit)
+            filters = (year, storage_type)
             if not skipped:
                 request += " AND not albums.loved &? "
                 filters += (LovedFlags.SKIPPED,)
+            filters += (limit,)
             request += " GROUP BY tracks.album_id"
             request += order
             result = sql.execute(request, filters)
@@ -979,10 +980,11 @@ class TracksDatabase:
                        AND tracks.album_id=albums.rowid\
                        AND albums.storage_type & ?\
                        AND tracks.year=?"
-            filters = (Type.COMPILATIONS, storage_type, year, limit)
+            filters = (Type.COMPILATIONS, storage_type, year)
             if not skipped:
                 request += " AND not albums.loved &? "
                 filters += (LovedFlags.SKIPPED,)
+            filters += (limit,)
             request += " GROUP BY tracks.album_id"
             request += order
             result = sql.execute(request, filters)
