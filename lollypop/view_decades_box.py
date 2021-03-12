@@ -119,12 +119,13 @@ class DecadesBoxView(FlowBoxView):
         child = self._box.get_child_at_pos(x, y)
         if child is None or child.artwork is None:
             return
-        album_ids = []
+        items = []
         for year in child.data:
-            album_ids += App().albums.get_ids_for_year(
+            items += App().tracks.get_albums_by_disc_for_year(
                 year, self.storage_type, False)
-            album_ids += App().albums.get_compilation_ids_for_year(
+            items += App().tracks.get_compilations_by_disc_for_year(
                 year, self.storage_type, False)
+        album_ids = [item[0] for item in items]
         albums = [Album(album_id, [], [], False) for album_id in album_ids]
         if albums:
             App().player.play_album_for_albums(albums[0], albums)
