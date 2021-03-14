@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pycodestyle --ignore=E722,E741,E402,E121,E123,E126,E226,E24,E704,W504 lollypop/*.py 
+pycodestyle --ignore=E722,E741,E402,E121,E123,E126,E226,E241,E704,W504 lollypop/*.py 
 ret="$?"
 
 if (( ret != 0 ))
