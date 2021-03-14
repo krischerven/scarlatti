@@ -103,7 +103,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">High quality artwork</property>
-                <property name="activatable-widget">artist-artwork_boolean</property>
+                <property name="activatable-widget">hd-artwork_boolean</property>
                 <child>
                   <object class="GtkSwitch" id="hd-artwork_boolean">
                     <property name="name">hd-artwork</property>
