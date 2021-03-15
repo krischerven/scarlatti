@@ -67,7 +67,8 @@ class AlbumMenu(Gio.Menu):
                                          "app.show_album_action")
             menu_item.set_attribute_value("close", GLib.Variant("b", True))
             actions_menu.prepend_item(menu_item)
-        self.append_section(_("Others"), actions_menu)
+        if actions_menu.get_n_items() != 0:
+            self.append_section(_("Others"), actions_menu)
 
 
 class AlbumsMenu(Gio.Menu):
@@ -116,7 +117,9 @@ class TrackMenu(Gio.Menu):
             section = Gio.Menu()
             section.append_submenu(_("Playlists"), PlaylistsMenu([track]))
             self.append_section(_("Add to"), section)
-        self.append_section(_("Others"), ActionsMenu(track))
+        actions_menu = ActionsMenu(track)
+        if actions_menu.get_n_items() != 0:
+            self.append_section(_("Others"), actions_menu)
 
 
 class TrackMenuExt(Gtk.Grid):
