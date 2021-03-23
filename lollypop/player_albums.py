@@ -65,6 +65,9 @@ class AlbumsPlayer:
                     for track in album.tracks:
                         if track.id not in track_ids:
                             self._albums[-1].append_track(track)
+                    album.set_tracks(self._albums[-1].tracks)
+                    self._albums.remove(self._albums[-1])
+                    self._albums.append(album)
                     emit_signal(self, "playback-updated", self._albums[-1])
                 else:
                     self._albums.append(album)
