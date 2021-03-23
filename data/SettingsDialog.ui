@@ -267,11 +267,13 @@
                 <property name="subtitle" translatable="yes">Transition duration in milliseconds</property>
                 <child>
                   <object class="GtkSpinButton" id="transitions-duration_range">
+                    <property name="name">transitions-duration</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="width-chars">4</property>
                     <property name="adjustment">adjustment1</property>
+                    <signal name="value-changed" handler="_on_range_changed" swapped="no"/>
                   </object>
                 </child>
               </object>
