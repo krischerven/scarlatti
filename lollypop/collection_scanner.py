@@ -213,7 +213,7 @@ class CollectionScanner(GObject.GObject, TagReader):
             different artists
             @param item as CollectionItem
         """
-        if item.album_artist_ids:
+        if item.album_artist_ids and not item.compilation:
             App().albums.set_artist_ids(item.album_id, item.album_artist_ids)
         # Set artist ids based on content
         else:
