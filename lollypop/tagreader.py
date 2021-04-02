@@ -276,7 +276,7 @@ class TagReader:
             if not compilation:
                 compilation = self.__get_extended(tags, ["COMPILATION"])
             if compilation:
-                return bool(compilation)
+                return compilation == 1
         except Exception as e:
             Logger.error("TagReader::get_compilation(): %s" % e)
         return False
