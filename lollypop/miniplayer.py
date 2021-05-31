@@ -113,7 +113,6 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             @param reveal as bool
         """
         if reveal:
-            self.__update_progress_visibility()
             self.__revealer.set_reveal_child(True)
             emit_signal(self, "revealed", True)
             self.__progress_widget.update()
@@ -178,6 +177,7 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             @param player as Player
         """
         if player.current_track.id is None:
+            self.__on_artwork(None)
             self.__previous_artwork_id = None
             self.reveal(False)
             self.hide()
@@ -237,15 +237,6 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
 #######################
 # PRIVATE             #
 #######################
-    def __update_progress_visibility(self):
-        """
-            Update progress bar visibility
-        """
-        if App().player.current_track.id is not None:
-            self.__progress_widget.show()
-        else:
-            self.__progress_widget.hide()
-
     def __set_widgets_position(self):
         """
             Add label widget to wanted UI part
