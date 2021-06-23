@@ -277,6 +277,10 @@ class TagReader:
                 compilation = self.__get_extended(tags, ["COMPILATION"])
             if compilation:
                 return compilation == 1
+            artists = self.get_album_artists(tags)
+            print(artists)
+            if artists.lower() == "various artists":
+                return True
         except Exception as e:
             Logger.error("TagReader::get_compilation(): %s" % e)
         return False
