@@ -199,6 +199,8 @@ class LyricsHelper:
             artist = track.artists[0]
         elif track.album_artists:
             artist = track.album_artists[0]
+        else:
+            artist = ""
         if escape:
             return GLib.uri_escape_string(artist, None, False)
         else:
