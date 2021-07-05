@@ -505,6 +505,8 @@ class CollectionScanner(GObject.GObject, TagReader):
                 self.__flatpak_migration()
                 App().notify.send("Lollypop",
                                   _("Scan disabled, missing collection"))
+                App().settings.set_value("flatpak-access-migration",
+                                         GLib.Variant("b", True))
                 return
             if scan_type == ScanType.NEW_FILES:
                 db_uris = App().tracks.get_uris(uris)
@@ -559,8 +561,6 @@ class CollectionScanner(GObject.GObject, TagReader):
         except Exception as e:
             Logger.warning("CollectionScanner::__scan(): %s", e)
         SqlCursor.remove(App().db)
-        App().settings.set_value("flatpak-access-migration",
-                                 GLib.Variant("b", True))
 
     def __scan_to_handle(self, uri):
         """
