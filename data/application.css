@@ -237,6 +237,10 @@ flowboxchild:selected  {
     color: black;
 }
 
+.white-text {
+    color: white;
+}
+
 .rounded {
     border-radius: 50%;
 }
