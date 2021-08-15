@@ -58,7 +58,7 @@ class FullScreen(Gtk.Window, SignalsHelper):
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/FullScreen.ui")
         builder.connect_signals(self)
-        self.__progress_widget = ProgressPlayerWidget()
+        self.__progress_widget = ProgressPlayerWidget(True)
         self.__progress_widget.show()
         self.__progress_widget.set_property("halign", Gtk.Align.CENTER)
         self.__progress_widget.set_size_request(500, -1)
