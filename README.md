@@ -25,7 +25,6 @@ It provides:
 - Context artist view
 - MTP sync
 - Fullscreen view
-- Radio support
 - Last.fm support
 - Auto install codecs
 - HiDPI support
