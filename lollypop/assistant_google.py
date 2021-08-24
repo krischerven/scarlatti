@@ -78,7 +78,7 @@ Open <b>"Credentials"</b> in the sidebar and
 create credentials for an API key.
 
 Then click 'Finish' within this wizard.
-The wizard will then configure Lollypop to use the key.
+Copy the API key to Lollypop.
 """),
               "uri_label": "",
               "uri": None,
