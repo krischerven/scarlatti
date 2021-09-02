@@ -178,15 +178,15 @@ def init_proxy_from_gnome():
             socks = Gio.Settings.new("org.gnome.system.proxy.socks")
             host = socks.get_value("host").get_string()
             port = socks.get_value("port").get_int32()
-            proxy = "socks4://%s:%s" % (host, port)
-            from os import environ
-            environ["all_proxy"] = proxy
-            environ["ALL_PROXY"] = proxy
             if host != "" and port != 0:
                 import socket
                 import socks
+                from os import environ
                 socks.set_default_proxy(socks.SOCKS4, host, port)
                 socket.socket = socks.socksocket
+                proxy = "socks4://%s:%s" % (host, port)
+                environ["all_proxy"] = proxy
+                environ["ALL_PROXY"] = proxy
     except Exception as e:
         Logger.warning("set_proxy_from_gnome(): %s", e)
     return (None, None)
