@@ -257,7 +257,9 @@ class ArtistViewList(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
             Add appears on albums
             @param view as ArtistViewBox
         """
-        if self.__albums_count == 1:
+        # Ugly hack, will try to do better with Lollypop 2.
+        if self.__albums_count == 1 and not\
+                App().settings.get_value("show-artist-tracks"):
             self.__boxes[0].get_children()[0].reveal_child()
         from lollypop.view_albums_line import AlbumsArtistAppearsOnLineView
         others_box = AlbumsArtistAppearsOnLineView(self.__artist_ids,
