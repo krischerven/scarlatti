@@ -781,7 +781,8 @@ class CollectionScanner(GObject.GObject, TagReader):
         if album_mtime == 0:
             album_mtime = track_mtime
         bpm = self.get_bpm(tags)
-        compilation = self.get_compilation(tags)
+        compilation = not self.__disable_compilations and\
+            self.get_compilation(tags)
         (original_year, original_timestamp) = self.get_original_year(tags)
         (year, timestamp) = self.get_year(tags)
         if year is None:
@@ -802,6 +803,11 @@ class CollectionScanner(GObject.GObject, TagReader):
             artists += ";%s" % remixers if remixers != "" else ""
         if artists == "":
             artists = _("Unknown")
+        # Reset album tags if we found a compilation
+        if compilation:
+            album_artists = ""
+            mb_album_artist_id = ""
+            aa_sortnames = ""
         return (title, artists, genres, a_sortnames, aa_sortnames,
                 album_artists, album_name, discname, album_loved, album_mtime,
                 album_synced, album_rate, album_pop, discnumber, year,
