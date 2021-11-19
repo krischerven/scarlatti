@@ -177,10 +177,7 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             @param player as Player
         """
         if player.current_track.id is None:
-            self.__on_artwork(None)
-            self.__previous_artwork_id = None
-            self.reveal(False)
-            self.hide()
+            App().window.show_miniplayer(False)
             return
 
         same_artwork = self.__previous_artwork_id ==\
