@@ -34,7 +34,9 @@
   <url type="bugtracker">https://gitlab.gnome.org/World/lollypop/-/issues</url>
   <url type="donation">https://www.paypal.me/lollypopgnome</url>
   <url type="translate">https://hosted.weblate.org/projects/gnumdk/</url>
-  <content_rating type="oars-1.1" />
+  <content_rating type="oars-1.1">
+    <content_attribute id="money-advertising">mild</content_attribute>
+  </content_rating>
   <update_contact>cedric.bellegarde@adishatz.org</update_contact>
   <custom>
     <value key="Purism::form_factor">workstation</value>
