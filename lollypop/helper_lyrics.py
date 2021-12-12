@@ -94,8 +94,6 @@ class LyricsHelper:
         methods = []
         if get_network_available("BING"):
             methods.append(self.__download_bing_lyrics)
-        if get_network_available("WIKIA"):
-            methods.append(self.__download_wikia_lyrics)
         if get_network_available("GENIUS"):
             methods.append(self.__download_genius_lyrics)
         if get_network_available("METROLYRICS"):
@@ -245,28 +243,6 @@ class LyricsHelper:
                                 self.__on_lyrics_downloaded,
                                 "lyrics-body",
                                 "",
-                                track,
-                                methods,
-                                callback,
-                                *args)
-
-    def __download_wikia_lyrics(self, track, methods, callback, *args):
-        """
-            Downloas lyrics from wikia
-            @param track as Track
-            @param methods as []
-            @param callback as function
-        """
-        title = self.__get_title(track, False)
-        artist = self.__get_artist(track, False).lower()
-        string = "%s:%s" % (artist, title)
-        uri = "https://lyrics.wikia.com/wiki/%s" % string.replace(" ", "_")
-        helper = TaskHelper()
-        helper.load_uri_content(uri,
-                                self.__cancellable,
-                                self.__on_lyrics_downloaded,
-                                "lyricbox",
-                                "\n",
                                 track,
                                 methods,
                                 callback,
