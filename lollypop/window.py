@@ -107,8 +107,9 @@ class Window(Handy.ApplicationWindow, SignalsHelper):
                 App().lookup_action("miniplayer").change_state(
                     GLib.Variant("b", False))
             else:
-                self.__miniplayer.destroy()
-                self.__miniplayer = None
+                if not self.folded:
+                    self.__miniplayer.destroy()
+                    self.__miniplayer = None
                 self.__container.show()
                 show_buttons(True)
         if self.__miniplayer is not None:

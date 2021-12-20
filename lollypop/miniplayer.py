@@ -181,6 +181,11 @@ class MiniPlayer(Handy.WindowHandle, SizeAllocationHelper, SignalsHelper):
             self.__previous_artwork_id = None
             self.reveal(False)
             self.hide()
+            size = App().settings.get_value("window-size")
+            maximized = App().settings.get_value("window-maximized")
+            App().window.resize(size[0], size[1])
+            if maximized:
+                GLib.idle_add(App().window.maximize)
             return
 
         same_artwork = self.__previous_artwork_id ==\
