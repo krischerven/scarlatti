@@ -168,6 +168,15 @@ class PlaylistsView(AlbumsListView, SignalsHelper, SizeAllocationHelper):
                 albums.append(album_row.album)
             App().player.play_track_for_albums(track, albums)
 
+    def _on_row_destroy(self, row):
+        """
+            Remove album from playlist
+            @param row as AlbumRow
+        """
+        App().playlists.remove_tracks(self.__playlist_id,
+                                      row.album.track_ids,
+                                      False)
+
     def _on_track_removed(self, row, track):
         """
             @param row as AlbumRow
