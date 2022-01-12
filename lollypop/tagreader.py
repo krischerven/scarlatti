@@ -276,7 +276,7 @@ class TagReader:
             if not compilation:
                 compilation = self.__get_extended(tags, ["COMPILATION"])
             if compilation:
-                return compilation == 1
+                return int(compilation) == 1
             artists = self.get_album_artists(tags)
             if artists.lower() == "various artists":
                 return True
