@@ -53,8 +53,6 @@ class FullScreen(Gtk.Window, SignalsHelper):
         self.__signal1_id = self.__signal2_id = None
         self.__background_id = None
         self.set_decorated(False)
-        art_size = ArtSize.FULLSCREEN
-        font_size = 30
         builder = Gtk.Builder()
         builder.add_from_resource("/org/gnome/Lollypop/FullScreen.ui")
         builder.connect_signals(self)
@@ -71,10 +69,11 @@ class FullScreen(Gtk.Window, SignalsHelper):
             ArtBehaviour.CACHE | ArtBehaviour.CROP_SQUARE)
         self.__artwork_widget.show()
         self.__artwork_widget.set_vexpand(True)
-        self.__artwork_widget.set_art_size(art_size, art_size)
+        self.__artwork_widget.set_art_size(ArtSize.FULLSCREEN,
+                                           ArtSize.FULLSCREEN)
         self.__artwork_widget.set_property("valign", Gtk.Align.CENTER)
         self.__artwork_widget.set_property("halign", Gtk.Align.CENTER)
-        self.__label_widget = LabelPlayerWidget(True, font_size)
+        self.__label_widget = LabelPlayerWidget(True, 30)
         self.__label_widget.show()
         self.__label_widget.set_hexpand(True)
         self.__label_widget.set_vexpand(True)
@@ -419,4 +418,7 @@ class FullScreen(Gtk.Window, SignalsHelper):
                 allocation.height == self.__allocation.height:
             return
         self.__allocation = allocation
+        size = allocation.width * ArtSize.FULLSCREEN / 1920
+        self.__artwork_widget.set_art_size(size, size)
+        self.__artwork_widget.update(True)
         self.__update_background()
