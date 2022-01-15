@@ -173,8 +173,11 @@ class PlaylistsView(AlbumsListView, SignalsHelper, SizeAllocationHelper):
             Remove album from playlist
             @param row as AlbumRow
         """
+        tracks = []
+        for track_id in row.album.track_ids:
+            tracks.append(Track(track_id))
         App().playlists.remove_tracks(self.__playlist_id,
-                                      row.album.track_ids,
+                                      tracks,
                                       False)
 
     def _on_track_removed(self, row, track):
