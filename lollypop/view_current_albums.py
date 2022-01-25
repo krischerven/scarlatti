@@ -173,7 +173,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
         """
         App().player.load(track)
 
-    def _on_row_destroy(self, row):
+    def _on_album_removed(self, row):
         """
             Remove album from playback
             @param row as AlbumRow
@@ -186,7 +186,7 @@ class CurrentAlbumsView(AlbumsListView, SignalsHelper):
             else:
                 App().player.add_album(row.album)
         except Exception as e:
-            Logger.error("CurrentAlbumsView::_on_row_destroy()", e)
+            Logger.error("CurrentAlbumsView::_on_album_removed()", e)
 
     def _on_track_removed(self, row, track):
         """
