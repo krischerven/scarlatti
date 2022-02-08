@@ -371,7 +371,7 @@ class TagReader:
             return (None, None)
 
         if tags is None:
-            return None
+            return (None, None)
         values = get_id3()
         if values[0] is None:
             values = get_ogg()
