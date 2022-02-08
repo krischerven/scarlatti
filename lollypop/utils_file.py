@@ -28,7 +28,7 @@ def get_file_type(uri):
              "au", "awb", "dct", "dss", "dvf", "flac", "gsm", "iklax", "ivs",
              "m4a", "m4b", "m4p", "mmf", "mp3", "mpc", "msv", "nmf", "nsf",
              "ogg", "opus", "ra", "raw", "rf64", "sln", "tta", "voc", "vox",
-             "wav", "wma", "wv", "webm", "8svx", "cda"]
+             "wav", "wma", "wv", "webm", "8svx", "cda", "dff", "dsf"]
     other = ["7z", "arj", "deb", "pkg", "rar", "rpm", "tar.gz", "z", "zip",
              "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "db", "txt",
              "mov", "avi", "html", "ini", "cue", "nfo", "lrc"]
@@ -67,7 +67,7 @@ def is_audio(info):
              "audio/x-pn-windows-acm", "application/x-matroska",
              "audio/x-matroska", "audio/x-wavpack", "video/mp4",
              "audio/x-mod", "audio/x-mo3", "audio/x-xm", "audio/x-s3m",
-             "audio/x-it", "audio/aiff", "audio/x-aiff"]
+             "audio/x-it", "audio/aiff", "audio/x-aiff", "audio/x-dff", "audio/x-dsf"]
     if info is not None:
         if info.get_content_type() in audio:
             return True
