@@ -24,7 +24,7 @@ class SettingsDialog:
         Dialog showing lollypop settings
     """
 
-    __BOOLEAN = ["dark-ui", "artist-artwork", "auto-update", "background-mode",
+    __BOOLEAN = ["artist-artwork", "auto-update", "background-mode",
                  "save-state", "import-playlists", "save-to-tags",
                  "show-compilations", "transitions", "network-access",
                  "recent-youtube-dl", "import-advanced-artist-tags",
@@ -116,12 +116,7 @@ class SettingsDialog:
         setting = widget.get_name()
         App().settings.set_value(setting,
                                  GLib.Variant("b", state))
-        if setting == "dark-ui":
-            if not App().player.is_party:
-                settings = Gtk.Settings.get_default()
-                settings.set_property("gtk-application-prefer-dark-theme",
-                                      state)
-        elif setting == "artist-artwork":
+        if setting == "artist-artwork":
             App().window.container.reload_view()
         elif setting == "network-access":
             self.__update_locked()
