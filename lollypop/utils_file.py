@@ -67,7 +67,8 @@ def is_audio(info):
              "audio/x-pn-windows-acm", "application/x-matroska",
              "audio/x-matroska", "audio/x-wavpack", "video/mp4",
              "audio/x-mod", "audio/x-mo3", "audio/x-xm", "audio/x-s3m",
-             "audio/x-it", "audio/aiff", "audio/x-aiff", "audio/x-dff", "audio/x-dsf"]
+             "audio/x-it", "audio/aiff", "audio/x-aiff", "audio/x-dff",
+             "audio/x-dsf"]
     if info is not None:
         if info.get_content_type() in audio:
             return True

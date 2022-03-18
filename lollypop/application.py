@@ -163,7 +163,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             from lollypop.mpris import MPRIS
             MPRIS(self)
 
-        settings = Gtk.Settings.get_default()
         ApplicationActions.__init__(self)
         monitor = Gio.NetworkMonitor.get_default()
         if monitor.get_network_available() and\
