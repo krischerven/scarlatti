@@ -164,11 +164,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             MPRIS(self)
 
         settings = Gtk.Settings.get_default()
-        self.__gtk_dark = settings.get_property(
-            "gtk-application-prefer-dark-theme")
-        if not self.__gtk_dark:
-            dark = self.settings.get_value("dark-ui")
-            settings.set_property("gtk-application-prefer-dark-theme", dark)
         ApplicationActions.__init__(self)
         monitor = Gio.NetworkMonitor.get_default()
         if monitor.get_network_available() and\
@@ -182,6 +177,8 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         """
         Gtk.Application.do_startup(self)
         Handy.init()
+        manager = Handy.StyleManager.get_default()
+        manager.set_color_scheme(Handy.ColorScheme.PREFER_LIGHT)
         if self.__window is None:
             from lollypop.window import Window
             self.init()
@@ -301,14 +298,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             @return str
         """
         return self.__data_dir
-
-    @property
-    def gtk_application_prefer_dark_theme(self):
-        """
-            Return default gtk value
-            @return bool
-        """
-        return self.__gtk_dark
 
 #######################
 # PRIVATE             #
