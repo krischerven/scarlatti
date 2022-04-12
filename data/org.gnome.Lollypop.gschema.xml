@@ -196,6 +196,11 @@
             <summary>Show artist artwork</summary>
             <description></description>
         </key>
+        <key type="b" name="dark-ui">
+            <default>false</default>
+            <summary>Use dark GTK theme</summary>
+            <description></description>
+        </key>
          <key type="b" name="disable-scrobbling">
             <default>false</default>
             <summary>Disable scrobbling usage</summary>

@@ -1,7 +1,7 @@
 {
     "app-id" : "org.gnome.Lollypop",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "master",
+    "runtime-version" : "3.38",
     "sdk" : "org.gnome.Sdk",
     "command" : "lollypop",
     "tags" : [
@@ -303,6 +303,22 @@
                     "type" : "archive",
                     "url" : "https://github.com/ytdl-org/youtube-dl/archive/2019.11.28.tar.gz",
                     "sha256" : "372cbf0cdf1a3abbd6634f0a8a366622be19d7c03eab59cb3c8014a7a084d7a5"
+                }
+            ]
+        },
+        {
+            "name" : "libhandy",
+            "buildsystem" : "meson",
+            "config-opts" : [
+                "-Dglade_catalog=disabled",
+                "-Dtests=false",
+                "-Dexamples=false"
+            ],
+            "sources" : [
+                {
+                    "type" : "archive",
+                    "url" : "https://download.gnome.org/sources/libhandy/1.0/libhandy-1.0.2.tar.xz",
+                    "sha256" : "3ad78d0594165c7e8150f662506d386552825e693aa3679744af96bd94dc1c2d"
                 }
             ]
         },
