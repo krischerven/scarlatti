@@ -50,20 +50,20 @@ class LabelPlayerWidget(Gtk.Label, SignalsHelper):
         artist_text = GLib.markup_escape_text(artists)
         title_text = GLib.markup_escape_text(title)
         if self.__font_size is None:
-            markup = "<b>%s</b>" % artist_text
+            markup = "<b>%s</b>" % title_text
             markup += "\n<span size='small' alpha='50000'%s>%s</span>" % (
                 " color='white'" if self.__fullscreen else "",
-                title_text)
+                artist_text)
         else:
             markup = "<span font='%s' size='x-large'%s><b>%s</b></span>" % (
                 self.__font_size,
                 " color='white'" if self.__fullscreen else "",
-                artist_text)
+                title_text)
             markup += "\n<span font='%s' size='x-large'%s>%s</span>"\
                 % (
                     self.__font_size,
                     " color='white'" if self.__fullscreen else "",
-                    title_text)
+                    artist_text)
         if self.__fullscreen:
             album_text = "%s" % GLib.markup_escape_text(
                 App().player.current_track.album.name)
