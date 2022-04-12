@@ -169,6 +169,12 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
                 not monitor.get_network_metered() and\
                 self.settings.get_value("recent-youtube-dl"):
             self.task_helper.run(install_youtube_dl)
+        if self.settings.get_value("dark-ui"):
+            settings = Gtk.Settings.get_default()
+            settings.set_property("gtk-application-prefer-dark-theme", True)
+        else:
+            manager = Handy.StyleManager.get_default()
+            manager.set_color_scheme(Handy.ColorScheme.PREFER_LIGHT)
 
     def do_startup(self):
         """
@@ -176,8 +182,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         """
         Gtk.Application.do_startup(self)
         Handy.init()
-        manager = Handy.StyleManager.get_default()
-        manager.set_color_scheme(Handy.ColorScheme.PREFER_LIGHT)
         if self.__window is None:
             from lollypop.window import Window
             self.init()

@@ -389,5 +389,10 @@
             <summary>Order albums by</summary>
             <description></description>
         </key>
+        <key type="b" name="dark-ui">
+            <default>false</default>
+            <summary>Use dark GTK theme</summary>
+            <description></description>
+        </key>
     </schema>
 </schemalist>
