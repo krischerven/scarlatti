@@ -138,7 +138,7 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
         if App().window.folded or not self.__artwork.get_visible():
             return
         track = App().player.current_track
-        if track.id >= 0:
+        if track.id is not None and track.id >= 0:
             from lollypop.menu_objects import TrackMenu, TrackMenuExt
             from lollypop.widgets_menu import MenuBuilder
             menu = TrackMenu(track, ViewType.TOOLBAR)
@@ -160,12 +160,11 @@ class ToolbarInfo(Gtk.Bin, ArtworkPlayerWidget, GesturesHelper):
             @param keyboard as bool
             @param tooltip as Gtk.Tooltip
         """
-        if App().player.current_track.id >= 0:
-            artist = GLib.markup_escape_text(
-                ",".join(App().player.current_track.artists))
-            title = GLib.markup_escape_text(App().player.current_track.title)
-            album = GLib.markup_escape_text(
-                App().player.current_track.album.name)
+        track = App().player.current_track
+        if track.id is not None and track.id >= 0:
+            artist = GLib.markup_escape_text(",".join(track.artists))
+            title = GLib.markup_escape_text(track.title)
+            album = GLib.markup_escape_text(track.album.name)
             tooltip.set_markup("<b>%s</b> - %s\n%s" % (title, artist, album))
             return True
         return False
