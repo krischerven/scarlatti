@@ -166,7 +166,7 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
 
         settings = Gtk.Settings.get_default()
         manager = Handy.StyleManager.get_default()
-        if not manager.get_system_supports_color_schemes():
+        if manager.get_system_supports_color_schemes():
             self.system_supports_color_schemes = True
             manager.set_color_scheme(Handy.ColorScheme.PREFER_LIGHT)
         else:

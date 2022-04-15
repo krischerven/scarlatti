@@ -294,7 +294,7 @@ class ToolbarEnd(Gtk.Bin):
             @param value as bool
         """
         manager = Handy.StyleManager.get_default()
-        if not manager.get_system_supports_color_schemes():
+        if manager.get_system_supports_color_schemes():
             if value:
                 manager.set_color_scheme(Handy.ColorScheme.PREFER_DARK)
             else:
