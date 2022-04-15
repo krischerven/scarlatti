@@ -166,7 +166,7 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
 
         settings = Gtk.Settings.get_default()
         manager = Handy.StyleManager.get_default()
-        if manager.get_system_supports_color_schemes():
+        if not manager.get_system_supports_color_schemes():
             self.system_supports_color_schemes = True
             manager.set_color_scheme(Handy.ColorScheme.PREFER_LIGHT)
         else:
@@ -308,14 +308,6 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
             @return str
         """
         return self.__data_dir
-
-    @property
-    def gtk_application_prefer_dark_theme(self):
-        """
-            Return default gtk value
-            @return bool
-        """
-        return self.__gtk_dark
 
 #######################
 # PRIVATE             #
