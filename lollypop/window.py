@@ -203,10 +203,6 @@ class Window(Handy.ApplicationWindow, SignalsHelper):
         self.__setup_size_and_position()
         if App().settings.get_value("auto-update") or App().tracks.is_empty():
             App().scanner.update(ScanType.FULL)
-        # FIXME: remove this later
-        elif GLib.file_test("/app", GLib.FileTest.EXISTS) and\
-                not App().settings.get_value("flatpak-access-migration"):
-            App().scanner.update(ScanType.FULL)
 
     def __on_button_release_event(self, window, event):
         """
