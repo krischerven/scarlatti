@@ -1,5 +1,5 @@
 {
-    "app-id": "org.gnome.Lollypop",
+    "app-id": "org.gnome.Lollypop.Devel",
     "runtime": "org.gnome.Platform",
     "runtime-version": "43",
     "sdk": "org.gnome.Sdk",
@@ -160,6 +160,9 @@
         {
             "name": "lollypop",
             "buildsystem": "meson",
+            "config-opts": [
+                "-Dprofile=development"
+            ],
             "sources": [
                 {
                     "type": "git",

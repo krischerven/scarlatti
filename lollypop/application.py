@@ -84,12 +84,12 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         (self.__proxy_host, self.__proxy_port) = init_proxy_from_gnome()
         GLib.setenv("PULSE_PROP_media.role", "music", True)
         GLib.setenv("PULSE_PROP_application.icon_name",
-                    "org.gnome.Lollypop", True)
+                    app_id, True)
         # Flatpak hacks
         if GLib.file_test("/app", GLib.FileTest.EXISTS):
             # Set /tmp for GLib, /tmp not accessible in flatpak
             tmp = GLib.environ_getenv(GLib.get_environ(), "XDG_RUNTIME_DIR")
-            GLib.setenv("TMPDIR", "%s/app/org.gnome.Lollypop" % tmp, True)
+            GLib.setenv("TMPDIR", "%s/app/%s" % (tmp, app_id), True)
         self.cursors = {}
         self.shown_sidebar_tooltip = False
         self.system_supports_color_schemes = False

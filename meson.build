@@ -7,8 +7,8 @@ if revision == ''
   revision=meson.project_version()
 endif
 
-if get_option('devel').enabled()
-  appid='None'
+if get_option('profile') == 'development'
+  appid='org.gnome.Lollypop.Devel'
 else
   appid='org.gnome.Lollypop'
 endif
