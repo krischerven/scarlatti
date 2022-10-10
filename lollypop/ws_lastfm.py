@@ -154,13 +154,13 @@ class LastFMWebService:
             args.append(("sk", token))
             api_sig = self.__get_sig_for_args(args)
             args.append(("api_sig", api_sig))
-            post_data = {}
+            hash = {}
             for (name, value) in args:
-                post_data[name] = value
-            msg = Soup.form_request_new_from_hash("POST",
-                                                  self.__uri,
-                                                  post_data)
-            msg.request_headers.append("Accept-Charset", "utf-8")
+                hash[name] = value
+            form = Soup.form_encode_hash(hash)
+            msg = Soup.Message.new_from_encoded_form("POST", self.__uri, form)
+            request_headers = msg.get_property("request-headers")
+            request_headers.append("Accept-Charset", "utf-8")
             data = App().task_helper.send_message_sync(msg, self.__cancellable)
             if data is not None:
                 Logger.debug("%s: %s", self.__uri, data)
@@ -218,13 +218,14 @@ class LastFMWebService:
                 args.append(("sk", token))
                 api_sig = self.__get_sig_for_args(args)
                 args.append(("api_sig", api_sig))
-                post_data = {}
+                hash = {}
                 for (name, value) in args:
-                    post_data[name] = value
-                msg = Soup.form_request_new_from_hash("POST",
-                                                      self.__uri,
-                                                      post_data)
-                msg.request_headers.append("Accept-Charset", "utf-8")
+                    hash[name] = value
+                form = Soup.form_encode_hash(hash)
+                msg = Soup.Message.new_from_encoded_form(
+                    "POST", self.__uri, form)
+                request_headers = msg.get_property("request-headers")
+                request_headers.append("Accept-Charset", "utf-8")
                 data = App().task_helper.send_message_sync(msg,
                                                            self.__cancellable)
                 if data is not None:
@@ -258,16 +259,16 @@ class LastFMWebService:
             args.append(("sk", token))
             api_sig = self.__get_sig_for_args(args)
             args.append(("api_sig", api_sig))
-            post_data = {}
+            hash = {}
             for (name, value) in args:
-                post_data[name] = value
-            msg = Soup.form_request_new_from_hash("POST",
-                                                  self.__uri,
-                                                  post_data)
-            msg.request_headers.append("Accept-Charset", "utf-8")
+                hash[name] = value
+            form = Soup.form_encode_hash(hash)
+            msg = Soup.Message.new_from_encoded_form("POST", self.__uri, form)
+            request_headers = msg.get_property("request-headers")
+            request_headers.append("Accept-Charset", "utf-8")
             data = App().task_helper.send_message_sync(msg, self.__cancellable)
             if data is not None:
-                Logger.debug("%s: %s -> %s", self.__uri, data, post_data)
+                Logger.debug("%s: %s -> %s", self.__uri, data, hash)
         except Exception as e:
             Logger.error("LastFMWebService::__playing_now(): %s" % e)
 
