@@ -4,3 +4,4 @@ PyGObject
 pycairo
 pylast
 textblob
+yt-dlp
