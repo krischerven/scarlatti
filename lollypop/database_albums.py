@@ -1040,6 +1040,7 @@ class AlbumsDatabase:
         if orderby == OrderBy.ARTIST_YEAR:
             order = " ORDER BY artists.sortname\
                      COLLATE NOCASE COLLATE LOCALIZED,\
+                     albums.year,\
                      albums.timestamp,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
@@ -1052,11 +1053,13 @@ class AlbumsDatabase:
             order = " ORDER BY albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.YEAR_DESC:
-            order = " ORDER BY albums.timestamp DESC,\
+            order = " ORDER BY albums.year DESC,\
+                     albums.timestamp DESC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         elif orderby == OrderBy.YEAR_ASC:
-            order = " ORDER BY albums.timestamp ASC,\
+            order = " ORDER BY albums.year ASC,\
+                     albums.timestamp ASC,\
                      albums.name\
                      COLLATE NOCASE COLLATE LOCALIZED"
         else:
