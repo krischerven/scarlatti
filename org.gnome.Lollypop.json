@@ -1,9 +1,10 @@
 {
     "app-id": "org.gnome.Lollypop.Devel",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "43",
+    "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "lollypop",
+    "rename-desktop-file": "org.gnome.Lollypop",
     "tags" : [
         "devel",
         "development",
@@ -31,7 +32,7 @@
     "add-extensions": {
         "org.freedesktop.Platform.ffmpeg-full": {
             "directory": "lib/ffmpeg",
-            "version": "22.08",
+            "version": "master",
             "add-ld-path": ".",
             "autodelete": false
         }
@@ -50,18 +51,8 @@
             ],
             "sources": [
                 {
-                    "type": "archive",
-                    "url": "https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.20.4.tar.xz",
-                    "sha256": "5c9ec6bab96517e438b3f9bae0ceb84d3436f3da9bbe180cf4d28e32a7251b59",
-                    "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 15187,
-                        "stable-only": true,
-                        "versions": {
-                            "<": "1.21"
-                        },
-                        "url-template": "https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-$version.tar.xz"
-                    }
+                    "type": "git",
+                    "url": "https://gitlab.freedesktop.org/gstreamer/gst-plugins-ugly.git"
                 }
             ]
         },
@@ -74,18 +65,8 @@
             ],
             "sources": [
                 {
-                    "type": "archive",
-                    "url": "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.20.4.tar.xz",
-                    "sha256": "a1a3f53b3604d9a04fdd0bf9a1a616c3d2dab5320489e9ecee1178e81e33a16a",
-                    "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 21849,
-                        "stable-only": true,
-                        "versions": {
-                            "<": "1.21"
-                        },
-                        "url-template": "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-$version.tar.xz"
-                    }
+                    "type": "git",
+                    "url": "https://gitlab.freedesktop.org/gstreamer/gst-plugins-bad.git"
                 }
             ]
         },
@@ -100,14 +81,8 @@
             ],
             "sources": [
                 {
-                    "type": "archive",
-                    "url": "https://download.gnome.org/sources/gmime/3.2/gmime-3.2.7.tar.xz",
-                    "sha256": "2aea96647a468ba2160a64e17c6dc6afe674ed9ac86070624a3f584c10737d44",
-                    "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 13124,
-                        "url-template": "https://download.gnome.org/sources/gmime/3.2/gmime-$version.tar.xz"
-                    }
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/Archive/gmime.git"
                 }
             ]
         },
@@ -116,14 +91,8 @@
             "buildsystem": "meson",
             "sources": [
                 {
-                    "type": "archive",
-                    "url": "https://download.gnome.org/sources/totem-pl-parser/3.26/totem-pl-parser-3.26.6.tar.xz",
-                    "sha256": "c0df0f68d5cf9d7da43c81c7f13f11158358368f98c22d47722f3bd04bd3ac1c",
-                    "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 13163,
-                        "url-template": "https://download.gnome.org/sources/totem-pl-parser/3.26/totem-pl-parser-$version.tar.xz"
-                    }
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/totem-pl-parser.git"
                 }
             ],
             "cleanup": [
