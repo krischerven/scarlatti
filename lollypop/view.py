@@ -106,6 +106,9 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
                 self.add(self.__banner)
             self.add(self.__stack)
         if banner is not None:
+            if self.view_type & ViewType.SCROLLED:
+                self.scrolled.get_vscrollbar().set_margin_top(
+                    self.__banner.height)
             banner.connect("height-changed", self.__on_banner_height_changed)
 
     def populate(self):
@@ -243,11 +246,6 @@ class View(Gtk.Grid, AdaptiveHelper, FilteringHelper, SignalsHelper):
                 if main_widget is not None:
                     main_widget.set_margin_top(self.__banner.height +
                                                MARGIN_SMALL)
-                if self.view_type & ViewType.SCROLLED:
-                    self.scrolled.get_vscrollbar().set_margin_top(
-                        self.__banner.height)
-            elif self.view_type & ViewType.SCROLLED:
-                self.scrolled.get_vscrollbar().set_margin_top(0)
 
     def _on_map(self, widget):
         """
