@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk
 
-from lollypop.define import ViewType, MARGIN, App
+from lollypop.define import ViewType, MARGIN, MARGIN_SMALL, App
 from lollypop.utils import set_cursor_type
 from lollypop.widgets_banner_artist import ArtistBannerWidget
 from lollypop.widgets_album import AlbumWidget
@@ -191,7 +191,7 @@ class ArtistViewList(LazyLoadingView, SignalsHelper, SizeAllocationHelper):
         while len(self.__boxes) <= index:
             box = Gtk.Box.new(Gtk.Orientation.VERTICAL, MARGIN)
             box.set_valign(Gtk.Align.START)
-            box.set_property("margin", MARGIN)
+            box.set_property("margin", MARGIN_SMALL)
             self.__boxes.append(box)
             self.__boxes_grid.add(box)
         return self.__boxes[index]

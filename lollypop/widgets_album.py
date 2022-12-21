@@ -12,7 +12,7 @@
 
 from gi.repository import Gtk, GObject
 
-from lollypop.define import App, ViewType, MARGIN
+from lollypop.define import App, ViewType
 from lollypop.view_tracks_album import AlbumTracksView
 from lollypop.widgets_banner_album import AlbumBannerWidget
 from lollypop.utils import emit_signal
@@ -188,8 +188,6 @@ class AlbumWidget(Gtk.Grid):
                 self.__tracks_view = AlbumTracksView(self.__album,
                                                      self.__view_type)
                 self.__tracks_view.show()
-                self.__tracks_view.set_margin_start(MARGIN)
-                self.__tracks_view.set_margin_end(MARGIN)
                 self.__tracks_view.populate()
                 self.__tracks_view.connect("populated",
                                            self.__on_tracks_populated)

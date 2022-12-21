@@ -6,7 +6,7 @@
 .row-big {
     padding: 15px;
     border-radius: 3px;
-	margin: 2px;
+	  margin: 2px;
 }
 
 .row {
@@ -395,7 +395,7 @@ flowboxchild:selected  {
     padding: 2px;
     border-radius: 5px;
     box-shadow: none;
-	background-color: transparent;
+	  background-color: transparent;
   	color: inherit;
 }
 
@@ -446,10 +446,11 @@ flowboxchild:selected  {
 }
 
 .trackrow {
-    padding: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     min-height: 40px;
     box-shadow: none;
-	background-color: transparent;
+	  background-color: transparent;
   	color: inherit;
   	border: 1px solid transparent;
   	border-radius: 5px;
