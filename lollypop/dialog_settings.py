@@ -26,9 +26,9 @@ class SettingsDialog:
 
     __BOOLEAN = ["dark-ui", "artist-artwork", "auto-update", "background-mode",
                  "save-state", "import-playlists", "save-to-tags",
-                 "show-compilations", "transitions", "network-access",
+                 "show-compilations", "transitions", "transitions-party-only",
                  "recent-youtube-dl", "import-advanced-artist-tags",
-                 "force-single-column", "hd-artwork"]
+                 "force-single-column", "hd-artwork", "network-access"]
 
     __RANGE = ["cover-size", "transitions-duration"]
 
