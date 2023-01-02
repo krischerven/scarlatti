@@ -172,7 +172,7 @@
             <description>Resetting this value will reset the database, popular albums will be restored</description>
         </key>
         <key type="i" name="cover-size">
-            <default>200</default>
+            <default>170</default>
             <summary>Albums cover size</summary>
             <description></description>
         </key>
