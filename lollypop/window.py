@@ -36,7 +36,6 @@ class Window(Handy.ApplicationWindow, SignalsHelper):
                                          icon_name="org.gnome.Lollypop")
         self.__miniplayer = None
         self.__configure_timeout_id = None
-        self.set_auto_startup_notification(False)
         self.connect("realize", self.__on_realize)
         # Does not work with a Gtk.Gesture in GTK3
         self.connect("button-release-event", self.__on_button_release_event)
