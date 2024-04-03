@@ -6,6 +6,7 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>Lollypop</name>
+  <developer_name>Cédric Bellegarde</developer_name>
   <summary>Play and organize your music collection</summary>
   <description>
     <p>Lollypop is a lightweight modern music player designed to work excellently on the GNOME desktop environment. It also features a party mode which will auto-select party-related playlists; allows access the player from your couch thanks to it fullscreen mode; fetches lyrics, artwork and biography online; and provides native support for ReplayGain.</p>
@@ -20,8 +21,6 @@
   <screenshots>
     <screenshot type="default">
       <image type="source" width="1754" height="1095">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop.jpg</image>
-      <image type="source" width="1920" height="1080">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop2.jpg</image>
-      <image type="source" width="597" height="853">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop3.jpg</image>
     </screenshot>
   </screenshots>
   <translation type="gettext">lollypop</translation>
@@ -33,8 +32,17 @@
     <content_attribute id="money-advertising">mild</content_attribute>
   </content_rating>
   <update_contact>cedric.bellegarde@adishatz.org</update_contact>
+
+  <recommends>
+    <control>touch</control>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
   <custom>
-    <value key="Purism::form_factor">workstation</value>
     <value key="Purism::form_factor">mobile</value>
   </custom>
 </component>
