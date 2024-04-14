@@ -175,7 +175,7 @@ class FullScreen(Gtk.Window, SignalsHelper):
         monitor = screen.get_monitor_at_window(App().main_window.get_window())
         self.fullscreen_on_monitor(screen, monitor)
         # Disable screensaver (idle)
-        App().inhibitor.manual_inhibit(
+        App().inhibitor.override_inhibit(
                 Gtk.ApplicationInhibitFlags.IDLE |
                 Gtk.ApplicationInhibitFlags.SUSPEND)
 
@@ -187,7 +187,7 @@ class FullScreen(Gtk.Window, SignalsHelper):
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
             self.__timeout_id = None
-        App().inhibitor.manual_uninhibit()
+        App().inhibitor.unoverride_inhibit()
 
     @property
     def miniplayer(self):
