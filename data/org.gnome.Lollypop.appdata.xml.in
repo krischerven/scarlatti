@@ -23,6 +23,15 @@
   <screenshots>
     <screenshot type="default">
       <image type="source" width="1754" height="1095">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop.jpg</image>
+      <caption>Main window</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="1920" height="1080">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop2.jpg</image>
+      <caption>Mini player</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="597" height="853">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop3.jpg</image>
+      <caption>Fullscreen player</caption>
     </screenshot>
   </screenshots>
   <translation type="gettext">lollypop</translation>
