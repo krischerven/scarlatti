@@ -12,11 +12,9 @@
     <p>Lollypop is a lightweight modern music player designed to work excellently on the GNOME desktop environment. It also features a party mode which will auto-select party-related playlists; allows access the player from your couch thanks to it fullscreen mode; fetches lyrics, artwork and biography online; and provides native support for ReplayGain.</p>
   </description>
   <releases>
-    <release version="1.4.39" date="2024-04-14">
+    <release version="1.4.40" date="2024-06-13">
       <description>
-	Fix startup notifications
-	Fix playlist export
-	Fix suspend inhibitor
+	Fix scrolling issue on mobile devices
       </description>
     </release>
   </releases>
