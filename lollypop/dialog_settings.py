@@ -30,7 +30,7 @@ class SettingsDialog:
                  "recent-youtube-dl", "import-advanced-artist-tags",
                  "force-single-column", "hd-artwork", "network-access"]
 
-    __RANGE = ["cover-size", "transitions-duration"]
+    __RANGE = ["cover-size", "transitions-duration", "max-search-results"]
 
     __COMBO = ["replay-gain", "orderby"]
     __ENTRY = ["invidious-server", "cs-api-key", "listenbrainz-user-token"]
@@ -136,6 +136,7 @@ class SettingsDialog:
         setting = widget.get_name()
         value = widget.get_value()
         App().settings.set_value(setting, GLib.Variant("i", value))
+
         if setting == "cover-size":
             if self.__timeout_id is not None:
                 GLib.source_remove(self.__timeout_id)

@@ -17,7 +17,7 @@ from random import shuffle
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType, LovedFlags
 from lollypop.logger import Logger
-from lollypop.utils import remove_static, make_subrequest
+from lollypop.utils import remove_static, make_subrequest, max_search_results
 
 
 class AlbumsDatabase:
@@ -1293,10 +1293,10 @@ class AlbumsDatabase:
             @return album ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type)
+            filters = ("%" + searched + "%", storage_type, max_search_results())
             request = "SELECT rowid, name FROM albums\
                        WHERE noaccents(name) LIKE ?\
-                       AND albums.storage_type & ? LIMIT 25"
+                       AND albums.storage_type & ? LIMIT ?"
             result = sql.execute(request, filters)
             return list(result)
 

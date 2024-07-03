@@ -16,7 +16,7 @@ import itertools
 
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, StorageType, Type, LovedFlags
-from lollypop.utils import noaccents, make_subrequest
+from lollypop.utils import noaccents, make_subrequest, max_search_results
 
 
 class TracksDatabase:
@@ -1046,10 +1046,10 @@ class TracksDatabase:
             @return [(int, name)]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type)
+            filters = ("%" + searched + "%", storage_type, max_search_results())
             request = "SELECT rowid, name FROM tracks\
                        WHERE noaccents(name) LIKE ?\
-                       AND tracks.storage_type & ? LIMIT 25"
+                       AND tracks.storage_type & ? LIMIT ?"
             result = sql.execute(request, filters)
             return list(result)
 
@@ -1061,7 +1061,7 @@ class TracksDatabase:
             @return [(int, name)]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type)
+            filters = ("%" + searched + "%", storage_type, max_search_results())
             request = "SELECT DISTINCT tracks.rowid, artists.name\
                    FROM track_artists, tracks, artists\
                    WHERE track_artists.artist_id=artists.rowid AND\
@@ -1071,7 +1071,7 @@ class TracksDatabase:
                         SELECT album_artists.artist_id\
                         FROM album_artists\
                         WHERE album_artists.artist_id=artists.rowid)\
-                    LIMIT 25"
+                    LIMIT ?"
             result = sql.execute(request, filters)
             return list(result)
 

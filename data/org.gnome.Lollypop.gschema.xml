@@ -176,6 +176,11 @@
             <summary>Albums cover size</summary>
             <description></description>
         </key>
+        <key type="i" name="max-search-results">
+            <default>25</default>
+            <summary>Max search results</summary>
+            <description></description>
+        </key>
         <key type="i" name="convert-bitrate">
             <default>192</default>
             <summary>Encoding quality</summary>

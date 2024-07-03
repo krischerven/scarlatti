@@ -554,3 +554,10 @@ def split_list(l, n=1):
     length = len(l)
     split = [l[i * length // n: (i + 1) * length // n] for i in range(n)]
     return [l for l in split if l]
+
+
+def max_search_results():
+    """
+        Return maximum # of search results based on settings
+    """
+    return App().settings.get_value("max-search-results").get_int32()
