@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Just sort if no provided argument
+if [ "$1" == "" ]; then
+    sort .gitignore -o .gitignore
+    exit 0
+fi
+
+# Add newline if missing
+test "$(tail -c 1 .gitignore | wc -l)" -eq 0 && echo "" >> .gitignore
+
+# Append and sort
+echo "$1" >> .gitignore
+sort .gitignore -o .gitignore
