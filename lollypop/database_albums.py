@@ -1293,9 +1293,9 @@ class AlbumsDatabase:
             @return album ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type, max_search_results())
+            filters = (searched, storage_type, max_search_results())
             request = "SELECT rowid, name FROM albums\
-                       WHERE noaccents(name) LIKE ?\
+                       WHERE noaccents(name) REGEXP ?\
                        AND albums.storage_type & ? LIMIT ?"
             result = sql.execute(request, filters)
             return list(result)

@@ -1046,9 +1046,9 @@ class TracksDatabase:
             @return [(int, name)]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type, max_search_results())
+            filters = (searched, storage_type, max_search_results())
             request = "SELECT rowid, name FROM tracks\
-                       WHERE noaccents(name) LIKE ?\
+                       WHERE noaccents(name) REGEXP ?\
                        AND tracks.storage_type & ? LIMIT ?"
             result = sql.execute(request, filters)
             return list(result)
@@ -1061,12 +1061,12 @@ class TracksDatabase:
             @return [(int, name)]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type, max_search_results())
+            filters = (searched, storage_type, max_search_results())
             request = "SELECT DISTINCT tracks.rowid, artists.name\
                    FROM track_artists, tracks, artists\
                    WHERE track_artists.artist_id=artists.rowid AND\
                    track_artists.track_id=tracks.rowid AND\
-                   noaccents(artists.name) LIKE ? AND\
+                   noaccents(artists.name) REGEXP ? AND\
                    tracks.storage_type & ? AND NOT EXISTS (\
                         SELECT album_artists.artist_id\
                         FROM album_artists\

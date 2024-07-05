@@ -16,6 +16,7 @@ import sqlite3
 from threading import Lock
 from random import shuffle
 import itertools
+import re
 
 from lollypop.define import App, LOLLYPOP_DATA_PATH
 from lollypop.database_upgrade import DatabaseAlbumsUpgrade
@@ -209,6 +210,9 @@ class Database:
             c.create_collation("LOCALIZED", LocalizedCollation())
             c.create_function("noaccents", 1, noaccents)
             c.create_function("sql_escape", 1, sql_escape)
+            # https://www.sqlite.org/lang_expr.html
+            c.create_function("regexp", 2,
+                              lambda pattern, str: True if re.search(pattern, str) else False)
             return c
         except:
             exit(-1)

@@ -220,7 +220,7 @@ def get_network_available(acl_name=""):
 
 def noaccents(string):
     """
-        Return string without accents lowered
+        Return string without accents and lowered
         @param string as str
         @return str
     """
@@ -251,6 +251,13 @@ def escape(str, ignore=["_", "-", " ", "."]):
     return "".join([c for c in str if
                     c.isalpha() or
                     c.isdigit() or c in ignore]).rstrip()
+
+
+def valid_search_regexpr(regexpr):
+    """
+        Return True if pattern has certain regex symbols like *, ^, etc
+    """
+    return any(pattern in regexpr for pattern in ["*", "^", "$", "?", "+"])
 
 
 def get_lollypop_album_id(name, artists, year=None, mbid=None):

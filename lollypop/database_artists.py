@@ -407,12 +407,12 @@ class ArtistsDatabase:
             @return artist ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            filters = ("%" + searched + "%", storage_type, max_search_results())
+            filters = (searched, storage_type, max_search_results())
             request = "SELECT DISTINCT artists.rowid, artists.name\
                    FROM albums, album_artists, artists\
                    WHERE album_artists.artist_id=artists.rowid AND\
                    album_artists.album_id=albums.rowid AND\
-                   noaccents(artists.name) LIKE ? AND\
+                   noaccents(artists.name) REGEXP ? AND\
                    albums.storage_type & ? LIMIT ?"
             result = sql.execute(request, filters)
             return list(result)
