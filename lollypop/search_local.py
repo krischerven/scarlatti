@@ -59,8 +59,7 @@ class LocalSearch(GObject.Object):
         """
         split = []
         for word in string.split():
-            if len(word) > 2:
-                split.append(word)
+            split.append(word)
         return split
 
     def __search_tracks(self, search, storage_type, cancellable):
