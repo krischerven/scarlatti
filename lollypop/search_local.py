@@ -81,10 +81,10 @@ class LocalSearch(GObject.Object):
                 break
         for (track_id, track_name) in tracks:
             valid = True
-            no_accents = noaccents(track_name)
-            if not no_accents.startswith(search):
+            track_name = noaccents(track_name)
+            if not track_name.startswith(search):
                 for word in split:
-                    if word not in no_accents:
+                    if word not in track_name:
                         valid = False
                         break
             # Track starts with all the same words, adding to result
@@ -97,7 +97,7 @@ class LocalSearch(GObject.Object):
             for artist in App().tracks.get_artists(track_id):
                 valid = True
                 for word in [w for w in split if w != noaccents(artist)]:
-                    if word not in no_accents:
+                    if word not in track_name:
                         valid = False
                         break
                 if valid:
@@ -121,10 +121,10 @@ class LocalSearch(GObject.Object):
                 break
         for (artist_id, artist_name) in artists:
             valid = True
-            no_accents = noaccents(artist_name)
-            if not no_accents.startswith(search):
+            artist_name = noaccents(artist_name)
+            if not artist_name.startswith(search):
                 for word in split:
-                    if word not in no_accents:
+                    if word not in artist_name:
                         valid = False
                         break
             # Artist starts with all the same words, adding to result
@@ -152,10 +152,10 @@ class LocalSearch(GObject.Object):
                 break
         for (album_id, album_name) in albums:
             valid = True
-            no_accents = noaccents(album_name)
-            if not no_accents.startswith(search):
+            album_name = noaccents(album_name)
+            if not album_name.startswith(search):
                 for word in split:
-                    if word not in no_accents:
+                    if word not in album_name:
                         valid = False
                         break
             # Album starts with all the same words, adding to result
