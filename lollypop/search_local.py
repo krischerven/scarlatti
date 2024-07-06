@@ -95,10 +95,13 @@ class LocalSearch(GObject.Object):
                 track_ids.append(track_id)
             # Detected an artist match, adding to result
             for artist in App().tracks.get_artists(track_id):
-                no_accents = noaccents(artist)
-                for word in split:
-                    if word in no_accents:
-                        track_ids.append(track_id)
+                valid = True
+                for word in [w for w in split if w != noaccents(artist)]:
+                    if word not in no_accents:
+                        valid = False
+                        break
+                if valid:
+                    track_ids.append(track_id)
         return track_ids
 
     def __search_artists(self, search, storage_type, cancellable):
