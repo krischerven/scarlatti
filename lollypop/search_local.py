@@ -58,8 +58,27 @@ class LocalSearch(GObject.Object):
             @return str
         """
         split = []
+        nextWord = ""
         for word in string.split():
-            split.append(word)
+            if word.startswith("\""):
+                nextWord = word[1:]
+                if word.endswith("\""):
+                    word = nextWord[:-1]
+                    nextWord = ""
+                    split.append(word)
+            elif word.endswith("\"") and nextWord != "":
+                word = nextWord+" "+word[:-1]
+                nextWord = ""
+                split.append(word)
+            else:
+                # Unfinished word or intentional quote
+                if nextWord != "":
+                    split.append("\""+nextWord)
+                    nextWord = ""
+                split.append(word)
+        # Unfinished word or intentional quote
+        if nextWord != "":
+            split.append("\""+nextWord)
         return split
 
     def __search_tracks(self, search, storage_type, cancellable):
@@ -70,9 +89,14 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
             @return [int]
         """
+
         tracks = []
         track_ids = []
         split = [] if valid_search_regexpr(search) else self.__split_string(search)
+
+        if search.startswith("\"") and search.endswith("\""):
+            search = search[1:-1]
+
         for search_str in [search] + split:
             tracks += App().tracks.search_performed(search_str, storage_type)
             tracks += App().tracks.search(search_str, storage_type)
