@@ -23,6 +23,7 @@
 /configure
 /configure.lineno
 /configure.scan
+credentials.org
 /data/AboutDialog.ui
 data/Makefile
 data/Makefile.in
