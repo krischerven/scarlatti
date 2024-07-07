@@ -1,10 +1,11 @@
-# Lollypop music player
+# Lollypop-plus music player
 
 ![Lollypop logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
 
-Support Lollypop: https://www.patreon.com/gnumdk
+Support upstream development: https://www.patreon.com/gnumdk
 
-Lollypop is a new GNOME music playing application.
+This project is a fork of Lollypop, the GNOME music playing application.
+The aim of Lollypop-plus is to add new features - particularly advanced search features - missing from Lollypop.
 
 - Users: https://wiki.gnome.org/Apps/Lollypop
 
@@ -29,6 +30,7 @@ It provides:
 - Auto install codecs
 - HiDPI support
 - TuneIn support
+- **Regex search and word grouping**
 
 ## Depends on
 
@@ -50,8 +52,8 @@ It provides:
 ## Building from Git
 
 ```bash
-$ git clone https://gitlab.gnome.org/World/lollypop.git
-$ cd lollypop
+$ git clone https://github.com/krischerven/lollypop-plus
+$ cd lollypop-plus
 $ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
@@ -59,8 +61,8 @@ $ meson builddir --prefix=/usr/local
 ### On Debian/Ubuntu
 
 ```bash
-$ git clone https://gitlab.gnome.org/World/lollypop.git
-$ cd lollypop
+$ git clone https://github.com/krischerven/lollypop-plus
+$ cd lollypop-plus
 # apt-get install meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
 $ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
@@ -69,11 +71,12 @@ $ meson builddir --prefix=/usr/local
 ### On Fedora
 
 ```bash
-$ git clone https://gitlab.gnome.org/World/lollypop.git
-$ cd lollypop
+$ git clone https://github.com/krischerven/lollypop-plus
+$ cd lollypop-plus
 # sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel libsoup-devel
 $ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/lollypop.svg)](https://repology.org/project/lollypop/versions)
+<!-- [![Packaging status](https://repology.org/badge/vertical-allrepos/lollypop.svg)](https://repology.org/project/lollypop/versions) -->
+    
