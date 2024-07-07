@@ -189,37 +189,18 @@ class LocalSearch(GObject.Object):
                 album_ids.append(album_id)
         return album_ids
 
-    def __get_artists(self, search, storage_type, cancellable):
+    def __get_generic(self, ids, storage_type, signal):
         """
-            Get artists for search
+            Get [tracks/artists/albums] for search
             @param search as str
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        artist_ids = self.__search_artists(search, storage_type, cancellable)
-        counter = Counter(artist_ids)
-        artist_ids = sorted(artist_ids,
-                            key=lambda x: (counter[x], x),
-                            reverse=True)
-        artist_ids = list(dict.fromkeys(artist_ids))
-        for artist_id in artist_ids:
-            GLib.idle_add(self.emit, "match-artist", artist_id, storage_type)
-
-    def __get_albums(self, search, storage_type, cancellable):
-        """
-            Get albums for search
-            @param search as str
-            @param storage_type as StorageType
-            @param cancellable as Gio.Cancellable
-        """
-        album_ids = self.__search_albums(search, storage_type, cancellable)
-        counter = Counter(album_ids)
-        album_ids = sorted(album_ids,
-                           key=lambda x: (counter[x], x),
-                           reverse=True)
-        album_ids = list(dict.fromkeys(album_ids))
-        for album_id in album_ids:
-            GLib.idle_add(self.emit, "match-album", album_id, storage_type)
+        counter = Counter(ids)
+        ids = sorted(ids, key=lambda x: (counter[x], x), reverse=True)
+        ids = list(dict.fromkeys(ids))
+        for id in ids:
+            GLib.idle_add(self.emit, signal, id, storage_type)
 
     def __get_tracks(self, search, storage_type, cancellable):
         """
@@ -228,11 +209,25 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        track_ids = self.__search_tracks(search, storage_type, cancellable)
-        counter = Counter(track_ids)
-        track_ids = sorted(track_ids,
-                           key=lambda x: (counter[x], x),
-                           reverse=True)
-        track_ids = list(dict.fromkeys(track_ids))
-        for track_id in track_ids:
-            GLib.idle_add(self.emit, "match-track", track_id, storage_type)
+        self.__get_generic(self.__search_tracks(search, storage_type, cancellable),
+                           storage_type, "match-track")
+
+    def __get_artists(self, search, storage_type, cancellable):
+        """
+            Get artists for search
+            @param search as str
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        self.__get_generic(self.__search_artists(search, storage_type, cancellable),
+                           storage_type, "match-artist")
+
+    def __get_albums(self, search, storage_type, cancellable):
+        """
+            Get albums for search
+            @param search as str
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+        """
+        self.__get_generic(self.__search_albums(search, storage_type, cancellable),
+                           storage_type, "match-album")
