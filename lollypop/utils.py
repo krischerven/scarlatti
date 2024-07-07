@@ -253,11 +253,19 @@ def escape(str, ignore=["_", "-", " ", "."]):
                     c.isdigit() or c in ignore]).rstrip()
 
 
+def regexpr(pattern, str):
+    return True if re.search(pattern, str) else False
+
+
 def valid_search_regexpr(regexpr):
     """
         Return True if pattern has certain regex symbols like *, ^, etc
     """
     return any(pattern in regexpr for pattern in ["*", "^", "$", "?", "+"])
+
+
+def regexpr_and_valid(pattern, str):
+    return valid_search_regexpr(pattern) and regexpr(pattern, str)
 
 
 def get_lollypop_album_id(name, artists, year=None, mbid=None):

@@ -15,7 +15,7 @@ from gi.repository import GObject, GLib
 from collections import Counter
 
 from lollypop.define import App
-from lollypop.utils import noaccents, valid_search_regexpr
+from lollypop.utils import noaccents, regexpr_and_valid
 
 
 class LocalSearch(GObject.Object):
@@ -92,7 +92,7 @@ class LocalSearch(GObject.Object):
 
         tracks = []
         track_ids = []
-        split = [] if valid_search_regexpr(search) else self.__split_string(search)
+        split = self.__split_string(search)
 
         if search.startswith("\"") and search.endswith("\""):
             search = search[1:-1]
@@ -107,7 +107,7 @@ class LocalSearch(GObject.Object):
             track_name = noaccents(track_name)
             if not track_name.startswith(search):
                 for word in split:
-                    if word not in track_name:
+                    if not regexpr_and_valid(word, track_name) and word not in track_name:
                         valid = False
                         break
             # Track starts with all the same words, adding to result
@@ -120,7 +120,7 @@ class LocalSearch(GObject.Object):
             for artist in App().tracks.get_artists(track_id):
                 valid = True
                 for word in [w for w in split if w != noaccents(artist)]:
-                    if word not in track_name:
+                    if not regexpr_and_valid(word, track_name) and word not in track_name:
                         valid = False
                         break
                 if valid:
@@ -137,7 +137,7 @@ class LocalSearch(GObject.Object):
         """
         artists = []
         artist_ids = []
-        split = [] if valid_search_regexpr(search) else self.__split_string(search)
+        split = self.__split_string(search)
         for search_str in [search] + split:
             artists += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
@@ -147,7 +147,7 @@ class LocalSearch(GObject.Object):
             artist_name = noaccents(artist_name)
             if not artist_name.startswith(search):
                 for word in split:
-                    if word not in artist_name:
+                    if not regexpr_and_valid(word, artist_name) and word not in artist_name:
                         valid = False
                         break
             # Artist starts with all the same words, adding to result
@@ -168,7 +168,7 @@ class LocalSearch(GObject.Object):
         """
         albums = []
         album_ids = []
-        split = [] if valid_search_regexpr(search) else self.__split_string(search)
+        split = self.__split_string(search)
         for search_str in [search] + split:
             albums += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
@@ -178,7 +178,7 @@ class LocalSearch(GObject.Object):
             album_name = noaccents(album_name)
             if not album_name.startswith(search):
                 for word in split:
-                    if word not in album_name:
+                    if not regexpr_and_valid(word, album_name) and word not in album_name:
                         valid = False
                         break
             # Album starts with all the same words, adding to result
