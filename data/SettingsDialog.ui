@@ -150,24 +150,6 @@
                 </child>
               </object>
             </child>
-            <child>
-              <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="title" translatable="yes">Max search results</property>
-                <child>
-                  <object class="GtkSpinButton" id="max-search-results_range">
-                    <property name="name">max-search-results</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="valign">center</property>
-                    <property name="width-chars">4</property>
-                    <property name="adjustment">adjustment3</property>
-                    <signal name="value-changed" handler="_on_range_changed" swapped="no"/>
-                  </object>
-                </child>
-              </object>
-            </child>
           </object>
         </child>
         <child>
@@ -250,6 +232,25 @@
                       <item id="popularity" translatable="yes">Popularity</item>
                     </items>
                     <signal name="changed" handler="_on_combo_changed" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Max search results</property>
+                <property name="subtitle" translatable="yes">How many results can be returned for a query</property>
+                <child>
+                  <object class="GtkSpinButton" id="max-search-results_range">
+                    <property name="name">max-search-results</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="width-chars">4</property>
+                    <property name="adjustment">adjustment3</property>
+                    <signal name="value-changed" handler="_on_range_changed" swapped="no"/>
                   </object>
                 </child>
               </object>
