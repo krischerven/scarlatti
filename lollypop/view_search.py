@@ -18,7 +18,7 @@ from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
 from lollypop.search import Search
 from lollypop.view import View
-from lollypop.utils import sql_escape, case_sensitive_search_p
+from lollypop.utils import sql_escape, case_sensitive_search_p, search_settings_string
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -155,6 +155,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__banner.show()
         self.__stack = SearchStack(self.storage_type)
         self.__stack.show()
+        self.__last_search_settings_string = search_settings_string()
         self.add_widget(self.__stack, self.__banner)
         self.__banner.entry.connect("changed", self._on_search_changed)
         self.show_placeholder(True,
@@ -342,8 +343,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__timeout_id = None
         new_search = self.__banner.entry.get_text().strip()
-        if self.__current_search != new_search:
+        if self.__current_search != new_search or \
+           self.__last_search_settings_string != search_settings_string():
             self.__current_search = new_search
+            self.__last_search_settings_string = search_settings_string()
             self.populate()
 
     def __on_button_clicked(self, button):
