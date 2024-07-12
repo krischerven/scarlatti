@@ -47,7 +47,6 @@ flatpak/metadata
 /ID
 /INSTALL
 /install-sh
-/install.sh
 /intltool-extract.in
 /intltool-merge.in
 /intltool-update.in
@@ -57,7 +56,6 @@ flatpak/metadata
 /*.lo
 /local
 /lollypop-cli
-/lollypop.sh
 /ltmain.sh
 /m4
 /Makefile
