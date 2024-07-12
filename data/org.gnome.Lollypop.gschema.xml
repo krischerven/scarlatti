@@ -222,7 +222,7 @@
             <description></description>
         </key>
         <key type="b" name="background-mode">
-            <default>false</default>
+            <default>true</default>
             <summary>Continue playback when closed</summary>
             <description></description>
         </key>
