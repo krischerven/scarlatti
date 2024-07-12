@@ -18,6 +18,7 @@ from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType, LovedFlags
 from lollypop.logger import Logger
 from lollypop.utils import remove_static, make_subrequest, max_search_results
+from lollypop.utils import regexp_search_filter, regexp_search_query
 
 
 class AlbumsDatabase:
@@ -1293,10 +1294,11 @@ class AlbumsDatabase:
             @return album ids as [int]
         """
         with SqlCursor(self.__db) as sql:
-            filters = (searched, storage_type, max_search_results())
-            request = "SELECT rowid, name FROM albums\
-                       WHERE noaccents(name) REGEXP ?\
-                       AND albums.storage_type & ? LIMIT ?"
+            filters = (regexp_search_filter(searched), storage_type, max_search_results())
+            request = regexp_search_query(
+                        "SELECT rowid, name FROM albums\
+                         WHERE noaccents(name) REGEXP ?\
+                         AND albums.storage_type & ? LIMIT ?")
             result = sql.execute(request, filters)
             return list(result)
 

@@ -18,7 +18,7 @@ from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
 from lollypop.search import Search
 from lollypop.view import View
-from lollypop.utils import sql_escape
+from lollypop.utils import sql_escape, case_sensitive_search_p
 from lollypop.objects_album import Album
 from lollypop.objects_track import Track
 from lollypop.helper_signals import SignalsHelper, signals_map
@@ -178,7 +178,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.__stack.new_current_child()
         if len(self.__current_search) > 1:
             self.__banner.spinner.start()
-            current_search = self.__current_search.lower()
+            if case_sensitive_search_p():
+                current_search = self.__current_search
+            else:
+                current_search = self.__current_search.lower()
             self.__search.get(current_search, self.__cancellable)
         else:
             self.show_placeholder(True,

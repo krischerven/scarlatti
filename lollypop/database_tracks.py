@@ -17,6 +17,7 @@ import itertools
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, StorageType, Type, LovedFlags
 from lollypop.utils import noaccents, make_subrequest, max_search_results
+from lollypop.utils import regexp_search_filter, regexp_search_query
 
 
 class TracksDatabase:
@@ -125,9 +126,9 @@ class TracksDatabase:
         """
         with SqlCursor(self.__db) as sql:
             result = sql.execute("SELECT rowid\
-                                  FROM tracks WHERE noaccents(name)=?\
+                                  FROM tracks WHERE noaccents2(name)=?\
                                   COLLATE NOCASE",
-                                 (noaccents(name),))
+                                 (noaccents2(name),))
             return list(itertools.chain(*result))
 
     def get_id_by_uri(self, uri):
@@ -1046,10 +1047,11 @@ class TracksDatabase:
             @return [(int, name)]
         """
         with SqlCursor(self.__db) as sql:
-            filters = (searched, storage_type, max_search_results())
-            request = "SELECT rowid, name FROM tracks\
-                       WHERE noaccents(name) REGEXP ?\
-                       AND tracks.storage_type & ? LIMIT ?"
+            filters = (regexp_search_filter(searched), storage_type, max_search_results())
+            request = regexp_search_query(
+                        "SELECT rowid, name FROM tracks\
+                         WHERE noaccents(name) REGEXP ?\
+                         AND tracks.storage_type & ? LIMIT ?")
             result = sql.execute(request, filters)
             return list(result)
 
@@ -1061,8 +1063,9 @@ class TracksDatabase:
             @return [(int, name)]
         """
         with SqlCursor(self.__db) as sql:
-            filters = (searched, storage_type, max_search_results())
-            request = "SELECT DISTINCT tracks.rowid, artists.name\
+            filters = (regexp_search_filter(searched), storage_type, max_search_results())
+            request = regexp_search_query(
+                  "SELECT DISTINCT tracks.rowid, artists.name\
                    FROM track_artists, tracks, artists\
                    WHERE track_artists.artist_id=artists.rowid AND\
                    track_artists.track_id=tracks.rowid AND\
@@ -1071,7 +1074,7 @@ class TracksDatabase:
                         SELECT album_artists.artist_id\
                         FROM album_artists\
                         WHERE album_artists.artist_id=artists.rowid)\
-                    LIMIT ?"
+                    LIMIT ?")
             result = sql.execute(request, filters)
             return list(result)
 

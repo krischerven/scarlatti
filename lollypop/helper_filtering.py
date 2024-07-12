@@ -13,7 +13,7 @@
 from gi.repository import GLib, Gtk
 
 from lollypop.define import ViewType, App
-from lollypop.utils import noaccents
+from lollypop.utils import noaccents2
 from lollypop.utils_album import tracks_to_albums
 from lollypop.logger import Logger
 
@@ -40,7 +40,7 @@ class FilteringHelper():
         if not text:
             return
         for child in self.filtered:
-            if noaccents(child.name).find(noaccents(text)) != -1:
+            if noaccents2(child.name).find(noaccents2(text)) != -1:
                 style_context = child.get_style_context()
                 style_context.add_class("typeahead")
                 GLib.idle_add(self._scroll_to_child, child)
@@ -61,7 +61,7 @@ class FilteringHelper():
             previous_children.insert(0, child)
         if previous_children and found_child is not None:
             for child in previous_children:
-                if noaccents(child.name).find(noaccents(text)) != -1:
+                if noaccents2(child.name).find(noaccents2(text)) != -1:
                     found_child.get_style_context().remove_class("typeahead")
                     child.get_style_context().add_class("typeahead")
                     GLib.idle_add(self._scroll_to_child, child)
@@ -80,7 +80,7 @@ class FilteringHelper():
                 previous_style_context = style_context
                 found = True
                 continue
-            if found and noaccents(child.name).find(noaccents(text)) != -1:
+            if found and noaccents2(child.name).find(noaccents2(text)) != -1:
                 previous_style_context.remove_class("typeahead")
                 style_context.add_class("typeahead")
                 GLib.idle_add(self._scroll_to_child, child)

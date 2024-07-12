@@ -218,17 +218,6 @@ def get_network_available(acl_name=""):
     return False
 
 
-def noaccents(string):
-    """
-        Return string without accents and lowered
-        @param string as str
-        @return str
-    """
-    nfkd_form = unicodedata.normalize("NFKD", string)
-    v = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
-    return v.lower()
-
-
 def sql_escape(string):
     """
         Escape string for SQL request
@@ -576,3 +565,61 @@ def max_search_results():
         Return maximum # of search results based on settings
     """
     return App().settings.get_value("max-search-results").get_int32()
+
+
+def regexp_search_p():
+    """
+        Return true if regexp search is enabled
+    """
+    return App().settings.get_value("regexp-search").get_boolean()
+
+
+def case_sensitive_search_p():
+    """
+        Return true if case-sensitive search is enabled
+    """
+    return App().settings.get_value("case-sensitive-search").get_boolean()
+
+
+def regexp_search_filter(filter):
+    """
+        Return filter (a string) if regexp_search_p(), otherwise return '%'+filter+'%'
+    """
+    if regexp_search_p():
+        return filter
+    else:
+        return "%"+filter+"%"
+
+
+def regexp_search_query(query):
+    """
+        Return query with all instances of LIKE/REGEXP replaced with the correct operator,
+        based on whether or not regexp_search_p() == True.
+    """
+    if regexp_search_p():
+        return query.replace(" LIKE ", " REGEXP ")
+    else:
+        return query.replace(" REGEXP ", " LIKE ")
+
+def noaccents(string):
+    """
+        Return string without accents and lowered (the latter only if not case_sensitive_search_p())
+        @param string as str
+        @return str
+    """
+    nfkd_form = unicodedata.normalize("NFKD", string)
+    v = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    if case_sensitive_search_p():
+        return v
+    else:
+        return v.lower()
+
+def noaccents2(string):
+    """
+        Return string without accents and lowered
+        @param string as str
+        @return str
+    """
+    nfkd_form = unicodedata.normalize("NFKD", string)
+    v = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    return v.lower()

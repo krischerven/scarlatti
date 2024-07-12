@@ -28,7 +28,8 @@ class SettingsDialog:
                  "save-state", "import-playlists", "save-to-tags",
                  "show-compilations", "transitions", "transitions-party-only",
                  "recent-youtube-dl", "import-advanced-artist-tags",
-                 "force-single-column", "hd-artwork", "network-access"]
+                 "force-single-column", "hd-artwork", "network-access",
+                 "regexp-search", "case-sensitive-search"]
 
     __RANGE = ["cover-size", "transitions-duration", "max-search-results"]
 

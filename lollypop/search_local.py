@@ -18,6 +18,7 @@ from lollypop.define import App
 from lollypop.utils import noaccents, regexpr_and_valid
 
 
+
 class LocalSearch(GObject.Object):
     """
         Local search

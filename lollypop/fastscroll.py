@@ -76,7 +76,7 @@ class FastScroll(Gtk.ScrolledWindow):
             @param c as char
         """
         if c:
-            to_add = noaccents(index_of(c)).upper()
+            to_add = noaccents2(index_of(c)).upper()
             if to_add not in self.__chars:
                 self.__chars.append(to_add)
 
@@ -155,8 +155,8 @@ class FastScroll(Gtk.ScrolledWindow):
             @param start as char
             @param end as char
         """
-        start = noaccents(index_of(start)).upper()
-        end = noaccents(index_of(end)).upper()
+        start = noaccents2(index_of(start)).upper()
+        end = noaccents2(index_of(end)).upper()
         chars = sorted(self.__chars, key=strxfrm)
         start_idx = chars.index(start)
         end_idx = chars.index(end)
@@ -193,7 +193,7 @@ class FastScroll(Gtk.ScrolledWindow):
                 for child in self.__listbox.get_children():
                     if child.id < 0:
                         continue
-                    if noaccents(index_of(child.sortname))[0].upper() == char:
+                    if noaccents2(index_of(child.sortname))[0].upper() == char:
                         row = child
                         break
         if row is not None:
