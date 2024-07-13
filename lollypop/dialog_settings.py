@@ -31,7 +31,7 @@ class SettingsDialog:
                  "force-single-column", "hd-artwork", "network-access",
                  "regexp-search", "case-sensitive-search"]
 
-    __RANGE = ["cover-size", "transitions-duration", "max-search-results"]
+    __RANGE = ["cover-size", "transitions-duration", "max-search-results", "search-update-timeout"]
 
     __COMBO = ["replay-gain", "orderby"]
     __ENTRY = ["invidious-server", "cs-api-key", "listenbrainz-user-token"]

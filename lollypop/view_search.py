@@ -334,7 +334,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
         self.__timeout_id = GLib.timeout_add(
-                500,
+                App().settings.get_value("search-update-timeout").get_int32(),
                 self.__on_search_changed_timeout)
 
     def __on_search_changed_timeout(self):

@@ -394,6 +394,11 @@
             <summary>Case sensitive search</summary>
             <description></description>
         </key>
+        <key type="i" name="search-update-timeout">
+            <default>250</default>
+            <summary>Search update timeout</summary>
+            <description></description>
+        </key>
         <key enum="org.gnome.Lollypop.PowerManagement" name="power-management">
             <default>'suspend'</default>
             <summary>Possibilities for powermanagement options</summary>
