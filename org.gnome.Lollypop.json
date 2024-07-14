@@ -1,16 +1,14 @@
 {
-    "app-id": "org.gnome.Lollypop.Devel",
+    "app-id": "org.gnome.Lollypop",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "45",
     "sdk": "org.gnome.Sdk",
     "command": "lollypop",
-    "rename-desktop-file": "org.gnome.Lollypop",
     "tags" : [
         "devel",
         "development",
         "nightly"
     ],
-    "desktop-file-name-prefix" : "(Development) ",
     "finish-args": [
         "--share=ipc",
         "--share=network",
@@ -109,7 +107,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/World/lollypop.git"
+                    "url": "https://github.com/krischerven/lollypop-plus"
                 }
             ]
         }

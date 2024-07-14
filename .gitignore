@@ -72,6 +72,7 @@ portal/org.gnome.Lollypop.Portal.service
 *.pyc
 /py-compile
 /*.rej
+repo
 search-provider/lollypop-sp
 search-provider/Makefile
 search-provider/Makefile.in
