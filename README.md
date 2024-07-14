@@ -49,6 +49,11 @@ It provides:
 - `python-sqlite`
 - `beautifulsoup4`
 
+## Flatpak installation
+``` bash
+curl -L -o /tmp/lollypop-plus.flatpak https://github.com/krischerven/lollypop-plus/raw/master/lollypop.flatpak && flatpak install /tmp/lollypop-plus.flatpak
+```
+
 ## Building from Git
 
 ```bash
