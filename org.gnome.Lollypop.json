@@ -5,9 +5,7 @@
     "sdk": "org.gnome.Sdk",
     "command": "lollypop",
     "tags" : [
-        "devel",
-        "development",
-        "nightly"
+        "release"
     ],
     "finish-args": [
         "--share=ipc",
@@ -102,7 +100,7 @@
             "name": "lollypop",
             "buildsystem": "meson",
             "config-opts": [
-                "-Dprofile=development"
+                "-Dprofile=release"
             ],
             "sources": [
                 {
