@@ -57,29 +57,29 @@ curl -L -o /tmp/lollypop-plus.flatpak https://github.com/krischerven/lollypop-pl
 ## Building from Git
 
 ```bash
-$ git clone https://github.com/krischerven/lollypop-plus
-$ cd lollypop-plus
-$ meson builddir --prefix=/usr/local
+git clone https://github.com/krischerven/lollypop-plus
+cd lollypop-plus
+meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
 ### On Debian/Ubuntu
 
 ```bash
-$ git clone https://github.com/krischerven/lollypop-plus
-$ cd lollypop-plus
+git clone https://github.com/krischerven/lollypop-plus
+cd lollypop-plus
 # apt-get install meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
-$ meson builddir --prefix=/usr/local
+meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
 ### On Fedora
 
 ```bash
-$ git clone https://github.com/krischerven/lollypop-plus
-$ cd lollypop-plus
+git clone https://github.com/krischerven/lollypop-plus
+cd lollypop-plus
 # sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel libsoup-devel
-$ meson builddir --prefix=/usr/local
+meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
