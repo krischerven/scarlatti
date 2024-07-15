@@ -51,7 +51,7 @@ It provides:
 
 ## Flatpak installation
 ``` bash
-curl -s -L https://github.com/krischerven/lollypop-plus/raw/master/install-flatpak.sh | bash
+bash -c "$(curl -L https://github.com/krischerven/lollypop-plus/raw/master/install-flatpak.sh)"
 ```
 
 ## Building from Git
