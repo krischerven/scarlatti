@@ -1,4 +1,4 @@
-# Lollypop-plus music player
+# Lollypop-plus: A music player for Linux
 
 ![Lollypop logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
 
