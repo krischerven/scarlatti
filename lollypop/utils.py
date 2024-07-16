@@ -250,7 +250,7 @@ def valid_search_regexpr(regexpr):
     """
         Return True if pattern has certain regex symbols like *, ^, etc
     """
-    return any(pattern in regexpr for pattern in ["*", "^", "$", "?", "+"])
+    return any(pattern in regexpr for pattern in ["*", "^", "$", "?", "+", "|"])
 
 
 def regexpr_and_valid(pattern, str):
