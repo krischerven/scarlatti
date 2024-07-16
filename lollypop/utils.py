@@ -549,15 +549,15 @@ def profile(f):
     return wrapper
 
 
-def split_list(l, n=1):
+def split_list(li, n=1):
     """
         Split list in n parts
         @param l as []
         @param n as int
     """
-    length = len(l)
-    split = [l[i * length // n: (i + 1) * length // n] for i in range(n)]
-    return [l for l in split if l]
+    length = len(li)
+    split = [li[i * length // n: (i + 1) * length // n] for i in range(n)]
+    return [x for x in split if x]
 
 
 def max_search_results():
@@ -580,8 +580,10 @@ def case_sensitive_search_p():
     """
     return App().settings.get_value("case-sensitive-search").get_boolean()
 
+
 def search_settings_string():
     return f"{max_search_results()};{regexp_search_p()};{case_sensitive_search_p()}"
+
 
 def regexp_search_filter(filter):
     """
@@ -603,6 +605,7 @@ def regexp_search_query(query):
     else:
         return query.replace(" REGEXP ", " LIKE ")
 
+
 def noaccents(string):
     """
         Return string without accents and lowered (the latter only if not case_sensitive_search_p())
@@ -615,6 +618,7 @@ def noaccents(string):
         return v
     else:
         return v.lower()
+
 
 def noaccents2(string):
     """
