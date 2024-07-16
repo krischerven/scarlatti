@@ -78,7 +78,7 @@ meson builddir --prefix=/usr/local
 ```bash
 git clone https://github.com/krischerven/lollypop-plus
 cd lollypop-plus
-# sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel libsoup-devel
+# sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel python3-gobject-devel libsoup-devel
 meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
