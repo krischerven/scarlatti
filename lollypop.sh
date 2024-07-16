@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-meson builddir --prefix=/usr/local
+meson setup builddir --prefix=/usr/local
 sudo ninja -C builddir install
 lollypop
