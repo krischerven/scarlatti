@@ -49,7 +49,7 @@ It provides:
 - `python-sqlite`
 - `beautifulsoup4`
 
-## Flatpak installation
+## Installation (Flatpak)
 ``` bash
 bash -c "$(curl -L https://github.com/krischerven/lollypop-plus/raw/master/install-flatpak.sh)"
 ```
@@ -63,7 +63,7 @@ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
-### On Debian/Ubuntu
+### Building on Debian/Ubuntu
 
 ```bash
 git clone https://github.com/krischerven/lollypop-plus
@@ -73,12 +73,15 @@ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
-### On Fedora
+### Building on Fedora
 
 ```bash
 git clone https://github.com/krischerven/lollypop-plus
 cd lollypop-plus
 # sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel python3-gobject-devel libsoup-devel
+
+# (newer versions of Fedora)
+# sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 python3-gobject-devel libsoup3-devel totem-pl-parser libhandy python3-pillow
 meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
