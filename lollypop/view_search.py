@@ -120,6 +120,14 @@ class SearchStack(Gtk.Stack):
         return self.__current_child
 
 
+lastSearchView = None
+
+
+def getLastSearchView():
+    global lastSearchView
+    return lastSearchView
+
+
 class SearchView(View, Gtk.Bin, SignalsHelper):
     """
         View for searching albums/tracks
@@ -161,6 +169,8 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.show_placeholder(True,
                               _("Search for artists, albums and tracks"))
         self.set_search(initial_search)
+        global lastSearchView
+        lastSearchView = self
         return [
                 (self.__search, "match-artist", "_on_match_artist"),
                 (self.__search, "match-album", "_on_match_album"),
@@ -219,6 +229,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         search = self.__banner.entry.get_text().strip()
         return {"initial_search": search,
                 "view_type": self.view_type}
+
+    def on_search_changed(self):
+        self._on_search_changed(None, timeout=0)
 
 #######################
 # PROTECTED           #
@@ -326,15 +339,17 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         self.__placeholder.set_text()
 
-    def _on_search_changed(self, widget):
+    def _on_search_changed(self, widget, timeout=None):
         """
             Timeout filtering
             @param widget as Gtk.TextEntry
         """
         if self.__timeout_id is not None:
             GLib.source_remove(self.__timeout_id)
+        if timeout is None:
+            timeout = App().settings.get_value("search-update-timeout").get_int32()
         self.__timeout_id = GLib.timeout_add(
-                App().settings.get_value("search-update-timeout").get_int32(),
+                timeout,
                 self.__on_search_changed_timeout)
 
     def __on_search_changed_timeout(self):

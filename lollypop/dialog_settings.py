@@ -17,6 +17,7 @@ from gettext import gettext as _
 from lollypop.define import App, ScanType, NetworkAccessACL
 from lollypop.widgets_row_device import DeviceRow
 from lollypop.helper_passwords import PasswordsHelper
+from lollypop.view_search import getLastSearchView
 
 
 class SettingsDialog:
@@ -128,6 +129,8 @@ class SettingsDialog:
             App().window.container.reload_view()
         elif setting == "network-access":
             self.__update_locked()
+        if getLastSearchView():
+            getLastSearchView().on_search_changed()
 
     def _on_range_changed(self, widget):
         """
@@ -144,6 +147,8 @@ class SettingsDialog:
             self.__timeout_id = GLib.timeout_add(500,
                                                  self.__update_coversize,
                                                  widget)
+        if getLastSearchView():
+            getLastSearchView().on_search_changed()
 
     def _on_combo_changed(self, widget):
         """
@@ -157,6 +162,8 @@ class SettingsDialog:
             for plugin in App().player.plugins:
                 plugin.build_audiofilter()
             App().player.reload_track()
+        if getLastSearchView():
+            getLastSearchView().on_search_changed()
 
     def _on_clean_artwork_cache_clicked(self, button):
         """
