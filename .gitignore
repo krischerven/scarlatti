@@ -39,6 +39,7 @@ data/Makefile.in
 /flatpak/.flatpak-builder
 flatpak/metadata
 /flatpak/repo
+github-key
 /GPATH
 *.gresource
 /GRTAGS
