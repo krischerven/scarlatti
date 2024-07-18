@@ -68,7 +68,7 @@ meson builddir --prefix=/usr/local
 ```bash
 git clone https://github.com/krischerven/lollypop-plus
 cd lollypop-plus
-# apt-get install meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
+# apt-get install --ignore-missing meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
 meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
@@ -78,10 +78,7 @@ meson builddir --prefix=/usr/local
 ```bash
 git clone https://github.com/krischerven/lollypop-plus
 cd lollypop-plus
-# sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel python3-gobject-devel libsoup-devel
-
-# (newer versions of Fedora)
-# sudo dnf install meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 python3-gobject-devel libsoup3-devel totem-pl-parser libhandy python3-pillow
+# sudo dnf install --skip-broken meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel python3-gobject-devel libsoup3-devel totem-pl-parser libhandy python3-pillow
 meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
