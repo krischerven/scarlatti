@@ -379,11 +379,6 @@
             <summary>Applies signal compression/limiting to raw audio data</summary>
             <description>It performs strict hard limiting with soft-knee characteristics, using a threshold of -6 dB</description>
         </key>
-        <key type="i" name="max-search-results">
-            <default>25</default>
-            <summary>Max search results</summary>
-            <description></description>
-        </key>
         <key type="b" name="regexp-search">
             <default>true</default>
             <summary>Regex search</summary>
@@ -392,6 +387,11 @@
         <key type="b" name="case-sensitive-search">
             <default>false</default>
             <summary>Case sensitive search</summary>
+            <description></description>
+        </key>
+        <key type="i" name="max-search-results">
+            <default>25</default>
+            <summary>Max search results</summary>
             <description></description>
         </key>
         <key type="i" name="search-update-timeout">
