@@ -402,7 +402,7 @@ class ArtistsDatabase:
 
     def search(self, searched, storage_type):
         """
-            Search for artists looking like searched
+            Search for artists that look like [searched]
             @param searched as str without accents
             @param storage_type as StorageType
             @return artist ids as [int]

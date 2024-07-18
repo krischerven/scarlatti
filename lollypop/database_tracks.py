@@ -1041,7 +1041,7 @@ class TracksDatabase:
 
     def search(self, searched, storage_type):
         """
-            Search for tracks looking like searched
+            Search for tracks that look like [searched]
             @param searched as str without accents
             @param storage_type as StorageType
             @return [(int, name)]
@@ -1055,9 +1055,9 @@ class TracksDatabase:
             result = sql.execute(request, filters)
             return list(result)
 
-    def search_performed(self, searched, storage_type):
+    def search_artist(self, searched, storage_type):
         """
-            Search tracks looking like searched with performers
+            Search for tracks with an artist that looks like [searched]
             @param searched as str without accents
             @param storage_type as StorageType
             @return [(int, name)]
