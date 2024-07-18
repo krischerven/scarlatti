@@ -1,12 +1,12 @@
-# Lollypop-plus: A music player for Linux
+# Lollypop-plus: A modern music player for Linux
 
 ![Lollypop logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
 
-Support upstream development: https://www.patreon.com/gnumdk
+This project is a mostly-backwards-compatible fork of Lollypop, the GNOME music playing application.
+The aim of Lollypop-plus is to add new features - particularly advanced search features - missing
+from Lollypop. You can support upstream development by going to https://www.patreon.com/gnumdk
 
-This project is a fork of Lollypop, the GNOME music playing application.
-The aim of Lollypop-plus is to add new features - particularly advanced search features - missing from Lollypop.
-
+(**WIP - THESE ARE UPSTREAM LINKS**)
 - Users: https://wiki.gnome.org/Apps/Lollypop
 
 - Translators: https://hosted.weblate.org/projects/gnumdk/
@@ -32,7 +32,7 @@ It provides:
 - TuneIn support
 - **Regex search and word grouping**
 
-## Depends on
+## Dependencies
 
 - `gtk3 >= 3.20`
 - `gobject-introspection`
@@ -68,7 +68,7 @@ meson builddir --prefix=/usr/local
 ```bash
 git clone https://github.com/krischerven/lollypop-plus
 cd lollypop-plus
-# apt-get install --ignore-missing meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
+# sudo apt-get install --ignore-missing meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
 meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
