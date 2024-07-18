@@ -18,8 +18,8 @@ It provides:
 - MP3/4, Ogg and FLAC.
 - Genre/cover browsing
 - Genre/artist/cover browsing
-- Search
-- Main playlist (called queue in other apps)
+- Regex-enabled search with word-grouping
+- Queue
 - Party mode
 - ReplayGain
 - Cover art downloader
@@ -30,7 +30,6 @@ It provides:
 - Auto install codecs
 - HiDPI support
 - TuneIn support
-- **Regex search and word grouping**
 
 ## Dependencies
 
