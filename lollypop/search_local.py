@@ -98,9 +98,9 @@ class LocalSearch(GObject.Object):
         if search.startswith("\"") and search.endswith("\""):
             search = search[1:-1]
 
-        for search_str in [search] + split:
-            tracks += App().tracks.search_artist(search_str, storage_type)
+        for search_str in list(set([search] + split)):
             tracks += App().tracks.search(search_str, storage_type)
+            tracks += App().tracks.search_artist(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
         for (track_id, track_name) in tracks:
@@ -139,7 +139,7 @@ class LocalSearch(GObject.Object):
         artists = []
         artist_ids = []
         split = self.__split_string(search)
-        for search_str in [search] + split:
+        for search_str in list(set([search] + split)):
             artists += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -170,7 +170,7 @@ class LocalSearch(GObject.Object):
         albums = []
         album_ids = []
         split = self.__split_string(search)
-        for search_str in [search] + split:
+        for search_str in list(set([search] + split)):
             albums += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
