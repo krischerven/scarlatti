@@ -26,11 +26,12 @@ class SearchTracksView(TracksView, SignalsHelper):
     """
 
     @signals_map
-    def __init__(self):
+    def __init__(self, name="Tracks"):
         """
             Init view
         """
         TracksView.__init__(self, ViewType.SEARCH)
+        self.name = name
         self.__track_ids = []
         self._add_disc_container(0)
         self._tracks_widget_left[0].show()
@@ -100,7 +101,7 @@ class SearchTracksView(TracksView, SignalsHelper):
         if not TracksView._set_orientation(self, orientation):
             return
         self._responsive_widget.insert_row(0)
-        self.__label = Gtk.Label.new(_("Tracks"))
+        self.__label = Gtk.Label.new(_(self.name))
         self.__label.show()
         self.__label.set_ellipsize(Pango.EllipsizeMode.END)
         self.__label.get_style_context().add_class("dim-label")

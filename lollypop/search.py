@@ -25,6 +25,7 @@ class Search(GObject.Object):
         "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "finished": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
@@ -128,6 +129,8 @@ class Search(GObject.Object):
         """
         search.connect("match-artist",
                        lambda x, y, z: self.emit("match-artist", y, z))
+        search.connect("match-artist-track",
+                       lambda x, y, z: self.emit("match-artist-track", y, z))
         search.connect("match-album",
                        lambda x, y, z: self.emit("match-album", y, z))
         search.connect("match-track",

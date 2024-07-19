@@ -31,6 +31,7 @@ class SaveWebHelper(GObject.Object):
     __gsignals__ = {
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }

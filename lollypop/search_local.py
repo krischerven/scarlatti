@@ -27,6 +27,7 @@ class LocalSearch(GObject.Object):
         "match-artist": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "match-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -82,7 +83,7 @@ class LocalSearch(GObject.Object):
             split.append("\""+nextWord)
         return split
 
-    def __search_tracks(self, search, storage_type, cancellable):
+    def __search_tracks_generic(self, search, search_function, storage_type, cancellable):
         """
             Get tracks for search items
             @param search as str
@@ -99,8 +100,7 @@ class LocalSearch(GObject.Object):
             search = search[1:-1]
 
         for search_str in list(set([search] + split)):
-            tracks += App().tracks.search(search_str, storage_type)
-            tracks += App().tracks.search_artist(search_str, storage_type)
+            tracks += search_function(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
         for (track_id, track_name) in tracks:
@@ -127,6 +127,26 @@ class LocalSearch(GObject.Object):
                 if valid:
                     track_ids.append(track_id)
         return track_ids
+
+    def __search_tracks(self, search, storage_type, cancellable):
+        """
+            Get tracks for search items
+            @param search as str
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+            @return [int]
+        """
+        return self.__search_tracks_generic(search, App().tracks.search, storage_type, cancellable)
+
+    def __search_artist_tracks(self, search, storage_type, cancellable):
+        """
+            Get tracks for search items
+            @param search as str
+            @param storage_type as StorageType
+            @param cancellable as Gio.Cancellable
+            @return [int]
+        """
+        return self.__search_tracks_generic(search, App().tracks.search_artist, storage_type, cancellable)
 
     def __search_artists(self, search, storage_type, cancellable):
         """
@@ -212,6 +232,8 @@ class LocalSearch(GObject.Object):
         """
         self.__get_generic(self.__search_tracks(search, storage_type, cancellable),
                            storage_type, "match-track")
+        self.__get_generic(self.__search_artist_tracks(search, storage_type, cancellable),
+                           storage_type, "match-artist-track")
 
     def __get_artists(self, search, storage_type, cancellable):
         """

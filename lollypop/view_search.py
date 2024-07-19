@@ -46,9 +46,11 @@ class SearchGrid(Gtk.Grid):
         self.__artists_line_view = ArtistsSearchLineView(storage_type)
         self.__albums_line_view = AlbumsSearchLineView(storage_type)
         self.__search_tracks_view = SearchTracksView()
+        self.__search_artist_tracks_view = SearchTracksView(name="Artist tracks")
         self.add(self.__albums_line_view)
         self.add(self.__artists_line_view)
         self.add(self.__search_tracks_view)
+        self.add(self.__search_artist_tracks_view)
 
     @property
     def search_tracks_view(self):
@@ -57,6 +59,14 @@ class SearchGrid(Gtk.Grid):
             @return SearchTracksView
         """
         return self.__search_tracks_view
+
+    @property
+    def search_artist_tracks_view(self):
+        """
+            Get SearchArtistTracksView
+            @return SearchArtistTracksView
+        """
+        return self.__search_artist_tracks_view
 
     @property
     def artists_line_view(self):
@@ -102,6 +112,7 @@ class SearchStack(Gtk.Stack):
         """
         if self.__current_child is not None:
             self.__current_child.search_tracks_view.clear()
+            self.__current_child.search_artist_tracks_view.clear()
             self.__current_child.artists_line_view.clear()
             self.__current_child.albums_line_view.clear()
         for child in self.get_children():
@@ -175,6 +186,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 (self.__search, "match-artist", "_on_match_artist"),
                 (self.__search, "match-album", "_on_match_album"),
                 (self.__search, "match-track", "_on_match_track"),
+                (self.__search, "match-artist-track", "_on_match_artist_track"),
                 (self.__search, "finished", "_on_search_finished"),
                 (App().settings, "changed::web-search",
                  "_on_web_search_changed")
@@ -302,6 +314,19 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__stack.current_child.search_tracks_view.append_row(track)
             self.show_placeholder(False)
 
+    def _on_match_artist_track(self, search, track_id, storage_type):
+        """
+            Add a new artist track to view
+            @param search as *Search
+            @param track_id as int
+            @param storage_type as StorageType
+        """
+        if storage_type & StorageType.SEARCH:
+            track = Track(track_id)
+            self.__stack.current_child.search_artist_tracks_view.show()
+            self.__stack.current_child.search_artist_tracks_view.append_row(track)
+            self.show_placeholder(False)
+
     def _on_search_finished(self, search_handler, last):
         """
             Stop spinner and show placeholder if not result
@@ -310,11 +335,14 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
         tracks_len = len(
             self.__stack.current_child.search_tracks_view.children)
+        artist_tracks_len = len(
+            self.__stack.current_child.search_artist_tracks_view.children)
         albums_len = len(
             self.__stack.current_child.albums_line_view.children)
         artists_len = len(
             self.__stack.current_child.artists_line_view.children)
-        empty = albums_len == 0 and tracks_len == 0 and artists_len == 0
+        empty = tracks_len == 0 and artist_tracks_len == 0 and albums_len == 0 \
+            and artists_len == 0
         self.__stack.set_visible_child(self.__stack.current_child)
         if last:
             self.__banner.spinner.stop()
