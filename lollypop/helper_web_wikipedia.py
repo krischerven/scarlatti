@@ -114,8 +114,8 @@ class WikipediaHelper:
                                 escape(term.lower()):
                             return (locale, item["pageid"])
                         else:
-                            for word in [_("band"), _("singer"),
-                                         "band", "singer"]:
+                            for word in [_("band"), _("singer"), _("composer"), _("musician"),
+                                         "band", "singer", "composer", "musician"]:
                                 if item["snippet"].lower().find(word) != -1:
                                     return (locale, item["pageid"])
         except Exception as e:
