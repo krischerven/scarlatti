@@ -10,14 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import shutil
+
 from gi.repository import Gio, GLib
 
 from gettext import gettext as _
 from hashlib import sha256
 
-from lollypop.define import Type, App, SelectionListMask
+from lollypop.define import Type, App, SelectionListMask, ARTIST_WIKI_PATH
 from lollypop.shown import ShownLists, ShownPlaylists
 from lollypop.utils import get_icon_name
+from lollypop.utils_file import create_dir
 
 
 class SelectionListRowMenu(Gio.Menu):
@@ -36,6 +40,8 @@ class SelectionListRowMenu(Gio.Menu):
             label = ShownLists.IDS[rowid]
             icon_name = get_icon_name(rowid)
             self.append_item(MenuHeader(label, icon_name))
+
+        # Startup menu
         startup_menu = Gio.Menu()
         selected = rowid == App().settings.get_value(
             "startup-id").get_int32()
@@ -51,6 +57,24 @@ class SelectionListRowMenu(Gio.Menu):
                                 "app.default_selection_id")
         startup_menu.append_item(item)
         self.append_section(_("Startup"), startup_menu)
+
+        # Cache menu
+        label = ShownLists.IDS[rowid]
+        if label == "Information":
+            cache_menu = Gio.Menu()
+            selected = rowid == App().settings.get_value(
+                "cache-id").get_int32()
+            action = Gio.SimpleAction.new(
+                                    "default_selection_id_2",
+                                    None)
+            App().add_action(action)
+            action.connect("activate",
+                           self.__wipe_information_cache,
+                           rowid)
+            item = Gio.MenuItem.new(_("Wipe cache"),
+                                    "app.default_selection_id_2")
+            cache_menu.append_item(item)
+            self.append_section(_("Cache"), cache_menu)
 
 #######################
 # PRIVATE             #
@@ -69,6 +93,23 @@ class SelectionListRowMenu(Gio.Menu):
         else:
             App().settings.set_value("startup-id",
                                      GLib.Variant("i", -1))
+
+    def __wipe_information_cache(self, action, variant, rowid):
+        """
+            Wipe the information cache
+            @param action as Gio.SimpleAction
+            @param variant as GVariant
+            @param rowid as int
+        """
+        if os.path.exists(ARTIST_WIKI_PATH) and "/lollypop/" in ARTIST_WIKI_PATH:
+            shutil.rmtree(ARTIST_WIKI_PATH)
+            create_dir(ARTIST_WIKI_PATH)
+            App().window.container.show_notification(
+                _("Successfully wiped the information cache."), [], [])
+            GLib.timeout_add(2000, App().window.container.dismiss_notification)
+        else:
+            App().window.container.show_notification(
+                _("An error occured while trying to wipe the cache."), [], [])
 
 
 class SelectionListMenu(Gio.Menu):
@@ -110,6 +151,7 @@ class SelectionListMenu(Gio.Menu):
             App().add_action(action)
             options_menu.append(_("Show text"), "app.show_label")
             self.append_section(_("Options"), options_menu)
+
         # Shown menu
         shown_menu = Gio.Menu()
         if mask & SelectionListMask.PLAYLISTS:
@@ -133,6 +175,7 @@ class SelectionListMenu(Gio.Menu):
                            item[0])
             App().add_action(action)
             shown_menu.append(item[1], "app.%s" % encoded)
+
         # Translators: shown => items
         self.append_section(_("Sections"), shown_menu)
 

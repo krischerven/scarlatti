@@ -16,12 +16,13 @@ from gettext import gettext as _
 import re
 
 from lollypop.define import App, ViewType, MARGIN
-from lollypop.define import ARTISTS_PATH
+from lollypop.define import ARTIST_WIKI_PATH
 from lollypop.objects_album import Album
 from lollypop.information_store import InformationStore
 from lollypop.view_albums_list import AlbumsListView
 from lollypop.view import View
 from lollypop.utils import get_default_storage_type
+from lollypop.utils_file import create_dir
 from lollypop.widgets_banner_information import InformationBannerWidget
 from lollypop.helper_signals import SignalsHelper, signals_map
 
@@ -144,8 +145,9 @@ class InformationView(View, SignalsHelper):
         if not self.__minimal:
             widget.add(self.__albums_view)
         self._on_container_folded()
+        create_dir(ARTIST_WIKI_PATH)
         content = self.__information_store.get_information(self.__artist_name,
-                                                           ARTISTS_PATH)
+                                                           ARTIST_WIKI_PATH)
         if content is None:
             self.__label.set_text(_("Loading information"))
             from lollypop.information_downloader import InformationDownloader
@@ -265,7 +267,7 @@ class InformationView(View, SignalsHelper):
             App().task_helper.run(self.__to_markup, content,
                                   callback=(self.__label.set_markup,))
             self.__information_store.save_information(
-                self.__artist_name, ARTISTS_PATH, content)
+                self.__artist_name, ARTIST_WIKI_PATH, content)
 
     def __on_artist_artwork(self, surface):
         """
@@ -291,7 +293,7 @@ class InformationView(View, SignalsHelper):
             App().task_helper.run(self.__to_markup, content,
                                   callback=(self.__label.set_markup,))
             self.__information_store.save_information(self.__artist_name,
-                                                      ARTISTS_PATH,
+                                                      ARTIST_WIKI_PATH,
                                                       content)
 
     def __on_row_activated(self, listbox, row):

@@ -40,8 +40,7 @@ class InformationStore(GObject.Object, InformationDownloader):
         content = None
         try:
             encoded = md5(name.encode("utf-8")).hexdigest()
-            filepath = "%s/%s.txt" % (path, encoded)
-            f = Gio.File.new_for_path(filepath)
+            f = Gio.File.new_for_path(f"{path}/{encoded}.txt")
             if f.query_exists():
                 (status, content, tag) = f.load_contents()
         except Exception as e:
@@ -58,8 +57,7 @@ class InformationStore(GObject.Object, InformationDownloader):
         try:
             if content is not None:
                 encoded = md5(name.encode("utf-8")).hexdigest()
-                filepath = "%s/%s.txt" % (path, encoded)
-                f = Gio.File.new_for_path(filepath)
+                f = Gio.File.new_for_path(f"{path}/{encoded}.txt")
                 fstream = f.replace(None, False,
                                     Gio.FileCreateFlags.REPLACE_DESTINATION,
                                     None)

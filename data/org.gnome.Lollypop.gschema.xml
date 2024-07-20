@@ -314,6 +314,11 @@
             <summary>INTERNAL</summary>
             <description></description>
         </key>
+        <key type="i" name="cache-id">
+            <default>-2</default>
+            <summary>INTERNAL</summary>
+            <description></description>
+        </key>
         <key type="b" name="show-sidebar-labels">
             <default>true</default>
             <summary>Show labels in sidebar</summary>

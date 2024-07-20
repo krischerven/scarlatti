@@ -32,13 +32,15 @@ MARGIN_MEDIUM = 10
 MARGIN_SMALL = 5
 
 LOLLYPOP_DATA_PATH = GLib.get_user_data_dir() + "/lollypop"
-# All cache goes here
+# All cache files go here
 CACHE_PATH = GLib.get_user_cache_dir() + "/lollypop"
-# Stores for albums
+# Store for albums
 ALBUMS_PATH = LOLLYPOP_DATA_PATH + "/albums"
 ALBUMS_WEB_PATH = LOLLYPOP_DATA_PATH + "/albums_web"
-# Stores for artists
+# Store for artists
 ARTISTS_PATH = LOLLYPOP_DATA_PATH + "/artists"
+# Store for wikipedia
+ARTIST_WIKI_PATH = LOLLYPOP_DATA_PATH + "/wiki"
 # Store for lyrics
 LYRICS_PATH = LOLLYPOP_DATA_PATH + "/lyrics"
 
