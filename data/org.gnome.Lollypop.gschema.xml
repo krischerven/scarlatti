@@ -325,7 +325,7 @@
             <description></description>
         </key>
         <key type="b" name="transitions">
-            <default>true</default>
+            <default>false</default>
             <summary>Smooth track transitions</summary>
             <description></description>
         </key>
