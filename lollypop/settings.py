@@ -34,6 +34,13 @@ class Settings(Gio.Settings):
         settings.__class__ = Settings
         return settings
 
+    def reset_all_settings(settings):
+        """
+            Reset all settings to defaults.
+        """
+        for key in settings.list_keys():
+            settings.reset(key)
+
     def get_music_uris(self):
         """
             Return music uris
