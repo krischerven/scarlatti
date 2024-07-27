@@ -16,8 +16,8 @@ from collections import Counter
 
 from lollypop.define import App
 
-from lollypop.utils import noaccents, search_synonyms
-from lollypop.utils import word_case_type, case_sensitive_search_p, regexpr_and_valid
+from lollypop.utils import noaccents, search_synonyms, word_case_type
+from lollypop.utils import case_sensitive_search_p, unique, regexpr_and_valid
 
 
 class LocalSearch(GObject.Object):
@@ -108,7 +108,7 @@ class LocalSearch(GObject.Object):
             search2 = " ".join(words2)
             if search2 != search:
                 li += self.__synonymic_search_strings(search2, synonyms, words)
-        return list(set(li))
+        return unique(li)
 
     def __search_tracks_generic(self, search, search_function, storage_type, cancellable):
         """
@@ -126,7 +126,7 @@ class LocalSearch(GObject.Object):
         if search.startswith("\"") and search.endswith("\""):
             search = search[1:-1]
 
-        for search_str in list(set([search] + split)):
+        for search_str in unique([search] + split):
             tracks += search_function(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -186,7 +186,7 @@ class LocalSearch(GObject.Object):
         artists = []
         artist_ids = []
         split = self.__split_string(search)
-        for search_str in list(set([search] + split)):
+        for search_str in unique([search] + split):
             artists += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -217,7 +217,7 @@ class LocalSearch(GObject.Object):
         albums = []
         album_ids = []
         split = self.__split_string(search)
-        for search_str in list(set([search] + split)):
+        for search_str in unique([search] + split):
             albums += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break

@@ -30,6 +30,15 @@ from lollypop.shown import ShownLists
 from lollypop.utils_file import create_file_with_content_if_not_exists
 
 
+def unique(li):
+    """
+        Return a list containing only the unique items in <li>
+        @param li as list
+        @return list
+    """
+    return list(set(li))
+
+
 def make_subrequest(value, operand, count):
     """
         Make a subrequest for value and operand
@@ -191,6 +200,13 @@ def init_proxy_from_gnome():
     except Exception as e:
         Logger.warning("set_proxy_from_gnome(): %s", e)
     return (None, None)
+
+
+def debug_separator():
+    """
+        Print a debug separator string."
+    """
+    print("-".repeat(10))
 
 
 def debug(str):

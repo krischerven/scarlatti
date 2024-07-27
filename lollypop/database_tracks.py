@@ -17,7 +17,7 @@ import itertools
 from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, StorageType, Type, LovedFlags
 from lollypop.utils import noaccents, make_subrequest, max_search_results
-from lollypop.utils import regexp_search_filter, regexp_search_query
+from lollypop.utils import regexp_search_filter, regexp_search_query, unique
 
 
 class TracksDatabase:
@@ -674,7 +674,7 @@ class TracksDatabase:
                 request += " ORDER BY popularity DESC LIMIT ?"
                 result = sql.execute(request, filters)
                 track_ids += list(itertools.chain(*result))
-            return list(set(track_ids))
+            return unique(track_ids)
 
     def get_higher_popularity(self):
         """

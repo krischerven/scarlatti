@@ -18,7 +18,7 @@ from lollypop.sqlcursor import SqlCursor
 from lollypop.define import App, Type, OrderBy, StorageType, LovedFlags
 from lollypop.logger import Logger
 from lollypop.utils import remove_static, make_subrequest, max_search_results
-from lollypop.utils import regexp_search_filter, regexp_search_query
+from lollypop.utils import regexp_search_filter, regexp_search_query, unique
 
 
 class AlbumsDatabase:
@@ -881,7 +881,7 @@ class AlbumsDatabase:
                                                     genre_id,
                                                     skipped,
                                                     diff)
-        album_ids = list(set(album_ids))
+        album_ids = unique(album_ids)
         # We need to shuffle again as set() sort has sorted ids
         shuffle(album_ids)
         return album_ids
