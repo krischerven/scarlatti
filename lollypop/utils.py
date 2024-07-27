@@ -25,8 +25,9 @@ from functools import wraps
 
 from lollypop.logger import Logger
 from lollypop.define import App, Type, NetworkAccessACL
-from lollypop.define import StorageType
+from lollypop.define import StorageType, SEARCH_SYNONYM_PATH
 from lollypop.shown import ShownLists
+from lollypop.utils_file import create_file_with_content_if_not_exists
 
 
 def make_subrequest(value, operand, count):
@@ -629,3 +630,58 @@ def noaccents2(string):
     nfkd_form = unicodedata.normalize("NFKD", string)
     v = u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
     return v.lower()
+
+
+def word_case_type(old_word, new_word, return_old_word=False):
+    """
+        Return <new_word> with the same case type as <old_word>, or <new_word>
+        if <old_word> does not have a case type.
+
+        Valid case types are:
+            lowercase
+            UPPERCASE
+            Capitalcase
+
+        @param new_word as str
+        @param old_word as str
+        @return str
+    """
+    if old_word.islower():
+        return new_word.lower()
+    elif old_word.isupper():
+        return new_word.upper()
+    elif old_word[0].isupper() and old_word[1:].islower():
+        return new_word.capitalize()
+    else:
+        if return_old_word:
+            return old_word
+        return new_word
+
+
+def search_synonyms():
+    """
+        Return a list of words that are synonym pairs.
+        @return [[str, str]]
+    """
+    create_file_with_content_if_not_exists(SEARCH_SYNONYM_PATH,
+                                           f"""# {SEARCH_SYNONYM_PATH}
+# - Comments in this file begin with a #
+# - The syntax of other lines is 'word synonym' or 'word synonym synonym' (without the single quotes)
+# - An arbitrary number of synonyms may be listed, separated by spaces. Extra whitespace is ignored. Words and synonyms are NOT case-sensitive.
+# - The following line is a working example that maps 'Sonate' to 'Sonata' and 'Sonatina'
+# sonate sonata sonatina
+""")
+
+    synonyms = []
+    for line in open(SEARCH_SYNONYM_PATH, "r").readlines():
+        line = line.strip()
+        if line.startswith("#"):
+            continue
+        if line == "":
+            continue
+        words = line.split(" ")
+        if len(words) > 1:
+            word1 = words[0]
+            for word in words[1:]:
+                synonyms.append([word1.lower(), word.strip().lower()])
+    return synonyms

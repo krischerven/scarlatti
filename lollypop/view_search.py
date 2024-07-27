@@ -16,6 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
+from lollypop.define import SEARCH_SYNONYM_PATH
 from lollypop.search import Search
 from lollypop.view import View
 from lollypop.utils import sql_escape, case_sensitive_search_p, search_settings_string
@@ -27,6 +28,11 @@ from lollypop.view_albums_line import AlbumsSearchLineView
 from lollypop.view_tracks_search import SearchTracksView
 from lollypop.widgets_banner_search import SearchBannerWidget
 
+from hashlib import md5
+from threading import Thread
+
+import os
+import time
 
 class SearchGrid(Gtk.Grid):
     """
@@ -138,6 +144,8 @@ def getLastSearchView():
     global lastSearchView
     return lastSearchView
 
+searchUpdateDaemonThread = None
+
 
 class SearchView(View, Gtk.Bin, SignalsHelper):
     """
@@ -182,6 +190,11 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         self.set_search(initial_search)
         global lastSearchView
         lastSearchView = self
+        global searchUpdateDaemonThread
+        if searchUpdateDaemonThread == None:
+            searchUpdateDaemonThread = Thread(target=self.search_update_daemon)
+            searchUpdateDaemonThread.daemon = True
+            searchUpdateDaemonThread.start()
         return [
                 (self.__search, "match-artist", "_on_match_artist"),
                 (self.__search, "match-album", "_on_match_album"),
@@ -191,6 +204,21 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 (App().settings, "changed::web-search",
                  "_on_web_search_changed")
         ]
+
+    def search_update_daemon(self):
+        """
+            Run a background process for special search updates.
+        """
+        last_synonym_file_hash = None
+        while True:
+            timeout = App().settings.get_value("search-update-timeout").get_int32()
+            time.sleep(timeout/1000)
+            md5sum = None
+            if os.path.exists(SEARCH_SYNONYM_PATH):
+                md5sum = md5(open(SEARCH_SYNONYM_PATH).read().encode()).hexdigest()
+            if md5sum != last_synonym_file_hash:
+                self.populate()
+            last_synonym_file_hash = md5sum
 
     def populate(self):
         """

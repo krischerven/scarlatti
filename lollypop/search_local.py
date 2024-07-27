@@ -15,8 +15,9 @@ from gi.repository import GObject, GLib
 from collections import Counter
 
 from lollypop.define import App
-from lollypop.utils import noaccents, regexpr_and_valid
 
+from lollypop.utils import noaccents, search_synonyms
+from lollypop.utils import word_case_type, case_sensitive_search_p, regexpr_and_valid
 
 
 class LocalSearch(GObject.Object):
@@ -82,6 +83,32 @@ class LocalSearch(GObject.Object):
         if nextWord != "":
             split.append("\""+nextWord)
         return split
+
+    def __synonymic_search_strings(self, search, synonyms=None, original_words=[]):
+        """
+            Return a list of all possible search strings, based on search_synonyms()
+            @param search as str
+            @return [string]
+        """
+
+        li = [search]
+        words = search.split(" ")
+        owords = [w.lower() for w in original_words]
+        synonyms = synonyms or search_synonyms()
+
+        # If we map sonata => sonate, we don't want to then map sonate => sonata
+        # as it will create an infinite recursion
+        for kv in [w for w in synonyms if w[1].lower() not in owords]:
+            words2 = []
+            for word in words:
+                if word.lower() == kv[0]:
+                    words2.append(word_case_type(word, kv[1], case_sensitive_search_p()))
+                else:
+                    words2.append(word)
+            search2 = " ".join(words2)
+            if search2 != search:
+                li += self.__synonymic_search_strings(search2, synonyms, words)
+        return list(set(li))
 
     def __search_tracks_generic(self, search, search_function, storage_type, cancellable):
         """
@@ -218,6 +245,7 @@ class LocalSearch(GObject.Object):
             @param cancellable as Gio.Cancellable
         """
         counter = Counter(ids)
+        # Remove duplicates
         ids = sorted(ids, key=lambda x: (counter[x], x), reverse=True)
         ids = list(dict.fromkeys(ids))
         for id in ids:
@@ -230,10 +258,11 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        self.__get_generic(self.__search_tracks(search, storage_type, cancellable),
-                           storage_type, "match-track")
-        self.__get_generic(self.__search_artist_tracks(search, storage_type, cancellable),
-                           storage_type, "match-artist-track")
+        for search in self.__synonymic_search_strings(search):
+            self.__get_generic(self.__search_tracks(search, storage_type, cancellable),
+                               storage_type, "match-track")
+            self.__get_generic(self.__search_artist_tracks(search, storage_type, cancellable),
+                               storage_type, "match-artist-track")
 
     def __get_artists(self, search, storage_type, cancellable):
         """
@@ -242,8 +271,9 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        self.__get_generic(self.__search_artists(search, storage_type, cancellable),
-                           storage_type, "match-artist")
+        for search in self.__synonymic_search_strings(search):
+            self.__get_generic(self.__search_artists(search, storage_type, cancellable),
+                               storage_type, "match-artist")
 
     def __get_albums(self, search, storage_type, cancellable):
         """
@@ -252,5 +282,6 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
-        self.__get_generic(self.__search_albums(search, storage_type, cancellable),
-                           storage_type, "match-album")
+        for search in self.__synonymic_search_strings(search):
+            self.__get_generic(self.__search_albums(search, storage_type, cancellable),
+                               storage_type, "match-album")

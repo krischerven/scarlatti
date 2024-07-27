@@ -18,6 +18,8 @@ from gi.repository import Gio, GLib
 
 App = Gio.Application.get_default
 
+BUG_REPORT_URL = "https://github.com/krischerven/lollypop-plus/issues"
+
 LASTFM_API_KEY = "7a9619a850ccf7377c46cf233c51e3c6"
 LASTFM_API_SECRET = "9254319364d73bec6c59ace485a95c98"
 
@@ -43,6 +45,8 @@ ARTISTS_PATH = LOLLYPOP_DATA_PATH + "/artists"
 ARTIST_WIKI_PATH = LOLLYPOP_DATA_PATH + "/wiki"
 # Store for lyrics
 LYRICS_PATH = LOLLYPOP_DATA_PATH + "/lyrics"
+# Store for search synonyms
+SEARCH_SYNONYM_PATH = LOLLYPOP_DATA_PATH + "/search_synonyms.txt"
 
 
 class TimeStamp:

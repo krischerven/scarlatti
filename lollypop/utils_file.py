@@ -18,6 +18,8 @@ from time import time
 from lollypop.logger import Logger
 from lollypop.define import App, FileType
 
+import os
+
 
 def get_file_type(uri):
     """
@@ -151,6 +153,27 @@ def create_dir(path):
             d.make_directory_with_parents()
         except:
             Logger.info("Can't create %s" % path)
+
+
+def create_file_if_not_exists(path):
+    """
+        Create a file, unless it exists already
+        @param path as str
+    """
+    if not os.path.exists(path):
+        open(path, "w").close()
+
+
+def create_file_with_content_if_not_exists(path, content):
+    """
+        Create a file containing <content>, unless it exists already
+        @param path as str
+        @param content as str
+    """
+    if not os.path.exists(path):
+        with open(path, "w") as file:
+            file.write(content)
+            file.close()
 
 
 def install_youtube_dl():
