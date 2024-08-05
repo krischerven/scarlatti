@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
-from lollypop.define import SEARCH_SYNONYM_PATH
+from lollypop.define import SEARCH_SYNONYM_PATH, SEARCH_TYPO_PATH
 from lollypop.search import Search
 from lollypop.view import View
 from lollypop.utils import sql_escape, case_sensitive_search_p, search_settings_string
@@ -209,16 +209,17 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Run a background process for special search updates.
         """
-        last_synonym_file_hash = None
+        last_file_hash = {SEARCH_SYNONYM_PATH: None, SEARCH_TYPO_PATH: None}
         while True:
             timeout = App().settings.get_value("search-update-timeout").get_int32()
             time.sleep(timeout/1000)
-            md5sum = None
-            if os.path.exists(SEARCH_SYNONYM_PATH):
-                md5sum = md5(open(SEARCH_SYNONYM_PATH).read().encode()).hexdigest()
-            if md5sum != last_synonym_file_hash:
-                self.populate()
-            last_synonym_file_hash = md5sum
+            for file, hash in last_file_hash.items():
+                md5sum = None
+                if os.path.exists(file):
+                    md5sum = md5(open(file).read().encode()).hexdigest()
+                if md5sum != hash:
+                    self.populate()
+                last_file_hash[file] = md5sum
 
     def populate(self):
         """

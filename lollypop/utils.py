@@ -17,6 +17,7 @@ from gettext import gettext as _
 from urllib.parse import urlparse
 import unicodedata
 import cairo
+import subprocess
 import time
 import re
 from hashlib import md5
@@ -24,8 +25,8 @@ from threading import current_thread
 from functools import wraps
 
 from lollypop.logger import Logger
-from lollypop.define import App, Type, NetworkAccessACL
-from lollypop.define import StorageType, SEARCH_SYNONYM_PATH
+from lollypop.define import App, Type, NetworkAccessACL, BUG_REPORT_URL
+from lollypop.define import StorageType, SEARCH_SYNONYM_PATH, SEARCH_TYPO_PATH
 from lollypop.shown import ShownLists
 from lollypop.utils_file import create_file_with_content_if_not_exists
 
@@ -577,6 +578,27 @@ def split_list(li, n=1):
     return [x for x in split if x]
 
 
+def open_in_text_editor(filepath):
+    """
+        Open <filepath> for editing in the default text editor
+    """
+    editors = ["xdg-open", "gedit", "kate", "kwrite", "leafpad", "mousepad", "nano", "vim", "vi"]
+
+    def editor_is_available(editor):
+        return subprocess.call(["which", editor],
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL) == 0
+
+    for editor in editors:
+        if editor_is_available(editor):
+            subprocess.Popen([editor, filepath])
+            return
+
+    App().window.container.show_notification(
+        _(f"Failed to find a suitable text editor. Please open a bug report at {BUG_REPORT_URL}"),
+        [], [])
+
+
 def max_search_results():
     """
         Return maximum # of search results based on settings
@@ -701,3 +723,31 @@ def search_synonyms():
             for word in words[1:]:
                 synonyms.append([word1.lower(), word.strip().lower()])
     return synonyms
+
+
+def search_typos():
+    """
+        Return a list of words that are typo pairs.
+        @return [[str, str]]
+    """
+    create_file_with_content_if_not_exists(SEARCH_TYPO_PATH,
+                                           f"""# {SEARCH_TYPO_PATH}
+# - Comments in this file begin with a #
+# - The syntax of other lines is 'typo correct_spelling' (without the single quotes)
+# - Extra whitespace is ignored. Lines are NOT case-sensitive.
+# - The following line is a working example that corrects 'Scarlati' to 'Scarlatti'
+# scarlati scarlatti
+""")
+
+    typos = []
+    for line in open(SEARCH_TYPO_PATH, "r").readlines():
+        line = line.strip()
+        if line.startswith("#"):
+            continue
+        if line == "":
+            continue
+        words = line.split(" ")
+        if len(words) > 1:
+            # Ignore extra words
+            typos.append([words[0].lower(), words[1].strip().lower()])
+    return typos

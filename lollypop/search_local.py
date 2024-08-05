@@ -16,7 +16,7 @@ from collections import Counter
 
 from lollypop.define import App
 
-from lollypop.utils import noaccents, search_synonyms, word_case_type
+from lollypop.utils import noaccents, search_synonyms, search_typos, word_case_type
 from lollypop.utils import case_sensitive_search_p, unique, regexpr_and_valid
 
 
@@ -91,8 +91,23 @@ class LocalSearch(GObject.Object):
             @return [string]
         """
 
-        li = [search]
         words = search.split(" ")
+
+        # First iteration: Fix typos
+        if synonyms is None:
+            words1 = []
+            typos = search_typos()
+            typo_keys = [w[0] for w in typos]
+            typo_dict = dict(typos)
+            for word in words:
+                if word.lower() in typo_keys:
+                    words1.append(word_case_type(word, typo_dict[word.lower()],
+                                                 case_sensitive_search_p()))
+                else:
+                    words1.append(word)
+            words = words1
+
+        li = [" ".join(words)]
         owords = [w.lower() for w in original_words]
         synonyms = synonyms or search_synonyms()
 
@@ -108,6 +123,7 @@ class LocalSearch(GObject.Object):
             search2 = " ".join(words2)
             if search2 != search:
                 li += self.__synonymic_search_strings(search2, synonyms, words)
+
         return unique(li)
 
     def __search_tracks_generic(self, search, search_function, storage_type, cancellable):
