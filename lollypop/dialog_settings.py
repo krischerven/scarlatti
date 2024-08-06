@@ -15,7 +15,7 @@ from gi.repository import Gtk, GLib, Gdk, Handy
 from gettext import gettext as _
 
 from lollypop.define import App, NetworkAccessACL, ScanType
-from lollypop.define import SEARCH_SYNONYM_PATH, SEARCH_TYPO_PATH
+from lollypop.define import SEARCH_SYNONYMS_PATH, SEARCH_TYPOS_PATH
 from lollypop.widgets_row_device import DeviceRow
 from lollypop.helper_passwords import PasswordsHelper
 from lollypop.utils import open_in_text_editor
@@ -197,14 +197,14 @@ class SettingsDialog:
             Open the search synonyms file for editing in the default text editor
             @param button as Gtk.Button
         """
-        open_in_text_editor(SEARCH_SYNONYM_PATH)
+        open_in_text_editor(SEARCH_SYNONYMS_PATH)
 
     def _on_edit_search_typos_button_clicked(self, button):
         """
             Open the search typos file for editing in the default text editor
             @param button as Gtk.Button
         """
-        open_in_text_editor(SEARCH_TYPO_PATH)
+        open_in_text_editor(SEARCH_TYPOS_PATH)
 
     def _on_connect_button_clicked(self, button):
         """

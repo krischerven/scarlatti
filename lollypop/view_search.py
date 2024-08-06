@@ -16,7 +16,7 @@ from gettext import gettext as _
 
 from lollypop.define import App, StorageType
 from lollypop.define import ViewType, MARGIN
-from lollypop.define import SEARCH_SYNONYM_PATH, SEARCH_TYPO_PATH
+from lollypop.define import SEARCH_SYNONYMS_PATH, SEARCH_TYPOS_PATH
 from lollypop.search import Search
 from lollypop.view import View
 from lollypop.utils import sql_escape, case_sensitive_search_p, search_settings_string
@@ -209,7 +209,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         """
             Run a background process for special search updates.
         """
-        last_file_hash = {SEARCH_SYNONYM_PATH: None, SEARCH_TYPO_PATH: None}
+        last_file_hash = {SEARCH_SYNONYMS_PATH: None, SEARCH_TYPOS_PATH: None}
         while True:
             timeout = App().settings.get_value("search-update-timeout").get_int32()
             time.sleep(timeout/1000)

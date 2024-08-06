@@ -26,7 +26,7 @@ from functools import wraps
 
 from lollypop.logger import Logger
 from lollypop.define import App, Type, NetworkAccessACL, BUG_REPORT_URL
-from lollypop.define import StorageType, SEARCH_SYNONYM_PATH, SEARCH_TYPO_PATH
+from lollypop.define import StorageType, SEARCH_SYNONYMS_PATH, SEARCH_TYPOS_PATH
 from lollypop.shown import ShownLists
 from lollypop.utils_file import create_file_with_content_if_not_exists
 
@@ -701,8 +701,8 @@ def search_synonyms():
         Return a list of words that are synonym pairs.
         @return [[str, str]]
     """
-    create_file_with_content_if_not_exists(SEARCH_SYNONYM_PATH,
-                                           f"""# {SEARCH_SYNONYM_PATH}
+    create_file_with_content_if_not_exists(SEARCH_SYNONYMS_PATH,
+                                           f"""# {SEARCH_SYNONYMS_PATH}
 # - Comments in this file begin with a #
 # - The syntax of other lines is 'word synonym' or 'word synonym synonym' (without the single quotes)
 # - An arbitrary number of synonyms may be listed, separated by spaces. Extra whitespace is ignored. Words and synonyms are NOT case-sensitive.
@@ -711,7 +711,7 @@ def search_synonyms():
 """)
 
     synonyms = []
-    for line in open(SEARCH_SYNONYM_PATH, "r").readlines():
+    for line in open(SEARCH_SYNONYMS_PATH, "r").readlines():
         line = line.strip()
         if line.startswith("#"):
             continue
@@ -730,8 +730,8 @@ def search_typos():
         Return a list of words that are typo pairs.
         @return [[str, str]]
     """
-    create_file_with_content_if_not_exists(SEARCH_TYPO_PATH,
-                                           f"""# {SEARCH_TYPO_PATH}
+    create_file_with_content_if_not_exists(SEARCH_TYPOS_PATH,
+                                           f"""# {SEARCH_TYPOS_PATH}
 # - Comments in this file begin with a #
 # - The syntax of other lines is 'typo correct_spelling' (without the single quotes)
 # - Extra whitespace is ignored. Lines are NOT case-sensitive.
@@ -740,7 +740,7 @@ def search_typos():
 """)
 
     typos = []
-    for line in open(SEARCH_TYPO_PATH, "r").readlines():
+    for line in open(SEARCH_TYPOS_PATH, "r").readlines():
         line = line.strip()
         if line.startswith("#"):
             continue
