@@ -37,7 +37,7 @@ def unique(li):
         @param li as list
         @return list
     """
-    return list(set(li))
+    return list(dict.fromkeys(li))
 
 
 def make_subrequest(value, operand, count):
