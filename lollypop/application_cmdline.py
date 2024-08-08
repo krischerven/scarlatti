@@ -49,10 +49,10 @@ class ApplicationCmdline:
                              GLib.OptionArg.NONE, "Stop playback",
                              None)
         self.add_main_option("next", b"n", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Go to next track",
+                             GLib.OptionArg.NONE, "Go to the next track",
                              None)
         self.add_main_option("prev", b"p", GLib.OptionFlags.NONE,
-                             GLib.OptionArg.NONE, "Go to prev track",
+                             GLib.OptionArg.NONE, "Go to the previous track",
                              None)
         self.add_main_option("emulate-phone", b"e", GLib.OptionFlags.NONE,
                              GLib.OptionArg.NONE,
@@ -60,7 +60,7 @@ class ApplicationCmdline:
                              None)
         self.add_main_option("version", b"v", GLib.OptionFlags.NONE,
                              GLib.OptionArg.NONE,
-                             "Lollypop version",
+                             "Display Lollypop version",
                              None)
         self.connect("command-line", self.__on_command_line)
         self.connect("handle-local-options", self.__on_handle_local_options)
