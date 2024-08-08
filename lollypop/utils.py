@@ -703,10 +703,17 @@ def search_synonyms():
     """
     create_file_with_content_if_not_exists(SEARCH_SYNONYMS_PATH,
                                            f"""# {SEARCH_SYNONYMS_PATH}
+
+# This file is a list of word/synonym pairs. When you type a word in the first column,
+# Lollypop will automatically search for the words in the second column, third, etc, column,
+# in addition to the original word.
+
 # - Comments in this file begin with a #
-# - The syntax of other lines is 'word synonym' or 'word synonym synonym' (without the single quotes)
-# - An arbitrary number of synonyms may be listed, separated by spaces. Extra whitespace is ignored. Words and synonyms are NOT case-sensitive.
-# - The following line is a working example that maps 'Sonate' to 'Sonata' and 'Sonatina'
+# - The syntax of all other lines is 'word synonym synonym' (without the single quotes)
+# - An arbitrary number of synonyms may be listed, separated by spaces.
+# - Extra whitespace is ignored. Words and synonyms are NOT case-sensitive.
+# - The following line is an example that maps 'Sonate' to 'Sonata' and 'Sonatina'
+
 # sonate sonata sonatina
 """)
 
@@ -732,10 +739,15 @@ def search_typos():
     """
     create_file_with_content_if_not_exists(SEARCH_TYPOS_PATH,
                                            f"""# {SEARCH_TYPOS_PATH}
+
+# This file is a list of typo/word pairs. When you type a mispelled word in the first column,
+# Lollypop will automatically change it to the correct spelling in the second column.
+
 # - Comments in this file begin with a #
-# - The syntax of other lines is 'typo correct_spelling' (without the single quotes)
+# - The syntax of all other lines is 'typo correct_spelling' (without the single quotes)
 # - Extra whitespace is ignored. Lines are NOT case-sensitive.
 # - The following line is a working example that corrects 'Scarlati' to 'Scarlatti'
+
 # scarlati scarlatti
 """)
 
