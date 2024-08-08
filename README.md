@@ -18,7 +18,8 @@ It provides:
 - MP3/4, Ogg and FLAC.
 - Genre/cover browsing
 - Genre/artist/cover browsing
-- Regex-enabled search with word-grouping
+- Regex search with word-grouping
+- Search synonyms/typos
 - Queue
 - Party mode
 - ReplayGain
