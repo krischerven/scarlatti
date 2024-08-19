@@ -1,4 +1,4 @@
-rm -fr /usr/local/lib/python3.*/site-packages/lollypop/
+rm -fr /usr/local/lib/python3.*/site-packages/scarlatti/
 sudo ninja -C local install
 reset
-lollypop -e "$@"
+scarlatti -e "$@"

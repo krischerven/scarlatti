@@ -4,7 +4,7 @@ function generate_resource()
 {
     echo '<?xml version="1.0" encoding="UTF-8"?>'
     echo '<gresources>'
-    echo '  <gresource prefix="/org/gnome/Lollypop">'
+    echo '  <gresource prefix="/org/scarlatti/Scarlatti">'
     for file in data/*.css
     do
         echo -n '    <file compressed="true">'
@@ -24,21 +24,20 @@ function generate_resource()
 function generate_po()
 {
     cd po
-    git pull https://hosted.weblate.org/git/gnumdk/lollypop
-    >lollypop.pot
-    for file in ../data/org.gnome.Lollypop.gschema.xml ../data/*.in ../data/*.ui ../lollypop/*.py
+    git pull https://github.com/krischerven/scarlatti-translations > scarlatti.pot
+    for file in ../data/org.scarlatti.Scarlatti.gschema.xml ../data/*.in ../data/*.ui ../scarlatti/*.py
     do
-        xgettext --from-code=UTF-8 -j $file -o lollypop.pot
+        xgettext --from-code=UTF-8 -j $file -o scarlatti.pot
     done
     >LINGUAS
     for po in *.po
     do
-        msgmerge -N $po lollypop.pot > /tmp/$$language_new.po
+        msgmerge -N $po scarlatti.pot > /tmp/$$language_new.po
         mv /tmp/$$language_new.po $po
         language=${po%.po}
         echo $language >>LINGUAS
     done
 }
 
-generate_resource > data/lollypop.gresource.xml
+generate_resource > data/scarlatti.gresource.xml
 generate_po

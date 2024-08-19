@@ -635,7 +635,7 @@ and with different artists</property>
           <object class="HdyPreferencesGroup" id="device_group">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="description" translatable="yes">Remove devices managed by Lollypop</property>
+            <property name="description" translatable="yes">Remove devices managed by Scarlatti</property>
             <property name="title" translatable="yes">Devices</property>
             <child>
               <placeholder/>

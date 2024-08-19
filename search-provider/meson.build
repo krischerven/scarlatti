@@ -3,8 +3,8 @@ serarch_provider_dir = join_paths(get_option('datadir'), 'gnome-shell', 'search-
 
 
 configure_file(
-  input: 'lollypop-sp.in',
-  output: 'lollypop-sp',
+  input: 'scarlatti-sp.in',
+  output: 'scarlatti-sp',
   configuration: conf,
   install_dir: LIBEXEC_DIR
 )
@@ -15,6 +15,6 @@ configure_file(
   install_dir: service_dir
 )
 install_data(
-  'org.gnome.Lollypop.SearchProvider.ini',
+  'org.scarlatti.Scarlatti.SearchProvider.ini',
   install_dir: serarch_provider_dir
 )

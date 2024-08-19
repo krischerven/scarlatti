@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.gnome.Lollypop.SearchProvider
-Exec=@libexecdir@/lollypop-sp

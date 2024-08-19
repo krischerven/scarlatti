@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-curl -L -o /tmp/lollypop-plus.flatpak https://github.com/krischerven/lollypop-plus/raw/master/lollypop.flatpak
-flatpak install /tmp/lollypop-plus.flatpak
+curl -L -o /tmp/scarlatti.flatpak https://github.com/krischerven/scarlatti/raw/master/scarlatti.flatpak
+flatpak install /tmp/scarlatti.flatpak

@@ -18,10 +18,10 @@ import socketserver
 import threading
 import os
 
-from lollypop.define import Lp, Type
-from lollypop.objects import Track
-from lollypop.database_mpd import MpdDatabase
-from lollypop.utils import get_ip
+from scarlatti.define import Lp, Type
+from scarlatti.objects import Track
+from scarlatti.database_mpd import MpdDatabase
+from scarlatti.utils import get_ip
 
 
 class MpdHandler(socketserver.StreamRequestHandler):
@@ -179,7 +179,7 @@ class MpdHandler(socketserver.StreamRequestHandler):
 
     def _count(self, cmd_args):
         """
-            Send lollypop current song
+            Send scarlatti current song
             @syntax count tag
             @param args as str
             @return msg as str
@@ -221,7 +221,7 @@ class MpdHandler(socketserver.StreamRequestHandler):
 
     def _currentsong(self, cmd_args):
         """
-            Send lollypop current song
+            Send scarlatti current song
             @syntax currentsong
             @param args as str
 
@@ -901,7 +901,7 @@ class MpdHandler(socketserver.StreamRequestHandler):
 
     def _random(self, cmd_args):
         """
-            Set player random, as MPD can't handle all lollypop random modes,
+            Set player random, as MPD can't handle all scarlatti random modes,
             set party mode
             @syntax random [1|0]
             @param args as str
@@ -1027,7 +1027,7 @@ class MpdHandler(socketserver.StreamRequestHandler):
 
     def _status(self, cmd_args):
         """
-            Send lollypop status
+            Send scarlatti status
             @syntax status
             @param args as str
             @return msg as str

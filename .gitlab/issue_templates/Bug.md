@@ -1,5 +1,5 @@
 ### Environment
-- Lollypop version: 
+- Scarlatti version:
 - GTK+ version:
 - Operating system:
 

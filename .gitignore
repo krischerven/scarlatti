@@ -27,7 +27,7 @@ credentials.org
 /data/AboutDialog.ui
 data/Makefile
 data/Makefile.in
-/data/org.gnome.Lollypop.appdata.xml
+/data/org.scarlatti.Scarlatti.appdata.xml
 /depcomp
 /.deps
 *.desktop
@@ -56,7 +56,7 @@ github-key
 /libtool
 /*.lo
 /local
-/lollypop-cli
+/scarlatti-cli
 /ltmain.sh
 /m4
 /Makefile
@@ -66,18 +66,18 @@ github-key
 /*.o
 /*.orig
 /po
-portal/lollypop-portal
+portal/scarlatti-portal
 portal/Makefile
 portal/Makefile.in
-portal/org.gnome.Lollypop.Portal.service
+portal/org.scarlatti.Scarlatti.Portal.service
 *.pyc
 /py-compile
 /*.rej
 repo
-search-provider/lollypop-sp
+search-provider/scarlatti-sp
 search-provider/Makefile
 search-provider/Makefile.in
-search-provider/org.gnome.Lollypop.SearchProvider.service
+search-provider/org.scarlatti.Scarlatti.SearchProvider.service
 /so_locations
 /src/Makefile
 /src/Makefile.in
@@ -90,5 +90,6 @@ search-provider/org.gnome.Lollypop.SearchProvider.service
 /TAGS
 *.tar.xz
 todo.org
+scarlatti/todo.org
 *.valid
 .vscode/

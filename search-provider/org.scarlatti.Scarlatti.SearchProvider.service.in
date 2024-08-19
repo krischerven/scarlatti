@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.scarlatti.Scarlatti.SearchProvider
+Exec=@libexecdir@/scarlatti-sp

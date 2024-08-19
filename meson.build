@@ -1,4 +1,4 @@
-project('lollypop',
+project('scarlatti',
   version: '1.4.40',
   meson_version: '>= 0.46.0'
 )
@@ -8,14 +8,14 @@ if revision == ''
 endif
 
 if get_option('profile') == 'development'
-  appid='org.gnome.Lollypop.Devel'
+  appid='org.scarlatti.Scarlatti.Devel'
 else
-  appid='org.gnome.Lollypop'
+  appid='org.scarlatti.Scarlatti'
 endif
 
 i18n = import('i18n')
 py_mod = import('python')
-project_id = 'org.gnome.Lollypop'
+project_id = 'org.scarlatti.Scarlatti'
 
 message('Looking for dependencies')
 py_installation = py_mod.find_installation('python3')
@@ -53,19 +53,19 @@ subproject('po')
 subdir('search-provider')
 
 install_subdir(
-  'lollypop',
+  'scarlatti',
   install_dir: python_dir
 )
 
 #install_subdir(
 #  'thirdparty',
-#  install_dir: join_paths(python_dir, 'lollypop')
+#  install_dir: join_paths(python_dir, 'scarlatti')
 #)
 
 message('Preparing init file')
 configure_file(
-  input: 'lollypop.in',
-  output: 'lollypop',
+  input: 'scarlatti.in',
+  output: 'scarlatti',
   configuration: conf,
   install_dir: bindir
 )

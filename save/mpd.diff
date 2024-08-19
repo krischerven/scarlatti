@@ -10,7 +10,7 @@ index 677e0b0..8ca6d78 100644
 -              <object class="GtkLabel" id="mpd">
 -                <property name="visible">True</property>
 -                <property name="can_focus">False</property>
--                <property name="tooltip_text" translatable="yes">Control Lollypop with any MPD client</property>
+-                <property name="tooltip_text" translatable="yes">Control Scarlatti with any MPD client</property>
 -                <property name="halign">start</property>
 -                <property name="label" translatable="yes">Network control</property>
 -                <property name="ellipsize">start</property>
@@ -61,11 +61,11 @@ diff --git a/src/application.py b/src/application.py
 index 8b37afd..1baea49 100644
 --- a/src/application.py
 +++ b/src/application.py
-@@ -52,7 +52,6 @@ from lollypop.playlists import Playlists
- from lollypop.radios import Radios
- from lollypop.collectionscanner import CollectionScanner
- from lollypop.fullscreen import FullScreen
--from lollypop.mpd import MpdServerDaemon
+@@ -52,7 +52,6 @@ from scarlatti.playlists import Playlists
+ from scarlatti.radios import Radios
+ from scarlatti.collectionscanner import CollectionScanner
+ from scarlatti.fullscreen import FullScreen
+-from scarlatti.mpd import MpdServerDaemon
  
  
  class Application(Gtk.Application):
@@ -90,7 +90,7 @@ index 8b37afd..1baea49 100644
  
 @@ -216,8 +210,6 @@ class Application(Gtk.Application):
          """
-             Quit lollypop
+             Quit scarlatti
          """
 -        if self.mpd is not None:
 -            self.mpd.quit()
@@ -104,8 +104,8 @@ index db186dc..69681e5 100644
 @@ -21,7 +21,6 @@ from gettext import gettext as _
  from threading import Thread
  
- from lollypop.define import Lp, Type, SecretSchema, SecretAttributes, ArtSize
--from lollypop.mpd import MpdServerDaemon
+ from scarlatti.define import Lp, Type, SecretSchema, SecretAttributes, ArtSize
+-from scarlatti.mpd import MpdServerDaemon
  
  
  class Settings(Gio.Settings):

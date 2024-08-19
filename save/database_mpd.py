@@ -12,8 +12,8 @@
 
 import itertools
 
-from lollypop.sqlcursor import SqlCursor
-from lollypop.define import Lp, Type
+from scarlatti.sqlcursor import SqlCursor
+from scarlatti.define import Lp, Type
 
 
 class MpdDatabase:

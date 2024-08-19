@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2014 Cédric Bellegarde --> 
+<component type="desktop-application">
+  <id>org.scarlatti.Scarlatti</id>
+  <launchable type="desktop-id">org.scarlatti.Scarlatti.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>Scarlatti</name>
+  <developer_name>Scarlatti developers</developer_name>
+  <summary>Play and organize your music collection</summary>
+  <description>
+    <p>Scarlatti is a lightweight modern music player designed to work excellently on the GNOME desktop environment. It also features a party mode which will auto-select party-related playlists; allows access the player from your couch thanks to it fullscreen mode; fetches lyrics, artwork and biography online; and provides native support for ReplayGain.</p>
+  </description>
+  <releases>
+    <release version="1.4.40" date="2024-06-13">
+      <description>
+	Fix scrolling issue on mobile devices
+      </description>
+    </release>
+  </releases>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source" width="1754" height="1095">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop.jpg</image>
+      <caption>Main window</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="1920" height="1080">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop2.jpg</image>
+      <caption>Mini player</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="597" height="853">https://gitlab.gnome.org/gnumdk/lollypop-help/raw/master/screenshots/lollypop3.jpg</image>
+      <caption>Fullscreen player</caption>
+    </screenshot>
+  </screenshots>
+  <translation type="gettext">scarlatti</translation>
+  <url type="homepage">https://wiki.gnome.org/Apps/Lollypop</url>
+  <url type="bugtracker">https://github.com/krischerven/scarlatti/issues</url>
+  <url type="donation">https://www.paypal.me/lollypopgnome</url>
+  <url type="translate">https://hosted.weblate.org/projects/gnumdk/</url>
+  <content_rating type="oars-1.1">
+    <content_attribute id="money-advertising">mild</content_attribute>
+  </content_rating>
+  <update_contact>krischerven@gmail.com</update_contact>
+
+  <recommends>
+    <control>touch</control>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <custom>
+    <value key="Purism::form_factor">mobile</value>
+  </custom>
+</component>

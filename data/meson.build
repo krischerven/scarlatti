@@ -70,7 +70,7 @@ if compile_schemas.found()
 endif
 
 message('Installing man-page')
-install_man('lollypop.1')
+install_man('scarlatti.1')
 
 message('Making a list of icons')
 subdir('icons')
