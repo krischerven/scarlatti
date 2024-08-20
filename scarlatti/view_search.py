@@ -144,6 +144,7 @@ def getLastSearchView():
     global lastSearchView
     return lastSearchView
 
+
 searchUpdateDaemonThread = None
 
 
@@ -218,7 +219,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 if os.path.exists(file):
                     md5sum = md5(open(file).read().encode()).hexdigest()
                 if md5sum != hash:
-                    self.populate()
+                    GLib.idle_add(self.populate)
                 last_file_hash[file] = md5sum
 
     def populate(self):
