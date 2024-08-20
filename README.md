@@ -15,8 +15,7 @@ from Lollypop. You can support upstream development by going to https://www.patr
 
 It provides:
 
-- MP3/4, Ogg and FLAC.
-- Genre/cover browsing
+- MP3/4, Ogg and FLAC support
 - Genre/artist/cover browsing
 - Regex search with word-grouping
 - Search synonyms/typos
@@ -28,7 +27,7 @@ It provides:
 - MTP sync
 - Fullscreen view
 - Last.fm support
-- Auto install codecs
+- Auto install of codecs
 - HiDPI support
 - TuneIn support
 
