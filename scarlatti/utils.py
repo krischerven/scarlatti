@@ -696,10 +696,9 @@ def word_case_type(old_word, new_word, return_old_word=False):
         return new_word
 
 
-def search_synonyms():
+def create_search_synonyms_file():
     """
-        Return a list of words that are synonym pairs.
-        @return [[str, str]]
+        Create the file <SEARCH_SYNONYMS_PATH> if it does not exist.
     """
     create_file_with_content_if_not_exists(SEARCH_SYNONYMS_PATH,
                                            f"""# {SEARCH_SYNONYMS_PATH}
@@ -717,6 +716,14 @@ def search_synonyms():
 # sonate sonata sonatina
 """)
 
+
+def search_synonyms():
+    """
+        Return a list of words that are synonym pairs.
+        @return [[str, str]]
+    """
+    create_search_synonyms_file()
+
     synonyms = []
     for line in open(SEARCH_SYNONYMS_PATH, "r").readlines():
         line = line.strip()
@@ -732,10 +739,9 @@ def search_synonyms():
     return synonyms
 
 
-def search_typos():
+def create_search_typos_file():
     """
-        Return a list of words that are typo pairs.
-        @return [[str, str]]
+        Create the file <SEARCH_TYPOS_PATH> if it does not exist.
     """
     create_file_with_content_if_not_exists(SEARCH_TYPOS_PATH,
                                            f"""# {SEARCH_TYPOS_PATH}
@@ -750,6 +756,14 @@ def search_typos():
 
 # scarlati scarlatti
 """)
+
+
+def search_typos():
+    """
+        Return a list of words that are typo pairs.
+        @return [[str, str]]
+    """
+    create_search_typos_file()
 
     typos = []
     for line in open(SEARCH_TYPOS_PATH, "r").readlines():

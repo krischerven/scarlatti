@@ -19,6 +19,7 @@ from scarlatti.define import SEARCH_SYNONYMS_PATH, SEARCH_TYPOS_PATH
 from scarlatti.widgets_row_device import DeviceRow
 from scarlatti.helper_passwords import PasswordsHelper
 from scarlatti.utils import open_in_text_editor
+from scarlatti.utils import create_search_synonyms_file, create_search_typos_file
 from scarlatti.view_search import getLastSearchView
 
 
@@ -197,6 +198,7 @@ class SettingsDialog:
             Open the search synonyms file for editing in the default text editor
             @param button as Gtk.Button
         """
+        create_search_synonyms_file()
         open_in_text_editor(SEARCH_SYNONYMS_PATH)
 
     def _on_edit_search_typos_button_clicked(self, button):
@@ -204,6 +206,7 @@ class SettingsDialog:
             Open the search typos file for editing in the default text editor
             @param button as Gtk.Button
         """
+        create_search_typos_file()
         open_in_text_editor(SEARCH_TYPOS_PATH)
 
     def _on_connect_button_clicked(self, button):
