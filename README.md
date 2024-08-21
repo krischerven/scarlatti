@@ -1,6 +1,6 @@
 # Scarlatti: A modern music player for Linux
 
-![Scarlatti logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png)
+<!-- ![Scarlatti logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png) -->
 
 This project is a mostly-backwards-compatible fork of Lollypop, the GNOME music playing application.
 The aim of Scarlatti is to add new features - particularly advanced search features - missing
