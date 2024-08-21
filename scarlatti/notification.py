@@ -23,8 +23,9 @@ class NotificationManager:
 
     def __init__(self):
         """
-            Init notification object with scarlatti info
+            Init notification object with Scarlatti info
         """
+        self.nextNotification = True
         self.__notification_timeout_id = None
         App().player.connect("current-changed", self.__on_current_changed)
         self.__notification = Gio.Notification.new("")
@@ -43,6 +44,10 @@ class NotificationManager:
             Send a message about track
             @param track as Track
         """
+        if self.nextNotification is False:
+            self.nextNotification = True
+            return
+
         if App().settings.get_enum("notifications") == Notifications.NONE:
             return
         state = App().window.get_window().get_state()

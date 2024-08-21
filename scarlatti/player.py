@@ -156,6 +156,10 @@ class Player(GObject.GObject, AlbumsPlayer, BinPlayer, AutoRandomPlayer,
                             if track.id == self._current_track.id:
                                 self._load_track(track)
                                 break
+
+                    if not App().settings.get_value("startup-track-notif"):
+                        App().notify.nextNotification = False
+
                     if is_playing:
                         self.play()
                     else:

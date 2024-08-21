@@ -246,6 +246,11 @@
             <summary>Restore previous state</summary>
             <description></description>
         </key>
+        <key type="b" name="startup-track-notif">
+            <default>false</default>
+            <summary>Display a notification showing any currently playing track on startup</summary>
+            <description></description>
+        </key>
         <key type="b" name="disable-mpris">
             <default>false</default>
             <summary>Disable MPRIS</summary>

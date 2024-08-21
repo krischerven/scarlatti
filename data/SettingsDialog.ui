@@ -203,6 +203,25 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Show current track on startup</property>
+                <property name="activatable-widget">startup-track-notif_boolean</property>
+                <property name="subtitle" translatable="yes">Display a notification showing any currently playing track on startup</property>
+
+                <child>
+                  <object class="GtkSwitch" id="startup-track-notif_boolean">
+                    <property name="name">startup-track-notif</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Save changes to file</property>
                 <property name="activatable-widget">save-to-tags_boolean</property>
                 <property name="subtitle" translatable="yes">Save artwork and rating to files</property>

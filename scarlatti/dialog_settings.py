@@ -29,7 +29,7 @@ class SettingsDialog:
     """
 
     __BOOLEAN = ["dark-ui", "artist-artwork", "auto-update", "background-mode",
-                 "save-state", "import-playlists", "save-to-tags",
+                 "save-state", "startup-track-notif", "import-playlists", "save-to-tags",
                  "show-compilations", "transitions", "transitions-party-only",
                  "recent-youtube-dl", "import-advanced-artist-tags",
                  "force-single-column", "hd-artwork", "network-access",
