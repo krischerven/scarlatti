@@ -193,7 +193,7 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         global lastSearchView
         lastSearchView = self
         global searchUpdateDaemonThread
-        if searchUpdateDaemonThread == None:
+        if searchUpdateDaemonThread is None:
             searchUpdateDaemonThread = Thread(target=self.search_update_daemon)
             searchUpdateDaemonThread.daemon = True
             searchUpdateDaemonThread.start()
