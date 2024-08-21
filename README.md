@@ -6,13 +6,6 @@ This project is a mostly-backwards-compatible fork of Lollypop, the GNOME music 
 The aim of Scarlatti is to add new features - particularly advanced search features - missing
 from Lollypop. You can support upstream development by going to https://www.patreon.com/gnumdk
 
-(**WIP - THESE ARE UPSTREAM LINKS**)
-- Users: https://wiki.gnome.org/Apps/Lollypop
-
-- Translators: https://hosted.weblate.org/projects/gnumdk/
-
-- Contributions: https://gitlab.gnome.org/World/lollypop/-/wikis/Contributions
-
 It provides:
 
 - MP3/4, Ogg and FLAC support
