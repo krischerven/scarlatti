@@ -1,4 +1,4 @@
-# Scarlatti: A modern music player for Linux
+# Scarlatti: A modern, powerful music player for Linux
 
 <!-- ![Scarlatti logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png) -->
 
@@ -11,18 +11,18 @@ It provides:
 - MP3/4, Ogg and FLAC support
 - Genre/artist/cover browsing
 - Regex search with word-grouping
-- Search synonyms/typos
+- Search synonym/typo-correction system
 - Queue
 - Party mode
 - ReplayGain
 - Cover art downloader
-- Context artist view
+- Artist view
 - MTP sync
-- Fullscreen view
+- Fullscreen support
 - Last.fm support
-- Auto install of codecs
 - HiDPI support
 - TuneIn support
+- Builtin codecs
 
 ## Dependencies
 
