@@ -20,6 +20,7 @@ from scarlatti.define import SEARCH_SYNONYMS_PATH, SEARCH_TYPOS_PATH
 from scarlatti.search import Search
 from scarlatti.view import View
 from scarlatti.utils import sql_escape, case_sensitive_search_p, search_settings_string
+from scarlatti.utils import create_search_synonyms_file, create_search_typos_file
 from scarlatti.objects_album import Album
 from scarlatti.objects_track import Track
 from scarlatti.helper_signals import SignalsHelper, signals_map
@@ -214,6 +215,9 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
         while True:
             timeout = App().settings.get_value("search-update-timeout").get_int32()
             time.sleep(timeout/1000)
+            # prevent having to populate twice
+            create_search_synonyms_file()
+            create_search_typos_file()
             for file, hash in last_file_hash.items():
                 md5sum = None
                 if os.path.exists(file):
