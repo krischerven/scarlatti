@@ -777,3 +777,12 @@ def search_typos():
             # Ignore extra words
             typos.append([words[0].lower(), words[1].strip().lower()])
     return typos
+
+
+def report_large_delta(location, t1, t2):
+    """
+        Report a large time delta in <location>
+    """
+    delta = t2 - t1
+    if delta >= 0.25:
+        print(f"WARNING: Large time delta in {location} ({delta})")

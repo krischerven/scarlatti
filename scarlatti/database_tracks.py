@@ -17,7 +17,8 @@ import itertools
 from scarlatti.sqlcursor import SqlCursor
 from scarlatti.define import App, StorageType, Type, LovedFlags
 from scarlatti.utils import noaccents, make_subrequest, max_search_results
-from scarlatti.utils import regexp_search_filter, regexp_search_query, unique
+from scarlatti.utils import regexp_search_filter, regexp_search_query, unique, report_large_delta
+import time
 
 
 class TracksDatabase:
@@ -1046,13 +1047,15 @@ class TracksDatabase:
             @param storage_type as StorageType
             @return [(int, name)]
         """
+        t1 = time.time()
         with SqlCursor(self.__db) as sql:
-            filters = (regexp_search_filter(searched), storage_type, max_search_results())
+            filters = (regexp_search_filter(searched), storage_type)
             request = regexp_search_query(
                         "SELECT rowid, name FROM tracks\
                          WHERE noaccents(name) REGEXP ?\
-                         AND tracks.storage_type & ? LIMIT ?")
+                         AND tracks.storage_type & ?")
             result = sql.execute(request, filters)
+            report_large_delta("database_tracks/search", t1, time.time())
             return list(result)
 
     def search_artist(self, searched, storage_type):
@@ -1062,8 +1065,9 @@ class TracksDatabase:
             @param storage_type as StorageType
             @return [(int, name)]
         """
+        t1 = time.time()
         with SqlCursor(self.__db) as sql:
-            filters = (regexp_search_filter(searched), storage_type, max_search_results())
+            filters = (regexp_search_filter(searched), storage_type)
             request = regexp_search_query(
                   "SELECT DISTINCT tracks.rowid, artists.name\
                    FROM track_artists, tracks, artists\
@@ -1073,9 +1077,9 @@ class TracksDatabase:
                    tracks.storage_type & ? AND NOT EXISTS (\
                         SELECT album_artists.artist_id\
                         FROM album_artists\
-                        WHERE album_artists.artist_id=artists.rowid)\
-                    LIMIT ?")
+                        WHERE album_artists.artist_id=artists.rowid)")
             result = sql.execute(request, filters)
+            report_large_delta("database_tracks/search_artist", t1, time.time())
             return list(result)
 
     def search_track(self, artist, title):

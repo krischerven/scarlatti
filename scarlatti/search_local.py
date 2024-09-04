@@ -18,6 +18,7 @@ from scarlatti.define import App
 
 from scarlatti.utils import noaccents, search_synonyms, search_typos, word_case_type
 from scarlatti.utils import case_sensitive_search_p, unique, regexpr_and_valid
+from scarlatti.utils import max_search_results
 
 
 class LocalSearch(GObject.Object):
@@ -264,8 +265,12 @@ class LocalSearch(GObject.Object):
         # Remove duplicates
         ids = sorted(ids, key=lambda x: (counter[x], x), reverse=True)
         ids = list(dict.fromkeys(ids))
+        addc = 0
         for id in ids:
             GLib.idle_add(self.emit, signal, id, storage_type)
+            addc += 1
+            if addc == max_search_results():
+                break
 
     def __get_tracks(self, search, storage_type, cancellable):
         """

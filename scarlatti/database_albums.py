@@ -18,7 +18,7 @@ from scarlatti.sqlcursor import SqlCursor
 from scarlatti.define import App, Type, OrderBy, StorageType, LovedFlags
 from scarlatti.logger import Logger
 from scarlatti.utils import remove_static, make_subrequest, max_search_results
-from scarlatti.utils import regexp_search_filter, regexp_search_query, unique
+from scarlatti.utils import regexp_search_filter, regexp_search_query, unique, report_large_delta
 
 
 class AlbumsDatabase:
@@ -1293,13 +1293,15 @@ class AlbumsDatabase:
             @param storage_type as StorageType
             @return album ids as [int]
         """
+        t1 = time()
         with SqlCursor(self.__db) as sql:
-            filters = (regexp_search_filter(searched), storage_type, max_search_results())
+            filters = (regexp_search_filter(searched), storage_type)
             request = regexp_search_query(
                         "SELECT rowid, name FROM albums\
                          WHERE noaccents(name) REGEXP ?\
-                         AND albums.storage_type & ? LIMIT ?")
+                         AND albums.storage_type & ?")
             result = sql.execute(request, filters)
+            report_large_delta("database_albums/search", t1, time())
             return list(result)
 
     def calculate_artist_ids(self, album_id, disable_compilations):
