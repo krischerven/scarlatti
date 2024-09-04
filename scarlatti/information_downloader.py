@@ -37,9 +37,6 @@ class InformationDownloader:
             @param artist as str
             @param callback as function
         """
-        if not get_network_available("DATA"):
-            callback(None, *args)
-            return
         App().task_helper.run(self.__get_information, artist, callback, *args)
 
 #######################
