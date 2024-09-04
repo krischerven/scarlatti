@@ -1,13 +1,15 @@
 # Scarlatti: A modern, powerful music player for Linux
 
-<!-- ![Scarlatti logo](https://gitlab.gnome.org/World/lollypop/raw/master/data/icons/hicolor/256x256/apps/org.gnome.Lollypop.png) -->
 ![Scarlatti screenshot](./img/Screenshot_2024-08-24_01-57-42.png)
 
 This project is a mostly-backwards-compatible fork of Lollypop, the GNOME music playing application.
-The aim of Scarlatti is to add new features - particularly advanced search features - missing
-from Lollypop. You can support upstream development by going to https://www.patreon.com/gnumdk
+Scarlatti was created because I needed a number of new features in my Lollypop workflow, and no other
+music player met my needs. In general, Scarlatti will accept any reasonable feature request (but not
+all features will be enabled by default) so as to make it useful for the largest number of people.
 
-It provides:
+You can support upstream development of Lollypop by going to https://www.patreon.com/gnumdk
+
+Scarlatti provides, among other features:
 
 - MP3/4, Ogg and FLAC support
 - Genre/artist/cover browsing
@@ -25,7 +27,7 @@ It provides:
 - TuneIn support
 - Builtin codecs
 
-For a full list of improvements from Lollypop, see [here](./scarlatti-vs-lollypop.md)
+For a full list of improvements to Lollypop, see [here](./scarlatti-vs-lollypop.md).
 
 ## Dependencies
 
