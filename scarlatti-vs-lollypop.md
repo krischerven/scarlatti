@@ -5,7 +5,7 @@
 - Added a case-sensitive search setting, off by default
 - Added a search update delay setting with a default of 250ms (changed from the hardcoded 500ms)
 - Improved the Information section results (it previously failed to lookup composers or musicians, only bands and singers)
-- Added the abiltiy to wipe the Information cache via a right click option
+- Added the ability to wipe the Information cache via a right click option
 - Added a separate artist track view
 - Added a search synonym feature, allowing mapping of search terms to related search terms
 - Added a search typo feature, which works like search synonyms but disregards the original word
