@@ -25,6 +25,8 @@ It provides:
 - TuneIn support
 - Builtin codecs
 
+For a full list of improvements from Lollypop, see [here](./scarlatti-vs-lollypop.md)
+
 ## Dependencies
 
 - `gtk3 >= 3.20`
