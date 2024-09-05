@@ -9,7 +9,7 @@
 - Added a separate artist track view
 - Added a search synonym feature, allowing mapping of search terms to related search terms
 - Added a search typo feature, which works like search synonyms but disregards the original word
-- Added an option to disable displaying the current track on startup
+- Added an option to enable displaying the current track on startup (now disabled by default)
 
 # Major bugfixes missing in Lollypop
 - Fixed missing search results
