@@ -29,6 +29,8 @@ Scarlatti provides, among other features:
 
 For a full list of improvements to Lollypop, see [here](./scarlatti-vs-lollypop.md).
 
+For a usage guide, see [here](./how-do-I.md).
+
 ## Dependencies
 
 - `gtk3 >= 3.20`
