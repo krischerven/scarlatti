@@ -2,12 +2,21 @@
 
 ![Scarlatti screenshot](./img/Screenshot_2024-08-24_01-57-42.png)
 
-This project is a mostly-backwards-compatible fork of Lollypop, the GNOME music playing application.
-Scarlatti was created because I needed a number of new features in my Lollypop workflow, and no other
-music player met my needs. In general, Scarlatti will accept any reasonable feature request (but not
-all features will be enabled by default) so as to make it useful for the largest number of people.
+Scarlatti is a mostly-backwards-compatible fork of Lollypop, the GNOME music playing application.
+Scarlatti was created because I needed a number of new features in my Lollypop workflow, and no
+other music player met my needs.
 
-You can support upstream development of Lollypop by going to https://www.patreon.com/gnumdk
+Scarlatti is designed to be particularly good at searching through large collections of untagged
+music with detailed filenames (which is a large part of my unusual workflow)
+
+Generally speaking, Scarlatti will accept any reasonable feature request so as to make it useful for
+the largest number of people. Not all features will be enabled by default, but Scarlatti's philosophy
+is that a good music player should be powerful and extremely flexible while still having a modern
+look and feel.
+
+This project would not have been possible without the work of the original Lollypop developers,
+particularly Cédric Bellegarde. Please consider supporting him and Lollypop by going to
+https://www.patreon.com/gnumdk
 
 Scarlatti provides, among other features:
 
@@ -29,31 +38,16 @@ Scarlatti provides, among other features:
 
 For a full list of improvements to Lollypop, see [here](./scarlatti-vs-lollypop.md).
 
-For a usage guide, see [here](./how-do-I.md).
+For a (heavy WIP) usage guide, see [here](./how-do-I.md).
 
-## Dependencies
+For a list of build dependencies, see [here](./build-dependencies.md).
 
-- `gtk3 >= 3.20`
-- `gobject-introspection`
-- `appstream-glib`
-- `gir1.2-gstreamer-1.0 (Debian)`
-- `python3`
-- `libhandy1`
-- `meson >= 0.40`
-- `ninja`
-- `totem-plparser`
-- `python-gst`
-- `python-cairo`
-- `python-gobject`
-- `python-sqlite`
-- `beautifulsoup4`
-
-## Installation (Flatpak)
+## Flatpak installation (recommended)
 ``` bash
 bash -c "$(curl -L https://github.com/krischerven/scarlatti/raw/master/install-flatpak.sh)"
 ```
 
-## Building from Git
+## Building from source
 
 ```bash
 git clone https://github.com/krischerven/scarlatti

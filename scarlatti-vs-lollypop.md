@@ -19,3 +19,4 @@
 - Disabled track transitions (only enabled in party mode already) by default
 - Removed the search requirement that all words are >2 characters
 - Enabled background mode by default
+- Many improvements to grammar/ambiguous language
