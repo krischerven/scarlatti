@@ -307,6 +307,12 @@ class SettingsDialog:
         chooser.set_action(Gtk.FileChooserAction.SELECT_FOLDER)
         chooser.set_valign(Gtk.Align.CENTER)
         chooser.set_hexpand(True)
+
+        # Take the Gtk.ComboBox (second child) of the chooser and suppress all scroll events.
+        # This fixes the footgun of accidentally changing your main music folder and Scarlatti
+        # resetting all of your music!
+        chooser.get_children()[1].connect("scroll-event", lambda scrolled, event: True)
+
         self.__choosers.append(chooser)
         if uri is not None:
             chooser.set_uri(uri)
