@@ -19,6 +19,7 @@ from scarlatti.helper_gestures import GesturesHelper
 from scarlatti.fastscroll import FastScroll
 from scarlatti.define import Type, App, ArtSize, SelectionListMask
 from scarlatti.define import ArtBehaviour, ViewType, StorageType
+from scarlatti.shown import ShownLists
 from scarlatti.logger import Logger
 from scarlatti.utils import get_icon_name, on_query_tooltip, popup_widget
 from scarlatti.utils import emit_signal
@@ -656,7 +657,9 @@ class SelectionList(LazyLoadingView, GesturesHelper):
                 menu = SelectionListMenu(self,
                                          self.mask,
                                          App().window.folded)
-            elif not App().settings.get_value("save-state"):
+
+            elif not App().settings.get_value("save-state") or \
+                    ShownLists.IDS[row_id] == "Information":
                 from scarlatti.menu_selectionlist import SelectionListRowMenu
                 menu = SelectionListRowMenu(row_id,
                                             App().window.folded)

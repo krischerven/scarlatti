@@ -34,32 +34,33 @@ class SelectionListRowMenu(Gio.Menu):
             @param rowid as int
             @param header as bool
         """
+
+        label = ShownLists.IDS[rowid]
         Gio.Menu.__init__(self)
         if header:
             from scarlatti.menu_header import MenuHeader
-            label = ShownLists.IDS[rowid]
             icon_name = get_icon_name(rowid)
             self.append_item(MenuHeader(label, icon_name))
 
         # Startup menu
-        startup_menu = Gio.Menu()
-        selected = rowid == App().settings.get_value(
-            "startup-id").get_int32()
-        action = Gio.SimpleAction.new_stateful(
-                                   "default_selection_id",
-                                   None,
-                                   GLib.Variant.new_boolean(selected))
-        App().add_action(action)
-        action.connect("change-state",
-                       self.__on_default_change_state,
-                       rowid)
-        item = Gio.MenuItem.new(_("Default on startup"),
-                                "app.default_selection_id")
-        startup_menu.append_item(item)
-        self.append_section(_("Startup"), startup_menu)
+        if not App().settings.get_value("save-state"):
+            startup_menu = Gio.Menu()
+            selected = rowid == App().settings.get_value(
+                "startup-id").get_int32()
+            action = Gio.SimpleAction.new_stateful(
+                                    "default_selection_id",
+                                    None,
+                                    GLib.Variant.new_boolean(selected))
+            App().add_action(action)
+            action.connect("change-state",
+                           self.__on_default_change_state,
+                           rowid)
+            item = Gio.MenuItem.new(_("Default on startup"),
+                                    "app.default_selection_id")
+            startup_menu.append_item(item)
+            self.append_section(_("Startup"), startup_menu)
 
         # Cache menu
-        label = ShownLists.IDS[rowid]
         if label == "Information":
             cache_menu = Gio.Menu()
             selected = rowid == App().settings.get_value(
