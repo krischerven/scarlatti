@@ -56,7 +56,7 @@ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
-### Building on Debian/Ubuntu
+## Building on Debian/Ubuntu
 
 ```bash
 git clone https://github.com/krischerven/scarlatti
@@ -66,7 +66,7 @@ meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
 
-### Building on Fedora
+## Building on Fedora
 
 ```bash
 git clone https://github.com/krischerven/scarlatti
