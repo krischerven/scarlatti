@@ -548,7 +548,7 @@
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Auto update music</property>
                 <property name="activatable-widget">auto-update_boolean</property>
-                <property name="subtitle" translatable="yes">Update music if files added to collection</property>
+                <property name="subtitle" translatable="yes">Update music when files are added to your collection</property>
                 <child>
                   <object class="GtkSwitch" id="auto-update_boolean">
                     <property name="name">auto-update</property>
@@ -564,11 +564,11 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="tooltip-text" translatable="yes">You need to reset collection</property>
+                <property name="tooltip-text" translatable="yes">You'll have to reset your collection afterwards</property>
                 <property name="title" translatable="yes">Show compilations</property>
                 <property name="activatable-widget">show-compilations_boolean</property>
-                <property name="subtitle" translatable="yes">A compilation is an album without any "Album artist tag"
-and with different artists</property>
+                <property name="subtitle" translatable="yes">A compilation is an album without any 'Album artist' tags
+that contains different artists</property>
                 <child>
                   <object class="GtkSwitch" id="show-compilations_boolean">
                     <property name="name">show-compilations</property>
@@ -602,10 +602,10 @@ and with different artists</property>
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="tooltip-text" translatable="yes">You need to reset collection</property>
+                <property name="tooltip-text" translatable="yes">You'll have to reset your collection afterwards</property>
                 <property name="title" translatable="yes">Import advanced tags</property>
                 <property name="activatable-widget">import-advanced-artist-tags_boolean</property>
-                <property name="subtitle" translatable="yes">Performers, composers, …</property>
+                <property name="subtitle" translatable="yes">Performers, composers, conductors, and remixers</property>
                 <child>
                   <object class="GtkSwitch" id="import-advanced-artist-tags_boolean">
                     <property name="name">import-advanced-artist-tags</property>
@@ -697,7 +697,7 @@ and with different artists</property>
                 <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Background data</property>
                 <property name="activatable-widget">DATA_button</property>
-                <property name="subtitle" translatable="yes">Search artwork in background</property>
+                <property name="subtitle" translatable="yes">Download album/artist artwork in the background</property>
                 <child>
                   <object class="GtkSwitch" id="DATA_button">
                     <property name="name">DATA</property>
@@ -906,7 +906,7 @@ and with different artists</property>
           <object class="HdyPreferencesGroup" id="search">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="title" translatable="yes">Search (artwork, songs, ...)</property>
+            <property name="title" translatable="yes">Search (artwork, songs, etc)</property>
             <child>
               <object class="HdyExpanderRow">
                 <property name="visible">True</property>

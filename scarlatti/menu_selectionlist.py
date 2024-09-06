@@ -72,7 +72,7 @@ class SelectionListRowMenu(Gio.Menu):
             action.connect("activate",
                            self.__wipe_information_cache,
                            rowid)
-            item = Gio.MenuItem.new(_("Wipe cache"),
+            item = Gio.MenuItem.new(_("Clear cache"),
                                     "app.default_selection_id_2")
             cache_menu.append_item(item)
             self.append_section(_("Cache"), cache_menu)

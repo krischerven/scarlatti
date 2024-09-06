@@ -213,7 +213,7 @@
         </key>
         <key type="b" name="import-advanced-artist-tags">
             <default>false</default>
-            <summary>Handle performers, compositors, ...</summary>
+            <summary>Import performers, composers, conductors and remixers</summary>
             <description></description>
         </key>
         <key type="b" name="show-compilations-in-album-view">
