@@ -9,7 +9,7 @@ other music player met my needs.
 Scarlatti is designed to be particularly good at searching through large collections of untagged
 music with detailed filenames (which is a large part of my unusual workflow)
 
-Generally speaking, Scarlatti will accept any reasonable feature request so as to make it useful for
+Generally speaking, I will accept any reasonable feature request so as to make Scarlatti useful for
 the largest number of people. Not all features will be enabled by default, but Scarlatti's philosophy
 is that a good music player should be powerful and extremely flexible while still having a modern
 look and feel.
@@ -42,7 +42,7 @@ For a (heavy WIP) usage guide, see [here](./how-do-I.md).
 
 For a list of build dependencies, see [here](./build-dependencies.md).
 
-## Flatpak installation (recommended)
+## Flatpak installation/update (recommended)
 ``` bash
 bash -c "$(curl -L https://github.com/krischerven/scarlatti/raw/master/install-flatpak.sh)"
 ```
