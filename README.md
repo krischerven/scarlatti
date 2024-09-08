@@ -47,6 +47,11 @@ For a list of build dependencies, see [here](./build-dependencies.md).
 bash -c "$(curl -L https://github.com/krischerven/scarlatti/raw/master/install-flatpak.sh)"
 ```
 
+## Uninstallation
+``` bash
+flatpak remove org.scarlatti.Scarlatti
+```
+
 ## Building from source
 
 ```bash
