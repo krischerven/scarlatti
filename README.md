@@ -57,26 +57,7 @@ flatpak remove org.scarlatti.Scarlatti
 ```bash
 git clone https://github.com/krischerven/scarlatti
 cd scarlatti
-meson builddir --prefix=/usr/local
-# sudo ninja -C builddir install
-```
-
-## Building on Debian/Ubuntu
-
-```bash
-git clone https://github.com/krischerven/scarlatti
-cd scarlatti
-# sudo apt-get install --ignore-missing meson libglib2.0-dev yelp-tools libgirepository1.0-dev libgtk-3-dev gir1.2-totemplparser-1.0 python-gi-dev
-meson builddir --prefix=/usr/local
-# sudo ninja -C builddir install
-```
-
-## Building on Fedora
-
-```bash
-git clone https://github.com/krischerven/scarlatti
-cd scarlatti
-# sudo dnf install --skip-broken meson glib2-devel yelp-tools gtk3-devel gobject-introspection-devel python3 pygobject3-devel python3-gobject-devel libsoup3-devel totem-pl-parser libhandy python3-pillow
+# Install dependencies using instructions in ./build-dependencies.md
 meson builddir --prefix=/usr/local
 # sudo ninja -C builddir install
 ```
