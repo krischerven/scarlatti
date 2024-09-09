@@ -228,11 +228,14 @@ def decodeUnicode(bites, encoding):
 
 
 def splitUnicode(data, encoding):
-    from scarlatti.define import UTF_16_ENCODING, UTF_16BE_ENCODING
+    from scarlatti.define import LATIN1_ENCODING, UTF_8_ENCODING, \
+        UTF_16_ENCODING, UTF_16BE_ENCODING
     try:
         (d, t) = data.split(encoding, 1)
         # Try to fix invalid UTF16
-        if encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
+        if encoding == LATIN1_ENCODING or encoding == UTF_8_ENCODING:
+            t = t.rstrip(b"\x00")
+        elif encoding == UTF_16_ENCODING or encoding == UTF_16BE_ENCODING:
             if t[1] == 0:
                 t = b''.join(t.split(b'\x00')) + b'\x00'
     except ValueError as e:

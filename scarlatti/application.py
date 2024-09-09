@@ -98,7 +98,7 @@ class Application(Gtk.Application, ApplicationActions, ApplicationCmdline):
         settings = Gio.Settings.new("org.gnome.desktop.interface")
         self.animations = settings.get_value("enable-animations").get_boolean()
         GLib.set_application_name("Scarlatti")
-        GLib.set_prgname("scarlatti")
+        GLib.set_prgname("org.scarlatti.Scarlatti")
         self.connect("activate", self.__on_activate)
         self.connect("shutdown", lambda a: self.__save_state())
         if GLib.environ_getenv(GLib.get_environ(), "DEBUG_LEAK") is not None:
