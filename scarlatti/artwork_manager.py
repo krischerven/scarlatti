@@ -108,7 +108,7 @@ class ArtworkManager(GObject.GObject):
         value = App().settings.get_value("cover-size").get_int32()
         # Check value as user can enter bad value via dconf
         if value < 50 or value > 400:
-            value = 200
+            value = 170
         ArtSize.BIG = value
         ArtSize.BANNER = int(ArtSize.BIG * 150 / 200)
         ArtSize.MEDIUM = int(ArtSize.BIG * 100 / 200)
