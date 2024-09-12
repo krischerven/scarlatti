@@ -9,11 +9,12 @@
     <property name="type_hint">normal</property>
     <property name="program_name">Scarlatti</property>
     <property name="version">@REVISION@</property>
-    <property name="copyright">Copyright © 2014-2020 Cédric Bellegarde</property>
-    <property name="comments" translatable="yes">A music player for GNOME.</property>
+    <property name="copyright">Copyright © 2024 The Scarlatti Developers</property>
+    <property name="comments" translatable="yes">A modern, powerful music player.</property>
     <property name="website">@PACKAGE_URL@</property>
     <property name="website_label" translatable="yes">Visit Scarlatti website</property>
-    <property name="authors">Cédric Bellegarde &lt;cedric.bellegarde@adishatz.org&gt;
+    <property name="authors">Kris Cherven
+Cédric Bellegarde
 Jean-Philippe Braun
 Philipp Wolfer
 Jason Gray
@@ -27,8 +28,6 @@ Frederick Schenk
 </property>
     <property name="translator-credits" translatable="yes" context="Add your names here, do not remove previous names!" comments="Replace me with your names">translator1, translator2, ...</property>
     <property name="artists" translatable="yes">
-Reda Lazri:
-    Scarlatti icon
 Geary Development Team:
     tag-list-symbolic icon
 GNOME Project:
