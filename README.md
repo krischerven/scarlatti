@@ -1,4 +1,4 @@
-# Scarlatti: A modern, powerful music player for Linux
+# Scarlatti: A modern, powerful music player for Linux (and WSL)
 
 ![Scarlatti screenshot](./img/Screenshot_2024-08-24_01-57-42.png)
 
