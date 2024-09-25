@@ -158,6 +158,7 @@ class ApplicationActions:
         App().set_accels_for_action("app.mini", ["<Control>m"])
         App().set_accels_for_action("app.about", ["F3"])
         App().set_accels_for_action("app.shortcuts", ["F2"])
+        App().set_accels_for_action("app.shortcuts", ["<Control>k"])
         App().set_accels_for_action("app.help", ["F1"])
         App().set_accels_for_action("app.quit", ["<Control>q"])
         App().set_accels_for_action("app.shortcut::loved", ["<Alt>l"])
