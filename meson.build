@@ -1,5 +1,5 @@
 project('scarlatti',
-  version: '1.4.40',
+  version: 'v1',
   meson_version: '>= 0.46.0'
 )
 revision = run_command('bin/revision.sh').stdout().strip()
