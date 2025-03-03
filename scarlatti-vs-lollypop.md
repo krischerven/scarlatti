@@ -10,6 +10,7 @@
 - Added a search synonym feature, allowing mapping of search terms to related search terms
 - Added a search typo feature, which works like search synonyms but disregards the original word
 - Added an option to enable displaying the current track on startup (now disabled by default)
+- Added a RC option to open the source of the current track in a web browser
 
 # Major bugfixes missing in Lollypop
 - Fixed missing search results

@@ -42,4 +42,8 @@ Go to Web/Status in settings and toggle "Background data". Make sure "Allow netw
 ## Wipe the Information (Wikipedia) cache
 **keywords:** sections, sidebar, information, wikipedia, cache,
 
+## Open the source of a track in a web browser
+**keywords:** source, video, audio, web
+Right click the track and select Others > Open source URL
+
 Right-click on the Information section in the sidebar and click "Wipe Cache".

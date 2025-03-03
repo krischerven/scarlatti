@@ -14,6 +14,8 @@ from gi.repository import Gio, GLib, Gtk, Gdk
 
 from gettext import gettext as _
 
+from re import search as regex_search
+
 from scarlatti.define import App, StorageType, CACHE_PATH
 from scarlatti.objects_track import Track
 from scarlatti.objects_album import Album
@@ -23,7 +25,7 @@ from scarlatti.dialog_apps import AppsDialog
 
 class ActionsMenu(Gio.Menu):
     """
-        ActionsMenu menu for album
+        ActionsMenu menu for albums and tracks
     """
 
     def __init__(self, object):
@@ -41,6 +43,9 @@ class ActionsMenu(Gio.Menu):
         if self.__object.storage_type & StorageType.COLLECTION and\
                 not GLib.file_test("/app", GLib.FileTest.EXISTS):
             self.__set_open_action()
+
+        if isinstance(object, Track):
+            self.__set_open_source_url_action()
 
 #######################
 # PRIVATE             #
@@ -99,6 +104,17 @@ class ActionsMenu(Gio.Menu):
         open_tag_action.connect("activate", self.__on_open_tag_action_activate)
         menu_item = Gio.MenuItem.new(_("Open with…"),
                                      "app.open_tag_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
+    def __set_open_source_url_action(self):
+        """
+            Setup the open_source_url action
+        """
+        open_source_url_action = Gio.SimpleAction(name="open_source_url_action")
+        App().add_action(open_source_url_action)
+        open_source_url_action.connect("activate", self.__open_source_url)
+        menu_item = Gio.MenuItem.new(_("Open source URL"), "app.open_source_url_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
 
@@ -199,3 +215,18 @@ class ActionsMenu(Gio.Menu):
             dialog.run()
         except Exception as e:
             Logger.error("ActionsMenu::__on_open_tag_action_activate(): %s", e)
+
+    def __open_source_url(self, action, variant):
+        """
+            Open the source (if any) of the selected track
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        ytdlp_1 = regex_search(r"\[([a-zA-Z0-9_]{11})\]", self.__object.title)
+        ytdlp_2 = regex_search(r"-([a-zA-Z0-9_]{11})", self.__object.title)
+        extracted = ytdlp_1 if ytdlp_1 else ytdlp_2
+        if extracted:
+            uid = extracted.group(1)
+            Gio.AppInfo.launch_default_for_uri(f"https://youtube.com/watch?v={uid}", None)
+        else:
+            App().window.container.show_notification(_("No source URL was found in the track title"))
