@@ -595,8 +595,7 @@ def open_in_text_editor(filepath):
             return
 
     App().window.container.show_notification(
-        _(f"Failed to find a suitable text editor. Please open a bug report at {BUG_REPORT_URL}"),
-        [], [])
+        _(f"Failed to find a suitable text editor. Please open a bug report at {BUG_REPORT_URL}"))
 
 
 def max_search_results():

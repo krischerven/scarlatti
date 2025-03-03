@@ -42,7 +42,7 @@ class NotificationContainer:
                 not network_access_acl & NetworkAccessACL["DATA"]:
             self.__show_background_data()
 
-    def show_notification(self, title, buttons, actions):
+    def show_notification(self, title, buttons=[], actions=[]):
         """
             Show a notification
             @param title as str

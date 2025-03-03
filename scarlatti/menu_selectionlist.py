@@ -105,12 +105,10 @@ class SelectionListRowMenu(Gio.Menu):
         if os.path.exists(ARTIST_WIKI_PATH) and "/scarlatti/" in ARTIST_WIKI_PATH:
             shutil.rmtree(ARTIST_WIKI_PATH)
             create_dir(ARTIST_WIKI_PATH)
-            App().window.container.show_notification(
-                _("Successfully wiped the information cache."), [], [])
+            App().window.container.show_notification(_("Successfully wiped the information cache."))
             GLib.timeout_add(2000, App().window.container.dismiss_notification)
         else:
-            App().window.container.show_notification(
-                _("An error occured while trying to wipe the cache."), [], [])
+            App().window.container.show_notification(_("An error occured while trying to wipe the cache."))
 
 
 class SelectionListMenu(Gio.Menu):
