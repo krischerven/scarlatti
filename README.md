@@ -38,7 +38,7 @@ Scarlatti provides, among other features:
 
 For a full list of improvements to Lollypop, see [here](./scarlatti-vs-lollypop.md).
 
-For a (heavy WIP) usage guide, see [here](./how-do-I.md).
+For a (heavy WIP!) usage guide, see [here](./how-do-I.md).
 
 For a list of build dependencies, see [here](./build-dependencies.md).
 
