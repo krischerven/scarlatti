@@ -92,6 +92,12 @@ def get_human_duration(duration):
         return _("%s m") % minutes
 
 
+def copy_to_clipboard(text):
+    clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+    clipboard.set_text(text, -1)
+    clipboard.store()
+
+
 def get_round_surface(surface, scale_factor, radius):
     """
         Get rounded surface from surface/pixbuf

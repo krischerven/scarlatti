@@ -21,6 +21,7 @@ from scarlatti.objects_track import Track
 from scarlatti.objects_album import Album
 from scarlatti.logger import Logger
 from scarlatti.dialog_apps import AppsDialog
+from scarlatti.utils import copy_to_clipboard
 
 
 class ActionsMenu(Gio.Menu):
@@ -46,6 +47,8 @@ class ActionsMenu(Gio.Menu):
 
         if isinstance(object, Track):
             self.__set_open_source_url_action()
+            self.__set_copy_title_to_clipboard_action()
+
 
 #######################
 # PRIVATE             #
@@ -115,6 +118,17 @@ class ActionsMenu(Gio.Menu):
         App().add_action(open_source_url_action)
         open_source_url_action.connect("activate", self.__open_source_url)
         menu_item = Gio.MenuItem.new(_("Open source URL"), "app.open_source_url_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
+    def __set_copy_title_to_clipboard_action(self):
+        """
+            Setup the copy_title_to_clipboard action
+        """
+        copy_title_to_clipboard_action = Gio.SimpleAction(name="copy_title_to_clipboard_action")
+        App().add_action(copy_title_to_clipboard_action)
+        copy_title_to_clipboard_action.connect("activate", self.__copy_title_to_clipboard)
+        menu_item = Gio.MenuItem.new(_("Copy title to clipboard"), "app.copy_title_to_clipboard_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
 
@@ -230,3 +244,12 @@ class ActionsMenu(Gio.Menu):
             Gio.AppInfo.launch_default_for_uri(f"https://youtube.com/watch?v={uid}", None)
         else:
             App().window.container.show_notification(_("No source URL was found in the track title"))
+
+    def __copy_title_to_clipboard(self, action, variant):
+        """
+            Open the source (if any) of the selected track
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        copy_to_clipboard(self.__object.title)
+        App().window.container.show_notification(_("Track title copied to clipboard"))
