@@ -672,7 +672,8 @@ def noaccents2(string):
 def word_case_type(old_word, new_word, return_old_word=False):
     """
         Return <new_word> with the same case type as <old_word>, or <new_word>
-        if <old_word> does not have a case type.
+        if <old_word> does not have a case type (unless <return_old_word> is set,
+        in which case <old_word> will be returned in that final case).
 
         Valid case types are:
             lowercase
@@ -732,9 +733,12 @@ def search_synonyms():
             continue
         words = line.split(" ")
         if len(words) > 1:
-            word1 = words[0]
+            word1 = words[0].lower()
             for word in words[1:]:
-                synonyms.append([word1.lower(), word.strip().lower()])
+                synonym = word.strip().lower()
+                synonyms.append([word1, synonym])
+                synonyms.append([synonym, word1])
+
     return synonyms
 
 

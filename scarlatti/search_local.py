@@ -117,8 +117,8 @@ class LocalSearch(GObject.Object):
         for kv in [w for w in synonyms if w[1].lower() not in owords]:
             words2 = []
             for word in words:
-                if word.lower() == kv[0]:
-                    words2.append(word_case_type(word, kv[1], case_sensitive_search_p()))
+                if noaccents(word.lower()) == noaccents(kv[0]):
+                    words2.append(noaccents(word_case_type(word, kv[1], case_sensitive_search_p())))
                 else:
                     words2.append(word)
             search2 = " ".join(words2)
