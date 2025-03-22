@@ -55,13 +55,13 @@ class LocalSearch(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
-    def __split_string(self, string):
+    def __word_grouping(self, string):
         """
             Split string for search
             @param string as str
             @return str
         """
-        split = []
+        words = []
         nextWord = ""
         for word in string.split():
             if word.startswith("\""):
@@ -69,21 +69,21 @@ class LocalSearch(GObject.Object):
                 if word.endswith("\""):
                     word = nextWord[:-1]
                     nextWord = ""
-                    split.append(word)
+                    words.append(word)
             elif word.endswith("\"") and nextWord != "":
                 word = nextWord+" "+word[:-1]
                 nextWord = ""
-                split.append(word)
+                words.append(word)
             else:
                 # Unfinished word or intentional quote
                 if nextWord != "":
-                    split.append("\""+nextWord)
+                    words.append("\""+nextWord)
                     nextWord = ""
-                split.append(word)
+                words.append(word)
         # Unfinished word or intentional quote
         if nextWord != "":
-            split.append("\""+nextWord)
-        return split
+            words.append("\""+nextWord)
+        return words
 
     def __synonymic_search_strings(self, search, synonyms=None, original_words=[]):
         """
@@ -138,12 +138,12 @@ class LocalSearch(GObject.Object):
 
         tracks = []
         track_ids = []
-        split = self.__split_string(search)
+        words = self.__word_grouping(search)
 
         if search.startswith("\"") and search.endswith("\""):
             search = search[1:-1]
 
-        for search_str in unique([search] + split):
+        for search_str in unique([search] + words):
             tracks += search_function(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -151,7 +151,7 @@ class LocalSearch(GObject.Object):
             valid = True
             track_name = noaccents(track_name)
             if not track_name.startswith(search):
-                for word in split:
+                for word in words:
                     if not regexpr_and_valid(word, track_name) and word not in track_name:
                         valid = False
                         break
@@ -164,7 +164,7 @@ class LocalSearch(GObject.Object):
             # Detected an artist match, adding to result
             for artist in App().tracks.get_artists(track_id):
                 valid = True
-                for word in [w for w in split if w != noaccents(artist)]:
+                for word in [w for w in words if w != noaccents(artist)]:
                     if not regexpr_and_valid(word, track_name) and word not in track_name:
                         valid = False
                         break
@@ -202,8 +202,8 @@ class LocalSearch(GObject.Object):
         """
         artists = []
         artist_ids = []
-        split = self.__split_string(search)
-        for search_str in unique([search] + split):
+        words = self.__word_grouping(search)
+        for search_str in unique([search] + words):
             artists += App().artists.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -211,7 +211,7 @@ class LocalSearch(GObject.Object):
             valid = True
             artist_name = noaccents(artist_name)
             if not artist_name.startswith(search):
-                for word in split:
+                for word in words:
                     if not regexpr_and_valid(word, artist_name) and word not in artist_name:
                         valid = False
                         break
@@ -233,8 +233,8 @@ class LocalSearch(GObject.Object):
         """
         albums = []
         album_ids = []
-        split = self.__split_string(search)
-        for search_str in unique([search] + split):
+        words = self.__word_grouping(search)
+        for search_str in unique([search] + words):
             albums += App().albums.search(search_str, storage_type)
             if cancellable.is_cancelled():
                 break
@@ -242,7 +242,7 @@ class LocalSearch(GObject.Object):
             valid = True
             album_name = noaccents(album_name)
             if not album_name.startswith(search):
-                for word in split:
+                for word in words:
                     if not regexpr_and_valid(word, album_name) and word not in album_name:
                         valid = False
                         break
