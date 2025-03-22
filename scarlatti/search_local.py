@@ -20,6 +20,8 @@ from scarlatti.utils import noaccents, search_synonyms, search_typos, word_case_
 from scarlatti.utils import case_sensitive_search_p, unique, regexpr_and_valid
 from scarlatti.utils import max_search_results
 
+import re
+
 
 class LocalSearch(GObject.Object):
     """
@@ -55,41 +57,24 @@ class LocalSearch(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
+
     def __word_grouping(self, string):
         """
-            Split string for search
+            Returns a list consisting of:
+             - Phrases: Groups of words contained within double quotes.
+             - Individual words outside of quotes, separated by spaces.
             @param string as str
-            @return str
+            @return [str]
         """
-        words = []
-        nextWord = ""
-        for word in string.split():
-            if word.startswith("\""):
-                nextWord = word[1:]
-                if word.endswith("\""):
-                    word = nextWord[:-1]
-                    nextWord = ""
-                    words.append(word)
-            elif word.endswith("\"") and nextWord != "":
-                word = nextWord+" "+word[:-1]
-                nextWord = ""
-                words.append(word)
-            else:
-                # Unfinished word or intentional quote
-                if nextWord != "":
-                    words.append("\""+nextWord)
-                    nextWord = ""
-                words.append(word)
-        # Unfinished word or intentional quote
-        if nextWord != "":
-            words.append("\""+nextWord)
-        return words
+        pattern = r'"(.*?)"|(\S+)'
+        matches = re.findall(pattern, string)
+        return [match[0] if match[0] else match[1] for match in matches]
 
     def __synonymic_search_strings(self, search, synonyms=None, original_words=[]):
         """
             Return a list of all possible search strings, based on search_synonyms()
             @param search as str
-            @return [string]
+            @return [str]
         """
 
         words = search.split(" ")
