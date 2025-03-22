@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 meson setup builddir --prefix=/usr/local
-sudo ninja -C builddir install
+sudo ninja -C builddir install > ninja.log 2>&1
+echo "Wrote $(grep -c '' ./ninja.log) lines to ./ninja.log"
+echo ""
 scarlatti
