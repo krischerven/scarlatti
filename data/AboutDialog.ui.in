@@ -9,7 +9,7 @@
     <property name="type_hint">normal</property>
     <property name="program_name">Scarlatti</property>
     <property name="version">@REVISION@</property>
-    <property name="copyright">Copyright © 2024 The Scarlatti Developers</property>
+    <property name="copyright">Copyright © 2025 The Scarlatti Developers</property>
     <property name="comments" translatable="yes">A modern, powerful music player.</property>
     <property name="website">@PACKAGE_URL@</property>
     <property name="website_label" translatable="yes">Visit Scarlatti website</property>
