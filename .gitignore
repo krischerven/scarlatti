@@ -58,6 +58,7 @@ github-key
 /local
 /scarlatti-cli
 /ltmain.sh
+/ninja.log
 /m4
 /Makefile
 /Makefile.in
