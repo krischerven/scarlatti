@@ -12,9 +12,9 @@
     <p>Scarlatti is a lightweight modern music player designed to work excellently on the GNOME desktop environment. It also features a party mode which will auto-select party-related playlists; allows access the player from your couch thanks to it fullscreen mode; fetches lyrics, artwork and biography online; and provides native support for ReplayGain.</p>
   </description>
   <releases>
-    <release version="v1" date="2024-06-13">
+    <release version="v5" date="2025-04-10">
       <description>
-	Fix scrolling issue on mobile devices
+	Version 5
       </description>
     </release>
   </releases>
