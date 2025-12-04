@@ -97,7 +97,8 @@ class TrackRow(Gtk.ListBoxRow):
         self.__duration_label = Gtk.Label.new(duration)
         self.__duration_label.get_style_context().add_class("dim-label")
         self.__duration_label.show()
-        self._grid.add(self.__duration_label)
+        if self._track.id != -1: # Truncated label
+            self._grid.add(self.__duration_label)
         self.__action_button = None
         if self.__view_type & (
                 ViewType.PLAYBACK | ViewType.PLAYLISTS):

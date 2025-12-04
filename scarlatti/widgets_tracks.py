@@ -96,6 +96,9 @@ class TracksWidget(Gtk.ListBox, SignalsHelper, GesturesHelper):
         row = self.get_row_at_y(y)
         if row is None:
             return
+        # Dummy track (i.e., N results truncated)
+        if row.track.id == -1:
+            return
         if event.state & Gdk.ModifierType.SHIFT_MASK:
             emit_signal(self, "do-shift-selection", row)
         elif event.state & Gdk.ModifierType.CONTROL_MASK:

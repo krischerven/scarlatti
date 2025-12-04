@@ -32,6 +32,10 @@ class LocalSearch(GObject.Object):
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "truncated-artist": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "truncated-album": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "truncated-track": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "truncated-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "finished": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
@@ -250,11 +254,14 @@ class LocalSearch(GObject.Object):
         # Remove duplicates
         ids = sorted(ids, key=lambda x: (counter[x], x), reverse=True)
         ids = list(dict.fromkeys(ids))
-        addc = 0
+        count = 0
         for id in ids:
             GLib.idle_add(self.emit, signal, id, storage_type)
-            addc += 1
-            if addc == max_search_results():
+            count += 1
+            if count == max_search_results():
+                remainder = len(ids) - count
+                if remainder > 0:
+                    GLib.idle_add(self.emit, signal.replace("match-", "truncated-"), remainder)
                 break
 
     def __get_tracks(self, search, storage_type, cancellable):

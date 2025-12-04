@@ -202,6 +202,10 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
                 (self.__search, "match-album", "_on_match_album"),
                 (self.__search, "match-track", "_on_match_track"),
                 (self.__search, "match-artist-track", "_on_match_artist_track"),
+                (self.__search, "truncated-artist", "_on_truncated_artist"),
+                (self.__search, "truncated-album", "_on_truncated_album"),
+                (self.__search, "truncated-track", "_on_truncated_track"),
+                (self.__search, "truncated-artist-track", "_on_truncated_artist_track"),
                 (self.__search, "finished", "_on_search_finished"),
                 (App().settings, "changed::web-search",
                  "_on_web_search_changed")
@@ -382,6 +386,48 @@ class SearchView(View, Gtk.Bin, SignalsHelper):
             self.__banner.spinner.stop()
             if empty:
                 self.show_placeholder(True, _("No results for this search"))
+
+    def _on_truncated_track(self, search, n):
+        """
+            Indicate that the remaining [n] tracks are truncated
+            @param search as *Search
+            @param n as int
+        """
+        track = Track(-1)
+        track.name = f"An additional {n} results were truncated"
+        self.__stack.current_child.search_tracks_view.show()
+        self.__stack.current_child.search_tracks_view.append_row(track)
+        self.show_placeholder(False)
+
+    def _on_truncated_artist_track(self, search, n):
+        """
+            Indicate that the remaining [n] artist tracks are truncated
+            @param search as *Search
+            @param n as int
+        """
+        track = Track(-1)
+        track.name = f"An additional {n} results were truncated"
+        self.__stack.current_child.search_artist_tracks_view.show()
+        self.__stack.current_child.search_artist_tracks_view.append_row(track)
+        self.show_placeholder(False)
+
+    # FIXME(implement)
+    def _on_truncated_album(self, search, n):
+        """
+            Indicate that the remaining [n] albums are truncated
+            @param search as *Search
+            @param n as int
+        """
+        pass
+
+    # FIXME(implement)
+    def _on_truncated_artist(self, search, n):
+        """
+            Indicate that the remaining [n] artists are truncated
+            @param search as *Search
+            @param n as int
+        """
+        pass
 
     def _on_web_search_changed(self, settings, value):
         """

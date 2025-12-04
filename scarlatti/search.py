@@ -26,6 +26,10 @@ class Search(GObject.Object):
         "match-album": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
         "match-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int, int)),
+        "truncated-artist": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "truncated-album": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "truncated-track": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
+        "truncated-artist-track": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
         "finished": (GObject.SignalFlags.RUN_FIRST, None, (bool,)),
     }
 
@@ -135,4 +139,12 @@ class Search(GObject.Object):
                        lambda x, y, z: self.emit("match-album", y, z))
         search.connect("match-track",
                        lambda x, y, z: self.emit("match-track", y, z))
+        search.connect("truncated-artist",
+                       lambda _, y: self.emit("truncated-artist", y))
+        search.connect("truncated-artist-track",
+                       lambda _, y: self.emit("truncated-artist-track", y))
+        search.connect("truncated-album",
+                       lambda _, y: self.emit("truncated-album", y))
+        search.connect("truncated-track",
+                       lambda _, y: self.emit("truncated-track", y))
         search.connect("finished", self.__on_finished)
