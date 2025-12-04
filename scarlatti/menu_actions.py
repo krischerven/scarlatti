@@ -46,6 +46,7 @@ class ActionsMenu(Gio.Menu):
             self.__set_open_action()
 
         if isinstance(object, Track):
+            self.__set_copy_source_url_to_clipboard_action()
             self.__set_open_source_url_action()
             self.__set_copy_title_to_clipboard_action()
 
@@ -107,6 +108,17 @@ class ActionsMenu(Gio.Menu):
         open_tag_action.connect("activate", self.__on_open_tag_action_activate)
         menu_item = Gio.MenuItem.new(_("Open with…"),
                                      "app.open_tag_action")
+        menu_item.set_attribute_value("close", GLib.Variant("b", True))
+        self.append_item(menu_item)
+
+    def __set_copy_source_url_to_clipboard_action(self):
+        """
+            Setup the open_source_url action
+        """
+        copy_source_url_to_clipboard_action = Gio.SimpleAction(name="copy_source_url_to_clipboard_action")
+        App().add_action(copy_source_url_to_clipboard_action)
+        copy_source_url_to_clipboard_action.connect("activate", self.__copy_source_url_to_clipboard)
+        menu_item = Gio.MenuItem.new(_("Copy source URL"), "app.copy_source_url_to_clipboard_action")
         menu_item.set_attribute_value("close", GLib.Variant("b", True))
         self.append_item(menu_item)
 
@@ -230,18 +242,42 @@ class ActionsMenu(Gio.Menu):
         except Exception as e:
             Logger.error("ActionsMenu::__on_open_tag_action_activate(): %s", e)
 
+    def __get_source_url(self, action, variant):
+        """
+            Get the source (if any) of the selected track
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        ytdlp_1 = regex_search(r"\[([a-zA-Z0-9_\-]{11})\]", self.__object.title)
+        ytdlp_2 = regex_search(r"-([a-zA-Z0-9_\-]{11})", self.__object.title)
+        extracted = ytdlp_1 if ytdlp_1 else ytdlp_2
+        if extracted:
+            uid = extracted.group(1)
+            return f"https://youtube.com/watch?v={uid}"
+        return None
+
     def __open_source_url(self, action, variant):
         """
             Open the source (if any) of the selected track
             @param Gio.SimpleAction
             @param GLib.Variant
         """
-        ytdlp_1 = regex_search(r"\[([a-zA-Z0-9_]{11})\]", self.__object.title)
-        ytdlp_2 = regex_search(r"-([a-zA-Z0-9_]{11})", self.__object.title)
-        extracted = ytdlp_1 if ytdlp_1 else ytdlp_2
-        if extracted:
-            uid = extracted.group(1)
-            Gio.AppInfo.launch_default_for_uri(f"https://youtube.com/watch?v={uid}", None)
+        url = self.__get_source_url(action, variant)
+        if url:
+            Gio.AppInfo.launch_default_for_uri(url, None)
+        else:
+            App().window.container.show_notification(_("No source URL was found in the track title"))
+
+    def __copy_source_url_to_clipboard(self, action, variant):
+        """
+            Open the source (if any) of the selected track
+            @param Gio.SimpleAction
+            @param GLib.Variant
+        """
+        url = self.__get_source_url(action, variant)
+        if url:
+            copy_to_clipboard(url)
+            App().window.container.show_notification(_("Track source URL copied to clipboard"))
         else:
             App().window.container.show_notification(_("No source URL was found in the track title"))
 
