@@ -109,7 +109,7 @@ class TrackMenu(Gio.Menu):
             from scarlatti.menu_header import AlbumMenuHeader
             self.append_item(AlbumMenuHeader(track))
         self.append_section(_("Playback"), TrackPlaybackMenu(track, view_type))
-        if view_type & ViewType.SEARCH:
+        if view_type & ViewType.SEARCH and track.artist_ids:
             from scarlatti.menu_artist import ArtistAlbumsMenu
             menu = ArtistAlbumsMenu(track.artist_ids[0], track.storage_type)
             if menu.get_n_items() != 0:

@@ -201,6 +201,10 @@ class TrackRow(Gtk.ListBoxRow):
             @param x as int
             @param y as int
         """
+        # Don't show menu for dummy tracks (truncated results indicator)
+        if self._track.id == -1:
+            return
+
         def on_hidden(widget, hide):
             self.set_indicator()
 
