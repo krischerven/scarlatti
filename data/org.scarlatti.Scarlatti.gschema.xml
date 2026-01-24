@@ -409,6 +409,11 @@
             <summary>Search update timeout</summary>
             <description></description>
         </key>
+        <key type="b" name="random-search">
+            <default>false</default>
+            <summary>Random search results</summary>
+            <description>When enabled, search results will be randomized instead of deterministic</description>
+        </key>
         <key enum="org.scarlatti.Scarlatti.PowerManagement" name="power-management">
             <default>'suspend'</default>
             <summary>Possibilities for powermanagement options</summary>

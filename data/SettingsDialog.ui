@@ -400,6 +400,24 @@
               <object class="HdyActionRow">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="title" translatable="yes">Random search results</property>
+                <property name="activatable-widget">random-search_boolean</property>
+                <property name="subtitle" translatable="yes">Randomize search results for discovering new tracks</property>
+                <child>
+                  <object class="GtkSwitch" id="random-search_boolean">
+                    <property name="name">random-search</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="valign">center</property>
+                    <signal name="state-set" handler="_on_boolean_state_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Max search results</property>
                 <property name="subtitle" translatable="yes">How many results can be returned for a query</property>
                 <child>

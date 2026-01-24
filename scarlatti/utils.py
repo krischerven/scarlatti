@@ -625,8 +625,15 @@ def case_sensitive_search_p():
     return App().settings.get_value("case-sensitive-search").get_boolean()
 
 
+def random_search_p():
+    """
+        Return true if random search is enabled
+    """
+    return App().settings.get_value("random-search").get_boolean()
+
+
 def search_settings_string():
-    return f"{max_search_results()};{regexp_search_p()};{case_sensitive_search_p()}"
+    return f"{max_search_results()};{regexp_search_p()};{case_sensitive_search_p()};{random_search_p()}"
 
 
 def regexp_search_filter(filter):

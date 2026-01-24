@@ -13,12 +13,13 @@
 from gi.repository import GObject, GLib
 
 from collections import Counter
+import random
 
 from scarlatti.define import App
 
 from scarlatti.utils import noaccents, search_synonyms, search_typos, word_case_type
 from scarlatti.utils import case_sensitive_search_p, unique, regexpr_and_valid
-from scarlatti.utils import max_search_results
+from scarlatti.utils import max_search_results, random_search_p
 
 import re
 
@@ -44,6 +45,7 @@ class LocalSearch(GObject.Object):
             Init search
         """
         GObject.Object.__init__(self)
+        self.__randomize = False
 
     def get(self, search, storage_type, cancellable):
         """
@@ -52,6 +54,13 @@ class LocalSearch(GObject.Object):
             @param storage_type as StorageType
             @param cancellable as Gio.Cancellable
         """
+        # Parse for (random "...") syntax
+        search, self.__randomize = self.__parse_random_command(search)
+        
+        # Check if random search is enabled by default setting
+        if not self.__randomize and random_search_p():
+            self.__randomize = True
+        
         search = noaccents(search)
         self.__get_artists(search, storage_type, cancellable)
         self.__get_albums(search, storage_type, cancellable)
@@ -61,6 +70,26 @@ class LocalSearch(GObject.Object):
 #######################
 # PRIVATE             #
 #######################
+
+    def __parse_random_command(self, search):
+        """
+            Parse search string for (random "...") command
+            @param search as str
+            @return (search_string, randomize) as (str, bool)
+        """
+        # Match (random "text") or (random 'text')
+        pattern = r'^\s*\(\s*random\s+["\'](.+?)["\']\s*\)\s*$'
+        match = re.match(pattern, search, re.IGNORECASE)
+        if match:
+            return (match.group(1), True)
+        
+        # Also support without quotes: (random text)
+        pattern2 = r'^\s*\(\s*random\s+(.+?)\s*\)\s*$'
+        match2 = re.match(pattern2, search, re.IGNORECASE)
+        if match2:
+            return (match2.group(1), True)
+        
+        return (search, False)
 
     def __word_grouping(self, string):
         """
@@ -254,6 +283,11 @@ class LocalSearch(GObject.Object):
         # Remove duplicates
         ids = sorted(ids, key=lambda x: (counter[x], x), reverse=True)
         ids = list(dict.fromkeys(ids))
+        
+        # Randomize if random search is active
+        if self.__randomize:
+            random.shuffle(ids)
+        
         count = 0
         for id in ids:
             GLib.idle_add(self.emit, signal, id, storage_type)

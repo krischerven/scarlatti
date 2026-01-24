@@ -33,7 +33,7 @@ class SettingsDialog:
                  "show-compilations", "transitions", "transitions-party-only",
                  "recent-youtube-dl", "import-advanced-artist-tags",
                  "force-single-column", "hd-artwork", "network-access",
-                 "regexp-search", "case-sensitive-search"]
+                 "regexp-search", "case-sensitive-search", "random-search"]
 
     __RANGE = ["cover-size", "transitions-duration", "max-search-results", "search-update-timeout"]
 
